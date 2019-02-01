@@ -1,0 +1,9 @@
+# Project-specific files to ignore.
+#
+# Do not add IDE or OS-specific files here. Common things such as that should
+# be added to a global gitignore file.
+# Details on configuring a global gitignore in your environment can be found
+# here:
+#
+# https://help.github.com/articles/ignoring-files/#create-a-global-gitignore
+
