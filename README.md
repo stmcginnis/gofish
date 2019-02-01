@@ -6,6 +6,32 @@
 
 ## Introduction
 
-Gofish is a Golang library for interacting with (DMTF
-Redfish)[https://www.dmtf.org/standards/redfish] and (SNIA
-Swordfish)[https://www.snia.org/forums/smi/swordfish] enabled devices.
+Gofish is a Golang library for interacting with [DMTF
+Redfish](https://www.dmtf.org/standards/redfish) and [SNIA
+Swordfish](https://www.snia.org/forums/smi/swordfish) enabled devices.
+
+## Usage ##
+
+Basic usage would be:
+
+```go
+
+package main
+
+import (
+    "fmt"
+
+    "github.com/stmcginnis/gofish"
+    "github.com/stmcginnis/gofish/school"
+)
+
+func main() {
+    c := gofish.APIClient("localhost", 5000, false)
+    service, err := school.ServiceRoot(c)
+
+    chassis, err := service.Chassis()
+    for _, chass := range chassis {
+        fmt.Printf("Chassis: %#v\n\n", chass)
+    }
+}
+```
