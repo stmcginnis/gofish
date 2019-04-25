@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultManagerPath is the default URI for Manager collections.
@@ -30,7 +32,7 @@ type UIConsoleInfo struct {
 // Managers, Management Controllers and other subsystems assigned managability
 // functions.
 type Manager struct {
-	Entity
+	common.Entity
 	ManagerType           string
 	Description           string
 	ServiceEntryPointUUID string
@@ -38,7 +40,7 @@ type Manager struct {
 	Model                 string
 	DateTime              string
 	DateTimeLocalOffset   string
-	Status                Status
+	Status                common.Status
 	GraphicalConsole      UIConsoleInfo
 	SerialConsole         UIConsoleInfo
 	CommandShell          UIConsoleInfo
@@ -57,17 +59,17 @@ type Manager struct {
 func (s *Manager) UnmarshalJSON(b []byte) error {
 	type temp Manager
 	type linkReference struct {
-		ManagerForServers Links
-		ManagerForChassis Links
-		ManagerInChassis  Link
+		ManagerForServers common.Links
+		ManagerForChassis common.Links
+		ManagerInChassis  common.Link
 	}
 	var t struct {
 		temp
-		NetworkProtocol    Link
-		EthernetInterfaces Link
-		SerialInterfaces   Link
-		LogServices        Link
-		VirtualMedia       Link
+		NetworkProtocol    common.Link
+		EthernetInterfaces common.Link
+		SerialInterfaces   common.Link
+		LogServices        common.Link
+		VirtualMedia       common.Link
 		Links              linkReference
 	}
 
@@ -92,7 +94,7 @@ func (s *Manager) UnmarshalJSON(b []byte) error {
 }
 
 // GetManager will get a Manager instance from the Swordfish service.
-func GetManager(c Client, uri string) (*Manager, error) {
+func GetManager(c common.Client, uri string) (*Manager, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -107,9 +109,9 @@ func GetManager(c Client, uri string) (*Manager, error) {
 }
 
 // ListReferencedManagers gets the collection of Managers
-func ListReferencedManagers(c Client, link string) ([]*Manager, error) {
+func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
 	var result []*Manager
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -126,6 +128,6 @@ func ListReferencedManagers(c Client, link string) ([]*Manager, error) {
 }
 
 // ListManagers gets all Manager in the system
-func ListManagers(c Client) ([]*Manager, error) {
+func ListManagers(c common.Client) ([]*Manager, error) {
 	return ListReferencedManagers(c, DefaultManagerPath)
 }

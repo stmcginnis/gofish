@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultChassisPath is the default URI for Chassis collections.
@@ -87,16 +89,16 @@ const (
 // accessible to software running on the system) are linked either directly or
 // indirectly through this resource.
 type Chassis struct {
-	Entity
-	ChassisType     ChassisType `json:"ChassisType"`
-	Manufacturer    string      `json:"Manufacturer"`
-	Model           string      `json:"Model"`
-	SKU             string      `json:"SKU"`
-	SerialNumber    string      `json:"SerialNumber"`
-	Version         string      `json:"Version"`
-	PartNumber      string      `json:"PartNumber"`
-	AssetTag        string      `json:"AssetTag"`
-	Status          Status      `json:"Status"`
+	common.Entity
+	ChassisType     ChassisType   `json:"ChassisType"`
+	Manufacturer    string        `json:"Manufacturer"`
+	Model           string        `json:"Model"`
+	SKU             string        `json:"SKU"`
+	SerialNumber    string        `json:"SerialNumber"`
+	Version         string        `json:"Version"`
+	PartNumber      string        `json:"PartNumber"`
+	AssetTag        string        `json:"AssetTag"`
+	Status          common.Status `json:"Status"`
 	thermal         string
 	power           string
 	computerSystems []string
@@ -108,14 +110,14 @@ type Chassis struct {
 func (c *Chassis) UnmarshalJSON(b []byte) error {
 	type temp Chassis
 	type linkReference struct {
-		ComputerSystems Links
-		ResourceBlocks  Links
-		ManagedBy       Links
+		ComputerSystems common.Links
+		ResourceBlocks  common.Links
+		ManagedBy       common.Links
 	}
 	var t struct {
 		temp
-		Thermal Link
-		Power   Link
+		Thermal common.Link
+		Power   common.Link
 		Links   linkReference
 	}
 
@@ -137,7 +139,7 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 }
 
 // GetChassis will get a Chassis instance from the Redfish service.
-func GetChassis(c Client, uri string) (*Chassis, error) {
+func GetChassis(c common.Client, uri string) (*Chassis, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -152,9 +154,9 @@ func GetChassis(c Client, uri string) (*Chassis, error) {
 }
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
-func ListReferencedChassis(c Client, link string) ([]*Chassis, error) {
+func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 	var result []*Chassis
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -171,19 +173,19 @@ func ListReferencedChassis(c Client, link string) ([]*Chassis, error) {
 }
 
 // ListChassis gets all Chassis in the system.
-func ListChassis(c Client) ([]*Chassis, error) {
+func ListChassis(c common.Client) ([]*Chassis, error) {
 	return ListReferencedChassis(c, DefaultChassisPath)
 }
 
 // ThermalInfo is reference to the thermal properties (fans, cooling, sensors)
 // of this chassis.
 type ThermalInfo struct {
-	Entity
+	common.Entity
 	Temperatures []struct {
 		MemberID                  string `json:"MemberId"`
 		Name                      string
 		SensorNumber              int
-		Status                    Status
+		Status                    common.Status
 		ReadingCelsius            int
 		UpperThresholdNonCritical int
 		UpperThresholdCritical    int
@@ -194,13 +196,13 @@ type ThermalInfo struct {
 		MinimumValue              int
 		MaximumValue              int
 		PhysicalContext           string
-		RelatedItem               []Link
+		RelatedItem               []common.Link
 	}
 	Fans []struct {
 		MemberID                  string `json:"MemberId"`
 		FanName                   string
 		PhysicalContext           string
-		Status                    Status
+		Status                    common.Status
 		ReadingRPM                int
 		UpperThresholdNonCritical int
 		UpperThresholdCritical    int
@@ -210,15 +212,15 @@ type ThermalInfo struct {
 		LowerThresholdFatal       int
 		MinReadingRange           int
 		MaxReadingRange           int
-		Redundancy                []Link
-		RelatedItem               []Link
+		Redundancy                []common.Link
+		RelatedItem               []common.Link
 	}
 	Redundancy []struct {
 		MemberID        string `json:"MemberId"`
 		Name            string
-		RedundancySet   []Link
+		RedundancySet   []common.Link
 		Mode            string
-		Status          Status
+		Status          common.Status
 		MinNumNeeded    int
 		MaxNumSupported int
 	}
@@ -230,7 +232,7 @@ func (c *Chassis) Thermal() (*ThermalInfo, error) {
 		return nil, nil
 	}
 
-	resp, err := c.client.Get(c.thermal)
+	resp, err := c.Client.Get(c.thermal)
 	defer resp.Body.Close()
 
 	var thermal ThermalInfo
@@ -245,7 +247,7 @@ func (c *Chassis) Thermal() (*ThermalInfo, error) {
 // PowerInfo provides the power properties (power supplies, power
 // policies, sensors) of the chassis.
 type PowerInfo struct {
-	Entity
+	common.Entity
 	PowerControl []struct {
 		MemberID            string `json:"MemberId"`
 		Name                string
@@ -265,14 +267,14 @@ type PowerInfo struct {
 			LimitException string
 			CorrectionInMS int `json:"CorrectionInMs"`
 		}
-		RelatedItem []Link
-		Status      Status
+		RelatedItem []common.Link
+		Status      common.Status
 	}
 	Voltages []struct {
 		MemberID                  string `json:"MemberId"`
 		Name                      string
 		SensorNumber              int
-		Status                    Status
+		Status                    common.Status
 		ReadingVolts              int
 		UpperThresholdNonCritical float32
 		UpperThresholdCritical    float32
@@ -283,12 +285,12 @@ type PowerInfo struct {
 		MinReadingRange           int
 		MaxReadingRange           int
 		PhysicalContext           string
-		RelatedItem               []Link
+		RelatedItem               []common.Link
 	}
 	PowerSupplies []struct {
 		MemberID             string `json:"MemberId"`
 		Name                 string
-		Status               Status
+		Status               common.Status
 		PowerSupplyType      string
 		LineInputVoltageType string
 		LineInputVoltage     int
@@ -299,7 +301,7 @@ type PowerInfo struct {
 		SerialNumber         string
 		PartNumber           string
 		SparePartNumber      string
-		RelatedItem          []Link
+		RelatedItem          []common.Link
 	}
 }
 
@@ -309,7 +311,7 @@ func (c *Chassis) Power() (*PowerInfo, error) {
 		return nil, nil
 	}
 
-	resp, err := c.client.Get(c.power)
+	resp, err := c.Client.Get(c.power)
 	defer resp.Body.Close()
 
 	var power PowerInfo
@@ -325,7 +327,7 @@ func (c *Chassis) Power() (*PowerInfo, error) {
 func (c *Chassis) ComputerSystems() ([]*ComputerSystem, error) {
 	var result []*ComputerSystem
 	for _, uri := range c.computerSystems {
-		cs, err := GetComputerSystem(c.client, uri)
+		cs, err := GetComputerSystem(c.Client, uri)
 		if err != nil {
 			return nil, err
 		}
@@ -340,7 +342,7 @@ func (c *Chassis) ComputerSystems() ([]*ComputerSystem, error) {
 func (c *Chassis) ManagedBy() ([]*Manager, error) {
 	var result []*Manager
 	for _, uri := range c.managedBy {
-		manager, err := GetManager(c.client, uri)
+		manager, err := GetManager(c.Client, uri)
 		if err != nil {
 			return nil, err
 		}

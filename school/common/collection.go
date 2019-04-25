@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package common
 
 import (
 	"encoding/json"
@@ -27,8 +27,8 @@ func (c *Collection) UnmarshalJSON(b []byte) error {
 	type temp Collection
 	var t struct {
 		temp
-		linksCollection
-		Links linksCollection `json:"Links"`
+		LinksCollection
+		Links LinksCollection `json:"Links"`
 	}
 
 	err := json.Unmarshal(b, &t)

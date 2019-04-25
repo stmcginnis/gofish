@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultEventServicePath is the default URI for EventService collections.
@@ -23,8 +25,8 @@ const DefaultEventServicePath = "/redfish/v1/EventService"
 // generates the events sent to subscribers.  The resource has links to the
 // actual collection of subscriptions (called Event Destinations).
 type EventService struct {
-	Entity
-	Status                       Status
+	common.Entity
+	Status                       common.Status
 	ServiceEnabled               string
 	DeliveryRetryAttempts        int
 	DeliveryRetryIntervalSeconds int
@@ -37,7 +39,7 @@ func (es *EventService) UnmarshalJSON(b []byte) error {
 	type temp EventService
 	var t struct {
 		temp
-		Subscriptions Link
+		Subscriptions common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -54,7 +56,7 @@ func (es *EventService) UnmarshalJSON(b []byte) error {
 }
 
 // GetEventService will get a Event instance from the Redfish service.
-func GetEventService(c Client, uri string) (*EventService, error) {
+func GetEventService(c common.Client, uri string) (*EventService, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 

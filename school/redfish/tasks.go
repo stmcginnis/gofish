@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultTaskServicePath is the default URI for TaskService collections.
@@ -55,16 +57,16 @@ const (
 // Task contains information about a specific Task scheduled by or being
 // executed by a Redfish service's Task Service.
 type Task struct {
-	Entity
+	common.Entity
 	Modified   string
 	TaskState  TaskState
 	StartTime  string
 	EndTime    string
-	TaskStatus Health
+	TaskStatus common.Health
 }
 
 // GetTask will get a Task instance from the Redfish service.
-func GetTask(c Client, uri string) (*Task, error) {
+func GetTask(c common.Client, uri string) (*Task, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -78,9 +80,9 @@ func GetTask(c Client, uri string) (*Task, error) {
 }
 
 // ListReferencedTasks gets the collection of Tasks
-func ListReferencedTasks(c Client, link string) ([]*Task, error) {
+func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
 	var result []*Task
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -97,6 +99,6 @@ func ListReferencedTasks(c Client, link string) ([]*Task, error) {
 }
 
 // ListTasks gets all Task in the system
-func ListTasks(c Client) ([]*Task, error) {
+func ListTasks(c common.Client) ([]*Task, error) {
 	return ListReferencedTasks(c, DefaultTaskServicePath)
 }

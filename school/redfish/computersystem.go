@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultSystemPath is the default URI for System collections.
@@ -21,21 +23,21 @@ const DefaultSystemPath = "/redfish/v1/Systems"
 
 // ProcessorSummaryInfo represents information about the system processors
 type ProcessorSummaryInfo struct {
-	Status Status
+	Status common.Status
 	Count  uint
 	Model  string
 }
 
 // MemorySummaryInfo represents information about the system memory
 type MemorySummaryInfo struct {
-	Status                         Status
+	Status                         common.Status
 	TotalSystemMemoryGiB           uint
 	TotalSystemPersistentMemoryGiB uint
 }
 
 // TrustedModuleInfo represents information about system TPMs
 type TrustedModuleInfo struct {
-	Status                Status
+	Status                common.Status
 	ModuleType            string
 	FirmwareVersion       string
 	FirmwareVersion2      string
@@ -45,7 +47,7 @@ type TrustedModuleInfo struct {
 // ComputerSystem represents a machine (physical or virtual) and the local resources
 // such as memory, cpu and other devices that can be accessed from that machine.
 type ComputerSystem struct {
-	Entity
+	common.Entity
 	SystemType         string
 	AssetTag           string
 	Manufacturer       string
@@ -56,10 +58,10 @@ type ComputerSystem struct {
 	Description        string
 	UUID               string
 	HostName           string
-	Status             Status
-	IndicatorLED       IndicatorLED
+	Status             common.Status
+	IndicatorLED       common.IndicatorLED
 	PowerState         string
-	Boot               BootSettings
+	Boot               common.BootSettings
 	BiosVersion        string
 	ProcessorSummary   ProcessorSummaryInfo
 	MemorySummary      MemorySummaryInfo
@@ -77,16 +79,16 @@ type ComputerSystem struct {
 func (s *ComputerSystem) UnmarshalJSON(b []byte) error {
 	type temp ComputerSystem
 	type linkReference struct {
-		Chassis   Links
-		ManagedBy Links
-		OEM       Link `json:"Oem"`
+		Chassis   common.Links
+		ManagedBy common.Links
+		OEM       common.Link `json:"Oem"`
 	}
 	var t struct {
 		temp
-		Processors         Link
-		Memory             Link
-		EthernetInterfaces Link
-		SimpleStorage      Link
+		Processors         common.Link
+		Memory             common.Link
+		EthernetInterfaces common.Link
+		SimpleStorage      common.Link
 		Links              linkReference
 	}
 
@@ -110,7 +112,7 @@ func (s *ComputerSystem) UnmarshalJSON(b []byte) error {
 }
 
 // GetComputerSystem will get a ComputerSystem instance from the Swordfish service.
-func GetComputerSystem(c Client, uri string) (*ComputerSystem, error) {
+func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -125,9 +127,9 @@ func GetComputerSystem(c Client, uri string) (*ComputerSystem, error) {
 }
 
 // ListReferencedComputerSystems gets the collection of ComputerSystems
-func ListReferencedComputerSystems(c Client, link string) ([]*ComputerSystem, error) {
+func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) {
 	var result []*ComputerSystem
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -144,6 +146,6 @@ func ListReferencedComputerSystems(c Client, link string) ([]*ComputerSystem, er
 }
 
 // ListComputerSystems gets all ComputerSystem in the system
-func ListComputerSystems(c Client) ([]*ComputerSystem, error) {
+func ListComputerSystems(c common.Client) ([]*ComputerSystem, error) {
 	return ListReferencedComputerSystems(c, DefaultSystemPath)
 }

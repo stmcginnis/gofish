@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package common
 
 import (
 	"encoding/json"
@@ -33,13 +33,13 @@ type Client interface {
 type Entity struct {
 	ID     string `json:"Id"`
 	Name   string `json:"Name"`
-	client Client
+	Client Client
 }
 
 // SetClient sets the API client connection to use for accessing this
 // entity.
 func (e *Entity) SetClient(c Client) {
-	e.client = c
+	e.Client = c
 }
 
 // Link is an OData link reference
@@ -73,13 +73,13 @@ func (l Links) ToStrings() []string {
 }
 
 // links are the json references to other entities
-type linksCollection struct {
-	Count   int   `json:"Members@odata.count"`
+type LinksCollection struct {
+	Count   int   `json:"Member@odata.count"`
 	Members Links `json:"Members"`
 }
 
 // ToStrings will extract the URI for all linked entities.
-func (l linksCollection) ToStrings() []string {
+func (l LinksCollection) ToStrings() []string {
 	return l.Members.ToStrings()
 }
 
@@ -157,4 +157,29 @@ type Status struct {
 type StatusWithRollup struct {
 	Status
 	HealthRollup Health
+}
+
+// BootSettings is a StorageService boot setting Swordfish object
+type BootSettings struct {
+	OverrideEnabled    string   `json:"BootSourceOverrideEnabled"`
+	Mode               string   `json:"BootSourceOverrideMode"`
+	Target             string   `json:"BootSourceOverrideTarget"`
+	AllowableValues    []string `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
+	UEFITargetOverride string   `json:"UefiTargetBootSourceOverride"`
+}
+
+// MemorySummary has information about memory state
+type MemorySummary struct {
+	MemoryMirroring      string
+	Status               StatusWithRollup
+	TotalSystemMemoryGiB int
+}
+
+// TrustedModules has TMP information
+type TrustedModules struct {
+	FirmwareVersion        string
+	FirmwareVersion2       string
+	InterfaceTypeSelection string
+	ModuleType             string
+	Status                 Status
 }

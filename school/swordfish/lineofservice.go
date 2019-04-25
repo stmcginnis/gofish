@@ -10,9 +10,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package swordfish
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
+)
 
 // LineOfService is the common attributes of LOS objects
 type LineOfService struct {
@@ -55,7 +59,7 @@ type DataProtectionLineOfService struct {
 func (s *DataProtectionLineOfService) UnmarshalJSON(b []byte) error {
 	type temp DataProtectionLineOfService
 	type linkReference struct {
-		replicaOption Link
+		replicaOption common.Link
 	}
 	var t struct {
 		temp

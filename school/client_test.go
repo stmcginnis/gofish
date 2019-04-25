@@ -12,13 +12,18 @@
 
 package gofish
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // TestClientGetRoot tests getting the root data from the server.
 func TestClientGetRoot(t *testing.T) {
-	client := &Client{
-		Host: "localhost",
-		Port: 5000}
+	client := APIClient("localhost", 5000, false)
 
-	client.GetRoot()
+	service, _ := ServiceRoot(client)
+	chassis, _ := service.Chassis()
+	for _, chass := range chassis {
+		fmt.Printf("Chassis: %#v\n\n", chass)
+	}
 }

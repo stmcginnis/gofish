@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultSessionServicePath is the default URI for SessionService collections.
@@ -22,14 +24,14 @@ const DefaultSessionServicePath = "/redfish/v1/SessionService"
 // Session describes a single connection (session) between a client and a
 // Redfish service instance.
 type Session struct {
-	Entity
+	common.Entity
 	Description string
 	Modified    string
 	UserName    string
 }
 
 // GetSession will get a Session instance from the Redfish service.
-func GetSession(c Client, uri string) (*Session, error) {
+func GetSession(c common.Client, uri string) (*Session, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -43,9 +45,9 @@ func GetSession(c Client, uri string) (*Session, error) {
 }
 
 // ListReferencedSessions gets the collection of Sessions
-func ListReferencedSessions(c Client, link string) ([]*Session, error) {
+func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
 	var result []*Session
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -62,6 +64,6 @@ func ListReferencedSessions(c Client, link string) ([]*Session, error) {
 }
 
 // ListSessions gets all Session in the system
-func ListSessions(c Client) ([]*Session, error) {
+func ListSessions(c common.Client) ([]*Session, error) {
 	return ListReferencedSessions(c, DefaultSessionServicePath)
 }

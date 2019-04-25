@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultAccountServicePath is the default URI for AccountService collections.
@@ -27,7 +29,7 @@ const DefaultAccountsPath = "/redfish/v1/AccountService/Accounts"
 // and control features such as account lockout. The schema also contains links
 // to the collections of Manager Accounts and Roles.
 type AccountService struct {
-	Entity
+	common.Entity
 	Description                 string
 	Modified                    string
 	AuthFailureLoggingThreshold int
@@ -40,8 +42,8 @@ type AccountService struct {
 func (as *AccountService) UnmarshalJSON(b []byte) error {
 	type temp AccountService
 	type AccountLinks struct {
-		Accounts Link
-		Roles    Link
+		Accounts common.Link
+		Roles    common.Link
 	}
 	var t struct {
 		temp
@@ -64,7 +66,7 @@ func (as *AccountService) UnmarshalJSON(b []byte) error {
 
 // GetAccountService will get the AccountService instance from the Redfish
 // service.
-func GetAccountService(c Client, uri string) (*AccountService, error) {
+func GetAccountService(c common.Client, uri string) (*AccountService, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -80,17 +82,17 @@ func GetAccountService(c Client, uri string) (*AccountService, error) {
 
 // Accounts get the accounts from the account service
 func (as *AccountService) Accounts() ([]*Account, error) {
-	return ListReferencedAccounts(as.client, as.accounts)
+	return ListReferencedAccounts(as.Client, as.accounts)
 }
 
 // Roles gets the roles from the account service
 func (as *AccountService) Roles() ([]*Role, error) {
-	return ListReferencedRoles(as.client, as.roles)
+	return ListReferencedRoles(as.Client, as.roles)
 }
 
 // Account is a Redfish account
 type Account struct {
-	Entity
+	common.Entity
 	Modified    string
 	Description string
 	Password    string
@@ -105,7 +107,7 @@ type Account struct {
 func (s *Account) UnmarshalJSON(b []byte) error {
 	type temp Account
 	type AccountLinks struct {
-		Role Link
+		Role common.Link
 	}
 	var t struct {
 		temp
@@ -126,7 +128,7 @@ func (s *Account) UnmarshalJSON(b []byte) error {
 }
 
 // GetAccount will get an account instance from the Redfish service.
-func GetAccount(c Client, uri string) (*Account, error) {
+func GetAccount(c common.Client, uri string) (*Account, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -140,9 +142,9 @@ func GetAccount(c Client, uri string) (*Account, error) {
 }
 
 // ListReferencedAccounts gets the collection of Accounts
-func ListReferencedAccounts(c Client, link string) ([]*Account, error) {
+func ListReferencedAccounts(c common.Client, link string) ([]*Account, error) {
 	var result []*Account
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -159,13 +161,13 @@ func ListReferencedAccounts(c Client, link string) ([]*Account, error) {
 }
 
 // ListAccounts gets all Accounts in the system
-func ListAccounts(c Client) ([]*Account, error) {
+func ListAccounts(c common.Client) ([]*Account, error) {
 	return ListReferencedAccounts(c, DefaultAccountsPath)
 }
 
 // Role is a Redfish role
 type Role struct {
-	Entity
+	common.Entity
 	Modified           string
 	Description        string
 	IsPredefined       bool
@@ -174,7 +176,7 @@ type Role struct {
 }
 
 // GetRole will get a role instance from the Redfish service.
-func GetRole(c Client, uri string) (*Role, error) {
+func GetRole(c common.Client, uri string) (*Role, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -188,9 +190,9 @@ func GetRole(c Client, uri string) (*Role, error) {
 }
 
 // ListReferencedRoles gets the collection of Roles
-func ListReferencedRoles(c Client, link string) ([]*Role, error) {
+func ListReferencedRoles(c common.Client, link string) ([]*Role, error) {
 	var result []*Role
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -207,6 +209,6 @@ func ListReferencedRoles(c Client, link string) ([]*Role, error) {
 }
 
 // ListRoles gets all Roles in the system
-func ListRoles(c Client) ([]*Role, error) {
+func ListRoles(c common.Client) ([]*Role, error) {
 	return ListReferencedRoles(c, DefaultAccountsPath)
 }

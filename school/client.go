@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/stmcginnis/gofish/school"
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // apiClient represents a connection to a Redfish/Swordfish enabled service
@@ -30,7 +30,7 @@ type apiClient struct {
 }
 
 // APIClient creates a new client connection to a Redfish service.
-func APIClient(host string, port uint16, useHTTPS bool) school.Client {
+func APIClient(host string, port uint16, useHTTPS bool) common.Client {
 	http := "http"
 	if useHTTPS {
 		http = "https"
@@ -47,7 +47,7 @@ func APIClient(host string, port uint16, useHTTPS bool) school.Client {
 func (c apiClient) Get(url string) (*http.Response, error) {
 	relativePath := url
 	if relativePath == "" {
-		relativePath = school.DefaultServiceRoot
+		relativePath = common.DefaultServiceRoot
 	}
 
 	endpoint := fmt.Sprintf("%s%s", c.Endpoint, relativePath)

@@ -21,15 +21,14 @@ package main
 import (
     "fmt"
 
-    "github.com/stmcginnis/gofish"
     "github.com/stmcginnis/gofish/school"
 )
 
 func main() {
     c := gofish.APIClient("localhost", 5000, false)
-    service, err := school.ServiceRoot(c)
+    service, _ := school.ServiceRoot(c)
 
-    chassis, err := service.Chassis()
+    chassis, _ := service.Chassis()
     for _, chass := range chassis {
         fmt.Printf("Chassis: %#v\n\n", chass)
     }

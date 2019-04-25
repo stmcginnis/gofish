@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package swordfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultStorageServicePath is the default URI for StorageService collections.
@@ -21,7 +23,7 @@ const DefaultStorageServicePath = "/redfish/v1/StorageServices"
 
 // StorageService is a Swordfish storage system instance.
 type StorageService struct {
-	Entity
+	common.Entity
 	classesOfService              string
 	clientEndPointGroups          string
 	Description                   string
@@ -35,7 +37,7 @@ type StorageService struct {
 	ioConnectivityLOSCapabilities string
 	ioPerformanceLOSCapabilities  string
 	serverEndpointGroups          string
-	Status                        Status
+	Status                        common.Status
 	storageGroups                 string
 	storagePools                  string
 	storageSubsystems             string
@@ -46,25 +48,25 @@ type StorageService struct {
 func (s *StorageService) UnmarshalJSON(b []byte) error {
 	type temp StorageService
 	type linkReference struct {
-		dataProtectionLOSCapabilities Link
-		dataSecurityLOSCapabilities   Link
-		dataStorageLOSCapabilities    Link
-		enclosures                    Link
-		hostingSystem                 Link
-		ioConnectivityLOSCapabilities Link
-		ioPerformanceLOSCapabilities  Link
+		dataProtectionLOSCapabilities common.Link
+		dataSecurityLOSCapabilities   common.Link
+		dataStorageLOSCapabilities    common.Link
+		enclosures                    common.Link
+		hostingSystem                 common.Link
+		ioConnectivityLOSCapabilities common.Link
+		ioPerformanceLOSCapabilities  common.Link
 	}
 	var t struct {
 		temp
-		ClassesOfService     Link
-		ClientEndPointGroups Link
-		Drives               Link
-		Endpoints            Link
-		ServerEndpointGroups Link
-		StorageGroups        Link
-		StoragePools         Link
-		StorageSubsystems    Link
-		Volumes              linksCollection
+		ClassesOfService     common.Link
+		ClientEndPointGroups common.Link
+		Drives               common.Link
+		Endpoints            common.Link
+		ServerEndpointGroups common.Link
+		StorageGroups        common.Link
+		StoragePools         common.Link
+		StorageSubsystems    common.Link
+		Volumes              common.LinksCollection
 		Links                linkReference
 	}
 
@@ -97,7 +99,7 @@ func (s *StorageService) UnmarshalJSON(b []byte) error {
 }
 
 // GetStorageService will get a StorageService instance from the Swordfish service.
-func GetStorageService(c Client, uri string) (*StorageService, error) {
+func GetStorageService(c common.Client, uri string) (*StorageService, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -112,9 +114,9 @@ func GetStorageService(c Client, uri string) (*StorageService, error) {
 }
 
 // ListReferencedStorageServices gets the collection of StorageServices
-func ListReferencedStorageServices(c Client, link string) ([]*StorageService, error) {
+func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) {
 	var result []*StorageService
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -131,11 +133,11 @@ func ListReferencedStorageServices(c Client, link string) ([]*StorageService, er
 }
 
 // ListStorageServices gets all StorageService in the system
-func ListStorageServices(c Client) ([]*StorageService, error) {
+func ListStorageServices(c common.Client) ([]*StorageService, error) {
 	return ListReferencedStorageServices(c, DefaultStorageServicePath)
 }
 
 // ClassesOfService gets the storage service classes of service
 func (s *StorageService) ClassesOfService() ([]*ClassesOfService, error) {
-	return ListReferencedClassesOfServices(s.client, s.classesOfService)
+	return ListReferencedClassesOfServices(s.Client, s.classesOfService)
 }

@@ -10,15 +10,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package gofish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
+	"github.com/stmcginnis/gofish/school/redfish"
+	"github.com/stmcginnis/gofish/school/swordfish"
 )
 
 // Service represents the service root of a Redfish enabled device.
 type Service struct {
-	Entity
+	common.Entity
 	Version            string `json:"ServiceVersion"`
 	UUID               string `json:"UUID"`
 	chassis            string
@@ -38,17 +42,17 @@ type Service struct {
 func (s *Service) UnmarshalJSON(b []byte) error {
 	type temp Service
 	type linkReference struct {
-		Chassis            Link
-		Managers           Link
-		TaskService        Link
-		SessionService     Link
-		StorageServices    Link
-		StorageSystems     Link
-		AccountService     Link
-		EventService       Link
-		Registries         Link
-		Systems            Link
-		CompositionService Link
+		Chassis            common.Link
+		Managers           common.Link
+		TaskService        common.Link
+		SessionService     common.Link
+		StorageServices    common.Link
+		StorageSystems     common.Link
+		AccountService     common.Link
+		EventService       common.Link
+		Registries         common.Link
+		Systems            common.Link
+		CompositionService common.Link
 	}
 	var t struct {
 		temp
@@ -79,7 +83,7 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 }
 
 // ServiceRoot gets the root service of the Redfish service.
-func ServiceRoot(c Client) (*Service, error) {
+func ServiceRoot(c common.Client) (*Service, error) {
 
 	resp, err := c.Get("/redfish/v1")
 	defer resp.Body.Close()
@@ -94,46 +98,46 @@ func ServiceRoot(c Client) (*Service, error) {
 }
 
 // Chassis gets the chassis instances managed by this service.
-func (s *Service) Chassis() ([]*Chassis, error) {
-	return ListReferencedChassis(s.client, s.chassis)
+func (s *Service) Chassis() ([]*redfish.Chassis, error) {
+	return redfish.ListReferencedChassis(s.Client, s.chassis)
 }
 
 // StorageSystems gets the storage system instances managed by this service.
-func (s *Service) StorageSystems() ([]*StorageSystem, error) {
-	return ListReferencedStorageSystems(s.client, s.storageSystems)
+func (s *Service) StorageSystems() ([]*swordfish.StorageSystem, error) {
+	return swordfish.ListReferencedStorageSystems(s.Client, s.storageSystems)
 }
 
 // StorageServices gets the Swordfish storage services
-func (s *Service) StorageServices() ([]*StorageService, error) {
-	return ListReferencedStorageServices(s.client, s.storageServices)
+func (s *Service) StorageServices() ([]*swordfish.StorageService, error) {
+	return swordfish.ListReferencedStorageServices(s.Client, s.storageServices)
 }
 
 // Tasks gets the system's tasks
-func (s *Service) Tasks() ([]*Task, error) {
-	return ListReferencedTasks(s.client, s.taskService)
+func (s *Service) Tasks() ([]*redfish.Task, error) {
+	return redfish.ListReferencedTasks(s.Client, s.taskService)
 }
 
 // Sessions gets the system's active sessions
-func (s *Service) Sessions() ([]*Session, error) {
-	return ListReferencedSessions(s.client, s.sessionService)
+func (s *Service) Sessions() ([]*redfish.Session, error) {
+	return redfish.ListReferencedSessions(s.Client, s.sessionService)
 }
 
 // AccountService gets the Redfish AccountService
-func (s *Service) AccountService() (*AccountService, error) {
-	return GetAccountService(s.client, s.accountService)
+func (s *Service) AccountService() (*redfish.AccountService, error) {
+	return redfish.GetAccountService(s.Client, s.accountService)
 }
 
 // EventService gets the Redfish EventService
-func (s *Service) EventService() (*EventService, error) {
-	return GetEventService(s.client, s.eventService)
+func (s *Service) EventService() (*redfish.EventService, error) {
+	return redfish.GetEventService(s.Client, s.eventService)
 }
 
 // Systems get the system instances from the service
-func (s *Service) Systems() ([]*ComputerSystem, error) {
-	return ListReferencedComputerSystems(s.client, s.systems)
+func (s *Service) Systems() ([]*redfish.ComputerSystem, error) {
+	return redfish.ListReferencedComputerSystems(s.Client, s.systems)
 }
 
 // CompositionService gets the composition service instance
-func (s *Service) CompositionService() (*CompositionService, error) {
-	return GetCompositionService(s.client, s.compositionService)
+func (s *Service) CompositionService() (*redfish.CompositionService, error) {
+	return redfish.GetCompositionService(s.Client, s.compositionService)
 }

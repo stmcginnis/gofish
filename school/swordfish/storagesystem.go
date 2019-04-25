@@ -10,61 +10,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package swordfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultStorageSystemPath is the default URI for StorageSystem collections.
 const DefaultStorageSystemPath = "/redfish/v1/StorageSystems"
 
-// BootSettings is a StorageService boot setting Swordfish object
-type BootSettings struct {
-	OverrideEnabled    string   `json:"BootSourceOverrideEnabled"`
-	Mode               string   `json:"BootSourceOverrideMode"`
-	Target             string   `json:"BootSourceOverrideTarget"`
-	AllowableValues    []string `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
-	UEFITargetOverride string   `json:"UefiTargetBootSourceOverride"`
-}
-
-// MemorySummary has information about memory state
-type MemorySummary struct {
-	MemoryMirroring      string
-	Status               StatusWithRollup
-	TotalSystemMemoryGiB int
-}
-
-// TrustedModules has TMP information
-type TrustedModules struct {
-	FirmwareVersion        string
-	FirmwareVersion2       string
-	InterfaceTypeSelection string
-	ModuleType             string
-	Status                 Status
-}
-
 // StorageSystem is a Swordfish storage system instance.
 type StorageSystem struct {
-	Entity
+	common.Entity
 	AssetTag        string
 	BiosVersion     string
-	Boot            BootSettings
+	Boot            common.BootSettings
 	Description     string
 	HostName        string
 	HostedServices  string
 	HostingRoles    string
 	IndicatorLED    string
 	Manufacturer    string
-	MemorySummary   MemorySummary
+	MemorySummary   common.MemorySummary
 	Model           string
 	Oem             []string
 	PartNumber      string
 	SKU             string
 	SerialNumber    string
-	Status          StatusWithRollup
+	Status          common.StatusWithRollup
 	SystemType      string
-	TrustedModules  []TrustedModules
+	TrustedModules  []common.TrustedModules
 	UUID            string
 	storageServices []string
 }
@@ -73,7 +50,7 @@ type StorageSystem struct {
 func (s *StorageSystem) UnmarshalJSON(b []byte) error {
 	type temp StorageSystem
 	type linkReference struct {
-		StorageServices Links
+		StorageServices common.Links
 	}
 	var t struct {
 		temp
@@ -94,7 +71,7 @@ func (s *StorageSystem) UnmarshalJSON(b []byte) error {
 }
 
 // GetStorageSystem will get a StorageSystem instance from the Swordfish service.
-func GetStorageSystem(c Client, uri string) (*StorageSystem, error) {
+func GetStorageSystem(c common.Client, uri string) (*StorageSystem, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -109,9 +86,9 @@ func GetStorageSystem(c Client, uri string) (*StorageSystem, error) {
 }
 
 // ListReferencedStorageSystems gets the collection of StorageSystems.
-func ListReferencedStorageSystems(c Client, link string) ([]*StorageSystem, error) {
+func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSystem, error) {
 	var result []*StorageSystem
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
@@ -128,6 +105,6 @@ func ListReferencedStorageSystems(c Client, link string) ([]*StorageSystem, erro
 }
 
 // ListStorageSystems gets all StorageSystem in the system.
-func ListStorageSystems(c Client) ([]*StorageSystem, error) {
+func ListStorageSystems(c common.Client) ([]*StorageSystem, error) {
 	return ListReferencedStorageSystems(c, DefaultStorageSystemPath)
 }

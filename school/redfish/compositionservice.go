@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package redfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // DefaultCompositionServicePath is the default URI for CompositionService collections.
@@ -23,8 +25,8 @@ const DefaultCompositionServicePath = "/redfish/v1/CompositionService"
 // properties for the service and links to the resources available for
 // composition.
 type CompositionService struct {
-	Entity
-	Status         Status
+	common.Entity
+	Status         common.Status
 	ServiceEnabled string
 	resourceBlocks string
 	resourceZones  string
@@ -35,8 +37,8 @@ func (cs *CompositionService) UnmarshalJSON(b []byte) error {
 	type temp CompositionService
 	var t struct {
 		temp
-		ResourceBlocks Link
-		ResourceZones  Link
+		ResourceBlocks common.Link
+		ResourceZones  common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -54,7 +56,7 @@ func (cs *CompositionService) UnmarshalJSON(b []byte) error {
 }
 
 // GetCompositionService will get a Composition instance from the Redfish service.
-func GetCompositionService(c Client, uri string) (*CompositionService, error) {
+func GetCompositionService(c common.Client, uri string) (*CompositionService, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 

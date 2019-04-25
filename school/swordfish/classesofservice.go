@@ -10,10 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package school
+package swordfish
 
 import (
 	"encoding/json"
+
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // LinesOfServiceCollection contains the lines of service for the CoS
@@ -27,14 +29,14 @@ type LinesOfServiceCollection struct {
 
 // ClassesOfService is a Swordfish storage system instance.
 type ClassesOfService struct {
-	Entity
+	common.Entity
 	ClassesOfServiceVersion string
 	Description             string
 	LinesOfService          LinesOfServiceCollection
 }
 
 // GetClassesOfService will get a ClassesOfService instance from the Swordfish service.
-func GetClassesOfService(c Client, uri string) (*ClassesOfService, error) {
+func GetClassesOfService(c common.Client, uri string) (*ClassesOfService, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
@@ -49,9 +51,9 @@ func GetClassesOfService(c Client, uri string) (*ClassesOfService, error) {
 }
 
 // ListReferencedClassesOfServices gets the collection of ClassesOfServices
-func ListReferencedClassesOfServices(c Client, link string) ([]*ClassesOfService, error) {
+func ListReferencedClassesOfServices(c common.Client, link string) ([]*ClassesOfService, error) {
 	var result []*ClassesOfService
-	links, err := GetCollection(c, link)
+	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return result, err
 	}
