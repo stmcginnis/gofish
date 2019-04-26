@@ -72,7 +72,7 @@ func (l Links) ToStrings() []string {
 	return result
 }
 
-// links are the json references to other entities
+// LinksCollection contains links to other entities
 type LinksCollection struct {
 	Count   int   `json:"Member@odata.count"`
 	Members Links `json:"Members"`
