@@ -152,34 +152,3 @@ type Status struct {
 	Health Health `json:"Health"`
 	State  State  `json:"State"`
 }
-
-// StatusWithRollup describes the status, health, and rollup status of a resource.
-type StatusWithRollup struct {
-	Status
-	HealthRollup Health
-}
-
-// BootSettings is a StorageService boot setting Swordfish object
-type BootSettings struct {
-	OverrideEnabled    string   `json:"BootSourceOverrideEnabled"`
-	Mode               string   `json:"BootSourceOverrideMode"`
-	Target             string   `json:"BootSourceOverrideTarget"`
-	AllowableValues    []string `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
-	UEFITargetOverride string   `json:"UefiTargetBootSourceOverride"`
-}
-
-// MemorySummary has information about memory state
-type MemorySummary struct {
-	MemoryMirroring      string
-	Status               StatusWithRollup
-	TotalSystemMemoryGiB int
-}
-
-// TrustedModules has TMP information
-type TrustedModules struct {
-	FirmwareVersion        string
-	FirmwareVersion2       string
-	InterfaceTypeSelection string
-	ModuleType             string
-	Status                 Status
-}

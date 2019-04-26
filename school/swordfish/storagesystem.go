@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 
 	"github.com/stmcginnis/gofish/school/common"
+	"github.com/stmcginnis/gofish/school/redfish"
 )
 
 // DefaultStorageSystemPath is the default URI for StorageSystem collections.
@@ -23,51 +24,7 @@ const DefaultStorageSystemPath = "/redfish/v1/StorageSystems"
 
 // StorageSystem is a Swordfish storage system instance.
 type StorageSystem struct {
-	common.Entity
-	AssetTag        string
-	BiosVersion     string
-	Boot            common.BootSettings
-	Description     string
-	HostName        string
-	HostedServices  string
-	HostingRoles    string
-	IndicatorLED    string
-	Manufacturer    string
-	MemorySummary   common.MemorySummary
-	Model           string
-	Oem             []string
-	PartNumber      string
-	SKU             string
-	SerialNumber    string
-	Status          common.StatusWithRollup
-	SystemType      string
-	TrustedModules  []common.TrustedModules
-	UUID            string
-	storageServices []string
-}
-
-// UnmarshalJSON unmarshals a StorageSystem object from the raw JSON.
-func (s *StorageSystem) UnmarshalJSON(b []byte) error {
-	type temp StorageSystem
-	type linkReference struct {
-		StorageServices common.Links
-	}
-	var t struct {
-		temp
-		Links linkReference
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	*s = StorageSystem(t.temp)
-
-	// Extract the links to other entities for later
-	s.storageServices = t.Links.StorageServices.ToStrings()
-
-	return nil
+	redfish.ComputerSystem
 }
 
 // GetStorageSystem will get a StorageSystem instance from the Swordfish service.
