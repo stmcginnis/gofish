@@ -10,7 +10,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+PKGS := $(shell go list ./...)
+
 all: build
 
+test:
+	go test $(PKGS)
+
 build:
-	@echo "Nothing to see here, move along"
+	go build
+
+clean:
+	go clean
