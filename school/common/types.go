@@ -18,7 +18,7 @@ import (
 )
 
 // DefaultServiceRoot is the default path to the Redfish service endpoint.
-const DefaultServiceRoot = "/redfish/v1"
+const DefaultServiceRoot = "/redfish/v1/"
 
 // Client is a connection to a Redfish service.
 type Client interface {
@@ -74,7 +74,7 @@ func (l Links) ToStrings() []string {
 
 // LinksCollection contains links to other entities
 type LinksCollection struct {
-	Count   int   `json:"Member@odata.count"`
+	Count   int   `json:"Members@odata.count"`
 	Members Links `json:"Members"`
 }
 
