@@ -32,14 +32,14 @@ func GetStorageSystem(c common.Client, uri string) (*StorageSystem, error) {
 	resp, err := c.Get(uri)
 	defer resp.Body.Close()
 
-	var StorageSystem StorageSystem
-	err = json.NewDecoder(resp.Body).Decode(&StorageSystem)
+	var storageSystem StorageSystem
+	err = json.NewDecoder(resp.Body).Decode(&storageSystem)
 	if err != nil {
 		return nil, err
 	}
 
-	StorageSystem.SetClient(c)
-	return &StorageSystem, nil
+	storageSystem.SetClient(c)
+	return &storageSystem, nil
 }
 
 // ListReferencedStorageSystems gets the collection of StorageSystems.
@@ -50,12 +50,12 @@ func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSyste
 		return result, err
 	}
 
-	for _, StorageSystemLink := range links.ItemLinks {
-		StorageSystem, err := GetStorageSystem(c, StorageSystemLink)
+	for _, storageSystemLink := range links.ItemLinks {
+		storageSystem, err := GetStorageSystem(c, storageSystemLink)
 		if err != nil {
 			return result, err
 		}
-		result = append(result, StorageSystem)
+		result = append(result, storageSystem)
 	}
 
 	return result, nil

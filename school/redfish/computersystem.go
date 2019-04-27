@@ -353,7 +353,7 @@ type ComputerSystem struct {
 	// primary system firmware.
 	BIOSVersion string `json:"BiosVersion"`
 	// Boot describes boot information for the current resource.
-	Boot string
+	Boot Boot
 	// Description is the resource description.
 	Description string
 	// EthernetInterfaces shall be a link to a
@@ -382,7 +382,7 @@ type ComputerSystem struct {
 	// Links is The Links property, as described by the Redfish
 	// Specification, shall contain references to resources that are related
 	// to, but not contained by (subordinate to), this resource.
-	Links string
+	Links CSLinks
 	// LogServices shall be a link to a
 	// collection of type LogServiceCollection.
 	LogServices string
@@ -397,7 +397,7 @@ type ComputerSystem struct {
 	MemoryDomains string
 	// MemorySummary is This object shall contain properties which describe
 	// the central memory for the current resource.
-	MemorySummary string
+	MemorySummary MemorySummary
 	// Model shall contain the information
 	// about how the manufacturer references this system. This is typically
 	// the product name, without the manufacturer name.
@@ -407,9 +407,8 @@ type ComputerSystem struct {
 	// NetworkInterfaces shall be a link to a
 	// collection of type NetworkInterfaceCollection.
 	NetworkInterfaces string
-	// OEM is The value of this string shall be of the format for the
-	// reserved word *Oem*.
-	OEM string `json:"Oem"`
+	// OEM shall be of the format for the reserved word *Oem*.
+	OEM []string `json:"Oem"`
 	// PCIeDevices shall be an array of
 	// references of type PCIeDevice.
 	PCIeDevices string
@@ -433,7 +432,7 @@ type ComputerSystem struct {
 	PowerState PowerState
 	// ProcessorSummary is This object shall contain properties which
 	// describe the central processors for the current resource.
-	ProcessorSummary string
+	ProcessorSummary ProcessorSummary
 	// Processors shall be a link to a
 	// collection of type ProcessorCollection.
 	Processors string
@@ -469,7 +468,7 @@ type ComputerSystem struct {
 	SystemType SystemType
 	// TrustedModules is This object shall contain an array of objects with
 	// properties which describe the truted modules for the current resource.
-	TrustedModules []string
+	TrustedModules []TrustedModules
 	// UUID is used to contain a universal unique identifier number for the
 	// system. RFC4122 describes methods that can be used to create the
 	// value. The value should be considered to be opaque. Client software
@@ -574,62 +573,62 @@ func (hostedservices *HostedServices) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Links is \references to resources that are related to, but not contained
+// CSLinks are references to resources that are related to, but not contained
 // by (subordinate to), this resource.
-// type Links struct {
-// 	common.Entity
+type CSLinks struct {
+	common.Entity
 
-// 	// Chassis shall reference a resource of
-// 	// type Chassis that represents the physical container associated with
-// 	// this resource.
-// 	Chassis string
-// 	// ChassisODataCount is
-// 	ChassisODataCount string `json:"Chassis@odata.count"`
-// 	// ConsumingComputerSystems is The value shall be an array of references
-// 	// to ComputerSystems that are realized, in whole or in part, from this
-// 	// ComputerSystem.
-// 	ConsumingComputerSystems string
-// 	// ConsumingComputerSystemsODataCount is
-// 	ConsumingComputerSystemsODataCount string `json:"ConsumingComputerSystems@odata.count"`
-// 	// CooledBy shall be an array of IDs
-// 	// containing pointers consistent with JSON pointer syntax to the
-// 	// resource that powers this computer system.
-// 	CooledBy string
-// 	// CooledByODataCount is
-// 	CooledByODataCount string `json:"CooledBy@odata.count"`
-// 	// Endpoints shall be a reference to the
-// 	// resources that this system is associated with and shall reference a
-// 	// resource of type Endpoint.
-// 	Endpoints string
-// 	// EndpointsODataCount is
-// 	EndpointsODataCount string `json:"Endpoints@odata.count"`
-// 	// ManagedBy shall reference a resource of
-// 	// type manager that represents the resource with management
-// 	// responsibility for this resource.
-// 	ManagedBy string
-// 	// ManagedByODataCount is
-// 	ManagedByODataCount string `json:"ManagedBy@odata.count"`
-// 	// OEM represents the Oem property. All values for
-// 	// resources described by this schema shall comply to the requirements as
-// 	// described in the Redfish specification.
-// 	OEM string `json:"Oem"`
-// 	// PoweredBy shall be an array of IDs
-// 	// containing pointers consistent with JSON pointer syntax to the
-// 	// resource that powers this computer system.
-// 	PoweredBy string
-// 	// PoweredByODataCount is
-// 	PoweredByODataCount string `json:"PoweredBy@odata.count"`
-// 	// ResourceBlocks is used in this Computer System.
-// 	ResourceBlocks string
-// 	// ResourceBlocksODataCount is
-// 	ResourceBlocksODataCount string `json:"ResourceBlocks@odata.count"`
-// 	// SupplyingComputerSystems is The value shall be an array of references
-// 	// to ComputerSystems that contribute, in whole or in part, to the
-// 	// implementation of this ComputerSystem.
-// 	SupplyingComputerSystems string
-// 	// SupplyingComputerSystemsODataCount is
-// 	SupplyingComputerSystemsODataCount string `json:"SupplyingComputerSystems@odata.count"`
-// }
+	// Chassis shall reference a resource of
+	// type Chassis that represents the physical container associated with
+	// this resource.
+	Chassis common.Links
+	// ChassisODataCount is
+	ChassisODataCount int `json:"Chassis@odata.count"`
+	// ConsumingComputerSystems shall be an array of references
+	// to ComputerSystems that are realized, in whole or in part, from this
+	// ComputerSystem.
+	ConsumingComputerSystems common.Links
+	// ConsumingComputerSystemsODataCount is
+	ConsumingComputerSystemsODataCount int `json:"ConsumingComputerSystems@odata.count"`
+	// CooledBy shall be an array of IDs
+	// containing pointers consistent with JSON pointer syntax to the
+	// resource that powers this computer system.
+	CooledBy []string
+	// CooledByODataCount is
+	CooledByODataCount int `json:"CooledBy@odata.count"`
+	// Endpoints shall be a reference to the
+	// resources that this system is associated with and shall reference a
+	// resource of type Endpoint.
+	Endpoints common.Links
+	// EndpointsODataCount is
+	EndpointsODataCount int `json:"Endpoints@odata.count"`
+	// ManagedBy shall reference a resource of
+	// type manager that represents the resource with management
+	// responsibility for this resource.
+	ManagedBy common.Links
+	// ManagedByODataCount is
+	ManagedByODataCount int `json:"ManagedBy@odata.count"`
+	// OEM represents the Oem property. All values for
+	// resources described by this schema shall comply to the requirements as
+	// described in the Redfish specification.
+	OEM []string `json:"Oem"`
+	// PoweredBy shall be an array of IDs
+	// containing pointers consistent with JSON pointer syntax to the
+	// resource that powers this computer system.
+	PoweredBy []string
+	// PoweredByODataCount is
+	PoweredByODataCount int `json:"PoweredBy@odata.count"`
+	// ResourceBlocks is used in this Computer System.
+	ResourceBlocks common.Links
+	// ResourceBlocksODataCount is
+	ResourceBlocksODataCount int `json:"ResourceBlocks@odata.count"`
+	// SupplyingComputerSystems shall be an array of references
+	// to ComputerSystems that contribute, in whole or in part, to the
+	// implementation of this ComputerSystem.
+	SupplyingComputerSystems common.Links
+	// SupplyingComputerSystemsODataCount is
+	SupplyingComputerSystemsODataCount int `json:"SupplyingComputerSystems@odata.count"`
+}
 
 // MemorySummary contains properties which describe the
 // central memory for a system.
@@ -658,10 +657,10 @@ type ProcessorSummary struct {
 
 	// Count is the number of physical central
 	// processors in the system.
-	Count string
+	Count int
 	// LogicalProcessorCount is the number of
 	// logical central processors in the system.
-	LogicalProcessorCount string
+	LogicalProcessorCount int
 	// Model is the processor model for the
 	// central processors in the system, per the description in the Processor
 	// Information - Processor Family section of the SMBIOS Specification
@@ -714,7 +713,7 @@ type WatchdogTimer struct {
 	// OEM represents the Oem property. All values for
 	// resources described by this schema shall comply to the requirements as
 	// described in the Redfish specification.
-	OEM string `json:"Oem"`
+	OEM []string `json:"Oem"`
 	// Status is any status or health properties
 	// of the resource.
 	Status string
