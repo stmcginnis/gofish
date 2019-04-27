@@ -85,7 +85,7 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 // ServiceRoot gets the root service of the Redfish service.
 func ServiceRoot(c common.Client) (*Service, error) {
 
-	resp, err := c.Get("/redfish/v1")
+	resp, err := c.Get(common.DefaultServiceRoot)
 	defer resp.Body.Close()
 
 	var service Service
