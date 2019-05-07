@@ -96,6 +96,45 @@ const (
 	CriticalHealth Health = "Critical"
 )
 
+// DurableNameFormat indicates the type of durable name.
+type DurableNameFormat string
+
+const (
+	// NAADurableNameFormat shall be a hexadecimal representation of the Name Address
+	// Authority structure as defined in the T11 Fibre Channel - Framing and Signaling
+	// - 3 (FC-FS-3) specification.
+	NAADurableNameFormat DurableNameFormat = "NAA"
+	// IQNDurableNameFormat shall be in the iSCSI Qualified Name format as defined
+	// in RFC 3720 and RFC 3721.
+	IQNDurableNameFormat DurableNameFormat = "iQN"
+	// FCWWNDurableNameFormat shall be a hexadecimal representation of the World
+	// Wide Name format as defined in the T11 Fibre Channel Physical and Signaling
+	// Interface Specification.
+	FCWWNDurableNameFormat DurableNameFormat = "FC_WWN"
+	// UUIDDurableNameFormat shall be the hexadecimal representation of the Universal
+	// Unique Identifier as defined in the Internation Telecom Union's OSI networking
+	// and system aspects - Naming, Addressing and Registration Specification.
+	UUIDDurableNameFormat DurableNameFormat = "UUID"
+	// EUIDurableNameFormat shall be the hexadecimal representation of the IEEE-defined
+	// 64-bit Extended Unique Identifier as defined in the IEEE's Guidelines for
+	// 64-bit Global Identifier (EUI-64) Specification.
+	EUIDurableNameFormat DurableNameFormat = "EUI"
+	// NQNDurableNameFormat shall be in the NVMe Qualified Name format as defined
+	// in the NVN Express over Fabric Specification.
+	NQNDurableNameFormat DurableNameFormat = "NQN"
+	// NSIDDurableNameFormat shall be in the NVM Namespace Identifier format as
+	// defined in the NVN Express Specification.
+	NSIDDurableNameFormat DurableNameFormat = "NSID"
+)
+
+// Identifier shall contain any additional identifiers of a resource.
+type Identifier struct {
+	// DurableName indicates the world wide, persistent name of the resource.
+	DurableName string
+	// DurableNameFormat
+	DurableNameFormat DurableNameFormat
+}
+
 // IndicatorLED represents LED indicator states
 type IndicatorLED string
 
