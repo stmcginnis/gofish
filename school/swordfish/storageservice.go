@@ -121,7 +121,23 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	type temp StorageService
 	var t struct {
 		temp
-		ClassesOfService common.Link
+		ClassesOfService              common.Link
+		DataProtectionLoSCapabilities common.Link
+		DataSecurityLoSCapabilities   common.Link
+		DataStorageLoSCapabilities    common.Link
+		DefaultClassOfService         common.Link
+		Drives                        common.Link
+		EndpointGroups                common.Link
+		Endpoints                     common.Link
+		FileSystems                   common.Link
+		IOConnectivityLoSCapabilities common.Link
+		IOPerformanceLoSCapabilities  common.Link
+		IOStatistics                  common.Link
+		Redundancy                    common.Link
+		SpareResourceSets             common.Link
+		StorageGroups                 common.Link
+		StoragePools                  common.Links
+		StorageSubsystems             common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -133,6 +149,22 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	storageservice.classesOfService = string(t.ClassesOfService)
+	storageservice.dataProtectionLoSCapabilities = string(t.DataProtectionLoSCapabilities)
+	storageservice.dataSecurityLoSCapabilities = string(t.DataSecurityLoSCapabilities)
+	storageservice.dataStorageLoSCapabilities = string(t.DataSecurityLoSCapabilities)
+	storageservice.defaultClassOfService = string(t.DataSecurityLoSCapabilities)
+	storageservice.drives = string(t.DataSecurityLoSCapabilities)
+	storageservice.endpointGroups = string(t.DataSecurityLoSCapabilities)
+	storageservice.endpoints = string(t.DataSecurityLoSCapabilities)
+	storageservice.fileSystems = string(t.DataSecurityLoSCapabilities)
+	storageservice.ioConnectivityLoSCapabilities = string(t.DataSecurityLoSCapabilities)
+	storageservice.ioPerformanceLoSCapabilities = string(t.DataSecurityLoSCapabilities)
+	storageservice.ioStatistics = string(t.DataSecurityLoSCapabilities)
+	storageservice.redundancy = string(t.DataSecurityLoSCapabilities)
+	storageservice.spareResourceSets = string(t.DataSecurityLoSCapabilities)
+	storageservice.storageGroups = string(t.DataSecurityLoSCapabilities)
+	storageservice.storagePools = t.StoragePools.ToStrings()
+	storageservice.storageSubsystems = string(t.DataSecurityLoSCapabilities)
 
 	return nil
 }
