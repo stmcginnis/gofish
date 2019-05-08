@@ -82,33 +82,6 @@ const (
 	SwitchHostingRole HostingRole = "Switch"
 )
 
-// IndicatorLED is the state of the indicator LED.
-type IndicatorLED string
-
-const (
-
-	// UnknownIndicatorLED the Indicator LED is in an unknown
-	// state. The service shall reject PATCH or PUT requests containing this
-	// value by returning HTTP 400 (Bad Request).
-	UnknownIndicatorLED IndicatorLED = "Unknown"
-	// LitIndicatorLED the Indicator LED is in a solid on
-	// state. If this value is not supported by the service, the service
-	// shall reject PATCH or PUT requests containing this value by returning
-	// HTTP 400 (Bad Request).
-	LitIndicatorLED IndicatorLED = "Lit"
-	// BlinkingIndicatorLED the Indicator LED is in a
-	// blinking state where the LED is being turned on and off in repetition.
-	// If this value is not supported by the service, the service shall
-	// reject PATCH or PUT requests containing this value by returning HTTP
-	// 400 (Bad Request).
-	BlinkingIndicatorLED IndicatorLED = "Blinking"
-	// OffIndicatorLED the Indicator LED is in a solid off
-	// state. If this value is not supported by the service, the service
-	// shall reject PATCH or PUT requests containing this value by returning
-	// HTTP 400 (Bad Request).
-	OffIndicatorLED IndicatorLED = "Off"
-)
-
 // InterfaceType is the Trusted Platform Module type.
 type InterfaceType string
 
@@ -340,8 +313,6 @@ type ComputerSystem struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is the @odata.type
 	ODataType string `json:"@odata.type"`
-	// Actions contain the available actions for this resource.
-	Actions string
 	// AssetTag shall contain the value of the asset tag of the system.
 	AssetTag string
 	// BIOS shall be a link to a resource of
@@ -358,7 +329,7 @@ type ComputerSystem struct {
 	Description string
 	// EthernetInterfaces shall be a link to a
 	// collection of type EthernetInterfaceCollection.
-	EthernetInterfaces string
+	ethernetInterfaces string
 	// HostName shall be the host name for this
 	// system, as reported by the operating system or hypervisor. This value
 	// is typically provided to the Manager by a service running in the host
@@ -378,11 +349,7 @@ type ComputerSystem struct {
 	ID string `json:"Id"`
 	// IndicatorLED shall contain the indicator
 	// light state for the indicator light associated with this system.
-	IndicatorLED string
-	// Links is The Links property, as described by the Redfish
-	// Specification, shall contain references to resources that are related
-	// to, but not contained by (subordinate to), this resource.
-	Links CSLinks
+	IndicatorLED common.IndicatorLED
 	// LogServices shall be a link to a
 	// collection of type LogServiceCollection.
 	LogServices string
@@ -391,7 +358,7 @@ type ComputerSystem struct {
 	Manufacturer string
 	// Memory shall be a link to a collection
 	// of type MemoryCollection.
-	Memory string
+	memory string
 	// MemoryDomains shall be a link to a
 	// collection of type MemoryDomainCollection.
 	MemoryDomains string
@@ -412,13 +379,13 @@ type ComputerSystem struct {
 	// PCIeDevices shall be an array of
 	// references of type PCIeDevice.
 	PCIeDevices string
-	// PCIeDevicesODataCount is
-	PCIeDevicesODataCount string `json:"PCIeDevices@odata.count"`
+	// PCIeDevicesCount is
+	PCIeDevicesCount string `json:"PCIeDevices@odata.count"`
 	// PCIeFunctions shall be an array of
 	// references of type PCIeFunction.
 	PCIeFunctions string
-	// PCIeFunctionsODataCount is
-	PCIeFunctionsODataCount string `json:"PCIeFunctions@odata.count"`
+	// PCIeFunctionsCount is
+	PCIeFunctionsCount string `json:"PCIeFunctions@odata.count"`
 	// PartNumber shall contain the part number
 	// for the system as defined by the manufacturer.
 	PartNumber string
@@ -433,16 +400,15 @@ type ComputerSystem struct {
 	// ProcessorSummary is This object shall contain properties which
 	// describe the central processors for the current resource.
 	ProcessorSummary ProcessorSummary
-	// Processors shall be a link to a
-	// collection of type ProcessorCollection.
-	Processors string
-	// Redundancy is If present, each entry shall reference a redundancy
+	// Processors shall be a link to a collection of type ProcessorCollection.
+	processors string
+	// Redundancy ireference a redundancy
 	// entity that specifies a kind and level of redundancy and a collection
 	// (RedundancySet) of other ComputerSystems that provide the specified
 	// redundancy to this ComputerSystem.
 	Redundancy string
-	// RedundancyODataCount is
-	RedundancyODataCount string `json:"Redundancy@odata.count"`
+	// RedundancyCount is the number of Reduncy objects.
+	RedundancyCount string `json:"Redundancy@odata.count"`
 	// SKU shall contain the Stock Keeping Unit
 	// (SKU) for the system.
 	SKU string
@@ -453,7 +419,7 @@ type ComputerSystem struct {
 	// number for the system.
 	SerialNumber string
 	// SimpleStorage shall be a link to a collection of type SimpleStorageCollection.
-	SimpleStorage string
+	simpleStorage string
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
@@ -487,6 +453,11 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	type temp ComputerSystem
 	var t struct {
 		temp
+		Processors         common.Link
+		Memory             common.Link
+		EthernetInterfaces common.Link
+		SimpleStorage      common.Link
+		Links              CSLinks
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -497,6 +468,10 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	*computersystem = ComputerSystem(t.temp)
 
 	// Extract the links to other entities for later
+	computersystem.processors = string(t.Processors)
+	computersystem.memory = string(t.Memory)
+	computersystem.ethernetInterfaces = string(t.EthernetInterfaces)
+	computersystem.simpleStorage = string(t.SimpleStorage)
 
 	return nil
 }
@@ -541,100 +516,64 @@ func ListComputerSystems(c common.Client) ([]*ComputerSystem, error) {
 	return ListReferencedComputerSystems(c, DefaultComputerSystemPath)
 }
 
-// HostedServices is The values of this collection shall describe
-// services supported by a computer system.
-type HostedServices struct {
-	common.Entity
-
-	// OEM represents the Oem property. All values for
-	// resources described by this schema shall comply to the requirements as
-	// described in the Redfish specification.
-	OEM string `json:"Oem"`
-	// StorageServices shall be a link to a collection of type HostedStorageServices.
-	StorageServices string
-}
-
-// UnmarshalJSON unmarshals a HostedServices object from the raw JSON.
-func (hostedservices *HostedServices) UnmarshalJSON(b []byte) error {
-	type temp HostedServices
-	var t struct {
-		temp
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	*hostedservices = HostedServices(t.temp)
-
-	// Extract the links to other entities for later
-
-	return nil
-}
-
 // CSLinks are references to resources that are related to, but not contained
 // by (subordinate to), this resource.
 type CSLinks struct {
-	common.Entity
-
 	// Chassis shall reference a resource of
 	// type Chassis that represents the physical container associated with
 	// this resource.
 	Chassis common.Links
-	// ChassisODataCount is
-	ChassisODataCount int `json:"Chassis@odata.count"`
+	// ChassisCount is
+	ChassisCount int `json:"Chassis@odata.count"`
 	// ConsumingComputerSystems shall be an array of references
 	// to ComputerSystems that are realized, in whole or in part, from this
 	// ComputerSystem.
 	ConsumingComputerSystems common.Links
-	// ConsumingComputerSystemsODataCount is
-	ConsumingComputerSystemsODataCount int `json:"ConsumingComputerSystems@odata.count"`
+	// ConsumingComputerSystemsCount is
+	ConsumingComputerSystemsCount int `json:"ConsumingComputerSystems@odata.count"`
 	// CooledBy shall be an array of IDs
 	// containing pointers consistent with JSON pointer syntax to the
 	// resource that powers this computer system.
 	CooledBy []string
-	// CooledByODataCount is
-	CooledByODataCount int `json:"CooledBy@odata.count"`
+	// CooledByCount is
+	CooledByCount int `json:"CooledBy@odata.count"`
 	// Endpoints shall be a reference to the
 	// resources that this system is associated with and shall reference a
 	// resource of type Endpoint.
 	Endpoints common.Links
-	// EndpointsODataCount is
-	EndpointsODataCount int `json:"Endpoints@odata.count"`
+	// EndpointsCount is
+	EndpointsCount int `json:"Endpoints@odata.count"`
 	// ManagedBy shall reference a resource of
 	// type manager that represents the resource with management
 	// responsibility for this resource.
 	ManagedBy common.Links
-	// ManagedByODataCount is
-	ManagedByODataCount int `json:"ManagedBy@odata.count"`
+	// ManagedByCount is
+	ManagedByCount int `json:"ManagedBy@odata.count"`
 	// OEM represents the Oem property. All values for
 	// resources described by this schema shall comply to the requirements as
 	// described in the Redfish specification.
-	OEM []string `json:"Oem"`
+	//OEM []string `json:"Oem"`
 	// PoweredBy shall be an array of IDs
 	// containing pointers consistent with JSON pointer syntax to the
 	// resource that powers this computer system.
 	PoweredBy []string
-	// PoweredByODataCount is
-	PoweredByODataCount int `json:"PoweredBy@odata.count"`
+	// PoweredByCount is
+	PoweredByCount int `json:"PoweredBy@odata.count"`
 	// ResourceBlocks is used in this Computer System.
 	ResourceBlocks common.Links
-	// ResourceBlocksODataCount is
-	ResourceBlocksODataCount int `json:"ResourceBlocks@odata.count"`
+	// ResourceBlocksCount is
+	ResourceBlocksCount int `json:"ResourceBlocks@odata.count"`
 	// SupplyingComputerSystems shall be an array of references
 	// to ComputerSystems that contribute, in whole or in part, to the
 	// implementation of this ComputerSystem.
 	SupplyingComputerSystems common.Links
-	// SupplyingComputerSystemsODataCount is
-	SupplyingComputerSystemsODataCount int `json:"SupplyingComputerSystems@odata.count"`
+	// SupplyingComputerSystemsCount is
+	SupplyingComputerSystemsCount int `json:"SupplyingComputerSystems@odata.count"`
 }
 
 // MemorySummary contains properties which describe the
 // central memory for a system.
 type MemorySummary struct {
-	common.Entity
-
 	// MemoryMirroring is the ability and type of memory mirring supported by this system.
 	MemoryMirroring MemoryMirroring
 	// Status is the status or health properties
@@ -653,8 +592,6 @@ type MemorySummary struct {
 // ProcessorSummary is This type shall contain properties which describe
 // the central processors for a system.
 type ProcessorSummary struct {
-	common.Entity
-
 	// Count is the number of physical central
 	// processors in the system.
 	Count int
@@ -674,8 +611,6 @@ type ProcessorSummary struct {
 // TrustedModules is This type shall describe a truted module for a
 // system.
 type TrustedModules struct {
-	common.Entity
-
 	// FirmwareVersion is the firwmare version as
 	// defined by the manufacturer for the Trusted Module.
 	FirmwareVersion string
@@ -702,8 +637,6 @@ type TrustedModules struct {
 // WatchdogTimer contains properties which describe the
 // host watchdog timer functionality for this ComputerSystem.
 type WatchdogTimer struct {
-	common.Entity
-
 	// FunctionEnabled shall indicate whether
 	// the host watchdog timer functionality has been enabled or not. This
 	// property indicates only that the functionality is enabled or disabled
