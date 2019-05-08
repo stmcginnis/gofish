@@ -102,6 +102,11 @@ func (s *Service) Chassis() ([]*redfish.Chassis, error) {
 	return redfish.ListReferencedChassis(s.Client, s.chassis)
 }
 
+// Managers gets the manager instances of this service.
+func (s *Service) Managers() ([]*redfish.Manager, error) {
+	return redfish.ListReferencedManagers(s.Client, s.managers)
+}
+
 // StorageSystems gets the storage system instances managed by this service.
 func (s *Service) StorageSystems() ([]*swordfish.StorageSystem, error) {
 	return swordfish.ListReferencedStorageSystems(s.Client, s.storageSystems)
