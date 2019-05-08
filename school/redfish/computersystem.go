@@ -335,15 +335,13 @@ type ComputerSystem struct {
 	// is typically provided to the Manager by a service running in the host
 	// operating system.
 	HostName string
-	// HostWatchdogTimer is This object shall contain properties which
+	// HostWatchdogTimer shall contain properties which
 	// describe the host watchdog timer functionality for this
 	// ComputerSystem.
 	HostWatchdogTimer string
-	// HostedServices is The values of this collection shall describe
-	// services supported by this computer system.
+	// HostedServices shall describe services supported by this computer system.
 	HostedServices string
-	// HostingRoles is The values of this collection shall be the hosting
-	// roles supported by this computer system.
+	// HostingRoles shall be the hosting roles supported by this computer system.
 	HostingRoles string
 	// ID is the identifier.
 	ID string `json:"Id"`
@@ -353,14 +351,11 @@ type ComputerSystem struct {
 	// LogServices shall be a link to a
 	// collection of type LogServiceCollection.
 	LogServices string
-	// Manufacturer shall contain a value that
-	// represents the manufacturer of the system.
+	// Manufacturer shall contain a value that represents the manufacturer of the system.
 	Manufacturer string
-	// Memory shall be a link to a collection
-	// of type MemoryCollection.
+	// Memory shall be a link to a collection of type MemoryCollection.
 	memory string
-	// MemoryDomains shall be a link to a
-	// collection of type MemoryDomainCollection.
+	// MemoryDomains shall be a link to a collection of type MemoryDomainCollection.
 	MemoryDomains string
 	// MemorySummary is This object shall contain properties which describe
 	// the central memory for the current resource.
@@ -374,17 +369,13 @@ type ComputerSystem struct {
 	// NetworkInterfaces shall be a link to a
 	// collection of type NetworkInterfaceCollection.
 	NetworkInterfaces string
-	// OEM shall be of the format for the reserved word *Oem*.
-	OEM []string `json:"Oem"`
-	// PCIeDevices shall be an array of
-	// references of type PCIeDevice.
+	// PCIeDevices shall be an array of references of type PCIeDevice.
 	PCIeDevices string
-	// PCIeDevicesCount is
+	// PCIeDevicesCount is the number of PCIeDevices.
 	PCIeDevicesCount string `json:"PCIeDevices@odata.count"`
-	// PCIeFunctions shall be an array of
-	// references of type PCIeFunction.
+	// PCIeFunctions shall be an array of references of type PCIeFunction.
 	PCIeFunctions string
-	// PCIeFunctionsCount is
+	// PCIeFunctionsCount is the number of PCIeFunctions.
 	PCIeFunctionsCount string `json:"PCIeFunctions@odata.count"`
 	// PartNumber shall contain the part number
 	// for the system as defined by the manufacturer.
@@ -394,29 +385,25 @@ type ComputerSystem struct {
 	// of 'LastState' shall return the system to the PowerState it was in
 	// when power was lost.
 	PowerRestorePolicy PowerState
-	// PowerState shall contain the power state
-	// of the system.
+	// PowerState shall contain the power state of the system.
 	PowerState PowerState
-	// ProcessorSummary is This object shall contain properties which
+	// ProcessorSummary shall contain properties which
 	// describe the central processors for the current resource.
 	ProcessorSummary ProcessorSummary
 	// Processors shall be a link to a collection of type ProcessorCollection.
 	processors string
-	// Redundancy ireference a redundancy
+	// Redundancy references a redundancy
 	// entity that specifies a kind and level of redundancy and a collection
 	// (RedundancySet) of other ComputerSystems that provide the specified
 	// redundancy to this ComputerSystem.
 	Redundancy string
 	// RedundancyCount is the number of Reduncy objects.
 	RedundancyCount string `json:"Redundancy@odata.count"`
-	// SKU shall contain the Stock Keeping Unit
-	// (SKU) for the system.
+	// SKU shall contain the Stock Keeping Unit (SKU) for the system.
 	SKU string
-	// SecureBoot shall be a link to a resource
-	// of type SecureBoot.
+	// SecureBoot shall be a link to a resource of type SecureBoot.
 	SecureBoot string
-	// SerialNumber shall contain the serial
-	// number for the system.
+	// SerialNumber shall contain the serial number for the system.
 	SerialNumber string
 	// SimpleStorage shall be a link to a collection of type SimpleStorageCollection.
 	simpleStorage string
@@ -432,8 +419,8 @@ type ComputerSystem struct {
 	SubModel string
 	// SystemType indicates the kind of system that this resource represents.
 	SystemType SystemType
-	// TrustedModules is This object shall contain an array of objects with
-	// properties which describe the truted modules for the current resource.
+	// TrustedModules shall contain an array of objects with
+	// properties which describe the trusted modules for the current resource.
 	TrustedModules []TrustedModules
 	// UUID is used to contain a universal unique identifier number for the
 	// system. RFC4122 describes methods that can be used to create the
@@ -549,25 +536,21 @@ type CSLinks struct {
 	ManagedBy common.Links
 	// ManagedByCount is
 	ManagedByCount int `json:"ManagedBy@odata.count"`
-	// OEM represents the Oem property. All values for
-	// resources described by this schema shall comply to the requirements as
-	// described in the Redfish specification.
-	//OEM []string `json:"Oem"`
 	// PoweredBy shall be an array of IDs
 	// containing pointers consistent with JSON pointer syntax to the
 	// resource that powers this computer system.
 	PoweredBy []string
-	// PoweredByCount is
+	// PoweredByCount is the number of PoweredBy objects.
 	PoweredByCount int `json:"PoweredBy@odata.count"`
 	// ResourceBlocks is used in this Computer System.
 	ResourceBlocks common.Links
-	// ResourceBlocksCount is
+	// ResourceBlocksCount is the nunmber of ResourceBlocks.
 	ResourceBlocksCount int `json:"ResourceBlocks@odata.count"`
 	// SupplyingComputerSystems shall be an array of references
 	// to ComputerSystems that contribute, in whole or in part, to the
 	// implementation of this ComputerSystem.
 	SupplyingComputerSystems common.Links
-	// SupplyingComputerSystemsCount is
+	// SupplyingComputerSystemsCount is the number of SupplyingComputerSystems.
 	SupplyingComputerSystemsCount int `json:"SupplyingComputerSystems@odata.count"`
 }
 
@@ -576,40 +559,32 @@ type CSLinks struct {
 type MemorySummary struct {
 	// MemoryMirroring is the ability and type of memory mirring supported by this system.
 	MemoryMirroring MemoryMirroring
-	// Status is the status or health properties
-	// of the resource.
+	// Status is the status or health properties of the resource.
 	Status common.Status
-	// TotalSystemMemoryGiB is the amount of
-	// configured system general purpose volatile (RAM) memory as measured in
-	// gibibytes.
+	// TotalSystemMemoryGiB is the amount of configured system general purpose
+	// volatile (RAM) memory as measured in gibibytes.
 	TotalSystemMemoryGiB int
-	// TotalSystemPersistentMemoryGiB is the
-	// total amount of configured persistent memory available to the system
-	// as measured in gibibytes.
+	// TotalSystemPersistentMemoryGiB is the total amount of configured
+	// persistent memory available to the system as measured in gibibytes.
 	TotalSystemPersistentMemoryGiB int
 }
 
 // ProcessorSummary is This type shall contain properties which describe
 // the central processors for a system.
 type ProcessorSummary struct {
-	// Count is the number of physical central
-	// processors in the system.
+	// Count is the number of physical central processors in the system.
 	Count int
-	// LogicalProcessorCount is the number of
-	// logical central processors in the system.
+	// LogicalProcessorCount is the number of logical central processors in the system.
 	LogicalProcessorCount int
-	// Model is the processor model for the
-	// central processors in the system, per the description in the Processor
-	// Information - Processor Family section of the SMBIOS Specification
-	// DSP0134 2.8 or later.
+	// Model is the processor model for the central processors in the system,
+	// per the description in the Processor Information - Processor Family
+	// section of the SMBIOS Specification DSP0134 2.8 or later.
 	Model string
-	// Status is any status or health properties
-	// of the resource.
+	// Status is any status or health properties of the resource.
 	Status common.Status
 }
 
-// TrustedModules is This type shall describe a truted module for a
-// system.
+// TrustedModules is This type shall describe a truted module for a system.
 type TrustedModules struct {
 	// FirmwareVersion is the firwmare version as
 	// defined by the manufacturer for the Trusted Module.
@@ -625,10 +600,6 @@ type TrustedModules struct {
 	// Type Selection method (for example to switch between TPM1_2 and
 	// TPM2_0) that is supported by this TrustedModule.
 	InterfaceTypeSelection string
-	// OEM represents the Oem property. All values for
-	// resources described by this schema shall comply to the requirements as
-	// described in the Redfish specification.
-	OEM string `json:"Oem"`
 	// Status is any status or health properties
 	// of the resource.
 	Status common.Status
@@ -643,13 +614,9 @@ type WatchdogTimer struct {
 	// by the user, and updates to this property shall not initiate a
 	// watchdog timer countdown.
 	FunctionEnabled string
-	// OEM represents the Oem property. All values for
-	// resources described by this schema shall comply to the requirements as
-	// described in the Redfish specification.
-	OEM []string `json:"Oem"`
 	// Status is any status or health properties
 	// of the resource.
-	Status string
+	Status common.State
 	// TimeoutAction is the action to perform
 	// upon the  expiration of the Watchdog Timer.
 	TimeoutAction string
