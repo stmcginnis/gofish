@@ -10,8 +10,12 @@ import (
 
 func main() {
 	queryObject := ""
+	subQuery := ""
 	if len(os.Args) > 1 {
 		queryObject = s.ToLower(os.Args[1])
+	}
+	if len(os.Args) > 2 {
+		subQuery = s.ToLower(os.Args[2])
 	}
 	c := gofish.APIClient("localhost", 5000, false)
 	service, _ := gofish.ServiceRoot(c)
@@ -41,6 +45,12 @@ func main() {
 		objs, _ := service.StorageServices()
 		for _, obj := range objs {
 			fmt.Printf("Storage service: %#v\n\n", obj)
+			if subQuery == "endpoints" {
+				endpoints, _ := obj.Endpoints()
+				for _, endpoint := range endpoints {
+					fmt.Printf("\tEndpoint: %#v\n\n", endpoint)
+				}
+			}
 		}
 	case "storagesystems":
 		objs, _ := service.StorageSystems()

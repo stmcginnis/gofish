@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 
 	"github.com/stmcginnis/gofish/school/common"
+	"github.com/stmcginnis/gofish/school/redfish"
 )
 
 // DefaultStorageServicePath is the default URI for the StorageService
@@ -27,9 +28,6 @@ type SSLinks struct {
 	// HostingSystem shall reference the ComputerSystem or
 	// StorageController that hosts this service.
 	HostingSystem common.Link
-	// OEM properties for resources described by this schema shall comply to
-	// the requirements as described in the Redfish specification.
-	OEM string `json:"Oem"`
 }
 
 // StorageService is a collection of resources that the system can make
@@ -155,20 +153,20 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	storageservice.classesOfService = string(t.ClassesOfService)
 	storageservice.dataProtectionLoSCapabilities = string(t.DataProtectionLoSCapabilities)
 	storageservice.dataSecurityLoSCapabilities = string(t.DataSecurityLoSCapabilities)
-	storageservice.dataStorageLoSCapabilities = string(t.DataSecurityLoSCapabilities)
-	storageservice.defaultClassOfService = string(t.DataSecurityLoSCapabilities)
-	storageservice.drives = string(t.DataSecurityLoSCapabilities)
-	storageservice.endpointGroups = string(t.DataSecurityLoSCapabilities)
-	storageservice.endpoints = string(t.DataSecurityLoSCapabilities)
-	storageservice.fileSystems = string(t.DataSecurityLoSCapabilities)
-	storageservice.ioConnectivityLoSCapabilities = string(t.DataSecurityLoSCapabilities)
-	storageservice.ioPerformanceLoSCapabilities = string(t.DataSecurityLoSCapabilities)
-	storageservice.ioStatistics = string(t.DataSecurityLoSCapabilities)
-	storageservice.redundancy = string(t.DataSecurityLoSCapabilities)
-	storageservice.spareResourceSets = string(t.DataSecurityLoSCapabilities)
-	storageservice.storageGroups = string(t.DataSecurityLoSCapabilities)
+	storageservice.dataStorageLoSCapabilities = string(t.DataStorageLoSCapabilities)
+	storageservice.defaultClassOfService = string(t.DefaultClassOfService)
+	storageservice.drives = string(t.Drives)
+	storageservice.endpointGroups = string(t.EndpointGroups)
+	storageservice.endpoints = string(t.Endpoints)
+	storageservice.fileSystems = string(t.FileSystems)
+	storageservice.ioConnectivityLoSCapabilities = string(t.IOConnectivityLoSCapabilities)
+	storageservice.ioPerformanceLoSCapabilities = string(t.IOPerformanceLoSCapabilities)
+	storageservice.ioStatistics = string(t.IOStatistics)
+	storageservice.redundancy = string(t.Redundancy)
+	storageservice.spareResourceSets = string(t.SpareResourceSets)
+	storageservice.storageGroups = string(t.StorageGroups)
 	storageservice.storagePools = string(t.StoragePools)
-	storageservice.storageSubsystems = string(t.DataSecurityLoSCapabilities)
+	storageservice.storageSubsystems = string(t.StorageSubsystems)
 	storageservice.hostingSystem = string(t.Links.HostingSystem)
 
 	return nil
@@ -230,4 +228,9 @@ func (storageservice *StorageService) ClassesOfService() (*ClassesOfService, err
 	}
 
 	return &classofservice, nil
+}
+
+// Endpoints gets the storage service's endpoints.
+func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
+	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
 }
