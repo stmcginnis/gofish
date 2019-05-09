@@ -84,7 +84,7 @@ type CapacitySource struct {
 	// ProvidedClassOfService shall reference the provided
 	// ClassOfService from the ProvidingDrives, ProvidingVolumes,
 	// ProvidingMemoryChunks, ProvidingMemory or ProvidingPools.
-	ProvidedClassOfService ClassOfService
+	ProvidedClassOfService ClassesOfService
 	// ProvidingDrives is If present, the value shall be a reference to a
 	// contributing drive or drives.
 	// providingDrives DriveCollection

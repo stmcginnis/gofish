@@ -26,7 +26,7 @@ const DefaultStorageServicePath = "/redfish/v1/StorageService"
 type SSLinks struct {
 	// HostingSystem shall reference the ComputerSystem or
 	// StorageController that hosts this service.
-	HostingSystem string
+	HostingSystem common.Link
 	// OEM properties for resources described by this schema shall comply to
 	// the requirements as described in the Redfish specification.
 	OEM string `json:"Oem"`
@@ -76,6 +76,9 @@ type StorageService struct {
 	// FileSystems is an array of references to FileSystems managed by this
 	// storage service.
 	fileSystems string
+	// HostingSystem shall reference the ComputerSystem or
+	// StorageController that hosts this service.
+	hostingSystem string
 	// IOConnectivityLoSCapabilities shall reference the IO connectivity
 	// capabilities of this service.
 	ioConnectivityLoSCapabilities string
@@ -106,7 +109,7 @@ type StorageService struct {
 	// StorageGroups shall reference a StorageGroup.
 	storageGroups string
 	// StoragePools is an array of references to StoragePools.
-	storagePools []string
+	storagePools string
 	// StorageSubsystems shall be a link to a collection of type
 	// StorageCollection having members that represent storage subsystems
 	// managed by this storage service.
@@ -136,8 +139,9 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		Redundancy                    common.Link
 		SpareResourceSets             common.Link
 		StorageGroups                 common.Link
-		StoragePools                  common.Links
+		StoragePools                  common.Link
 		StorageSubsystems             common.Link
+		Links                         SSLinks
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -163,8 +167,9 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	storageservice.redundancy = string(t.DataSecurityLoSCapabilities)
 	storageservice.spareResourceSets = string(t.DataSecurityLoSCapabilities)
 	storageservice.storageGroups = string(t.DataSecurityLoSCapabilities)
-	storageservice.storagePools = t.StoragePools.ToStrings()
+	storageservice.storagePools = string(t.StoragePools)
 	storageservice.storageSubsystems = string(t.DataSecurityLoSCapabilities)
+	storageservice.hostingSystem = string(t.Links.HostingSystem)
 
 	return nil
 }
@@ -210,7 +215,7 @@ func ListStorageServices(c common.Client) ([]*StorageService, error) {
 }
 
 // ClassesOfService gets the classes of service supported by this storage.
-func (storageservice *StorageService) ClassesOfService() (*ClassOfService, error) {
+func (storageservice *StorageService) ClassesOfService() (*ClassesOfService, error) {
 	if storageservice.classesOfService == "" {
 		return nil, nil
 	}
@@ -218,7 +223,7 @@ func (storageservice *StorageService) ClassesOfService() (*ClassOfService, error
 	resp, err := storageservice.Client.Get(storageservice.classesOfService)
 	defer resp.Body.Close()
 
-	var classofservice ClassOfService
+	var classofservice ClassesOfService
 	err = json.NewDecoder(resp.Body).Decode(&classofservice)
 	if err != nil {
 		return nil, err
