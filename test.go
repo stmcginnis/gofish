@@ -45,8 +45,14 @@ func main() {
 		objs, _ := service.StorageServices()
 		for _, obj := range objs {
 			fmt.Printf("Storage service: %#v\n\n", obj)
-			if subQuery == "endpoints" {
+			switch subQuery {
+			case "endpoints":
 				endpoints, _ := obj.Endpoints()
+				for _, endpoint := range endpoints {
+					fmt.Printf("\tEndpoint: %#v\n\n", endpoint)
+				}
+			case "endpointgroups":
+				endpoints, _ := obj.EndpointGroups()
 				for _, endpoint := range endpoints {
 					fmt.Printf("\tEndpoint: %#v\n\n", endpoint)
 				}

@@ -234,3 +234,8 @@ func (storageservice *StorageService) ClassesOfService() (*ClassesOfService, err
 func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
 	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
 }
+
+// EndpointGroups gets the storage service's endpoint groups.
+func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
+	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
+}
