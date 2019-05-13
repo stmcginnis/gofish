@@ -266,6 +266,15 @@ func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error)
 	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
 }
 
+// Drives gets the storage service's drives.
+func (storageservice *StorageService) Drives() ([]*redfish.Drive, error) {
+	if storageservice.drives == "" {
+		var result []*redfish.Drive
+		return result, nil
+	}
+	return redfish.ListReferencedDrives(storageservice.Client, storageservice.drives)
+}
+
 // DefaultClassOfService references the default class of service for entities
 // allocated by this storage service.
 func (storageservice *StorageService) DefaultClassOfService() (*ClassOfService, error) {

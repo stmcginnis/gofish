@@ -235,7 +235,7 @@ type Links struct {
 	PortsCount int `json:"Ports@odata.count"`
 }
 
-// PciId shall describe a PCI ID.
+// PciID shall describe a PCI ID.
 type PciID struct {
 	// ClassCode shall be the PCI Class Code,
 	// Subclass code, and Programming Interface code of the PCIe device
