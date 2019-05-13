@@ -265,3 +265,12 @@ func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error)
 	}
 	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
 }
+
+// DefaultClassOfService references the default class of service for entities
+// allocated by this storage service.
+func (storageservice *StorageService) DefaultClassOfService() (*ClassOfService, error) {
+	if storageservice.defaultClassOfService == "" {
+		return nil, nil
+	}
+	return GetClassOfService(storageservice.Client, storageservice.defaultClassOfService)
+}
