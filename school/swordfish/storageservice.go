@@ -62,10 +62,10 @@ type StorageService struct {
 	// dataProtectionLoSCapabilities shall reference the data
 	// protection capabilities of this service.
 	dataProtectionLoSCapabilities string
-	// DataSecurityLoSCapabilities shall reference the data
+	// dataSecurityLoSCapabilities shall reference the data
 	// security capabilities of this service.
 	dataSecurityLoSCapabilities string
-	// DataStorageLoSCapabilities shall reference the data
+	// dataStorageLoSCapabilities shall reference the data
 	// storage capabilities of this service.
 	dataStorageLoSCapabilities string
 	// DefaultClassOfService, if present, shall reference the
@@ -235,6 +235,16 @@ func (storageservice *StorageService) DataSecurityLoSCapabilities() ([]*DataSecu
 		return result, nil
 	}
 	return ListReferencedDataSecurityLoSCapabilities(storageservice.Client, storageservice.dataSecurityLoSCapabilities)
+
+}
+
+// DataStorageLoSCapabilities references the data storage capabilities of this service.
+func (storageservice *StorageService) DataStorageLoSCapabilities() ([]*DataStorageLoSCapabilities, error) {
+	if storageservice.dataStorageLoSCapabilities == "" {
+		var result []*DataStorageLoSCapabilities
+		return result, nil
+	}
+	return ListReferencedDataStorageLoSCapabilities(storageservice.Client, storageservice.dataStorageLoSCapabilities)
 
 }
 
