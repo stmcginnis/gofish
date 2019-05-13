@@ -239,3 +239,9 @@ func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
 func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
 	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
 }
+
+// DataProtectionLoSCapabilities gets the storage service's data protection
+// capabilities.
+func (storageservice *StorageService) DataProtectionLoSCapabilities() ([]*DataProtectionLoSCapabilities, error) {
+	return ListReferencedDataProtectionLoSCapabilities(storageservice.Client, storageservice.dataProtectionLoSCapabilities)
+}
