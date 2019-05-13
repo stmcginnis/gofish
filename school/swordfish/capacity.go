@@ -73,10 +73,6 @@ type CapacitySource struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
-	// ID uniquely identifies the resource.
-	ID string `json:"Id"`
-	// Name is the name of the resource or array element.
-	Name string
 	// ProvidedCapacity shall be the amount of space that has
 	// been provided from the ProvidingDrives, ProvidingVolumes,
 	// ProvidingMemory or ProvidingPools.

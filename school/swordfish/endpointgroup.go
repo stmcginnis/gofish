@@ -73,12 +73,8 @@ type EndpointGroup struct {
 	// Client/Initiator or Server/Target.  If this endpoint group represents
 	// a SCSI target group, the value of GroupType shall be Server.
 	GroupType GroupType
-	// ID uniquely identifies the resource.
-	ID string `json:"Id"`
 	// Identifier shall be unique within the managed ecosystem.
 	Identifier common.Identifier
-	// Name is the name of the resource or array element.
-	Name string
 	// Preferred with a value of True shall indicate that
 	// access to the associated resource through the endpoints in this
 	// endpoint group is preferred over access through other endpoints. The

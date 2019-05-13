@@ -31,7 +31,9 @@ type Client interface {
 
 // Entity provides the common basis for all Redfish and Swordfish objects.
 type Entity struct {
-	ID     string `json:"Id"`
+	// ID uniquely identifies the resource.
+	ID string `json:"Id"`
+	// Name is the name of the resource or array element.
 	Name   string `json:"Name"`
 	Client Client
 }

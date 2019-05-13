@@ -46,9 +46,20 @@ type StorageService struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is
 	ODataType string `json:"@odata.type"`
-	// ClassesOfService shall reference a ClassOfService supported by this service.
+	// Description is a description for this StorageService.
+	Description string
+	// Identifier identifies this resource. The value shall be
+	// unique within the managed ecosystem.
+	Identifier common.Identifier
+	// RedundancyCount is the Redundancy collection object count.
+	RedundancyCount int `json:"Redundancy@odata.count"`
+	// SpareResourceSetsCount is the number of SpareResourceSet objects.
+	SpareResourceSetsCount int `json:"SpareResourceSets@odata.count"`
+	// Status is the StorageService status.
+	Status common.Status
+	// classesOfService shall reference a ClassOfService supported by this service.
 	classesOfService string
-	// DataProtectionLoSCapabilities shall reference the data
+	// dataProtectionLoSCapabilities shall reference the data
 	// protection capabilities of this service.
 	dataProtectionLoSCapabilities string
 	// DataSecurityLoSCapabilities shall reference the data
@@ -62,49 +73,31 @@ type StorageService struct {
 	// service. This default may be overridden by the DefaultClassOfService
 	// property values within contained StoragePools.
 	defaultClassOfService string
-	// Description is a description for this StorageService.
-	Description string
-	// Drives is a collection that indicates all the drives managed by this
+	// drives is a collection that indicates all the drives managed by this
 	// storage service.
 	drives string
-	// EndpointGroups shall reference an EndpointGroup.
+	// endpointGroups shall reference an EndpointGroup.
 	endpointGroups string
-	// Endpoints shall reference an Endpoint managed by this service.
+	// endpoints shall reference an Endpoint managed by this service.
 	endpoints string
-	// FileSystems is an array of references to FileSystems managed by this
+	// fileSystems is an array of references to FileSystems managed by this
 	// storage service.
 	fileSystems string
-	// HostingSystem shall reference the ComputerSystem or
+	// hostingSystem shall reference the ComputerSystem or
 	// StorageController that hosts this service.
 	hostingSystem string
-	// IOConnectivityLoSCapabilities shall reference the IO connectivity
+	// ioConnectivityLoSCapabilities shall reference the IO connectivity
 	// capabilities of this service.
 	ioConnectivityLoSCapabilities string
-	// IOPerformanceLoSCapabilities shall reference the IO performance
+	// ioPerformanceLoSCapabilities shall reference the IO performance
 	// capabilities of this service.
 	ioPerformanceLoSCapabilities string
-	// IOStatistics shall represent IO statistics for this StorageService.
+	// ioStatistics shall represent IO statistics for this StorageService.
 	ioStatistics string
-	// ID is the instance identifier.
-	ID string `json:"Id"`
-	// Identifier identifies this resource. The value shall be
-	// unique within the managed ecosystem.
-	Identifier common.Identifier
-	// Name is the instance name.
-	Name string
-	// Redundancy collection shall contain the redundancy information
-	// for the storage subsystem.
-	redundancy string
-	// RedundancyCount is the Redundancy collection object count.
-	RedundancyCount int `json:"Redundancy@odata.count"`
-	// SpareResourceSets shall contain resources that may be utilized to
+	// spareResourceSets shall contain resources that may be utilized to
 	// replace the capacity provided by a failed resource having a compatible type.
 	spareResourceSets string
-	// SpareResourceSetsCount is the number of SpareResourceSet objects.
-	SpareResourceSetsCount int `json:"SpareResourceSets@odata.count"`
-	// Status is the StorageService status.
-	Status common.Status
-	// StorageGroups shall reference a StorageGroup.
+	// storageGroups are the associated storage groups for this service.
 	storageGroups string
 	// StoragePools is an array of references to StoragePools.
 	storagePools string
@@ -112,6 +105,9 @@ type StorageService struct {
 	// StorageCollection having members that represent storage subsystems
 	// managed by this storage service.
 	storageSubsystems string
+	// Redundancy collection shall contain the redundancy information
+	// for the storage subsystem.
+	redundancy string
 	// Volumes is an array of references to Volumes managed by this storage
 	// service.
 	volumes string
@@ -212,36 +208,50 @@ func ListStorageServices(c common.Client) ([]*StorageService, error) {
 	return ListReferencedStorageServices(c, DefaultStorageServicePath)
 }
 
-// ClassesOfService gets the classes of service supported by this storage.
-func (storageservice *StorageService) ClassesOfService() (*ClassesOfService, error) {
+// ClassesOfService gets the storage service's classes of service.
+func (storageservice *StorageService) ClassesOfService() ([]*ClassesOfService, error) {
 	if storageservice.classesOfService == "" {
-		return nil, nil
+		var result []*ClassesOfService
+		return result, nil
 	}
-
-	resp, err := storageservice.Client.Get(storageservice.classesOfService)
-	defer resp.Body.Close()
-
-	var classofservice ClassesOfService
-	err = json.NewDecoder(resp.Body).Decode(&classofservice)
-	if err != nil {
-		return nil, err
-	}
-
-	return &classofservice, nil
-}
-
-// Endpoints gets the storage service's endpoints.
-func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
-	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
-}
-
-// EndpointGroups gets the storage service's endpoint groups.
-func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
+	return ListReferencedClassesOfServices(storageservice.Client, storageservice.classesOfService)
 }
 
 // DataProtectionLoSCapabilities gets the storage service's data protection
 // capabilities.
 func (storageservice *StorageService) DataProtectionLoSCapabilities() ([]*DataProtectionLoSCapabilities, error) {
+	if storageservice.dataProtectionLoSCapabilities == "" {
+		var result []*DataProtectionLoSCapabilities
+		return result, nil
+	}
 	return ListReferencedDataProtectionLoSCapabilities(storageservice.Client, storageservice.dataProtectionLoSCapabilities)
+}
+
+// DataSecurityLoSCapabilities gets the storage service's data security
+// capabilities.
+func (storageservice *StorageService) DataSecurityLoSCapabilities() ([]*DataSecurityLoSCapabilities, error) {
+	if storageservice.dataSecurityLoSCapabilities == "" {
+		var result []*DataSecurityLoSCapabilities
+		return result, nil
+	}
+	return ListReferencedDataSecurityLoSCapabilities(storageservice.Client, storageservice.dataSecurityLoSCapabilities)
+
+}
+
+// Endpoints gets the storage service's endpoints.
+func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
+	if storageservice.endpoints == "" {
+		var result []*redfish.Endpoint
+		return result, nil
+	}
+	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
+}
+
+// EndpointGroups gets the storage service's endpoint groups.
+func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
+	if storageservice.endpointGroups == "" {
+		var result []*EndpointGroup
+		return result, nil
+	}
+	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
 }

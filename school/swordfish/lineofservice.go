@@ -79,19 +79,6 @@ func (s *DataProtectionLineOfService) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// DataSecurityLineOfService is a line of service for data security
-type DataSecurityLineOfService struct {
-	LineOfService
-	AntivirusEngineProvider   string
-	AntivirusScanPolicies     []string
-	ChannelEncruptionStrength string
-	DataSantizationPolicy     string
-	HostAuthenticationType    string
-	MediaEncryptionStrength   string
-	SecureChannelProtocol     string
-	UserAuthenticationType    string
-}
-
 // DataStorageLineOfService has information about data storage attributes
 type DataStorageLineOfService struct {
 	LineOfService

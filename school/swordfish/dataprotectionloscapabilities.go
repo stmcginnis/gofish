@@ -87,12 +87,8 @@ type DataProtectionLoSCapabilities struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
-	// ID uniquely identifies the resource.
-	ID string `json:"Id"`
 	// Identifier shall be unique within the managed ecosystem.
 	Identifier common.Identifier
-	// Name is the name of the resource or array element.
-	Name string
 	// SupportedLinesOfService collection shall contain known and
 	// supported DataProtectionLinesOfService.
 	SupportedLinesOfService string
