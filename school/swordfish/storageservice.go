@@ -23,13 +23,6 @@ import (
 // object.
 const DefaultStorageServicePath = "/redfish/v1/StorageService"
 
-// SSLinks is
-type SSLinks struct {
-	// HostingSystem shall reference the ComputerSystem or
-	// StorageController that hosts this service.
-	HostingSystem common.Link
-}
-
 // StorageService is a collection of resources that the system can make
 // available to one or more host systems. The collection can contain:
 // block, file, or object storage; local system access points through
@@ -96,7 +89,7 @@ type StorageService struct {
 	ioStatistics string
 	// spareResourceSets shall contain resources that may be utilized to
 	// replace the capacity provided by a failed resource having a compatible type.
-	spareResourceSets string
+	spareResourceSets []string
 	// storageGroups are the associated storage groups for this service.
 	storageGroups string
 	// StoragePools is an array of references to StoragePools.
@@ -107,7 +100,7 @@ type StorageService struct {
 	storageSubsystems string
 	// Redundancy collection shall contain the redundancy information
 	// for the storage subsystem.
-	redundancy string
+	redundancy []string
 	// Volumes is an array of references to Volumes managed by this storage
 	// service.
 	volumes string
@@ -116,6 +109,11 @@ type StorageService struct {
 // UnmarshalJSON unmarshals a StorageService object from the raw JSON.
 func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	type temp StorageService
+	type links struct {
+		// HostingSystem shall reference the ComputerSystem or
+		// StorageController that hosts this service.
+		HostingSystem common.Link
+	}
 	var t struct {
 		temp
 		ClassesOfService              common.Link
@@ -130,12 +128,12 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		IOConnectivityLoSCapabilities common.Link
 		IOPerformanceLoSCapabilities  common.Link
 		IOStatistics                  common.Link
-		Redundancy                    common.Link
-		SpareResourceSets             common.Link
+		Redundancy                    common.Links
+		SpareResourceSets             common.Links
 		StorageGroups                 common.Link
 		StoragePools                  common.Link
 		StorageSubsystems             common.Link
-		Links                         SSLinks
+		Links                         links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -158,8 +156,8 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	storageservice.ioConnectivityLoSCapabilities = string(t.IOConnectivityLoSCapabilities)
 	storageservice.ioPerformanceLoSCapabilities = string(t.IOPerformanceLoSCapabilities)
 	storageservice.ioStatistics = string(t.IOStatistics)
-	storageservice.redundancy = string(t.Redundancy)
-	storageservice.spareResourceSets = string(t.SpareResourceSets)
+	storageservice.redundancy = t.Redundancy.ToStrings()
+	storageservice.spareResourceSets = t.SpareResourceSets.ToStrings()
 	storageservice.storageGroups = string(t.StorageGroups)
 	storageservice.storagePools = string(t.StoragePools)
 	storageservice.storageSubsystems = string(t.StorageSubsystems)
@@ -248,22 +246,13 @@ func (storageservice *StorageService) DataStorageLoSCapabilities() ([]*DataStora
 
 }
 
-// Endpoints gets the storage service's endpoints.
-func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
-	if storageservice.endpoints == "" {
-		var result []*redfish.Endpoint
-		return result, nil
+// DefaultClassOfService references the default class of service for entities
+// allocated by this storage service.
+func (storageservice *StorageService) DefaultClassOfService() (*ClassOfService, error) {
+	if storageservice.defaultClassOfService == "" {
+		return nil, nil
 	}
-	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
-}
-
-// EndpointGroups gets the storage service's endpoint groups.
-func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
-	if storageservice.endpointGroups == "" {
-		var result []*EndpointGroup
-		return result, nil
-	}
-	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
+	return GetClassOfService(storageservice.Client, storageservice.defaultClassOfService)
 }
 
 // Drives gets the storage service's drives.
@@ -275,11 +264,96 @@ func (storageservice *StorageService) Drives() ([]*redfish.Drive, error) {
 	return redfish.ListReferencedDrives(storageservice.Client, storageservice.drives)
 }
 
-// DefaultClassOfService references the default class of service for entities
-// allocated by this storage service.
-func (storageservice *StorageService) DefaultClassOfService() (*ClassOfService, error) {
-	if storageservice.defaultClassOfService == "" {
+// EndpointGroups gets the storage service's endpoint groups.
+func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
+	if storageservice.endpointGroups == "" {
+		var result []*EndpointGroup
+		return result, nil
+	}
+	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
+}
+
+// Endpoints gets the storage service's endpoints.
+func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
+	if storageservice.endpoints == "" {
+		var result []*redfish.Endpoint
+		return result, nil
+	}
+	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
+}
+
+// FileSystems gets all filesystems available through this storage service.
+func (storageservice *StorageService) FileSystems() ([]*FileSystem, error) {
+	return ListReferencedFileSystems(storageservice.Client, storageservice.fileSystems)
+}
+
+// IOConnectivityLoSCapabilities references the IO connectivity capabilities of this service.
+func (storageservice *StorageService) IOConnectivityLoSCapabilities() (*IOConnectivityLoSCapabilities, error) {
+	if storageservice.ioConnectivityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storageservice.Client, storageservice.defaultClassOfService)
+	return GetIOConnectivityLoSCapabilities(storageservice.Client, storageservice.ioConnectivityLoSCapabilities)
+}
+
+// IOPerformanceLoSCapabilities references the IO performance capabilities of this service.
+func (storageservice *StorageService) IOPerformanceLoSCapabilities() (*IOPerformanceLoSCapabilities, error) {
+	if storageservice.ioConnectivityLoSCapabilities == "" {
+		return nil, nil
+	}
+	return GetIOPerformanceLoSCapabilities(storageservice.Client, storageservice.ioPerformanceLoSCapabilities)
+}
+
+// IOStatistics represents the IO statistics for this storage service.
+func (storageservice *StorageService) IOStatistics() (*IOStatistics, error) {
+	if storageservice.ioStatistics == "" {
+		return nil, nil
+	}
+	return GetIOStatistics(storageservice.Client, storageservice.ioStatistics)
+}
+
+// Redundancy gets the redundancy information for the storage subsystem.
+func (storageservice *StorageService) Redundancy() ([]*redfish.Redundancy, error) {
+	var result []*redfish.Redundancy
+	for _, redundancyLink := range storageservice.redundancy {
+		redundancy, err := redfish.GetRedundancy(storageservice.Client, redundancyLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, redundancy)
+	}
+
+	return result, nil
+}
+
+// SpareResourceSets gets resources that may be utilized to replace the capacity
+// provided by a failed resource having a compatible type.
+func (storageservice *StorageService) SpareResourceSets() ([]*SpareResourceSet, error) {
+	var result []*SpareResourceSet
+	for _, srsLink := range storageservice.spareResourceSets {
+		srs, err := GetSpareResourceSet(storageservice.Client, srsLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, srs)
+	}
+
+	return result, nil
+}
+
+// StorageGroups gets the storage groups that are a part of this storage service.
+func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
+	if storageservice.storageGroups == "" {
+		var result []*StorageGroup
+		return result, nil
+	}
+	return ListReferencedStorageGroups(storageservice.Client, storageservice.storageGroups)
+}
+
+// StoragePools gets the storage pools that are a part of this storage service.
+func (storageservice *StorageService) StoragePools() ([]*StoragePool, error) {
+	if storageservice.storagePools == "" {
+		var result []*StoragePool
+		return result, nil
+	}
+	return ListReferencedStoragePools(storageservice.Client, storageservice.storagePools)
 }
