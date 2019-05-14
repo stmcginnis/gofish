@@ -244,7 +244,7 @@ type Volume struct {
 	// volume is associated with and shall reference resources of type Drive.
 	// This property shall only contain references to Drive entities which are
 	// currently assigned as a dedicated spare and are able to support this Volume.
-	dedicatedSpareDrives common.Links
+	dedicatedSpareDrives []string
 	// drives shall be a reference to the resources that this volume is
 	// associated with and shall reference resources of type Drive. This
 	// property shall only contain references to Drive entities which are
@@ -254,7 +254,7 @@ type Volume struct {
 	// SpareResourceSets referenced SpareResourceSet shall contain
 	// resources that may be utilized to replace the capacity provided by a
 	// failed resource having a compatible type.
-	spareResourceSets []string
+	spareResourceSets string
 	// allocatedPools shall contain references
 	// to all storage pools allocated from this volume.
 	allocatedPools string
@@ -290,7 +290,7 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 		// SpareResourceSets is Each referenced SpareResourceSet shall contain
 		// resources that may be utilized to replace the capacity provided by a
 		// failed resource having a compatible type.
-		SpareResourceSets common.Links
+		SpareResourceSets common.Link
 		// SpareResourceSets@odata.count is
 		SpareResourceSetsCount int `json:"SpareResourceSets@odata.count"`
 	}
@@ -308,6 +308,13 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 	*volume = Volume(t.temp)
 
 	// Extract the links to other entities for later
+	volume.classOfService = string(t.Links.ClassOfService)
+	volume.dedicatedSpareDrives = t.Links.DedicatedSpareDrives.ToStrings()
+	volume.drives = t.Links.Drives.ToStrings()
+	volume.spareResourceSets = string(t.Links.SpareResourceSets)
+	volume.DedicatedSpareDrivesCount = t.Links.DedicatedSpareDrivesCount
+	volume.DrivesCount = t.Links.DrivesCount
+	volume.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
 
 	return nil
 }
@@ -327,8 +334,7 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 	return &volume, nil
 }
 
-// ListReferencedVolumes gets the collection of Volume from
-// a provided reference.
+// ListReferencedVolumes gets the collection of Volume from a provided reference.
 func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 	var result []*Volume
 	if link == "" {
@@ -349,4 +355,44 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 	}
 
 	return result, nil
+}
+
+// ClassOfService gets the class of service that this storage volume conforms to.
+func (volume *Volume) ClassOfService() (*ClassOfService, error) {
+	if volume.classOfService == "" {
+		return nil, nil
+	}
+
+	return GetClassOfService(volume.Client, volume.classOfService)
+}
+
+// getDrives gets a set of referenced drives.
+func (volume *Volume) getDrives(links []string) ([]*redfish.Drive, error) {
+	var result []*redfish.Drive
+
+	for _, driveLink := range links {
+		drive, err := redfish.GetDrive(volume.Client, driveLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, drive)
+	}
+
+	return result, nil
+}
+
+// DedicatedSpareDrives references the Drives that are dedicated spares for this
+// volume.
+func (volume *Volume) DedicatedSpareDrives() ([]*redfish.Drive, error) {
+	return volume.getDrives(volume.dedicatedSpareDrives)
+}
+
+// Drives references the Drives that are associated with this volume.
+func (volume *Volume) Drives() ([]*redfish.Drive, error) {
+	return volume.getDrives(volume.drives)
+}
+
+// SpareResourceSets gets the spare resources that can be used for this volume.
+func (volume *Volume) SpareResourceSets() ([]*SpareResourceSet, error) {
+	return ListReferencedSpareResourceSets(volume.Client, volume.spareResourceSets)
 }

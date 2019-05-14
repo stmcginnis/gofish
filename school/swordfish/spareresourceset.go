@@ -18,8 +18,7 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// SpareResourceSet is The values define a set of spares of a particular
-// type.
+// SpareResourceSet define a set of spares of a particular type.
 type SpareResourceSet struct {
 	common.Entity
 
@@ -33,27 +32,27 @@ type SpareResourceSet struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
-	// OnHandLocation is The location where this set of spares is kept.
+	// OnHandLocation is the location where this set of spares is kept.
 	OnHandLocation common.Location
-	// OnLine is This set shall be online.
+	// OnLine indicates if the set is online.
 	OnLine bool
-	// ResourceType is The type of resources in the set.
+	// ResourceType is the type of resources in the set.
 	ResourceType string
-	// TimeToProvision is Amount of time  needed to make an on-hand resource
+	// TimeToProvision is the amount of time needed to make an on-hand resource
 	// available as a spare.
 	TimeToProvision string
-	// TimeToReplenish is Amount of time to needed replenish consumed on-hand
+	// TimeToReplenish is the amount of time to needed replenish consumed on-hand
 	// resources.
 	TimeToReplenish string
 	// OnHandSparesCount is the number of on hand spares.
 	OnHandSparesCount int `json:"OnHandSpares@odata.count"`
-	// ReplacementSpareSets@odata.count is the number of replacement spare sets.
+	// ReplacementSpareSetsCount is the number of replacement spare sets.
 	ReplacementSpareSetsCount int `json:"ReplacementSpareSets@odata.count"`
 	// onHandSpares are links to available spares.
 	onHandSpares []string
 	// ReplacementSpareSets are other spare sets that can be utilized to
 	// replenish this spare set.
-	replacementSpareSets []string
+	replacementSpareSets string
 }
 
 // UnmarshalJSON unmarshals a SpareResourceSet object from the raw JSON.
@@ -65,7 +64,7 @@ func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
 		OnHandSparesCount int `json:"OnHandSpares@odata.count"`
 		// ReplacementSpareSets are other spare sets that can be utilized to
 		// replenish this spare set.
-		ReplacementSpareSets common.Links
+		ReplacementSpareSets common.Link
 		// ReplacementSpareSets@odata.count is the number of replacement spare sets.
 		ReplacementSpareSetsCount int `json:"ReplacementSpareSets@odata.count"`
 	}
@@ -85,7 +84,7 @@ func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
 	spareresourceset.OnHandSparesCount = t.OnHandSparesCount
 	spareresourceset.onHandSpares = t.Links.OnHandSpares.ToStrings()
 	spareresourceset.ReplacementSpareSetsCount = t.ReplacementSpareSetsCount
-	spareresourceset.replacementSpareSets = t.Links.ReplacementSpareSets.ToStrings()
+	spareresourceset.replacementSpareSets = string(t.Links.ReplacementSpareSets)
 
 	return nil
 }
@@ -127,4 +126,10 @@ func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareReso
 	}
 
 	return result, nil
+}
+
+// ReplacementSpareSets gets other spare sets that can be utilized to replenish
+// this spare set.
+func (spareresourceset *SpareResourceSet) ReplacementSpareSets() ([]*SpareResourceSet, error) {
+	return ListReferencedSpareResourceSets(spareresourceset.Client, spareresourceset.replacementSpareSets)
 }
