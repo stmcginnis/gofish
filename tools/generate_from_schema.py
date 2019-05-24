@@ -172,7 +172,6 @@ def main():
 
     data = requests.get(url)
     try:
-        print(data.text)
         base_data = data.json()
     except Exception:
         LOG.exception('Error with data:\n%s' % data)
