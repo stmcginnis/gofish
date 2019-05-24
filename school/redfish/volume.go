@@ -18,6 +18,111 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
+// RAIDType is
+type RAIDType string
+
+const (
+
+	// RAID0RAIDType A placement policy where consecutive logical blocks of
+	// data are uniformly distributed across a set of independent storage
+	// devices without offering any form of redundancy. This is commonly
+	// referred to as data striping. This form of RAID will encounter data
+	// loss with the failure of any storage device in the set.
+	RAID0RAIDType RAIDType = "RAID0"
+	// RAID1RAIDType A placement policy where each logical block of data is
+	// stored on more than one independent storage device. This is commonly
+	// referred to as mirroring. Data stored using this form of RAID is able
+	// to survive a single storage device failure without data loss.
+	RAID1RAIDType RAIDType = "RAID1"
+	// RAID3RAIDType A placement policy using parity-based protection where
+	// logical bytes of data are uniformly distributed across a set of
+	// independent storage devices and where the parity is stored on a
+	// dedicated independent storage device. Data stored using this form of
+	// RAID is able to survive a single storage device failure without data
+	// loss. If the storage devices use rotating media, they are assumed to
+	// be rotationally synchronized, and the data stripe size should be no
+	// larger than the exported block size.
+	RAID3RAIDType RAIDType = "RAID3"
+	// RAID4RAIDType A placement policy using parity-based protection where
+	// logical blocks of data are uniformly distributed across a set of
+	// independent storage devices and where the parity is stored on a
+	// dedicated independent storage device. Data stored using this form of
+	// RAID is able to survive a single storage device failure without data
+	// loss.
+	RAID4RAIDType RAIDType = "RAID4"
+	// RAID5RAIDType A placement policy using parity-based protection for
+	// storing stripes of 'n' logical blocks of data and one logical block of
+	// parity across a set of 'n+1' independent storage devices where the
+	// parity and data blocks are interleaved across the storage devices.
+	// Data stored using this form of RAID is able to survive a single
+	// storage device failure without data loss.
+	RAID5RAIDType RAIDType = "RAID5"
+	// RAID6RAIDType A placement policy using parity-based protection for
+	// storing stripes of 'n' logical blocks of data and two logical blocks
+	// of independent parity across a set of 'n+2' independent storage
+	// devices where the parity and data blocks are interleaved across the
+	// storage devices. Data stored using this form of RAID is able to
+	// survive any two independent storage device failures without data loss.
+	RAID6RAIDType RAIDType = "RAID6"
+	// RAID10RAIDType A placement policy that creates a striped device (RAID
+	// 0) over a set of mirrored devices (RAID 1). This is commonly referred
+	// to as RAID 1/0. Data stored using this form of RAID is able to survive
+	// storage device failures in each RAID 1 set without data loss.
+	RAID10RAIDType RAIDType = "RAID10"
+	// RAID01RAIDType A data placement policy that creates a mirrored device
+	// (RAID 1) over a set of striped devices (RAID 0). This is commonly
+	// referred to as RAID 0+1 or RAID 0/1. Data stored using this form of
+	// RAID is able to survive a single RAID 0 data set failure without data
+	// loss.
+	RAID01RAIDType RAIDType = "RAID01"
+	// RAID6TPRAIDType A placement policy that uses parity-based protection
+	// for storing stripes of 'n' logical blocks of data and three logical
+	// blocks of independent parity across a set of 'n+3' independent storage
+	// devices where the parity and data blocks are interleaved across the
+	// storage devices. This is commonly referred to as Triple Parity RAID.
+	// Data stored using this form of RAID is able to survive any three
+	// independent storage device failures without data loss.
+	RAID6TPRAIDType RAIDType = "RAID6TP"
+	// RAID1ERAIDType A placement policy that uses a form of mirroring
+	// implemented over a set of independent storage devices where logical
+	// blocks are duplicated on a pair of independent storage devices so that
+	// data is uniformly distributed across the storage devices. This is
+	// commonly referred to as RAID 1 Enhanced. Data stored using this form
+	// of RAID is able to survive a single storage device failure without
+	// data loss.
+	RAID1ERAIDType RAIDType = "RAID1E"
+	// RAID50RAIDType A placement policy that uses a RAID 0 stripe set over
+	// two or more RAID 5 sets of independent storage devices. Data stored
+	// using this form of RAID is able to survive a single storage device
+	// failure within each RAID 5 set without data loss.
+	RAID50RAIDType RAIDType = "RAID50"
+	// RAID60RAIDType A placement policy that uses a RAID 0 stripe set over
+	// two or more RAID 6 sets of independent storage devices. Data stored
+	// using this form of RAID is able to survive two device failures within
+	// each RAID 6 set without data loss.
+	RAID60RAIDType RAIDType = "RAID60"
+	// RAID00RAIDType A placement policy that creates a RAID 0 stripe set
+	// over two or more RAID 0 sets. This is commonly referred to as RAID
+	// 0+0. This form of data layout is not fault tolerant; if any storage
+	// device fails there will be data loss.
+	RAID00RAIDType RAIDType = "RAID00"
+	// RAID10ERAIDType A placement policy that uses a RAID 0 stripe set over
+	// two or more RAID 10 sets. This is commonly referred to as Enhanced
+	// RAID 10. Data stored using this form of RAID is able to survive a
+	// single device failure within each nested RAID 1 set without data loss.
+	RAID10ERAIDType RAIDType = "RAID10E"
+	// RAID1TripleRAIDType A placement policy where each logical block of
+	// data is mirrored three times across a set of three independent storage
+	// devices. This is commonly referred to as three-way mirroring. This
+	// form of RAID can survive two device failures without data loss.
+	RAID1TripleRAIDType RAIDType = "RAID1Triple"
+	// RAID10TripleRAIDType A placement policy that uses a striped device
+	// (RAID 0) over a set of triple mirrored devices (RAID 1Triple). This
+	// form of RAID can survive up to two failures in each triple mirror set
+	// without data loss.
+	RAID10TripleRAIDType RAIDType = "RAID10Triple"
+)
+
 // EncryptionTypes is the type of encryption used by the volume.
 type EncryptionTypes string
 
