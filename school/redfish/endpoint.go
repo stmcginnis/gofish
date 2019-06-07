@@ -163,6 +163,9 @@ func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
 // GetEndpoint will get a Endpoint instance from the service.
 func GetEndpoint(c common.Client, uri string) (*Endpoint, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var endpoint Endpoint

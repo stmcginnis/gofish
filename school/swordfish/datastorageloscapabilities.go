@@ -93,6 +93,9 @@ type DataStorageLoSCapabilities struct {
 // GetDataStorageLoSCapabilities will get a DataStorageLoSCapabilities instance from the service.
 func GetDataStorageLoSCapabilities(c common.Client, uri string) (*DataStorageLoSCapabilities, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var datastorageloscapabilities DataStorageLoSCapabilities

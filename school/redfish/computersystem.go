@@ -466,6 +466,9 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 // GetComputerSystem will get a ComputerSystem instance from the service.
 func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var computersystem ComputerSystem

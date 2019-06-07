@@ -74,6 +74,9 @@ type DataProtectionLineOfService struct {
 // GetDataProtectionLineOfService will get a DataProtectionLineOfService instance from the service.
 func GetDataProtectionLineOfService(c common.Client, uri string) (*DataProtectionLineOfService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var dataprotectionlineofservice DataProtectionLineOfService

@@ -87,6 +87,9 @@ func (datastoragelineofservice *DataStorageLineOfService) UnmarshalJSON(b []byte
 // GetDataStorageLineOfService will get a DataStorageLineOfService instance from the service.
 func GetDataStorageLineOfService(c common.Client, uri string) (*DataStorageLineOfService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var datastoragelineofservice DataStorageLineOfService

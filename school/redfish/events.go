@@ -58,6 +58,9 @@ func (es *EventService) UnmarshalJSON(b []byte) error {
 // GetEventService will get a Event instance from the Redfish service.
 func GetEventService(c common.Client, uri string) (*EventService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var t EventService

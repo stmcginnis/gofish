@@ -264,6 +264,9 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 // GetDrive will get a Drive instance from the service.
 func GetDrive(c common.Client, uri string) (*Drive, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var drive Drive

@@ -157,6 +157,9 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) UnmarshalJSO
 // GetDataProtectionLoSCapabilities will get a DataProtectionLoSCapabilities instance from the service.
 func GetDataProtectionLoSCapabilities(c common.Client, uri string) (*DataProtectionLoSCapabilities, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var dataprotectionloscapabilities DataProtectionLoSCapabilities

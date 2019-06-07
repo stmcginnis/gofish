@@ -51,6 +51,9 @@ type VLanNetworkInterface struct {
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.
 func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var vlannetworkinterface VLanNetworkInterface

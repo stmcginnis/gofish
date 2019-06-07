@@ -57,6 +57,9 @@ type IOStatistics struct {
 // GetIOStatistics will get a IOStatistics instance from the service.
 func GetIOStatistics(c common.Client, uri string) (*IOStatistics, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var iostatistics IOStatistics

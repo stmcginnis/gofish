@@ -81,6 +81,9 @@ type Redundancy struct {
 // GetRedundancy will get a Redundancy instance from the service.
 func GetRedundancy(c common.Client, uri string) (*Redundancy, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var redundancy Redundancy

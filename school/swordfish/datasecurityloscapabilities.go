@@ -164,6 +164,9 @@ type DataSecurityLoSCapabilities struct {
 // GetDataSecurityLoSCapabilities will get a DataSecurityLoSCapabilities instance from the service.
 func GetDataSecurityLoSCapabilities(c common.Client, uri string) (*DataSecurityLoSCapabilities, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var datasecurityloscapabilities DataSecurityLoSCapabilities

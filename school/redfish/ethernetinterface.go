@@ -239,6 +239,9 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 // GetEthernetInterface will get a EthernetInterface instance from the service.
 func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var ethernetinterface EthernetInterface

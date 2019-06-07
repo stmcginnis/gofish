@@ -96,6 +96,9 @@ func (s *Manager) UnmarshalJSON(b []byte) error {
 // GetManager will get a Manager instance from the Swordfish service.
 func GetManager(c common.Client, uri string) (*Manager, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var manager Manager
