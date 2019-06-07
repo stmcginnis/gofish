@@ -50,6 +50,9 @@ type IOConnectivityLineOfService struct {
 // GetIOConnectivityLineOfService will get a IOConnectivityLineOfService instance from the service.
 func GetIOConnectivityLineOfService(c common.Client, uri string) (*IOConnectivityLineOfService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var ioconnectivitylineofservice IOConnectivityLineOfService

@@ -73,6 +73,9 @@ type ClassOfService struct {
 // GetClassOfService will get a ClassOfService instance from the service.
 func GetClassOfService(c common.Client, uri string) (*ClassOfService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var classofservice ClassOfService

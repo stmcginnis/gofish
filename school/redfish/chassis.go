@@ -141,6 +141,9 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 // GetChassis will get a Chassis instance from the Redfish service.
 func GetChassis(c common.Client, uri string) (*Chassis, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var chassis Chassis
@@ -233,6 +236,9 @@ func (c *Chassis) Thermal() (*ThermalInfo, error) {
 	}
 
 	resp, err := c.Client.Get(c.thermal)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var thermal ThermalInfo
@@ -312,6 +318,9 @@ func (c *Chassis) Power() (*PowerInfo, error) {
 	}
 
 	resp, err := c.Client.Get(c.power)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var power PowerInfo

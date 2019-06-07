@@ -113,6 +113,9 @@ func (endpointgroup *EndpointGroup) UnmarshalJSON(b []byte) error {
 // GetEndpointGroup will get a EndpointGroup instance from the service.
 func GetEndpointGroup(c common.Client, uri string) (*EndpointGroup, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var endpointgroup EndpointGroup

@@ -92,6 +92,9 @@ func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
 // GetSpareResourceSet will get a SpareResourceSet instance from the service.
 func GetSpareResourceSet(c common.Client, uri string) (*SpareResourceSet, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var spareresourceset SpareResourceSet

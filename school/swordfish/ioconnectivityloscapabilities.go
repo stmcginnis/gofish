@@ -55,6 +55,9 @@ type IOConnectivityLoSCapabilities struct {
 // instance from the service.
 func GetIOConnectivityLoSCapabilities(c common.Client, uri string) (*IOConnectivityLoSCapabilities, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var ioconnectivityloscapabilities IOConnectivityLoSCapabilities

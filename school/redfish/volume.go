@@ -231,6 +231,9 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 // GetVolume will get a Volume instance from the service.
 func GetVolume(c common.Client, uri string) (*Volume, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var volume Volume

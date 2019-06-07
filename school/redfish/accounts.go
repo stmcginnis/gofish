@@ -68,6 +68,9 @@ func (as *AccountService) UnmarshalJSON(b []byte) error {
 // service.
 func GetAccountService(c common.Client, uri string) (*AccountService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var t AccountService
@@ -130,6 +133,9 @@ func (s *Account) UnmarshalJSON(b []byte) error {
 // GetAccount will get an account instance from the Redfish service.
 func GetAccount(c common.Client, uri string) (*Account, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var t Account
@@ -178,6 +184,9 @@ type Role struct {
 // GetRole will get a role instance from the Redfish service.
 func GetRole(c common.Client, uri string) (*Role, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var t Role

@@ -179,6 +179,9 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 // GetStorageGroup will get a StorageGroup instance from the service.
 func GetStorageGroup(c common.Client, uri string) (*StorageGroup, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var storagegroup StorageGroup

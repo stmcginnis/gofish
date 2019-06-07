@@ -38,6 +38,9 @@ type ClassesOfService struct {
 // GetClassesOfService will get a ClassesOfService instance from the Swordfish service.
 func GetClassesOfService(c common.Client, uri string) (*ClassesOfService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var ClassesOfService ClassesOfService

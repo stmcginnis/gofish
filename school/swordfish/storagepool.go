@@ -144,6 +144,9 @@ func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
 // GetStoragePool will get a StoragePool instance from the service.
 func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var storagepool StoragePool

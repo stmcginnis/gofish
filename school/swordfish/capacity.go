@@ -133,6 +133,9 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 // GetCapacitySource will get a CapacitySource instance from the service.
 func GetCapacitySource(c common.Client, uri string) (*CapacitySource, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var capacitysource CapacitySource

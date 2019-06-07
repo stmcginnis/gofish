@@ -237,6 +237,9 @@ func (filesystem *FileSystem) UnmarshalJSON(b []byte) error {
 // GetFileSystem will get a FileSystem instance from the service.
 func GetFileSystem(c common.Client, uri string) (*FileSystem, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var filesystem FileSystem

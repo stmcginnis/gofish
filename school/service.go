@@ -41,7 +41,9 @@ type Service struct {
 // UnmarshalJSON unmarshals a Service object from the raw JSON.
 func (s *Service) UnmarshalJSON(b []byte) error {
 	type temp Service
-	type linkReference struct {
+	var t struct {
+		temp
+		// Link references
 		Chassis            common.Link
 		Managers           common.Link
 		TaskService        common.Link
@@ -54,10 +56,6 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 		Systems            common.Link
 		CompositionService common.Link
 	}
-	var t struct {
-		temp
-		Links linkReference
-	}
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
@@ -67,25 +65,27 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 	*s = Service(t.temp)
 
 	// Extract the links to other entities for later
-	s.chassis = string(t.Links.Chassis)
-	s.managers = string(t.Links.Managers)
-	s.taskService = string(t.Links.TaskService)
-	s.sessionService = string(t.Links.SessionService)
-	s.storageServices = string(t.Links.StorageServices)
-	s.storageSystems = string(t.Links.StorageSystems)
-	s.accountService = string(t.Links.AccountService)
-	s.eventService = string(t.Links.EventService)
-	s.registries = string(t.Links.Registries)
-	s.systems = string(t.Links.Systems)
-	s.compositionService = string(t.Links.CompositionService)
+	s.chassis = string(t.Chassis)
+	s.managers = string(t.Managers)
+	s.taskService = string(t.TaskService)
+	s.sessionService = string(t.SessionService)
+	s.storageServices = string(t.StorageServices)
+	s.storageSystems = string(t.StorageSystems)
+	s.accountService = string(t.AccountService)
+	s.eventService = string(t.EventService)
+	s.registries = string(t.Registries)
+	s.systems = string(t.Systems)
+	s.compositionService = string(t.CompositionService)
 
 	return nil
 }
 
 // ServiceRoot gets the root service of the Redfish service.
 func ServiceRoot(c common.Client) (*Service, error) {
-
 	resp, err := c.Get(common.DefaultServiceRoot)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var service Service
@@ -93,6 +93,7 @@ func ServiceRoot(c common.Client) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	service.SetClient(c)
 	return &service, nil
 }

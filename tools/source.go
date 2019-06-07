@@ -15,7 +15,7 @@ package swordfish
 import (
 	"encoding/json"
 
-        "github.com/stmcginnis/gofish/school/common"
+	"github.com/stmcginnis/gofish/school/common"
 )
 
 // Default{{ object_name }}Path is the default URI for the {{ object_name }}
@@ -67,6 +67,9 @@ func ({{ class.name|lower }} *{{ class.name }}) UnmarshalJSON(b []byte) error {
 // Get{{ class.name }} will get a {{ class.name }} instance from the service.
 func Get{{ class.name }}(c common.Client, uri string) (*{{ class.name }}, error) {
     resp, err := c.Get(uri)
+    if err != nil {
+        return nil, err
+    }
     defer resp.Body.Close()
 
     var {{ class.name|lower }} {{ class.name }}

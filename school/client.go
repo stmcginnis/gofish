@@ -14,7 +14,10 @@ package gofish
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
+
+	"strings"
 
 	"github.com/stmcginnis/gofish/school/common"
 )
@@ -26,21 +29,21 @@ type apiClient struct {
 	Endpoint string
 
 	// httpClient is for direct http actions
-	httpClient http.Client
+	httpClient *http.Client
 }
 
 // APIClient creates a new client connection to a Redfish service.
-func APIClient(host string, port uint16, useHTTPS bool) common.Client {
-	http := "http"
-	if useHTTPS {
-		http = "https"
+func APIClient(endpoint string, httpClient *http.Client) (c common.Client, err error) {
+	if !strings.HasPrefix(endpoint, "http") {
+		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
-
-	endpoint := fmt.Sprintf("%s://%s:%d", http, host, port)
-
-	client := apiClient{
-		Endpoint: endpoint}
-	return client
+	client := apiClient{Endpoint: endpoint}
+	if httpClient != nil {
+		client.httpClient = httpClient
+	} else {
+		client.httpClient = &http.Client{}
+	}
+	return client, err
 }
 
 // Get performs a GET request against the Redfish service.
@@ -63,6 +66,15 @@ func (c apiClient) Get(url string) (*http.Response, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
 	}
 
 	return resp, err

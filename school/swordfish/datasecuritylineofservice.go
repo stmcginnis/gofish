@@ -60,6 +60,9 @@ type DataSecurityLineOfService struct {
 // GetDataSecurityLineOfService will get a DataSecurityLineOfService instance from the service.
 func GetDataSecurityLineOfService(c common.Client, uri string) (*DataSecurityLineOfService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var datasecuritylineofservice DataSecurityLineOfService

@@ -436,6 +436,9 @@ type StorageReplicaInfo struct {
 // GetStorageReplicaInfo will get a StorageReplicaInfo instance from the service.
 func GetStorageReplicaInfo(c common.Client, uri string) (*StorageReplicaInfo, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var storagereplicainfo StorageReplicaInfo

@@ -136,6 +136,9 @@ func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 // GetPCIeDevice will get a PCIeDevice instance from the service.
 func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var pciedevice PCIeDevice

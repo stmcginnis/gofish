@@ -68,6 +68,9 @@ type Task struct {
 // GetTask will get a Task instance from the Redfish service.
 func GetTask(c common.Client, uri string) (*Task, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var t Task

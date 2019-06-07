@@ -140,6 +140,9 @@ func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
 // GetFileShare will get a FileShare instance from the service.
 func GetFileShare(c common.Client, uri string) (*FileShare, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var fileshare FileShare

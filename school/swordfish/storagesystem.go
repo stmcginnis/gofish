@@ -30,6 +30,9 @@ type StorageSystem struct {
 // GetStorageSystem will get a StorageSystem instance from the Swordfish service.
 func GetStorageSystem(c common.Client, uri string) (*StorageSystem, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var storageSystem StorageSystem

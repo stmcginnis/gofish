@@ -33,6 +33,9 @@ type Session struct {
 // GetSession will get a Session instance from the Redfish service.
 func GetSession(c common.Client, uri string) (*Session, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var t Session

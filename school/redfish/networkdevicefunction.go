@@ -339,6 +339,9 @@ func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) erro
 // GetNetworkDeviceFunction will get a NetworkDeviceFunction instance from the service.
 func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFunction, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var networkdevicefunction NetworkDeviceFunction

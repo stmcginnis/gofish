@@ -58,6 +58,9 @@ func (cs *CompositionService) UnmarshalJSON(b []byte) error {
 // GetCompositionService will get a Composition instance from the Redfish service.
 func GetCompositionService(c common.Client, uri string) (*CompositionService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var t CompositionService

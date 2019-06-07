@@ -168,6 +168,9 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 // GetHostInterface will get a HostInterface instance from the service.
 func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var hostinterface HostInterface

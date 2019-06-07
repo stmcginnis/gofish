@@ -169,6 +169,9 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 // GetStorageService will get a StorageService instance from the service.
 func GetStorageService(c common.Client, uri string) (*StorageService, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var storageservice StorageService
