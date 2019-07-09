@@ -18,8 +18,8 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultSessionServicePath is the default URI for SessionService collections.
-const DefaultSessionServicePath = "/redfish/v1/SessionService"
+// DefaultSessionPath is the default URI for SessionService collections.
+const DefaultSessionPath = "/redfish/v1/Sessions"
 
 // Session describes a single connection (session) between a client and a
 // Redfish service instance.
@@ -68,5 +68,5 @@ func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
 
 // ListSessions gets all Session in the system
 func ListSessions(c common.Client) ([]*Session, error) {
-	return ListReferencedSessions(c, DefaultSessionServicePath)
+	return ListReferencedSessions(c, DefaultSessionPath)
 }
