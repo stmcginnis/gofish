@@ -24,20 +24,23 @@ import (
 
 // apiClient represents a connection to a Redfish/Swordfish enabled service
 // or device.
-type apiClient struct {
+type ApiClient struct {
 	// Endpoint is the URL of the *fish service
 	Endpoint string
+
+	// Token is the session token to be used for all requests issued
+	Token string
 
 	// httpClient is for direct http actions
 	httpClient *http.Client
 }
 
 // APIClient creates a new client connection to a Redfish service.
-func APIClient(endpoint string, httpClient *http.Client) (c common.Client, err error) {
+func APIClient(endpoint string, httpClient *http.Client) (c *ApiClient, err error) {
 	if !strings.HasPrefix(endpoint, "http") {
 		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
-	client := apiClient{Endpoint: endpoint}
+	client := &ApiClient{Endpoint: endpoint}
 	if httpClient != nil {
 		client.httpClient = httpClient
 	} else {
@@ -47,7 +50,7 @@ func APIClient(endpoint string, httpClient *http.Client) (c common.Client, err e
 }
 
 // Get performs a GET request against the Redfish service.
-func (c apiClient) Get(url string) (*http.Response, error) {
+func (c *ApiClient) Get(url string) (*http.Response, error) {
 	relativePath := url
 	if relativePath == "" {
 		relativePath = common.DefaultServiceRoot
@@ -61,6 +64,9 @@ func (c apiClient) Get(url string) (*http.Response, error) {
 
 	req.Header.Set("User-Agent", "gofish/1.0.0")
 	req.Header.Set("Accept", "application/json")
+	if c.Token != "" {
+		req.Header.Set("X-Auth-Token", c.Token)
+	}
 	req.Close = true
 
 	resp, err := c.httpClient.Do(req)
@@ -80,18 +86,18 @@ func (c apiClient) Get(url string) (*http.Response, error) {
 	return resp, err
 }
 
-func (c *apiClient) Post() {
+func (c *ApiClient) Post() {
 
 }
 
-func (c *apiClient) Put() {
+func (c *ApiClient) Put() {
 
 }
 
-func (c *apiClient) Patch() {
+func (c *ApiClient) Patch() {
 
 }
 
-func (c *apiClient) Delete() {
+func (c *ApiClient) Delete() {
 
 }
