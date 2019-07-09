@@ -26,7 +26,7 @@ type Client interface {
 	// Post()
 	// Patch()
 	// Put()
-	// Delete()
+	Delete(url string) error
 }
 
 // Entity provides the common basis for all Redfish and Swordfish objects.
