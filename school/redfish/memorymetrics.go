@@ -108,6 +108,9 @@ type MemoryMetrics struct {
 // GetMemoryMetrics will get a MemoryMetrics instance from the service.
 func GetMemoryMetrics(c common.Client, uri string) (*MemoryMetrics, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var memorymetrics MemoryMetrics
