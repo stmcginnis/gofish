@@ -30,6 +30,11 @@ type Session struct {
 	UserName    string
 }
 
+// DeleteSession deletes a session using the location as argument
+func DeleteSession(c common.Client, url string) (err error) {
+	return c.Delete(url)
+}
+
 // GetSession will get a Session instance from the Redfish service.
 func GetSession(c common.Client, uri string) (*Session, error) {
 	resp, err := c.Get(uri)
