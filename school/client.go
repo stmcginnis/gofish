@@ -98,6 +98,38 @@ func (c *ApiClient) Patch() {
 
 }
 
-func (c *ApiClient) Delete() {
+func (c *ApiClient) Delete(url string) error {
+	relativePath := url
+	if relativePath == "" {
+		relativePath = common.DefaultServiceRoot
+	}
 
+	endpoint := fmt.Sprintf("%s%s", c.Endpoint, relativePath)
+	req, err := http.NewRequest("DELETE", endpoint, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("User-Agent", "gofish/1.0.0")
+	req.Header.Set("Accept", "application/json")
+	if c.Token != "" {
+		req.Header.Set("X-Auth-Token", c.Token)
+	}
+	req.Close = true
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		return fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
+	}
+
+	return err
 }
