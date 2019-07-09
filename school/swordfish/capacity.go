@@ -15,21 +15,22 @@ package swordfish
 import (
 	"encoding/json"
 
+	"github.com/stmcginnis/gofish/school/redfish"
+
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// Capacity is used to represent storage capacity.  The sum of the values
+// Capacity is used to represent storage capacity. The sum of the values
 // in Data, Metadata, and Snapshot shall be equal to the total capacity
 // for the data store.
 type Capacity struct {
-	// Data shall be capacity information relating to
-	// provisioned user data.
+	// Data shall be capacity information relating to provisioned user data.
 	Data CapacityInfo
 	// IsThinProvisioned is If the value is false, the capacity shall be
-	// fully allocated.  The default value shall be false.
+	// fully allocated. The default value shall be false.
 	IsThinProvisioned bool
-	// Metadata shall be capacity information relating to
-	// provisioned system (non-user accessible) data.
+	// Metadata shall be capacity information relating to provisioned system
+	// (non-user accessible) data.
 	Metadata CapacityInfo
 	// Snapshot shall be capacity information relating to
 	// provisioned snapshot or backup data.
@@ -54,9 +55,9 @@ type CapacityInfo struct {
 }
 
 // CapacitySource is used to represent the source and type of storage
-// capacity.  At most one of the ProvidingDrives, ProvidingVolumes,
+// capacity. At most one of the ProvidingDrives, ProvidingVolumes,
 // ProvidingMemoryChunks, ProvidingMemory or ProvidingPools properties
-// may have a value.  If any of ProvidingDrives, ProvidingVolumes,
+// may have a value. If any of ProvidingDrives, ProvidingVolumes,
 // ProvidingMemory or ProvidingPools reference more than one resource,
 // allocation of capacity across those resources is implementation
 // dependent.
@@ -80,22 +81,22 @@ type CapacitySource struct {
 	// ProvidedClassOfService shall reference the provided
 	// ClassOfService from the ProvidingDrives, ProvidingVolumes,
 	// ProvidingMemoryChunks, ProvidingMemory or ProvidingPools.
-	ProvidedClassOfService ClassesOfService
-	// ProvidingDrives is If present, the value shall be a reference to a
+	providedClassOfService string
+	// ProvidingDrives if present, the value shall be a reference to a
 	// contributing drive or drives.
-	// providingDrives DriveCollection
-	// ProvidingMemory is If present, the value shall be a reference to the
+	providingDrives []string
+	// ProvidingMemory if present, the value shall be a reference to the
 	// contributing memory.
-	// providingMemory MemoryCollection
-	// ProvidingMemoryChunks is If present, the value shall be a reference to
+	providingMemory []string
+	// ProvidingMemoryChunks if present, the value shall be a reference to
 	// the contributing memory chunks.
-	// providingMemoryChunks MemoryChunksCollection
-	// ProvidingPools is If present, the value shall be a reference to a
+	providingMemoryChunks []string
+	// ProvidingPools if present, the value shall be a reference to a
 	// contributing storage pool or storage pools.
-	// providingPools StoragePoolCollection
-	// ProvidingVolumes is If present, the value shall be a reference to a
+	providingPools []string
+	// ProvidingVolumes if present, the value shall be a reference to a
 	// contributing volume or volumes.
-	// providingVolumes VolumeCollection
+	providingVolumes []string
 }
 
 // UnmarshalJSON unmarshals a CapacitySource object from the raw JSON.
@@ -103,6 +104,12 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 	type temp CapacitySource
 	var t struct {
 		temp
+		ProvidedClassOfService common.Link
+		ProvidingDrives        common.LinksCollection
+		ProvidingMemory        common.LinksCollection
+		ProvidingMemoryChunks  common.LinksCollection
+		ProvidingPools         common.LinksCollection
+		ProvidingVolumes       common.LinksCollection
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -113,6 +120,12 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 	*capacitysource = CapacitySource(t.temp)
 
 	// Extract the links to other entities for later
+	capacitysource.providedClassOfService = string(t.ProvidedClassOfService)
+	capacitysource.providingDrives = t.ProvidingDrives.ToStrings()
+	capacitysource.providingMemory = t.ProvidingMemory.ToStrings()
+	capacitysource.providingMemoryChunks = t.ProvidingMemoryChunks.ToStrings()
+	capacitysource.providingPools = t.ProvidingPools.ToStrings()
+	capacitysource.providingVolumes = t.ProvidingVolumes.ToStrings()
 
 	return nil
 }
@@ -156,5 +169,27 @@ func ListReferencedCapacitySources(c common.Client, link string) ([]*CapacitySou
 		result = append(result, capSource)
 	}
 
+	return result, nil
+}
+
+// ProvidedClassOfService gets the ClassOfService from the ProvidingDrives,
+// ProvidingVolumes, ProvidingMemoryChunks, ProvidingMemory or ProvidingPools.
+func (capacitysource *CapacitySource) ProvidedClassOfService() (*ClassOfService, error) {
+	if capacitysource.providedClassOfService == "" {
+		return nil, nil
+	}
+	return GetClassOfService(capacitysource.Client, capacitysource.providedClassOfService)
+}
+
+// ProvidingDrives gets contributing drives.
+func (capacitysource *CapacitySource) ProvidingDrives() ([]*redfish.Drive, error) {
+	var result []*redfish.Drive
+	for _, driveLink := range capacitysource.providingDrives {
+		drive, err := redfish.GetDrive(capacitysource.Client, driveLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, drive)
+	}
 	return result, nil
 }
