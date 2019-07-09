@@ -125,9 +125,19 @@ func (s *Service) Tasks() ([]*redfish.Task, error) {
 	return redfish.ListReferencedTasks(s.Client, s.taskService)
 }
 
+// CreateSession creates a new session and returns the token and id
+func (s *Service) CreateSession(username string, password string) (*redfish.AuthToken, error) {
+	return redfish.CreateSession(s.Client, username, password)
+}
+
 // Sessions gets the system's active sessions
 func (s *Service) Sessions() ([]*redfish.Session, error) {
 	return redfish.ListReferencedSessions(s.Client, s.sessions)
+}
+
+// DeleteSession logout the specified session
+func (s *Service) DeleteSession(url string) error {
+	return redfish.DeleteSession(s.Client, url)
 }
 
 // AccountService gets the Redfish AccountService
