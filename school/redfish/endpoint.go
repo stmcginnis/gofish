@@ -122,8 +122,7 @@ type Endpoint struct {
 	// IPTransportDetails shall contain the details for each IP transport
 	// supported by this endpoint.
 	IPTransportDetails string
-	// ID uniquely identifies the resource.
-	ID string `json:"Id"`
+
 	// Identifiers shall be unique in the context of other endpoints that can
 	// reached over the connected network.
 	Identifiers []common.Identifier
