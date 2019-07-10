@@ -30,6 +30,40 @@ type Session struct {
 	UserName    string
 }
 
+type AuthToken struct {
+	Token   string
+	Session string
+}
+
+type authPayload struct {
+	Username string `json:"UserName"`
+	Password string `json:"Password"`
+}
+
+// CreateSession creates a new session and returns the token and id
+func CreateSession(c common.Client, username string, password string) (auth *AuthToken, err error) {
+	a := &authPayload{
+		Username: username,
+		Password: password,
+	}
+
+	payload, err := json.Marshal(a)
+	if err != nil {
+		return auth, err
+	}
+
+	resp, err := c.Post(DefaultSessionPath, payload)
+	if err != nil {
+		return auth, err
+	}
+
+	auth = &AuthToken{}
+	auth.Token = resp.Header.Get("X-Auth-Token")
+	auth.Session = resp.Header.Get("Location")
+
+	return auth, err
+}
+
 // DeleteSession deletes a session using the location as argument
 func DeleteSession(c common.Client, url string) (err error) {
 	return c.Delete(url)
