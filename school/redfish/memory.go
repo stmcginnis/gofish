@@ -373,6 +373,9 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 // GetMemory will get a Memory instance from the service.
 func GetMemory(c common.Client, uri string) (*Memory, error) {
 	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var memory Memory

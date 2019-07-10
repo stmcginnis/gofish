@@ -28,7 +28,7 @@ type Service struct {
 	chassis            string
 	managers           string
 	taskService        string
-	sessionService     string
+	sessions           string
 	storageServices    string
 	storageSystems     string
 	accountService     string
@@ -47,7 +47,6 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 		Chassis            common.Link
 		Managers           common.Link
 		TaskService        common.Link
-		SessionService     common.Link
 		StorageServices    common.Link
 		StorageSystems     common.Link
 		AccountService     common.Link
@@ -55,6 +54,9 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 		Registries         common.Link
 		Systems            common.Link
 		CompositionService common.Link
+		Links              struct {
+			Sessions common.Link
+		} `json:"Links"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -68,7 +70,7 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 	s.chassis = string(t.Chassis)
 	s.managers = string(t.Managers)
 	s.taskService = string(t.TaskService)
-	s.sessionService = string(t.SessionService)
+	s.sessions = string(t.Links.Sessions)
 	s.storageServices = string(t.StorageServices)
 	s.storageSystems = string(t.StorageSystems)
 	s.accountService = string(t.AccountService)
@@ -123,9 +125,19 @@ func (s *Service) Tasks() ([]*redfish.Task, error) {
 	return redfish.ListReferencedTasks(s.Client, s.taskService)
 }
 
+// CreateSession creates a new session and returns the token and id
+func (s *Service) CreateSession(username string, password string) (*redfish.AuthToken, error) {
+	return redfish.CreateSession(s.Client, username, password)
+}
+
 // Sessions gets the system's active sessions
 func (s *Service) Sessions() ([]*redfish.Session, error) {
-	return redfish.ListReferencedSessions(s.Client, s.sessionService)
+	return redfish.ListReferencedSessions(s.Client, s.sessions)
+}
+
+// DeleteSession logout the specified session
+func (s *Service) DeleteSession(url string) error {
+	return redfish.DeleteSession(s.Client, url)
 }
 
 // AccountService gets the Redfish AccountService

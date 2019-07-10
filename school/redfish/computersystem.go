@@ -343,8 +343,7 @@ type ComputerSystem struct {
 	HostedServices string
 	// HostingRoles shall be the hosting roles supported by this computer system.
 	HostingRoles string
-	// ID is the identifier.
-	ID string `json:"Id"`
+
 	// IndicatorLED shall contain the indicator
 	// light state for the indicator light associated with this system.
 	IndicatorLED common.IndicatorLED
