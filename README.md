@@ -21,14 +21,25 @@ package main
 import (
     "fmt"
 
-    "github.com/stmcginnis/gofish/school"
+    gofish "github.com/stmcginnis/gofish/school"
 )
 
 func main() {
-    c := gofish.APIClient("localhost", 5000, false)
-    service, _ := school.ServiceRoot(c)
+    c, err := gofish.APIClient("http://localhost:5000", nil)
+    if err != nil {
+        panic(err)
+    }
 
-    chassis, _ := service.Chassis()
+    service, err := gofish.ServiceRoot(c)
+    if err != nil {
+        panic(err)
+    }
+
+    chassis, err := service.Chassis()
+    if err != nil {
+        panic(err)
+    }
+
     for _, chass := range chassis {
         fmt.Printf("Chassis: %#v\n\n", chass)
     }
