@@ -23,7 +23,7 @@ const DefaultServiceRoot = "/redfish/v1/"
 // Client is a connection to a Redfish service.
 type Client interface {
 	Get(url string) (*http.Response, error)
-	// Post()
+	Post(url string, payload []byte) (*http.Response, error)
 	// Patch()
 	// Put()
 	Delete(url string) error
