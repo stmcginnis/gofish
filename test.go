@@ -17,7 +17,7 @@ func main() {
 	if len(os.Args) > 2 {
 		subQuery = s.ToLower(os.Args[2])
 	}
-	c := gofish.APIClient("http://localhost:5000", nil)
+	c, _ := gofish.APIClient("http://localhost:5000", nil)
 	service, _ := gofish.ServiceRoot(c)
 
 	switch queryObject {

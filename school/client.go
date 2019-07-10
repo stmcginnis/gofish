@@ -23,7 +23,7 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// apiClient represents a connection to a Redfish/Swordfish enabled service
+// ApiClient represents a connection to a Redfish/Swordfish enabled service
 // or device.
 type ApiClient struct {
 	// Endpoint is the URL of the *fish service

@@ -30,6 +30,7 @@ type Session struct {
 	UserName    string
 }
 
+// AuthToken contains the authentication and session information.
 type AuthToken struct {
 	Token   string
 	Session string
