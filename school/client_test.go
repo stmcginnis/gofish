@@ -19,7 +19,7 @@ import (
 
 // TestClientGetRoot tests getting the root data from the server.
 func TestClientGetRoot(t *testing.T) {
-	client := APIClient("http://localhost:5000")
+	client, _ := APIClient("http://localhost:5000", nil)
 
 	service, _ := ServiceRoot(client)
 	chassis, _ := service.Chassis()
