@@ -19,10 +19,6 @@ import (
 	"github.com/stmcginnis/gofish/school/redfish"
 )
 
-// DefaultStorageServicePath is the default URI for the StorageService
-// object.
-const DefaultStorageServicePath = "/redfish/v1/StorageService"
-
 // StorageService is a collection of resources that the system can make
 // available to one or more host systems. The collection can contain:
 // block, file, or object storage; local system access points through
@@ -202,11 +198,6 @@ func ListReferencedStorageServices(c common.Client, link string) ([]*StorageServ
 	}
 
 	return result, nil
-}
-
-// ListStorageServices gets all StorageService in the system.
-func ListStorageServices(c common.Client) ([]*StorageService, error) {
-	return ListReferencedStorageServices(c, DefaultStorageServicePath)
 }
 
 // ClassesOfService gets the storage service's classes of service.

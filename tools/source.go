@@ -18,9 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// Default{{ object_name }}Path is the default URI for the {{ object_name }}
-// object.
-const Default{{ object_name }}Path = "/redfish/v1/{{ object_name }}"
 {% for enum in enums %}
 
 {{ enum.description }}
@@ -104,11 +101,6 @@ func ListReferenced{{ class.name }}s(c common.Client, link string) ([]*{{ class.
     }
 
     return result, nil
-}
-
-// List{{ class.name }}s gets all {{ class.name }} in the system.
-func List{{ class.name }}s(c common.Client) ([]*{{ class.name }}, error) {
-    return ListReferenced{{ class.name }}s(c, Default{{ class.name }}Path)
 }
 
 {% endif %}

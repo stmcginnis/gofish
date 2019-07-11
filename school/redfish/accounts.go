@@ -18,12 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultAccountServicePath is the default URI for AccountService collections.
-const DefaultAccountServicePath = "/redfish/v1/AccountService"
-
-// DefaultAccountsPath is the default URI for Accounts collections.
-const DefaultAccountsPath = "/redfish/v1/AccountService/Accounts"
-
 // AccountService contains properties for managing user accounts. The
 // properties are common to all user accounts, such as password requirements,
 // and control features such as account lockout. The schema also contains links
@@ -166,11 +160,6 @@ func ListReferencedAccounts(c common.Client, link string) ([]*Account, error) {
 	return result, nil
 }
 
-// ListAccounts gets all Accounts in the system
-func ListAccounts(c common.Client) ([]*Account, error) {
-	return ListReferencedAccounts(c, DefaultAccountsPath)
-}
-
 // Role is a Redfish role
 type Role struct {
 	common.Entity
@@ -215,9 +204,4 @@ func ListReferencedRoles(c common.Client, link string) ([]*Role, error) {
 	}
 
 	return result, nil
-}
-
-// ListRoles gets all Roles in the system
-func ListRoles(c common.Client) ([]*Role, error) {
-	return ListReferencedRoles(c, DefaultAccountsPath)
 }

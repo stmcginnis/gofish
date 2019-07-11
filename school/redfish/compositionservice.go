@@ -18,8 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultCompositionServicePath is the default URI for CompositionService collections.
-const DefaultCompositionServicePath = "/redfish/v1/CompositionService"
 
 // CompositionService defines a Composition Service which represents the
 // properties for the service and links to the resources available for

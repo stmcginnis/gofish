@@ -18,10 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultComputerSystemPath is the default URI for the ComputerSystem
-// object.
-const DefaultComputerSystemPath = "/redfish/v1/ComputerSystem"
-
 // BootOrderTypes is the choice of boot order property to use when controller
 // the persistent boot order for this computer system.
 type BootOrderTypes string
@@ -498,11 +494,6 @@ func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSys
 	}
 
 	return result, nil
-}
-
-// ListComputerSystems gets all ComputerSystem in the system.
-func ListComputerSystems(c common.Client) ([]*ComputerSystem, error) {
-	return ListReferencedComputerSystems(c, DefaultComputerSystemPath)
 }
 
 // CSLinks are references to resources that are related to, but not contained

@@ -19,10 +19,6 @@ import (
 	"github.com/stmcginnis/gofish/school/redfish"
 )
 
-// DefaultEndpointGroupPath is the default URI for the EndpointGroup
-// object.
-const DefaultEndpointGroupPath = "/redfish/v1/EndpointGroup"
-
 // AccessState is used for associated resources through all
 // aggregated endpoints shall share this access state.
 type AccessState string
@@ -150,11 +146,6 @@ func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGrou
 	}
 
 	return result, nil
-}
-
-// ListEndpointGroups gets all EndpointGroup in the system.
-func ListEndpointGroups(c common.Client) ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(c, DefaultEndpointGroupPath)
 }
 
 // Endpoints gets the group's endpoints.
