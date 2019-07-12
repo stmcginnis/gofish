@@ -237,8 +237,6 @@ const (
 
 // Boot contains properties which describe boot information for a system.
 type Boot struct {
-	common.Entity
-
 	// AliasBootOrder shall be an ordered array
 	// of boot source aliases (of type BootSource) representing the
 	// persistent Boot Order of this computer system.
@@ -317,6 +315,34 @@ func (boot *Boot) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// Reset describe the type off reset to be issue by the resource
+type ResetType string
+
+const (
+	// On shall be used to power on the machine
+	On ResetType = "On"
+	// ForceOff shall be used to power off the machine without wait the OS to shutdown
+	ForceOff ResetType = "ForceOff"
+	// ForceRestart shall be used to restart the machine without wait the OS to shutdown
+	ForceRestart ResetType = "ForceRestart"
+	// GracefulShutdown shall be used to restart the machine waiting the OS shutdown gracefully
+	GracefulShutdown ResetType = "GracefulShutdown"
+	// PushPowerButton shall be used to emulate pushing the power button
+	PushPowerButton ResetType = "PushPowerButton"
+	// Nmi shall be used to trigger a crash/core dump file
+	Nmi ResetType = "Nmi"
+)
+
+type Actions struct {
+	// ResetType shall contain the desired action to be issued
+	// The valid values for this property are specified through
+	// the Redfish.AllowableValues annotation.
+	ComputerSystemReset struct {
+		ResetType []ResetType `json:"ResetType@Redfish.AllowableValues"`
+		Target    string
+	} `json:"#ComputerSystem.Reset"`
+}
+
 // ComputerSystem is used to represent resources that represent a
 // computing system in the Redfish specification.
 type ComputerSystem struct {
@@ -330,6 +356,9 @@ type ComputerSystem struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is the @odata.type
 	ODataType string `json:"@odata.type"`
+
+	// Actions type shall contain the available actions for this resource.
+	Actions Actions
 	// AssetTag shall contain the value of the asset tag of the system.
 	AssetTag string
 	// bios shall be a link to a resource of
