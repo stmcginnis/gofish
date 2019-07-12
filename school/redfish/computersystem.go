@@ -252,12 +252,12 @@ type Boot struct {
 	BootNext string
 	// BootOptions shall be a link to a
 	// collection of type BootOptionCollection.
-	BootOptions string
+	bootOptions string
 	// BootOrder shall be an ordered array of
 	// BootOptionReference strings representing the persistent Boot Order of
 	// this computer system. For UEFI systems, this is the UEFI BootOrder as
 	// defined by the UEFI Specification.
-	BootOrder string
+	BootOrder []string
 	// BootOrderPropertySelection shall
 	// indicate which boot order property the system uses when specifying the
 	// persistent boot order.
@@ -294,6 +294,27 @@ type Boot struct {
 	// one time boot only. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
 	UefiTargetBootSourceOverride string
+}
+
+// UnmarshalJSON unmarshals a Boot object from the raw JSON.
+func (boot *Boot) UnmarshalJSON(b []byte) error {
+	type temp Boot
+	var t struct {
+		temp
+		BootOptions common.Link
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*boot = Boot(t.temp)
+
+	// Extract the links to other entities for later
+	boot.bootOptions = string(t.BootOptions)
+
+	return nil
 }
 
 // ComputerSystem is used to represent resources that represent a
@@ -334,11 +355,11 @@ type ComputerSystem struct {
 	// HostWatchdogTimer shall contain properties which
 	// describe the host watchdog timer functionality for this
 	// ComputerSystem.
-	HostWatchdogTimer string
+	HostWatchdogTimer WatchdogTimer
 	// HostedServices shall describe services supported by this computer system.
 	HostedServices string
 	// HostingRoles shall be the hosting roles supported by this computer system.
-	HostingRoles string
+	HostingRoles []string
 
 	// IndicatorLED shall contain the indicator
 	// light state for the indicator light associated with this system.
@@ -365,13 +386,13 @@ type ComputerSystem struct {
 	// collection of type NetworkInterfaceCollection.
 	networkInterfaces string
 	// PCIeDevices shall be an array of references of type PCIeDevice.
-	PCIeDevices string
+	pcieDevices []string
 	// PCIeDevicesCount is the number of PCIeDevices.
-	PCIeDevicesCount string `json:"PCIeDevices@odata.count"`
+	PCIeDevicesCount int `json:"PCIeDevices@odata.count"`
 	// PCIeFunctions shall be an array of references of type PCIeFunction.
-	PCIeFunctions string
+	pcieFunctions []string
 	// PCIeFunctionsCount is the number of PCIeFunctions.
-	PCIeFunctionsCount string `json:"PCIeFunctions@odata.count"`
+	PCIeFunctionsCount int `json:"PCIeFunctions@odata.count"`
 	// PartNumber shall contain the part number
 	// for the system as defined by the manufacturer.
 	PartNumber string
@@ -445,6 +466,8 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		NetworkInterfaces  common.Link
 		LogServices        common.Link
 		MemoryDomains      common.Link
+		PCIeDevices        []common.Link
+		PCIeFunctions      []common.Link
 		Links              CSLinks
 	}
 
@@ -466,6 +489,12 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.storage = string(t.Storage)
 	computersystem.logServices = string(t.LogServices)
 	computersystem.memoryDomains = string(t.MemoryDomains)
+	for _, p := range t.PCIeDevices {
+		computersystem.pcieDevices = append(computersystem.pcieDevices, string(p))
+	}
+	for _, p := range t.PCIeFunctions {
+		computersystem.pcieFunctions = append(computersystem.pcieFunctions, string(p))
+	}
 
 	return nil
 }
@@ -618,10 +647,12 @@ type WatchdogTimer struct {
 	// property indicates only that the functionality is enabled or disabled
 	// by the user, and updates to this property shall not initiate a
 	// watchdog timer countdown.
-	FunctionEnabled string
+	FunctionEnabled bool
 	// Status is any status or health properties
 	// of the resource.
-	Status common.State
+	Status struct {
+		State common.State
+	}
 	// TimeoutAction is the action to perform
 	// upon the  expiration of the Watchdog Timer.
 	TimeoutAction string
