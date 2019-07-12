@@ -18,9 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultTaskServicePath is the default URI for TaskService collections.
-const DefaultTaskServicePath = "/redfish/v1/TaskService"
-
 // TaskState indicates the state of a task
 type TaskState string
 
@@ -99,9 +96,4 @@ func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
 	}
 
 	return result, nil
-}
-
-// ListTasks gets all Task in the system
-func ListTasks(c common.Client) ([]*Task, error) {
-	return ListReferencedTasks(c, DefaultTaskServicePath)
 }

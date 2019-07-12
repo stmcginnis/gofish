@@ -18,9 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultChassisPath is the default URI for Chassis collections.
-const DefaultChassisPath = "/redfish/v1/Chassis"
-
 // ChassisType is a physical form of the chassis
 type ChassisType string
 
@@ -173,11 +170,6 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 	}
 
 	return result, nil
-}
-
-// ListChassis gets all Chassis in the system.
-func ListChassis(c common.Client) ([]*Chassis, error) {
-	return ListReferencedChassis(c, DefaultChassisPath)
 }
 
 // ThermalInfo is reference to the thermal properties (fans, cooling, sensors)

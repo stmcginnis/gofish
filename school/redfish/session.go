@@ -18,9 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultSessionPath is the default URI for SessionService collections.
-const DefaultSessionPath = "/redfish/v1/Sessions"
-
 // Session describes a single connection (session) between a client and a
 // Redfish service instance.
 type Session struct {
@@ -42,7 +39,7 @@ type authPayload struct {
 }
 
 // CreateSession creates a new session and returns the token and id
-func CreateSession(c common.Client, username string, password string) (auth *AuthToken, err error) {
+func CreateSession(c common.Client, uri string, username string, password string) (auth *AuthToken, err error) {
 	a := &authPayload{
 		Username: username,
 		Password: password,
@@ -53,7 +50,7 @@ func CreateSession(c common.Client, username string, password string) (auth *Aut
 		return auth, err
 	}
 
-	resp, err := c.Post(DefaultSessionPath, payload)
+	resp, err := c.Post(uri, payload)
 	if err != nil {
 		return auth, err
 	}
@@ -104,9 +101,4 @@ func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
 	}
 
 	return result, nil
-}
-
-// ListSessions gets all Session in the system
-func ListSessions(c common.Client) ([]*Session, error) {
-	return ListReferencedSessions(c, DefaultSessionPath)
 }

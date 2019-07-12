@@ -18,10 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultComputerSystemPath is the default URI for the ComputerSystem
-// object.
-const DefaultComputerSystemPath = "/redfish/v1/ComputerSystem"
-
 // BootOrderTypes is the choice of boot order property to use when controller
 // the persistent boot order for this computer system.
 type BootOrderTypes string
@@ -241,8 +237,6 @@ const (
 
 // Boot contains properties which describe boot information for a system.
 type Boot struct {
-	common.Entity
-
 	// AliasBootOrder shall be an ordered array
 	// of boot source aliases (of type BootSource) representing the
 	// persistent Boot Order of this computer system.
@@ -256,12 +250,12 @@ type Boot struct {
 	BootNext string
 	// BootOptions shall be a link to a
 	// collection of type BootOptionCollection.
-	BootOptions string
+	bootOptions string
 	// BootOrder shall be an ordered array of
 	// BootOptionReference strings representing the persistent Boot Order of
 	// this computer system. For UEFI systems, this is the UEFI BootOrder as
 	// defined by the UEFI Specification.
-	BootOrder string
+	BootOrder []string
 	// BootOrderPropertySelection shall
 	// indicate which boot order property the system uses when specifying the
 	// persistent boot order.
@@ -300,6 +294,55 @@ type Boot struct {
 	UefiTargetBootSourceOverride string
 }
 
+// UnmarshalJSON unmarshals a Boot object from the raw JSON.
+func (boot *Boot) UnmarshalJSON(b []byte) error {
+	type temp Boot
+	var t struct {
+		temp
+		BootOptions common.Link
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*boot = Boot(t.temp)
+
+	// Extract the links to other entities for later
+	boot.bootOptions = string(t.BootOptions)
+
+	return nil
+}
+
+// Reset describe the type off reset to be issue by the resource
+type ResetType string
+
+const (
+	// On shall be used to power on the machine
+	On ResetType = "On"
+	// ForceOff shall be used to power off the machine without wait the OS to shutdown
+	ForceOff ResetType = "ForceOff"
+	// ForceRestart shall be used to restart the machine without wait the OS to shutdown
+	ForceRestart ResetType = "ForceRestart"
+	// GracefulShutdown shall be used to restart the machine waiting the OS shutdown gracefully
+	GracefulShutdown ResetType = "GracefulShutdown"
+	// PushPowerButton shall be used to emulate pushing the power button
+	PushPowerButton ResetType = "PushPowerButton"
+	// Nmi shall be used to trigger a crash/core dump file
+	Nmi ResetType = "Nmi"
+)
+
+type Actions struct {
+	// ResetType shall contain the desired action to be issued
+	// The valid values for this property are specified through
+	// the Redfish.AllowableValues annotation.
+	ComputerSystemReset struct {
+		ResetType []ResetType `json:"ResetType@Redfish.AllowableValues"`
+		Target    string
+	} `json:"#ComputerSystem.Reset"`
+}
+
 // ComputerSystem is used to represent resources that represent a
 // computing system in the Redfish specification.
 type ComputerSystem struct {
@@ -313,11 +356,14 @@ type ComputerSystem struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is the @odata.type
 	ODataType string `json:"@odata.type"`
+
+	// Actions type shall contain the available actions for this resource.
+	Actions Actions
 	// AssetTag shall contain the value of the asset tag of the system.
 	AssetTag string
-	// BIOS shall be a link to a resource of
-	// type BIOS that lists the BIOS settings for this system.
-	BIOS string `json:"Bios"`
+	// bios shall be a link to a resource of
+	// type Bios that lists the Bios settings for this system.
+	bios string
 	// BIOSVersion shall be the version string
 	// of the currently installed and running BIOS (for x86 systems). For
 	// other systems, the value may contain a version string representing the
@@ -338,24 +384,24 @@ type ComputerSystem struct {
 	// HostWatchdogTimer shall contain properties which
 	// describe the host watchdog timer functionality for this
 	// ComputerSystem.
-	HostWatchdogTimer string
+	HostWatchdogTimer WatchdogTimer
 	// HostedServices shall describe services supported by this computer system.
 	HostedServices string
 	// HostingRoles shall be the hosting roles supported by this computer system.
-	HostingRoles string
+	HostingRoles []string
 
 	// IndicatorLED shall contain the indicator
 	// light state for the indicator light associated with this system.
 	IndicatorLED common.IndicatorLED
-	// LogServices shall be a link to a
+	// logServices shall be a link to a
 	// collection of type LogServiceCollection.
-	LogServices string
+	logServices string
 	// Manufacturer shall contain a value that represents the manufacturer of the system.
 	Manufacturer string
 	// Memory shall be a link to a collection of type MemoryCollection.
 	memory string
-	// MemoryDomains shall be a link to a collection of type MemoryDomainCollection.
-	MemoryDomains string
+	// memoryDomains shall be a link to a collection of type MemoryDomainCollection.
+	memoryDomains string
 	// MemorySummary is This object shall contain properties which describe
 	// the central memory for the current resource.
 	MemorySummary MemorySummary
@@ -365,17 +411,17 @@ type ComputerSystem struct {
 	Model string
 	// Name is the resource name.
 	Name string
-	// NetworkInterfaces shall be a link to a
+	// networkInterfaces shall be a link to a
 	// collection of type NetworkInterfaceCollection.
-	NetworkInterfaces string
+	networkInterfaces string
 	// PCIeDevices shall be an array of references of type PCIeDevice.
-	PCIeDevices string
+	pcieDevices []string
 	// PCIeDevicesCount is the number of PCIeDevices.
-	PCIeDevicesCount string `json:"PCIeDevices@odata.count"`
+	PCIeDevicesCount int `json:"PCIeDevices@odata.count"`
 	// PCIeFunctions shall be an array of references of type PCIeFunction.
-	PCIeFunctions string
+	pcieFunctions []string
 	// PCIeFunctionsCount is the number of PCIeFunctions.
-	PCIeFunctionsCount string `json:"PCIeFunctions@odata.count"`
+	PCIeFunctionsCount int `json:"PCIeFunctions@odata.count"`
 	// PartNumber shall contain the part number
 	// for the system as defined by the manufacturer.
 	PartNumber string
@@ -400,8 +446,8 @@ type ComputerSystem struct {
 	RedundancyCount string `json:"Redundancy@odata.count"`
 	// SKU shall contain the Stock Keeping Unit (SKU) for the system.
 	SKU string
-	// SecureBoot shall be a link to a resource of type SecureBoot.
-	SecureBoot string
+	// secureBoot shall be a link to a resource of type SecureBoot.
+	secureBoot string
 	// SerialNumber shall contain the serial number for the system.
 	SerialNumber string
 	// SimpleStorage shall be a link to a collection of type SimpleStorageCollection.
@@ -409,9 +455,9 @@ type ComputerSystem struct {
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
-	// Storage shall be a link to a collection
+	// storage shall be a link to a collection
 	// of type StorageCollection.
-	Storage string
+	storage string
 	// SubModel shall contain the information
 	// about the sub-model (or config) of the system. This shall not include
 	// the model/product name or the manufacturer name.
@@ -439,10 +485,18 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	type temp ComputerSystem
 	var t struct {
 		temp
+		Bios               common.Link
 		Processors         common.Link
 		Memory             common.Link
 		EthernetInterfaces common.Link
 		SimpleStorage      common.Link
+		SecureBoot         common.Link
+		Storage            common.Link
+		NetworkInterfaces  common.Link
+		LogServices        common.Link
+		MemoryDomains      common.Link
+		PCIeDevices        []common.Link
+		PCIeFunctions      []common.Link
 		Links              CSLinks
 	}
 
@@ -454,10 +508,22 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	*computersystem = ComputerSystem(t.temp)
 
 	// Extract the links to other entities for later
+	computersystem.bios = string(t.Bios)
 	computersystem.processors = string(t.Processors)
 	computersystem.memory = string(t.Memory)
 	computersystem.ethernetInterfaces = string(t.EthernetInterfaces)
 	computersystem.simpleStorage = string(t.SimpleStorage)
+	computersystem.networkInterfaces = string(t.NetworkInterfaces)
+	computersystem.secureBoot = string(t.SecureBoot)
+	computersystem.storage = string(t.Storage)
+	computersystem.logServices = string(t.LogServices)
+	computersystem.memoryDomains = string(t.MemoryDomains)
+	for _, p := range t.PCIeDevices {
+		computersystem.pcieDevices = append(computersystem.pcieDevices, string(p))
+	}
+	for _, p := range t.PCIeFunctions {
+		computersystem.pcieFunctions = append(computersystem.pcieFunctions, string(p))
+	}
 
 	return nil
 }
@@ -498,11 +564,6 @@ func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSys
 	}
 
 	return result, nil
-}
-
-// ListComputerSystems gets all ComputerSystem in the system.
-func ListComputerSystems(c common.Client) ([]*ComputerSystem, error) {
-	return ListReferencedComputerSystems(c, DefaultComputerSystemPath)
 }
 
 // CSLinks are references to resources that are related to, but not contained
@@ -565,7 +626,7 @@ type MemorySummary struct {
 	Status common.Status
 	// TotalSystemMemoryGiB is the amount of configured system general purpose
 	// volatile (RAM) memory as measured in gibibytes.
-	TotalSystemMemoryGiB int
+	TotalSystemMemoryGiB float32
 	// TotalSystemPersistentMemoryGiB is the total amount of configured
 	// persistent memory available to the system as measured in gibibytes.
 	TotalSystemPersistentMemoryGiB int
@@ -615,10 +676,12 @@ type WatchdogTimer struct {
 	// property indicates only that the functionality is enabled or disabled
 	// by the user, and updates to this property shall not initiate a
 	// watchdog timer countdown.
-	FunctionEnabled string
+	FunctionEnabled bool
 	// Status is any status or health properties
 	// of the resource.
-	Status common.State
+	Status struct {
+		State common.State
+	}
 	// TimeoutAction is the action to perform
 	// upon the  expiration of the Watchdog Timer.
 	TimeoutAction string

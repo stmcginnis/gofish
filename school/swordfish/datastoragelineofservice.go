@@ -18,10 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultDataStorageLineOfServicePath is the default URI for the DataStorageLineOfService
-// object.
-const DefaultDataStorageLineOfServicePath = "/redfish/v1/DataStorageLineOfService"
-
 // DataStorageLineOfService is used to describe a service option covering
 // storage provisioning and availability.
 type DataStorageLineOfService struct {
@@ -124,9 +120,4 @@ func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*D
 	}
 
 	return result, nil
-}
-
-// ListDataStorageLineOfServices gets all DataStorageLineOfService in the system.
-func ListDataStorageLineOfServices(c common.Client) ([]*DataStorageLineOfService, error) {
-	return ListReferencedDataStorageLineOfServices(c, DefaultDataStorageLineOfServicePath)
 }
