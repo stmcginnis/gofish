@@ -311,9 +311,9 @@ type ComputerSystem struct {
 	ODataType string `json:"@odata.type"`
 	// AssetTag shall contain the value of the asset tag of the system.
 	AssetTag string
-	// BIOS shall be a link to a resource of
-	// type BIOS that lists the BIOS settings for this system.
-	BIOS string `json:"Bios"`
+	// bios shall be a link to a resource of
+	// type Bios that lists the Bios settings for this system.
+	bios string
 	// BIOSVersion shall be the version string
 	// of the currently installed and running BIOS (for x86 systems). For
 	// other systems, the value may contain a version string representing the
@@ -343,15 +343,15 @@ type ComputerSystem struct {
 	// IndicatorLED shall contain the indicator
 	// light state for the indicator light associated with this system.
 	IndicatorLED common.IndicatorLED
-	// LogServices shall be a link to a
+	// logServices shall be a link to a
 	// collection of type LogServiceCollection.
-	LogServices string
+	logServices string
 	// Manufacturer shall contain a value that represents the manufacturer of the system.
 	Manufacturer string
 	// Memory shall be a link to a collection of type MemoryCollection.
 	memory string
-	// MemoryDomains shall be a link to a collection of type MemoryDomainCollection.
-	MemoryDomains string
+	// memoryDomains shall be a link to a collection of type MemoryDomainCollection.
+	memoryDomains string
 	// MemorySummary is This object shall contain properties which describe
 	// the central memory for the current resource.
 	MemorySummary MemorySummary
@@ -361,9 +361,9 @@ type ComputerSystem struct {
 	Model string
 	// Name is the resource name.
 	Name string
-	// NetworkInterfaces shall be a link to a
+	// networkInterfaces shall be a link to a
 	// collection of type NetworkInterfaceCollection.
-	NetworkInterfaces string
+	networkInterfaces string
 	// PCIeDevices shall be an array of references of type PCIeDevice.
 	PCIeDevices string
 	// PCIeDevicesCount is the number of PCIeDevices.
@@ -396,8 +396,8 @@ type ComputerSystem struct {
 	RedundancyCount string `json:"Redundancy@odata.count"`
 	// SKU shall contain the Stock Keeping Unit (SKU) for the system.
 	SKU string
-	// SecureBoot shall be a link to a resource of type SecureBoot.
-	SecureBoot string
+	// secureBoot shall be a link to a resource of type SecureBoot.
+	secureBoot string
 	// SerialNumber shall contain the serial number for the system.
 	SerialNumber string
 	// SimpleStorage shall be a link to a collection of type SimpleStorageCollection.
@@ -405,9 +405,9 @@ type ComputerSystem struct {
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
-	// Storage shall be a link to a collection
+	// storage shall be a link to a collection
 	// of type StorageCollection.
-	Storage string
+	storage string
 	// SubModel shall contain the information
 	// about the sub-model (or config) of the system. This shall not include
 	// the model/product name or the manufacturer name.
@@ -435,10 +435,16 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	type temp ComputerSystem
 	var t struct {
 		temp
+		Bios               common.Link
 		Processors         common.Link
 		Memory             common.Link
 		EthernetInterfaces common.Link
 		SimpleStorage      common.Link
+		SecureBoot         common.Link
+		Storage            common.Link
+		NetworkInterfaces  common.Link
+		LogServices        common.Link
+		MemoryDomains      common.Link
 		Links              CSLinks
 	}
 
@@ -450,10 +456,16 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	*computersystem = ComputerSystem(t.temp)
 
 	// Extract the links to other entities for later
+	computersystem.bios = string(t.Bios)
 	computersystem.processors = string(t.Processors)
 	computersystem.memory = string(t.Memory)
 	computersystem.ethernetInterfaces = string(t.EthernetInterfaces)
 	computersystem.simpleStorage = string(t.SimpleStorage)
+	computersystem.networkInterfaces = string(t.NetworkInterfaces)
+	computersystem.secureBoot = string(t.SecureBoot)
+	computersystem.storage = string(t.Storage)
+	computersystem.logServices = string(t.LogServices)
+	computersystem.memoryDomains = string(t.MemoryDomains)
 
 	return nil
 }
@@ -556,7 +568,7 @@ type MemorySummary struct {
 	Status common.Status
 	// TotalSystemMemoryGiB is the amount of configured system general purpose
 	// volatile (RAM) memory as measured in gibibytes.
-	TotalSystemMemoryGiB int
+	TotalSystemMemoryGiB float32
 	// TotalSystemPersistentMemoryGiB is the total amount of configured
 	// persistent memory available to the system as measured in gibibytes.
 	TotalSystemPersistentMemoryGiB int
