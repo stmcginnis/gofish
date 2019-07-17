@@ -18,9 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultManagerPath is the default URI for Manager collections.
-const DefaultManagerPath = "/redfish/v1/Managers"
-
 // UIConsoleInfo contains information about GUI services.
 type UIConsoleInfo struct {
 	ServiceEnabled        string
@@ -128,9 +125,4 @@ func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
 	}
 
 	return result, nil
-}
-
-// ListManagers gets all Manager in the system
-func ListManagers(c common.Client) ([]*Manager, error) {
-	return ListReferencedManagers(c, DefaultManagerPath)
 }

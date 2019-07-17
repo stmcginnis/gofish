@@ -18,8 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultEventServicePath is the default URI for EventService collections.
-const DefaultEventServicePath = "/redfish/v1/EventService"
 
 // EventService contains properties for managing event subcriptions and
 // generates the events sent to subscribers.  The resource has links to the

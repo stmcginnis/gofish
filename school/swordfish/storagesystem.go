@@ -19,9 +19,6 @@ import (
 	"github.com/stmcginnis/gofish/school/redfish"
 )
 
-// DefaultStorageSystemPath is the default URI for StorageSystem collections.
-const DefaultStorageSystemPath = "/redfish/v1/StorageSystems"
-
 // StorageSystem is a Swordfish storage system instance.
 type StorageSystem struct {
 	redfish.ComputerSystem
@@ -62,9 +59,4 @@ func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSyste
 	}
 
 	return result, nil
-}
-
-// ListStorageSystems gets all StorageSystem in the system.
-func ListStorageSystems(c common.Client) ([]*StorageSystem, error) {
-	return ListReferencedStorageSystems(c, DefaultStorageSystemPath)
 }

@@ -18,9 +18,7 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// DefaultHostInterfacePath is the default URI for the HostInterface
 // object.
-const DefaultHostInterfacePath = "/redfish/v1/HostInterface"
 
 // AuthenticationMode is
 type AuthenticationMode string

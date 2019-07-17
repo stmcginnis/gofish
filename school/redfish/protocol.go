@@ -12,9 +12,7 @@
 
 package redfish
 
-// DefaultProtocolPath is the default URI for the Protocol
 // object.
-const DefaultProtocolPath = "/redfish/v1/Protocol"
 
 // Protocol is
 type Protocol string

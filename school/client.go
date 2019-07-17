@@ -102,6 +102,7 @@ func (c *ApiClient) Post(url string, payload []byte) (*http.Response, error) {
 
 	req.Header.Set("User-Agent", "gofish/1.0.0")
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 	if c.Token != "" {
 		req.Header.Set("X-Auth-Token", c.Token)
 	}
