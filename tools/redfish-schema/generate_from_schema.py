@@ -60,7 +60,9 @@ def _ident(name):
     outname = outname.replace('-','_')              # converts dashes to underbars
     outname = outname.replace('switch','Switch')    # Watch out for keyword switch
     outname = outname.replace(' ','')               # Collapse spaces
-
+    outname = outname.replace(':','_')               # Collapse spaces
+    outname = outname.replace('/','_div_')
+    outname = outname.replace('+','_plus_')
 #### not working yet
     if len(outname) == 1:
         if outname[0:1].isdigit():
