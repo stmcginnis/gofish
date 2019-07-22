@@ -319,18 +319,18 @@ func (boot *Boot) UnmarshalJSON(b []byte) error {
 type ResetType string
 
 const (
-	// On shall be used to power on the machine
-	On ResetType = "On"
-	// ForceOff shall be used to power off the machine without wait the OS to shutdown
-	ForceOff ResetType = "ForceOff"
-	// ForceRestart shall be used to restart the machine without wait the OS to shutdown
-	ForceRestart ResetType = "ForceRestart"
-	// GracefulShutdown shall be used to restart the machine waiting the OS shutdown gracefully
-	GracefulShutdown ResetType = "GracefulShutdown"
-	// PushPowerButton shall be used to emulate pushing the power button
-	PushPowerButton ResetType = "PushPowerButton"
-	// Nmi shall be used to trigger a crash/core dump file
-	Nmi ResetType = "Nmi"
+	// OnResetType shall be used to power on the machine
+	OnResetType ResetType = "On"
+	// ForceOffResetType shall be used to power off the machine without wait the OS to shutdown
+	ForceOffResetType ResetType = "ForceOff"
+	// ForceRestartResetType shall be used to restart the machine without wait the OS to shutdown
+	ForceRestartResetType ResetType = "ForceRestart"
+	// GracefulShutdownResetType shall be used to restart the machine waiting the OS shutdown gracefully
+	GracefulShutdownResetType ResetType = "GracefulShutdown"
+	// PushPowerButtonResetType shall be used to emulate pushing the power button
+	PushPowerButtonResetType ResetType = "PushPowerButton"
+	// NmiResetType shall be used to trigger a crash/core dump file
+	NmiResetType ResetType = "Nmi"
 )
 
 type Actions struct {
