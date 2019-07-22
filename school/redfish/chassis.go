@@ -273,15 +273,15 @@ type PowerInfo struct {
 		Name                      string
 		SensorNumber              int
 		Status                    common.Status
-		ReadingVolts              int
+		ReadingVolts              float32
 		UpperThresholdNonCritical float32
 		UpperThresholdCritical    float32
 		UpperThresholdFatal       float32
 		LowerThresholdNonCritical float32
 		LowerThresholdCritical    float32
 		LowerThresholdFatal       float32
-		MinReadingRange           int
-		MaxReadingRange           int
+		MinReadingRange           float32
+		MaxReadingRange           float32
 		PhysicalContext           string
 		RelatedItem               []common.Link
 	}
