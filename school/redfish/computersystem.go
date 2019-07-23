@@ -495,8 +495,8 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		NetworkInterfaces  common.Link
 		LogServices        common.Link
 		MemoryDomains      common.Link
-		PCIeDevices        []common.Link
-		PCIeFunctions      []common.Link
+		PCIeDevices        common.Links
+		PCIeFunctions      common.Links
 		Links              CSLinks
 	}
 
@@ -518,12 +518,8 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.storage = string(t.Storage)
 	computersystem.logServices = string(t.LogServices)
 	computersystem.memoryDomains = string(t.MemoryDomains)
-	for _, p := range t.PCIeDevices {
-		computersystem.pcieDevices = append(computersystem.pcieDevices, string(p))
-	}
-	for _, p := range t.PCIeFunctions {
-		computersystem.pcieFunctions = append(computersystem.pcieFunctions, string(p))
-	}
+	computersystem.pcieDevices = t.PCIeDevices.ToStrings()
+	computersystem.pcieFunctions = t.PCIeFunctions.ToStrings()
 
 	return nil
 }
