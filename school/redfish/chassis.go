@@ -98,6 +98,7 @@ type Chassis struct {
 	Status          common.Status `json:"Status"`
 	thermal         string
 	power           string
+	networkAdapters string
 	computerSystems []string
 	resourceBlocks  []string
 	managedBy       []string
@@ -113,9 +114,10 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Thermal common.Link
-		Power   common.Link
-		Links   linkReference
+		Thermal         common.Link
+		Power           common.Link
+		NetworkAdapters common.Link
+		Links           linkReference
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -128,6 +130,7 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	c.thermal = string(t.Thermal)
 	c.power = string(t.Power)
+	c.networkAdapters = string(t.NetworkAdapters)
 	c.computerSystems = t.Links.ComputerSystems.ToStrings()
 	c.resourceBlocks = t.Links.ResourceBlocks.ToStrings()
 	c.managedBy = t.Links.ManagedBy.ToStrings()
@@ -352,4 +355,9 @@ func (c *Chassis) ManagedBy() ([]*Manager, error) {
 	}
 
 	return result, nil
+}
+
+// NetworkAdapters gets the collection of network adapters of this chassis
+func (c *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
+	return ListReferencedNetworkAdapter(c.Client, c.networkAdapters)
 }
