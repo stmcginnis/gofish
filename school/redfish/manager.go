@@ -28,18 +28,18 @@ type UIConsoleInfo struct {
 type ManagerType string
 
 const (
-	// AuxiliaryController a controller which provides management functions for a particular subsystem or group of devices
-	AuxiliaryController ManagerType = "AuxiliaryController"
-	// BMC a controller which provides management functions for a single computer system
-	BMC ManagerType = "BMC"
-	// EnclosureManager a controller which provides management functions for a chassis or group of devices or systems
-	EnclosureManager ManagerType = "EnclosureManager"
-	// ManagementController a controller used primarily to monitor or manage the operation of a device or system
-	ManagementController ManagerType = "ManagementController"
-	// RackManager a controller which provides management functions for a whole or part of a rack
-	RackManager ManagerType = "RackManager"
-	// Service a software-based service which provides management functions
-	Service ManagerType = "Service"
+	// AuxiliaryControllerManagerType a controller which provides management functions for a particular subsystem or group of devices
+	AuxiliaryControllerManagerType ManagerType = "AuxiliaryController"
+	// BMCManagerType a controller which provides management functions for a single computer system
+	BMCManagerType ManagerType = "BMC"
+	// EnclosureManagerManagerType a controller which provides management functions for a chassis or group of devices or systems
+	EnclosureManagerManagerType ManagerType = "EnclosureManager"
+	// ManagementControllerManagerType a controller used primarily to monitor or manage the operation of a device or system
+	ManagementControllerManagerType ManagerType = "ManagementController"
+	// RackManagerManagerType a controller which provides management functions for a whole or part of a rack
+	RackManagerManagerType ManagerType = "RackManager"
+	// ServiceManagerType a software-based service which provides management functions
+	ServiceManagerType ManagerType = "Service"
 )
 
 // Manager is a management subsystem. Examples of managers are BMCs, Enclosure
