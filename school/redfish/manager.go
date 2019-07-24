@@ -20,7 +20,7 @@ import (
 
 // UIConsoleInfo contains information about GUI services.
 type UIConsoleInfo struct {
-	ServiceEnabled        string
+	ServiceEnabled        bool
 	MaxConcurrentSessions uint
 	ConnectTypesSupported []string
 }
