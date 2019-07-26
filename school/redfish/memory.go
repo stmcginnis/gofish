@@ -257,7 +257,7 @@ type Memory struct {
 	MemoryDeviceType MemoryDeviceType
 	// MemoryLocation shall contain properties which describe the Memory
 	// connection information to sockets and memory controllers.
-	MemoryLocation string
+	MemoryLocation MemoryLocation
 	// MemoryMedia shall be the media types of this Memory.
 	MemoryMedia []MemoryMedia
 	// MemorySubsystemControllerManufacturerID shall be the two byte
@@ -346,7 +346,7 @@ type Memory struct {
 func (memory *Memory) UnmarshalJSON(b []byte) error {
 	type temp Memory
 	type links struct {
-		Chassis string
+		Chassis common.Link
 	}
 	var t struct {
 		temp
