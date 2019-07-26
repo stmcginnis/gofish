@@ -596,7 +596,7 @@ type CSLinks struct {
 	// CooledBy shall be an array of IDs
 	// containing pointers consistent with JSON pointer syntax to the
 	// resource that powers this computer system.
-	CooledBy []string
+	CooledBy common.Links
 	// CooledByCount is
 	CooledByCount int `json:"CooledBy@odata.count"`
 	// Endpoints shall be a reference to the
@@ -614,7 +614,7 @@ type CSLinks struct {
 	// PoweredBy shall be an array of IDs
 	// containing pointers consistent with JSON pointer syntax to the
 	// resource that powers this computer system.
-	PoweredBy []string
+	PoweredBy common.Links
 	// PoweredByCount is the number of PoweredBy objects.
 	PoweredByCount int `json:"PoweredBy@odata.count"`
 	// ResourceBlocks is used in this Computer System.
