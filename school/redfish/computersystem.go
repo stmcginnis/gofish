@@ -524,6 +524,22 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// Processors return a collection of processors from this system
+func (computersystem *ComputerSystem) Processors() ([]*Processor, error) {
+	return ListReferencedProcessors(computersystem.Client, computersystem.processors)
+	//var result []*Processor
+	//for _, uri := range computersystem.processors {
+	//	cs, err := GetProcessor(computersystem.Client, uri)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	result = append(result, cs)
+	//}
+	//
+	//return result, nil
+}
+
 // GetComputerSystem will get a ComputerSystem instance from the service.
 func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 	resp, err := c.Get(uri)
