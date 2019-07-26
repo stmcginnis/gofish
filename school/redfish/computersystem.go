@@ -319,18 +319,18 @@ func (boot *Boot) UnmarshalJSON(b []byte) error {
 type ResetType string
 
 const (
-	// On shall be used to power on the machine
-	On ResetType = "On"
-	// ForceOff shall be used to power off the machine without wait the OS to shutdown
-	ForceOff ResetType = "ForceOff"
-	// ForceRestart shall be used to restart the machine without wait the OS to shutdown
-	ForceRestart ResetType = "ForceRestart"
-	// GracefulShutdown shall be used to restart the machine waiting the OS shutdown gracefully
-	GracefulShutdown ResetType = "GracefulShutdown"
-	// PushPowerButton shall be used to emulate pushing the power button
-	PushPowerButton ResetType = "PushPowerButton"
-	// Nmi shall be used to trigger a crash/core dump file
-	Nmi ResetType = "Nmi"
+	// OnResetType shall be used to power on the machine
+	OnResetType ResetType = "On"
+	// ForceOffResetType shall be used to power off the machine without wait the OS to shutdown
+	ForceOffResetType ResetType = "ForceOff"
+	// ForceRestartResetType shall be used to restart the machine without wait the OS to shutdown
+	ForceRestartResetType ResetType = "ForceRestart"
+	// GracefulShutdownResetType shall be used to restart the machine waiting the OS shutdown gracefully
+	GracefulShutdownResetType ResetType = "GracefulShutdown"
+	// PushPowerButtonResetType shall be used to emulate pushing the power button
+	PushPowerButtonResetType ResetType = "PushPowerButton"
+	// NmiResetType shall be used to trigger a crash/core dump file
+	NmiResetType ResetType = "Nmi"
 )
 
 type Actions struct {
@@ -495,8 +495,8 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		NetworkInterfaces  common.Link
 		LogServices        common.Link
 		MemoryDomains      common.Link
-		PCIeDevices        []common.Link
-		PCIeFunctions      []common.Link
+		PCIeDevices        common.Links
+		PCIeFunctions      common.Links
 		Links              CSLinks
 	}
 
@@ -518,14 +518,26 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.storage = string(t.Storage)
 	computersystem.logServices = string(t.LogServices)
 	computersystem.memoryDomains = string(t.MemoryDomains)
-	for _, p := range t.PCIeDevices {
-		computersystem.pcieDevices = append(computersystem.pcieDevices, string(p))
-	}
-	for _, p := range t.PCIeFunctions {
-		computersystem.pcieFunctions = append(computersystem.pcieFunctions, string(p))
-	}
+	computersystem.pcieDevices = t.PCIeDevices.ToStrings()
+	computersystem.pcieFunctions = t.PCIeFunctions.ToStrings()
 
 	return nil
+}
+
+// Processors return a collection of processors from this system
+func (computersystem *ComputerSystem) Processors() ([]*Processor, error) {
+	return ListReferencedProcessors(computersystem.Client, computersystem.processors)
+	//var result []*Processor
+	//for _, uri := range computersystem.processors {
+	//	cs, err := GetProcessor(computersystem.Client, uri)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	result = append(result, cs)
+	//}
+	//
+	//return result, nil
 }
 
 // GetComputerSystem will get a ComputerSystem instance from the service.

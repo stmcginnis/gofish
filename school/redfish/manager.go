@@ -20,17 +20,34 @@ import (
 
 // UIConsoleInfo contains information about GUI services.
 type UIConsoleInfo struct {
-	ServiceEnabled        string
+	ServiceEnabled        bool
 	MaxConcurrentSessions uint
 	ConnectTypesSupported []string
 }
+
+type ManagerType string
+
+const (
+	// AuxiliaryControllerManagerType a controller which provides management functions for a particular subsystem or group of devices
+	AuxiliaryControllerManagerType ManagerType = "AuxiliaryController"
+	// BMCManagerType a controller which provides management functions for a single computer system
+	BMCManagerType ManagerType = "BMC"
+	// EnclosureManagerManagerType a controller which provides management functions for a chassis or group of devices or systems
+	EnclosureManagerManagerType ManagerType = "EnclosureManager"
+	// ManagementControllerManagerType a controller used primarily to monitor or manage the operation of a device or system
+	ManagementControllerManagerType ManagerType = "ManagementController"
+	// RackManagerManagerType a controller which provides management functions for a whole or part of a rack
+	RackManagerManagerType ManagerType = "RackManager"
+	// ServiceManagerType a software-based service which provides management functions
+	ServiceManagerType ManagerType = "Service"
+)
 
 // Manager is a management subsystem. Examples of managers are BMCs, Enclosure
 // Managers, Management Controllers and other subsystems assigned managability
 // functions.
 type Manager struct {
 	common.Entity
-	ManagerType           string
+	ManagerType           ManagerType
 	Description           string
 	ServiceEntryPointUUID string
 	UUID                  string
