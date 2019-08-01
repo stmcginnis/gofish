@@ -14,7 +14,6 @@ package redfish
 
 import (
 	"encoding/json"
-
 	"github.com/stmcginnis/gofish/school/common"
 )
 
@@ -556,6 +555,32 @@ func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 
 	computersystem.SetClient(c)
 	return &computersystem, nil
+}
+
+func (computersystem *ComputerSystem) Memory() ([]*Memory, error) {
+	return ListReferencedMemorys(computersystem.Client, computersystem.memory)
+}
+
+func (computersystem *ComputerSystem) Storage() ([]*Storage, error) {
+	return ListReferencedStorages(computersystem.Client, computersystem.storage)
+}
+
+func (computersystem *ComputerSystem) EthernetInterface() ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(computersystem.Client, computersystem.ethernetInterfaces)
+}
+
+
+func (computersystem *ComputerSystem) PCIeDevice() ([]*PCIeDevice, error) {
+	var result []*PCIeDevice
+	for _, uri := range computersystem.pcieDevices {
+		pcieDevice, err := GetPCIeDevice(computersystem.Client, uri)
+		if err != nil {
+
+			return nil, err
+		}
+		result = append(result, pcieDevice)
+	}
+	return result, nil
 }
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
