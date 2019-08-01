@@ -18,7 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-
 // EventService contains properties for managing event subcriptions and
 // generates the events sent to subscribers.  The resource has links to the
 // actual collection of subscriptions (called Event Destinations).

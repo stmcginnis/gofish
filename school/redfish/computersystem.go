@@ -315,7 +315,7 @@ func (boot *Boot) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Reset describe the type off reset to be issue by the resource
+// ResetType describe the type off reset to be issue by the resource
 type ResetType string
 
 const (
@@ -333,10 +333,15 @@ const (
 	NmiResetType ResetType = "Nmi"
 )
 
+// Actions shall contain the available actions for this resource
 type Actions struct {
-	// ResetType shall contain the desired action to be issued
-	// The valid values for this property are specified through
-	// the Redfish.AllowableValues annotation.
+	// ComputerSystemReset shall perform a reset of the ComputerSystem. For
+	// systems which implement ACPI Power Button functionality, the
+	// PushPowerButton value shall perform or emulate an ACPI Power Button push.
+	// The ForceOff value shall remove power from the system or perform an ACPI
+	// Power Button Override (commonly known as a 4-second hold of the Power
+	// Button). The ForceRestart value shall perform a ForceOff action followed
+	// by a On action.
 	ComputerSystemReset struct {
 		ResetType []ResetType `json:"ResetType@Redfish.AllowableValues"`
 		Target    string

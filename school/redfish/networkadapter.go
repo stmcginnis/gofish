@@ -178,6 +178,8 @@ func (controller *Controller) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// NetworkDeviceFunctions gets an array of logical interface exposed by the
+// network adapter.
 func (controller *Controller) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
 	var result []*NetworkDeviceFunction
 	for _, uri := range controller.networkDeviceFunctions {
@@ -255,7 +257,7 @@ func (npiv *NPIV) UnmarshalJSON(b []byte) error {
 }
 
 // NetworkAdapter is A NetworkAdapter represents the physical network
-// adapter capable of connecting to a computer network.  Examples include
+// adapter capable of connecting to a computer network. Examples include
 // but are not limited to Ethernet, Fibre Channel, and converged network
 // adapters.
 type NetworkAdapter struct {

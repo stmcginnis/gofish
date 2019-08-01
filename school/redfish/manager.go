@@ -25,6 +25,11 @@ type UIConsoleInfo struct {
 	ConnectTypesSupported []string
 }
 
+// ManagerType shall describe the function of this manager. The value
+// EnclosureManager shall be used if this manager controls one or more services
+// through aggregation. The value BMC shall be used if this manager represents a
+// traditional server management controller. The value ManagementController
+// shall be used if none of the other enumerations apply.
 type ManagerType string
 
 const (

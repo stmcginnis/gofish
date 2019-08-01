@@ -18,7 +18,7 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// FlowControl is
+// FlowControl is type of flow control for the port.
 type FlowControl string
 
 const (
@@ -30,12 +30,12 @@ const (
 	// RXFlowControl IEEE 802.3x flow control may be initiated by the link
 	// partner.
 	RXFlowControl FlowControl = "RX"
-	// TX_RXFlowControl IEEE 802.3x flow control may be initiated by this
+	// TXRXFlowControl IEEE 802.3x flow control may be initiated by this
 	// station or the link partner.
-	TX_RXFlowControl FlowControl = "TX_RX"
+	TXRXFlowControl FlowControl = "TX_RX"
 )
 
-// LinkNetworkTechnology is
+// LinkNetworkTechnology is the link type.
 type LinkNetworkTechnology string
 
 const (
@@ -131,7 +131,7 @@ type NetDevFuncMinBWAlloc struct {
 
 	// MinBWAllocPercent is The value of this property shall be the minimum
 	// bandwidth percentage allocation for the associated network device
-	// function.  The sum total of all minimum percentages shall not exceed
+	// function. The sum total of all minimum percentages shall not exceed
 	// 100.
 	MinBWAllocPercent int
 	// NetworkDeviceFunction is The value of this property shall be a
@@ -170,7 +170,7 @@ type NetworkPort struct {
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
 	// ODataID is the odata identifier.
-	ODataId string `json:"@odata.id"`
+	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Actions is The Actions property shall contain the available actions
@@ -230,8 +230,8 @@ type NetworkPort struct {
 	OEM string `json:"Oem"`
 	// PhysicalPortNumber is The value of this property shall be the physical
 	// port number on the network adapter hardware that this Network Port
-	// corresponds to.  This value should match a value visible on the
-	// hardware.  When HostPortEnabled and ManagementPortEnabled are both
+	// corresponds to. This value should match a value visible on the
+	// hardware. When HostPortEnabled and ManagementPortEnabled are both
 	// "false", the port shall not establish physical link.
 	PhysicalPortNumber string
 	// PortMaximumMTU is The value of this property shall be the largest
@@ -253,9 +253,9 @@ type NetworkPort struct {
 	// cabling, interface module presence, or remote link parter status or
 	// configuration.
 	SupportedLinkCapabilities []SupportedLinkCapabilities
-	// VendorId is This property shall indicate the Vendor Identification
-	// string information as provided by the manufacturer of this port.
-	VendorId string
+	// VendorID shall indicate the Vendor Identification string information as
+	// provided by the manufacturer of this port.
+	VendorID string `json:"VendorId"`
 	// WakeOnLANEnabled is The value of this property shall be a boolean
 	// indicating whether Wake on LAN (WoL) is enabled for this network port.
 	WakeOnLANEnabled bool

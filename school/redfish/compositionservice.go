@@ -18,7 +18,6 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-
 // CompositionService defines a Composition Service which represents the
 // properties for the service and links to the resources available for
 // composition.
