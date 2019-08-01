@@ -540,6 +540,14 @@ func (computersystem *ComputerSystem) Processors() ([]*Processor, error) {
 	//return result, nil
 }
 
+func (computersystem *ComputerSystem) Memory() ([]*Memory, error) {
+	return ListReferencedMemorys(computersystem.Client, computersystem.memory)
+}
+
+func (computersystem *ComputerSystem) Storage() ([]*Storage, error) {
+	return ListReferencedStorages(computersystem.Client, computersystem.storage)
+}
+
 // GetComputerSystem will get a ComputerSystem instance from the service.
 func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 	resp, err := c.Get(uri)
