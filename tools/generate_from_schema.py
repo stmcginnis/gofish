@@ -22,9 +22,8 @@ import requests
 
 LOG = logging.getLogger(__name__)
 
-# SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/'
-SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/swordfish/v1/'
-
+REDFISH_SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/v1/'
+SWORDFISH_SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/swordfish/v1/'
 
 COMMON_NAME_CHANGES = {
     'Oem': 'OEM',
@@ -156,7 +155,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'object',
-        help='The Swordfish schema object to process.')
+        help='The Swordfish/Redfish schema object to process.')
+    parser.add_argument(
+        '-t',
+        '--type',
+        default='swordfish',
+        const='swordfish',
+        nargs='?',
+        choices=['redfish', 'swordfish'],
+        help='Define the object type and go package')
     parser.add_argument(
         '-o',
         '--output-file',
@@ -167,7 +174,13 @@ def main():
 
     args = parser.parse_args()
 
-    url = '%s%s.json' % (SCHEMA_BASE, args.object)
+    if args.type == 'redfish':
+        url = '%s%s.json' % (REDFISH_SCHEMA_BASE, args.object)
+    elif args.type == 'swordfish':
+        url = '%s%s.json' % (SWORDFISH_SCHEMA_BASE, args.object)
+    else:
+        raise NameError("Unknown schema type")
+
     LOG.debug(url)
 
     data = requests.get(url)
@@ -190,7 +203,7 @@ def main():
             break
 
     object_data = requests.get(url).json()
-    params = {'object_name': args.object, 'classes': [], 'enums': []}
+    params = {'object_name': args.object, 'classes': [], 'enums': [], 'package': args.type}
 
     for name in object_data['definitions']:
         if name == 'Actions':
