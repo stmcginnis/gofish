@@ -333,8 +333,8 @@ const (
 	NmiResetType ResetType = "Nmi"
 )
 
-// Actions shall contain the available actions for this resource
-type Actions struct {
+// CSActions shall contain the available actions for this resource
+type CSActions struct {
 	// ComputerSystemReset shall perform a reset of the ComputerSystem. For
 	// systems which implement ACPI Power Button functionality, the
 	// PushPowerButton value shall perform or emulate an ACPI Power Button push.
@@ -363,7 +363,7 @@ type ComputerSystem struct {
 	ODataType string `json:"@odata.type"`
 
 	// Actions type shall contain the available actions for this resource.
-	Actions Actions
+	Actions CSActions
 	// AssetTag shall contain the value of the asset tag of the system.
 	AssetTag string
 	// bios shall be a link to a resource of
@@ -398,8 +398,7 @@ type ComputerSystem struct {
 	// IndicatorLED shall contain the indicator
 	// light state for the indicator light associated with this system.
 	IndicatorLED common.IndicatorLED
-	// logServices shall be a link to a
-	// collection of type LogServiceCollection.
+	// logServices shall be a link to a collection of type LogServiceCollection.
 	logServices string
 	// Manufacturer shall contain a value that represents the manufacturer of the system.
 	Manufacturer string
@@ -416,8 +415,8 @@ type ComputerSystem struct {
 	Model string
 	// Name is the resource name.
 	Name string
-	// networkInterfaces shall be a link to a
-	// collection of type NetworkInterfaceCollection.
+	// networkInterfaces shall be a link to a collection of type
+	// NetworkInterfaceCollection.
 	networkInterfaces string
 	// PCIeDevices shall be an array of references of type PCIeDevice.
 	pcieDevices []string
@@ -529,22 +528,6 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Processors return a collection of processors from this system
-func (computersystem *ComputerSystem) Processors() ([]*Processor, error) {
-	return ListReferencedProcessors(computersystem.Client, computersystem.processors)
-	//var result []*Processor
-	//for _, uri := range computersystem.processors {
-	//	cs, err := GetProcessor(computersystem.Client, uri)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	result = append(result, cs)
-	//}
-	//
-	//return result, nil
-}
-
 // GetComputerSystem will get a ComputerSystem instance from the service.
 func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 	resp, err := c.Get(uri)
@@ -581,6 +564,90 @@ func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSys
 	}
 
 	return result, nil
+}
+
+// Bios gets the Bios information for this ComputerSystem.
+func (computersystem *ComputerSystem) Bios() (*Bios, error) {
+	if computersystem.bios == "" {
+		return nil, nil
+	}
+
+	return GetBios(computersystem.Client, computersystem.bios)
+}
+
+// EthernetInterfaces get this system's ethernet interfaces.
+func (computersystem *ComputerSystem) EthernetInterfaces() ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(computersystem.Client, computersystem.ethernetInterfaces)
+}
+
+// LogServices get this system's log services.
+func (computersystem *ComputerSystem) LogServices() ([]*LogService, error) {
+	return ListReferencedLogServices(computersystem.Client, computersystem.logServices)
+}
+
+// Memory gets this system's memory.
+func (computersystem *ComputerSystem) Memory() ([]*Memory, error) {
+	return ListReferencedMemorys(computersystem.Client, computersystem.memory)
+}
+
+// MemoryDomains gets this system's memory domains.
+func (computersystem *ComputerSystem) MemoryDomains() ([]*MemoryDomain, error) {
+	return ListReferencedMemoryDomains(computersystem.Client, computersystem.memoryDomains)
+}
+
+// NetworkInterfaces returns a collection of network interfaces in this system.
+func (computersystem *ComputerSystem) NetworkInterfaces() ([]*NetworkInterface, error) {
+	return ListReferencedNetworkInterfaces(computersystem.Client, computersystem.networkInterfaces)
+}
+
+// PCIeDevices gets all PCIeDevices for this system.
+func (computersystem *ComputerSystem) PCIeDevices() ([]*PCIeDevice, error) {
+	var result []*PCIeDevice
+	for _, pciedeviceLink := range computersystem.pcieDevices {
+		pciedevice, err := GetPCIeDevice(computersystem.Client, pciedeviceLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, pciedevice)
+	}
+	return result, nil
+}
+
+// PCIeFunctions gets all PCIeFunctions for this system.
+func (computersystem *ComputerSystem) PCIeFunctions() ([]*PCIeFunction, error) {
+	var result []*PCIeFunction
+	for _, pciefunctionLink := range computersystem.pcieFunctions {
+		pciefunction, err := GetPCIeFunction(computersystem.Client, pciefunctionLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, pciefunction)
+	}
+	return result, nil
+}
+
+// Processors returns a collection of processors from this system
+func (computersystem *ComputerSystem) Processors() ([]*Processor, error) {
+	return ListReferencedProcessors(computersystem.Client, computersystem.processors)
+}
+
+// SecureBoot gets the secure boot information for the system.
+func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
+	if computersystem.secureBoot == "" {
+		return nil, nil
+	}
+
+	return GetSecureBoot(computersystem.Client, computersystem.secureBoot)
+}
+
+// SimpleStorages gets all simple storage services of this system.
+func (computersystem *ComputerSystem) SimpleStorages() ([]*SimpleStorage, error) {
+	return ListReferencedSimpleStorages(computersystem.Client, computersystem.simpleStorage)
+}
+
+// Storage gets the storage associated with this system.
+func (computersystem *ComputerSystem) Storage() ([]*Storage, error) {
+	return ListReferencedStorages(computersystem.Client, computersystem.storage)
 }
 
 // CSLinks are references to resources that are related to, but not contained
@@ -634,8 +701,7 @@ type CSLinks struct {
 	SupplyingComputerSystemsCount int `json:"SupplyingComputerSystems@odata.count"`
 }
 
-// MemorySummary contains properties which describe the
-// central memory for a system.
+// MemorySummary contains properties which describe the central memory for a system.
 type MemorySummary struct {
 	// MemoryMirroring is the ability and type of memory mirring supported by this system.
 	MemoryMirroring MemoryMirroring
@@ -646,7 +712,7 @@ type MemorySummary struct {
 	TotalSystemMemoryGiB float32
 	// TotalSystemPersistentMemoryGiB is the total amount of configured
 	// persistent memory available to the system as measured in gibibytes.
-	TotalSystemPersistentMemoryGiB int
+	TotalSystemPersistentMemoryGiB float32
 }
 
 // ProcessorSummary is This type shall contain properties which describe
@@ -673,13 +739,12 @@ type TrustedModules struct {
 	// version, if applicable, as defined by the manufacturer for the Trusted
 	// Module.
 	FirmwareVersion2 string
-	// InterfaceType is the interface type of the
-	// installed Trusted Module.
-	InterfaceType string
+	// InterfaceType is the interface type of the installed Trusted Module.
+	InterfaceType InterfaceType
 	// InterfaceTypeSelection is the Interface
 	// Type Selection method (for example to switch between TPM1_2 and
 	// TPM2_0) that is supported by this TrustedModule.
-	InterfaceTypeSelection string
+	InterfaceTypeSelection InterfaceTypeSelection
 	// Status is any status or health properties
 	// of the resource.
 	Status common.Status
@@ -694,8 +759,7 @@ type WatchdogTimer struct {
 	// by the user, and updates to this property shall not initiate a
 	// watchdog timer countdown.
 	FunctionEnabled bool
-	// Status is any status or health properties
-	// of the resource.
+	// Status is any status or health properties of the resource.
 	Status struct {
 		State common.State
 	}
