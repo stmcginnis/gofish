@@ -184,15 +184,15 @@ type ThermalInfo struct {
 		Name                      string
 		SensorNumber              int
 		Status                    common.Status
-		ReadingCelsius            int
-		UpperThresholdNonCritical int
-		UpperThresholdCritical    int
-		UpperThresholdFatal       int
-		LowerThresholdNonCritical int
-		LowerThresholdCritical    int
-		LowerThresholdFatal       int
-		MinimumValue              int
-		MaximumValue              int
+		ReadingCelsius            float32
+		UpperThresholdNonCritical float32
+		UpperThresholdCritical    float32
+		UpperThresholdFatal       float32
+		LowerThresholdNonCritical float32
+		LowerThresholdCritical    float32
+		LowerThresholdFatal       float32
+		MinimumValue              float32
+		MaximumValue              float32
 		PhysicalContext           string
 		RelatedItem               []common.Link
 	}
@@ -201,15 +201,15 @@ type ThermalInfo struct {
 		FanName                   string
 		PhysicalContext           string
 		Status                    common.Status
-		ReadingRPM                int
-		UpperThresholdNonCritical int
-		UpperThresholdCritical    int
-		UpperThresholdFatal       int
-		LowerThresholdNonCritical int
-		LowerThresholdCritical    int
-		LowerThresholdFatal       int
-		MinReadingRange           int
-		MaxReadingRange           int
+		ReadingRPM                float32
+		UpperThresholdNonCritical float32
+		UpperThresholdCritical    float32
+		UpperThresholdFatal       float32
+		LowerThresholdNonCritical float32
+		LowerThresholdCritical    float32
+		LowerThresholdFatal       float32
+		MinReadingRange           float32
+		MaxReadingRange           float32
 		Redundancy                []common.Link
 		RelatedItem               []common.Link
 	}
@@ -252,21 +252,21 @@ type PowerInfo struct {
 	PowerControl []struct {
 		MemberID            string `json:"MemberId"`
 		Name                string
-		PowerConsumedWatts  int
-		PowerRequestedWatts int
-		PowerAvailableWatts int
-		PowerCapacityWatts  int
-		PowerAllocatedWatts int
+		PowerConsumedWatts  float32
+		PowerRequestedWatts float32
+		PowerAvailableWatts float32
+		PowerCapacityWatts  float32
+		PowerAllocatedWatts float32
 		PowerMetrics        struct {
 			IntervalInMin        int
-			MinConsumedWatts     int
-			MaxConsumedWatts     int
-			AverageConsumedWatts int
+			MinConsumedWatts     float32
+			MaxConsumedWatts     float32
+			AverageConsumedWatts float32
 		}
 		PowerLimit struct {
-			LimitInWatts   int
+			LimitInWatts   float32
 			LimitException string
-			CorrectionInMS int `json:"CorrectionInMs"`
+			CorrectionInMS float32 `json:"CorrectionInMs"`
 		}
 		RelatedItem []common.Link
 		Status      common.Status
@@ -294,9 +294,9 @@ type PowerInfo struct {
 		Status               common.Status
 		PowerSupplyType      string
 		LineInputVoltageType string
-		LineInputVoltage     int
-		PowerCapacityWatts   int
-		LastPowerOutputWatts int
+		LineInputVoltage     float32
+		PowerCapacityWatts   float32
+		LastPowerOutputWatts float32
 		Model                string
 		FirmwareVersion      string
 		SerialNumber         string
