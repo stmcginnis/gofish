@@ -19,6 +19,7 @@ import (
 )
 
 // Bios is used to represent BIOS attributes.
+// TODO: Sort out how to handle Attributes.
 type Bios struct {
 	common.Entity
 

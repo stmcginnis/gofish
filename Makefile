@@ -10,12 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PKGS := $(shell go list ./...)
+PKGS := $(shell go list ./school/...)
 
 all: build
 
 test:
-	go test $(PKGS)
+	go test -v $(PKGS)
 
 build:
 	go build

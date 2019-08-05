@@ -482,6 +482,8 @@ type ComputerSystem struct {
 	// xxxx-xxxxxxxxxxxx string format so that the property value matches the
 	// byte order presented by current OS APIs such as WMI and dmidecode.
 	UUID string
+	// Chassis is an array of references to the chassis in which this system is contained.
+	chassis []string
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
@@ -524,6 +526,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.memoryDomains = string(t.MemoryDomains)
 	computersystem.pcieDevices = t.PCIeDevices.ToStrings()
 	computersystem.pcieFunctions = t.PCIeFunctions.ToStrings()
+	computersystem.chassis = t.Links.Chassis.ToStrings()
 
 	return nil
 }

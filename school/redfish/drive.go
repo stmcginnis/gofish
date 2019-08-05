@@ -135,8 +135,8 @@ type Drive struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Assembly shall be a link to a resource of type Assembly.
-	Assembly string
+	// assembly shall be a link to a resource of type Assembly.
+	assembly string
 	// AssetTag is used to track the drive for inventory purposes.
 	AssetTag string
 	// BlockSizeBytes shall contain size of the smallest addressible unit of the
@@ -146,7 +146,7 @@ type Drive struct {
 	// drive.
 	CapableSpeedGbs int
 	// CapacityBytes shall contain the raw size in bytes of the associated drive.
-	CapacityBytes int
+	CapacityBytes int64
 	// Description provides a description of this resource.
 	Description string
 	// EncryptionAbility shall contain the encryption ability for the associated
@@ -166,9 +166,8 @@ type Drive struct {
 	// Identifiers shall contain a list of all known durable
 	// names for the associated drive.
 	Identifiers []common.Identifier
-	// IndicatorLED is This value of this property shall contain the
-	// indicator light state for the indicator light associated with this
-	// drive.
+	// IndicatorLED shall contain the indicator light state for the indicator
+	// light associated with this drive.
 	IndicatorLED common.IndicatorLED
 	// Location shall contain location information of the associated drive.
 	Location []common.Location
@@ -221,12 +220,16 @@ type Drive struct {
 	// endpoints shall be a reference to the resources that this drive is
 	// associated with and shall reference a resource of type Endpoint.
 	endpoints []string
-	// Endpoints@odata.count is
+	// EndpointsCount is the number of endpoints.
 	EndpointsCount int `json:"Endpoints@odata.count"`
 	// volumes are the associated volumes.
 	volumes []string
 	// Volumes is the number of associated volumes.
 	VolumesCount int
+	// pcieFunctions are the associated PCIeFunction objects.
+	pcieFunctions []string
+	// PCIeFunctionCount is the number of PCIeFunctions.
+	PCIeFunctionCount int
 }
 
 // UnmarshalJSON unmarshals a Drive object from the raw JSON.
@@ -236,12 +239,19 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 		Chassis       common.Link
 		Endpoints     common.Links
 		EndpointCount int `json:"Endpoints@odata.count"`
-		Volumes       common.Links
-		VolumeCount   int `json:"Volumes@odata.count"`
+		// PCIeFunctions is The value of this property shall reference a resource
+		// of type PCIeFunction that represents the PCIe functions associated
+		// with this resource.
+		PCIeFunctions common.Links
+		// PCIeFunctions@odata.count is
+		PCIeFunctionsCount int `json:"PCIeFunctions@odata.count"`
+		Volumes            common.Links
+		VolumeCount        int `json:"Volumes@odata.count"`
 	}
 	var t struct {
 		temp
-		links
+		Links    links
+		Assembly common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -249,14 +259,16 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*drive = Drive(t.temp)
-
 	// Extract the links to other entities for later
-	drive.chassis = string(t.Chassis)
-	drive.endpoints = t.Endpoints.ToStrings()
-	drive.EndpointsCount = t.EndpointCount
-	drive.volumes = t.Volumes.ToStrings()
-	drive.VolumesCount = t.VolumeCount
+	*drive = Drive(t.temp)
+	drive.assembly = string(t.Assembly)
+	drive.chassis = string(t.Links.Chassis)
+	drive.endpoints = t.Links.Endpoints.ToStrings()
+	drive.EndpointsCount = t.Links.EndpointCount
+	drive.volumes = t.Links.Volumes.ToStrings()
+	drive.VolumesCount = t.Links.VolumeCount
+	drive.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
+	drive.PCIeFunctionCount = t.Links.PCIeFunctionsCount
 
 	return nil
 }
@@ -302,6 +314,15 @@ func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
 	return result, nil
 }
 
+// Assembly gets the Assembly for this drive.
+func (drive *Drive) Assembly() (*Assembly, error) {
+	if drive.assembly == "" {
+		return nil, nil
+	}
+
+	return GetAssembly(drive.Client, drive.assembly)
+}
+
 // Chassis gets the containing chassis for this drive.
 func (drive *Drive) Chassis() (*Chassis, error) {
 	if drive.chassis == "" {
@@ -321,6 +342,36 @@ func (drive *Drive) Endpoints() ([]*Endpoint, error) {
 			return result, err
 		}
 		result = append(result, endpoint)
+	}
+
+	return result, nil
+}
+
+// Volumes references the Volumes that this drive is associated with.
+func (drive *Drive) Volumes() ([]*Volume, error) {
+	var result []*Volume
+
+	for _, volumeLink := range drive.volumes {
+		volume, err := GetVolume(drive.Client, volumeLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, volume)
+	}
+
+	return result, nil
+}
+
+// PCIeFunctions references the PCIeFunctions that this drive is associated with.
+func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
+	var result []*PCIeFunction
+
+	for _, pcieFunctionLink := range drive.pcieFunctions {
+		pcieFunction, err := GetPCIeFunction(drive.Client, pcieFunctionLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, pcieFunction)
 	}
 
 	return result, nil

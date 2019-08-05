@@ -102,6 +102,8 @@ type AssemblyData struct {
 	// Model shall be the name by which the manufacturer generally refers to the
 	// assembly.
 	Model string
+	// Name provides the name of the resource.
+	Name string
 	// PartNumber shall be the part number of the assembly.
 	PartNumber string
 	// PhysicalContext shall be a description of the physical context for this
