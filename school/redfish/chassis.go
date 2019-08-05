@@ -175,57 +175,8 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 	return result, nil
 }
 
-// ThermalInfo is reference to the thermal properties (fans, cooling, sensors)
-// of this chassis.
-type ThermalInfo struct {
-	common.Entity
-	Temperatures []struct {
-		MemberID                  string `json:"MemberId"`
-		Name                      string
-		SensorNumber              int
-		Status                    common.Status
-		ReadingCelsius            float32
-		UpperThresholdNonCritical float32
-		UpperThresholdCritical    float32
-		UpperThresholdFatal       float32
-		LowerThresholdNonCritical float32
-		LowerThresholdCritical    float32
-		LowerThresholdFatal       float32
-		MinimumValue              float32
-		MaximumValue              float32
-		PhysicalContext           string
-		RelatedItem               []common.Link
-	}
-	Fans []struct {
-		MemberID                  string `json:"MemberId"`
-		FanName                   string
-		PhysicalContext           string
-		Status                    common.Status
-		ReadingRPM                float32
-		UpperThresholdNonCritical float32
-		UpperThresholdCritical    float32
-		UpperThresholdFatal       float32
-		LowerThresholdNonCritical float32
-		LowerThresholdCritical    float32
-		LowerThresholdFatal       float32
-		MinReadingRange           float32
-		MaxReadingRange           float32
-		Redundancy                []common.Link
-		RelatedItem               []common.Link
-	}
-	Redundancy []struct {
-		MemberID        string `json:"MemberId"`
-		Name            string
-		RedundancySet   []common.Link
-		Mode            string
-		Status          common.Status
-		MinNumNeeded    int
-		MaxNumSupported int
-	}
-}
-
 // Thermal gets the thermal temperature and cooling information for the chassis
-func (c *Chassis) Thermal() (*ThermalInfo, error) {
+func (c *Chassis) Thermal() (*Thermal, error) {
 	if c.thermal == "" {
 		return nil, nil
 	}
@@ -236,7 +187,7 @@ func (c *Chassis) Thermal() (*ThermalInfo, error) {
 	}
 	defer resp.Body.Close()
 
-	var thermal ThermalInfo
+	var thermal Thermal
 	err = json.NewDecoder(resp.Body).Decode(&thermal)
 	if err != nil {
 		return nil, err
@@ -245,69 +196,8 @@ func (c *Chassis) Thermal() (*ThermalInfo, error) {
 	return &thermal, nil
 }
 
-// PowerInfo provides the power properties (power supplies, power
-// policies, sensors) of the chassis.
-type PowerInfo struct {
-	common.Entity
-	PowerControl []struct {
-		MemberID            string `json:"MemberId"`
-		Name                string
-		PowerConsumedWatts  float32
-		PowerRequestedWatts float32
-		PowerAvailableWatts float32
-		PowerCapacityWatts  float32
-		PowerAllocatedWatts float32
-		PowerMetrics        struct {
-			IntervalInMin        int
-			MinConsumedWatts     float32
-			MaxConsumedWatts     float32
-			AverageConsumedWatts float32
-		}
-		PowerLimit struct {
-			LimitInWatts   float32
-			LimitException string
-			CorrectionInMS float32 `json:"CorrectionInMs"`
-		}
-		RelatedItem []common.Link
-		Status      common.Status
-	}
-	Voltages []struct {
-		MemberID                  string `json:"MemberId"`
-		Name                      string
-		SensorNumber              int
-		Status                    common.Status
-		ReadingVolts              float32
-		UpperThresholdNonCritical float32
-		UpperThresholdCritical    float32
-		UpperThresholdFatal       float32
-		LowerThresholdNonCritical float32
-		LowerThresholdCritical    float32
-		LowerThresholdFatal       float32
-		MinReadingRange           float32
-		MaxReadingRange           float32
-		PhysicalContext           string
-		RelatedItem               []common.Link
-	}
-	PowerSupplies []struct {
-		MemberID             string `json:"MemberId"`
-		Name                 string
-		Status               common.Status
-		PowerSupplyType      string
-		LineInputVoltageType string
-		LineInputVoltage     float32
-		PowerCapacityWatts   float32
-		LastPowerOutputWatts float32
-		Model                string
-		FirmwareVersion      string
-		SerialNumber         string
-		PartNumber           string
-		SparePartNumber      string
-		RelatedItem          []common.Link
-	}
-}
-
 // Power gets the power information for the chassis
-func (c *Chassis) Power() (*PowerInfo, error) {
+func (c *Chassis) Power() (*Power, error) {
 	if c.power == "" {
 		return nil, nil
 	}
@@ -318,7 +208,7 @@ func (c *Chassis) Power() (*PowerInfo, error) {
 	}
 	defer resp.Body.Close()
 
-	var power PowerInfo
+	var power Power
 	err = json.NewDecoder(resp.Body).Decode(&power)
 	if err != nil {
 		return nil, err
