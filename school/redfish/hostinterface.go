@@ -18,9 +18,7 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
-// object.
-
-// AuthenticationMode is
+// AuthenticationMode is the method used for authentication.
 type AuthenticationMode string
 
 const (
@@ -39,7 +37,7 @@ const (
 	OemAuthAuthenticationMode AuthenticationMode = "OemAuth"
 )
 
-// HostInterfaceType is
+// HostInterfaceType is the type of network interface.
 type HostInterfaceType string
 
 const (
@@ -98,9 +96,9 @@ type HostInterface struct {
 	KernelAuthRoleID string `json:"KernelAuthRoleId"`
 	// ManagerEthernetInterface is used by this Manager as the HostInterface.
 	managerEthernetInterface string
-	// NetworkProtocol shall contain a
-	// reference to a resource of type ManagerNetworkProtocol which
-	// represents the network services for this Manager.
+	// NetworkProtocol shall contain a reference to a resource of type
+	// ManagerNetworkProtocol which represents the network services for this
+	// Manager.
 	networkProtocol string
 	// Status is This property shall contain any status or health properties
 	// of the resource.
@@ -203,6 +201,33 @@ func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterfac
 	}
 
 	return result, nil
+}
+
+// ComputerSystems references the ComputerSystems that this host interface is associated with.
+func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error) {
+	var result []*ComputerSystem
+
+	for _, computerSystemLink := range hostinterface.computerSystems {
+		computerSystem, err := GetComputerSystem(hostinterface.Client, computerSystemLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, computerSystem)
+	}
+
+	return result, nil
+}
+
+// HostNetworkInterfaces gets the network interface controllers or cards (NICs)
+// that a Computer System uses to communicate with this Host Interface.
+func (hostinterface *HostInterface) HostNetworkInterfaces() ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(hostinterface.Client, hostinterface.managerEthernetInterface)
+}
+
+// ManagerNetworkInterfaces gets the network interface controllers or cards
+// (NIC) that this Manager uses for network communication with this Host Interface.
+func (hostinterface *HostInterface) ManagerNetworkInterfaces() ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(hostinterface.Client, hostinterface.managerEthernetInterface)
 }
 
 // TODO: Add access functions for linked objects
