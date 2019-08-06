@@ -70,17 +70,16 @@ type LogService struct {
 	// Description provides a description of this resource.
 	Description string
 	// Entries shall reference a collection of resources of type LogEntry.
-	Entries string
+	entries string
 	// LogEntryType shall represent the
 	// EntryType of all LogEntry resources contained in the Entries
 	// collection. If a single EntryType for all LogEntry resources cannot
 	// be determined or guaranteed by the Service, the value of this property
 	// shall be 'Multiple'.
 	LogEntryType LogEntryTypes
-	// MaxNumberOfRecords shall be the maximum
-	// numbers of LogEntry resources in the Entries collection for this
-	// service.
-	MaxNumberOfRecords string
+	// MaxNumberOfRecords shall be the maximum numbers of LogEntry resources in
+	// the Entries collection for this service.
+	MaxNumberOfRecords uint64
 	// OverWritePolicy shall indicate the
 	// policy of the log service when the MaxNumberOfRecords has been
 	// reached. Unknown indicates the log overwrite policy is unknown.
@@ -101,6 +100,7 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	type temp LogService
 	var t struct {
 		temp
+		Entries common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -108,9 +108,9 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*logservice = LogService(t.temp)
-
 	// Extract the links to other entities for later
+	*logservice = LogService(t.temp)
+	logservice.entries = string(t.Entries)
 
 	return nil
 }
@@ -133,8 +133,7 @@ func GetLogService(c common.Client, uri string) (*LogService, error) {
 	return &logservice, nil
 }
 
-// ListReferencedLogServices gets the collection of LogService from
-// a provided reference.
+// ListReferencedLogServices gets the collection of LogService from a provided reference.
 func ListReferencedLogServices(c common.Client, link string) ([]*LogService, error) {
 	var result []*LogService
 	if link == "" {
@@ -157,27 +156,7 @@ func ListReferencedLogServices(c common.Client, link string) ([]*LogService, err
 	return result, nil
 }
 
-// OemActions is This type shall contain any additional OEM actions for
-// this resource.
-type OemActions struct {
-	common.Entity
-}
-
-// UnmarshalJSON unmarshals a OemActions object from the raw JSON.
-func (oemactions *OemActions) UnmarshalJSON(b []byte) error {
-	type temp OemActions
-	var t struct {
-		temp
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	*oemactions = OemActions(t.temp)
-
-	// Extract the links to other entities for later
-
-	return nil
+// Entries gets the log entries of this service.
+func (logservice *LogService) Entries() ([]*LogEntry, error) {
+	return ListReferencedLogEntrys(logservice.Client, logservice.entries)
 }
