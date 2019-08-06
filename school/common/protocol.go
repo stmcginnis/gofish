@@ -42,9 +42,9 @@ const (
 	// FCProtocol shall mean that this device conforms to the T11 Fibre
 	// Channel Physical and Signaling Interface Specification.
 	FCProtocol Protocol = "FC"
-	// iSCSIProtocol shall mean that this device conforms to the IETF
+	// ISCSIProtocol shall mean that this device conforms to the IETF
 	// Internet Small Computer Systems Interface (iSCSI) Specification.
-	iSCSIProtocol Protocol = "iSCSI"
+	ISCSIProtocol Protocol = "iSCSI"
 	// FCoEProtocol shall mean that this device conforms to the T11 FC-BB-5
 	// Specification.
 	FCoEProtocol Protocol = "FCoE"

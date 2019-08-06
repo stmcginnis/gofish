@@ -261,10 +261,10 @@ type StorageController struct {
 	Status common.Status
 	// SupportedControllerProtocols shall be the set of protocols this storage
 	// controller can be communicated to.
-	SupportedControllerProtocols []Protocol
+	SupportedControllerProtocols []common.Protocol
 	// SupportedDeviceProtocols shall be the set of protocols this storage
 	// controller can use to communicate with attached devices.
-	SupportedDeviceProtocols []Protocol
+	SupportedDeviceProtocols []common.Protocol
 	// SupportedRAIDTypes shall contain all the RAIDType values supported by the
 	// current resource.
 	SupportedRAIDTypes []RAIDType

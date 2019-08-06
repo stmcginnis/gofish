@@ -86,13 +86,6 @@ type ConnectedEntity struct {
 	// the context of other resources that can reached over the connected
 	// network.
 	Identifiers []common.Identifier
-	// PciClassCode shall be the PCI Class
-	// Code, Subclass code, and Programming Interface code of the PCIe device
-	// function.
-	PciClassCode string
-	// PciFunctionNumber shall be the PCI
-	// Function Number of the connected PCIe entity.
-	PciFunctionNumber int
 }
 
 // Endpoint is used to represent a fabric endpoint for a Redfish
@@ -110,19 +103,18 @@ type Endpoint struct {
 	ODataType string `json:"@odata.type"`
 	// ConnectedEntities shall contain all the entities which this endpoint
 	// allows access to.
-	ConnectedEntities string
+	ConnectedEntities []ConnectedEntity
 	// Description provides a description of this resource.
 	Description string
-	// endpointProtocol shall contain the protocol this endpoint uses to
+	// EndpointProtocol shall contain the protocol this endpoint uses to
 	// communicate with other endpoints on this fabric.
-	endpointProtocol string
+	EndpointProtocol common.Protocol
 	// HostReservationMemoryBytes shall be the amount of memory in Bytes that
 	// the Host should allocate to connect to this endpoint.
-	HostReservationMemoryBytes int
+	HostReservationMemoryBytes int64
 	// IPTransportDetails shall contain the details for each IP transport
 	// supported by this endpoint.
-	IPTransportDetails string
-
+	IPTransportDetails []IPTransportDetails
 	// Identifiers shall be unique in the context of other endpoints that can
 	// reached over the connected network.
 	Identifiers []common.Identifier
@@ -132,19 +124,53 @@ type Endpoint struct {
 	PciID PciID `json:"PciId"`
 	// Redundancy is used to show how this endpoint is grouped with other
 	// endpoints to form redundancy sets.
-	redundancy []string
+	Redundancy []Redundancy
 	// RedundancyCount is the number of Redundancy objects.
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
+	// MutuallyExclusiveEndpoints shall be an array of references of type
+	// Endpoint that cannot be used in a zone if this endpoint is used in a zone.
+	mutuallyExclusiveEndpoints []string
+	// MutuallyExclusiveEndpointsCount is the number of MutuallyExclusiveEndpoints.
+	MutuallyExclusiveEndpointsCount int
+	// NetworkDeviceFunction shall be a reference to a NetworkDeviceFunction
+	// resource, with which this endpoint is associated.
+	networkDeviceFunction []string
+	// NetworkDeviceFunctionCount is the number of NetworkDeviceFunctions.
+	NetworkDeviceFunctionCount int
+	// Ports shall be an array of references of type Port that are utilized by
+	// this endpoint.
+	ports []string
+	// PortsCount is the number of Ports.
+	PortsCount int
 }
 
 // UnmarshalJSON unmarshals a Endpoint object from the raw JSON.
 func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
 	type temp Endpoint
+	type links struct {
+		// MutuallyExclusiveEndpoints shall be an array of references of type
+		// Endpoint that cannot be used in a zone if this endpoint is used in a zone.
+		MutuallyExclusiveEndpoints common.Links
+		// MutuallyExclusiveEndpointsCount is the number of MutuallyExclusiveEndpoints.
+		MutuallyExclusiveEndpointsCount int `json:"MutuallyExclusiveEndpoints@odata.count"`
+		// NetworkDeviceFunction shall be a reference to a NetworkDeviceFunction
+		// resource, with which this endpoint is associated.
+		NetworkDeviceFunction common.Links
+		// NetworkDeviceFunctionCount is the number of NetworkDeviceFunctions.
+		NetworkDeviceFunctionCount int `json:"NetworkDeviceFunction@odata.count"`
+		// Ports shall be an array of references of type Port that are utilized by
+		// this endpoint.
+		Ports common.Links
+		// PortsCount is the number of Ports.
+		PortsCount int `json:"Ports@odata.count"`
+	}
 	var t struct {
 		temp
+		Links      links
+		Redundancy common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -152,9 +178,14 @@ func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*endpoint = Endpoint(t.temp)
-
 	// Extract the links to other entities for later
+	*endpoint = Endpoint(t.temp)
+	endpoint.mutuallyExclusiveEndpoints = t.Links.MutuallyExclusiveEndpoints.ToStrings()
+	endpoint.MutuallyExclusiveEndpointsCount = t.Links.MutuallyExclusiveEndpointsCount
+	endpoint.networkDeviceFunction = t.Links.NetworkDeviceFunction.ToStrings()
+	endpoint.NetworkDeviceFunctionCount = t.Links.NetworkDeviceFunctionCount
+	endpoint.ports = t.Links.Ports.ToStrings()
+	endpoint.PortsCount = t.Links.PortsCount
 
 	return nil
 }
@@ -204,37 +235,15 @@ func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) 
 // IPTransportDetails shall contain properties which specify
 // the details of the transport supported by the endpoint.
 type IPTransportDetails struct {
-	// IPv4Address shall specify the
-	// IPv4Address.
+	// IPv4Address shall specify the IPv4Address.
 	IPv4Address string
-	// IPv6Address shall specify the
-	// IPv6Address.
+	// IPv6Address shall specify the IPv6Address.
 	IPv6Address string
-	// Port is used for communication with the Endpoint.
+	// Port shall be an specify UDP or TCP port number used for communication
+	// with the Endpoint.
 	Port int
 	// TransportProtocol is used by the connection entity.
-	TransportProtocol string
-}
-
-// Links is This type, as described by the Redfish Specification, shall
-// contain references to resources that are related to, but not contained
-// by (subordinate to), this resource.
-type Links struct {
-	// MutuallyExclusiveEndpoints is used in a zone if this endpoint is used
-	// in a zone.
-	MutuallyExclusiveEndpoints common.Link
-	// MutuallyExclusiveEndpointsCount is the number of MutuallyExclusiveEndpoints.
-	MutuallyExclusiveEndpointsCount int `json:"MutuallyExclusiveEndpoints@odata.count"`
-	// NetworkDeviceFunction shall be a reference to a NetworkDeviceFunction
-	// resource, with which this endpoint is associated.
-	NetworkDeviceFunction common.Link
-	// NetworkDeviceFunctionCount is the number of NetworkDeviceFunctions.
-	NetworkDeviceFunctionCount int `json:"NetworkDeviceFunction@odata.count"`
-	// Ports shall be an array of references of type Port that are utilized by
-	// this endpoint.
-	Ports []common.Link
-	// PortsCount is the number of Ports.
-	PortsCount int `json:"Ports@odata.count"`
+	TransportProtocol common.Protocol
 }
 
 // PciID shall describe a PCI ID.
