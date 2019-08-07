@@ -92,10 +92,10 @@ type Controllers struct {
 	// firmware package.
 	FirmwarePackageVersion string
 	// Location shall contain location information of the associated network
-	// adapter controller.
-	Location string
-	// pcieInterface is used to connect this PCIe-based controller to its host.
-	pcieInterface string
+	// adapter controller. TODO: Needs to be a Location struct.
+	//Location string
+	// PCIeInterface is used to connect this PCIe-based controller to its host.
+	PCIeInterface PCIeInterface
 	// NetworkDeviceFunctions shall be an array of references of type
 	// NetworkDeviceFunction that represent the Network Device Functions
 	// associated with this Network Controller.
@@ -128,8 +128,7 @@ func (controllers *Controllers) UnmarshalJSON(b []byte) error {
 
 	var t struct {
 		temp
-		PCIeInterface common.Link
-		Links         links
+		Links links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -139,7 +138,6 @@ func (controllers *Controllers) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*controllers = Controllers(t.temp)
-	controllers.pcieInterface = string(t.PCIeInterface)
 	controllers.networkPorts = t.Links.NetworkPorts.ToStrings()
 	controllers.NetworkPortsCount = t.Links.NetworkPortsCount
 	controllers.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
