@@ -42,9 +42,9 @@ type AlarmTrips struct {
 // ClearCurrentPeriod Action was performed or the system reset.
 type CurrentPeriod struct {
 	// BlocksRead shall be number of blocks read since reset.
-	BlocksRead int
+	BlocksRead uint
 	// BlocksWritten shall be mumber of blocks written since reset.
-	BlocksWritten int
+	BlocksWritten uint
 }
 
 // HealthData shall contain properties which describe the HealthData metrics for
@@ -52,7 +52,7 @@ type CurrentPeriod struct {
 type HealthData struct {
 	// AlarmTrips shall contain properties describe the types of alarms that
 	// have been raised by the memory.
-	AlarmTrips string
+	AlarmTrips AlarmTrips
 	// DataLossDetected shall be data loss detection status, with true
 	// indicating data loss detected.
 	DataLossDetected bool
@@ -72,9 +72,9 @@ type HealthData struct {
 // LifeTime shall describe the metrics of the memory since manufacturing.
 type LifeTime struct {
 	// BlocksRead shall be number of blocks read for the lifetime of the Memory.
-	BlocksRead int
+	BlocksRead uint64
 	// BlocksWritten shall be number of blocks written for the lifetime of the Memory.
-	BlocksWritten int
+	BlocksWritten uint64
 }
 
 // MemoryMetrics is used to represent the Memory Metrics for a single Memory
