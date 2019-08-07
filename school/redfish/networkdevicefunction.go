@@ -262,46 +262,42 @@ type NetworkDeviceFunction struct {
 	// function is enabled. Disabled network device functions shall not be
 	// enumerated or seen by the operating system.
 	DeviceEnabled bool
-	// Ethernet shall contain Ethernet capabilities, status,
-	// and configuration values for this network device function.
+	// Ethernet shall contain Ethernet capabilities, status, and configuration
+	// values for this network device function.
 	Ethernet Ethernet
-	// FibreChannel shall contain Fibre Channel capabilities,
-	// status, and configuration values for this network device function.
+	// FibreChannel shall contain Fibre Channel capabilities, status, and
+	// configuration values for this network device function.
 	FibreChannel FibreChannel
-	// MaxVirtualFunctions shall be the number
-	// of virtual functions (VFs) that are available for this Network Device
-	// Function.
+	// MaxVirtualFunctions shall be the number of virtual functions (VFs) that
+	// are available for this Network Device Function.
 	MaxVirtualFunctions int
-	// NetDevFuncCapabilities shall contain an array of
-	// capabilities of this network device function.
-	NetDevFuncCapabilities []NetworkDeviceTechnology
-	// NetDevFuncType shall be the configured
-	// capability of this network device function.
-	NetDevFuncType NetworkDeviceTechnology
-	// Status shall contain any status or health properties
-	// of the resource.
-	Status common.Status
-	// VirtualFunctionsEnabled shall be a
-	// boolean indicating whether Single Root I/O Virtualization (SR-IOV)
-	// Virual Functions (VFs) are enabled for this Network Device Function.
-	VirtualFunctionsEnabled bool
-	// iSCSIBoot shall contain iSCSI boot capabilities,
-	// status, and configuration values for this network device function.
-	ISCSIBoot ISCSIBoot `json:"iSCSIBoot"`
-	// Endpoints is The type shall contain an array property who's members
-	// reference resources, of type Endpoint, which are associated with this
+	// NetDevFuncCapabilities shall contain an array of capabilities of this
 	// network device function.
+	NetDevFuncCapabilities []NetworkDeviceTechnology
+	// NetDevFuncType shall be the configured capability of this network device
+	// function.
+	NetDevFuncType NetworkDeviceTechnology
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
+	// VirtualFunctionsEnabled shall be a boolean indicating whether Single Root
+	// I/O Virtualization (SR-IOV) Virual Functions (VFs) are enabled for this
+	// Network Device Function.
+	VirtualFunctionsEnabled bool
+	// iSCSIBoot shall contain iSCSI boot capabilities, status, and
+	// configuration values for this network device function.
+	ISCSIBoot ISCSIBoot `json:"iSCSIBoot"`
+	// Endpoints shall contain an array property who's members reference
+	// resources, of type Endpoint, which are associated with this network
+	// device function.
 	endpoints []string
-	// EndpointsCount is the number of
+	// EndpointsCount is the number of Endpoints.
 	EndpointsCount int
-	// PCIeFunction shall be a references of
-	// type PCIeFunction that represents the PCI-e Function associated with
-	// this Network Device Function.
+	// PCIeFunction shall be a references of type PCIeFunction that represents
+	// the PCI-e Function associated with this Network Device Function.
 	pcieFunction string
-	// PhysicalPortAssignment shall be the
-	// physical port that this network device function is currently assigned
-	// to. This value shall be one of the AssignablePhysicalPorts array
-	// members.
+	// PhysicalPortAssignment shall be the physical port that this network
+	// device function is currently assigned to. This value shall be one of the
+	// AssignablePhysicalPorts array members.
 	physicalPortAssignment string
 }
 
