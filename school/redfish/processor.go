@@ -203,20 +203,15 @@ type FPGA struct {
 	// version.
 	FirmwareVersion string
 	// FpgaType shall be a type of the FPGA device.
-	FpgaType string
+	FpgaType FpgaType
 	// HostInterface shall be an object that describes the connectivity to the
 	// host for system software to use.
-	HostInterface string
+	HostInterface FpgaInterface
 	// Model shall be a model of the FPGA device.
 	Model string
-	// OEM is This object represents the Oem property. All values for
-	// resources described by this schema shall comply to the requirements as
-	// described in the Redfish specification.
-	OEM string `json:"Oem"`
-	// PCIeVirtualFunctions shall be an integer
-	// that describes the number of PCIe Virtual Functions configured within
-	// the FPGA.
-	PCIeVirtualFunctions string
+	// PCIeVirtualFunctions shall be an integer that describes the number of
+	// PCIe Virtual Functions configured within the FPGA.
+	PCIeVirtualFunctions int
 	// ProgrammableFromHost shall indicate
 	// whether the FPGA firmware can be reprogrammed from the host using
 	// system software. If set to false, system software shall not be able
@@ -234,23 +229,23 @@ type FPGA struct {
 type FpgaInterface struct {
 	// Ethernet shall be an object the
 	// describes the Ethernet related information about this FPGA interface.
-	Ethernet string
+	Ethernet EthernetInterface
 	// InterfaceType shall be an enum that
 	// describes the type of interface to the FPGA.
 	InterfaceType FpgaInterfaceType
-	// PCIe shall be an object the describes
-	// the PCI-e related information about this FPGA interface.
-	PCIe string
+	// pcie shall be an object the describes the PCI-e related information about
+	// this FPGA interface. TODO: Get link to PCIeInterface.
+	pcie string
 }
 
-// FpgaReconfigurationSlot shall contain information about
-// the FPGA reconfiguration slot.
+// FpgaReconfigurationSlot shall contain information about the FPGA
+// reconfiguration slot.
 type FpgaReconfigurationSlot struct {
-	// AccelerationFunction shall be a
-	// reference to the acceleration function resources provided by the code
-	// programmed into a reconfiguration slot and shall reference a resource
-	// of type AccelerationFunction.
-	AccelerationFunction string
+	// AccelerationFunction shall be a reference to the acceleration function
+	// resources provided by the code programmed into a reconfiguration slot and
+	// shall reference a resource of type AccelerationFunction.
+	// TODO: Get link to resource.
+	accelerationFunction string
 	// ProgrammableFromHost shall indicate
 	// whether the reconfiguration slot can be reprogrammed from the host
 	// using system software. If set to false, system software shall not be
@@ -278,9 +273,9 @@ type Processor struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// AccelerationFunctions shall be a link to
+	// accelerationFunctions shall be a link to
 	// a collection of type AccelerationFunctionCollection.
-	AccelerationFunctions string
+	accelerationFunctions string
 	// Actions is The Actions property shall contain the available actions
 	// for this resource.
 	Actions string
@@ -291,7 +286,7 @@ type Processor struct {
 	Description string
 	// FPGA shall be an object containing
 	// properties specific for Processors of type FPGA.
-	FPGA string
+	FPGA FPGA
 	// InstructionSet shall contain the string which
 	// identifies the instruction set of the processor contained in this
 	// socket.
@@ -356,7 +351,6 @@ type Processor struct {
 	// should only treat the overall value as a universally unique identifier
 	// and should not interpret any sub-fields within the UUID.
 	UUID string
-
 	// Chassis shall be a reference to a
 	// resource of type Chassis that represent the physical container
 	// associated with this Processor.
@@ -390,9 +384,10 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	type temp Processor
 	var t struct {
 		temp
-		Assembly        common.Link
-		ProcessorMemory common.Links
-		Links           struct {
+		AccelerationFunctions common.Link
+		Assembly              common.Link
+		ProcessorMemory       common.Links
+		Links                 struct {
 			Chassis                  common.Link
 			ConnectedProcessors      common.Links
 			ConnectedProcessorsCount int `json:"ConnectedProcessors@odata.count"`
@@ -412,6 +407,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	*processor = Processor(t.temp)
 
 	// Extract the links to other entities for later
+	processor.accelerationFunctions = string(t.AccelerationFunctions)
 	processor.assembly = string(t.Assembly)
 	processor.chassis = string(t.Links.Chassis)
 	processor.processorMemory = t.ProcessorMemory.ToStrings()
