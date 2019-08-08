@@ -206,7 +206,7 @@ type PowerControl struct {
 	MemberID string `json:"MemberId"`
 	// PhysicalContext shall be a description of the affected device(s) or region
 	// within the chassis to which this power control applies.
-	PhysicalContext string
+	PhysicalContext common.PhysicalContext
 	// PowerAllocatedWatts shall represent the total power currently allocated
 	// to chassis resources.
 	PowerAllocatedWatts int
@@ -313,8 +313,8 @@ type PowerSupply struct {
 	// line voltage supported by the associated power supply.
 	LineInputVoltageType LineInputVoltageType
 	// Location shall contain location information of the
-	// associated power supply.
-	Location string
+	// associated power supply. TODO: Make Location object.
+	//Location string
 	// Manufacturer shall be the name of the
 	// organization responsible for producing the power supply. This
 	// organization might be the entity from whom the power supply is
