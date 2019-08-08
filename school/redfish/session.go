@@ -18,13 +18,61 @@ import (
 	"github.com/stmcginnis/gofish/school/common"
 )
 
+// SessionTypes is the type of session.
+type SessionTypes string
+
+const (
+
+	// HostConsoleSessionTypes The Host's console, which could be connected
+	// via Telnet, SSH, or other protocol.
+	HostConsoleSessionTypes SessionTypes = "HostConsole"
+	// ManagerConsoleSessionTypes The Manager's console, which could be
+	// connected via Telnet, SSH, SM CLP, or other protocol.
+	ManagerConsoleSessionTypes SessionTypes = "ManagerConsole"
+	// IPMISessionTypes Intelligent Platform Management Interface.
+	IPMISessionTypes SessionTypes = "IPMI"
+	// KVMIPSessionTypes Keyboard-Video-Mouse over IP Session.
+	KVMIPSessionTypes SessionTypes = "KVMIP"
+	// OEMSessionTypes OEM Type. Please look at OemSessionType for OEM
+	// session type(s).
+	OEMSessionTypes SessionTypes = "OEM"
+	// RedfishSessionTypes A Redfish Session.
+	RedfishSessionTypes SessionTypes = "Redfish"
+	// VirtualMediaSessionTypes Virtual Media.
+	VirtualMediaSessionTypes SessionTypes = "VirtualMedia"
+	// WebUISessionTypes A non-Redfish Web User Interface session such as a
+	// graphical interface or other kinds of web-based protocols.
+	WebUISessionTypes SessionTypes = "WebUI"
+)
+
 // Session describes a single connection (session) between a client and a
 // Redfish service instance.
 type Session struct {
 	common.Entity
+
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataEtag is the odata etag.
+	ODataEtag string `json:"@odata.etag"`
+	// ODataID is the odata identifier.
+	ODataID string `json:"@odata.id"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Description provides a description of this resource.
 	Description string
-	Modified    string
-	UserName    string
+	// OemSessionType is used to report the OEM-specific session type. Thus,
+	// this property shall represent the type of OEM session that is
+	// currently active.
+	OemSessionType string
+	// Password shall be the password for this session. The value shall be null
+	// for GET requests.
+	Password string
+	// SessionType shall represent the type of session that is currently active.
+	SessionType SessionTypes
+	// UserName shall be the UserName that matches a registered account
+	// identified by a ManagerAccount resource registered with the Account
+	// Service.
+	UserName string
 }
 
 // AuthToken contains the authentication and session information.
