@@ -54,14 +54,14 @@ type Storage struct {
 	// DrivesCount is the number of drives.
 	DrivesCount int `json:"Drives@odata.count"`
 	// Redundancy shall contain redundancy information for the storage subsystem.
-	redundancy []string
+	Redundancy []Redundancy
 	// RedundancyCount is the number of Redundancy objects.
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// StorageControllers is a collection that indicates all the storage
 	// controllers that this resource represents.
-	storageControllers []string
+	StorageControllers []StorageController
 	// StorageControllersCount is the number of
 	StorageControllersCount int `json:"StorageControllers@odata.count"`
 	// Volumes is a collection that indicates all the volumes produced by the
@@ -83,11 +83,9 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Links              links
-		Drives             common.Links
-		Redundancy         common.Links
-		StorageControllers common.Links
-		Volumes            common.Link
+		Links   links
+		Drives  common.Links
+		Volumes common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -101,8 +99,6 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 	storage.enclosures = t.Links.Enclosures.ToStrings()
 	storage.EnclosuresCount = t.Links.EnclosuresCount
 	storage.drives = t.Drives.ToStrings()
-	storage.redundancy = t.Redundancy.ToStrings()
-	storage.storageControllers = t.StorageControllers.ToStrings()
 	storage.volumes = string(t.Volumes)
 
 	return nil
@@ -173,32 +169,6 @@ func (storage *Storage) Drives() ([]*Drive, error) {
 			return result, nil
 		}
 		result = append(result, drive)
-	}
-	return result, nil
-}
-
-// Redundancies gets the redundancy information for the storage subsystem.
-func (storage *Storage) Redundancies() ([]*Redundancy, error) {
-	var result []*Redundancy
-	for _, redundancyLink := range storage.redundancy {
-		redundancy, err := GetRedundancy(storage.Client, redundancyLink)
-		if err != nil {
-			return result, nil
-		}
-		result = append(result, redundancy)
-	}
-	return result, nil
-}
-
-// StorageControllers gets all the storage controllers that this resource represents.
-func (storage *Storage) StorageControllers() ([]*StorageController, error) {
-	var result []*StorageController
-	for _, storageControllerLink := range storage.storageControllers {
-		storageController, err := GetStorageController(storage.Client, storageControllerLink)
-		if err != nil {
-			return result, nil
-		}
-		result = append(result, storageController)
 	}
 	return result, nil
 }
