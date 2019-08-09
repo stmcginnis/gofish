@@ -41,7 +41,7 @@ type IOConnectivityLineOfService struct {
 	Description string
 	// MaxBytesPerSecond shall be the maximum bytes per second that a connection
 	// can support.
-	MaxBytesPerSecond int
+	MaxBytesPerSecond int64
 	// MaxIOPS shall be the maximum IOs per second that the connection shall
 	// allow for the selected access protocol.
 	MaxIOPS int
