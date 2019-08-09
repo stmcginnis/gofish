@@ -37,7 +37,7 @@ type IOConnectivityLoSCapabilities struct {
 	Identifier common.Identifier
 	// MaxSupportedBytesPerSecond shall be the maximum bytes per second that a
 	// connection can support.
-	MaxSupportedBytesPerSecond int
+	MaxSupportedBytesPerSecond int64
 	// MaxSupportedIOPS shall be the maximum IOPS that a connection can support.
 	MaxSupportedIOPS int
 	// SupportedAccessProtocols is Access protocols supported by this service
