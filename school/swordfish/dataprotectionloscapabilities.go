@@ -197,11 +197,11 @@ func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) (
 }
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.
-func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptions() ([]*ClassesOfService, error) {
-	var result []*ClassesOfService
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptions() ([]*ClassOfService, error) {
+	var result []*ClassOfService
 
 	for _, link := range dataprotectionloscapabilities.supportedReplicaOptions {
-		classOfService, err := GetClassesOfService(dataprotectionloscapabilities.Client, link)
+		classOfService, err := GetClassOfService(dataprotectionloscapabilities.Client, link)
 		if err != nil {
 			return result, err
 		}

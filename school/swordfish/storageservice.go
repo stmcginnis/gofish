@@ -200,13 +200,13 @@ func ListReferencedStorageServices(c common.Client, link string) ([]*StorageServ
 	return result, nil
 }
 
-// ClassesOfService gets the storage service's classes of service.
-func (storageservice *StorageService) ClassesOfService() ([]*ClassesOfService, error) {
+// ClassOfService gets the storage service's classes of service.
+func (storageservice *StorageService) ClassOfService() ([]*ClassOfService, error) {
 	if storageservice.classesOfService == "" {
-		var result []*ClassesOfService
+		var result []*ClassOfService
 		return result, nil
 	}
-	return ListReferencedClassesOfServices(storageservice.Client, storageservice.classesOfService)
+	return ListReferencedClassOfServices(storageservice.Client, storageservice.classesOfService)
 }
 
 // DataProtectionLoSCapabilities gets the storage service's data protection

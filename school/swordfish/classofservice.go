@@ -42,15 +42,15 @@ type ClassOfService struct {
 	// DataProtectionLinesOfService shall be a set of data protection service
 	// options. Within a class of service, one data protection service option
 	// shall be present for each replication session.
-	DataProtectionLinesOfService []DataProtectionLineOfService
+	dataProtectionLinesOfService []string
 	// DataProtectionLinesOfServiceCount is the number of DataProtectionLineOfService.
 	DataProtectionLinesOfServiceCount int `json:"DataProtectionLinesOfService@odata.count"`
 	// DataSecurityLinesOfService shall be a set of data security service options.
-	DataSecurityLinesOfService []DataSecurityLineOfService
+	dataSecurityLinesOfService []string
 	// DataSecurityLinesOfServiceCount is number of DataSercurityLineOfService.
 	DataSecurityLinesOfServiceCount int `json:"DataSecurityLinesOfService@odata.count"`
 	// DataStorageLinesOfService shall be a set of data protection service options.
-	DataStorageLinesOfService []DataStorageLineOfService
+	dataStorageLinesOfService []string
 	// DataStorageLinesOfServiceCount is the number of DataStorageLinesOfService.
 	DataStorageLinesOfServiceCount int `json:"DataStorageLinesOfService@odata.count"`
 	// Description provides a description of this resource.
@@ -58,16 +58,43 @@ type ClassOfService struct {
 	// IOConnectivityLinesOfService shall be a set of IO connectivity service
 	// options. Within a class of service, at most one IO connectivity service
 	// option may be present for a value of AccessProtocol.
-	IOConnectivityLinesOfService []IOConnectivityLineOfService
-	// IOConnectivityLinesOfServiceCount is
+	ioConnectivityLinesOfService []string
+	// IOConnectivityLinesOfServiceCount is the number of IOConnectivityLinesOfService.
 	IOConnectivityLinesOfServiceCount int `json:"IOConnectivityLinesOfService@odata.count"`
-	// IOPerformanceLinesOfService shall be a set of IO
-	// performance service options.
-	IOPerformanceLinesOfService []IOPerformanceLineOfService
-	// IOPerformanceLinesOfServiceCount is
+	// IOPerformanceLinesOfService shall be a set of IO performance service options.
+	ioPerformanceLinesOfService []string
+	// IOPerformanceLinesOfServiceCount is the number of IOPerformanceLinesOfService.
 	IOPerformanceLinesOfServiceCount int `json:"IOPerformanceLinesOfService@odata.count"`
 	// Identifier shall be unique within the managed ecosystem.
 	Identifier common.Identifier
+}
+
+// UnmarshalJSON unmarshals a ClassOfService object from the raw JSON.
+func (classofservice *ClassOfService) UnmarshalJSON(b []byte) error {
+	type temp ClassOfService
+	var t struct {
+		temp
+		DataProtectionLinesOfService common.Links
+		DataSecurityLinesOfService   common.Links
+		DataStorageLinesOfService    common.Links
+		IOConnectivityLinesOfService common.Links
+		IOPerformanceLinesOfService  common.Links
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	// Extract the links to other entities for later
+	*classofservice = ClassOfService(t.temp)
+	classofservice.dataProtectionLinesOfService = t.DataProtectionLinesOfService.ToStrings()
+	classofservice.dataSecurityLinesOfService = t.DataSecurityLinesOfService.ToStrings()
+	classofservice.dataStorageLinesOfService = t.DataStorageLinesOfService.ToStrings()
+	classofservice.ioConnectivityLinesOfService = t.IOConnectivityLinesOfService.ToStrings()
+	classofservice.ioPerformanceLinesOfService = t.IOPerformanceLinesOfService.ToStrings()
+
+	return nil
 }
 
 // GetClassOfService will get a ClassOfService instance from the service.
@@ -109,5 +136,75 @@ func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfServ
 		result = append(result, classofservice)
 	}
 
+	return result, nil
+}
+
+// DataProtectionLinesOfServices gets the DataProtectionLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) DataProtectionLinesOfServices() ([]*DataProtectionLineOfService, error) {
+	var result []*DataProtectionLineOfService
+	for _, dpLosLink := range classofservice.dataProtectionLinesOfService {
+		dpLos, err := GetDataProtectionLineOfService(classofservice.Client, dpLosLink)
+		if err != nil {
+			return result, nil
+		}
+		result = append(result, dpLos)
+	}
+	return result, nil
+}
+
+// DataSecurityLinesOfServices gets the DataSecurityLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) DataSecurityLinesOfServices() ([]*DataSecurityLineOfService, error) {
+	var result []*DataSecurityLineOfService
+	for _, dsLosLink := range classofservice.dataSecurityLinesOfService {
+		dsLos, err := GetDataSecurityLineOfService(classofservice.Client, dsLosLink)
+		if err != nil {
+			return result, nil
+		}
+		result = append(result, dsLos)
+	}
+	return result, nil
+}
+
+// DataStorageLinesOfServices gets the DataStorageLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) DataStorageLinesOfServices() ([]*DataStorageLineOfService, error) {
+	var result []*DataStorageLineOfService
+	for _, dsLosLink := range classofservice.dataStorageLinesOfService {
+		dsLos, err := GetDataStorageLineOfService(classofservice.Client, dsLosLink)
+		if err != nil {
+			return result, nil
+		}
+		result = append(result, dsLos)
+	}
+	return result, nil
+}
+
+// IOConnectivityLinesOfServices gets the IOConnectivityLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) IOConnectivityLinesOfServices() ([]*IOConnectivityLineOfService, error) {
+	var result []*IOConnectivityLineOfService
+	for _, ioLosLink := range classofservice.dataSecurityLinesOfService {
+		ioLos, err := GetIOConnectivityLineOfService(classofservice.Client, ioLosLink)
+		if err != nil {
+			return result, nil
+		}
+		result = append(result, ioLos)
+	}
+	return result, nil
+}
+
+// IOPerformanceLinesOfServices gets the IOPerformanceLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) IOPerformanceLinesOfServices() ([]*IOPerformanceLineOfService, error) {
+	var result []*IOPerformanceLineOfService
+	for _, ioLosLink := range classofservice.dataSecurityLinesOfService {
+		ioLos, err := GetIOPerformanceLineOfService(classofservice.Client, ioLosLink)
+		if err != nil {
+			return result, nil
+		}
+		result = append(result, ioLos)
+	}
 	return result, nil
 }
