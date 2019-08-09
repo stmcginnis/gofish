@@ -91,36 +91,35 @@ type DataProtectionLoSCapabilities struct {
 	Identifier common.Identifier
 	// SupportedLinesOfService collection shall contain known and
 	// supported DataProtectionLinesOfService.
-	SupportedLinesOfService string
+	supportedLinesOfService []string
 	// SupportedLinesOfService@odata.count is
 	SupportedLinesOfServiceCount int `json:"SupportedLinesOfService@odata.count"`
-	// SupportedMinLifetimes each entry shall be an ISO 8601
-	// duration that specifies the minimum lifetime required for the replica.
-	SupportedMinLifetimes string
-	// SupportedRecoveryGeographicObjectives each entry shall
-	// specify a supported failure domain.
-	SupportedRecoveryGeographicObjectives string
-	// SupportedRecoveryPointObjectiveTimes each entry shall
-	// specify a supported ISO 8601 time interval defining the maximum source
-	// information that may be lost on failure. In the case that IsIsolated =
-	// false, failure of the domain is not a consideration.
-	SupportedRecoveryPointObjectiveTimes string
-	// SupportedRecoveryTimeObjectives each entry shall
-	// specify an enumerated value that indicates a supported expectation for
-	// the time required to access an alternate replica. In the case that
-	// IsIsolated = false, failure of the domain is not a consideration.
-	SupportedRecoveryTimeObjectives string
-	// SupportedReplicaTypes each entry shall specify a
-	// supported replica type
-	SupportedReplicaTypes string
+	// SupportedMinLifetimes each entry shall be an ISO 8601 duration that
+	// specifies the minimum lifetime required for the replica.
+	SupportedMinLifetimes []string
+	// SupportedRecoveryGeographicObjectives each entry shall specify a
+	// supported failure domain.
+	SupportedRecoveryGeographicObjectives []FailureDomainScope
+	// SupportedRecoveryPointObjectiveTimes each entry shall specify a supported
+	// ISO 8601 time interval defining the maximum source information that may
+	// be lost on failure. In the case that IsIsolated = false, failure of the
+	// domain is not a consideration.
+	SupportedRecoveryPointObjectiveTimes []string
+	// SupportedRecoveryTimeObjectives each entry shall specify an enumerated
+	// value that indicates a supported expectation for the time required to
+	// access an alternate replica. In the case that IsIsolated = false, failure
+	// of the domain is not a consideration.
+	SupportedRecoveryTimeObjectives []RecoveryAccessScope
+	// SupportedReplicaTypes each entry shall specify a supported replica type,
+	SupportedReplicaTypes []ReplicaType
 	// SupportsIsolated is A value of true shall indicate that allocating a
 	// replica in a separate fault domain is supported. The default value for
 	// this property is false.
 	SupportsIsolated bool
 	// SupportedReplicaOptionsCount is the number of supported replica options.
 	SupportedReplicaOptionsCount int
-	// supportedReplicaOptions shall contain known and
-	// supported replica Classes of Service.
+	// supportedReplicaOptions shall contain known and supported replica Classes
+	// of Service.
 	supportedReplicaOptions []string
 }
 
@@ -138,7 +137,8 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) UnmarshalJSO
 	}
 	var t struct {
 		temp
-		Links DLinks
+		Links                   DLinks
+		SupportedLinesOfService common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -146,10 +146,11 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) UnmarshalJSO
 		return err
 	}
 
-	*dataprotectionloscapabilities = DataProtectionLoSCapabilities(t.temp)
-
 	// Extract the links to other entities for later
+	*dataprotectionloscapabilities = DataProtectionLoSCapabilities(t.temp)
 	dataprotectionloscapabilities.supportedReplicaOptions = t.Links.SupportedReplicaOptions.ToStrings()
+	dataprotectionloscapabilities.SupportedReplicaOptionsCount = t.Links.SupportedReplicaOptionsCount
+	dataprotectionloscapabilities.supportedLinesOfService = t.SupportedLinesOfService.ToStrings()
 
 	return nil
 }
@@ -206,6 +207,21 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedRep
 			return result, err
 		}
 		result = append(result, classOfService)
+	}
+
+	return result, nil
+}
+
+// SupportedLinesOfService gets the supported lines of service.
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLinesOfService() ([]*DataProtectionLineOfService, error) {
+	var result []*DataProtectionLineOfService
+
+	for _, link := range dataprotectionloscapabilities.supportedLinesOfService {
+		lineOfService, err := GetDataProtectionLineOfService(dataprotectionloscapabilities.Client, link)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, lineOfService)
 	}
 
 	return result, nil
