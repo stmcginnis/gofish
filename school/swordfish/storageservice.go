@@ -81,8 +81,8 @@ type StorageService struct {
 	// ioPerformanceLoSCapabilities shall reference the IO performance
 	// capabilities of this service.
 	ioPerformanceLoSCapabilities string
-	// ioStatistics shall represent IO statistics for this StorageService.
-	ioStatistics string
+	// IOStatistics shall represent IO statistics for this StorageService.
+	IOStatistics IOStatistics
 	// spareResourceSets shall contain resources that may be utilized to
 	// replace the capacity provided by a failed resource having a compatible type.
 	spareResourceSets []string
@@ -123,7 +123,6 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		FileSystems                   common.Link
 		IOConnectivityLoSCapabilities common.Link
 		IOPerformanceLoSCapabilities  common.Link
-		IOStatistics                  common.Link
 		Redundancy                    common.Links
 		SpareResourceSets             common.Links
 		StorageGroups                 common.Link
@@ -151,7 +150,6 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	storageservice.fileSystems = string(t.FileSystems)
 	storageservice.ioConnectivityLoSCapabilities = string(t.IOConnectivityLoSCapabilities)
 	storageservice.ioPerformanceLoSCapabilities = string(t.IOPerformanceLoSCapabilities)
-	storageservice.ioStatistics = string(t.IOStatistics)
 	storageservice.redundancy = t.Redundancy.ToStrings()
 	storageservice.spareResourceSets = t.SpareResourceSets.ToStrings()
 	storageservice.storageGroups = string(t.StorageGroups)
@@ -295,14 +293,6 @@ func (storageservice *StorageService) IOPerformanceLoSCapabilities() (*IOPerform
 		return nil, nil
 	}
 	return GetIOPerformanceLoSCapabilities(storageservice.Client, storageservice.ioPerformanceLoSCapabilities)
-}
-
-// IOStatistics represents the IO statistics for this storage service.
-func (storageservice *StorageService) IOStatistics() (*IOStatistics, error) {
-	if storageservice.ioStatistics == "" {
-		return nil, nil
-	}
-	return GetIOStatistics(storageservice.Client, storageservice.ioStatistics)
 }
 
 // Redundancy gets the redundancy information for the storage subsystem.

@@ -116,7 +116,7 @@ type FileSystem struct {
 	// capability.
 	AccessCapabilities []StorageAccessCapability
 	// BlockSizeBytes shall be the block size of the file system in bytes.
-	BlockSizeBytes int
+	BlockSizeBytes int64
 	// Capacity shall be the capacity allocated to the file system in bytes.
 	Capacity Capacity
 	// CapacitySources shall be an array containing entries for all the capacity
@@ -157,13 +157,13 @@ type FileSystem struct {
 	// of the values in the array. The following shall be true: Across all
 	// CapacitySources entries, percent = (SUM(AllocatedBytes) -
 	// SUM(ConsumedBytes))/SUM(AllocatedBytes)
-	LowSpaceWarningThresholdPercents []string
+	LowSpaceWarningThresholdPercents []int
 	// MaxFileNameLengthBytes shall specify the maximum length of a file name
 	// within the file system.
-	MaxFileNameLengthBytes int
-	// RecoverableCapacitySourceCount is The value is the number of available
-	// capacity source resources currently available in the event that an
-	// equivalent capacity source resource fails.
+	MaxFileNameLengthBytes int64
+	// RecoverableCapacitySourceCount is the number of available capacity source
+	// resources currently available in the event that an equivalent capacity
+	// source resource fails.
 	RecoverableCapacitySourceCount int
 	// RemainingCapacityPercent is If present, this value shall return
 	// {[(SUM(AllocatedBytes) - SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100

@@ -12,12 +12,6 @@
 
 package swordfish
 
-import (
-	"encoding/json"
-
-	"github.com/stmcginnis/gofish/school/common"
-)
-
 // IOStatistics is used to represent the IO statistics of the requested
 // object.
 type IOStatistics struct {
@@ -26,70 +20,30 @@ type IOStatistics struct {
 	NonIORequestTime string
 	// NonIORequests shall represent the total count from the time of last reset
 	// or wrap of non IO requests.
-	NonIORequests int
+	NonIORequests int64
 	// ReadHitIORequests shall represent the total count from the time of last
 	// reset or wrap of read IO requests satisfied from memory.
-	ReadHitIORequests int
+	ReadHitIORequests int64
 	// ReadIOKiBytes shall represent the total number of kibibytes read from the
 	// time of last reset or wrap.
-	ReadIOKiBytes int
+	ReadIOKiBytes int64
 	// ReadIORequestTime shall be an ISO 8601 conformant duration describing the
 	// time that the resource is busy processing read requests.
 	ReadIORequestTime string
 	// ReadIORequests shall represent the total count from the time of last
 	// reset or wrap of read IO requests satisfied from either media or memory
 	// (i.e. from a storage device or from a cache).
-	ReadIORequests int
+	ReadIORequests int64
 	// WriteHitIORequests shall represent the total count from the time of last
 	// reset or wrap of write IO requests coallesced into memory.
-	WriteHitIORequests int
+	WriteHitIORequests int64
 	// WriteIOKiBytes shall represent the total number of kibibytes written from
 	// the time of last reset or wrap.
-	WriteIOKiBytes int
+	WriteIOKiBytes int64
 	// WriteIORequestTime shall be an ISO 8601 conformant duration describing
 	// the time that the resource is busy processing write requests.
 	WriteIORequestTime string
 	// WriteIORequests shall represent the total count from the time of last
 	// reset or wrap of write IO requests.
-	WriteIORequests int
-}
-
-// GetIOStatistics will get a IOStatistics instance from the service.
-func GetIOStatistics(c common.Client, uri string) (*IOStatistics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var iostatistics IOStatistics
-	err = json.NewDecoder(resp.Body).Decode(&iostatistics)
-	if err != nil {
-		return nil, err
-	}
-	return &iostatistics, nil
-}
-
-// ListReferencedIOStatisticss gets the collection of IOStatistics from
-// a provided reference.
-func ListReferencedIOStatisticss(c common.Client, link string) ([]*IOStatistics, error) {
-	var result []*IOStatistics
-	if link == "" {
-		return result, nil
-	}
-
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
-	}
-
-	for _, iostatisticsLink := range links.ItemLinks {
-		iostatistics, err := GetIOStatistics(c, iostatisticsLink)
-		if err != nil {
-			return result, err
-		}
-		result = append(result, iostatistics)
-	}
-
-	return result, nil
+	WriteIORequests int64
 }

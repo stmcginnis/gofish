@@ -60,7 +60,7 @@ type StoragePool struct {
 	Description string
 	// IOStatistics is the value shall represent IO statistics for this
 	// StoragePool.
-	ioStatistics string
+	IOStatistics IOStatistics
 	// Identifier shall be unique within the managed ecosystem.
 	Identifier common.Identifier
 	// LowSpaceWarningThresholdPercents is each time the following value is
@@ -111,7 +111,6 @@ func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Links                 links
-		IOStatistics          common.Link
 		AllocatedPools        common.Link
 		AllocatedVolumes      common.Link
 		CapacitySource        common.Links
@@ -131,7 +130,6 @@ func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
 	storagepool.DedicatedSpareDrivesCount = t.Links.DedicatedSpareDrivesCount
 	storagepool.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
 	storagepool.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
-	storagepool.ioStatistics = string(t.IOStatistics)
 	storagepool.allocatedPools = string(t.AllocatedPools)
 	storagepool.allocatedVolumes = string(t.AllocatedVolumes)
 	storagepool.capacitySources = t.CapacitySource.ToStrings()
@@ -209,14 +207,6 @@ func (storagepool *StoragePool) SpareResourceSets() ([]*SpareResourceSet, error)
 		result = append(result, srs)
 	}
 	return result, nil
-}
-
-// IOStatistics gets IO statistics for this storage pool.
-func (storagepool *StoragePool) IOStatistics() (*IOStatistics, error) {
-	if storagepool.ioStatistics == "" {
-		return nil, nil
-	}
-	return GetIOStatistics(storagepool.Client, storagepool.ioStatistics)
 }
 
 // AllocatedPools gets the storage pools allocated from this storage pool.
