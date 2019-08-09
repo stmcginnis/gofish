@@ -303,10 +303,10 @@ type Location struct {
 	InfoFormat string
 	// Latitude shall be the latitude of the resource specified
 	// in degrees using a decimal format and not minutes or seconds.
-	Latitude int
+	Latitude float32
 	// Longitude shall be the longitude of the resource specified in degrees
 	// using a decimal format and not minutes or seconds.
-	Longitude int
+	Longitude float32
 	// PartLocation is used to indicate the location within the Placement.
 	PartLocation PartLocation
 	// Placement shall be a place within the addressed location.
