@@ -98,7 +98,7 @@ type StorageGroup struct {
 	Identifier common.Identifier
 	// mappedVolumes is an array of mapped volumes managed by this storage
 	// group.
-	mappedVolumes []string
+	MappedVolumes []MappedVolume
 	// MembersAreConsistent shall be set to true if all members are in a
 	// consistent state. The default value for this property is false.
 	MembersAreConsistent bool
@@ -154,7 +154,6 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Links                links
-		MappedVolumes        common.Links
 		ServerEndpointGroups common.Links
 	}
 
@@ -163,10 +162,8 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*storagegroup = StorageGroup(t.temp)
-
 	// Extract the links to other entities for later
-	storagegroup.mappedVolumes = t.MappedVolumes.ToStrings()
+	*storagegroup = StorageGroup(t.temp)
 	storagegroup.childStorageGroups = t.Links.ChildStorageGroups.ToStrings()
 	storagegroup.ChildStorageGroupsCount = t.Links.ChildStorageGroupsCount
 	storagegroup.classOfService = string(t.Links.ClassOfService)
@@ -218,20 +215,6 @@ func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup,
 	return result, nil
 }
 
-// MappedVolumes gets mapped volumes managed by this storage group.
-func (storagegroup *StorageGroup) MappedVolumes() ([]*Volume, error) {
-	var result []*Volume
-	for _, volLink := range storagegroup.mappedVolumes {
-		vol, err := GetVolume(storagegroup.Client, volLink)
-		if err != nil {
-			return result, err
-		}
-		result = append(result, vol)
-	}
-
-	return result, nil
-}
-
 // ChildStorageGroups gets child groups of this group.
 func (storagegroup *StorageGroup) ChildStorageGroups() ([]*StorageGroup, error) {
 	var result []*StorageGroup
@@ -267,4 +250,12 @@ func (storagegroup *StorageGroup) ClassOfService() (*ClassOfService, error) {
 		return nil, nil
 	}
 	return GetClassOfService(storagegroup.Client, storagegroup.classOfService)
+}
+
+//MappedVolume is an exposed volume mapping.
+type MappedVolume struct {
+	// LogicalUnitNumber is the value is a SCSI Logical Unit Number for the Volume.
+	LogicalUnitNumber int
+	// Volume shall reference a mapped Volume.
+	Volume common.Link
 }
