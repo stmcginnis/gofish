@@ -41,17 +41,17 @@ type Capacity struct {
 type CapacityInfo struct {
 	// AllocatedBytes shall be the number of bytes currently
 	// allocated by the storage system in this data store for this data type.
-	AllocatedBytes int
+	AllocatedBytes int64
 	// ConsumedBytes shall be the number of logical bytes
 	// currently consumed in this data store for this data type.
-	ConsumedBytes int
+	ConsumedBytes int64
 	// GuaranteedBytes shall be the number of bytes the storage
 	// system guarantees can be allocated in this data store for this data
 	// type.
-	GuaranteedBytes int
+	GuaranteedBytes int64
 	// ProvisionedBytes shall be the maximum number of bytes
 	// that can be allocated in this data store for this data type.
-	ProvisionedBytes int
+	ProvisionedBytes int64
 }
 
 // CapacitySource is used to represent the source and type of storage
@@ -74,29 +74,28 @@ type CapacitySource struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
-	// ProvidedCapacity shall be the amount of space that has
-	// been provided from the ProvidingDrives, ProvidingVolumes,
-	// ProvidingMemory or ProvidingPools.
+	// ProvidedCapacity shall be the amount of space that has been provided from
+	// the ProvidingDrives, ProvidingVolumes, ProvidingMemory or ProvidingPools.
 	ProvidedCapacity Capacity
-	// ProvidedClassOfService shall reference the provided
-	// ClassOfService from the ProvidingDrives, ProvidingVolumes,
-	// ProvidingMemoryChunks, ProvidingMemory or ProvidingPools.
+	// ProvidedClassOfService shall reference the provided ClassOfService from
+	// the ProvidingDrives, ProvidingVolumes, ProvidingMemoryChunks,
+	// ProvidingMemory or ProvidingPools.
 	providedClassOfService string
 	// ProvidingDrives if present, the value shall be a reference to a
 	// contributing drive or drives.
-	providingDrives []string
+	providingDrives string
 	// ProvidingMemory if present, the value shall be a reference to the
 	// contributing memory.
-	providingMemory []string
-	// ProvidingMemoryChunks if present, the value shall be a reference to
-	// the contributing memory chunks.
-	providingMemoryChunks []string
+	providingMemory string
+	// ProvidingMemoryChunks if present, the value shall be a reference to the
+	// contributing memory chunks.
+	providingMemoryChunks string
 	// ProvidingPools if present, the value shall be a reference to a
 	// contributing storage pool or storage pools.
-	providingPools []string
+	providingPools string
 	// ProvidingVolumes if present, the value shall be a reference to a
 	// contributing volume or volumes.
-	providingVolumes []string
+	providingVolumes string
 }
 
 // UnmarshalJSON unmarshals a CapacitySource object from the raw JSON.
@@ -105,11 +104,11 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		ProvidedClassOfService common.Link
-		ProvidingDrives        common.LinksCollection
-		ProvidingMemory        common.LinksCollection
-		ProvidingMemoryChunks  common.LinksCollection
-		ProvidingPools         common.LinksCollection
-		ProvidingVolumes       common.LinksCollection
+		ProvidingDrives        common.Link
+		ProvidingMemory        common.Link
+		ProvidingMemoryChunks  common.Link
+		ProvidingPools         common.Link
+		ProvidingVolumes       common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -121,11 +120,11 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	capacitysource.providedClassOfService = string(t.ProvidedClassOfService)
-	capacitysource.providingDrives = t.ProvidingDrives.ToStrings()
-	capacitysource.providingMemory = t.ProvidingMemory.ToStrings()
-	capacitysource.providingMemoryChunks = t.ProvidingMemoryChunks.ToStrings()
-	capacitysource.providingPools = t.ProvidingPools.ToStrings()
-	capacitysource.providingVolumes = t.ProvidingVolumes.ToStrings()
+	capacitysource.providingDrives = string(t.ProvidingDrives)
+	capacitysource.providingMemory = string(t.ProvidingMemory)
+	capacitysource.providingMemoryChunks = string(t.ProvidingMemoryChunks)
+	capacitysource.providingPools = string(t.ProvidingPools)
+	capacitysource.providingVolumes = string(t.ProvidingVolumes)
 
 	return nil
 }
@@ -183,13 +182,22 @@ func (capacitysource *CapacitySource) ProvidedClassOfService() (*ClassOfService,
 
 // ProvidingDrives gets contributing drives.
 func (capacitysource *CapacitySource) ProvidingDrives() ([]*redfish.Drive, error) {
-	var result []*redfish.Drive
-	for _, driveLink := range capacitysource.providingDrives {
-		drive, err := redfish.GetDrive(capacitysource.Client, driveLink)
-		if err != nil {
-			return result, err
-		}
-		result = append(result, drive)
-	}
-	return result, nil
+	return redfish.ListReferencedDrives(capacitysource.Client, capacitysource.providingDrives)
+}
+
+// ProvidingMemory gets contributing memory.
+func (capacitysource *CapacitySource) ProvidingMemory() ([]*redfish.Memory, error) {
+	return redfish.ListReferencedMemorys(capacitysource.Client, capacitysource.providingMemory)
+}
+
+// TODO: Add memory chunks
+
+// ProvidingPools gets contributing pools.
+func (capacitysource *CapacitySource) ProvidingPools() ([]*StoragePool, error) {
+	return ListReferencedStoragePools(capacitysource.Client, capacitysource.providingPools)
+}
+
+// ProvidingVolumes gets contributing volumes.
+func (capacitysource *CapacitySource) ProvidingVolumes() ([]*Volume, error) {
+	return ListReferencedVolumes(capacitysource.Client, capacitysource.providingVolumes)
 }
