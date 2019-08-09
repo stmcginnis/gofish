@@ -68,12 +68,12 @@ type StoragePool struct {
 	// LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all
 	// CapacitySources entries, percent = (SUM(AllocatedBytes) -
 	// SUM(ConsumedBytes))/SUM(AllocatedBytes).
-	LowSpaceWarningThresholdPercents []string
+	LowSpaceWarningThresholdPercents []int
 	// MaxBlockSizeBytes if present, the value is the maximum block size
 	// of an allocated resource. If the block size is unknown or if a block
 	// concept is not valid (for example, with Memory), this property shall
 	// be NULL.
-	MaxBlockSizeBytes int
+	MaxBlockSizeBytes int64
 	// RecoverableCapacitySourceCount is the value of the number of available
 	// capacity source resources currently available in the event that an
 	// equivalent capacity source resource fails.
