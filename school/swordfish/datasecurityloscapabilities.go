@@ -133,7 +133,7 @@ type DataSecurityLoSCapabilities struct {
 	// Identifier shall be unique within the managed ecosystem.
 	Identifier common.Identifier
 	// SupportedAntivirusEngineProviders shall specify supported AntiVirus providers.
-	SupportedAntivirusEngineProviders string
+	SupportedAntivirusEngineProviders []string
 	// SupportedAntivirusScanPolicies shall specify supported policies that
 	// trigger an AntiVirus scan.
 	SupportedAntivirusScanPolicies []AntiVirusScanTrigger
