@@ -72,7 +72,7 @@ type Schedule struct {
 	// enabled, for enabled days of week and months of year. If the array
 	// contains a single value of zero, or if the property is not present,
 	// all days of the month shall be enabled.
-	EnabledDaysOfMonth []string
+	EnabledDaysOfMonth []int
 	// EnabledDaysOfWeek is Days of the week when scheduled occurrences are
 	// enabled. If not present, all days of the week shall be enabled.
 	EnabledDaysOfWeek []DayOfWeek
