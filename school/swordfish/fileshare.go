@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 
 	"github.com/stmcginnis/gofish/school/common"
+	"github.com/stmcginnis/gofish/school/redfish"
 )
 
 // QuotaType shall indicate whether quotas are enabled and enforced by this file
@@ -59,7 +60,7 @@ type FileShare struct {
 	Description string
 	// EthernetInterfaces shall be a link to an EthernetInterfaceCollection with
 	// members that provide access to the file share.
-	EthernetInterfaces string
+	ethernetInterfaces string
 	// ExecuteSupport shall indicate whether Execute access is supported by the
 	// file share. The default value for this property is false.
 	ExecuteSupport bool
@@ -74,10 +75,10 @@ type FileShare struct {
 	FileShareQuotaType QuotaType
 	// FileShareRemainingQuotaBytes value of this property shall indicate the
 	// remaining number of bytes that may be consumed by this file share.
-	FileShareRemainingQuotaBytes int
+	FileShareRemainingQuotaBytes int64
 	// FileShareTotalQuotaBytes value of this property shall indicate the
 	// maximum number of bytes that may be consumed by this file share.
-	FileShareTotalQuotaBytes int
+	FileShareTotalQuotaBytes int64
 	// FileSharingProtocols is This property shall be an array containing
 	// entries for the file sharing protocols supported by this file share.
 	// Each entry shall specify a file sharing protocol supported by the file
@@ -90,7 +91,7 @@ type FileShare struct {
 	// value becomes less than one of the values in the array. The following
 	// shall be true: Across all CapacitySources entries, percent =
 	// (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes)
-	LowSpaceWarningThresholdPercents []string
+	LowSpaceWarningThresholdPercents []int
 	// RemainingCapacityPercent is If present, this value shall return
 	// {[(SUM(AllocatedBytes) - SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100
 	// represented as an integer value.
@@ -120,7 +121,8 @@ func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Links links
+		Links              links
+		EthernetInterfaces common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -128,11 +130,11 @@ func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*fileshare = FileShare(t.temp)
-
 	// Extract the links to other entities for later
+	*fileshare = FileShare(t.temp)
 	fileshare.classOfService = string(t.Links.ClassOfService)
 	fileshare.fileSystem = string(t.Links.FileSystem)
+	fileshare.ethernetInterfaces = string(t.EthernetInterfaces)
 
 	return nil
 }
@@ -195,4 +197,9 @@ func (fileshare *FileShare) FileSystem() (*FileSystem, error) {
 		return result, nil
 	}
 	return GetFileSystem(fileshare.Client, fileshare.fileSystem)
+}
+
+// EthernetInterfaces gets the EthernetInterfaces associated with this share.
+func (fileshare *FileShare) EthernetInterfaces() ([]*redfish.EthernetInterface, error) {
+	return redfish.ListReferencedEthernetInterfaces(fileshare.Client, fileshare.ethernetInterfaces)
 }
