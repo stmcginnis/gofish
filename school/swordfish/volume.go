@@ -189,7 +189,7 @@ type Volume struct {
 	// LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all
 	// CapacitySources entries, percent = (SUM(AllocatedBytes) -
 	// SUM(ConsumedBytes))/SUM(AllocatedBytes).
-	LowSpaceWarningThresholdPercents []string
+	LowSpaceWarningThresholdPercents []int
 	// Manufacturer shall contain a value that represents
 	// the manufacturer or implementer of the storage volume.
 	Manufacturer string
@@ -254,13 +254,13 @@ type Volume struct {
 	// SpareResourceSets referenced SpareResourceSet shall contain
 	// resources that may be utilized to replace the capacity provided by a
 	// failed resource having a compatible type.
-	spareResourceSets string
-	// allocatedPools shall contain references
-	// to all storage pools allocated from this volume.
-	allocatedPools string
+	spareResourceSets []string
+	// allocatedPools shall contain references to all storage pools allocated
+	// from this volume.
+	allocatedPools []string
 	// storageGroups shall contain references to all storage groups that include
 	// this volume.
-	storageGroups string
+	storageGroups []string
 }
 
 // UnmarshalJSON unmarshals a Volume object from the raw JSON.
@@ -290,14 +290,16 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 		// SpareResourceSets is Each referenced SpareResourceSet shall contain
 		// resources that may be utilized to replace the capacity provided by a
 		// failed resource having a compatible type.
-		SpareResourceSets common.Link
+		SpareResourceSets common.Links
 		// SpareResourceSets@odata.count is
 		SpareResourceSetsCount int `json:"SpareResourceSets@odata.count"`
 	}
 
 	var t struct {
 		temp
-		Links links
+		AllocatedPools common.Links
+		StorageGroups  common.Links
+		Links          links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -305,13 +307,14 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*volume = Volume(t.temp)
-
 	// Extract the links to other entities for later
+	*volume = Volume(t.temp)
+	volume.allocatedPools = t.AllocatedPools.ToStrings()
+	volume.storageGroups = t.StorageGroups.ToStrings()
 	volume.classOfService = string(t.Links.ClassOfService)
 	volume.dedicatedSpareDrives = t.Links.DedicatedSpareDrives.ToStrings()
 	volume.drives = t.Links.Drives.ToStrings()
-	volume.spareResourceSets = string(t.Links.SpareResourceSets)
+	volume.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
 	volume.DedicatedSpareDrivesCount = t.Links.DedicatedSpareDrivesCount
 	volume.DrivesCount = t.Links.DrivesCount
 	volume.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
@@ -397,5 +400,42 @@ func (volume *Volume) Drives() ([]*redfish.Drive, error) {
 
 // SpareResourceSets gets the spare resources that can be used for this volume.
 func (volume *Volume) SpareResourceSets() ([]*SpareResourceSet, error) {
-	return ListReferencedSpareResourceSets(volume.Client, volume.spareResourceSets)
+	var result []*SpareResourceSet
+	for _, srsLink := range volume.spareResourceSets {
+		srs, err := GetSpareResourceSet(volume.Client, srsLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, srs)
+	}
+
+	return result, nil
+}
+
+// StorageGroups gets the storage groups that associated with this volume.
+func (volume *Volume) StorageGroups() ([]*StorageGroup, error) {
+	var result []*StorageGroup
+	for _, sgLink := range volume.storageGroups {
+		sg, err := GetStorageGroup(volume.Client, sgLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, sg)
+	}
+
+	return result, nil
+}
+
+// StoragePools gets the storage pools that associated with this volume.
+func (volume *Volume) StoragePools() ([]*StoragePool, error) {
+	var result []*StoragePool
+	for _, sgLink := range volume.allocatedPools {
+		sg, err := GetStoragePool(volume.Client, sgLink)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, sg)
+	}
+
+	return result, nil
 }
