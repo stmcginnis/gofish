@@ -78,7 +78,7 @@ func TestChassis(t *testing.T) {
 	}
 
 	if result.AssetTag != "Chicago-45Z-2381" {
-		t.Errorf("Recieved invalid asset tag: %s", result.AssetTag)
+		t.Errorf("Received invalid asset tag: %s", result.AssetTag)
 	}
 
 	if result.ChassisType != RackMountChassisType {
@@ -90,7 +90,7 @@ func TestChassis(t *testing.T) {
 	}
 
 	if result.thermal != "/redfish/v1/Chassis/Chassis-1/Thermal" {
-		t.Errorf("Recieved invalid thermal reference: %s", result.thermal)
+		t.Errorf("Received invalid thermal reference: %s", result.thermal)
 	}
 
 	if result.power != "/redfish/v1/Chassis/Chassis-1/Power" {

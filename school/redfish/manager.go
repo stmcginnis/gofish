@@ -183,7 +183,7 @@ type Manager struct {
 	// ethernetInterfaces shall be a link to a collection of type
 	// EthernetInterfaceCollection.
 	ethernetInterfaces string
-	// FirmwareVersion shall contain the firwmare version as defined by the
+	// FirmwareVersion shall contain the firmware version as defined by the
 	// manufacturer for the associated manager.
 	FirmwareVersion string
 	// GraphicalConsole shall contain the information about the Graphical

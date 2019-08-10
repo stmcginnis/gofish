@@ -389,7 +389,7 @@ type LogEntry struct {
 	SensorType SensorType
 	// Severity shall be the severity of the
 	// condition resulting in the log entry, as defined in the Status section
-	// of the Redfish specificaiton.
+	// of the Redfish specification.
 	Severity EventSeverity
 	// originOfCondition shall be an href that
 	// references the resource for which the log is associated.

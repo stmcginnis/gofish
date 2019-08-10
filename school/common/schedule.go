@@ -77,7 +77,7 @@ type Schedule struct {
 	// enabled. If not present, all days of the week shall be enabled.
 	EnabledDaysOfWeek []DayOfWeek
 	// EnabledIntervals shall be an ISO 8601 conformant interval specifying when
-	// occurences are enabled.
+	// occurrences are enabled.
 	EnabledIntervals []string
 	// EnabledMonthsOfYear is Months of year when scheduled occurrences are
 	// enabled, for enabled days of week and days of month. If not present,

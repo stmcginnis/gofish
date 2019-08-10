@@ -60,7 +60,7 @@ type HealthData struct {
 	// indicating success.
 	LastShutdownSuccess bool
 	// PerformanceDegraded shall be performance degraded mode status, with true
-	// indicating perfomance degraded.
+	// indicating performance degraded.
 	PerformanceDegraded bool
 	// PredictedMediaLifeLeftPercent is This property shall contain an indicator
 	// of the percentage of life remaining in the media.
@@ -90,7 +90,7 @@ type MemoryMetrics struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// BlockSizeBytes shall be the block size in bytes of all stucture elements.
+	// BlockSizeBytes shall be the block size in bytes of all structure elements.
 	BlockSizeBytes int
 	// CurrentPeriod shall contain properties which describe the CurrentPeriod
 	// metrics for the current resource.

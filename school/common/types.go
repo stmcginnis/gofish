@@ -114,7 +114,7 @@ const (
 	// Interface Specification.
 	FCWWNDurableNameFormat DurableNameFormat = "FC_WWN"
 	// UUIDDurableNameFormat shall be the hexadecimal representation of the Universal
-	// Unique Identifier as defined in the Internation Telecom Union's OSI networking
+	// Unique Identifier as defined in the International Telecom Union's OSI networking
 	// and system aspects - Naming, Addressing and Registration Specification.
 	UUIDDurableNameFormat DurableNameFormat = "UUID"
 	// EUIDurableNameFormat shall be the hexadecimal representation of the IEEE-defined

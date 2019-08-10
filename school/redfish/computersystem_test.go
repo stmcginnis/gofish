@@ -215,7 +215,7 @@ func TestComputerSystem(t *testing.T) {
 	}
 
 	if result.processors != "/redfish/v1/Systems/System-1/Processors" {
-		t.Errorf("Recieved invalid processors reference: %s", result.processors)
+		t.Errorf("Received invalid processors reference: %s", result.processors)
 	}
 
 	if result.memory != "/redfish/v1/Systems/System-1/Memory" {

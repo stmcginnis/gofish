@@ -171,25 +171,25 @@ type SystemType string
 const (
 
 	// PhysicalSystemType is a System Type of Physical is typically used when
-	// representating the hardware aspects of a system such as is done by a
+	// representing the hardware aspects of a system such as is done by a
 	// management controller.
 	PhysicalSystemType SystemType = "Physical"
 	// VirtualSystemType is a System Type of Virtual is typically used when
-	// representating a system that is actually a virtual machine instance.
+	// representing a system that is actually a virtual machine instance.
 	VirtualSystemType SystemType = "Virtual"
-	// OSSystemType is a System Type of OS is typically used when representating
+	// OSSystemType is a System Type of OS is typically used when representing
 	// an OS or hypervisor view of the system.
 	OSSystemType SystemType = "OS"
 	// PhysicallyPartitionedSystemType is a System Type of PhysicallyPartition is
-	// typically used when representating a single system constructed from
+	// typically used when representing a single system constructed from
 	// one or more physical systems via a firmware or hardware-based service.
 	PhysicallyPartitionedSystemType SystemType = "PhysicallyPartitioned"
 	// VirtuallyPartitionedSystemType is a System Type of VirtuallyPartition is
-	// typically used when representating a single system constructed from
+	// typically used when representing a single system constructed from
 	// one or more virtual systems via a software-based service.
 	VirtuallyPartitionedSystemType SystemType = "VirtuallyPartitioned"
 	// ComposedSystemType is a System Type of Composed is typically used when
-	// representating a single system constructed from disaggregated resource
+	// representing a single system constructed from disaggregated resource
 	// via the Redfish Composition service.
 	ComposedSystemType SystemType = "Composed"
 )
@@ -735,7 +735,7 @@ type ProcessorSummary struct {
 
 // TrustedModules is This type shall describe a truted module for a system.
 type TrustedModules struct {
-	// FirmwareVersion is the firwmare version as
+	// FirmwareVersion is the firmware version as
 	// defined by the manufacturer for the Trusted Module.
 	FirmwareVersion string
 	// FirmwareVersion2 is the 2nd firmware

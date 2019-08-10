@@ -258,7 +258,7 @@ type PowerLimit struct {
 // resource.
 type PowerMetric struct {
 	// AverageConsumedWatts shall represent the
-	// average power level that occured averaged over the last IntervalInMin
+	// average power level that occurred averaged over the last IntervalInMin
 	// minutes.
 	AverageConsumedWatts int
 	// IntervalInMin shall represent the time
@@ -266,11 +266,11 @@ type PowerMetric struct {
 	// are measured over.
 	IntervalInMin int
 	// MaxConsumedWatts shall represent the
-	// maximum power level in watts that occured within the last
+	// maximum power level in watts that occurred within the last
 	// IntervalInMin minutes.
 	MaxConsumedWatts int
 	// MinConsumedWatts shall represent the
-	// minimum power level in watts that occured within the last
+	// minimum power level in watts that occurred within the last
 	// IntervalInMin minutes.
 	MinConsumedWatts int
 }
@@ -285,7 +285,7 @@ type PowerSupply struct {
 	// EfficiencyPercent shall contain the value of the measured power
 	// efficiency, as a percentage, of the associated power supply.
 	EfficiencyPercent int
-	// FirmwareVersion shall contain the firwmare version as
+	// FirmwareVersion shall contain the firmware version as
 	// defined by the manufacturer for the associated power supply.
 	FirmwareVersion string
 	// HotPluggable shall indicate whether the

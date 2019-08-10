@@ -77,7 +77,7 @@ func TestCompositionService(t *testing.T) {
 	}
 
 	if result.resourceBlocks != "/redfish/v1/CompositionService/ResourceBlocks" {
-		t.Errorf("Recieved invalid resource blocks reference: %s", result.resourceBlocks)
+		t.Errorf("Received invalid resource blocks reference: %s", result.resourceBlocks)
 	}
 
 	if result.resourceZones != "/redfish/v1/CompositionService/ResourceZones" {

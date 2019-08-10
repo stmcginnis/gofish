@@ -193,7 +193,7 @@ type StorageController struct {
 	// CacheSummary shall contain properties which describe the cache memory for
 	// the current resource.
 	CacheSummary CacheSummary
-	// FirmwareVersion shall contain the firwmare version as defined by the
+	// FirmwareVersion shall contain the firmware version as defined by the
 	// manufacturer for the associated storage controller.
 	FirmwareVersion string
 	// Identifiers shall contain a list of all known durable names for the
