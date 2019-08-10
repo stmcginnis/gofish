@@ -12,7 +12,7 @@
 
 PKGS := $(shell go list ./school/...)
 
-all: build
+all: build test
 
 test:
 	go test -v $(PKGS)
