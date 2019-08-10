@@ -43,7 +43,7 @@ const (
 	// is not yet complete.
 	StoppingTaskState TaskState = "Stopping"
 	// CompletedTaskState shall represent that the operation is complete and
-	// completed sucessfully or with warnings.
+	// completed successfully or with warnings.
 	CompletedTaskState TaskState = "Completed"
 	// KilledTaskState shall represent that the operation is complete because
 	// the task was killed by an operator.
