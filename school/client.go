@@ -125,10 +125,12 @@ func (c *ApiClient) Post(url string, payload []byte) (*http.Response, error) {
 	return resp, err
 }
 
+// Put makes a PUT call. TODO: Implement
 func (c *ApiClient) Put() {
 
 }
 
+// Patch makes a PATCH call. TODO: Implement
 func (c *ApiClient) Patch() {
 
 }
