@@ -1,7 +1,7 @@
 #!/bin/sh
 # Generates a subordinate script (gen_go_source.sh) from a given schema zip
 # file, finds the names of the objects, then generates go files based on
-# the provided generate_from_schema.py tool and accompanying source.go file.
+# the provided generate_from_schema.py tool and accompanying source.tmpl file.
 # Leaves the gen_go_source.sh in place for modification if needed and can be run
 # independently of this script to regenerate files.
 

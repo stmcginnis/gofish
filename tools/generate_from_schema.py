@@ -218,7 +218,7 @@ def main():
         else:
             LOG.debug('Skipping %s', definition)
 
-    with io.open('source.go', 'r', encoding='utf-8') as f:
+    with io.open('source.tmpl', 'r', encoding='utf-8') as f:
         template_body = f.read()
 
     template = jinja2.Template(template_body)
