@@ -328,11 +328,11 @@ type ReplicaInfo struct {
 	ConsistencyStatus ConsistencyStatus
 	// ConsistencyType is used by the source and its associated target group.
 	ConsistencyType ConsistencyType
-	// DataProtectionLineOfService shall be a set of data
+	// dataProtectionLineOfService shall be a set of data
 	// protection service options.  Within a class of service, one data
 	// protection service option shall be present for each replication
 	// session.
-	DataProtectionLineOfService DataProtectionLineOfService
+	dataProtectionLineOfService []string
 	// FailedCopyStopsHostIO is If true, the storage array shall stop
 	// receiving data to the source element if copying to a remote element
 	// fails. The default value for this property is false.
@@ -344,7 +344,7 @@ type ReplicaInfo struct {
 	// members of the group.
 	PercentSynced int
 	// Replica shall reference the resource that is the source of this replica.
-	Replica common.Link
+	replica string
 	// ReplicaPriority shall specify the priority
 	// of background copy engine I/O to be managed relative to host I/O
 	// operations during a sequential background copy operation.
@@ -363,7 +363,7 @@ type ReplicaInfo struct {
 	// number of bytes the SyncedElement (target) can be out of sync. If the
 	// number of out-of-sync bytes exceeds the skew value, ReplicaUpdateMode
 	// shall be switched to synchronous.
-	ReplicaSkewBytes int
+	ReplicaSkewBytes int64
 	// ReplicaState is The ReplicaState enumeration literal shall specify the
 	// state of the relationship with respect to Replication activity.
 	ReplicaState ReplicaState
@@ -415,6 +415,28 @@ type ReplicaInfo struct {
 	// Do not instantiate this property if implementation is not capable of
 	// providing this information.
 	WhenSynchronized string
+}
+
+// UnmarshalJSON unmarshals a ReplicaInfo object from the raw JSON.
+func (replicainfo *ReplicaInfo) UnmarshalJSON(b []byte) error {
+	type temp ReplicaInfo
+	var t struct {
+		temp
+		DataProtectionLineOfService common.Links
+		Replica                     common.Link
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	// Extract the links to other entities for later
+	*replicainfo = ReplicaInfo(t.temp)
+	replicainfo.dataProtectionLineOfService = t.DataProtectionLineOfService.ToStrings()
+	replicainfo.replica = string(t.Replica)
+
+	return nil
 }
 
 // StorageReplicaInfo is
