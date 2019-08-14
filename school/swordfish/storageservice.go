@@ -57,13 +57,13 @@ type StorageService struct {
 	// drives is a collection that indicates all the drives managed by this
 	// storage service.
 	drives string
-	// endpointGroups shall reference an EndpointGroup.
-	endpointGroups []string
-	// endpoints shall reference an Endpoint managed by this service.
-	endpoints []string
+	// endpointGroups shall reference a collection of EndpointGroups.
+	endpointGroups string
+	// endpoints shall reference a collection of Endpoints managed by this service.
+	endpoints string
 	// fileSystems is an array of references to FileSystems managed by this
 	// storage service.
-	fileSystems []string
+	fileSystems string
 	// hostingSystem shall reference the ComputerSystem or
 	// StorageController that hosts this service.
 	hostingSystem string
@@ -79,9 +79,9 @@ type StorageService struct {
 	// replace the capacity provided by a failed resource having a compatible type.
 	spareResourceSets []string
 	// storageGroups are the associated storage groups for this service.
-	storageGroups []string
+	storageGroups string
 	// StoragePools is an array of references to StoragePools.
-	storagePools []string
+	storagePools string
 	// StorageSubsystems shall be a link to a collection of type
 	// StorageCollection having members that represent storage subsystems
 	// managed by this storage service.
@@ -91,7 +91,7 @@ type StorageService struct {
 	redundancy []string
 	// Volumes is an array of references to Volumes managed by this storage
 	// service.
-	volumes []string
+	volumes string
 }
 
 // UnmarshalJSON unmarshals a StorageService object from the raw JSON.
@@ -110,17 +110,17 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		DataStorageLoSCapabilities    common.Link
 		DefaultClassOfService         common.Link
 		Drives                        common.Link
-		EndpointGroups                common.Links
-		Endpoints                     common.Links
-		FileSystems                   common.Links
+		EndpointGroups                common.Link
+		Endpoints                     common.Link
+		FileSystems                   common.Link
 		IOConnectivityLoSCapabilities common.Link
 		IOPerformanceLoSCapabilities  common.Link
 		Redundancy                    common.Links
 		SpareResourceSets             common.Links
-		StorageGroups                 common.Links
-		StoragePools                  common.Links
+		StorageGroups                 common.Link
+		StoragePools                  common.Link
 		StorageSubsystems             common.Link
-		Volumes                       common.Links
+		Volumes                       common.Link
 		Links                         links
 	}
 
@@ -137,18 +137,18 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	storageservice.dataStorageLoSCapabilities = string(t.DataStorageLoSCapabilities)
 	storageservice.defaultClassOfService = string(t.DefaultClassOfService)
 	storageservice.drives = string(t.Drives)
-	storageservice.endpointGroups = t.EndpointGroups.ToStrings()
-	storageservice.endpoints = t.Endpoints.ToStrings()
-	storageservice.fileSystems = t.FileSystems.ToStrings()
+	storageservice.endpointGroups = string(t.EndpointGroups)
+	storageservice.endpoints = string(t.Endpoints)
+	storageservice.fileSystems = string(t.FileSystems)
 	storageservice.ioConnectivityLoSCapabilities = string(t.IOConnectivityLoSCapabilities)
 	storageservice.ioPerformanceLoSCapabilities = string(t.IOPerformanceLoSCapabilities)
 	storageservice.redundancy = t.Redundancy.ToStrings()
 	storageservice.spareResourceSets = t.SpareResourceSets.ToStrings()
-	storageservice.storageGroups = t.StorageGroups.ToStrings()
-	storageservice.storagePools = t.StoragePools.ToStrings()
+	storageservice.storageGroups = string(t.StorageGroups)
+	storageservice.storagePools = string(t.StoragePools)
 	storageservice.storageSubsystems = string(t.StorageSubsystems)
 	storageservice.hostingSystem = string(t.Links.HostingSystem)
-	storageservice.volumes = t.Volumes.ToStrings()
+	storageservice.volumes = string(t.Volumes)
 
 	return nil
 }
@@ -193,10 +193,6 @@ func ListReferencedStorageServices(c common.Client, link string) ([]*StorageServ
 
 // ClassesOfService gets the storage service's classes of service.
 func (storageservice *StorageService) ClassesOfService() ([]*ClassOfService, error) {
-	if storageservice.classesOfService == "" {
-		var result []*ClassOfService
-		return result, nil
-	}
 	return ListReferencedClassOfServices(storageservice.Client, storageservice.classesOfService)
 }
 
@@ -239,56 +235,22 @@ func (storageservice *StorageService) DefaultClassOfService() (*ClassOfService, 
 
 // Drives gets the storage service's drives.
 func (storageservice *StorageService) Drives() ([]*redfish.Drive, error) {
-	if storageservice.drives == "" {
-		var result []*redfish.Drive
-		return result, nil
-	}
 	return redfish.ListReferencedDrives(storageservice.Client, storageservice.drives)
 }
 
 // EndpointGroups gets the storage service's endpoint groups.
 func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
-	var result []*EndpointGroup
-
-	for _, endpointGroupLink := range storageservice.endpointGroups {
-		endpointGroup, err := GetEndpointGroup(storageservice.Client, endpointGroupLink)
-		if err != nil {
-			return result, err
-		}
-		result = append(result, endpointGroup)
-	}
-
-	return result, nil
+	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
 }
 
 // Endpoints gets the storage service's endpoints.
 func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
-	var result []*redfish.Endpoint
-
-	for _, endpointLink := range storageservice.endpoints {
-		endpoint, err := redfish.GetEndpoint(storageservice.Client, endpointLink)
-		if err != nil {
-			return result, err
-		}
-		result = append(result, endpoint)
-	}
-
-	return result, nil
+	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
 }
 
 // FileSystems gets all filesystems available through this storage service.
 func (storageservice *StorageService) FileSystems() ([]*FileSystem, error) {
-	var result []*FileSystem
-
-	for _, fsLink := range storageservice.fileSystems {
-		fs, err := GetFileSystem(storageservice.Client, fsLink)
-		if err != nil {
-			return result, err
-		}
-		result = append(result, fs)
-	}
-
-	return result, nil
+	return ListReferencedFileSystems(storageservice.Client, storageservice.fileSystems)
 }
 
 // IOConnectivityLoSCapabilities references the IO connectivity capabilities of this service.
@@ -352,14 +314,5 @@ func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
 
 // Volumes gets the volumes that are a part of this storage service.
 func (storageservice *StorageService) Volumes() ([]*Volume, error) {
-	var result []*Volume
-	for _, volumeLink := range storageservice.volumes {
-		volume, err := GetVolume(storageservice.Client, volumeLink)
-		if err != nil {
-			return result, err
-		}
-		result = append(result, volume)
-	}
-
-	return result, nil
+	return ListReferencedVolumes(storageservice.Client, storageservice.volumes)
 }

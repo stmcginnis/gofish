@@ -33,27 +33,15 @@ var storageServiceBody = strings.NewReader(
 		"Drives": {
 			"@odata.id": "/redfish/v1/Drives"
 		},
-		"EndpointGroups": [{
-				"@odata.id": "/redfish/v1/Endpoints/1"
-			},
-			{
-				"@odata.id": "/redfish/v1/Endpoints/2"
-			}
-		],
-		"Endpoints": [{
-				"@odata.id": "/redfish/v1/Endpoints/1"
-			},
-			{
-				"@odata.id": "/redfish/v1/Endpoints/2"
-			}
-		],
-		"FileSystems": [{
-				"@odata.id": "/redfish/v1/FileSystem/1"
-			},
-			{
-				"@odata.id": "/redfish/v1/FileSystem/2"
-			}
-		],
+		"EndpointGroups": {
+			"@odata.id": "/redfish/v1/EndpointGroups"
+		},
+		"Endpoints": {
+			"@odata.id": "/redfish/v1/Endpoints"
+		},
+		"FileSystems": {
+			"@odata.id": "/redfish/v1/FileSystems"
+		},
 		"IOConnectivityLoSCapabilities": {
 			"@odata.id": "/redfish/v1/IOConnectivityLoSCapabilities/1"
 		},
@@ -122,12 +110,12 @@ func TestStorageService(t *testing.T) {
 		t.Errorf("Invalid ClassesOfService link: %s", result.classesOfService)
 	}
 
-	if len(result.endpointGroups) != 2 {
-		t.Errorf("Expected 2 endpoint groups, got %d", len(result.endpointGroups))
+	if result.endpointGroups != "/redfish/v1/EndpointGroups" {
+		t.Errorf("Invalid EndpointGroups link: %s", result.endpointGroups)
 	}
 
-	if len(result.endpoints) != 2 {
-		t.Errorf("Expected 2 endpoints, got %d", len(result.endpoints))
+	if result.endpoints != "/redfish/v1/Endpoints" {
+		t.Errorf("Invalid Endpoints link: %s", result.endpoints)
 	}
 
 	if result.IOStatistics.NonIORequests != 1000 {
