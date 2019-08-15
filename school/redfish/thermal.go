@@ -25,6 +25,7 @@ const (
 
 // Fan is
 type Fan struct {
+	common.Entity
 	// ODataID is the odata identifier.
 	ODataID string `json:"@odata.id"`
 	// assembly shall be a link to a resource of type Assembly.
@@ -117,6 +118,7 @@ func (fan *Fan) UnmarshalJSON(b []byte) error {
 	type temp Fan
 	var t struct {
 		temp
+		FanName  string
 		Assembly common.Link
 	}
 
@@ -128,6 +130,10 @@ func (fan *Fan) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*fan = Fan(t.temp)
 	fan.assembly = string(t.Assembly)
+
+	if t.FanName != "" {
+		fan.Name = t.FanName
+	}
 
 	return nil
 }
@@ -156,6 +162,7 @@ func (fan *Fan) UnmarshalJSON(b []byte) error {
 
 // Temperature is
 type Temperature struct {
+	common.Entity
 	// ODataID is the odata identifier.
 	ODataID string `json:"@odata.id"`
 	// AdjustedMaxAllowableOperatingValue shall

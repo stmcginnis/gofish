@@ -25,22 +25,22 @@ var powerBody = strings.NewReader(
 			"MemberId": "PC1",
 			"Name": "Fred",
 			"PhysicalContext": "Upper",
-			"PowerAllocatedWatts": 100,
-			"PowerAvailableWatts": 100,
-			"PowerCapacityWatts": 100,
-			"PowerConsumedWatts": 100,
+			"PowerAllocatedWatts": 100.0,
+			"PowerAvailableWatts": 100.0,
+			"PowerCapacityWatts": 100.0,
+			"PowerConsumedWatts": 100.0,
 			"PowerLimit": {
 				"CorrectionInMs": 10000,
 				"LimitException": "HardPowerOff",
-				"LimitInWatts": 1000
+				"LimitInWatts": 1000.0
 			},
 			"PowerMetrics": {
-				"AverageConsumedWatts": 1000,
+				"AverageConsumedWatts": 1000.0,
 				"IntervalInMin": 5,
-				"MaxConsumedWatts": 1000,
-				"MinConsumedWatts": 1000
+				"MaxConsumedWatts": 1000.0,
+				"MinConsumedWatts": 1000.0
 			},
-			"PowerRequestedWatts": 1000,
+			"PowerRequestedWatts": 1000.0,
 			"RelatedItem": [],
 			"RelatedItem@odata.count": 0,
 			"Status": {
@@ -61,23 +61,23 @@ var powerBody = strings.NewReader(
 			"IndicatorLED": "Lit",
 			"InputRanges": [{
 					"InputType": "AC",
-					"MaximumFrequencyHz": 99,
-					"MaximumVoltage": 9,
-					"MinimumFrequencyHz": 10,
-					"MinimumVoltage": 1,
-					"OutputWattage": 100
+					"MaximumFrequencyHz": 99.0,
+					"MaximumVoltage": 9.0,
+					"MinimumFrequencyHz": 10.0,
+					"MinimumVoltage": 1.0,
+					"OutputWattage": 100.0
 				},
 				{
 					"InputType": "DC",
-					"MaximumFrequencyHz": 88,
-					"MaximumVoltage": 9,
-					"MinimumFrequencyHz": 8,
-					"MinimumVoltage": 1,
-					"OutputWattage": 22
+					"MaximumFrequencyHz": 88.0,
+					"MaximumVoltage": 9.0,
+					"MinimumFrequencyHz": 8.0,
+					"MinimumVoltage": 1.0,
+					"OutputWattage": 22.0
 				}
 			],
-			"LastPowerOutputWatts": 100,
-			"LineInputVoltage": 9,
+			"LastPowerOutputWatts": 100.0,
+			"LineInputVoltage": 9.0,
 			"LineInputVoltageType": "ACandDCWideRange",
 			"Location": {},
 			"Manufacturer": "Acme Inc",
@@ -104,15 +104,15 @@ var powerBody = strings.NewReader(
 		"Redundancy@odata.count": 0,
 		"Voltages": [{
 			"@odata.id": "/redfish/v1/Voltage/1",
-			"LowerThresholdCritical": 1,
-			"LowerThresholdFatal": 0,
-			"LowerThresholdNonCritical": 5,
-			"MaxReadingRange": 10,
+			"LowerThresholdCritical": 1.0,
+			"LowerThresholdFatal": 0.0,
+			"LowerThresholdNonCritical": 5.0,
+			"MaxReadingRange": 10.0,
 			"MemberId": "Voltage1",
-			"MinReadingRange": 1,
+			"MinReadingRange": 1.0,
 			"Name": "Voltage-1",
 			"PhysicalContext": "Upper",
-			"ReadingVolts": 12,
+			"ReadingVolts": 12.0,
 			"RelatedItem": [],
 			"RelatedItem@odata.count": 0,
 			"SensorNumber": 1,
@@ -120,9 +120,9 @@ var powerBody = strings.NewReader(
 				"State": "Enabled",
 				"Health": "OK"
 			},
-			"UpperThresholdCritical": 10000,
-			"UpperThreadsholdFatal": 10001,
-			"UpperThresholdNonCritical": 1000
+			"UpperThresholdCritical": 10000.0,
+			"UpperThreadsholdFatal": 10001.0,
+			"UpperThresholdNonCritical": 1000.0
 		}],
 		"Voltages@odata.count": 1
 	}`)
@@ -162,6 +162,6 @@ func TestPower(t *testing.T) {
 	}
 
 	if result.Voltages[0].MaxReadingRange != 10 {
-		t.Errorf("Invalid MaxReadingRange: %d", result.Voltages[0].MaxReadingRange)
+		t.Errorf("Invalid MaxReadingRange: %f", result.Voltages[0].MaxReadingRange)
 	}
 }

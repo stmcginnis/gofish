@@ -43,31 +43,49 @@ type Redundancy struct {
 
 	// ODataID is the odata identifier.
 	ODataID string `json:"@odata.id"`
-	// MaxNumSupported is The value of this property shall contain the
-	// maximum number of members allowed in the redundancy group.
+	// MaxNumSupported shall contain the maximum number of members allowed in
+	// the redundancy group.
 	MaxNumSupported int
 	// MemberID ivalue of this string shall uniquely identify the member within
 	// the collection.
 	MemberID string `json:"MemberId"`
-	// MinNumNeeded is The value of this property shall contain the minimum
+	// MinNumNeeded shall contain the minimum
 	// number of members allowed in the redundancy group for the current
 	// redundancy mode to still be fault tolerant.
 	MinNumNeeded int
-	// Mode is The value of this property shall contain the information about
-	// the redundancy mode of this subsystem.
+	// Mode shall contain the information about the redundancy mode of this
+	// subsystem.
 	Mode RedundancyMode
-	// RedundancyEnabled is The value of this property shall be a boolean
-	// indicating whether the redundancy is enabled.
+	// RedundancyEnabled shall be a boolean indicating whether the redundancy is
+	// enabled.
 	RedundancyEnabled bool
-	// RedundancySet is The value of this property shall contain the ids of
-	// components that are part of this redundancy set. The id values may or
-	// may not be dereferenceable.
-	RedundancySet []string
-	// RedundancySetCount is
+	// RedundancySet shall contain the ids of components that are part of this
+	// redundancy set. The id values may or may not be dereferenceable.
+	redundancySet []string
+	// RedundancySetCount is the number of RedundancySets.
 	RedundancySetCount int `json:"RedundancySet@odata.count"`
-	// Status is This property shall contain any status or health properties
-	// of the resource.
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+}
+
+// UnmarshalJSON unmarshals a Redundancy object from the raw JSON.
+func (redundancy *Redundancy) UnmarshalJSON(b []byte) error {
+	type temp Redundancy
+	var t struct {
+		temp
+		RedundancySet common.Links
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	// Extract the links to other entities for later
+	*redundancy = Redundancy(t.temp)
+	redundancy.redundancySet = t.RedundancySet.ToStrings()
+
+	return nil
 }
 
 // GetRedundancy will get a Redundancy instance from the service.
