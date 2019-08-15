@@ -19,6 +19,8 @@ var thermalBody = strings.NewReader(
 		"Name": "ThermalOne",
 		"Description": "Thermal One",
 		"Fans": [{
+			"Id": "Fan1",
+			"FanName": "Fan One",
 			"Assembly": {
 				"@odata.id": "/redfish/v1/Assemblies/1"
 			},
@@ -61,6 +63,7 @@ var thermalBody = strings.NewReader(
 		},
 		"Temperatures": [{
 			"@odata.id": "/redfish/v1/Temp",
+			"Id": "Temp1",
 			"AdjustedMaxAllowableOperatingValue": 60,
 			"AdjustedMinAllowableOperatingValue": 1,
 			"DeltaPhysicalContext": "Exhaust",
@@ -105,5 +108,9 @@ func TestThermal(t *testing.T) {
 
 	if result.Name != "ThermalOne" {
 		t.Errorf("Received invalid name: %s", result.Name)
+	}
+
+	if result.Fans[0].Name != "Fan One" {
+		t.Errorf("Invalid fan name: %s", result.Fans[0].Name)
 	}
 }
