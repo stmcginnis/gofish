@@ -92,19 +92,19 @@ type InputRange struct {
 	InputType InputType
 	// MaximumFrequencyHz shall contain the value in Hertz of the maximum line
 	// input frequency which the power supply is capable of consuming for this range.
-	MaximumFrequencyHz int
+	MaximumFrequencyHz float32
 	// MaximumVoltage shall contain the value in Volts of the maximum line input
 	// voltage which the power supply is capable of consuming for this range.
-	MaximumVoltage int
+	MaximumVoltage float32
 	// MinimumFrequencyHz shall contain the value in Hertz of the minimum line
 	// input frequency which the power supply is capable of consuming for this range.
-	MinimumFrequencyHz int
+	MinimumFrequencyHz float32
 	// MinimumVoltage shall contain the value in Volts of the minimum line input
 	// voltage which the power supply is capable of consuming for this range.
-	MinimumVoltage int
+	MinimumVoltage float32
 	// OutputWattage shall contiain the maximum amount of power, in Watts, that
 	// the associated power supply is rated to deliver while operating in this input range.
-	OutputWattage int
+	OutputWattage float32
 }
 
 // Power is used to represent a power metrics resource for a Redfish
@@ -201,17 +201,17 @@ type PowerControl struct {
 	PhysicalContext common.PhysicalContext
 	// PowerAllocatedWatts shall represent the total power currently allocated
 	// to chassis resources.
-	PowerAllocatedWatts int
+	PowerAllocatedWatts float32
 	// PowerAvailableWatts shall represent the amount of power capacity (in
 	// Watts) not already allocated and shall equal PowerCapacityWatts -
 	// PowerAllocatedWatts.
-	PowerAvailableWatts int
+	PowerAvailableWatts float32
 	// PowerCapacityWatts shall represent the total power capacity that is
 	// available for allocation to the chassis resources.
-	PowerCapacityWatts int
+	PowerCapacityWatts float32
 	// PowerConsumedWatts shall represent the actual power being consumed (in
 	// Watts) by the chassis.
-	PowerConsumedWatts int
+	PowerConsumedWatts float32
 	// PowerLimit shall contain power limit status and configuration information
 	// for this chassis.
 	PowerLimit PowerLimit
@@ -221,7 +221,7 @@ type PowerControl struct {
 	// PowerRequestedWatts shall represent the
 	// amount of power (in Watts) that the chassis resource is currently
 	// requesting be budgeted to it for future use.
-	PowerRequestedWatts int
+	PowerRequestedWatts float32
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
@@ -242,7 +242,7 @@ type PowerLimit struct {
 	// LimitInWatts shall represent the power
 	// cap limit in watts for the resource. If set to null, power capping
 	// shall be disabled.
-	LimitInWatts int
+	LimitInWatts float32
 }
 
 // PowerMetric shall contain power metrics for power
@@ -252,7 +252,7 @@ type PowerMetric struct {
 	// AverageConsumedWatts shall represent the
 	// average power level that occurred averaged over the last IntervalInMin
 	// minutes.
-	AverageConsumedWatts int
+	AverageConsumedWatts float32
 	// IntervalInMin shall represent the time
 	// interval (or window), in minutes, in which the PowerMetrics properties
 	// are measured over.
@@ -260,11 +260,11 @@ type PowerMetric struct {
 	// MaxConsumedWatts shall represent the
 	// maximum power level in watts that occurred within the last
 	// IntervalInMin minutes.
-	MaxConsumedWatts int
+	MaxConsumedWatts float32
 	// MinConsumedWatts shall represent the
 	// minimum power level in watts that occurred within the last
 	// IntervalInMin minutes.
-	MinConsumedWatts int
+	MinConsumedWatts float32
 }
 
 // PowerSupply is Details of a power supplies associated with this system
@@ -296,11 +296,11 @@ type PowerSupply struct {
 	InputRanges []InputRange
 	// LastPowerOutputWatts shall contain the average power
 	// output, measured in Watts, of the associated power supply.
-	LastPowerOutputWatts int
+	LastPowerOutputWatts float32
 	// LineInputVoltage shall contain the value in Volts of
 	// the line input voltage (measured or configured for) that the power
 	// supply has been configured to operate with or is currently receiving.
-	LineInputVoltage int
+	LineInputVoltage float32
 	// LineInputVoltageType shall contain the type of input
 	// line voltage supported by the associated power supply.
 	LineInputVoltageType LineInputVoltageType
@@ -325,13 +325,13 @@ type PowerSupply struct {
 	// PowerCapacityWatts shall contiain the maximum amount
 	// of power, in Watts, that the associated power supply is rated to
 	// deliver.
-	PowerCapacityWatts int
+	PowerCapacityWatts float32
 	// PowerInputWatts shall contain the value of the
 	// measured input power, in Watts, of the associated power supply.
-	PowerInputWatts int
+	PowerInputWatts float32
 	// PowerOutputWatts shall contain the value of the
 	// measured output power, in Watts, of the associated power supply.
-	PowerOutputWatts int
+	PowerOutputWatts float32
 	// PowerSupplyType shall contain the input power type
 	// (AC or DC) of the associated power supply.
 	PowerSupplyType PowerSupplyType
@@ -380,33 +380,33 @@ type Voltage struct {
 	// LowerThresholdCritical shall indicate
 	// the present reading is below the normal range but is not yet fatal.
 	// Units shall use the same units as the related ReadingVolts propoerty.
-	LowerThresholdCritical int
+	LowerThresholdCritical float32
 	// LowerThresholdFatal shall indicate the
 	// present reading is below the normal range and is fatal. Units shall
 	// use the same units as the related ReadingVolts propoerty.
-	LowerThresholdFatal int
+	LowerThresholdFatal float32
 	// LowerThresholdNonCritical shall indicate
 	// the present reading is below the normal range but is not critical.
 	// Units shall use the same units as the related ReadingVolts propoerty.
-	LowerThresholdNonCritical int
+	LowerThresholdNonCritical float32
 	// MaxReadingRange shall indicate the
 	// highest possible value for ReadingVolts. Units shall use the same
 	// units as the related ReadingVolts propoerty.
-	MaxReadingRange int
+	MaxReadingRange float32
 	// MemberID shall uniquely identify the member within the collection. For
 	// services supporting Redfish v1.6 or higher, this value shall be the
 	// zero-based array index.
 	MemberID string `json:"MemberId"`
 	// MinReadingRange shall indicate the lowest possible value for ReadingVolts.
 	// Units shall use the same units as the related ReadingVolts property.
-	MinReadingRange int
+	MinReadingRange float32
 	// PhysicalContext shall be a description
 	// of the affected device or region within the chassis to which this
 	// voltage measurement applies.
 	PhysicalContext string
 	// ReadingVolts shall be the present
 	// reading of the voltage sensor's reading.
-	ReadingVolts int
+	ReadingVolts float32
 	// SensorNumber shall be a numerical
 	// identifier for this voltage sensor that is unique within this
 	// resource.
@@ -417,13 +417,13 @@ type Voltage struct {
 	// UpperThresholdCritical shall indicate
 	// the present reading is above the normal range but is not yet fatal.
 	// Units shall use the same units as the related ReadingVolts propoerty.
-	UpperThresholdCritical int
+	UpperThresholdCritical float32
 	// UpperThresholdFatal shall indicate the
 	// present reading is above the normal range and is fatal. Units shall
 	// use the same units as the related ReadingVolts propoerty.
-	UpperThresholdFatal int
+	UpperThresholdFatal float32
 	// UpperThresholdNonCritical shall indicate
 	// the present reading is above the normal range but is not critical.
 	// Units shall use the same units as the related ReadingVolts propoerty.
-	UpperThresholdNonCritical int
+	UpperThresholdNonCritical float32
 }
