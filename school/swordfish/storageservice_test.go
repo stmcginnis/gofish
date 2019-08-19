@@ -82,11 +82,9 @@ var storageServiceBody = strings.NewReader(
 		"StorageSubsystems": {
 			"@odata.id": "/redfish/v1/StorageSubsystems/1"
 		},
-		"Volumes": [{
+		"Volumes": {
 			"@odata.id": "/redfish/v1/Volumes/1"
-		}, {
-			"@odata.id": "/redfish/v1/Volumes/2"
-		}]
+		}
 	}`)
 
 // TestStorageService tests the parsing of StorageService objects.
@@ -120,5 +118,9 @@ func TestStorageService(t *testing.T) {
 
 	if result.IOStatistics.NonIORequests != 1000 {
 		t.Errorf("Invalid IOStats NonIORequests: %d", result.IOStatistics.NonIORequests)
+	}
+
+	if result.volumes != "/redfish/v1/Volumes/1" {
+		t.Errorf("Invalid volumes collection link: %s", result.volumes)
 	}
 }
