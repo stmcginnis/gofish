@@ -270,8 +270,8 @@ type PowerMetric struct {
 // PowerSupply is Details of a power supplies associated with this system
 // or device.
 type PowerSupply struct {
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
+	common.Entity
+
 	// assembly shall be a link to a resource of type Assembly.
 	assembly string
 	// EfficiencyPercent shall contain the value of the measured power
@@ -375,8 +375,8 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 
 // Voltage is a voltage representation.
 type Voltage struct {
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
+	common.Entity
+
 	// LowerThresholdCritical shall indicate
 	// the present reading is below the normal range but is not yet fatal.
 	// Units shall use the same units as the related ReadingVolts propoerty.
