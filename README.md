@@ -5,7 +5,6 @@
 [![LICENSE](https://img.shields.io/github/license/stmcginnis/gofish.svg?style=flat-square)](https://github.com/stmcginnis/gofish/blob/master/LICENSE)
 
 ![Gofish Logo](./images/gofish200x117.png)
-<img src="./images/gofish200x117.png">
 
 ## Introduction
 
