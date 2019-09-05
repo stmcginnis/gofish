@@ -4,6 +4,8 @@
 [![Releases](https://img.shields.io/github/release/stmcginnis/gofish/all.svg?style=flat-square)](https://github.com/stmcginnis/gofish/releases)
 [![LICENSE](https://img.shields.io/github/license/stmcginnis/gofish.svg?style=flat-square)](https://github.com/stmcginnis/gofish/blob/master/LICENSE)
 
+<img src="https://github.com/stmcginnis/gofish/raw/master/images/gofish.svg" width="100">
+
 ## Introduction
 
 Gofish is a Golang library for interacting with [DMTF
