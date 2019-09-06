@@ -9,7 +9,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	gofish "github.com/stmcginnis/gofish/school"
+	"github.com/stmcginnis/gofish"
 )
 
 func httpclientForSelfSigned() (client *http.Client, err error) {
@@ -50,6 +50,9 @@ func main() {
 	}
 	fmt.Printf("%+v\n", auth)
 
+	// Make sure to delete the session and logout
+	defer service.DeleteSession(auth.Session)
+
 	// Assign the token back to our gofish client
 	c.Token = auth.Token
 
@@ -62,7 +65,4 @@ func main() {
 	for _, chass := range chassis {
 		fmt.Printf("Chassis: %#v\n\n", chass)
 	}
-
-	// Delete the session and logout
-	service.DeleteSession(auth.Session)
 }
