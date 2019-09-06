@@ -23,7 +23,7 @@ package main
 import (
     "fmt"
 
-    gofish "github.com/stmcginnis/gofish/school"
+    "github.com/stmcginnis/gofish"
 )
 
 func main() {
