@@ -27,16 +27,12 @@ import (
 )
 
 func main() {
-    c, err := gofish.APIClient("http://localhost:5000", nil)
+    c, err := gofish.ConnectDefault("http://localhost:5000")
     if err != nil {
         panic(err)
     }
 
-    service, err := gofish.ServiceRoot(c)
-    if err != nil {
-        panic(err)
-    }
-
+    service := c.Service
     chassis, err := service.Chassis()
     if err != nil {
         panic(err)
