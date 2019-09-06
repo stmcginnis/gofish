@@ -6,6 +6,7 @@ package gofish
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -33,11 +34,26 @@ func APIClient(endpoint string, httpClient *http.Client) (c *ApiClient, err erro
 	if !strings.HasPrefix(endpoint, "http") {
 		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
+
 	client := &ApiClient{Endpoint: endpoint}
 	if httpClient != nil {
 		client.httpClient = httpClient
 	} else {
-		client.httpClient = &http.Client{}
+		// TODO: Provide config or arg to be able to control whether to skip
+		// certificate validation.
+		defaultTransport := http.DefaultTransport.(*http.Transport)
+		transport := &http.Transport{ // copy default parameters
+			Proxy:                 defaultTransport.Proxy,
+			DialContext:           defaultTransport.DialContext,
+			MaxIdleConns:          defaultTransport.MaxIdleConns,
+			IdleConnTimeout:       defaultTransport.IdleConnTimeout,
+			ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+			TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+		client.httpClient = &http.Client{Transport: transport}
 	}
 	return client, err
 }
