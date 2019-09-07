@@ -85,10 +85,46 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 		}
 
 		client.Service = service
-		client.auth = auth
+		client.Auth = auth
 	}
 
 	return client, err
+}
+
+// NewAPIClient just returns a new APIClient, without a connection,
+// note: APIClient.Auth, APIClient.Service are left to be set by the caller
+func NewAPIClient(endpoint string, insecure bool, httpClient *http.Client) (c *APIClient, err error) {
+
+	if !strings.HasPrefix(endpoint, "http") {
+		return c, fmt.Errorf("endpoint must starts with http or https")
+	}
+
+	c = &APIClient{endpoint: endpoint}
+
+	// setup http client with default transport params
+	if httpClient == nil {
+		defaultTransport := http.DefaultTransport.(*http.Transport)
+		transport := &http.Transport{
+			Proxy:                 defaultTransport.Proxy,
+			DialContext:           defaultTransport.DialContext,
+			MaxIdleConns:          defaultTransport.MaxIdleConns,
+			IdleConnTimeout:       defaultTransport.IdleConnTimeout,
+			ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+			TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: insecure,
+			},
+		}
+
+		c.HTTPClient = &http.Client{Transport: transport}
+
+	} else {
+
+		c.HTTPClient = httpClient
+	}
+
+	return c, err
+
 }
 
 // ConnectDefault creates an unauthenticated connection to a Redfish service.
