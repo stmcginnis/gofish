@@ -33,7 +33,7 @@ type APIClient struct {
 	Service *Service
 
 	// Auth information saved for later to be able to log out
-	auth *redfish.AuthToken
+	Auth *redfish.AuthToken
 }
 
 // ClientConfig holds the settings for establishing a connection.
@@ -161,8 +161,8 @@ func (c *APIClient) Get(url string) (*http.Response, error) {
 
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", applicationJSON)
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
+	if c.Auth != nil && c.Auth.Token != "" {
+		req.Header.Set("X-Auth-Token", c.Auth.Token)
 	}
 	req.Close = true
 
@@ -199,8 +199,8 @@ func (c *APIClient) Post(url string, payload []byte) (*http.Response, error) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Content-Type", applicationJSON)
 	req.Header.Set("Accept", applicationJSON)
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
+	if c.Auth != nil && c.Auth.Token != "" {
+		req.Header.Set("X-Auth-Token", c.Auth.Token)
 	}
 	req.Close = true
 
@@ -246,8 +246,8 @@ func (c *APIClient) Delete(url string) error {
 
 	req.Header.Set("User-Agent", "gofish/1.0.0")
 	req.Header.Set("Accept", "application/json")
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
+	if c.Auth != nil && c.Auth.Token != "" {
+		req.Header.Set("X-Auth-Token", c.Auth.Token)
 	}
 	req.Close = true
 
@@ -271,7 +271,7 @@ func (c *APIClient) Delete(url string) error {
 // Logout will delete any active session. Useful to defer logout when creating
 // a new connection.
 func (c *APIClient) Logout() {
-	if c.Service != nil && c.auth != nil {
-		c.Service.DeleteSession(c.auth.Session)
+	if c.Service != nil && c.Auth != nil {
+		c.Service.DeleteSession(c.Auth.Session)
 	}
 }
