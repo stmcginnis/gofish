@@ -49,28 +49,37 @@ type ClientConfig struct {
 
 	// Insecure controls whether to enforce SSL certificate validity.
 	Insecure bool
+
+	// HTTPClient is the optional client to connect with.
+	HTTPClient *http.Client
 }
 
 // Connect creates a new client connection to a Redfish service.
 func Connect(config ClientConfig) (c *APIClient, err error) {
+
 	if !strings.HasPrefix(config.Endpoint, "http") {
 		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
 
 	client := &APIClient{endpoint: config.Endpoint}
-	defaultTransport := http.DefaultTransport.(*http.Transport)
-	transport := &http.Transport{
-		Proxy:                 defaultTransport.Proxy,
-		DialContext:           defaultTransport.DialContext,
-		MaxIdleConns:          defaultTransport.MaxIdleConns,
-		IdleConnTimeout:       defaultTransport.IdleConnTimeout,
-		ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
-		TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: config.Insecure,
-		},
+
+	if config.HTTPClient == nil {
+		defaultTransport := http.DefaultTransport.(*http.Transport)
+		transport := &http.Transport{
+			Proxy:                 defaultTransport.Proxy,
+			DialContext:           defaultTransport.DialContext,
+			MaxIdleConns:          defaultTransport.MaxIdleConns,
+			IdleConnTimeout:       defaultTransport.IdleConnTimeout,
+			ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+			TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: config.Insecure,
+			},
+		}
+		client.HTTPClient = &http.Client{Transport: transport}
+	} else {
+		client.HTTPClient = config.HTTPClient
 	}
-	client.HTTPClient = &http.Client{Transport: transport}
 
 	if config.Username != "" {
 		// Authenticate with the service
