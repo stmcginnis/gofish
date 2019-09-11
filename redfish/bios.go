@@ -137,7 +137,7 @@ func (bios *Bios) ChangePassword(passwordName string, oldPassword string, newPas
 		return err
 	}
 
-	_, err = bios.Client.Patch(bios.changePasswordTarget, payload)
+	_, err = bios.Client.Post(bios.changePasswordTarget, payload)
 	return err
 }
 
@@ -146,6 +146,6 @@ func (bios *Bios) ChangePassword(passwordName string, oldPassword string, newPas
 // action may impact other resources.
 func (bios *Bios) ResetBios() error {
 	var payload []byte
-	_, err := bios.Client.Patch(bios.resetBiosTarget, payload)
+	_, err := bios.Client.Post(bios.resetBiosTarget, payload)
 	return err
 }
