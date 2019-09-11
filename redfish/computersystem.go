@@ -694,6 +694,32 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) (bool, error) {
 	return true, nil
 }
 
+// Reset This action shall perform a reset of the ComputerSystem.  For systems which implement ACPI Power Button
+// functionality, the PushPowerButton value shall perform or emulate an ACPI Power Button push.  The ForceOff
+// value shall remove power from the system or perform an ACPI Power Button Override (commonly known as a
+// 4-second hold of the Power Button).  The ForceRestart value shall perform a ForceOff action followed by a On action.
+func (computersystem *ComputerSystem) Reset(r ResetType) (bool, error) {
+	type temp struct {
+		ResetType ResetType
+	}
+	t := temp{
+		ResetType: r,
+	}
+
+	payload, err := json.Marshal(t)
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := computersystem.Client.Post(computersystem.Actions.ComputerSystemReset.Target, payload)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	return true, nil
+}
+
 // SimpleStorages gets all simple storage services of this system.
 func (computersystem *ComputerSystem) SimpleStorages() ([]*SimpleStorage, error) {
 	return ListReferencedSimpleStorages(computersystem.Client, computersystem.simpleStorage)
