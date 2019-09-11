@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -361,21 +362,6 @@ const (
 	NmiResetType ResetType = "Nmi"
 )
 
-// CSActions shall contain the available actions for this resource
-type CSActions struct {
-	// ComputerSystemReset shall perform a reset of the ComputerSystem. For
-	// systems which implement ACPI Power Button functionality, the
-	// PushPowerButton value shall perform or emulate an ACPI Power Button push.
-	// The ForceOff value shall remove power from the system or perform an ACPI
-	// Power Button Override (commonly known as a 4-second hold of the Power
-	// Button). The ForceRestart value shall perform a ForceOff action followed
-	// by a On action.
-	ComputerSystemReset struct {
-		ResetType []ResetType `json:"ResetType@Redfish.AllowableValues"`
-		Target    string
-	} `json:"#ComputerSystem.Reset"`
-}
-
 // ComputerSystem is used to represent resources that represent a
 // computing system in the Redfish specification.
 type ComputerSystem struct {
@@ -390,8 +376,6 @@ type ComputerSystem struct {
 	// ODataType is the @odata.type
 	ODataType string `json:"@odata.type"`
 
-	// Actions type shall contain the available actions for this resource.
-	Actions CSActions
 	// AssetTag shall contain the value of the asset tag of the system.
 	AssetTag string
 	// bios shall be a link to a resource of
@@ -512,13 +496,30 @@ type ComputerSystem struct {
 	UUID string
 	// Chassis is an array of references to the chassis in which this system is contained.
 	chassis []string
+	// resetTarget is the internal URL to send reset targets to.
+	resetTarget string
+	// SupportedResetTypes, if provided, is the reset types this system supports.
+	SupportedResetTypes []ResetType
+	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
+	setDefaultBootOrderTarget string
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
 func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
+	type CSActions struct {
+		ComputerSystemReset struct {
+			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
+			Target            string
+		} `json:"#ComputerSystem.Reset"`
+		SetDefaultBootOrder struct {
+			Target string
+		} `json:"#ComputerSystem.SetDefaultBootOrder"`
+	}
+
 	type temp ComputerSystem
 	var t struct {
 		temp
+		Actions            CSActions
 		Bios               common.Link
 		Processors         common.Link
 		Memory             common.Link
@@ -555,6 +556,9 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.pcieDevices = t.PCIeDevices.ToStrings()
 	computersystem.pcieFunctions = t.PCIeFunctions.ToStrings()
 	computersystem.chassis = t.Links.Chassis.ToStrings()
+	computersystem.resetTarget = t.Actions.ComputerSystemReset.Target
+	computersystem.SupportedResetTypes = t.Actions.ComputerSystemReset.AllowedResetTypes
+	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
 	return nil
 }
@@ -685,25 +689,41 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error {
 		return err
 	}
 
-	resp, err := computersystem.Client.Patch(computersystem.ODataID, payload)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	return nil
+	_, err = computersystem.Client.Patch(computersystem.ODataID, payload)
+	return err
 }
 
-// Reset This action shall perform a reset of the ComputerSystem.  For systems which implement ACPI Power Button
-// functionality, the PushPowerButton value shall perform or emulate an ACPI Power Button push.  The ForceOff
-// value shall remove power from the system or perform an ACPI Power Button Override (commonly known as a
-// 4-second hold of the Power Button).  The ForceRestart value shall perform a ForceOff action followed by a On action.
-func (computersystem *ComputerSystem) Reset(r ResetType) error {
+// Reset shall perform a reset of the ComputerSystem. For systems which implement
+// ACPI Power Button functionality, the PushPowerButton value shall perform or
+// emulate an ACPI Power Button push. The ForceOff value shall remove power from
+// the system or perform an ACPI Power Button Override (commonly known as a
+// 4-second hold of the Power Button). The ForceRestart value shall perform a
+// ForceOff action followed by a On action.
+func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
+	// Make sure the requested reset type is supported by the system
+	valid := false
+	if len(computersystem.SupportedResetTypes) > 0 {
+		for _, allowed := range computersystem.SupportedResetTypes {
+			if resetType == allowed {
+				valid = true
+				break
+			}
+		}
+	} else {
+		// No allowed values supplied, assume we are OK
+		valid = true
+	}
+
+	if !valid {
+		return fmt.Errorf("Reset type '%s' is not supported by this service",
+			resetType)
+	}
+
 	type temp struct {
 		ResetType ResetType
 	}
 	t := temp{
-		ResetType: r,
+		ResetType: resetType,
 	}
 
 	payload, err := json.Marshal(t)
@@ -711,13 +731,20 @@ func (computersystem *ComputerSystem) Reset(r ResetType) error {
 		return err
 	}
 
-	resp, err := computersystem.Client.Post(computersystem.Actions.ComputerSystemReset.Target, payload)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+	_, err = computersystem.Client.Post(computersystem.resetTarget, payload)
+	return err
+}
 
-	return nil
+// SetDefaultBootOrder shall set the BootOrder array to the default settings.
+func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
+	// This action wasn't added until 1.5.0, make sure this is supported.
+	if computersystem.setDefaultBootOrderTarget == "" {
+		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
+	}
+
+	var payload []byte
+	_, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, payload)
+	return err
 }
 
 // SimpleStorages gets all simple storage services of this system.

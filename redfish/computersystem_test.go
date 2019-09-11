@@ -113,7 +113,18 @@ var computerSystemBody = strings.NewReader(
 		"Actions": {
 			"#ComputerSystem.Reset": {
 				"target": "/redfish/v1/Systems/System-1/Actions/ComputerSystem.Reset",
-				"@Redfish.ActionInfo": "/redfish/v1/Systems/System-1/ResetActionInfo"
+				"@Redfish.ActionInfo": "/redfish/v1/Systems/System-1/ResetActionInfo",
+				"ResetType@Redfish.AllowableValues": [
+					"On",
+					"ForceOff",
+					"ForceRestart",
+					"Nmi",
+					"ForceOn",
+					"PushPowerButton"
+				]
+			},
+			"#ComputerSystem.SetDefaultBootOrder": {
+				"target": "/redfish/v1/Systems/System-1/Actions/ComputerSystem.SetDefaultBootOrder"
 			}
 		}
 	}`)
@@ -228,5 +239,14 @@ func TestComputerSystem(t *testing.T) {
 
 	if result.chassis[0] != "/redfish/v1/Chassis/Chassis-1" {
 		t.Errorf("Received invalid chassis reference: %s", result.chassis[0])
+	}
+
+	if result.resetTarget != "/redfish/v1/Systems/System-1/Actions/ComputerSystem.Reset" {
+		t.Errorf("Invalid reset action target: %s", result.resetTarget)
+	}
+
+	if len(result.SupportedResetTypes) != 6 {
+		t.Errorf("Invalid allowable reset actions, expected 6, got %d",
+			len(result.SupportedResetTypes))
 	}
 }
