@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -71,7 +72,7 @@ const (
 	ZoneChassisType ChassisType = "Zone"
 )
 
-// Chassis represents the physical components of a system.  This
+// Chassis represents the physical components of a system. This
 // resource represents the sheet-metal confined spaces and logical zones such
 // as racks, enclosures, chassis and all other containers. Subsystems (like sensors)
 // that operate outside of a system's data plane (meaning the resources are not
@@ -94,6 +95,10 @@ type Chassis struct {
 	computerSystems []string
 	resourceBlocks  []string
 	managedBy       []string
+	// resetTarget is the internal URL to send reset actions to.
+	resetTarget string
+	// SupportedResetTypes, if provided, is the reset types this chassis supports.
+	SupportedResetTypes []ResetType
 }
 
 // UnmarshalJSON unmarshals a Chassis object from the raw JSON.
@@ -104,12 +109,20 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 		ResourceBlocks  common.Links
 		ManagedBy       common.Links
 	}
+	type Actions struct {
+		ChassisReset struct {
+			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
+			Target            string
+		} `json:"#Chassis.Reset"`
+	}
+
 	var t struct {
 		temp
 		Thermal         common.Link
 		Power           common.Link
 		NetworkAdapters common.Link
 		Links           linkReference
+		Actions         Actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -126,6 +139,8 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 	c.computerSystems = t.Links.ComputerSystems.ToStrings()
 	c.resourceBlocks = t.Links.ResourceBlocks.ToStrings()
 	c.managedBy = t.Links.ManagedBy.ToStrings()
+	c.resetTarget = t.Actions.ChassisReset.Target
+	c.SupportedResetTypes = t.Actions.ChassisReset.AllowedResetTypes
 
 	return nil
 }
@@ -242,4 +257,47 @@ func (c *Chassis) ManagedBy() ([]*Manager, error) {
 // NetworkAdapters gets the collection of network adapters of this chassis
 func (c *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
 	return ListReferencedNetworkAdapter(c.Client, c.networkAdapters)
+}
+
+// Reset shall reset the chassis. This action shall not reset Systems or other
+// contained resource, although side effects may occur which affect those resources.
+func (c *Chassis) Reset(resetType ResetType) error {
+	// Make sure the requested reset type is supported by the chassis
+	valid := false
+	if len(c.SupportedResetTypes) > 0 {
+		for _, allowed := range c.SupportedResetTypes {
+			if resetType == allowed {
+				valid = true
+				break
+			}
+		}
+	} else {
+		// No allowed values supplied, assume we are OK
+		valid = true
+	}
+
+	if !valid {
+		return fmt.Errorf("Reset type '%s' is not supported by this chassis",
+			resetType)
+	}
+
+	type temp struct {
+		ResetType ResetType
+	}
+	t := temp{
+		ResetType: resetType,
+	}
+
+	payload, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Client.Post(c.resetTarget, payload)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
 }

@@ -49,6 +49,15 @@ var chassisBody = strings.NewReader(
 					"@odata.id": "/redfish/v1/Managers/BMC-1"
 				}
 			]
+		},
+		"Actions": {
+			"#Chassis.Reset": {
+				"target": "/redfish/v1/Chassis/System.Embedded.1/Actions/Chassis.Reset",
+				"ResetType@Redfish.AllowableValues": [
+					"On",
+					"ForceOff"
+				]
+			}
 		}
 	}`)
 
@@ -107,5 +116,14 @@ func TestChassis(t *testing.T) {
 
 	if result.managedBy[0] != "/redfish/v1/Managers/BMC-1" {
 		t.Errorf("Invalid managed by reference: %s", result.managedBy[0])
+	}
+
+	if result.resetTarget != "/redfish/v1/Chassis/System.Embedded.1/Actions/Chassis.Reset" {
+		t.Errorf("Invalid reset action target: %s", result.resetTarget)
+	}
+
+	if len(result.SupportedResetTypes) != 2 {
+		t.Errorf("Invalid allowable reset actions, expected 2, got %d",
+			len(result.SupportedResetTypes))
 	}
 }
