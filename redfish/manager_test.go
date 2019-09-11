@@ -141,4 +141,8 @@ func TestManager(t *testing.T) {
 	if result.managerForServers[0] != "/redfish/v1/Systems/System-1" {
 		t.Errorf("Received manager for servers: %s", result.managerForServers)
 	}
+
+	if result.resetTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset" {
+		t.Errorf("Invalid Reset target: %s", result.resetTarget)
+	}
 }

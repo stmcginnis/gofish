@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -256,11 +257,21 @@ type Manager struct {
 	// managerInChassis shall contain a reference to the chassis that this
 	// manager is located in.
 	managerInChassis string
+	// resetTarget is the internal URL to send reset targets to.
+	resetTarget string
+	// SupportedResetTypes, if provided, is the reset types this system supports.
+	SupportedResetTypes []ResetType
 }
 
 // UnmarshalJSON unmarshals a Manager object from the raw JSON.
 func (manager *Manager) UnmarshalJSON(b []byte) error {
 	type temp Manager
+	type actions struct {
+		Reset struct {
+			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
+			Target            string
+		} `json:"#Manager.Reset"`
+	}
 	type linkReference struct {
 		ManagerForChassis       common.Links
 		ManagerForChassisCount  int `json:"ManagerForChassis@odata.count"`
@@ -279,6 +290,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		SerialInterfaces     common.Link
 		VirtualMedia         common.Link
 		Links                linkReference
+		Actions              actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -301,6 +313,8 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.ManagerForSwitchesCount = t.Links.ManagerForSwitchesCount
 	manager.managerForSwitches = t.Links.ManagerForSwitches.ToStrings()
 	manager.managerInChassis = string(t.Links.ManagerInChassis)
+	manager.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
+	manager.resetTarget = t.Actions.Reset.Target
 
 	return nil
 }
@@ -340,4 +354,41 @@ func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
 	}
 
 	return result, nil
+}
+
+// Reset shall perform a reset of the manager.
+func (manager *Manager) Reset(resetType ResetType) error {
+	// Make sure the requested reset type is supported by the manager.
+	valid := false
+	if len(manager.SupportedResetTypes) > 0 {
+		for _, allowed := range manager.SupportedResetTypes {
+			if resetType == allowed {
+				valid = true
+				break
+			}
+		}
+	} else {
+		// No allowed values supplied, assume we are OK
+		valid = true
+	}
+
+	if !valid {
+		return fmt.Errorf("Reset type '%s' is not supported by this manager",
+			resetType)
+	}
+
+	type temp struct {
+		ResetType ResetType
+	}
+	t := temp{
+		ResetType: resetType,
+	}
+
+	payload, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+
+	_, err = manager.Client.Post(manager.resetTarget, payload)
+	return err
 }
