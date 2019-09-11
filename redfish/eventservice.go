@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -79,14 +80,22 @@ type EventService struct {
 	// Subscriptions shall contain the link to a collection of type
 	// EventDestinationCollection.
 	subscriptions string
+	// submitTestEventTarget is the URL to send SubmitTestEvent actions.
+	submitTestEventTarget string
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
 func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 	type temp EventService
+	type Actions struct {
+		SubmitTestEvent struct {
+			Target string
+		} `json:"#EventService.SubmitTestEvent"`
+	}
 	var t struct {
 		temp
 		Subscriptions common.Link
+		Actions       Actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -97,6 +106,7 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*eventservice = EventService(t.temp)
 	eventservice.subscriptions = string(t.Subscriptions)
+	eventservice.submitTestEventTarget = t.Actions.SubmitTestEvent.Target
 
 	return nil
 }
@@ -141,6 +151,41 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 	}
 
 	return result, nil
+}
+
+// SubmitTestEvent shall add a test event to the event service with the event
+// data specified in the action parameters. This message should then be sent to
+// any appropriate ListenerDestination targets.
+func (eventservice *EventService) SubmitTestEvent(message string) error {
+	type temp struct {
+		EventGroupID      string `json:"EventGroupId"`
+		EventID           string `json:"EventId"`
+		EventTimestamp    string
+		EventType         string
+		Message           string
+		MessageArgs       []string
+		MessageID         string `json:"MessageId"`
+		OriginOfCondition string
+		Severity          string
+	}
+	t := temp{
+		EventGroupID:      "TESTING123",
+		EventID:           "TEST123",
+		EventTimestamp:    time.Now().String(),
+		EventType:         "Alert",
+		Message:           message,
+		MessageID:         "test123",
+		OriginOfCondition: eventservice.ODataID,
+		Severity:          "Informational",
+	}
+
+	payload, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+
+	_, err = eventservice.Client.Patch(eventservice.submitTestEventTarget, payload)
+	return err
 }
 
 // SSEFilterPropertiesSupported shall contain a set of properties that indicate
