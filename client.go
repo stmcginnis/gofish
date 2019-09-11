@@ -194,14 +194,80 @@ func (c *APIClient) Post(url string, payload []byte) (*http.Response, error) {
 	return resp, err
 }
 
-// Put makes a PUT call. TODO: Implement
-func (c *APIClient) Put() {
+// Put performs a Put request against the Redfish service.
+func (c *APIClient) Put(url string, payload []byte) (*http.Response, error) {
+	relativePath := url
+	if relativePath == "" {
+		relativePath = common.DefaultServiceRoot
+	}
 
+	endpoint := fmt.Sprintf("%s%s", c.endpoint, relativePath)
+	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Content-Type", applicationJSON)
+	req.Header.Set("Accept", applicationJSON)
+	if c.auth != nil && c.auth.Token != "" {
+		req.Header.Set("X-Auth-Token", c.auth.Token)
+	}
+	req.Close = true
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
+	}
+
+	return resp, err
 }
 
-// Patch makes a PATCH call. TODO: Implement
-func (c *APIClient) Patch() {
+// Patch performs a Patch request against the Redfish service.
+func (c *APIClient) Patch(url string, payload []byte) (*http.Response, error) {
+	relativePath := url
+	if relativePath == "" {
+		relativePath = common.DefaultServiceRoot
+	}
 
+	endpoint := fmt.Sprintf("%s%s", c.endpoint, relativePath)
+	req, err := http.NewRequest("Patch", endpoint, bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Content-Type", applicationJSON)
+	req.Header.Set("Accept", applicationJSON)
+	if c.auth != nil && c.auth.Token != "" {
+		req.Header.Set("X-Auth-Token", c.auth.Token)
+	}
+	req.Close = true
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
+	}
+
+	return resp, err
 }
 
 // Delete performs a Delete request against the Redfish service.

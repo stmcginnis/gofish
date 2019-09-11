@@ -16,8 +16,8 @@ const DefaultServiceRoot = "/redfish/v1/"
 type Client interface {
 	Get(url string) (*http.Response, error)
 	Post(url string, payload []byte) (*http.Response, error)
-	// Patch()
-	// Put()
+	Patch(url string, payload []byte) (*http.Response, error)
+	Put(url string, payload []byte) (*http.Response, error)
 	Delete(url string) error
 }
 
