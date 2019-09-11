@@ -672,7 +672,7 @@ func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
 }
 
 // SetBoot set a boot object based on a payload request
-func (computersystem *ComputerSystem) SetBoot(b Boot) (bool, error) {
+func (computersystem *ComputerSystem) SetBoot(b Boot) error {
 	type temp struct {
 		Boot Boot
 	}
@@ -682,23 +682,23 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) (bool, error) {
 
 	payload, err := json.Marshal(t)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	resp, err := computersystem.Client.Patch(computersystem.ODataID, payload)
 	if err != nil {
-		return false, err
+		return err
 	}
 	defer resp.Body.Close()
 
-	return true, nil
+	return nil
 }
 
 // Reset This action shall perform a reset of the ComputerSystem.  For systems which implement ACPI Power Button
 // functionality, the PushPowerButton value shall perform or emulate an ACPI Power Button push.  The ForceOff
 // value shall remove power from the system or perform an ACPI Power Button Override (commonly known as a
 // 4-second hold of the Power Button).  The ForceRestart value shall perform a ForceOff action followed by a On action.
-func (computersystem *ComputerSystem) Reset(r ResetType) (bool, error) {
+func (computersystem *ComputerSystem) Reset(r ResetType) error {
 	type temp struct {
 		ResetType ResetType
 	}
@@ -708,16 +708,16 @@ func (computersystem *ComputerSystem) Reset(r ResetType) (bool, error) {
 
 	payload, err := json.Marshal(t)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	resp, err := computersystem.Client.Post(computersystem.Actions.ComputerSystemReset.Target, payload)
 	if err != nil {
-		return false, err
+		return err
 	}
 	defer resp.Body.Close()
 
-	return true, nil
+	return nil
 }
 
 // SimpleStorages gets all simple storage services of this system.

@@ -39,11 +39,11 @@ func main() {
 
 	for _, system := range ss {
 		fmt.Printf("System: %#v\n\n", system)
-		_, err := system.SetBoot(bootOverride)
+		err := system.SetBoot(bootOverride)
 		if err != nil {
 			panic(err)
 		}
-		_, err = system.Reset(redfish.ForceRestartResetType)
+		err = system.Reset(redfish.ForceRestartResetType)
 		if err != nil {
 			panic(err)
 		}
