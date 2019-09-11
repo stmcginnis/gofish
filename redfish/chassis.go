@@ -293,11 +293,6 @@ func (c *Chassis) Reset(resetType ResetType) error {
 		return err
 	}
 
-	resp, err := c.Client.Post(c.resetTarget, payload)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	return nil
+	_, err = c.Client.Post(c.resetTarget, payload)
+	return err
 }

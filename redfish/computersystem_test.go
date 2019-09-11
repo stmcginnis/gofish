@@ -122,6 +122,9 @@ var computerSystemBody = strings.NewReader(
 					"ForceOn",
 					"PushPowerButton"
 				]
+			},
+			"#ComputerSystem.SetDefaultBootOrder": {
+				"target": "/redfish/v1/Systems/System-1/Actions/ComputerSystem.SetDefaultBootOrder"
 			}
 		}
 	}`)

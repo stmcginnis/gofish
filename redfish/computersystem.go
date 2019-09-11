@@ -500,6 +500,8 @@ type ComputerSystem struct {
 	resetTarget string
 	// SupportedResetTypes, if provided, is the reset types this system supports.
 	SupportedResetTypes []ResetType
+	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
+	setDefaultBootOrderTarget string
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
@@ -509,6 +511,9 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
 			Target            string
 		} `json:"#ComputerSystem.Reset"`
+		SetDefaultBootOrder struct {
+			Target string
+		} `json:"#ComputerSystem.SetDefaultBootOrder"`
 	}
 
 	type temp ComputerSystem
@@ -553,6 +558,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.chassis = t.Links.Chassis.ToStrings()
 	computersystem.resetTarget = t.Actions.ComputerSystemReset.Target
 	computersystem.SupportedResetTypes = t.Actions.ComputerSystemReset.AllowedResetTypes
+	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
 	return nil
 }
@@ -683,13 +689,8 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error {
 		return err
 	}
 
-	resp, err := computersystem.Client.Patch(computersystem.ODataID, payload)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	return nil
+	_, err = computersystem.Client.Patch(computersystem.ODataID, payload)
+	return err
 }
 
 // Reset shall perform a reset of the ComputerSystem. For systems which implement
@@ -730,13 +731,20 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 		return err
 	}
 
-	resp, err := computersystem.Client.Post(computersystem.resetTarget, payload)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+	_, err = computersystem.Client.Post(computersystem.resetTarget, payload)
+	return err
+}
 
-	return nil
+// SetDefaultBootOrder shall set the BootOrder array to the default settings.
+func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
+	// This action wasn't added until 1.5.0, make sure this is supported.
+	if computersystem.setDefaultBootOrderTarget == "" {
+		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
+	}
+
+	var payload []byte
+	_, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, payload)
+	return err
 }
 
 // SimpleStorages gets all simple storage services of this system.
