@@ -175,8 +175,6 @@ type NetworkAdapter struct {
 	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// The Actions property shall contain the available actions for this resource.
-	Actions string
 	// Assembly shall be a link to a resource of type Assembly.
 	assembly string
 	// Controllers shall contain the set of network controllers ASICs that make
@@ -204,16 +202,24 @@ type NetworkAdapter struct {
 	SerialNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// resetSettingsToDefaultTarget is the URL for sending a ResetSettingsToDefault action
+	resetSettingsToDefaultTarget string
 }
 
 // UnmarshalJSON unmarshals a NetworkAdapter object from the raw JSON.
 func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	type temp NetworkAdapter
+	type actions struct {
+		ResetSettingsToDefault struct {
+			Target string
+		} `json:"#NetworkAdapter.ResetSettingsToDefault"`
+	}
 	var t struct {
 		temp
 		Assembly               common.Link
 		NetworkDeviceFunctions common.Link
 		NetworkPorts           common.Link
+		Actions                actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -226,6 +232,7 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	networkadapter.assembly = string(t.Assembly)
 	networkadapter.networkDeviceFunctions = string(t.NetworkDeviceFunctions)
 	networkadapter.networkPorts = string(t.NetworkPorts)
+	networkadapter.resetSettingsToDefaultTarget = t.Actions.ResetSettingsToDefault.Target
 
 	return nil
 }
@@ -283,4 +290,12 @@ func (networkadapter *NetworkAdapter) NetworkDeviceFunctions() ([]*NetworkDevice
 // NetworkPorts gets the collection of NetworkPorts for this network adapter
 func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
 	return ListReferencedNetworkPorts(networkadapter.Client, networkadapter.networkPorts)
+}
+
+// ResetSettingsToDefault shall perform a reset of all active and pending
+// settings back to factory default settings upon reset of the network adapter.
+func (networkadapter *NetworkAdapter) ResetSettingsToDefault() error {
+	var payload []byte
+	_, err := networkadapter.Client.Post(networkadapter.resetSettingsToDefaultTarget, payload)
+	return err
 }

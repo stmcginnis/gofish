@@ -184,7 +184,7 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 		return err
 	}
 
-	_, err = eventservice.Client.Patch(eventservice.submitTestEventTarget, payload)
+	_, err = eventservice.Client.Post(eventservice.submitTestEventTarget, payload)
 	return err
 }
 

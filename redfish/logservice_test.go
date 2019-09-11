@@ -29,6 +29,11 @@ var logServiceBody = strings.NewReader(
 		"Status": {
 			"State": "Enabled",
 			"Health": "OK"
+		},
+		"Actions": {
+			"#LogService.ClearLog": {
+				"target": "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog"
+			}
 		}
 	}`)
 
@@ -67,5 +72,9 @@ func TestLogService(t *testing.T) {
 
 	if !result.ServiceEnabled {
 		t.Error("Service should be enabled")
+	}
+
+	if result.clearLogTarget != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog" {
+		t.Errorf("Invalid ClearLog target: %s", result.clearLogTarget)
 	}
 }

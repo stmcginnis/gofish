@@ -85,14 +85,22 @@ type LogService struct {
 	ServiceEnabled bool
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// clearLogTarget is the URL to send ClearLog actions to.
+	clearLogTarget string
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
 func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	type temp LogService
+	type Actions struct {
+		ClearLog struct {
+			Target string
+		} `json:"#LogService.ClearLog"`
+	}
 	var t struct {
 		temp
 		Entries common.Link
+		Actions Actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -103,6 +111,7 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*logservice = LogService(t.temp)
 	logservice.entries = string(t.Entries)
+	logservice.clearLogTarget = t.Actions.ClearLog.Target
 
 	return nil
 }
@@ -151,4 +160,12 @@ func ListReferencedLogServices(c common.Client, link string) ([]*LogService, err
 // Entries gets the log entries of this service.
 func (logservice *LogService) Entries() ([]*LogEntry, error) {
 	return ListReferencedLogEntrys(logservice.Client, logservice.entries)
+}
+
+// ClearLog shall delete all entries found in the Entries collection for this
+// Log Service.
+func (logservice *LogService) ClearLog() error {
+	var payload []byte
+	_, err := logservice.Client.Post(logservice.clearLogTarget, payload)
+	return err
 }

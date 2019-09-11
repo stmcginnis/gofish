@@ -83,6 +83,11 @@ var networkAdapterBody = strings.NewReader(
 		"Status": {
 			"State": "Enabled",
 			"Health": "OK"
+		},
+		"Actions": {
+			"#NetworkAdapter.ResetSettingsToDefault": {
+				"target": "/redfish/v1/NetworkAdapter/Actions/NetworkAdapter.ResetSettingsToDefault"
+			}
 		}
 	}`)
 
@@ -118,5 +123,9 @@ func TestNetworkAdapter(t *testing.T) {
 
 	if result.Controllers[0].PCIeInterface.PCIeType != Gen4PCIeTypes {
 		t.Errorf("Received incorrect PCIe type: %s", result.Controllers[0].PCIeInterface.PCIeType)
+	}
+
+	if result.resetSettingsToDefaultTarget != "/redfish/v1/NetworkAdapter/Actions/NetworkAdapter.ResetSettingsToDefault" {
+		t.Errorf("Invalid ResetSettingsToDefault target: %s", result.resetSettingsToDefaultTarget)
 	}
 }
