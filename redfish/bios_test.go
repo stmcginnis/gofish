@@ -61,4 +61,12 @@ func TestBios(t *testing.T) {
 	if result.AttributeRegistry != "BiosAttributeRegistryP89.v1_0_0" {
 		t.Errorf("Received incorrect attribute registry: %s", result.AttributeRegistry)
 	}
+
+	if result.resetBiosTarget != "/redfish/v1/Systems/437XR1138R2/BIOS/Actions/Bios.ResetBios" {
+		t.Errorf("Invalid ResetBios link: %s", result.resetBiosTarget)
+	}
+
+	if result.changePasswordTarget != "/redfish/v1/Systems/437XR1138R2/BIOS/Actions/Bios.ChangePassword" {
+		t.Errorf("Invalid ChangePassword target: %s", result.changePasswordTarget)
+	}
 }
