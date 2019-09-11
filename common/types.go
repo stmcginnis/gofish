@@ -498,3 +498,147 @@ type Operations struct {
 	// operation that has been completed.
 	PercentageComplete int
 }
+
+// ApplyTime is when to apply a change.
+type ApplyTime string
+
+const (
+
+	// ImmediateApplyTime shall be used to indicate the values within the
+	// Settings resource are applied immediately.
+	ImmediateApplyTime ApplyTime = "Immediate"
+	// OnResetApplyTime shall be used to indicate the values within the
+	// Settings resource are applied when the system or service is reset.
+	OnResetApplyTime ApplyTime = "OnReset"
+	// AtMaintenanceWindowStartApplyTime shall be used to indicate the values
+	// within the Settings resource are applied during the maintenance window
+	// specified by the MaintenanceWindowStartTime and
+	// MaintenanceWindowDurationInSeconds properties. A service may perform
+	// resets during this maintenance window.
+	AtMaintenanceWindowStartApplyTime ApplyTime = "AtMaintenanceWindowStart"
+	// InMaintenanceWindowOnResetApplyTime shall be used to indicate the
+	// values within the Settings resource are applied during the maintenance
+	// window specified by the MaintenanceWindowStartTime and
+	// MaintenanceWindowDurationInSeconds properties, and if a reset occurs
+	// within the maintenance window.
+	InMaintenanceWindowOnResetApplyTime ApplyTime = "InMaintenanceWindowOnReset"
+)
+
+// OperationApplyTime is when to perform the application.
+type OperationApplyTime string
+
+const (
+
+	// ImmediateOperationApplyTime shall be used to indicate the requested
+	// Create, Delete, or Action operation is applied immediately.
+	ImmediateOperationApplyTime OperationApplyTime = "Immediate"
+	// OnResetOperationApplyTime shall be used to indicate the requested
+	// Create, Delete, or Action operation is applied when the system or
+	// service is reset.
+	OnResetOperationApplyTime OperationApplyTime = "OnReset"
+	// AtMaintenanceWindowStartOperationApplyTime shall be used to indicate
+	// the requested Create, Delete, or Action operation is applied during
+	// the maintenance window specified by the MaintenanceWindowStartTime and
+	// MaintenanceWindowDurationInSeconds properties. A service may perform
+	// resets during this maintenance window.
+	AtMaintenanceWindowStartOperationApplyTime OperationApplyTime = "AtMaintenanceWindowStart"
+	// InMaintenanceWindowOnResetOperationApplyTime shall be used to indicate
+	// the requested Create, Delete, or Action operation is applied during
+	// the maintenance window specified by the MaintenanceWindowStartTime and
+	// MaintenanceWindowDurationInSeconds properties, and if a reset occurs
+	// within the maintenance window.
+	InMaintenanceWindowOnResetOperationApplyTime OperationApplyTime = "InMaintenanceWindowOnReset"
+)
+
+// MaintenanceWindow shall indicate if a given resource
+// has a maintenance window assignment for applying settings or
+// operations. Other resources may reference this object in order to
+// convey a common control surface for the configuration of the
+// maintenance window.
+type MaintenanceWindow struct {
+	// MaintenanceWindowDurationInSeconds shall
+	// indicate the end of the maintenance window as the number of seconds
+	// after the time specified by the MaintenanceWindowStartTime property.
+	MaintenanceWindowDurationInSeconds int
+	// MaintenanceWindowStartTime shall
+	// indicate the date and time as to when the service is allowed to start
+	// applying the requested settings or operation as part of a maintenance
+	// window.
+	MaintenanceWindowStartTime string
+}
+
+// OperationApplyTimeSupport shall specify the support a
+// service has for a client to request a specific apply time of a Create,
+// Delete, or Action operation of a given resource.
+type OperationApplyTimeSupport struct {
+	// MaintenanceWindowDurationInSeconds shall
+	// be the same as the MaintenanceWindowDurationInSeconds property found
+	// in the MaintenanceWindow structure on the MaintenanceWindowResource.
+	// This property shall be required if the SupportedValues property
+	// contains AtMaintenanceWindowStart or InMaintenanceWindowOnReset.
+	MaintenanceWindowDurationInSeconds int
+	// MaintenanceWindowResource shall be a
+	// reference to a resource that contains the @Redfish.MaintenanceWindow
+	// property which governs this resource. This property shall be required
+	// if the SupportedValues property contains AtMaintenanceWindowStart or
+	// InMaintenanceWindowOnReset.
+	MaintenanceWindowResource string
+	// MaintenanceWindowStartTime shall be the
+	// same as the MaintenanceWindowStartTime property found in the
+	// MaintenanceWindow structure on the MaintenanceWindowResource. This
+	// property shall be required if the SupportedValues property contains
+	// AtMaintenanceWindowStart or InMaintenanceWindowOnReset.
+	MaintenanceWindowStartTime string
+	// SupportedValues shall indicate the types
+	// of apply times the client is allowed request when performing a Create,
+	// Delete, or Action operation.
+	SupportedValues []OperationApplyTime
+}
+
+// PreferredApplyTime shall be specified by client in a request to indicate its
+// preference on when to apply the values in this Settings resource.
+type PreferredApplyTime struct {
+	// ApplyTime shall indicate the preference
+	// on to when to apply the values in this Settings resource.
+	ApplyTime string
+	// MaintenanceWindowDurationInSeconds shall
+	// indicate the end of the maintenance window as the number of seconds
+	// after the time specified by the MaintenanceWindowStartTime property.
+	// This property shall be required if the ApplyTime property is specified
+	// as AtMaintenanceWindowStart or InMaintenanceWindowOnReset.
+	MaintenanceWindowDurationInSeconds int
+	// MaintenanceWindowStartTime shall
+	// indicate the date and time as to when the service is allowed to start
+	// applying the future configuration as part of a maintenance window.
+	// This property shall be required if the ApplyTime property is specified
+	// as AtMaintenanceWindowStart or InMaintenanceWindowOnReset.
+	MaintenanceWindowStartTime string
+}
+
+// Settings shall describe any attributes of a resouce.
+type Settings struct {
+	// ETag shall be the ETag of the resource to which the settings were
+	// applied, after the application. This is here so that the client can check
+	// it against the ETag of the current resource to see if any other changes
+	// have also happened to the resource.
+	ETag string
+	// MaintenanceWindowResource shall be a
+	// reference to a resource that contains the @Redfish.MaintenanceWindow
+	// property which governs this resource. This property should be
+	// supported if the SupportedApplyTimes property contains
+	// AtMaintenanceWindowStart or InMaintenanceWindowOnReset.
+	MaintenanceWindowResource string
+	// Messages shall be an array of messages
+	// associated with the task.
+	Messages []Message
+	// SettingsObject shall be the URI of the resource to which a client must do
+	// a PUT or PATCH in order to modify this resource.
+	SettingsObject string
+	// SupportedApplyTimes is A service shall advertise its applytime
+	// capabilities using this property as to when a Setting resource can be
+	// applied.
+	SupportedApplyTimes []ApplyTime
+	// Time shall indicate the time that the settings object was applied to the
+	// resource.
+	Time string
+}
