@@ -41,6 +41,42 @@ const (
 	ContinuousBootSourceOverrideEnabled BootSourceOverrideEnabled = "Continuous"
 )
 
+// BootSourceOverrideTarget the current boot source to be used at next boot instead of the normal boot device, if BootSourceOverrideEnabled is true.
+type BootSourceOverrideTarget string
+
+const (
+	// NoneBootSourceOverrideTarget boot from the normal boot device
+	NoneBootSourceOverrideTarget BootSourceOverrideTarget = "None"
+	// PxeBootSourceOverrideTarget boot from the Pre-Boot EXecution (PXE) environment.
+	PxeBootSourceOverrideTarget BootSourceOverrideTarget = "Pxe"
+	// FloppyBootSourceOverrideTarget boot from the floppy disk drive
+	FloppyBootSourceOverrideTarget BootSourceOverrideTarget = "Floppy"
+	// CdBootSourceOverrideTarget boot from the CD/DVD disc
+	CdBootSourceOverrideTarget BootSourceOverrideTarget = "Cd"
+	// UsbBootSourceOverrideTarget boot from a USB device as specified by the system BIOS
+	UsbBootSourceOverrideTarget BootSourceOverrideTarget = "Usb"
+	// HddBootSourceOverrideTarget boot from a hard drive
+	HddBootSourceOverrideTarget BootSourceOverrideTarget = "Hdd"
+	// BiosSetupBootSourceOverrideTarget boot to the BIOS Setup Utility
+	BiosSetupBootSourceOverrideTarget BootSourceOverrideTarget = "BiosSetup"
+	// UtilitiesBootSourceOverrideTarget boot the manufacturer's Utilities program(s)
+	UtilitiesBootSourceOverrideTarget BootSourceOverrideTarget = "Utilities"
+	// DiagsBootSourceOverrideTarget boot the manufacturer's Diagnostics program
+	DiagsBootSourceOverrideTarget BootSourceOverrideTarget = "Diags"
+	// UefiShellBootSourceOverrideTarget boot to the UEFI Shell.
+	UefiShellBootSourceOverrideTarget BootSourceOverrideTarget = "UefiShell"
+	// UefiTargetBootSourceOverrideTarget boot to the UEFI Device specified in the UefiTargetBootSourceOverride property.
+	UefiTargetBootSourceOverrideTarget BootSourceOverrideTarget = "UefiTarget"
+	// SDCardBootSourceOverrideTarget boot from an SD Card
+	SDCardBootSourceOverrideTarget BootSourceOverrideTarget = "SDCard"
+	// UefiHttpBootSourceOverrideTarget boot from a UEFI HTTP network location
+	UefiHttpBootSourceOverrideTarget BootSourceOverrideTarget = "UefiHttp"
+	// RemoteDriveBootSourceOverrideTarget boot from a remote drive (e.g. iSCSI).
+	RemoteDriveBootSourceOverrideTarget BootSourceOverrideTarget = "RemoteDrive"
+	// UefiBootNextBootSourceOverrideTarget boot to the UEFI Device specified in the BootNext property
+	UefiBootNextBootSourceOverrideTarget BootSourceOverrideTarget = "UefiBootNext"
+)
+
 // BootSourceOverrideMode is the BIOS mode (Legacy or UEFI) to be used.
 type BootSourceOverrideMode string
 
@@ -232,37 +268,37 @@ type Boot struct {
 	// AliasBootOrder shall be an ordered array
 	// of boot source aliases (of type BootSource) representing the
 	// persistent Boot Order of this computer system.
-	AliasBootOrder []string
+	AliasBootOrder []string `json:",omitempty"`
 	// BootNext shall be the
 	// BootOptionReference of the UEFI Boot Option for one time boot, as
 	// defined by the UEFI Specification. The valid values for this property
 	// are specified in the values of the BootOrder array.
 	// BootSourceOverrideEnabled = Continuous is not supported for UEFI
 	// BootNext as this setting is defined in UEFI as a one-time boot only.
-	BootNext string
+	BootNext string `json:",omitempty"`
 	// BootOptions shall be a link to a
 	// collection of type BootOptionCollection.
-	bootOptions string
+	bootOptions string `json:",omitempty"`
 	// BootOrder shall be an ordered array of
 	// BootOptionReference strings representing the persistent Boot Order of
 	// this computer system. For UEFI systems, this is the UEFI BootOrder as
 	// defined by the UEFI Specification.
-	BootOrder []string
+	BootOrder []string `json:",omitempty"`
 	// BootOrderPropertySelection shall
 	// indicate which boot order property the system uses when specifying the
 	// persistent boot order.
-	BootOrderPropertySelection string
+	BootOrderPropertySelection string `json:",omitempty"`
 	// BootSourceOverrideEnabled shall be Once
 	// if this is a one time boot override and Continuous if this selection
 	// should remain active until cancelled. If the property value is set to
 	// Once, the value will be reset back to Disabled after the
 	// BootSourceOverrideTarget actions have been completed. Changes to this
 	// property do not alter the BIOS persistent boot order configuration.
-	BootSourceOverrideEnabled string
+	BootSourceOverrideEnabled BootSourceOverrideEnabled `json:",omitempty"`
 	// BootSourceOverrideMode shall be Legacy
 	// for non-UEFI BIOS boot or UEFI for UEFI boot from boot source
 	// specified in BootSourceOverrideTarget property.
-	BootSourceOverrideMode string
+	BootSourceOverrideMode BootSourceOverrideMode `json:",omitempty"`
 	// BootSourceOverrideTarget shall contain
 	// the source to boot the system from, overriding the normal boot order.
 	// The valid values for this property are specified through the
@@ -275,7 +311,7 @@ type Boot struct {
 	// boot from the UEFI BootOptionReference found in BootNext. Changes to
 	// this property do not alter the BIOS persistent boot order
 	// configuration.
-	BootSourceOverrideTarget string
+	BootSourceOverrideTarget BootSourceOverrideTarget `json:",omitempty"`
 	// UefiTargetBootSourceOverride shall be
 	// the UEFI device path of the override boot target. The valid values for
 	// this property are specified through the Redfish.AllowableValues
@@ -283,7 +319,7 @@ type Boot struct {
 	// for UEFI Boot Source Override as this setting is defined in UEFI as a
 	// one time boot only. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
-	UefiTargetBootSourceOverride string
+	UefiTargetBootSourceOverride string `json:",omitempty"`
 }
 
 // UnmarshalJSON unmarshals a Boot object from the raw JSON.
@@ -633,6 +669,55 @@ func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
 	}
 
 	return GetSecureBoot(computersystem.Client, computersystem.secureBoot)
+}
+
+// SetBoot set a boot object based on a payload request
+func (computersystem *ComputerSystem) SetBoot(b Boot) error {
+	type temp struct {
+		Boot Boot
+	}
+	t := temp{
+		Boot: b,
+	}
+
+	payload, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+
+	resp, err := computersystem.Client.Patch(computersystem.ODataID, payload)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
+// Reset This action shall perform a reset of the ComputerSystem.  For systems which implement ACPI Power Button
+// functionality, the PushPowerButton value shall perform or emulate an ACPI Power Button push.  The ForceOff
+// value shall remove power from the system or perform an ACPI Power Button Override (commonly known as a
+// 4-second hold of the Power Button).  The ForceRestart value shall perform a ForceOff action followed by a On action.
+func (computersystem *ComputerSystem) Reset(r ResetType) error {
+	type temp struct {
+		ResetType ResetType
+	}
+	t := temp{
+		ResetType: r,
+	}
+
+	payload, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+
+	resp, err := computersystem.Client.Post(computersystem.Actions.ComputerSystemReset.Target, payload)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
 }
 
 // SimpleStorages gets all simple storage services of this system.
