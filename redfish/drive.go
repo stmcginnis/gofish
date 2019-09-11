@@ -222,6 +222,8 @@ type Drive struct {
 	pcieFunctions []string
 	// PCIeFunctionCount is the number of PCIeFunctions.
 	PCIeFunctionCount int
+	// secureEraseTarget is the URL for SecureErase actions.
+	secureEraseTarget string
 }
 
 // UnmarshalJSON unmarshals a Drive object from the raw JSON.
@@ -240,9 +242,15 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 		Volumes            common.Links
 		VolumeCount        int `json:"Volumes@odata.count"`
 	}
+	type Actions struct {
+		SecureErase struct {
+			Target string
+		} `json:"#Drive.SecureErase"`
+	}
 	var t struct {
 		temp
 		Links    links
+		Actions  Actions
 		Assembly common.Link
 	}
 
@@ -261,6 +269,7 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 	drive.VolumesCount = t.Links.VolumeCount
 	drive.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	drive.PCIeFunctionCount = t.Links.PCIeFunctionsCount
+	drive.secureEraseTarget = t.Actions.SecureErase.Target
 
 	return nil
 }
@@ -367,4 +376,11 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 	}
 
 	return result, nil
+}
+
+// SecureErase shall perform a secure erase of the drive.
+func (drive *Drive) SecureErase() error {
+	var payload []byte
+	_, err := drive.Client.Patch(drive.secureEraseTarget, payload)
+	return err
 }

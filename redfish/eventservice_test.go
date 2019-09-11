@@ -90,4 +90,8 @@ func TestEventService(t *testing.T) {
 	if !result.SSEFilterPropertiesSupported.MessageID {
 		t.Error("Message ID filter should be true")
 	}
+
+	if result.submitTestEventTarget != "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent" {
+		t.Errorf("Invalid SubmitTestEvent target: %s", result.submitTestEventTarget)
+	}
 }

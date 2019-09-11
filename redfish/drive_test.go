@@ -18,6 +18,11 @@ var driveBody = strings.NewReader(
 		"Id": "Drive-1",
 		"Name": "Drive One",
 		"Description": "One drive",
+		"Actions": {
+			"#Drive.SecureErase": {
+				"target": "/redfish/v1/Chassis/NVMeChassis/Disk.Bay.0/Actions/Drive.SecureErase"
+			}
+		},
 		"Assembly": {
 			"@odata.id": "/redfish/v1/Assembly/Assembly-1"
 		},
@@ -123,5 +128,9 @@ func TestDrive(t *testing.T) {
 
 	if result.chassis != "/redfish/v1/Chassis/Chassis-1" {
 		t.Errorf("Invalid chassis link: %s", result.chassis)
+	}
+
+	if result.secureEraseTarget != "/redfish/v1/Chassis/NVMeChassis/Disk.Bay.0/Actions/Drive.SecureErase" {
+		t.Errorf("Invalid SecureErase target: %s", result.secureEraseTarget)
 	}
 }
