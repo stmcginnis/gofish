@@ -69,8 +69,8 @@ const (
 	UefiTargetBootSourceOverrideTarget BootSourceOverrideTarget = "UefiTarget"
 	// SDCardBootSourceOverrideTarget boot from an SD Card
 	SDCardBootSourceOverrideTarget BootSourceOverrideTarget = "SDCard"
-	// UefiHttpBootSourceOverrideTarget boot from a UEFI HTTP network location
-	UefiHttpBootSourceOverrideTarget BootSourceOverrideTarget = "UefiHttp"
+	// UefiHTTPBootSourceOverrideTarget boot from a UEFI HTTP network location
+	UefiHTTPBootSourceOverrideTarget BootSourceOverrideTarget = "UefiHttp"
 	// RemoteDriveBootSourceOverrideTarget boot from a remote drive (e.g. iSCSI).
 	RemoteDriveBootSourceOverrideTarget BootSourceOverrideTarget = "RemoteDrive"
 	// UefiBootNextBootSourceOverrideTarget boot to the UEFI Device specified in the BootNext property
@@ -278,7 +278,7 @@ type Boot struct {
 	BootNext string `json:",omitempty"`
 	// BootOptions shall be a link to a
 	// collection of type BootOptionCollection.
-	bootOptions string `json:",omitempty"`
+	bootOptions string
 	// BootOrder shall be an ordered array of
 	// BootOptionReference strings representing the persistent Boot Order of
 	// this computer system. For UEFI systems, this is the UEFI BootOrder as
