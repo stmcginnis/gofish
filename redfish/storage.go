@@ -64,6 +64,8 @@ type Storage struct {
 	enclosures []string
 	// EnclosuresCount is the number of enclosures.
 	EnclosuresCount int
+	// setEncryptionKeyTarget is the URL to send SetEncryptionKey requests.
+	setEncryptionKeyTarget string
 }
 
 // UnmarshalJSON unmarshals a Storage object from the raw JSON.
@@ -73,11 +75,17 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 		Enclosures      common.Links
 		EnclosuresCount int `json:"Enclosures@odata.count"`
 	}
+	type actions struct {
+		SetEncryptionKey struct {
+			Target string
+		} `json:"#Storage.SetEncryptionKey"`
+	}
 	var t struct {
 		temp
 		Links   links
 		Drives  common.Links
 		Volumes common.Link
+		Actions actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -92,6 +100,7 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 	storage.EnclosuresCount = t.Links.EnclosuresCount
 	storage.drives = t.Drives.ToStrings()
 	storage.volumes = string(t.Volumes)
+	storage.setEncryptionKeyTarget = t.Actions.SetEncryptionKey.Target
 
 	return nil
 }
@@ -168,6 +177,17 @@ func (storage *Storage) Drives() ([]*Drive, error) {
 // Volumes gets the volumes associated with this storage subsystem.
 func (storage *Storage) Volumes() ([]*Volume, error) {
 	return ListReferencedVolumes(storage.Client, storage.volumes)
+}
+
+// SetEncryptionKey shall set the encryption key for the storage subsystem.
+func (storage *Storage) SetEncryptionKey(key string) error {
+	type temp struct {
+		EncryptionKey string
+	}
+	t := temp{EncryptionKey: key}
+
+	_, err := storage.Client.Post(storage.setEncryptionKeyTarget, t)
+	return err
 }
 
 // StorageController is used to represent a resource that represents a
