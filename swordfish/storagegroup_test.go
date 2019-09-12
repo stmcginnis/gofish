@@ -57,7 +57,15 @@ var storageGroupBody = strings.NewReader(
 			"State": "Enabled",
 			"Health": "OK"
 		},
-		"VolumesAreExposed": true
+		"VolumesAreExposed": true,
+		"Actions": {
+			"#StorageGroup.ExposeVolumes": {
+				"target": "/redfish/v1/StorageGroup/Actions/StorageGroup.ExposeVolumes"
+			},
+			"#StorageGroup.HideVolumes": {
+				"target": "/redfish/v1/StorageGroup/Actions/StorageGroup.HideVolumes"
+			}
+		}
 	}`)
 
 // TestStorageGroup tests the parsing of StorageGroup objects.
@@ -95,5 +103,13 @@ func TestStorageGroup(t *testing.T) {
 
 	if !result.VolumesAreExposed {
 		t.Error("VolumesAreExposed should be True")
+	}
+
+	if result.exposeVolumesTarget != "/redfish/v1/StorageGroup/Actions/StorageGroup.ExposeVolumes" {
+		t.Errorf("Invalid ExposeVolumes target: %s", result.exposeVolumesTarget)
+	}
+
+	if result.hideVolumesTarget != "/redfish/v1/StorageGroup/Actions/StorageGroup.HideVolumes" {
+		t.Errorf("Invalid HideVolumes target: %s", result.hideVolumesTarget)
 	}
 }
