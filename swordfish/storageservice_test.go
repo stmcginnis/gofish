@@ -84,6 +84,11 @@ var storageServiceBody = strings.NewReader(
 		},
 		"Volumes": {
 			"@odata.id": "/redfish/v1/Volumes/1"
+		},
+		"Actions": {
+			"#StorageService.SetEncryptionKey": {
+				"target": "/redfish/v1/StorageService/Actions/StorageService.SetEncryptionKey"
+			}
 		}
 	}`)
 
@@ -122,5 +127,9 @@ func TestStorageService(t *testing.T) {
 
 	if result.volumes != "/redfish/v1/Volumes/1" {
 		t.Errorf("Invalid volumes collection link: %s", result.volumes)
+	}
+
+	if result.setEncryptionKeyTarget != "/redfish/v1/StorageService/Actions/StorageService.SetEncryptionKey" {
+		t.Errorf("Invalid SetEncryptionKey link: %s", result.setEncryptionKeyTarget)
 	}
 }

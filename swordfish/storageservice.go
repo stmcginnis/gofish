@@ -92,6 +92,8 @@ type StorageService struct {
 	// Volumes is an array of references to Volumes managed by this storage
 	// service.
 	volumes string
+	// setEncryptionKeyTarget is the URL to send SetEncryptionKey requests.
+	setEncryptionKeyTarget string
 }
 
 // UnmarshalJSON unmarshals a StorageService object from the raw JSON.
@@ -101,6 +103,11 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		// HostingSystem shall reference the ComputerSystem or
 		// StorageController that hosts this service.
 		HostingSystem common.Link
+	}
+	type actions struct {
+		SetEncryptionKey struct {
+			Target string
+		} `json:"#StorageService.SetEncryptionKey"`
 	}
 	var t struct {
 		temp
@@ -122,6 +129,7 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		StorageSubsystems             common.Link
 		Volumes                       common.Link
 		Links                         links
+		Actions                       actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -149,6 +157,7 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	storageservice.storageSubsystems = string(t.StorageSubsystems)
 	storageservice.hostingSystem = string(t.Links.HostingSystem)
 	storageservice.volumes = string(t.Volumes)
+	storageservice.setEncryptionKeyTarget = t.Actions.SetEncryptionKey.Target
 
 	return nil
 }
@@ -315,4 +324,15 @@ func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
 // Volumes gets the volumes that are a part of this storage service.
 func (storageservice *StorageService) Volumes() ([]*Volume, error) {
 	return ListReferencedVolumes(storageservice.Client, storageservice.volumes)
+}
+
+// SetEncryptionKey shall set the encryption key for the storage subsystem.
+func (storageservice *StorageService) SetEncryptionKey(key string) error {
+	type temp struct {
+		EncryptionKey string
+	}
+	t := temp{EncryptionKey: key}
+
+	_, err := storageservice.Client.Post(storageservice.setEncryptionKeyTarget, t)
+	return err
 }
