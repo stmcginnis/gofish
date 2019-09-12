@@ -384,11 +384,6 @@ func (manager *Manager) Reset(resetType ResetType) error {
 		ResetType: resetType,
 	}
 
-	payload, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-
-	_, err = manager.Client.Post(manager.resetTarget, payload)
+	_, err := manager.Client.Post(manager.resetTarget, t)
 	return err
 }

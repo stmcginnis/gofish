@@ -7,6 +7,7 @@ package gofish
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -131,17 +132,17 @@ func (c *APIClient) Get(url string) (*http.Response, error) {
 }
 
 // Post performs a Post request against the Redfish service.
-func (c *APIClient) Post(url string, payload []byte) (*http.Response, error) {
+func (c *APIClient) Post(url string, payload interface{}) (*http.Response, error) {
 	return c.runRequest("POST", url, payload)
 }
 
 // Put performs a Put request against the Redfish service.
-func (c *APIClient) Put(url string, payload []byte) (*http.Response, error) {
+func (c *APIClient) Put(url string, payload interface{}) (*http.Response, error) {
 	return c.runRequest("PUT", url, payload)
 }
 
 // Patch performs a Patch request against the Redfish service.
-func (c *APIClient) Patch(url string, payload []byte) (*http.Response, error) {
+func (c *APIClient) Patch(url string, payload interface{}) (*http.Response, error) {
 	return c.runRequest("PATCH", url, payload)
 }
 
@@ -152,14 +153,18 @@ func (c *APIClient) Delete(url string) error {
 }
 
 // runRequest actually performs the REST calls.
-func (c *APIClient) runRequest(method string, url string, payload []byte) (*http.Response, error) {
+func (c *APIClient) runRequest(method string, url string, payload interface{}) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("Unable to execute request, no target provided")
 	}
 
 	var payloadBuffer io.ReadSeeker
-	if payload != nil && len(payload) > 0 {
-		payloadBuffer = bytes.NewReader(payload)
+	if payload != nil {
+		body, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+		payloadBuffer = bytes.NewReader(body)
 	}
 
 	endpoint := fmt.Sprintf("%s%s", c.endpoint, url)
@@ -173,7 +178,7 @@ func (c *APIClient) runRequest(method string, url string, payload []byte) (*http
 	req.Header.Set("Accept", applicationJSON)
 
 	// Add content info if present
-	if payload != nil && len(payload) > 0 {
+	if payload != nil {
 		req.Header.Set("Content-Type", applicationJSON)
 	}
 

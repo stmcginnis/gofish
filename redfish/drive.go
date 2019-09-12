@@ -380,7 +380,6 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // SecureErase shall perform a secure erase of the drive.
 func (drive *Drive) SecureErase() error {
-	var payload []byte
-	_, err := drive.Client.Post(drive.secureEraseTarget, payload)
+	_, err := drive.Client.Post(drive.secureEraseTarget, nil)
 	return err
 }

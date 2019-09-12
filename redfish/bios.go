@@ -132,12 +132,7 @@ func (bios *Bios) ChangePassword(passwordName string, oldPassword string, newPas
 		NewPassword:  newPassword,
 	}
 
-	payload, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-
-	_, err = bios.Client.Post(bios.changePasswordTarget, payload)
+	_, err := bios.Client.Post(bios.changePasswordTarget, t)
 	return err
 }
 
@@ -145,7 +140,6 @@ func (bios *Bios) ChangePassword(passwordName string, oldPassword string, newPas
 // A system reset may be required for the default values to be applied. This
 // action may impact other resources.
 func (bios *Bios) ResetBios() error {
-	var payload []byte
-	_, err := bios.Client.Post(bios.resetBiosTarget, payload)
+	_, err := bios.Client.Post(bios.resetBiosTarget, nil)
 	return err
 }

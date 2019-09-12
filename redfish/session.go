@@ -85,12 +85,7 @@ func CreateSession(c common.Client, uri string, username string, password string
 		Password: password,
 	}
 
-	payload, err := json.Marshal(a)
-	if err != nil {
-		return auth, err
-	}
-
-	resp, err := c.Post(uri, payload)
+	resp, err := c.Post(uri, a)
 	if err != nil {
 		return auth, err
 	}
