@@ -288,11 +288,6 @@ func (c *Chassis) Reset(resetType ResetType) error {
 		ResetType: resetType,
 	}
 
-	payload, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.Client.Post(c.resetTarget, payload)
+	_, err := c.Client.Post(c.resetTarget, t)
 	return err
 }

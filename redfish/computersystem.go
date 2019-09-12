@@ -684,12 +684,7 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error {
 		Boot: b,
 	}
 
-	payload, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-
-	_, err = computersystem.Client.Patch(computersystem.ODataID, payload)
+	_, err := computersystem.Client.Patch(computersystem.ODataID, t)
 	return err
 }
 
@@ -726,12 +721,7 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 		ResetType: resetType,
 	}
 
-	payload, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-
-	_, err = computersystem.Client.Post(computersystem.resetTarget, payload)
+	_, err := computersystem.Client.Post(computersystem.resetTarget, t)
 	return err
 }
 
@@ -742,8 +732,7 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
 	}
 
-	var payload []byte
-	_, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, payload)
+	_, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, nil)
 	return err
 }
 

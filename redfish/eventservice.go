@@ -179,12 +179,7 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 		Severity:          "Informational",
 	}
 
-	payload, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-
-	_, err = eventservice.Client.Post(eventservice.submitTestEventTarget, payload)
+	_, err := eventservice.Client.Post(eventservice.submitTestEventTarget, t)
 	return err
 }
 
