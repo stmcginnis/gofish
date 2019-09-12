@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -126,128 +127,57 @@ func (c *APIClient) Get(url string) (*http.Response, error) {
 		relativePath = common.DefaultServiceRoot
 	}
 
-	endpoint := fmt.Sprintf("%s%s", c.endpoint, relativePath)
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("Accept", applicationJSON)
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
-	}
-	req.Close = true
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
-	}
-
-	return resp, err
+	return c.runRequest("GET", relativePath, nil)
 }
 
 // Post performs a Post request against the Redfish service.
 func (c *APIClient) Post(url string, payload []byte) (*http.Response, error) {
-	relativePath := url
-	if relativePath == "" {
-		relativePath = common.DefaultServiceRoot
-	}
-
-	endpoint := fmt.Sprintf("%s%s", c.endpoint, relativePath)
-	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(payload))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("Content-Type", applicationJSON)
-	req.Header.Set("Accept", applicationJSON)
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
-	}
-	req.Close = true
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
-	}
-
-	return resp, err
+	return c.runRequest("POST", url, payload)
 }
 
 // Put performs a Put request against the Redfish service.
 func (c *APIClient) Put(url string, payload []byte) (*http.Response, error) {
-	relativePath := url
-	if relativePath == "" {
-		relativePath = common.DefaultServiceRoot
-	}
-
-	endpoint := fmt.Sprintf("%s%s", c.endpoint, relativePath)
-	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(payload))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("Content-Type", applicationJSON)
-	req.Header.Set("Accept", applicationJSON)
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
-	}
-	req.Close = true
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
-	}
-
-	return resp, err
+	return c.runRequest("PUT", url, payload)
 }
 
 // Patch performs a Patch request against the Redfish service.
 func (c *APIClient) Patch(url string, payload []byte) (*http.Response, error) {
-	relativePath := url
-	if relativePath == "" {
-		relativePath = common.DefaultServiceRoot
+	return c.runRequest("PATCH", url, payload)
+}
+
+// Delete performs a Delete request against the Redfish service.
+func (c *APIClient) Delete(url string) error {
+	_, err := c.runRequest("DELETE", url, nil)
+	return err
+}
+
+// runRequest actually performs the REST calls.
+func (c *APIClient) runRequest(method string, url string, payload []byte) (*http.Response, error) {
+	if url == "" {
+		return nil, fmt.Errorf("Unable to execute request, no target provided")
 	}
 
-	endpoint := fmt.Sprintf("%s%s", c.endpoint, relativePath)
-	req, err := http.NewRequest("Patch", endpoint, bytes.NewBuffer(payload))
+	var payloadBuffer io.ReadSeeker
+	if payload != nil && len(payload) > 0 {
+		payloadBuffer = bytes.NewReader(payload)
+	}
+
+	endpoint := fmt.Sprintf("%s%s", c.endpoint, url)
+	req, err := http.NewRequest(method, endpoint, payloadBuffer)
 	if err != nil {
 		return nil, err
 	}
 
+	// Add common headers
 	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("Content-Type", applicationJSON)
 	req.Header.Set("Accept", applicationJSON)
+
+	// Add content info if present
+	if payload != nil && len(payload) > 0 {
+		req.Header.Set("Content-Type", applicationJSON)
+	}
+
+	// Add auth info if authenticated
 	if c.auth != nil && c.auth.Token != "" {
 		req.Header.Set("X-Auth-Token", c.auth.Token)
 	}
@@ -268,43 +198,6 @@ func (c *APIClient) Patch(url string, payload []byte) (*http.Response, error) {
 	}
 
 	return resp, err
-}
-
-// Delete performs a Delete request against the Redfish service.
-func (c *APIClient) Delete(url string) error {
-	relativePath := url
-	if relativePath == "" {
-		relativePath = common.DefaultServiceRoot
-	}
-
-	endpoint := fmt.Sprintf("%s%s", c.endpoint, relativePath)
-	req, err := http.NewRequest("DELETE", endpoint, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("User-Agent", "gofish/1.0.0")
-	req.Header.Set("Accept", "application/json")
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
-	}
-	req.Close = true
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != 200 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		return fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
-	}
-
-	return err
 }
 
 // Logout will delete any active session. Useful to defer logout when creating
