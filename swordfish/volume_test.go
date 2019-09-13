@@ -109,7 +109,36 @@ var volumeBody = strings.NewReader(
 		},
 		"StorageGroups": [{
 			"@odata.id": "/redfish/v1/StorageGroups/1"
-		}]
+		}],
+		"Actions": {
+			"#Volume.AssignReplicaTarget": {
+				"target": "/redfish/v1/Volume/Actions/Volume.AssignReplicaTarget"
+			},
+			"#Volume.CheckConsistency": {
+				"target": "/redfish/v1/Volume/Actions/Volume.CheckConsistency"
+			},
+			"#Volume.CreateReplicaTarget": {
+				"target": "/redfish/v1/Volume/Actions/Volume.CreateReplicaTarget"
+			},
+			"#Volume.Initialize": {
+				"target": "/redfish/v1/Volume/Actions/Volume.Initialize"
+			},
+			"#Volume.RemoveReplicaRelationship": {
+				"target": "/redfish/v1/Volume/Actions/Volume.RemoveReplicaRelationship"
+			},
+			"#Volume.ResumeReplication": {
+				"target": "/redfish/v1/Volume/Actions/Volume.ResumeReplication"
+			},
+			"#Volume.ReverseReplicationRelationship": {
+				"target": "/redfish/v1/Volume/Actions/Volume.ReverseReplicationRelationship"
+			},
+			"#Volume.SplitReplication": {
+				"target": "/redfish/v1/Volume/Actions/Volume.SplitReplication"
+			},
+			"#Volume.SuspendReplication": {
+				"target": "/redfish/v1/Volume/Actions/Volume.SuspendReplication"
+			}
+		}
 	}`)
 
 // TestVolume tests the parsing of Volume objects.
@@ -151,5 +180,41 @@ func TestVolume(t *testing.T) {
 
 	if result.storageGroups[0] != "/redfish/v1/StorageGroups/1" {
 		t.Errorf("Invalid StorageGroup link: %s", result.storageGroups[0])
+	}
+
+	if result.assignReplicaTargetTarget != "/redfish/v1/Volume/Actions/Volume.AssignReplicaTarget" {
+		t.Errorf("Invalid AssignReplicaTarget target: %s", result.assignReplicaTargetTarget)
+	}
+
+	if result.checkConsistencyTarget != "/redfish/v1/Volume/Actions/Volume.CheckConsistency" {
+		t.Errorf("Invalid CheckConsistency target: %s", result.checkConsistencyTarget)
+	}
+
+	if result.createReplicaTargetTarget != "/redfish/v1/Volume/Actions/Volume.CreateReplicaTarget" {
+		t.Errorf("Invalid CreateReplicaTarget target: %s", result.createReplicaTargetTarget)
+	}
+
+	if result.initializeTarget != "/redfish/v1/Volume/Actions/Volume.Initialize" {
+		t.Errorf("Invalid Initialize target: %s", result.initializeTarget)
+	}
+
+	if result.removeReplicaRelationshipTarget != "/redfish/v1/Volume/Actions/Volume.RemoveReplicaRelationship" {
+		t.Errorf("Invalid RemoveReplicaRelationship target: %s", result.removeReplicaRelationshipTarget)
+	}
+
+	if result.resumeReplicationTarget != "/redfish/v1/Volume/Actions/Volume.ResumeReplication" {
+		t.Errorf("Invalid ResumeReplication target: %s", result.resumeReplicationTarget)
+	}
+
+	if result.reverseReplicationRelationshipTarget != "/redfish/v1/Volume/Actions/Volume.ReverseReplicationRelationship" {
+		t.Errorf("Invalid ReverseReplicationRelationship target: %s", result.reverseReplicationRelationshipTarget)
+	}
+
+	if result.splitReplicationTarget != "/redfish/v1/Volume/Actions/Volume.SplitReplication" {
+		t.Errorf("Invalid SplitReplication target: %s", result.splitReplicationTarget)
+	}
+
+	if result.suspendReplicationTarget != "/redfish/v1/Volume/Actions/Volume.SuspendReplication" {
+		t.Errorf("Invalid SuspendReplication target: %s", result.suspendReplicationTarget)
 	}
 }

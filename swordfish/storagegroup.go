@@ -131,6 +131,10 @@ type StorageGroup struct {
 	parentStorageGroups []string
 	// ParentStorageGroupsCount is the number of parent storage groups.
 	ParentStorageGroupsCount int
+	// exposeVolumesTarget is the URL to for the ExposeVolumes action.
+	exposeVolumesTarget string
+	// hideVolumesTarget is the URL to for the HideVolumes action.
+	hideVolumesTarget string
 }
 
 // UnmarshalJSON unmarshals a StorageGroup object from the raw JSON.
@@ -143,10 +147,19 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 		ParentStorageGroups      common.Links
 		ParentStorageGroupsCount int `json:"ParentStorageGroups@odata.count"`
 	}
+	type actions struct {
+		ExposeVolumes struct {
+			Target string
+		} `json:"#StorageGroup.ExposeVolumes"`
+		HideVolumes struct {
+			Target string
+		} `json:"#StorageGroup.HideVolumes"`
+	}
 	var t struct {
 		temp
 		Links                links
 		ServerEndpointGroups common.Links
+		Actions              actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -161,6 +174,8 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 	storagegroup.classOfService = string(t.Links.ClassOfService)
 	storagegroup.parentStorageGroups = t.Links.ParentStorageGroups.ToStrings()
 	storagegroup.ParentStorageGroupsCount = t.Links.ParentStorageGroupsCount
+	storagegroup.exposeVolumesTarget = t.Actions.ExposeVolumes.Target
+	storagegroup.hideVolumesTarget = t.Actions.HideVolumes.Target
 
 	return nil
 }
@@ -250,4 +265,29 @@ type MappedVolume struct {
 	LogicalUnitNumber int
 	// Volume shall reference a mapped Volume.
 	Volume common.Link
+}
+
+// ExposeVolumes exposes the storage of this group via the target endpoints
+// named in the ServerEndpointGroups to the initiator endpoints named in the
+// ClientEndpointGroups.  The property VolumesAreExposed shall be set to true
+// when this action is completed.
+func (storagegroup *StorageGroup) ExposeVolumes() error {
+	_, err := storagegroup.Client.Post(storagegroup.exposeVolumesTarget, nil)
+	if err == nil {
+		// Only set to exposed if no error. Calling expose when already exposed
+		// could fail so we don't want to indicate they are not exposed.
+		storagegroup.VolumesAreExposed = true
+	}
+	return err
+}
+
+// HideVolumes hides the storage of this group from the initiator endpoints
+// named in the ClientEndpointGroups. The property VolumesAreExposed shall be
+// set to false when this action is completed.
+func (storagegroup *StorageGroup) HideVolumes() error {
+	_, err := storagegroup.Client.Post(storagegroup.hideVolumesTarget, nil)
+	if err == nil {
+		storagegroup.VolumesAreExposed = false
+	}
+	return err
 }

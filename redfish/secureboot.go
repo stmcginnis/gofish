@@ -75,6 +75,33 @@ type SecureBoot struct {
 	// SecureBootMode shall contain the current Secure Boot mode, as defined in
 	// the UEFI Specification.
 	SecureBootMode SecureBootModeType
+	// resetKeysTarget is the URL to send ResetKeys requests.
+	resetKeysTarget string
+}
+
+// UnmarshalJSON unmarshals a SecureBoot object from the raw JSON.
+func (secureboot *SecureBoot) UnmarshalJSON(b []byte) error {
+	type temp SecureBoot
+	type actions struct {
+		ResetKeys struct {
+			Target string
+		} `json:"#SecureBoot.ResetKeys"`
+	}
+	var t struct {
+		temp
+		Actions actions
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	// Extract the links to other entities for later
+	*secureboot = SecureBoot(t.temp)
+	secureboot.resetKeysTarget = t.Actions.ResetKeys.Target
+
+	return nil
 }
 
 // GetSecureBoot will get a SecureBoot instance from the service.
@@ -117,4 +144,19 @@ func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, err
 	}
 
 	return result, nil
+}
+
+// ResetKeys shall perform a reset of the Secure Boot key databases. The
+// ResetAllKeysToDefault value shall reset the UEFI Secure Boot key databases to
+// their default values. The DeleteAllKeys value shall delete the content of the
+// UEFI Secure Boot key databases. The DeletePK value shall delete the content
+// of the PK Secure boot key.
+func (secureboot *SecureBoot) ResetKeys(resetType ResetKeysType) error {
+	type temp struct {
+		ResetKeysType ResetKeysType
+	}
+	t := temp{ResetKeysType: resetType}
+
+	_, err := secureboot.Client.Post(secureboot.resetKeysTarget, t)
+	return err
 }

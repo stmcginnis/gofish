@@ -20,7 +20,12 @@ var secureBootBody = strings.NewReader(
 		"Description": "SecureBoot One",
 		"SecureBootCurrentBoot": "Enabled",
 		"SecureBootEnable": true,
-		"SecureBootMode": "UserMode"
+		"SecureBootMode": "UserMode",
+		"Actions": {
+			"#SecureBoot.ResetKeys": {
+				"target": "/redfish/v1/SecureBoot/Actions/SecureBoot.ResetKeys"
+			}
+		}
 	}`)
 
 // TestSecureBoot tests the parsing of SecureBoot objects.
@@ -50,5 +55,9 @@ func TestSecureBoot(t *testing.T) {
 
 	if result.SecureBootMode != UserModeSecureBootModeType {
 		t.Errorf("Invalid SecureBootMode: %s", result.SecureBootMode)
+	}
+
+	if result.resetKeysTarget != "/redfish/v1/SecureBoot/Actions/SecureBoot.ResetKeys" {
+		t.Errorf("Invalid ResetKeys target: %s", result.resetKeysTarget)
 	}
 }

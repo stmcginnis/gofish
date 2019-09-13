@@ -115,6 +115,11 @@ var storageBody = strings.NewReader(
 		}],
 		"Volumes": {
 			"@odata.id": "/redfish/v1/Volumes/1"
+		},
+		"Actions": {
+			"#Storage.SetEncryptionKey": {
+				"target": "/redfish/v1/Storage/Actions/Storage.SetEncryptionKey"
+			}
 		}
 	}`)
 
@@ -146,5 +151,9 @@ func TestStorage(t *testing.T) {
 
 	if result.StorageControllers[0].PCIeInterface.MaxPCIeType != Gen4PCIeTypes {
 		t.Errorf("Invalid MaxPCIeType: %s", result.StorageControllers[0].PCIeInterface.MaxPCIeType)
+	}
+
+	if result.setEncryptionKeyTarget != "/redfish/v1/Storage/Actions/Storage.SetEncryptionKey" {
+		t.Errorf("Invalid SetEncryptionKey target: %s", result.setEncryptionKeyTarget)
 	}
 }

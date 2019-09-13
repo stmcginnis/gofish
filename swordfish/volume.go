@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -253,6 +254,25 @@ type Volume struct {
 	// storageGroups shall contain references to all storage groups that include
 	// this volume.
 	storageGroups []string
+	// assignReplicaTargetTarget is the URL to send AssignReplicaTarget requests.
+	assignReplicaTargetTarget string
+	// checkConsistencyTarget is the URL to send CheckConsistency requests.
+	checkConsistencyTarget string
+	// createReplicaTargetTarget is the URL to send CreateReplicaTarget requests.
+	createReplicaTargetTarget string
+	// initializeTarget is the URL to send Initialize requests.
+	initializeTarget string
+	// removeReplicaRelationshipTarget is the URL to send RemoveReplicaRelationship requests.
+	removeReplicaRelationshipTarget string
+	// resumeReplicationTarget is the URL to send ResumeReplication requests.
+	resumeReplicationTarget string
+	// reverseReplicationRelationshipTarget is the URL to send
+	// ReverseReplicationRelationship requests.
+	reverseReplicationRelationshipTarget string
+	// splitReplicationTarget is the URL to send SplitReplication requests.
+	splitReplicationTarget string
+	// suspendReplicationTarget is the URL to send SuspendReplication requests.
+	suspendReplicationTarget string
 }
 
 // UnmarshalJSON unmarshals a Volume object from the raw JSON.
@@ -287,11 +307,42 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 		SpareResourceSetsCount int `json:"SpareResourceSets@odata.count"`
 	}
 
+	type actions struct {
+		AssignReplicaTarget struct {
+			Target string
+		} `json:"#Volume.AssignReplicaTarget"`
+		CheckConsistency struct {
+			Target string
+		} `json:"#Volume.CheckConsistency"`
+		CreateReplicaTarget struct {
+			Target string
+		} `json:"#Volume.CreateReplicaTarget"`
+		Initialize struct {
+			Target string
+		} `json:"#Volume.Initialize"`
+		RemoveReplicaRelationship struct {
+			Target string
+		} `json:"#Volume.RemoveReplicaRelationship"`
+		ResumeReplication struct {
+			Target string
+		} `json:"#Volume.ResumeReplication"`
+		ReverseReplicationRelationship struct {
+			Target string
+		} `json:"#Volume.ReverseReplicationRelationship"`
+		SplitReplication struct {
+			Target string
+		} `json:"#Volume.SplitReplication"`
+		SuspendReplication struct {
+			Target string
+		} `json:"#Volume.SuspendReplication"`
+	}
+
 	var t struct {
 		temp
 		AllocatedPools common.Links
 		StorageGroups  common.Links
 		Links          links
+		Actions        actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -310,6 +361,15 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 	volume.DedicatedSpareDrivesCount = t.Links.DedicatedSpareDrivesCount
 	volume.DrivesCount = t.Links.DrivesCount
 	volume.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
+	volume.assignReplicaTargetTarget = t.Actions.AssignReplicaTarget.Target
+	volume.checkConsistencyTarget = t.Actions.CheckConsistency.Target
+	volume.createReplicaTargetTarget = t.Actions.CreateReplicaTarget.Target
+	volume.initializeTarget = t.Actions.Initialize.Target
+	volume.removeReplicaRelationshipTarget = t.Actions.RemoveReplicaRelationship.Target
+	volume.resumeReplicationTarget = t.Actions.ResumeReplication.Target
+	volume.reverseReplicationRelationshipTarget = t.Actions.ReverseReplicationRelationship.Target
+	volume.splitReplicationTarget = t.Actions.SplitReplication.Target
+	volume.suspendReplicationTarget = t.Actions.SuspendReplication.Target
 
 	return nil
 }
@@ -430,4 +490,176 @@ func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 	}
 
 	return result, nil
+}
+
+// AssignReplicaTarget is used to establish a replication relationship by
+// assigning an existing volume to serve as a target replica for an existing
+// source volume.
+func (volume *Volume) AssignReplicaTarget(
+	replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) error {
+
+	// This action wasn't added until later revisions
+	if volume.assignReplicaTargetTarget == "" {
+		return fmt.Errorf("AssignReplicaTarget action is not supported by this system")
+	}
+
+	// Define this action's parameters
+	type temp struct {
+		ReplicaType       ReplicaType
+		ReplicaUpdateMode ReplicaUpdateMode
+		TargetVolume      string
+	}
+
+	// Set the values for the action arguments
+	t := temp{
+		ReplicaType:       replicaType,
+		ReplicaUpdateMode: updateMode,
+		TargetVolume:      targetVolumeODataID,
+	}
+
+	_, err := volume.Client.Post(volume.assignReplicaTargetTarget, t)
+	return err
+}
+
+// CheckConsistency is used to force a check of the Volume's parity or redundant
+// data to ensure it matches calculated values.
+func (volume *Volume) CheckConsistency() error {
+
+	if volume.checkConsistencyTarget == "" {
+		return fmt.Errorf("CheckConsistency action is not supported by this system")
+	}
+
+	_, err := volume.Client.Post(volume.checkConsistencyTarget, nil)
+	return err
+}
+
+// Initialize is used to prepare the contents of the volume for use by the system.
+func (volume *Volume) Initialize(initType InitializeType) error {
+
+	if volume.initializeTarget == "" {
+		return fmt.Errorf("Initialize action is not supported by this system")
+	}
+
+	// Define this action's parameters
+	type temp struct {
+		InitializeType InitializeType
+	}
+
+	// Set the values for the action arguments
+	t := temp{InitializeType: initType}
+
+	_, err := volume.Client.Post(volume.initializeTarget, t)
+	return err
+}
+
+// RemoveReplicaRelationship is used to disable data synchronization between a
+// source and target volume, remove the replication relationship, and optionally
+// delete the target volume.
+func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeODataID string) error {
+
+	// This action wasn't added until later revisions
+	if volume.removeReplicaRelationshipTarget == "" {
+		return fmt.Errorf("RemoveReplicaRelationship action is not supported by this system")
+	}
+
+	// Define this action's parameters
+	type temp struct {
+		DeleteTargetVolume bool
+		TargetVolume       string
+	}
+
+	// Set the values for the action arguments
+	t := temp{
+		DeleteTargetVolume: deleteTarget,
+		TargetVolume:       targetVolumeODataID,
+	}
+
+	_, err := volume.Client.Post(volume.removeReplicaRelationshipTarget, t)
+	return err
+}
+
+// ResumeReplication is used to resume the active data synchronization between a
+// source and target volume, without otherwise altering the replication
+// relationship.
+func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
+
+	// This action wasn't added until later revisions
+	if volume.resumeReplicationTarget == "" {
+		return fmt.Errorf("ResumeReplication action is not supported by this system")
+	}
+
+	// Define this action's parameters
+	type temp struct {
+		TargetVolume string
+	}
+
+	// Set the values for the action arguments
+	t := temp{TargetVolume: targetVolumeODataID}
+
+	_, err := volume.Client.Post(volume.resumeReplicationTarget, t)
+	return err
+}
+
+// ReverseReplicationRelationship is used to reverse the replication
+// relationship between a source and target volume.
+func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string) error {
+
+	// This action wasn't added until later revisions
+	if volume.reverseReplicationRelationshipTarget == "" {
+		return fmt.Errorf("ReverseReplicationRelationship action is not supported by this system")
+	}
+
+	// Define this action's parameters
+	type temp struct {
+		TargetVolume string
+	}
+
+	// Set the values for the action arguments
+	t := temp{TargetVolume: targetVolumeODataID}
+
+	_, err := volume.Client.Post(volume.reverseReplicationRelationshipTarget, t)
+	return err
+}
+
+// SplitReplication is used to split the replication relationship and suspend
+// data synchronization between a source and target volume.
+func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
+
+	// This action wasn't added until later revisions
+	if volume.splitReplicationTarget == "" {
+		return fmt.Errorf("SplitReplication action is not supported by this system")
+	}
+
+	// Define this action's parameters
+	type temp struct {
+		TargetVolume string
+	}
+
+	// Set the values for the action arguments
+	t := temp{TargetVolume: targetVolumeODataID}
+
+	_, err := volume.Client.Post(volume.splitReplicationTarget, t)
+	return err
+}
+
+// SuspendReplication is used to suspend active data synchronization between a
+// source and target volume, without otherwise altering the replication
+// relationship.
+func (volume *Volume) SuspendReplication(targetVolumeODataID string) error {
+
+	// This action wasn't added until later revisions
+	if volume.suspendReplicationTarget == "" {
+		return fmt.Errorf("SuspendReplication action is not supported by this system")
+	}
+
+	// Define this action's parameters
+	type temp struct {
+		TargetVolume string
+	}
+
+	// Set the values for the action arguments
+	t := temp{TargetVolume: targetVolumeODataID}
+
+	_, err := volume.Client.Post(volume.suspendReplicationTarget, t)
+	return err
 }
