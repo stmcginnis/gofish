@@ -12,6 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 
 	"strings"
 
@@ -36,6 +37,9 @@ type APIClient struct {
 
 	// Auth information saved for later to be able to log out
 	auth *redfish.AuthToken
+
+	// dumpWriter will receive HTTP dumps if non-nil.
+	dumpWriter io.Writer
 }
 
 // ClientConfig holds the settings for establishing a connection.
@@ -54,6 +58,10 @@ type ClientConfig struct {
 
 	// HTTPClient is the optional client to connect with.
 	HTTPClient *http.Client
+
+	// DumpWriter is an optional io.Writer to receive dumps of HTTP
+	// requests and responses.
+	DumpWriter io.Writer
 }
 
 // Connect creates a new client connection to a Redfish service.
@@ -63,7 +71,10 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
 
-	client := &APIClient{endpoint: config.Endpoint}
+	client := &APIClient{
+		endpoint:   config.Endpoint,
+		dumpWriter: config.DumpWriter,
+	}
 
 	if config.HTTPClient == nil {
 		defaultTransport := http.DefaultTransport.(*http.Transport)
@@ -188,9 +199,32 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 	}
 	req.Close = true
 
+	// Dump request if needed.
+	if c.dumpWriter != nil {
+		d, err := httputil.DumpRequestOut(req, true)
+		if err != nil {
+			return nil, err
+		}
+
+		d = append(d, '\n')
+		c.dumpWriter.Write(d)
+	}
+
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	// Dump response if needed.
+	if c.dumpWriter != nil {
+		d, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			defer resp.Body.Close()
+			return nil, err
+		}
+
+		d = append(d, '\n')
+		c.dumpWriter.Write(d)
 	}
 
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
