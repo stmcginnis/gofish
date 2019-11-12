@@ -1,5 +1,6 @@
  # Gofish - Redfish and Swordfish client library
 
+ [![Go Doc](https://godoc.org/github.com/stmcginnis/gofish?status.svg)](http://godoc.org/github.com/stmcginnis/gofish)
  [![Go Report Card](https://goreportcard.com/badge/github.com/stmcginnis/gofish?branch=master)](https://goreportcard.com/report/github.com/stmcginnis/gofish)
 [![Releases](https://img.shields.io/github/release/stmcginnis/gofish/all.svg?style=flat-square)](https://github.com/stmcginnis/gofish/releases)
 [![LICENSE](https://img.shields.io/github/license/stmcginnis/gofish.svg?style=flat-square)](https://github.com/stmcginnis/gofish/blob/master/LICENSE)
