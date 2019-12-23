@@ -89,6 +89,7 @@ func CreateSession(c common.Client, uri string, username string, password string
 	if err != nil {
 		return auth, err
 	}
+	defer resp.Body.Close()
 
 	auth = &AuthToken{}
 	auth.Token = resp.Header.Get("X-Auth-Token")
