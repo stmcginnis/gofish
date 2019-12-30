@@ -112,13 +112,13 @@ func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
 // ChangePassword shall change the selected BIOS password.
 func (bios *Bios) ChangePassword(passwordName string, oldPassword string, newPassword string) error {
 	if passwordName == "" {
-		return fmt.Errorf("Password name must be supplied")
+		return fmt.Errorf("password name must be supplied")
 	}
 	if oldPassword == "" {
-		return fmt.Errorf("Existing password must be supplied")
+		return fmt.Errorf("existing password must be supplied")
 	}
 	if newPassword == "" {
-		return fmt.Errorf("New password must be supplied")
+		return fmt.Errorf("new password must be supplied")
 	}
 
 	type temp struct {

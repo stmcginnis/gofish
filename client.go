@@ -166,7 +166,7 @@ func (c *APIClient) Delete(url string) error {
 // runRequest actually performs the REST calls.
 func (c *APIClient) runRequest(method string, url string, payload interface{}) (*http.Response, error) {
 	if url == "" {
-		return nil, fmt.Errorf("Unable to execute request, no target provided")
+		return nil, fmt.Errorf("unable to execute request, no target provided")
 	}
 
 	var payloadBuffer io.ReadSeeker
@@ -207,7 +207,10 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 		}
 
 		d = append(d, '\n')
-		c.dumpWriter.Write(d)
+		_, err = c.dumpWriter.Write(d)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	resp, err := c.HTTPClient.Do(req)
@@ -224,7 +227,10 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 		}
 
 		d = append(d, '\n')
-		c.dumpWriter.Write(d)
+		_, err = c.dumpWriter.Write(d)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
@@ -243,6 +249,6 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 // a new connection.
 func (c *APIClient) Logout() {
 	if c.Service != nil && c.auth != nil {
-		c.Service.DeleteSession(c.auth.Session)
+		_ = c.Service.DeleteSession(c.auth.Session)
 	}
 }

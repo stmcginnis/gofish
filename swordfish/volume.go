@@ -537,7 +537,7 @@ func (volume *Volume) CheckConsistency() error {
 func (volume *Volume) Initialize(initType InitializeType) error {
 
 	if volume.initializeTarget == "" {
-		return fmt.Errorf("Initialize action is not supported by this system")
+		return fmt.Errorf("initialize action is not supported by this system")
 	}
 
 	// Define this action's parameters

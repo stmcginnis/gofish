@@ -6,7 +6,6 @@
 import argparse
 import io
 import logging
-import pprint
 import textwrap
 
 import jinja2
@@ -15,7 +14,7 @@ import requests
 LOG = logging.getLogger(__name__)
 
 SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/'
-#SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/swordfish/v1/'
+# SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/swordfish/v1/'
 
 
 COMMON_NAME_CHANGES = {
@@ -46,21 +45,24 @@ numberwords = {
     '9': 'Nine',
 
 }
+
+
 def _ident(name):
     outname = name
 
-    outname = outname.replace('-','_')              # converts dashes to underscores
-    outname = outname.replace('switch','Switch')    # Watch out for keyword switch
-    outname = outname.replace(' ','')               # Collapse spaces
-    outname = outname.replace(':','_')               # Collapse spaces
-    outname = outname.replace('/','_div_')
-    outname = outname.replace('+','_plus_')
-#### not working yet
+    outname = outname.replace('-', '_')              # converts dashes to underscores
+    outname = outname.replace('switch', 'Switch')    # Watch out for keyword switch
+    outname = outname.replace(' ', '')               # Collapse spaces
+    outname = outname.replace(':', '_')               # Collapse spaces
+    outname = outname.replace('/', '_div_')
+    outname = outname.replace('+', '_plus_')
+# todo: not working yet
     if len(outname) == 1:
         if outname[0:1].isdigit():
             outname = numberwords[outname[0]]
 
     return outname
+
 
 def _format_comment(name, description, cutpoint='used', add=' is'):
     if name in COMMON_DESC:
@@ -71,7 +73,7 @@ def _format_comment(name, description, cutpoint='used', add=' is'):
 
     lines = textwrap.wrap(
         '%s%s %s' % (name, add, description[description.index(cutpoint):]))
-    return '\n'.join([('// %s' % l) for l in lines])
+    return '\n'.join([('// %s' % line) for line in lines])
 
 
 def _get_desc(obj):
@@ -127,7 +129,7 @@ def _add_object(params, name, obj):
     """Adds object information to our template parameters."""
     class_info = {
         'name': name,
-        'identname' : _ident(name),
+        'identname': _ident(name),
         'description': _format_comment(name, _get_desc(obj)),
         'attrs': []}
 
@@ -157,7 +159,7 @@ def _add_enum(params, name, enum):
     """Adds enum information to our template parameters."""
     enum_info = {
         'name': name,
-        'identname' : _ident(name),
+        'identname': _ident(name),
         'description': _format_comment(name, _get_desc(enum)),
         'members': []}
 
@@ -192,7 +194,6 @@ def main():
 
     url = '%s%s.json' % (SCHEMA_BASE, args.object)
     LOG.debug(url)
-    sourcefile = '%s' % (args.source)
 
     data = requests.get(url)
     try:

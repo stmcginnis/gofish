@@ -215,11 +215,11 @@ func (storagepool *StoragePool) AllocatedVolumes() ([]*Volume, error) {
 func (storagepool *StoragePool) CapacitySources() ([]*CapacitySource, error) {
 	var result []*CapacitySource
 	for _, capLink := range storagepool.capacitySources {
-		cap, err := GetCapacitySource(storagepool.Client, capLink)
+		capacity, err := GetCapacitySource(storagepool.Client, capLink)
 		if err != nil {
 			return result, nil
 		}
-		result = append(result, cap)
+		result = append(result, capacity)
 	}
 	return result, nil
 }
