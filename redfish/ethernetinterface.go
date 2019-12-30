@@ -112,9 +112,9 @@ type EthernetInterface struct {
 	// HostName shall be host name for this interface.
 	HostName string
 	// IPv4Addresses is used to represent the IPv4 connection characteristics
-	// for this interface. It is recommended that this propety be regarded as
+	// for this interface. It is recommended that this property be regarded as
 	// read-only, with configuration of static addresses performed by
-	// updating the values within IPv4StaticAddessses. Services may reject
+	// updating the values within IPv4StaticAddresses. Services may reject
 	// updates to this array for this reason.
 	IPv4Addresses []IPv4Address
 	// IPv4StaticAddresses is used to represent all IPv4 static addresses
@@ -145,7 +145,7 @@ type EthernetInterface struct {
 	// current MAC Address of this interface. If an assignable MAC address is
 	// not supported, this is a read only alias of the PermanentMACAddress.
 	MACAddress string
-	// MTUSize shall be the size in bytes oflargest Protocol Data Unit (PDU)
+	// MTUSize shall be the size in bytes of largest Protocol Data Unit (PDU)
 	// that can be passed in an Ethernet (MAC) frame on this interface.
 	MTUSize int
 	// MaxIPv6StaticAddresses shall indicate the number of array items supported
@@ -166,7 +166,7 @@ type EthernetInterface struct {
 	// StaticNameServers is used when DHCP provisioning is not in enabled for
 	// name server configuration. As an implementation option they may also
 	// be used in addition to DHCP provided addresses, or in cases where the
-	// DHCP server provides no DNS assigments.
+	// DHCP server provides no DNS assignments.
 	StaticNameServers []string
 	// Status shall contain any status or health properties
 	// of the resource.

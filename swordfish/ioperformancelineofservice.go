@@ -37,7 +37,7 @@ type IOPerformanceLineOfService struct {
 	// IOWorkload shall be a description of the expected
 	// workload. The workload provides the context in which the values of
 	// MaxIOOperationsPerSecondPerTerabyte and
-	// AverageIOOperationLatencyMicroseconds are expected to be achieveable.
+	// AverageIOOperationLatencyMicroseconds are expected to be achievable.
 	IOWorkload IOWorkload
 	// MaxIOOperationsPerSecondPerTerabyte shall be the amount
 	// of IOPS a volume of a given committed size in Terabytes can support.

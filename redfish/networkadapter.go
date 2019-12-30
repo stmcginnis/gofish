@@ -29,7 +29,7 @@ type ControllerCapabilities struct {
 		NparEnabled bool
 	}
 	// NPIV shall contain N_Port ID Virtualization (NPIV)
-	// capabilties for this controller.
+	// capabilities for this controller.
 	NPIV struct {
 		// MaxDeviceLogins shall be the maximum
 		// number of N_Port ID Virtualization (NPIV) logins allowed
@@ -149,7 +149,7 @@ type DataCenterBridging struct {
 	Capable bool
 }
 
-// NPIV shall contain N_Port ID Virtualization (NPIV) capabilties for a
+// NPIV shall contain N_Port ID Virtualization (NPIV) capabilities for a
 // controller.
 type NPIV struct {
 

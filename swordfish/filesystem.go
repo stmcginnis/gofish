@@ -18,7 +18,7 @@ const (
 	// ASCIICharacterCodeSet shall indicate that the ASCII character encoding
 	// is supported by the file system.
 	ASCIICharacterCodeSet CharacterCodeSet = "ASCII"
-	// UnicodeCharacterCodeSet shall indicate that Unicode characer encoding
+	// UnicodeCharacterCodeSet shall indicate that Unicode character encoding
 	// is supported by the file system.
 	UnicodeCharacterCodeSet CharacterCodeSet = "Unicode"
 	// ISO2022CharacterCodeSet shall indicate that ISO-2022 character

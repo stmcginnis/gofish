@@ -11,7 +11,7 @@ import (
 )
 
 // AlarmTrips shall contain properties describing the types of alarms that have
-// been raised by the memory. These alarams shall be reset when the system
+// been raised by the memory. These alarms shall be reset when the system
 // resets. Note that if they are re-discovered they can be reasserted.
 type AlarmTrips struct {
 	// AddressParityError shall be true if an Address Parity Error was detected
@@ -35,7 +35,7 @@ type AlarmTrips struct {
 type CurrentPeriod struct {
 	// BlocksRead shall be number of blocks read since reset.
 	BlocksRead uint
-	// BlocksWritten shall be mumber of blocks written since reset.
+	// BlocksWritten shall be number of blocks written since reset.
 	BlocksWritten uint
 }
 
@@ -48,7 +48,7 @@ type HealthData struct {
 	// DataLossDetected shall be data loss detection status, with true
 	// indicating data loss detected.
 	DataLossDetected bool
-	// LastShutdownSuccess shall be the status ofthe  last shutdown, with true
+	// LastShutdownSuccess shall be the status of the  last shutdown, with true
 	// indicating success.
 	LastShutdownSuccess bool
 	// PerformanceDegraded shall be performance degraded mode status, with true

@@ -31,7 +31,7 @@ type Message struct {
 	// Resolution of the message in message registry, if present.
 	Resolution string
 	// Severity is The value of this property shall be the severity of the
-	// error, as defined in the Status section of the Redfish specificaiton.
+	// error, as defined in the Status section of the Redfish specification.
 	Severity string
 }
 

@@ -63,7 +63,7 @@ const (
 	// ByteAccessiblePersistentMemoryClassification Byte accessible
 	// persistent memory.
 	ByteAccessiblePersistentMemoryClassification MemoryClassification = "ByteAccessiblePersistent"
-	// BlockMemoryClassification Block accesible memory.
+	// BlockMemoryClassification Block accessible memory.
 	BlockMemoryClassification MemoryClassification = "Block"
 )
 
@@ -154,7 +154,7 @@ type OperatingMemoryModes string
 const (
 	// VolatileOperatingMemoryModes Volatile memory.
 	VolatileOperatingMemoryModes OperatingMemoryModes = "Volatile"
-	// PMEMOperatingMemoryModes Persistent memory, byte accesible through
+	// PMEMOperatingMemoryModes Persistent memory, byte accessible through
 	// system address space.
 	PMEMOperatingMemoryModes OperatingMemoryModes = "PMEM"
 	// BlockOperatingMemoryModes Block accessible system memory.
@@ -487,7 +487,7 @@ type SecurityCapabilities struct {
 	MaxPassphraseCount int
 	// PassphraseCapable is Memory passphrase set capability.
 	PassphraseCapable bool
-	// PassphraseLockLimit shall be the maximum number of incorrect passphase
+	// PassphraseLockLimit shall be the maximum number of incorrect passphrase
 	// access attempts allowed before access to data is locked. A value of zero
 	// shall indicate that there is no limit to the number of attempts.
 	PassphraseLockLimit int

@@ -273,7 +273,7 @@ type Thermal struct {
 	// Temperatures shall be the definition for temperature sensors for a
 	// Redfish implementation.
 	Temperatures []Temperature
-	// TemperaturesCount is the number of Temperator objects
+	// TemperaturesCount is the number of Temperature objects
 	TemperaturesCount int `json:"Temperatures@odata.count"`
 }
 

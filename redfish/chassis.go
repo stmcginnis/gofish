@@ -16,7 +16,7 @@ type ChassisType string
 
 const (
 	// BladeChassisType is an enclosed or semi-enclosed, typically vertically-oriented, system
-	//mchassis which must be plugged into a multi-system chassis to function normally.
+	// chassis which must be plugged into a multi-system chassis to function normally.
 	BladeChassisType ChassisType = "Blade"
 	// CardChassisType is a loose device or circuit board intended to be installed in a system
 	// or other enclosure.

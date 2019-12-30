@@ -32,7 +32,7 @@ type FpgaType string
 
 const (
 
-	// IntegratedFpgaType The FPGA device integrasted with other porcessor in
+	// IntegratedFpgaType The FPGA device integrated with other processor in
 	// the single chip.
 	IntegratedFpgaType FpgaType = "Integrated"
 	// DiscreteFpgaType The discrete FPGA device.
@@ -185,13 +185,13 @@ type FPGA struct {
 	// ExternalInterfaces shall be an array of objects that describe the
 	// external connectivity of the FPGA.
 	ExternalInterfaces []FpgaInterface
-	// FirmwareID shall contain a string decsribing the FPGA firmware
+	// FirmwareID shall contain a string describing the FPGA firmware
 	// identifier.
 	FirmwareID string `json:"FirmwareId"`
-	// FirmwareManufacturer shall contain a string decsribing the FPGA firmware
+	// FirmwareManufacturer shall contain a string describing the FPGA firmware
 	// manufacturer.
 	FirmwareManufacturer string
-	// FirmwareVersion shall contain a string decsribing the FPGA firmware
+	// FirmwareVersion shall contain a string describing the FPGA firmware
 	// version.
 	FirmwareVersion string
 	// FpgaType shall be a type of the FPGA device.
@@ -311,7 +311,7 @@ type Processor struct {
 	// ProcessorID shall contain identification information for this processor.
 	ProcessorID ProcessorID `json:"ProcessorId"`
 	// ProcessorMemory shall be the memory
-	// directly attached or integrated witin this Processor.
+	// directly attached or integrated within this Processor.
 	processorMemory []string
 	// ProcessorType shall contain the string which
 	// identifies the type of processor contained in this Socket.
@@ -354,7 +354,7 @@ type Processor struct {
 	// ConnectedProcessors@odata.count is
 	ConnectedProcessorsCount int
 	// Endpoints shall be an array of
-	// references of type Endpoint that represent Endpoints accociated with
+	// references of type Endpoint that represent Endpoints associated with
 	// this Processor.
 	endpoints []string
 	// Endpoints@odata.count is
@@ -474,12 +474,12 @@ type ProcessorID struct {
 }
 
 // ProcessorMemory shall contain information about memory
-// directly attached or integratied within a processor.
+// directly attached or integrated within a processor.
 type ProcessorMemory struct {
 	// CapacityMiB shall be the memory capacity in MiB.
 	CapacityMiB int
 	// IntegratedMemory shall be a boolean
-	// indicating whether this memory is integrated within the Porcessor.
+	// indicating whether this memory is integrated within the Processor.
 	// Otherwise it is discrete memory attached to the Processor.
 	IntegratedMemory bool
 	// MemoryType shall be a type of the processor memory type.

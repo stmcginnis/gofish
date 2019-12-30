@@ -38,7 +38,7 @@ type EventService struct {
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// DeliveryRetryAttempts shall be the
-	// number of retrys attempted for any given event to the subscription
+	// number of retries attempted for any given event to the subscription
 	// destination before the subscription is terminated.  This retry is at
 	// the service level, meaning the HTTP POST to the Event Destination was
 	// returned by the HTTP operation as unsuccessful (4xx or 5xx return

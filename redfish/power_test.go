@@ -121,7 +121,7 @@ var powerBody = strings.NewReader(
 				"Health": "OK"
 			},
 			"UpperThresholdCritical": 10000.0,
-			"UpperThreadsholdFatal": 10001.0,
+			"UpperThresholdFatal": 10001.0,
 			"UpperThresholdNonCritical": 1000.0
 		}],
 		"Voltages@odata.count": 1

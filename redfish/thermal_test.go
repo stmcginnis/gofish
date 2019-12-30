@@ -51,7 +51,7 @@ var thermalBody = strings.NewReader(
 				"Health": "OK"
 			},
 			"UpperThresholdCritical": 9999,
-			"UppperThresholdFatal": 10000,
+			"UpperThresholdFatal": 10000,
 			"UpperThresholdNonCritical": 9998
 		}],
 		"Fan@odata.count": 1,
@@ -87,7 +87,7 @@ var thermalBody = strings.NewReader(
 				"Health": "OK"
 			},
 			"UpperThresholdCritical": 9999,
-			"UppperThresholdFatal": 10000,
+			"UpperThresholdFatal": 10000,
 			"UpperThresholdNonCritical": 9998
 		}],
 		"Temperatures@odata.count": 1

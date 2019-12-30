@@ -39,7 +39,7 @@ type ClassOfService struct {
 	DataProtectionLinesOfServiceCount int `json:"DataProtectionLinesOfService@odata.count"`
 	// DataSecurityLinesOfService shall be a set of data security service options.
 	dataSecurityLinesOfService []string
-	// DataSecurityLinesOfServiceCount is number of DataSercurityLineOfService.
+	// DataSecurityLinesOfServiceCount is number of DataSecurityLineOfService.
 	DataSecurityLinesOfServiceCount int `json:"DataSecurityLinesOfService@odata.count"`
 	// DataStorageLinesOfService shall be a set of data protection service options.
 	dataStorageLinesOfService []string

@@ -89,7 +89,7 @@ const (
 	// synchronization in progress.
 	SynchronizingReplicaProgressStatus ReplicaProgressStatus = "Synchronizing"
 	// ResyncingReplicaProgressStatus shall indicate that replication has
-	// resynchronization in progess.
+	// resynchronization in progress.
 	ResyncingReplicaProgressStatus ReplicaProgressStatus = "Resyncing"
 	// RestoringReplicaProgressStatus shall indicate that replication has a
 	// restore in progress.

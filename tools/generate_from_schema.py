@@ -125,7 +125,7 @@ def _add_object(params, name, obj):
 
 
 def _add_enum(params, name, enum):
-    """Adds enum information to our template parameteres."""
+    """Adds enum information to our template parameters."""
     enum_info = {
         'name': name,
         'description': _format_comment(name, _get_desc(enum)),

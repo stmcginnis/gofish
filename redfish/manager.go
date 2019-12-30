@@ -145,7 +145,7 @@ type GraphicalConsole struct {
 }
 
 // Manager is a management subsystem. Examples of managers are BMCs, Enclosure
-// Managers, Management Controllers and other subsystems assigned managability
+// Managers, Management Controllers and other subsystems assigned manageability
 // functions.
 type Manager struct {
 	common.Entity

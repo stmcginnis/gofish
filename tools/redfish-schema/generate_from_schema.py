@@ -49,7 +49,7 @@ numberwords = {
 def _ident(name):
     outname = name
 
-    outname = outname.replace('-','_')              # converts dashes to underbars
+    outname = outname.replace('-','_')              # converts dashes to underscores
     outname = outname.replace('switch','Switch')    # Watch out for keyword switch
     outname = outname.replace(' ','')               # Collapse spaces
     outname = outname.replace(':','_')               # Collapse spaces
@@ -154,7 +154,7 @@ def _add_object(params, name, obj):
 
 
 def _add_enum(params, name, enum):
-    """Adds enum information to our template parameteres."""
+    """Adds enum information to our template parameters."""
     enum_info = {
         'name': name,
         'identname' : _ident(name),

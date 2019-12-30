@@ -4,7 +4,7 @@
 
 package common
 
-// PhysicalContext is the physucal location.
+// PhysicalContext is the physical location.
 type PhysicalContext string
 
 const (

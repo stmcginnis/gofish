@@ -26,7 +26,7 @@ const (
 type EntityType string
 
 const (
-	// StorageInitiatorEntityType means the entity is a storage initator. The
+	// StorageInitiatorEntityType means the entity is a storage initiator. The
 	// EntityLink property (if present) should be a Storage.StorageController
 	// entity.
 	StorageInitiatorEntityType EntityType = "StorageInitiator"

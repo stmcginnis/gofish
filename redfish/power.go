@@ -102,7 +102,7 @@ type InputRange struct {
 	// MinimumVoltage shall contain the value in Volts of the minimum line input
 	// voltage which the power supply is capable of consuming for this range.
 	MinimumVoltage float32
-	// OutputWattage shall contiain the maximum amount of power, in Watts, that
+	// OutputWattage shall contain the maximum amount of power, in Watts, that
 	// the associated power supply is rated to deliver while operating in this input range.
 	OutputWattage float32
 }
@@ -322,7 +322,7 @@ type PowerSupply struct {
 	// PartNumber shall contain the part number as defined
 	// by the manufacturer for the associated power supply.
 	PartNumber string
-	// PowerCapacityWatts shall contiain the maximum amount
+	// PowerCapacityWatts shall contain the maximum amount
 	// of power, in Watts, that the associated power supply is rated to
 	// deliver.
 	PowerCapacityWatts float32
@@ -379,19 +379,19 @@ type Voltage struct {
 
 	// LowerThresholdCritical shall indicate
 	// the present reading is below the normal range but is not yet fatal.
-	// Units shall use the same units as the related ReadingVolts propoerty.
+	// Units shall use the same units as the related ReadingVolts property.
 	LowerThresholdCritical float32
 	// LowerThresholdFatal shall indicate the
 	// present reading is below the normal range and is fatal. Units shall
-	// use the same units as the related ReadingVolts propoerty.
+	// use the same units as the related ReadingVolts property.
 	LowerThresholdFatal float32
 	// LowerThresholdNonCritical shall indicate
 	// the present reading is below the normal range but is not critical.
-	// Units shall use the same units as the related ReadingVolts propoerty.
+	// Units shall use the same units as the related ReadingVolts property.
 	LowerThresholdNonCritical float32
 	// MaxReadingRange shall indicate the
 	// highest possible value for ReadingVolts. Units shall use the same
-	// units as the related ReadingVolts propoerty.
+	// units as the related ReadingVolts property.
 	MaxReadingRange float32
 	// MemberID shall uniquely identify the member within the collection. For
 	// services supporting Redfish v1.6 or higher, this value shall be the
@@ -416,14 +416,14 @@ type Voltage struct {
 	Status common.Status
 	// UpperThresholdCritical shall indicate
 	// the present reading is above the normal range but is not yet fatal.
-	// Units shall use the same units as the related ReadingVolts propoerty.
+	// Units shall use the same units as the related ReadingVolts property.
 	UpperThresholdCritical float32
 	// UpperThresholdFatal shall indicate the
 	// present reading is above the normal range and is fatal. Units shall
-	// use the same units as the related ReadingVolts propoerty.
+	// use the same units as the related ReadingVolts property.
 	UpperThresholdFatal float32
 	// UpperThresholdNonCritical shall indicate
 	// the present reading is above the normal range but is not critical.
-	// Units shall use the same units as the related ReadingVolts propoerty.
+	// Units shall use the same units as the related ReadingVolts property.
 	UpperThresholdNonCritical float32
 }
