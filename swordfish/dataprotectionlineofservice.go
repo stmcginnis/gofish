@@ -35,7 +35,7 @@ type DataProtectionLineOfService struct {
 	// of replicas can be determined using this value together with the
 	// replicaSchedule.
 	MinLifetime string
-	// RecoveryGeographicObjective specifies the geograhic scope of the failure
+	// RecoveryGeographicObjective specifies the geographic scope of the failure
 	// domain.
 	RecoveryGeographicObjective FailureDomainScope
 	// RecoveryPointObjectiveTime shall be an ISO 8601 duration that specifies

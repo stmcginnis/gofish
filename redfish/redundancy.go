@@ -46,7 +46,7 @@ type Redundancy struct {
 	// MaxNumSupported shall contain the maximum number of members allowed in
 	// the redundancy group.
 	MaxNumSupported int
-	// MemberID ivalue of this string shall uniquely identify the member within
+	// MemberID value of this string shall uniquely identify the member within
 	// the collection.
 	MemberID string `json:"MemberId"`
 	// MinNumNeeded shall contain the minimum

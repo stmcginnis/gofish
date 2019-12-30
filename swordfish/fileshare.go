@@ -45,7 +45,7 @@ type FileShare struct {
 	CASupported bool
 	// DefaultAccessCapabilities shall be an array containing entries for the
 	// default access capabilities for the file share. Each entry shall specify
-	// a defaul access privilege. The types of default access can include Read,
+	// a default access privilege. The types of default access can include Read,
 	// Write, and/or Execute.
 	DefaultAccessCapabilities []StorageAccessCapability
 	// Description provides a description of this resource.

@@ -17,7 +17,7 @@ var biosBody = strings.NewReader(
 		"@odata.id": "/redfish/v1/Systems/437XR1138R2/BIOS",
 		"Id": "BIOS",
 		"Name": "BIOS Configuration Current Settings",
-		"Description": "BIOD Settings",
+		"Description": "BIOS Settings",
 		"AttributeRegistry": "BiosAttributeRegistryP89.v1_0_0",
 		"Attributes": {
 			"AdminPhone": "",

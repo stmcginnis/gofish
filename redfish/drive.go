@@ -26,11 +26,12 @@ const (
 	OtherEncryptionAbility EncryptionAbility = "Other"
 )
 
-// EncryptionStatus is the drive's encruption state.
+// EncryptionStatus is the drive's encryption state.
 type EncryptionStatus string
 
 const (
 	// UnecryptedEncryptionStatus indicates the drive is not currently encrypted.
+	// note: this typo occurred in the spec and was deprecated in redfish v1.1
 	UnecryptedEncryptionStatus EncryptionStatus = "Unecrypted"
 	// UnlockedEncryptionStatus indicates the drive is currently encrypted but the data
 	// is accessible to the user unencrypted.
@@ -131,7 +132,7 @@ type Drive struct {
 	assembly string
 	// AssetTag is used to track the drive for inventory purposes.
 	AssetTag string
-	// BlockSizeBytes shall contain size of the smallest addressible unit of the
+	// BlockSizeBytes shall contain size of the smallest addressable unit of the
 	// associated drive.
 	BlockSizeBytes int
 	// CapableSpeedGbs shall contain fastest capable bus speed of the associated
@@ -144,7 +145,7 @@ type Drive struct {
 	// EncryptionAbility shall contain the encryption ability for the associated
 	// drive.
 	EncryptionAbility EncryptionAbility
-	// EncryptionStatus shall contain the encrytion status for the associated
+	// EncryptionStatus shall contain the encryption status for the associated
 	// drive.
 	EncryptionStatus EncryptionStatus
 	// FailurePredicted shall contain failure information as defined by the

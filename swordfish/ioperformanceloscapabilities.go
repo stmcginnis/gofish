@@ -64,7 +64,7 @@ type IOPerformanceLoSCapabilities struct {
 	MinSupportedIoOperationLatencyMicroseconds int
 	// SupportedIOWorkloads shall be a collection of supported workloads.
 	SupportedIOWorkloads []IOWorkload
-	// SupportedLinesOfService shall be a collection ofsupported IO performance
+	// SupportedLinesOfService shall be a collection of supported IO performance
 	// service options.
 	SupportedLinesOfService []IOPerformanceLineOfService
 	// SupportedLinesOfServiceCount is

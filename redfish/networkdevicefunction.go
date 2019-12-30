@@ -272,7 +272,7 @@ type NetworkDeviceFunction struct {
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// VirtualFunctionsEnabled shall be a boolean indicating whether Single Root
-	// I/O Virtualization (SR-IOV) Virual Functions (VFs) are enabled for this
+	// I/O Virtualization (SR-IOV) Virtual Functions (VFs) are enabled for this
 	// Network Device Function.
 	VirtualFunctionsEnabled bool
 	// iSCSIBoot shall contain iSCSI boot capabilities, status, and
@@ -375,17 +375,17 @@ type ISCSIBoot struct {
 	// CHAPSecret shall be the shared secret
 	// for CHAP authentication.
 	CHAPSecret string
-	// CHAPUsername shall behe username for
+	// CHAPUsername shall be the username for
 	// CHAP authentication.
 	CHAPUsername string
-	// IPAddressType shall behe type of IP
+	// IPAddressType shall be the type of IP
 	// address (IPv6 or IPv4) being populated in the iSCSIBoot IP address
 	// fields. Mixing of IPv6 and IPv4 addresses on the same network device
 	// function shall not be permissible.
 	IPAddressType IPAddressType
 	// IPMaskDNSViaDHCP shall be a boolean
 	// indicating whether the iSCSI boot initiator uses DHCP to obtain the
-	// iniator name, IP address, and netmask.
+	// initiator name, IP address, and netmask.
 	IPMaskDNSViaDHCP bool
 	// InitiatorDefaultGateway shall be the
 	// IPv6 or IPv4 iSCSI boot default gateway.

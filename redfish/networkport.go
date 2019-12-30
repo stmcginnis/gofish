@@ -193,7 +193,7 @@ type NetworkPort struct {
 	SupportedEthernetCapabilities []SupportedEthernetCapabilities
 	// SupportedLinkCapabilities is This object shall describe the static
 	// capabilities of the port, irrespective of transient conditions such as
-	// cabling, interface module presence, or remote link parter status or
+	// cabling, interface module presence, or remote link partner status or
 	// configuration.
 	SupportedLinkCapabilities []SupportedLinkCapabilities
 	// VendorID shall indicate the Vendor Identification string information as
@@ -248,7 +248,7 @@ func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, e
 
 // SupportedLinkCapabilities shall describe the static capabilities of an
 // associated port, irrespective of transient conditions such as cabling,
-// interface module presence, or remote link parter status or configuration.
+// interface module presence, or remote link partner status or configuration.
 type SupportedLinkCapabilities struct {
 	// AutoSpeedNegotiation shall be indicate whether the port is capable of
 	// auto-negotiating speed.

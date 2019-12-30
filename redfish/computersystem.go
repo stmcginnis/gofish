@@ -458,7 +458,7 @@ type ComputerSystem struct {
 	// (RedundancySet) of other ComputerSystems that provide the specified
 	// redundancy to this ComputerSystem.
 	Redundancy string
-	// RedundancyCount is the number of Reduncy objects.
+	// RedundancyCount is the number of Redundancy objects.
 	RedundancyCount string `json:"Redundancy@odata.count"`
 	// SKU shall contain the Stock Keeping Unit (SKU) for the system.
 	SKU string
@@ -787,7 +787,7 @@ type CSLinks struct {
 	PoweredByCount int `json:"PoweredBy@odata.count"`
 	// ResourceBlocks is used in this Computer System.
 	ResourceBlocks common.Links
-	// ResourceBlocksCount is the nunmber of ResourceBlocks.
+	// ResourceBlocksCount is the number of ResourceBlocks.
 	ResourceBlocksCount int `json:"ResourceBlocks@odata.count"`
 	// SupplyingComputerSystems shall be an array of references
 	// to ComputerSystems that contribute, in whole or in part, to the
@@ -799,7 +799,7 @@ type CSLinks struct {
 
 // MemorySummary contains properties which describe the central memory for a system.
 type MemorySummary struct {
-	// MemoryMirroring is the ability and type of memory mirring supported by this system.
+	// MemoryMirroring is the ability and type of memory mirroring supported by this system.
 	MemoryMirroring MemoryMirroring
 	// Status is the status or health properties of the resource.
 	Status common.Status
@@ -826,7 +826,7 @@ type ProcessorSummary struct {
 	Status common.Status
 }
 
-// TrustedModules is This type shall describe a truted module for a system.
+// TrustedModules is This type shall describe a trusted module for a system.
 type TrustedModules struct {
 	// FirmwareVersion is the firmware version as
 	// defined by the manufacturer for the Trusted Module.

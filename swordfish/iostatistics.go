@@ -27,7 +27,7 @@ type IOStatistics struct {
 	// (i.e. from a storage device or from a cache).
 	ReadIORequests int64
 	// WriteHitIORequests shall represent the total count from the time of last
-	// reset or wrap of write IO requests coallesced into memory.
+	// reset or wrap of write IO requests coalesced into memory.
 	WriteHitIORequests int64
 	// WriteIOKiBytes shall represent the total number of kibibytes written from
 	// the time of last reset or wrap.

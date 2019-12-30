@@ -24,7 +24,7 @@ const (
 	StandbyAccessState AccessState = "Standby"
 	// UnavailableAccessState shall be in an unavailable state.
 	UnavailableAccessState AccessState = "Unavailable"
-	// TransitioningAccessState shall be transitioning to a new AccesState.
+	// TransitioningAccessState shall be transitioning to a new AccessState.
 	TransitioningAccessState AccessState = "Transitioning"
 )
 

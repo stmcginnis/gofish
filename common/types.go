@@ -150,11 +150,11 @@ type State string
 const (
 	// EnabledState indicates this function or resource has been enabled.
 	EnabledState State = "Enabled"
-	// DisabledState Stateindicates this function or resource has been disabled.
+	// DisabledState State indicates this function or resource has been disabled.
 	DisabledState State = "Disabled"
 	// StandbyOfflineState indicates this function or resource is enabled,
 	// but awaiting an external action to activate it.
-	StandbyOfflineState State = "StandbyOffinline"
+	StandbyOfflineState State = "StandbyOffline"
 	// StandbySpareState indicates this function or resource is part of a
 	// redundancy set and is awaiting a failover or other external action to
 	// activate it.
@@ -186,7 +186,7 @@ type Status struct {
 	State  State  `json:"State"`
 }
 
-// LocationType shall name the type of locatio in use.
+// LocationType shall name the type of location in use.
 type LocationType string
 
 const (
@@ -233,7 +233,7 @@ const (
 type RackUnits string
 
 const (
-	// OpenURackUnits shall be specifie3d in terms of the Open Compute Open
+	// OpenURackUnits shall be specified in terms of the Open Compute Open
 	// Rack specification.
 	OpenURackUnits RackUnits = "OpenU"
 	// EIA310RackUnits shall be specified as defined by the EIA-310
@@ -365,7 +365,7 @@ type PostalAddress struct {
 	// District is used to name a county, parish, gun (JP), or district
 	// (IN).
 	District string
-	// Division is used to name a city division, borough, dity district,
+	// Division is used to name a city division, borough, city district,
 	// ward, chou (JP).
 	Division string
 	// Floor is used to provide a floor designation.
@@ -494,7 +494,7 @@ type Operations struct {
 	AssociatedTask string
 	// OperationName shall be a string of the name of the operation.
 	OperationName string
-	// PercentageComplete shall be an interger of the percentage of the
+	// PercentageComplete shall be an integer of the percentage of the
 	// operation that has been completed.
 	PercentageComplete int
 }
@@ -615,7 +615,7 @@ type PreferredApplyTime struct {
 	MaintenanceWindowStartTime string
 }
 
-// Settings shall describe any attributes of a resouce.
+// Settings shall describe any attributes of a resource.
 type Settings struct {
 	// ETag shall be the ETag of the resource to which the settings were
 	// applied, after the application. This is here so that the client can check
