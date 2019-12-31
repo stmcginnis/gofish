@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	gofish "github.com/stmcginnis/gofish"
-	redfish "github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish"
+	"github.com/stmcginnis/gofish/redfish"
 )
 
 func main() {

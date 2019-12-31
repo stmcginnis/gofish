@@ -373,7 +373,7 @@ func (manager *Manager) Reset(resetType ResetType) error {
 	}
 
 	if !valid {
-		return fmt.Errorf("Reset type '%s' is not supported by this manager",
+		return fmt.Errorf("reset type '%s' is not supported by this manager",
 			resetType)
 	}
 

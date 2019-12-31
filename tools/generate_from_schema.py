@@ -6,7 +6,6 @@
 import argparse
 import io
 import logging
-import pprint
 import textwrap
 
 import jinja2
@@ -43,7 +42,7 @@ def _format_comment(name, description, cutpoint='used', add=' is'):
 
     lines = textwrap.wrap(
         '%s%s %s' % (name, add, description[description.index(cutpoint):]))
-    return '\n'.join([('// %s' % l) for l in lines])
+    return '\n'.join([('// %s' % line) for line in lines])
 
 
 def _get_desc(obj):

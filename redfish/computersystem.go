@@ -710,7 +710,7 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 	}
 
 	if !valid {
-		return fmt.Errorf("Reset type '%s' is not supported by this service",
+		return fmt.Errorf("reset type '%s' is not supported by this service",
 			resetType)
 	}
 

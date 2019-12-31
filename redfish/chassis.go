@@ -277,7 +277,7 @@ func (c *Chassis) Reset(resetType ResetType) error {
 	}
 
 	if !valid {
-		return fmt.Errorf("Reset type '%s' is not supported by this chassis",
+		return fmt.Errorf("reset type '%s' is not supported by this chassis",
 			resetType)
 	}
 
