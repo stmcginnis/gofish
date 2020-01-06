@@ -26,10 +26,13 @@ var biosBody = strings.NewReader(
 			"NicBoot1": "NetworkBoot",
 			"NicBoot2": "Disabled",
 			"PowerProfile": "MaxPerf",
-			"ProcCoreDisable": 0,
+			"ProcCoreDisable": 3,
 			"ProcHyperthreading": "Enabled",
 			"ProcTurboMode": "Enabled",
-			"UsbControl": "UsbEnabled"
+			"UsbControl": "UsbEnabled",
+			"BoolTest1": "True",
+			"BoolTest2": 1,
+			"BoolTest3": "NotBool"
 		},
 		"Actions": {
 			"#Bios.ResetBios": {
@@ -68,5 +71,29 @@ func TestBios(t *testing.T) {
 
 	if result.changePasswordTarget != "/redfish/v1/Systems/437XR1138R2/BIOS/Actions/Bios.ChangePassword" {
 		t.Errorf("Invalid ChangePassword target: %s", result.changePasswordTarget)
+	}
+
+	if result.Attributes.String("AdminPhone") != "" {
+		t.Errorf("Invalid 'AdminPhone' attribute: %s", result.Attributes["AdminPhone"])
+	}
+
+	if result.Attributes.String("PowerProfile") != "MaxPerf" {
+		t.Errorf("Invalid 'PowerProfile' attribute: %s", result.Attributes["PowerProfile"])
+	}
+
+	if result.Attributes.Int("ProcCoreDisable") != 3 {
+		t.Errorf("Invalid 'ProcCoreDisable' attribute: %v", result.Attributes["ProcCoreDisable"])
+	}
+
+	if !result.Attributes.Bool("BoolTest1") {
+		t.Errorf("Expected True boolean value for 'BoolTest1': %v", result.Attributes["BoolTest1"])
+	}
+
+	if !result.Attributes.Bool("BoolTest2") {
+		t.Errorf("Expected True boolean value for 'BoolTest2': %v", result.Attributes["BoolTest1"])
+	}
+
+	if result.Attributes.Bool("BoolTest3") {
+		t.Errorf("Expected False boolean value for 'BoolTest3': %v", result.Attributes["BoolTest1"])
 	}
 }

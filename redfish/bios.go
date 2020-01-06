@@ -7,12 +7,51 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
+// BiosAttributes handles the Bios attribute values that may be any of several
+// types and adds some basic helper methods to make accessing values easier.
+type BiosAttributes map[string]interface{}
+
+// String gets the string representation of the attribute value.
+func (ba BiosAttributes) String(name string) string {
+	if val, ok := ba[name]; ok {
+		return fmt.Sprintf("%v", val)
+	}
+
+	return ""
+}
+
+// Float64 gets the value as a float64 or 0 if that is not possible.
+func (ba BiosAttributes) Float64(name string) float64 {
+	if val, ok := ba[name]; ok {
+		return val.(float64)
+	}
+
+	return 0
+}
+
+// Int gets the value as an integer or 0 if that is not possible.
+func (ba BiosAttributes) Int(name string) int {
+	// Integer values may be interpeted as float64, so get it as that first,
+	// then coerce down to int.
+	floatVal := int(ba.Float64(name))
+	return (floatVal)
+}
+
+// Bool gets the value as a boolean or returns false.
+func (ba BiosAttributes) Bool(name string) bool {
+	maybeBool := ba.String(name)
+	maybeBool = strings.ToLower(maybeBool)
+	return (maybeBool == "true" ||
+		maybeBool == "1" ||
+		maybeBool == "enabled")
+}
+
 // Bios is used to represent BIOS attributes.
-// TODO: Sort out how to handle Attributes.
 type Bios struct {
 	common.Entity
 
@@ -27,6 +66,14 @@ type Bios struct {
 	// AttributeRegistry is the Resource ID of the Attribute Registry that has
 	// the system-specific information about a BIOS resource.
 	AttributeRegistry string
+	// This property shall contain the list of BIOS attributes and their values
+	// as determined by the manufacturer or provider. This object shall
+	// describe BIOS attribute settings as additional properties. If the object
+	// specifies a BIOS Attribute Registry, attributes shall be looked up in
+	// that Attribute Registry by their attribute name. Attributes in this
+	// Attribute Registry with the AttributeType of Enumeration shall use valid
+	// ValueName values in this object, as listed in that Attribute Registry.
+	Attributes BiosAttributes
 	// Attributes are additional properties in this object, and can be looked up
 	// in the Attribute Registry by their AttributeName.
 	// Attributes string
