@@ -15,6 +15,7 @@ import (
 	"net/http/httputil"
 
 	"strings"
+	"time"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -56,6 +57,9 @@ type ClientConfig struct {
 	// Insecure controls whether to enforce SSL certificate validity.
 	Insecure bool
 
+	// Controls TLS handshake timeout
+	TLSHandshakeTimeout int
+
 	// HTTPClient is the optional client to connect with.
 	HTTPClient *http.Client
 
@@ -76,6 +80,10 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 		dumpWriter: config.DumpWriter,
 	}
 
+	if config.TLSHandshakeTimeout == 0 {
+		config.TLSHandshakeTimeout = 10
+	}
+
 	if config.HTTPClient == nil {
 		defaultTransport := http.DefaultTransport.(*http.Transport)
 		transport := &http.Transport{
@@ -84,7 +92,7 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 			MaxIdleConns:          defaultTransport.MaxIdleConns,
 			IdleConnTimeout:       defaultTransport.IdleConnTimeout,
 			ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
-			TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+			TLSHandshakeTimeout:   time.Duration(config.TLSHandshakeTimeout) * time.Second,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: config.Insecure,
 			},
