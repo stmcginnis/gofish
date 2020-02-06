@@ -387,3 +387,8 @@ func (manager *Manager) Reset(resetType ResetType) error {
 	_, err := manager.Client.Post(manager.resetTarget, t)
 	return err
 }
+
+// EthernetInterfaces get this system's ethernet interfaces.
+func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(manager.Client, manager.ethernetInterfaces)
+}

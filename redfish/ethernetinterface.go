@@ -153,6 +153,8 @@ type EthernetInterface struct {
 	MaxIPv6StaticAddresses int
 	// NameServers used on this interface.
 	NameServers []string
+	// Oem object used on this interface.
+	Oem interface{}
 	// PermanentMACAddress shall be the Permanent MAC Address of this interface
 	// (port). This value is typically programmed during the manufacturing time.
 	// This address is not assignable.
