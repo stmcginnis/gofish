@@ -350,14 +350,20 @@ type ResetType string
 const (
 	// OnResetType shall be used to power on the machine
 	OnResetType ResetType = "On"
+	// ForceOnResetType shall be used to power on the machine immediately
+	ForceOnResetType ResetType = "ForceOn"
 	// ForceOffResetType shall be used to power off the machine without wait the OS to shutdown
 	ForceOffResetType ResetType = "ForceOff"
 	// ForceRestartResetType shall be used to restart the machine without wait the OS to shutdown
 	ForceRestartResetType ResetType = "ForceRestart"
+	// GracefulRestartResetType shall be used to restart the machine waiting the OS shutdown gracefully
+	GracefulRestartResetType ResetType = "GracefulRestart"
 	// GracefulShutdownResetType shall be used to restart the machine waiting the OS shutdown gracefully
 	GracefulShutdownResetType ResetType = "GracefulShutdown"
 	// PushPowerButtonResetType shall be used to emulate pushing the power button
 	PushPowerButtonResetType ResetType = "PushPowerButton"
+	// PowerCycleResetType shall be used to power cycle the machine
+	PowerCycleResetType ResetType = "PowerCycle"
 	// NmiResetType shall be used to trigger a crash/core dump file
 	NmiResetType ResetType = "Nmi"
 )
