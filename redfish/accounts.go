@@ -40,6 +40,10 @@ func (as *AccountService) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
+	err = json.Unmarshal(b, &t.Links)
+	if err != nil {
+		return err
+	}
 
 	*as = AccountService(t.temp)
 
