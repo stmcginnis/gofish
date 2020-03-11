@@ -44,9 +44,10 @@ func main() {
 			payload["UserName"] = "new-username"
 			payload["Password"] = "new-password"
 			res, err := c.Patch(urlE, payload)
-			if err == nil {
-				fmt.Printf("%#v\n\n", res)
+			if err != nil {
+				panic(err)
 			}
+			fmt.Printf("%#v\n", res)
 		}
 	}
 }
