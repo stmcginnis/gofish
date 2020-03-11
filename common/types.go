@@ -23,6 +23,8 @@ type Client interface {
 
 // Entity provides the common basis for all Redfish and Swordfish objects.
 type Entity struct {
+	// ODataID is the location of the resource.
+	ODataID string `json:"@odata.id"`
 	// ID uniquely identifies the resource.
 	ID string `json:"Id"`
 	// Name is the name of the resource or array element.
