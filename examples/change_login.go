@@ -27,27 +27,29 @@ func main() {
 	// Retrieve the service root
 	service := c.Service
 
-	// Query the chassis data using the session token
-	accts, err := service.AccountService()
+	// Query the AccountService using the session token
+	accountService, err := service.AccountService()
 	if err != nil {
 		panic(err)
 	}
-	accs, err := accts.Accounts()
+	// Get list of accounts
+	accounts, err := accountService.Accounts()
 	if err != nil {
 		panic(err)
 	}
-
-	for _, acc := range accs {
-		if acc.UserName == username {
-			urlE := "/redfish/v1/AccountService/Accounts/"+acc.ID
+	// Iterate over accounts to find the current user
+	for _, account := range accounts {
+		if account.UserName == username {
 			payload := make(map[string]string)
 			payload["UserName"] = "new-username"
+			// New password must follow the rules set in AccountService : 
+			// MinPasswordLength and MaxPasswordLength
 			payload["Password"] = "new-password"
-			res, err := c.Patch(urlE, payload)
+			res, err := c.Patch(account.ODataID, payload)
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("%#v\n", res)
+			fmt.Printf("%+v\n", res)
 		}
 	}
 }
