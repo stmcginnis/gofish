@@ -399,3 +399,8 @@ func (manager *Manager) Reset(resetType ResetType) error {
 func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
 	return ListReferencedEthernetInterfaces(manager.Client, manager.ethernetInterfaces)
 }
+
+// LogServices get this manager's log services on this system.
+func (manager *Manager) LogServices()([]*LogService, error) {
+	return ListReferencedLogServices(manager.Client, manager.logServices)
+}

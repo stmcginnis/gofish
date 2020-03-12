@@ -165,6 +165,13 @@ func (logservice *LogService) Entries() ([]*LogEntry, error) {
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
 func (logservice *LogService) ClearLog() error {
-	_, err := logservice.Client.Post(logservice.clearLogTarget, nil)
+	type temp struct {
+		Action string
+	}
+	t := temp{
+		Action: "LogService.ClearLog",
+	}
+
+	_, err := logservice.Client.Post(logservice.clearLogTarget, t)
 	return err
 }
