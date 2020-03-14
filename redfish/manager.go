@@ -401,6 +401,6 @@ func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
 }
 
 // LogServices get this manager's log services on this system.
-func (manager *Manager) LogServices()([]*LogService, error) {
+func (manager *Manager) LogServices() ([]*LogService, error) {
 	return ListReferencedLogServices(manager.Client, manager.logServices)
 }

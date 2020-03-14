@@ -42,7 +42,7 @@ func main() {
 		if account.UserName == username {
 			payload := make(map[string]string)
 			payload["UserName"] = "new-username"
-			// New password must follow the rules set in AccountService : 
+			// New password must follow the rules set in AccountService :
 			// MinPasswordLength and MaxPasswordLength
 			payload["Password"] = "new-password"
 			res, err := c.Patch(account.ODataID, payload)
