@@ -7,6 +7,7 @@ package gofish
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -66,6 +67,9 @@ type ClientConfig struct {
 	// DumpWriter is an optional io.Writer to receive dumps of HTTP
 	// requests and responses.
 	DumpWriter io.Writer
+
+	// BasicAuth tells the APIClient if basic auth should be used (true) or token based auth must be used (false)
+	BasicAuth bool
 }
 
 // Connect creates a new client connection to a Redfish service.
@@ -109,9 +113,18 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 			return nil, err
 		}
 
-		auth, err := service.CreateSession(config.Username, config.Password)
-		if err != nil {
-			return nil, err
+		var auth *redfish.AuthToken
+		if config.BasicAuth {
+			auth = &redfish.AuthToken{
+				Username:  config.Username,
+				Password:  config.Password,
+				BasicAuth: true,
+			}
+		} else {
+			auth, err = service.CreateSession(config.Username, config.Password)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		client.Service = service
@@ -208,8 +221,15 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 	}
 
 	// Add auth info if authenticated
-	if c.auth != nil && c.auth.Token != "" {
-		req.Header.Set("X-Auth-Token", c.auth.Token)
+	if c.auth != nil {
+		if c.auth.Token != "" {
+			req.Header.Set("X-Auth-Token", c.auth.Token)
+		} else {
+			if c.auth.BasicAuth == true && c.auth.Username != "" && c.auth.Password != "" {
+				encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", c.auth.Username, c.auth.Password)))
+				req.Header.Set("Authorization", fmt.Sprintf("Basic %v", encodedAuth))
+			}
+		}
 	}
 	req.Close = true
 
