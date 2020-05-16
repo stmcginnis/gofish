@@ -26,8 +26,6 @@ const (
 // Fan is
 type Fan struct {
 	common.Entity
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// assembly shall be a link to a resource of type Assembly.
 	assembly string
 	// HotPluggable shall indicate whether the
@@ -163,8 +161,6 @@ func (fan *Fan) UnmarshalJSON(b []byte) error {
 // Temperature is
 type Temperature struct {
 	common.Entity
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// AdjustedMaxAllowableOperatingValue shall
 	// indicate the adjusted maximum allowable operating temperature for the
 	// equipment monitored by this temperature sensor, as specified by a
@@ -252,8 +248,6 @@ type Thermal struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.

@@ -116,8 +116,6 @@ type Power struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -190,8 +188,6 @@ func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
 type PowerControl struct {
 	common.Entity
 
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// MemberID shall uniquely identify the member within the collection. For
 	// services supporting Redfish v1.6 or higher, this value shall be the
 	// zero-based array index.

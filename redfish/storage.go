@@ -34,8 +34,6 @@ type Storage struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -195,8 +193,6 @@ func (storage *Storage) SetEncryptionKey(key string) error {
 type StorageController struct {
 	common.Entity
 
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// Assembly shall be a link to a resource of type Assembly.
 	assembly string
 	// AssetTag is used to track the storage controller for inventory

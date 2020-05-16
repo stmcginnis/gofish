@@ -41,8 +41,6 @@ const (
 type Redundancy struct {
 	common.Entity
 
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// MaxNumSupported shall contain the maximum number of members allowed in
 	// the redundancy group.
 	MaxNumSupported int

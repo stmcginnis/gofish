@@ -19,8 +19,6 @@ type Assembly struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Assemblies shall be the definition for assembly records for a Redfish
@@ -76,8 +74,6 @@ func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) 
 
 // AssemblyData is information about an assembly.
 type AssemblyData struct {
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// BinaryDataURI shall be a URI at which the Service provides for the
 	// download of the OEM-specific binary image of the assembly data. An HTTP
 	// GET from this URI shall return a response payload of MIME time
