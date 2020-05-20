@@ -9,3 +9,7 @@
 
 gofish
 bin/*
+**/env/*
+**/gofiles/*
+**/*.zip
+**/DSP*

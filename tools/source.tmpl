@@ -18,7 +18,7 @@ type {{ enum.name }} string
 const (
 {% for enum_member in enum.members %}
     {{ enum_member.description }}
-    {{ enum_member.name }}{{ enum.name }} {{ enum.name }} = "{{ enum_member.name }}"
+    {{ enum_member.identname }}{{ enum.name }} {{ enum.name }} = "{{ enum_member.name }}"
 {%- endfor %}
 )
 {% endfor %}
@@ -26,7 +26,9 @@ const (
 
 {{ class.description }}
 type {{ class.name }} struct {
+{% if class.isEntity %}
     common.Entity
+{% endif %}
 {% for attr in class.attrs %}
     {{ attr.description }}
     {{ attr.name }}  {{ attr.type }}
