@@ -299,7 +299,7 @@ type Processor struct {
 	MaxTDPWatts int
 	// Metrics shall be a reference to the Metrics
 	// associated with this Processor.
-	Metrics string
+	metrics string
 	// Model shall indicate the model information as
 	// provided by the manufacturer of this processor.
 	Model string
@@ -376,6 +376,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 		temp
 		AccelerationFunctions common.Link
 		Assembly              common.Link
+		Metrics               common.Link
 		ProcessorMemory       common.Links
 		Links                 struct {
 			Chassis                  common.Link
@@ -408,6 +409,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	processor.pcieDevice = string(t.Links.PCIeDevice)
 	processor.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	processor.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
+	processor.metrics = string(t.Metrics)
 
 	return nil
 }
