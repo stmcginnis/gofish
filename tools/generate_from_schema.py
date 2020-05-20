@@ -138,7 +138,9 @@ def _add_object(params, name, obj):
         'identname': _ident(name),
         'description': _format_comment(name, _get_desc(obj), cutpoint='shall'),
         'isEntity': False,
-        'attrs': []}
+        'attrs': [],
+        'rwAttrs': []
+    }
 
     for prop in obj.get('properties', []):
         if prop in ['Name', 'Id', '@odata.id']:
@@ -160,6 +162,8 @@ def _add_object(params, name, obj):
         attr['description'] = _format_comment(
             prop, _get_desc(prawp))
         class_info['attrs'].append(attr)
+        if not prawp.get('readonly', True):
+            class_info['rwAttrs'].append(attr['name'])
     params['classes'].append(class_info)
 
 
@@ -290,7 +294,7 @@ def main():
         # Write out the generated content
         outfile = None
         if args.outputfile:
-            outfile = open(args.outputfile, 'w')
+            outfile = open(args.outputfile.lower(), 'w')
 
         template = jinja2.Template(template_body)
         print(template.render(**params), file=outfile, flush=True)

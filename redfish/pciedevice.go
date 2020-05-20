@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -89,6 +90,8 @@ type PCIeDevice struct {
 	pcieFunctions []string
 	// PCIeFunctionsCount is the number of PCIeFunctions.
 	PCIeFunctionsCount int
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a PCIeDevice object from the raw JSON.
@@ -120,7 +123,28 @@ func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 	pciedevice.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	pciedevice.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
 
+	// This is a read/write object, so we need to save the raw object data for later
+	pciedevice.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (pciedevice *PCIeDevice) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(PCIeDevice)
+	original.UnmarshalJSON(pciedevice.rawData)
+
+	readWriteFields := []string{
+		"AssetTag",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(pciedevice).Elem()
+
+	return pciedevice.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetPCIeDevice will get a PCIeDevice instance from the service.

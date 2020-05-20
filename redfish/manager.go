@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -259,6 +260,8 @@ type Manager struct {
 	resetTarget string
 	// SupportedResetTypes, if provided, is the reset types this system supports.
 	SupportedResetTypes []ResetType
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Manager object from the raw JSON.
@@ -314,7 +317,30 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
 	manager.resetTarget = t.Actions.Reset.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	manager.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (manager *Manager) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Manager)
+	original.UnmarshalJSON(manager.rawData)
+
+	readWriteFields := []string{
+		"AutoDSTEnabled",
+		"DateTime",
+		"DateTimeLocalOffset",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(manager).Elem()
+
+	return manager.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetManager will get a Manager instance from the Swordfish service.

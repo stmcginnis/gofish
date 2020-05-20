@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -269,6 +270,47 @@ type Thermal struct {
 	Temperatures []Temperature
 	// TemperaturesCount is the number of Temperature objects
 	TemperaturesCount int `json:"Temperatures@odata.count"`
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals an object from the raw JSON.
+func (thermal *Thermal) UnmarshalJSON(b []byte) error {
+	type temp Thermal
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*thermal = Thermal(t.temp)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	thermal.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (thermal *Thermal) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Thermal)
+	original.UnmarshalJSON(thermal.rawData)
+
+	readWriteFields := []string{
+		"Fans",
+		"Temperatures",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(thermal).Elem()
+
+	return thermal.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetThermal will get a Thermal instance from the service.

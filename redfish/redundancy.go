@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -64,6 +65,8 @@ type Redundancy struct {
 	RedundancySetCount int `json:"RedundancySet@odata.count"`
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Redundancy object from the raw JSON.
@@ -83,7 +86,29 @@ func (redundancy *Redundancy) UnmarshalJSON(b []byte) error {
 	*redundancy = Redundancy(t.temp)
 	redundancy.redundancySet = t.RedundancySet.ToStrings()
 
+	// This is a read/write object, so we need to save the raw object data for later
+	redundancy.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (redundancy *Redundancy) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Redundancy)
+	original.UnmarshalJSON(redundancy.rawData)
+
+	readWriteFields := []string{
+		"Mode",
+		"RedundancyEnabled",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(redundancy).Elem()
+
+	return redundancy.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetRedundancy will get a Redundancy instance from the service.

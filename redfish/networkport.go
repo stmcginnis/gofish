@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -200,6 +201,50 @@ type NetworkPort struct {
 	// WakeOnLANEnabled shall be a boolean
 	// indicating whether Wake on LAN (WoL) is enabled for this network port.
 	WakeOnLANEnabled bool
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals a NetworkPort object from the raw JSON.
+func (networkport *NetworkPort) UnmarshalJSON(b []byte) error {
+	type temp NetworkPort
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*networkport = NetworkPort(t.temp)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	networkport.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (networkport *NetworkPort) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(NetworkPort)
+	original.UnmarshalJSON(networkport.rawData)
+
+	readWriteFields := []string{
+		"ActiveLinkTechnology",
+		"CurrentLinkSpeedMbps",
+		"EEEEnabled",
+		"FlowControlConfiguration",
+		"WakeOnLANEnabled",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(networkport).Elem()
+
+	return networkport.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetNetworkPort will get a NetworkPort instance from the service.

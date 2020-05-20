@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -109,6 +110,8 @@ type HostInterface struct {
 	// KernelAuthRole shall be a link to a Role object instance, and should
 	// reference the object identified by property KernelAuthRoleId.
 	kernelAuthRole string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a HostInterface object from the raw JSON.
@@ -148,7 +151,34 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 	hostinterface.managerEthernetInterface = string(t.ManagerEthernetInterface)
 	hostinterface.networkProtocol = string(t.NetworkProtocol)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	hostinterface.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (hostinterface *HostInterface) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(HostInterface)
+	original.UnmarshalJSON(hostinterface.rawData)
+
+	readWriteFields := []string{
+		"AuthNoneRoleId",
+		"AuthenticationModes",
+		"FirmwareAuthEnabled",
+		"FirmwareAuthRoleId",
+		"InterfaceEnabled",
+		"KernelAuthEnabled",
+		"KernelAuthRoleId",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(hostinterface).Elem()
+
+	return hostinterface.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetHostInterface will get a HostInterface instance from the service.

@@ -6,7 +6,9 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"reflect"
 )
 
 // DefaultServiceRoot is the default path to the Redfish service endpoint.
@@ -28,7 +30,8 @@ type Entity struct {
 	// ID uniquely identifies the resource.
 	ID string `json:"Id"`
 	// Name is the name of the resource or array element.
-	Name   string `json:"Name"`
+	Name string `json:"Name"`
+	// Client is the REST client interface to the system.
 	Client Client
 }
 
@@ -36,6 +39,61 @@ type Entity struct {
 // entity.
 func (e *Entity) SetClient(c Client) {
 	e.Client = c
+}
+
+// Update commits changes to an entity.
+func (e *Entity) Update(originalEntity reflect.Value, currentEntity reflect.Value,
+	allowedUpdates []string) error {
+
+	payload := make(map[string]interface{})
+
+	for i := 0; i < originalEntity.NumField(); i++ {
+		if !originalEntity.Field(i).CanInterface() {
+			// Private field or something that we can't access
+			continue
+		}
+		fieldType := originalEntity.Type().Field(i).Type.Kind()
+		if fieldType == reflect.Struct || fieldType == reflect.Ptr || fieldType == reflect.Slice {
+			// TODO: Handle more complicated data types
+			continue
+		}
+		fieldName := originalEntity.Type().Field(i).Name
+		originalValue := originalEntity.Field(i).Interface()
+		currentValue := currentEntity.Field(i).Interface()
+		if originalValue != currentValue {
+			// TODO: Handle JSON name being different than field name
+			payload[fieldName] = currentValue
+		}
+	}
+
+	// See if we are attempting to update anything that is not allowed
+	for field := range payload {
+		found := false
+		for _, name := range allowedUpdates {
+			if name == field {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("%s field is read only", field)
+		}
+	}
+
+	// TODO: Remove this after done debugging
+	fmt.Printf("Updates: %v\n", payload)
+
+	// If there are any allowed updates, try to send updates to the system and
+	// return the result.
+	if len(payload) > 0 {
+		_, err := e.Client.Patch(e.ODataID, payload)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Link is an OData link reference

@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -192,6 +193,8 @@ type EthernetInterface struct {
 	EndpointsCount int
 	// HostInterface is used by a host to communicate with a Manager.
 	hostInterface string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a EthernetInterface object from the raw JSON.
@@ -225,7 +228,36 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 	ethernetinterface.hostInterface = string(t.Links.HostInterface)
 	ethernetinterface.vlans = string(t.VLANs)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	ethernetinterface.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (ethernetinterface *EthernetInterface) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(EthernetInterface)
+	original.UnmarshalJSON(ethernetinterface.rawData)
+
+	readWriteFields := []string{
+		"AutoNeg",
+		"FQDN",
+		"FullDuplex",
+		"HostName",
+		"InterfaceEnabled",
+		"MACAddress",
+		"MTUSize",
+		"SpeedMbps",
+		"StaticNameServers",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(ethernetinterface).Elem()
+
+	return ethernetinterface.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetEthernetInterface will get a EthernetInterface instance from the service.

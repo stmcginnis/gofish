@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -257,6 +258,8 @@ type StorageController struct {
 	storageServices []string
 	// StorageServicesCount is the number of storage services.
 	StorageServicesCount int
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a StorageController object from the raw JSON.
@@ -288,7 +291,28 @@ func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 	storagecontroller.storageServices = t.Links.StorageServices.ToStrings()
 	storagecontroller.StorageServicesCount = t.Links.StorageServicesCount
 
+	// This is a read/write object, so we need to save the raw object data for later
+	storagecontroller.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (storagecontroller *StorageController) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(StorageController)
+	original.UnmarshalJSON(storagecontroller.rawData)
+
+	readWriteFields := []string{
+		"AssetTag",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(storagecontroller).Elem()
+
+	return storagecontroller.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetStorageController will get a Storage controller instance from the service.

@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -506,6 +507,8 @@ type ComputerSystem struct {
 	SupportedResetTypes []ResetType
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
@@ -564,7 +567,32 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.SupportedResetTypes = t.Actions.ComputerSystemReset.AllowedResetTypes
 	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	computersystem.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (computersystem *ComputerSystem) Update() error {
+	fmt.Println("ComputerSystem save called")
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	cs := new(ComputerSystem)
+	cs.UnmarshalJSON(computersystem.rawData)
+
+	readWriteFields := []string{
+		"AssetTag",
+		"HostName",
+		"IndicatorLED",
+		"PowerRestorePolicy",
+	}
+
+	originalElement := reflect.ValueOf(cs).Elem()
+	currentElement := reflect.ValueOf(computersystem).Elem()
+
+	return computersystem.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetComputerSystem will get a ComputerSystem instance from the service.

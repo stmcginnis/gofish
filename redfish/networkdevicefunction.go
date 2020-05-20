@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -289,6 +290,8 @@ type NetworkDeviceFunction struct {
 	// device function is currently assigned to. This value shall be one of the
 	// AssignablePhysicalPorts array members.
 	physicalPortAssignment string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a NetworkDeviceFunction object from the raw JSON.
@@ -319,7 +322,30 @@ func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) erro
 	networkdevicefunction.pcieFunction = string(t.Links.PCIeFunction)
 	networkdevicefunction.physicalPortAssignment = string(t.Links.PhysicalPortAssignment)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	networkdevicefunction.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (networkdevicefunction *NetworkDeviceFunction) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(NetworkDeviceFunction)
+	original.UnmarshalJSON(networkdevicefunction.rawData)
+
+	readWriteFields := []string{
+		"BootMode",
+		"DeviceEnabled",
+		"NetDevFuncType",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(networkdevicefunction).Elem()
+
+	return networkdevicefunction.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetNetworkDeviceFunction will get a NetworkDeviceFunction instance from the service.
