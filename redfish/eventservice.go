@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/stmcginnis/gofish/common"
@@ -33,8 +34,6 @@ type EventService struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// DeliveryRetryAttempts shall be the
@@ -82,6 +81,8 @@ type EventService struct {
 	subscriptions string
 	// submitTestEventTarget is the URL to send SubmitTestEvent actions.
 	submitTestEventTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
@@ -108,7 +109,30 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 	eventservice.subscriptions = string(t.Subscriptions)
 	eventservice.submitTestEventTarget = t.Actions.SubmitTestEvent.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	eventservice.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (eventservice *EventService) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(EventService)
+	original.UnmarshalJSON(eventservice.rawData)
+
+	readWriteFields := []string{
+		"DeliveryRetryAttempts",
+		"DeliveryRetryIntervalSeconds",
+		"ServiceEnabled",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(eventservice).Elem()
+
+	return eventservice.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetEventService will get a EventService instance from the service.

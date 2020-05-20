@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -116,8 +117,6 @@ type Power struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -190,8 +189,6 @@ func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
 type PowerControl struct {
 	common.Entity
 
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// MemberID shall uniquely identify the member within the collection. For
 	// services supporting Redfish v1.6 or higher, this value shall be the
 	// zero-based array index.
@@ -351,6 +348,8 @@ type PowerSupply struct {
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.
@@ -370,7 +369,28 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	*powersupply = PowerSupply(t.temp)
 	powersupply.assembly = string(t.Assembly)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	powersupply.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (powersupply *PowerSupply) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(PowerSupply)
+	original.UnmarshalJSON(powersupply.rawData)
+
+	readWriteFields := []string{
+		"IndicatorLED",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(powersupply).Elem()
+
+	return powersupply.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // Voltage is a voltage representation.

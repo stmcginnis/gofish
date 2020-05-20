@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -27,8 +28,6 @@ type VLanNetworkInterface struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -38,6 +37,47 @@ type VLanNetworkInterface struct {
 	VLANEnable bool
 	// VLANID is used to indicate the VLAN identifier for this VLAN.
 	VLANID int16 `json:"VLANId"`
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals an object from the raw JSON.
+func (vlannetworkinterface *VLanNetworkInterface) UnmarshalJSON(b []byte) error {
+	type temp VLanNetworkInterface
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*vlannetworkinterface = VLanNetworkInterface(t.temp)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	vlannetworkinterface.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (vlannetworkinterface *VLanNetworkInterface) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(VLanNetworkInterface)
+	original.UnmarshalJSON(vlannetworkinterface.rawData)
+
+	readWriteFields := []string{
+		"VLANEnable",
+		"VLANId",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(vlannetworkinterface).Elem()
+
+	return vlannetworkinterface.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.

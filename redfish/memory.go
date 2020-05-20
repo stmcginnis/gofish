@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -192,8 +193,6 @@ type Memory struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AllocationAlignmentMiB shall be the alignment boundary on which memory
@@ -332,6 +331,8 @@ type Memory struct {
 	// Chassis shall be a reference to a resource of type Chassis that represent
 	// the physical container associated with this Memory.
 	chassis string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Memory object from the raw JSON.
@@ -359,7 +360,28 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 	memory.metrics = string(t.Metrics)
 	memory.chassis = string(t.Links.Chassis)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	memory.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (memory *Memory) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Memory)
+	original.UnmarshalJSON(memory.rawData)
+
+	readWriteFields := []string{
+		"SecurityState",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(memory).Elem()
+
+	return memory.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetMemory will get a Memory instance from the service.

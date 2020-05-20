@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -26,8 +27,6 @@ const (
 // Fan is
 type Fan struct {
 	common.Entity
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// assembly shall be a link to a resource of type Assembly.
 	assembly string
 	// HotPluggable shall indicate whether the
@@ -163,8 +162,6 @@ func (fan *Fan) UnmarshalJSON(b []byte) error {
 // Temperature is
 type Temperature struct {
 	common.Entity
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// AdjustedMaxAllowableOperatingValue shall
 	// indicate the adjusted maximum allowable operating temperature for the
 	// equipment monitored by this temperature sensor, as specified by a
@@ -252,8 +249,6 @@ type Thermal struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -275,6 +270,47 @@ type Thermal struct {
 	Temperatures []Temperature
 	// TemperaturesCount is the number of Temperature objects
 	TemperaturesCount int `json:"Temperatures@odata.count"`
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals an object from the raw JSON.
+func (thermal *Thermal) UnmarshalJSON(b []byte) error {
+	type temp Thermal
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*thermal = Thermal(t.temp)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	thermal.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (thermal *Thermal) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Thermal)
+	original.UnmarshalJSON(thermal.rawData)
+
+	readWriteFields := []string{
+		"Fans",
+		"Temperatures",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(thermal).Elem()
+
+	return thermal.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetThermal will get a Thermal instance from the service.

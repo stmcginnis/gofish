@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -60,8 +61,6 @@ type SecureBoot struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -77,6 +76,8 @@ type SecureBoot struct {
 	SecureBootMode SecureBootModeType
 	// resetKeysTarget is the URL to send ResetKeys requests.
 	resetKeysTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a SecureBoot object from the raw JSON.
@@ -101,7 +102,28 @@ func (secureboot *SecureBoot) UnmarshalJSON(b []byte) error {
 	*secureboot = SecureBoot(t.temp)
 	secureboot.resetKeysTarget = t.Actions.ResetKeys.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	secureboot.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (secureboot *SecureBoot) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(SecureBoot)
+	original.UnmarshalJSON(secureboot.rawData)
+
+	readWriteFields := []string{
+		"SecureBootEnable",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(secureboot).Elem()
+
+	return secureboot.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetSecureBoot will get a SecureBoot instance from the service.

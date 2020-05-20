@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -49,8 +50,6 @@ type LogService struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// DateTime shall represent the current DateTime value that the log service
@@ -87,6 +86,8 @@ type LogService struct {
 	Status common.Status
 	// clearLogTarget is the URL to send ClearLog actions to.
 	clearLogTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
@@ -113,7 +114,30 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	logservice.entries = string(t.Entries)
 	logservice.clearLogTarget = t.Actions.ClearLog.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	logservice.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (logservice *LogService) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(LogService)
+	original.UnmarshalJSON(logservice.rawData)
+
+	readWriteFields := []string{
+		"DateTime",
+		"DateTimeLocalOffset",
+		"ServiceEnabled",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(logservice).Elem()
+
+	return logservice.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetLogService will get a LogService instance from the service.

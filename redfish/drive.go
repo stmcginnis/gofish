@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -124,8 +125,6 @@ type Drive struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// assembly shall be a link to a resource of type Assembly.
@@ -225,6 +224,8 @@ type Drive struct {
 	PCIeFunctionCount int
 	// secureEraseTarget is the URL for SecureErase actions.
 	secureEraseTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Drive object from the raw JSON.
@@ -272,7 +273,32 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 	drive.PCIeFunctionCount = t.Links.PCIeFunctionsCount
 	drive.secureEraseTarget = t.Actions.SecureErase.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	drive.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (drive *Drive) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Drive)
+	original.UnmarshalJSON(drive.rawData)
+
+	readWriteFields := []string{
+		"AssetTag",
+		"HotspareReplacementMode",
+		"IndicatorLED",
+		"StatusIndicator",
+		"WriteCacheEnabled",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(drive).Elem()
+
+	return drive.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetDrive will get a Drive instance from the service.

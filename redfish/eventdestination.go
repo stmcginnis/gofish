@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -44,8 +45,6 @@ type EventDestination struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Context shall contain a client supplied context that will remain with the
@@ -113,6 +112,8 @@ type EventDestination struct {
 	// this property is not present, the SubscriptionType shall be assumed to be
 	// RedfishEvent.
 	SubscriptionType SubscriptionType
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a EventDestination object from the raw JSON.
@@ -130,7 +131,29 @@ func (eventdestination *EventDestination) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*eventdestination = EventDestination(t.temp)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	eventdestination.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (eventdestination *EventDestination) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(EventDestination)
+	original.UnmarshalJSON(eventdestination.rawData)
+
+	readWriteFields := []string{
+		"Context",
+		"DeliveryRetryPolicy",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(eventdestination).Elem()
+
+	return eventdestination.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetEventDestination will get a EventDestination instance from the service.

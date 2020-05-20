@@ -4,8 +4,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/stmcginnis/gofish"
 )
 
@@ -40,16 +38,14 @@ func main() {
 	// Iterate over accounts to find the current user
 	for _, account := range accounts {
 		if account.UserName == username {
-			payload := make(map[string]string)
-			payload["UserName"] = "new-username"
+			account.UserName = "new-username"
 			// New password must follow the rules set in AccountService :
 			// MinPasswordLength and MaxPasswordLength
-			payload["Password"] = "new-password"
-			res, err := c.Patch(account.ODataID, payload)
+			account.Password = "new-password"
+			err := account.Update()
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("%+v\n", res)
 		}
 	}
 }

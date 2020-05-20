@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -19,8 +20,6 @@ type Assembly struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is the odata etag.
 	ODataEtag string `json:"@odata.etag"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Assemblies shall be the definition for assembly records for a Redfish
@@ -30,6 +29,46 @@ type Assembly struct {
 	AssembliesCount int `json:"Assemblies@odata.count"`
 	// Description provides a description of this resource.
 	Description string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals a Assembly object from the raw JSON.
+func (assembly *Assembly) UnmarshalJSON(b []byte) error {
+	type temp Assembly
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*assembly = Assembly(t.temp)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	assembly.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (assembly *Assembly) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Assembly)
+	original.UnmarshalJSON(assembly.rawData)
+
+	readWriteFields := []string{
+		"Assemblies",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(assembly).Elem()
+
+	return assembly.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetAssembly will get a Assembly instance from the service.
@@ -76,8 +115,6 @@ func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) 
 
 // AssemblyData is information about an assembly.
 type AssemblyData struct {
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// BinaryDataURI shall be a URI at which the Service provides for the
 	// download of the OEM-specific binary image of the assembly data. An HTTP
 	// GET from this URI shall return a response payload of MIME time
