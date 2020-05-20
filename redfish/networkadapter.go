@@ -84,8 +84,8 @@ type Controllers struct {
 	// firmware package.
 	FirmwarePackageVersion string
 	// Location shall contain location information of the associated network
-	// adapter controller. TODO: Needs to be a Location struct.
-	//Location string
+	// adapter controller.
+	Location common.Location
 	// PCIeInterface is used to connect this PCIe-based controller to its host.
 	PCIeInterface PCIeInterface
 	// NetworkDeviceFunctions shall be an array of references of type
