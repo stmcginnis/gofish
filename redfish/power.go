@@ -302,8 +302,8 @@ type PowerSupply struct {
 	// line voltage supported by the associated power supply.
 	LineInputVoltageType LineInputVoltageType
 	// Location shall contain location information of the
-	// associated power supply. TODO: Make Location object.
-	//Location string
+	// associated power supply.
+	Location common.Location
 	// Manufacturer shall be the name of the
 	// organization responsible for producing the power supply. This
 	// organization might be the entity from whom the power supply is

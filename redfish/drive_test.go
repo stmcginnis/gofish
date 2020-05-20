@@ -67,7 +67,12 @@ var driveBody = strings.NewReader(
 		"NegotiatedSpeedGbps": 10,
 		"Operations": [],
 		"PartNumber": "12345",
-		"PhysicalLocation": {},
+		"PhysicalLocation": {
+				"PartLocation": {
+				"LocationOrdinalValue": 0,
+				"LocationType": "Slot"
+			}
+		},
 		"PredictedMediaLifeLeftPercent": 100,
 		"Protocol": "FC",
 		"Revision": "2.0",

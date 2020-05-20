@@ -40,6 +40,13 @@ var memoryBody = strings.NewReader(
 		"FirmwareRevision": "3",
 		"IsRankSpareEnabled": false,
 		"IsSpareDeviceEnabled": false,
+		"Location": {
+			"PartLocation": {
+				"LocationType": "Slot",
+				"ServiceLabel": "DIMM 5",
+				"LocationOrdinalValue": 4
+			}
+		},
 		"LogicalSizeMiB": 2097152,
 		"Manufacturer": "Generic",
 		"MemoryDeviceType": "DDR4",

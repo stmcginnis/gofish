@@ -287,7 +287,7 @@ type Processor struct {
 	Links string
 	// Location shall contain location information of the
 	// associated processor.
-	Location string
+	Location common.Location
 	// Manufacturer shall contain a string which identifies
 	// the manufacturer of the processor.
 	Manufacturer string

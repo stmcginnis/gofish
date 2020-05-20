@@ -236,7 +236,7 @@ type Memory struct {
 	// IsSpareDeviceEnabled shall be true if a spare device is enabled for this Memory.
 	IsSpareDeviceEnabled bool
 	// Location shall contain location information of the associated memory.
-	Location string
+	Location common.Location
 	// LogicalSizeMiB shall be the total size of the logical memory in MiB.
 	LogicalSizeMiB int
 	// Manufacturer shall contain a string which identifies the manufacturer of the Memory.
