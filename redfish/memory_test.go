@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var memoryBody = strings.NewReader(
-	`{
+var memoryBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Memory.Memory",
 		"@odata.id": "/redfish/v1/Systems/System-1/Memory/NVRAM4",
 		"@odata.type": "#Memory.v1_2_0.Memory",
@@ -82,12 +83,12 @@ var memoryBody = strings.NewReader(
 			"State": "Enabled"
 		},
 		"VendorID": "Generic"
-	}`)
+	}`
 
 // TestMemory tests the parsing of Memory objects.
 func TestMemory(t *testing.T) {
 	var result Memory
-	err := json.NewDecoder(memoryBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(memoryBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -124,5 +125,31 @@ func TestMemory(t *testing.T) {
 
 	if result.SecurityCapabilities.DataLockCapable {
 		t.Error("Security capabilities data lock capable should be false")
+	}
+}
+
+// TestMemoryUpdate tests the Update call.
+func TestMemoryUpdate(t *testing.T) {
+	var result Memory
+	err := json.NewDecoder(strings.NewReader(memoryBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.SecurityState = FrozenSecurityStates
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "SecurityState:Frozen") {
+		t.Errorf("Unexpected SecurityState update payload: %s", calls[0].Payload)
 	}
 }

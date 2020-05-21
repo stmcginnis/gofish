@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var managerBody = strings.NewReader(
-	`{
+var managerBody = `{
 		"@Redfish.Copyright": "Copyright 2014-2019 DMTF. All rights reserved.",
 		"@odata.context": "/redfish/v1/$metadata#Manager.Manager",
 		"@odata.id": "/redfish/v1/Managers/BMC-1",
@@ -102,12 +103,12 @@ var managerBody = strings.NewReader(
 				]
 			}
 		}
-	}`)
+	}`
 
 // TestManager tests the parsing of Manager objects.
 func TestManager(t *testing.T) {
 	var result Manager
-	err := json.NewDecoder(managerBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(managerBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -144,5 +145,36 @@ func TestManager(t *testing.T) {
 
 	if result.resetTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset" {
 		t.Errorf("Invalid Reset target: %s", result.resetTarget)
+	}
+}
+
+// TestManagerUpdate tests the Update call.
+func TestManagerUpdate(t *testing.T) {
+	var result Manager
+	err := json.NewDecoder(strings.NewReader(managerBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.AutoDSTEnabled = false
+	result.DateTimeLocalOffset = "+05:00"
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "AutoDSTEnabled:false") {
+		t.Errorf("Unexpected AutoDSTEnabled update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "DateTimeLocalOffset:+05:00") {
+		t.Errorf("Unexpected DateTimeLocalOffset update payload: %s", calls[0].Payload)
 	}
 }

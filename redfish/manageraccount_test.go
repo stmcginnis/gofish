@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var managerAccountBody = strings.NewReader(
-	`{
+var managerAccountBody = `{
 		"@odata.context": "/redfish/v1/$metadata#AccountService/Links/Members/Accounts/Links/Members/$entity",
 		"@odata.id": "/redfish/v1/AccountService/Accounts/1",
 		"@odata.type": "#AccountService.0.94.0.ManagerAccount",
@@ -19,7 +20,7 @@ var managerAccountBody = strings.NewReader(
 		"Name": "User Account",
 		"Modified": "2013-09-11T17:03:55+00:00",
 		"Description": "User Account",
-		"Password": "Password",
+		"Password": null,
 		"UserName": "Administrator",
 		"Locked": false,
 		"Enabled": true,
@@ -29,12 +30,12 @@ var managerAccountBody = strings.NewReader(
 				"@odata.id": "/redfish/v1/AccountService/Roles/Admin"
 			}
 		}
-	}`)
+	}`
 
 // TestAccount tests the parsing of Account objects.
 func TestManagerAccount(t *testing.T) {
 	var result ManagerAccount
-	err := json.NewDecoder(managerAccountBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(managerAccountBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -54,5 +55,41 @@ func TestManagerAccount(t *testing.T) {
 
 	if result.role != "/redfish/v1/AccountService/Roles/Admin" {
 		t.Errorf("Received invalid Role: %s", result.role)
+	}
+}
+
+// TestAccountUpdate tests the Update call.
+func TestManagerAccountUpdate(t *testing.T) {
+	var result ManagerAccount
+	err := json.NewDecoder(strings.NewReader(managerAccountBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.Enabled = false
+	result.Locked = false
+	result.Password = "Test"
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Enabled:false") {
+		t.Errorf("Unexpected Enabled update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "Locked") {
+		t.Errorf("Unexpected Locked in update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "Password:Test") {
+		t.Errorf("Unexpected Password update payload: %s", calls[0].Payload)
 	}
 }

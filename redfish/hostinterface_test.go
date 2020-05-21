@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var hostInterfaceBody = strings.NewReader(
-	`{
+var hostInterfaceBody = `{
 		"@odata.context": "/redfish/v1/$metadata#HostInterface.HostInterface",
 		"@odata.type": "#HostInterface.v1_0_0.HostInterface",
 		"@odata.id": "/redfish/v1/HostInterface",
@@ -59,12 +60,12 @@ var hostInterfaceBody = strings.NewReader(
 			"State": "Enabled",
 			"Health": "OK"
 		}
-	}`)
+	}`
 
 // TestHostInterface tests the parsing of HostInterface objects.
 func TestHostInterface(t *testing.T) {
 	var result HostInterface
-	err := json.NewDecoder(hostInterfaceBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(hostInterfaceBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -96,5 +97,44 @@ func TestHostInterface(t *testing.T) {
 
 	if len(result.computerSystems) != 1 {
 		t.Errorf("Should be 1 computer system, got %d", len(result.computerSystems))
+	}
+}
+
+// TestHostInterfaceUpdate tests the Update call.
+func TestHostInterfaceUpdate(t *testing.T) {
+	var result HostInterface
+	err := json.NewDecoder(strings.NewReader(hostInterfaceBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	// TODO: Need to handle converted names
+	// result.AuthNoneRoleID = "role-test"
+	result.FirmwareAuthEnabled = true
+	// result.FirmwareAuthRoleID = "role-1"
+	result.InterfaceEnabled = true
+	result.KernelAuthEnabled = true
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "FirmwareAuthEnabled:true") {
+		t.Errorf("Unexpected FirmwareAuthEnabled update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "InterfaceEnabled") {
+		t.Errorf("Unexpected InterfaceEnabled update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "KernelAuthEnabled:true") {
+		t.Errorf("Unexpected KernelAuthEnabled update payload: %s", calls[0].Payload)
 	}
 }

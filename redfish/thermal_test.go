@@ -10,8 +10,7 @@ import (
 	"testing"
 )
 
-var thermalBody = strings.NewReader(
-	`{
+var thermalBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Thermal.Thermal",
 		"@odata.type": "#Thermal.v1_0_0.Thermal",
 		"@odata.id": "/redfish/v1/Thermal",
@@ -91,12 +90,12 @@ var thermalBody = strings.NewReader(
 			"UpperThresholdNonCritical": 9998
 		}],
 		"Temperatures@odata.count": 1
-	}`)
+	}`
 
 // TestThermal tests the parsing of Thermal objects.
 func TestThermal(t *testing.T) {
 	var result Thermal
-	err := json.NewDecoder(thermalBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(thermalBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)

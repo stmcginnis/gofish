@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var driveBody = strings.NewReader(
-	`{
+var driveBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Drive.Drive",
 		"@odata.type": "#Drive.v1_0_0.Drive",
 		"@odata.id": "/redfish/v1/Drive",
@@ -84,12 +85,12 @@ var driveBody = strings.NewReader(
 			"Health": "OK"
 		},
 		"StatusIndicator": "Hotspare"
-	}`)
+	}`
 
 // TestDrive tests the parsing of Drive objects.
 func TestDrive(t *testing.T) {
 	var result Drive
-	err := json.NewDecoder(driveBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(driveBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -137,5 +138,41 @@ func TestDrive(t *testing.T) {
 
 	if result.secureEraseTarget != "/redfish/v1/Chassis/NVMeChassis/Disk.Bay.0/Actions/Drive.SecureErase" {
 		t.Errorf("Invalid SecureErase target: %s", result.secureEraseTarget)
+	}
+}
+
+// TestDriveUpdate tests the Update call.
+func TestDriveUpdate(t *testing.T) {
+	var result Drive
+	err := json.NewDecoder(strings.NewReader(driveBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.AssetTag = "TestAssetTag"
+	result.IndicatorLED = common.LitIndicatorLED
+	result.StatusIndicator = HotspareStatusIndicator
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "AssetTag:TestAssetTag") {
+		t.Errorf("Unexpected AssetTag update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "IndicatorLED:Lit") {
+		t.Errorf("Unexpected IndicatorLED update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "StatusIndicator") {
+		t.Errorf("Unexpected update for StatusIndicator in payload: %s", calls[0].Payload)
 	}
 }

@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var networkPortBody = strings.NewReader(
-	`{
+var networkPortBody = `{
 		"@odata.context": "/redfish/v1/$metadata#NetworkPort.NetworkPort",
 		"@odata.type": "#NetworkPort.v1_2_2.NetworkPort",
 		"@odata.id": "/redfish/v1/NetworkPort",
@@ -74,12 +75,12 @@ var networkPortBody = strings.NewReader(
 		}],
 		"VendorId": "Vendor-ID",
 		"WakeOnLANEnabled": false
-	}`)
+	}`
 
 // TestNetworkPort tests the parsing of NetworkPort objects.
 func TestNetworkPort(t *testing.T) {
 	var result NetworkPort
-	err := json.NewDecoder(networkPortBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(networkPortBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -111,5 +112,41 @@ func TestNetworkPort(t *testing.T) {
 
 	if !result.SignalDetected {
 		t.Error("Signal detected should be true")
+	}
+}
+
+// TestNetworkPortUpdate tests the Update call.
+func TestNetworkPortUpdate(t *testing.T) {
+	var result NetworkPort
+	err := json.NewDecoder(strings.NewReader(networkPortBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.CurrentLinkSpeedMbps = 10000
+	result.EEEEnabled = true
+	result.WakeOnLANEnabled = true
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "CurrentLinkSpeedMbps:10000") {
+		t.Errorf("Unexpected CurrentLinkSpeedMbps update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "EEEEnabled") {
+		t.Errorf("Unexpected EEEEnabled in update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "WakeOnLANEnabled:true") {
+		t.Errorf("Unexpected WakeOnLANEnabled update payload: %s", calls[0].Payload)
 	}
 }

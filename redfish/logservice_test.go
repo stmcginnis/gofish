@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var logServiceBody = strings.NewReader(
-	`{
+var logServiceBody = `{
 		"@odata.context": "/redfish/v1/$metadata#LogService.LogService",
 		"@odata.type": "#LogService.v1_0_0.LogService",
 		"@odata.id": "/redfish/v1/LogService",
@@ -35,12 +36,12 @@ var logServiceBody = strings.NewReader(
 				"target": "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog"
 			}
 		}
-	}`)
+	}`
 
 // TestLogService tests the parsing of LogService objects.
 func TestLogService(t *testing.T) {
 	var result LogService
-	err := json.NewDecoder(logServiceBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(logServiceBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -76,5 +77,31 @@ func TestLogService(t *testing.T) {
 
 	if result.clearLogTarget != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog" {
 		t.Errorf("Invalid ClearLog target: %s", result.clearLogTarget)
+	}
+}
+
+// TestLogServiceUpdate tests the Update call.
+func TestLogServiceUpdate(t *testing.T) {
+	var result LogService
+	err := json.NewDecoder(strings.NewReader(logServiceBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.ServiceEnabled = false
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "ServiceEnabled:false") {
+		t.Errorf("Unexpected ServiceEnabled update payload: %s", calls[0].Payload)
 	}
 }

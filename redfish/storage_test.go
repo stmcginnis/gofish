@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var storageBody = strings.NewReader(
-	`{
+var storageBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Storage.Storage",
 		"@odata.type": "#Storage.v1_7_0.Storage",
 		"@odata.id": "/redfish/v1/Storage",
@@ -121,12 +122,12 @@ var storageBody = strings.NewReader(
 				"target": "/redfish/v1/Storage/Actions/Storage.SetEncryptionKey"
 			}
 		}
-	}`)
+	}`
 
 // TestStorage tests the parsing of Storage objects.
 func TestStorage(t *testing.T) {
 	var result Storage
-	err := json.NewDecoder(storageBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(storageBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -155,5 +156,35 @@ func TestStorage(t *testing.T) {
 
 	if result.setEncryptionKeyTarget != "/redfish/v1/Storage/Actions/Storage.SetEncryptionKey" {
 		t.Errorf("Invalid SetEncryptionKey target: %s", result.setEncryptionKeyTarget)
+	}
+}
+
+// TestStorageControllerUpdate tests the Update call.
+func TestStorageControllerUpdate(t *testing.T) {
+	var result Storage
+	err := json.NewDecoder(strings.NewReader(storageBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	scResult := result.StorageControllers[0]
+	scResult.AssetTag = "TestAssetTag"
+
+	// TODO: This highlights an issue that child objects of an object do not
+	// get their client set. Need to review objects like Storage that include
+	// the full objects rather than just links to them.
+	testClient := &common.TestClient{}
+	scResult.SetClient(testClient)
+	err = scResult.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "AssetTag:TestAssetTag") {
+		t.Errorf("Unexpected AssetTag update payload: %s", calls[0].Payload)
 	}
 }

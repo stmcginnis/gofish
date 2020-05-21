@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -294,24 +293,24 @@ func (thermal *Thermal) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Update commits updates to this object's properties to the running system.
-func (thermal *Thermal) Update() error {
+// // Update commits updates to this object's properties to the running system.
+// func (thermal *Thermal) Update() error {
 
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Thermal)
-	original.UnmarshalJSON(thermal.rawData)
+// 	// Get a representation of the object's original state so we can find what
+// 	// to update.
+// 	original := new(Thermal)
+// 	original.UnmarshalJSON(thermal.rawData)
 
-	readWriteFields := []string{
-		"Fans",
-		"Temperatures",
-	}
+// 	readWriteFields := []string{
+// 		"Fans",
+// 		"Temperatures",
+// 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(thermal).Elem()
+// 	originalElement := reflect.ValueOf(original).Elem()
+// 	currentElement := reflect.ValueOf(thermal).Elem()
 
-	return thermal.Entity.Update(originalElement, currentElement, readWriteFields)
-}
+// 	return thermal.Entity.Update(originalElement, currentElement, readWriteFields)
+// }
 
 // GetThermal will get a Thermal instance from the service.
 func GetThermal(c common.Client, uri string) (*Thermal, error) {

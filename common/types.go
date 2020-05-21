@@ -81,9 +81,6 @@ func (e *Entity) Update(originalEntity reflect.Value, currentEntity reflect.Valu
 		}
 	}
 
-	// TODO: Remove this after done debugging
-	fmt.Printf("Updates: %v\n", payload)
-
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
 	if len(payload) > 0 {

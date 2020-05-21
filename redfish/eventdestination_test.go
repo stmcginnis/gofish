@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var eventDestinationBody = strings.NewReader(
-	`{
+var eventDestinationBody = `{
 		"@odata.context": "/redfish/v1/$metadata#EventDestination.EventDestination",
 		"@odata.type": "#EventDestination.v1_0_0.EventDestination",
 		"@odata.id": "/redfish/v1/EventDestination",
@@ -28,12 +29,12 @@ var eventDestinationBody = strings.NewReader(
 		"ResourceTypes": ["one", "two"],
 		"SubordinateResources": false,
 		"SubscriptionType": "SSE"
-	}`)
+	}`
 
 // TestEventDestination tests the parsing of EventDestination objects.
 func TestEventDestination(t *testing.T) {
 	var result EventDestination
-	err := json.NewDecoder(eventDestinationBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(eventDestinationBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -61,5 +62,31 @@ func TestEventDestination(t *testing.T) {
 
 	if result.SubordinateResources {
 		t.Error("Subordinate resources should be False")
+	}
+}
+
+// TestEventDestinationUpdate tests the Update call.
+func TestEventDestinationUpdate(t *testing.T) {
+	var result EventDestination
+	err := json.NewDecoder(strings.NewReader(eventDestinationBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.Context = "NewContext"
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Context:NewContext") {
+		t.Errorf("Unexpected Context update payload: %s", calls[0].Payload)
 	}
 }

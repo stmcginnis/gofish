@@ -12,8 +12,7 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-var computerSystemBody = strings.NewReader(
-	`{
+var computerSystemBody = `{
 		"@odata.context": "/redfish/v1/$metadata#ComputerSystem.ComputerSystem",
 		"@odata.id": "/redfish/v1/Systems/System-1",
 		"@odata.type": "#ComputerSystem.v1_3_0.ComputerSystem",
@@ -127,12 +126,12 @@ var computerSystemBody = strings.NewReader(
 				"target": "/redfish/v1/Systems/System-1/Actions/ComputerSystem.SetDefaultBootOrder"
 			}
 		}
-	}`)
+	}`
 
 // TestComputerSystem tests the parsing of ComputerSystem objects.
 func TestComputerSystem(t *testing.T) {
 	var result ComputerSystem
-	err := json.NewDecoder(computerSystemBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -248,5 +247,41 @@ func TestComputerSystem(t *testing.T) {
 	if len(result.SupportedResetTypes) != 6 {
 		t.Errorf("Invalid allowable reset actions, expected 6, got %d",
 			len(result.SupportedResetTypes))
+	}
+}
+
+// TestComputerSystemUpdate tests the Update call.
+func TestComputerSystemUpdate(t *testing.T) {
+	var result ComputerSystem
+	err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.AssetTag = "TestAssetTag"
+	result.HostName = "TestHostName"
+	result.IndicatorLED = common.BlinkingIndicatorLED
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "AssetTag:TestAssetTag") {
+		t.Errorf("Unexpected AssetTag update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "HostName:TestHostName") {
+		t.Errorf("Unexpected HostName update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "IndicatorLED:Blinking") {
+		t.Errorf("Unexpected IndicatorLED update payload: %s", calls[0].Payload)
 	}
 }

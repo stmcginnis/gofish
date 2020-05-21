@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var networkDeviceFunctionBody = strings.NewReader(
-	`{
+var networkDeviceFunctionBody = `{
 		"@odata.context": "/redfish/v1/$metadata#NetworkDeviceFunction.NetworkDeviceFunction",
 		"@odata.type": "#NetworkDeviceFunction.v1_3_2.NetworkDeviceFunction",
 		"@odata.id": "/redfish/v1/NetworkDeviceFunction",
@@ -72,12 +73,12 @@ var networkDeviceFunctionBody = strings.NewReader(
 		},
 		"VirtualFunctionsEnabled": true,
 		"iSCSIBoot": {}
-	}`)
+	}`
 
 // TestNetworkDeviceFunction tests the parsing of NetworkDeviceFunction objects.
 func TestNetworkDeviceFunction(t *testing.T) {
 	var result NetworkDeviceFunction
-	err := json.NewDecoder(networkDeviceFunctionBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(networkDeviceFunctionBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -113,5 +114,36 @@ func TestNetworkDeviceFunction(t *testing.T) {
 
 	if result.NetDevFuncType != FibreChannelOverEthernetNetworkDeviceTechnology {
 		t.Errorf("Invalid network device function type: %s", result.NetDevFuncType)
+	}
+}
+
+// TestNetworkDeviceFunctionUpdate tests the Update call.
+func TestNetworkDeviceFunctionUpdate(t *testing.T) {
+	var result NetworkDeviceFunction
+	err := json.NewDecoder(strings.NewReader(networkDeviceFunctionBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.BootMode = FibreChannelBootMode
+	result.DeviceEnabled = true
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "BootMode:FibreChannel") {
+		t.Errorf("Unexpected Boot update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "DeviceEnabled") {
+		t.Errorf("Unexpected DeviceEnabled in update payload: %s", calls[0].Payload)
 	}
 }

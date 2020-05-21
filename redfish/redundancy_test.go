@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var redundancyBody = strings.NewReader(
-	`{
+var redundancyBody = `{
 		"@odata.id": "/redfish/v1/Redundancy",
 		"Id": "Redundancy-1",
 		"Name": "RedundancyOne",
@@ -29,12 +30,12 @@ var redundancyBody = strings.NewReader(
 			"State": "Enabled",
 			"Health": "OK"
 		}
-	}`)
+	}`
 
 // TestRedundancy tests the parsing of Redundancy objects.
 func TestRedundancy(t *testing.T) {
 	var result Redundancy
-	err := json.NewDecoder(redundancyBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(redundancyBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -54,5 +55,36 @@ func TestRedundancy(t *testing.T) {
 
 	if result.Mode != SparingRedundancyMode {
 		t.Errorf("Invalid mode: %s", result.Mode)
+	}
+}
+
+// TestRedundancyUpdate tests the Update call.
+func TestRedundancyUpdate(t *testing.T) {
+	var result Redundancy
+	err := json.NewDecoder(strings.NewReader(redundancyBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.Mode = NotRedundantRedundancyMode
+	result.RedundancyEnabled = true
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Mode:NotRedundant") {
+		t.Errorf("Unexpected Mode update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "RedundancyEnabled") {
+		t.Errorf("Unexpected update for RedundancyEnabled in payload: %s", calls[0].Payload)
 	}
 }

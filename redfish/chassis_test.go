@@ -12,8 +12,7 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-var chassisBody = strings.NewReader(
-	`{
+var chassisBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
 		"@odata.id": "/redfish/v1/Chassis/Chassis-1",
 		"@odata.type": "#Chassis.v1_0_0.Chassis",
@@ -59,12 +58,12 @@ var chassisBody = strings.NewReader(
 				]
 			}
 		}
-	}`)
+	}`
 
 // TestChassis tests the parsing of Chassis objects.
 func TestChassis(t *testing.T) {
 	var result Chassis
-	err := json.NewDecoder(chassisBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(chassisBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -125,5 +124,35 @@ func TestChassis(t *testing.T) {
 	if len(result.SupportedResetTypes) != 2 {
 		t.Errorf("Invalid allowable reset actions, expected 2, got %d",
 			len(result.SupportedResetTypes))
+	}
+}
+
+// TestChassisUpdate tests the Update call.
+func TestChassisUpdate(t *testing.T) {
+	var result Chassis
+	err := json.NewDecoder(strings.NewReader(chassisBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.AssetTag = "TestAssetTag"
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected one call to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[0].Payload, result.AssetTag) {
+		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
 	}
 }
