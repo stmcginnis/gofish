@@ -121,6 +121,9 @@ type Power struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
+	// IndicatorLED shall contain the indicator light state for the indicator
+	// light associated with this power supply.
+	IndicatorLED common.IndicatorLED
 	// PowerControl shall be the definition for power control (power reading and
 	// limiting) for a Redfish implementation.
 	PowerControl []PowerControl

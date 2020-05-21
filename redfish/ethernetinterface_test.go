@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var ethernetInterfaceBody = strings.NewReader(
-	`{
+var ethernetInterfaceBody = `{
 		"@odata.context": "/redfish/v1/$metadata#EthernetInterface.EthernetInterface",
 		"@odata.id": "/redfish/v1/Systems/System-1/EthernetInterfaces/NIC-0",
 		"@odata.type": "#EthernetInterface.v1_3_0.EthernetInterface",
@@ -51,12 +52,12 @@ var ethernetInterfaceBody = strings.NewReader(
 		"VLAN": {
 			"VLANId": 0
 		}
-	}`)
+	}`
 
 // TestEthernetInterface tests the parsing of EthernetInterface objects.
 func TestEthernetInterface(t *testing.T) {
 	var result EthernetInterface
-	err := json.NewDecoder(ethernetInterfaceBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(ethernetInterfaceBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -97,5 +98,70 @@ func TestEthernetInterface(t *testing.T) {
 
 	if result.SpeedMbps != 10000 {
 		t.Errorf("Expected 10000 speed, got %d", result.SpeedMbps)
+	}
+}
+
+// TestEthernetInterfaceUpdate tests the Update call.
+func TestEthernetInterfaceUpdate(t *testing.T) {
+	var result EthernetInterface
+	err := json.NewDecoder(strings.NewReader(ethernetInterfaceBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.AutoNeg = false
+	result.FQDN = "test.local"
+	result.FullDuplex = true
+	result.HostName = "test"
+	result.InterfaceEnabled = false
+	result.MACAddress = "de:ad:de:ad:de:ad"
+	result.MTUSize = 9216
+	result.SpeedMbps = 1000
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "AutoNeg:false") {
+		t.Errorf("Unexpected AutoNeg update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "FQDN:test.local") {
+		t.Errorf("Unexpected FQDN update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "FullDuplex") {
+		t.Errorf("Unexpected FullDuplex in update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "HostName:test") {
+		t.Errorf("Unexpected HostName update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "InterfaceEnabled:false") {
+		t.Errorf("Unexpected InterfaceEnabled update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "MACAddress:de:ad:de:ad:de:ad") {
+		t.Errorf("Unexpected MACAddress update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "MTUSize:9216") {
+		t.Errorf("Unexpected MTUSize update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "SpeedMbps:1000") {
+		t.Errorf("Unexpected SpeedMbps update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "FullDuplex") {
+		t.Errorf("Unexpected update for FullDuplex in payload: %s", calls[0].Payload)
 	}
 }

@@ -575,8 +575,6 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (computersystem *ComputerSystem) Update() error {
-	fmt.Println("ComputerSystem save called")
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	cs := new(ComputerSystem)

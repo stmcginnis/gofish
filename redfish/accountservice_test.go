@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var accountServiceBody = strings.NewReader(
-	`{
+var accountServiceBody = `{
 		"@odata.context": "/redfish/v1/$metadata#AccountService",
 		"@odata.id": "/redfish/v1/AccountService",
 		"@odata.type": "#AccountService.0.94.0.AccountService",
@@ -29,12 +30,12 @@ var accountServiceBody = strings.NewReader(
 				"@odata.id": "/redfish/v1/AccountService/Roles"
 			}
 		}
-	}`)
+	}`
 
 // TestAccountService tests the parsing of AccountService objects.
 func TestAccountService(t *testing.T) {
 	var result AccountService
-	err := json.NewDecoder(accountServiceBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(accountServiceBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -63,5 +64,36 @@ func TestAccountService(t *testing.T) {
 
 	if result.roles != "/redfish/v1/AccountService/Roles" {
 		t.Errorf("Received invalid Roles: %s", result.roles)
+	}
+}
+
+// TestAccountServiceUpdate tests the Update call for the account service.
+func TestAccountServiceUpdate(t *testing.T) {
+	var result AccountService
+	err := json.NewDecoder(strings.NewReader(accountServiceBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	orginalValue := result.AccountLockoutCounterResetEnabled
+	result.AccountLockoutCounterResetEnabled = !orginalValue
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected one call to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[0].Payload, "AccountLockoutCounterResetEnabled") {
+		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
 	}
 }

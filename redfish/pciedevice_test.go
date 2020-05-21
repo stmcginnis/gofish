@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var pcieDeviceBody = strings.NewReader(
-	`{
+var pcieDeviceBody = `{
 		"@odata.context": "/redfish/v1/$metadata#PCIeDevice.PCIeDevice",
 		"@odata.type": "#PCIeDevice.v1_3_1.PCIeDevice",
 		"@odata.id": "/redfish/v1/PCIeDevice",
@@ -53,12 +54,12 @@ var pcieDeviceBody = strings.NewReader(
 			"State": "Enabled",
 			"Health": "OK"
 		}
-	}`)
+	}`
 
 // TestPCIeDevice tests the parsing of PCIeDevice objects.
 func TestPCIeDevice(t *testing.T) {
 	var result PCIeDevice
-	err := json.NewDecoder(pcieDeviceBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(pcieDeviceBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -82,5 +83,31 @@ func TestPCIeDevice(t *testing.T) {
 
 	if result.PCIeInterface.PCIeType != Gen4PCIeTypes {
 		t.Errorf("Invalid PCIe type: %s", result.PCIeInterface.PCIeType)
+	}
+}
+
+// TestPCIeDeviceUpdate tests the Update call.
+func TestPCIeDeviceUpdate(t *testing.T) {
+	var result PCIeDevice
+	err := json.NewDecoder(strings.NewReader(pcieDeviceBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.AssetTag = "TestAssetTag"
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "AssetTag:TestAssetTag") {
+		t.Errorf("Unexpected AssetTag update payload: %s", calls[0].Payload)
 	}
 }

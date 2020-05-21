@@ -12,8 +12,7 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-var compositionServiceBody = strings.NewReader(
-	`{
+var compositionServiceBody = `{
 		"@odata.context": "/redfish/v1/$metadata#CompositionService.CompositionService",
 		"@odata.type": "#CompositionService.v1_0_0.CompositionService",
 		"@odata.id": "/redfish/v1/CompositionService",
@@ -33,12 +32,12 @@ var compositionServiceBody = strings.NewReader(
 		"ResourceZones": {
 			"@odata.id": "/redfish/v1/CompositionService/ResourceZones"
 		}
-	}`)
+	}`
 
 // TestCompositionService tests the parsing of CompositionService objects.
 func TestCompositionService(t *testing.T) {
 	var result CompositionService
-	err := json.NewDecoder(compositionServiceBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(compositionServiceBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -74,5 +73,40 @@ func TestCompositionService(t *testing.T) {
 
 	if result.resourceZones != "/redfish/v1/CompositionService/ResourceZones" {
 		t.Errorf("Received invalid resource zones reference: %s", result.resourceZones)
+	}
+}
+
+// TestCompositionServiceUpdate tests the Update call.
+func TestCompositionServiceUpdate(t *testing.T) {
+	var result CompositionService
+	err := json.NewDecoder(strings.NewReader(compositionServiceBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.ServiceEnabled = false
+	result.AllowOverprovisioning = false
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected one call to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[0].Payload, "AllowOverprovisioning:false") {
+		t.Errorf("Unexpected AllowOverprovisioning update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "ServiceEnabled:false") {
+		t.Errorf("Unexpected ServiceEnabled update payload: %s", calls[0].Payload)
 	}
 }
