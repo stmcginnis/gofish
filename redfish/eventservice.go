@@ -25,6 +25,47 @@ const (
 	MetricReportEventFormatType EventFormatType = "MetricReport"
 )
 
+// SMTPAuthenticationMethods is
+type SMTPAuthenticationMethods string
+
+const (
+
+	// NoneSMTPAuthenticationMethods shall indicate authentication is not
+	// required.
+	NoneSMTPAuthenticationMethods SMTPAuthenticationMethods = "None"
+	// AutoDetectSMTPAuthenticationMethods shall indicate authentication is
+	// auto-detected.
+	AutoDetectSMTPAuthenticationMethods SMTPAuthenticationMethods = "AutoDetect"
+	// PlainSMTPAuthenticationMethods shall indicate authentication conforms
+	// to the RFC4954-defined AUTH PLAIN mechanism.
+	PlainSMTPAuthenticationMethods SMTPAuthenticationMethods = "Plain"
+	// LoginSMTPAuthenticationMethods shall indicate authentication conforms
+	// to the RFC4954-defined AUTH LOGIN mechanism.
+	LoginSMTPAuthenticationMethods SMTPAuthenticationMethods = "Login"
+	// CRAMMD5SMTPAuthenticationMethods shall indicate authentication
+	// conforms to the RFC4954-defined AUTH CRAM-MD5 mechanism.
+	CRAMMD5SMTPAuthenticationMethods SMTPAuthenticationMethods = "CRAM_MD5"
+)
+
+// SMTPConnectionProtocol is
+type SMTPConnectionProtocol string
+
+const (
+
+	// NoneSMTPConnectionProtocol shall indicate the connection is in clear
+	// text.
+	NoneSMTPConnectionProtocol SMTPConnectionProtocol = "None"
+	// AutoDetectSMTPConnectionProtocol shall indicate the connection is
+	// auto-detected.
+	AutoDetectSMTPConnectionProtocol SMTPConnectionProtocol = "AutoDetect"
+	// StartTLSSMTPConnectionProtocol shall indicate the connection conforms
+	// to the RFC3207-defined StartTLS extension.
+	StartTLSSMTPConnectionProtocol SMTPConnectionProtocol = "StartTLS"
+	// TLSSSLSMTPConnectionProtocol shall indicate the connection is
+	// TLS/SSL.
+	TLSSSLSMTPConnectionProtocol SMTPConnectionProtocol = "TLS_SSL"
+)
+
 // EventService is used to represent an event service for a Redfish
 // implementation.
 type EventService struct {
@@ -55,11 +96,19 @@ type EventService struct {
 	// destination.  If this property is not present, the EventFormatType
 	// shall be assumed to be Event.
 	EventFormatTypes []EventFormatType
+	// IncludeOriginOfConditionSupported shall indicate
+	// whether the service supports including the resource payload of the
+	// origin of condition in the event payload.  If `true`, event
+	// subscriptions are allowed to specify the IncludeOriginOfCondition
+	// property.
+	IncludeOriginOfConditionSupported bool
 	// RegistryPrefixes is the array of the Prefixes of the Message Registries
 	// that shall be allowed for an Event Subscription.
 	RegistryPrefixes []string
 	// ResourceTypes is used for an Event Subscription.
 	ResourceTypes []string
+	// SMTP shall contain settings for SMTP event delivery.
+	SMTP SMTP
 	// SSEFilterPropertiesSupported shall contain a set of properties that
 	// indicate which properties are supported in the $filter query parameter
 	// for the URI indicated by the ServerSentEventUri property.
@@ -235,4 +284,34 @@ type SSEFilterPropertiesSupported struct {
 	// use of the ResourceType property in the $filter query parameter as
 	// described by the specification.
 	ResourceType bool
+}
+
+// SMTP is shall contain settings for SMTP event delivery.
+type SMTP struct {
+
+	// Authentication shall contain the authentication
+	// method for the SMTP server.
+	Authentication SMTPAuthenticationMethods
+	// ConnectionProtocol shall contain the connection type
+	// to the outgoing SMTP server.
+	ConnectionProtocol SMTPConnectionProtocol
+	// FromAddress shall contain the email address to use
+	// for the 'from' field in an outgoing email.
+	FromAddress string
+	// Password shall contain the password for
+	// authentication with the SMTP server. The value shall be `null` in
+	// responses.
+	Password string
+	// Port shall contain the destination port for the SMTP
+	// server.
+	Port int
+	// ServerAddress shall contain the address of the SMTP
+	// server for outgoing email.
+	ServerAddress string
+	// ServiceEnabled shall indicate if SMTP for event
+	// delivery is enabled.
+	ServiceEnabled bool
+	// Username shall contain the username for
+	// authentication with the SMTP server.
+	Username string
 }

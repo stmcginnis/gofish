@@ -97,6 +97,21 @@ const (
 	ServiceManagerType ManagerType = "Service"
 )
 
+// ResetToDefaultsType is the default to set on reset.
+type ResetToDefaultsType string
+
+const (
+
+	// ResetAllResetToDefaultsType Reset all settings to factory defaults.
+	ResetAllResetToDefaultsType ResetToDefaultsType = "ResetAll"
+	// PreserveNetworkAndUsersResetToDefaultsType Reset all settings except
+	// network and local user names/passwords to factory defaults.
+	PreserveNetworkAndUsersResetToDefaultsType ResetToDefaultsType = "PreserveNetworkAndUsers"
+	// PreserveNetworkResetToDefaultsType Reset all settings except network
+	// settings to factory defaults.
+	PreserveNetworkResetToDefaultsType ResetToDefaultsType = "PreserveNetwork"
+)
+
 // SerialConnectTypesSupported is serial connection type.
 type SerialConnectTypesSupported string
 
@@ -193,6 +208,10 @@ type Manager struct {
 	// ManagementController shall be used if none of the other enumerations
 	// apply.
 	ManagerType ManagerType
+	// Manufacturer shall contain the name of the organization responsible for
+	// producing the manager. This organization might be the entity from whom
+	// the manager is purchased, but this is not necessarily true.
+	Manufacturer string
 	// Model shall contain the information about how the manufacturer references
 	// this manager.
 	Model string
@@ -200,6 +219,9 @@ type Manager struct {
 	// ManagerNetworkProtocol which represents the network services for this
 	// manager.
 	networkProtocol string
+	// PartNumber shall contain a part number assigned by the organization that
+	// is responsible for producing or manufacturing the manager.
+	PartNumber string
 	// PowerState shall contain the power state of the Manager.
 	PowerState PowerState
 	// Redundancy is used to show how this manager is grouped with other
@@ -223,6 +245,9 @@ type Manager struct {
 	// serialInterfaces shall be a link to a collection of type
 	// SerialInterfaceCollection which are for the use of this manager.
 	serialInterfaces string
+	// SerialNumber shall contain a manufacturer-allocated number that
+	// identifies the manager.
+	SerialNumber string
 	// ServiceEntryPointUUID shall contain the UUID of the Redfish Service
 	// provided by this manager. Each Manager providing an Entry Point to the
 	// same Redfish Service shall report the same UUID value (even though the

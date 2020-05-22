@@ -173,6 +173,10 @@ type Drive struct {
 	// Model shall be the name by which the manufacturer generally refers to the
 	// drive.
 	Model string
+	// Multipath shall indicate whether the drive is
+	// accessible by an initiator from multiple paths allowing for failover
+	// capabilities upon a path failure.
+	Multipath bool
 	// NegotiatedSpeedGbs shall contain current bus speed of the associated
 	// drive.
 	NegotiatedSpeedGbs int
@@ -206,6 +210,9 @@ type Drive struct {
 	// indicator associated with this drive. The valid values for this property
 	// are specified through the Redfish.AllowableValues annotation.
 	StatusIndicator StatusIndicator
+	// WriteCacheEnabled shall indicate whether the drive
+	// write cache is enabled.
+	WriteCacheEnabled bool
 	// chassis shall be a reference to a resource of type Chassis that represent
 	// the physical container associated with this Drive.
 	chassis string
@@ -222,6 +229,8 @@ type Drive struct {
 	pcieFunctions []string
 	// PCIeFunctionCount is the number of PCIeFunctions.
 	PCIeFunctionCount int
+	storagePools      []string
+	StoragePoolsCount int
 	// secureEraseTarget is the URL for SecureErase actions.
 	secureEraseTarget string
 	// rawData holds the original serialized JSON so we can compare updates.
@@ -241,6 +250,8 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 		PCIeFunctions common.Links
 		// PCIeFunctions@odata.count is
 		PCIeFunctionsCount int `json:"PCIeFunctions@odata.count"`
+		StoragePools       common.Links
+		StoragePoolsCount  int `json:"StoragePools@odata.count"`
 		Volumes            common.Links
 		VolumeCount        int `json:"Volumes@odata.count"`
 	}
@@ -404,6 +415,21 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 
 	return result, nil
 }
+
+// // StoragePools references the StoragePools that this drive is associated with.
+// func (drive *Drive) StoragePools() ([]*StoragePools, error) {
+// 	var result []*StoragePools
+
+// 	for _, storagePoolLink := range drive.storagePools {
+// 		storagePool, err := GetStoragePools(drive.Client, storagePoolLink)
+// 		if err != nil {
+// 			return result, err
+// 		}
+// 		result = append(result, storagePool)
+// 	}
+
+// 	return result, nil
+// }
 
 // SecureErase shall perform a secure erase of the drive.
 func (drive *Drive) SecureErase() error {

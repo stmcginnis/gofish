@@ -11,6 +11,22 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+// DeliveryRetryPolicy is the retry policy for delivery failure.
+type DeliveryRetryPolicy string
+
+const (
+
+	// TerminateAfterRetriesDeliveryRetryPolicy The subscription is
+	// terminated after the maximum number of retries is reached.
+	TerminateAfterRetriesDeliveryRetryPolicy DeliveryRetryPolicy = "TerminateAfterRetries"
+	// SuspendRetriesDeliveryRetryPolicy The subscription is suspended after
+	// the maximum number of retries is reached.
+	SuspendRetriesDeliveryRetryPolicy DeliveryRetryPolicy = "SuspendRetries"
+	// RetryForeverDeliveryRetryPolicy shall continue even after the after
+	// the maximum number of retries is reached.
+	RetryForeverDeliveryRetryPolicy DeliveryRetryPolicy = "RetryForever"
+)
+
 // EventDestinationProtocol is the communication protocol of the event destination.
 type EventDestinationProtocol string
 
@@ -19,6 +35,53 @@ const (
 	// RedfishEventDestinationProtocol The destination follows the Redfish
 	// specification for event notifications.
 	RedfishEventDestinationProtocol EventDestinationProtocol = "Redfish"
+	// SNMPv1EventDestinationProtocol shall indicate the destination follows
+	// the RFC1157-defined SNMPv1 protocol.
+	SNMPv1EventDestinationProtocol EventDestinationProtocol = "SNMPv1"
+	// SNMPv2cEventDestinationProtocol shall indicate the destination follows
+	// the SNMPv2c protocol as defined by RFC1441 and RFC1452.
+	SNMPv2cEventDestinationProtocol EventDestinationProtocol = "SNMPv2c"
+	// SNMPv3EventDestinationProtocol shall indicate the destination follows
+	// the SNMPv3 protocol as defined by RFC3411 and RFC3418.
+	SNMPv3EventDestinationProtocol EventDestinationProtocol = "SNMPv3"
+	// SMTPEventDestinationProtocol shall indicate the destination follows
+	// the RFC5321-defined SMTP specification.
+	SMTPEventDestinationProtocol EventDestinationProtocol = "SMTP"
+)
+
+// SNMPAuthenticationProtocols is
+type SNMPAuthenticationProtocols string
+
+const (
+
+	// NoneSNMPAuthenticationProtocols shall indicate authentication is not
+	// required.
+	NoneSNMPAuthenticationProtocols SNMPAuthenticationProtocols = "None"
+	// CommunityStringSNMPAuthenticationProtocols shall indicate
+	// authentication using SNMP community strings and the value of
+	// TrapCommunity.
+	CommunityStringSNMPAuthenticationProtocols SNMPAuthenticationProtocols = "CommunityString"
+	// HMACMD5SNMPAuthenticationProtocols shall indicate authentication
+	// conforms to the RFC3414-defined HMAC-MD5-96 authentication protocol.
+	HMACMD5SNMPAuthenticationProtocols SNMPAuthenticationProtocols = "HMAC_MD5"
+	// HMACSHA96SNMPAuthenticationProtocols shall indicate authentication
+	// conforms to the RFC3414-defined HMAC-SHA-96 authentication protocol.
+	HMACSHA96SNMPAuthenticationProtocols SNMPAuthenticationProtocols = "HMAC_SHA96"
+)
+
+// SNMPEncryptionProtocols is
+type SNMPEncryptionProtocols string
+
+const (
+
+	// NoneSNMPEncryptionProtocols shall indicate there is no encryption.
+	NoneSNMPEncryptionProtocols SNMPEncryptionProtocols = "None"
+	// CBCDESSNMPEncryptionProtocols shall indicate encryption conforms to
+	// the RFC3414-defined CBC-DES encryption protocol.
+	CBCDESSNMPEncryptionProtocols SNMPEncryptionProtocols = "CBC_DES"
+	// CFB128AES128SNMPEncryptionProtocols shall indicate encryption
+	// conforms to the RFC3826-defined CFB128-AES-128 encryption protocol.
+	CFB128AES128SNMPEncryptionProtocols SNMPEncryptionProtocols = "CFB128_AES128"
 )
 
 // SubscriptionType is the type of subscription used.
@@ -33,6 +96,16 @@ const (
 	// SSESubscriptionType The subscription follows the HTML5 Server-Sent
 	// Event definition for event notifications.
 	SSESubscriptionType SubscriptionType = "SSE"
+	// SNMPTrapSubscriptionType shall indicate the subscription follows the
+	// various versions of SNMP Traps for event notifications.
+	// EventDestinationProtocol shall specify the appropriate version of
+	// SNMP.
+	SNMPTrapSubscriptionType SubscriptionType = "SNMPTrap"
+	// SNMPInformSubscriptionType shall indicate the subscription follows
+	// versions 2 and 3 of SNMP Inform for event notifications.
+	// EventDestinationProtocol shall specify the appropriate version of
+	// SNMP.
+	SNMPInformSubscriptionType SubscriptionType = "SNMPInform"
 )
 
 // EventDestination is used to represent the target of an event
@@ -50,6 +123,11 @@ type EventDestination struct {
 	// Context shall contain a client supplied context that will remain with the
 	// connection through the connections lifetime.
 	Context string
+	// DeliveryRetryPolicy shall indicate the subscription
+	// delivery retry policy for events where the subscription type is
+	// RedfishEvent. If this property is not present, the policy shall be
+	// assumed to be TerminateAfterRetries.
+	DeliveryRetryPolicy DeliveryRetryPolicy
 	// Description provides a description of this resource.
 	Description string
 	// Destination shall contain a URI to the destination where the events will
@@ -64,12 +142,27 @@ type EventDestination struct {
 	// Destination. This property shall be null or an empty array on a GET. An
 	// empty array is the preferred return value on GET.
 	HTTPHeaders []HTTPHeaderProperty `json:"HttpHeaders"`
+	// IncludeOriginOfCondition shall indicate whether the
+	// event payload sent to the subscription destination will expand the
+	// OriginOfCondition property to include the resource or object
+	// referenced by the OriginOfCondition property.
+	IncludeOriginOfCondition bool
 	// MessageIDs shall specify an array of MessageIds that are the only
 	// allowable values for the MessageId property within an EventRecord sent to
 	// the subscriber. Events with MessageIds not contained in this array shall
 	// not be sent to the subscriber. If this property is absent or the array is
 	// empty, the service shall send Events with any MessageId to the subscriber.
 	MessageIDs []string `json:"MessageIds"`
+	// metricReportDefinitions shall specify an array of
+	// metric report definitions that are the only allowable generators of
+	// metric reports for this subscription. Metric reports originating from
+	// metric report definitions not contained in this array shall not be
+	// sent to the subscriber. If this property is absent or the array is
+	// empty, the service shall send metric reports originating from any
+	// metric report definition to the subscriber.
+	metricReportDefinitions []string
+	// MetricReportDefinitions@odata.count is
+	MetricReportDefinitionsCount int `json:"MetricReportDefinitions@odata.count"`
 	// originResources shall specify an array of Resources, Resource Collections,
 	// or Referenceable Members that are the only allowable values for the
 	// OriginOfCondition property within an EventRecord sent to the subscriber.
@@ -101,6 +194,10 @@ type EventDestination struct {
 	// and instead shall just be Task. To specify that a client is subscribing
 	// for Metric Reports, the EventTypes property should include 'MetricReport'.
 	ResourceTypes []string
+	// SNMP shall contain the settings for an SNMP event destination.
+	SNMP SNMPSettings
+	// Status shall contain the status of the subscription.
+	Status common.Status
 	// SubordinateResources is When set to true and OriginResources is
 	// specified, indicates the subscription shall be for events from the
 	// OriginsResources specified and all subordinate resources. When set to
@@ -201,3 +298,24 @@ func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDest
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included
 // with every event POST to the Event Destination.
 type HTTPHeaderProperty map[string][]string
+
+// SNMPSettings is shall contain the settings for an SNMP event
+// destination.
+type SNMPSettings struct {
+
+	// AuthenticationKey is used for SNMPv3 authentication. The value shall
+	// be `null` in responses.
+	AuthenticationKey string
+	// AuthenticationProtocol is This property shall contain the SNMPv3
+	// authentication protocol.
+	AuthenticationProtocol SNMPAuthenticationProtocols
+	// EncryptionKey is This property shall contain the key for SNMPv3
+	// encryption. The value shall be `null` in responses.
+	EncryptionKey string
+	// EncryptionProtocol is This property shall contain the SNMPv3
+	// encryption protocol.
+	EncryptionProtocol SNMPEncryptionProtocols
+	// TrapCommunity is This property shall contain the SNMP trap community
+	// string. The value shall be `null` in responses.
+	TrapCommunity string
+}

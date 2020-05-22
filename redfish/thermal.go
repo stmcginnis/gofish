@@ -194,6 +194,13 @@ type Temperature struct {
 	// the ReadingCelsius is below the normal range but is not critical. The
 	// units shall be the same units as the related ReadingCelsius property.
 	LowerThresholdNonCritical float32
+	// LowerThresholdUser shall contain the value at which
+	// the ReadingCelsius property is below the user-defined range. The
+	// value of the property shall use the same units as the ReadingCelsius
+	// property. The value shall be equal to the value of
+	// LowerThresholdNonCritical, LowerThresholdCritical, or
+	// LowerThresholdFatal, unless set by a user.
+	LowerThresholdUser float32
 	// MaxAllowableOperatingValue shall
 	// indicate the maximum allowable operating temperature for the equipment
 	// monitored by this temperature sensor, as specified by a standards
@@ -237,6 +244,13 @@ type Temperature struct {
 	// the ReadingCelsius is above the normal range but is not critical. The
 	// units shall be the same units as the related ReadingCelsius property.
 	UpperThresholdNonCritical float32
+	// UpperThresholdUser shall contain the value at which
+	// the ReadingCelsius property is above the user-defined range. The
+	// value of the property shall use the same units as the ReadingCelsius
+	// property. The value shall be equal to the value of
+	// UpperThresholdNonCritical, UpperThresholdCritical, or
+	// UpperThresholdFatal, unless set by a user.
+	UpperThresholdUser float32
 }
 
 // Thermal is used to represent a thermal metrics resource for a Redfish

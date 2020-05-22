@@ -24,36 +24,6 @@ const (
 	OEMAccountTypes AccountTypes = "OEM"
 )
 
-// SNMPAuthenticationProtocols is the type of SNMP authentication used.
-type SNMPAuthenticationProtocols string
-
-const (
-	// NoneSNMPAuthenticationProtocols shall indicate authentication is not
-	// required.
-	NoneSNMPAuthenticationProtocols SNMPAuthenticationProtocols = "None"
-	// HMACMD5SNMPAuthenticationProtocols shall indicate authentication
-	// conforms to the RFC3414-defined HMAC-MD5-96 authentication protocol.
-	HMACMD5SNMPAuthenticationProtocols SNMPAuthenticationProtocols = "HMAC_MD5"
-	// HMACSHA96SNMPAuthenticationProtocols shall indicate authentication
-	// conforms to the RFC3414-defined HMAC-SHA-96 authentication protocol.
-	HMACSHA96SNMPAuthenticationProtocols SNMPAuthenticationProtocols = "HMAC_SHA96"
-)
-
-// SNMPEncryptionProtocols is the type of SNMP encryption.
-type SNMPEncryptionProtocols string
-
-const (
-
-	// NoneSNMPEncryptionProtocols shall indicate there is no encryption.
-	NoneSNMPEncryptionProtocols SNMPEncryptionProtocols = "None"
-	// CBCDESSNMPEncryptionProtocols shall indicate encryption conforms to
-	// the RFC3414-defined CBC-DES encryption protocol.
-	CBCDESSNMPEncryptionProtocols SNMPEncryptionProtocols = "CBC_DES"
-	// CFB128AES128SNMPEncryptionProtocols shall indicate encryption
-	// conforms to the RFC3826-defined CFB128-AES-128 encryption protocol.
-	CFB128AES128SNMPEncryptionProtocols SNMPEncryptionProtocols = "CFB128_AES128"
-)
-
 // ManagerAccount shall represent Resources that represent the user
 // accounts for the manager.
 type ManagerAccount struct {
