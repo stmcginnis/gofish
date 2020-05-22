@@ -340,6 +340,10 @@ type LogEntry struct {
 	// EventTimestamp records an Event and the value shall be the time the event
 	// occurred.
 	EventTimestamp string
+	// GeneratorId if EntryType is `SEL`, this property shall contain the
+	// 'Generator ID' field of the IPMI SEL Event Record. If EntryType is
+	// not `SEL`, this property should not be present.
+	GeneratorID string `json:"GeneratorId"`
 	// Message shall be the Message property of
 	// the event if the EntryType is Event, the Description if the EntryType
 	// is SEL, and OEM Specific if the EntryType is Oem.
@@ -357,6 +361,10 @@ type LogEntry struct {
 	// the second byte in the string, and Event Data 3 is the third byte in
 	// the string.
 	MessageID string `json:"MessageId"`
+	// Modified shall contain the date and time when the log
+	// entry was last modified. This property shall not appear if the log
+	// entry has not been modified since it was created.
+	Modified string
 	// OemLogEntryCode shall represent the OEM
 	// specific Log Entry Code type of the Entry. This property shall only
 	// be present if the value of EntryType is SEL and the value of

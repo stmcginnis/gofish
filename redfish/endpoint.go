@@ -58,6 +58,19 @@ const (
 	// (if present) should be a AccelerationFunction.AccelerationFunction
 	// entity.
 	AccelerationFunctionEntityType EntityType = "AccelerationFunction"
+	// MediaControllerEntityType means the entity is a media controller. The
+	// EntityLink property, if present, should be a MediaController type.
+	MediaControllerEntityType EntityType = "MediaController"
+	// MemoryChunkEntityType means the entity is a memory chunk. The EntityLink
+	// property, if present, should be a MemoryChunk type.
+	MemoryChunkEntityType EntityType = "MemoryChunk"
+	// SwitchEntityType means the entity is a switch, not an expander. Use
+	// `Expander` for expanders. The EntityLink property, if present, should
+	// be a Switch type.
+	SwitchEntityType EntityType = "Switch"
+	// FabricBridgeEntityType means the entity is a fabric bridge. The EntityLink
+	// property, if present, should be a FabricAdapter type.
+	FabricBridgeEntityType EntityType = "FabricBridge"
 )
 
 // ConnectedEntity shall represent a remote resource that is
@@ -74,6 +87,8 @@ type ConnectedEntity struct {
 	EntityRole EntityRole
 	// entityType shall indicate if type of connected entity.
 	EntityType EntityType
+	// GenZ shall contain the Gen-Z related properties for the entity.
+	GenZ GenZ
 	// Identifiers for the remote entity shall be unique in
 	// the context of other resources that can reached over the connected
 	// network.
@@ -135,12 +150,34 @@ type Endpoint struct {
 	ports []string
 	// PortsCount is the number of Ports.
 	PortsCount int
+	// addressPools shall contain an array of links to
+	// resources of type AddressPool with which this endpoint is associated.
+	addressPools []string
+	// AddressPoolsCount is the number of AddressPools.
+	AddressPoolsCount int
+	// connectedPorts shall contain an array of links to
+	// resources of type Port that represent ports associated with this
+	// endpoint.
+	connectedPorts []string
+	// ConnectedPortCount is the number of ConnectedPorts.
+	ConnectedPortsCount int
 }
 
 // UnmarshalJSON unmarshals a Endpoint object from the raw JSON.
 func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
 	type temp Endpoint
 	type links struct {
+		// AddressPools shall contain an array of links to
+		// resources of type AddressPool with which this endpoint is associated.
+		AddressPools common.Links
+		// AddressPools@odata.count is
+		AddressPoolsCount int `json:"AddressPools@odata.count"`
+		// ConnectedPorts shall contain an array of links to
+		// resources of type Port that represent ports associated with this
+		// endpoint.
+		ConnectedPorts common.Links
+		// ConnectedPorts@odata.count is
+		ConnectedPortsCount int `json:"ConnectedPorts@odata.count"`
 		// MutuallyExclusiveEndpoints shall be an array of references of type
 		// Endpoint that cannot be used in a zone if this endpoint is used in a zone.
 		MutuallyExclusiveEndpoints common.Links
@@ -220,6 +257,32 @@ func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) 
 	}
 
 	return result, nil
+}
+
+// GCID shall contain the Gen-Z Core Specification-defined Global
+// Component ID.
+type GCID struct {
+
+	// CID shall contain the 12 bit component identifier
+	// portion of the GCID of the entity.
+	CID string
+	// SID shall contain the 16 bit subnet identifier
+	// portion of the GCID of the entity.
+	SID string
+}
+
+// GenZ shall contain the Gen-Z related properties for an entity.
+type GenZ struct {
+
+	// AccessKey shall contain the Gen-Z Core Specification-
+	// defined 6 bit Access Key for the entity.
+	AccessKey string
+	// GCID shall contain the Gen-Z Core Specification-
+	// defined Global Component ID for the entity.
+	GCID GCID
+	// RegionKey shall contain the Gen-Z Core Specification-
+	// defined 32 bit Region Key for the entity.
+	RegionKey string
 }
 
 // IPTransportDetails shall contain properties which specify

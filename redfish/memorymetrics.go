@@ -54,7 +54,7 @@ type HealthData struct {
 	// PerformanceDegraded shall be performance degraded mode status, with true
 	// indicating performance degraded.
 	PerformanceDegraded bool
-	// PredictedMediaLifeLeftPercent is This property shall contain an indicator
+	// PredictedMediaLifeLeftPercent shall contain an indicator
 	// of the percentage of life remaining in the media.
 	PredictedMediaLifeLeftPercent int
 	// RemainingSpareBlockPercentage shall be the remaining spare blocks in percentage.
@@ -80,6 +80,11 @@ type MemoryMetrics struct {
 	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	// BandwidthPercent shall contain memory bandwidth utilization as a
+	// percentage.  When this resource is subordinate to the MemorySummary
+	// object, this property shall be the memory bandwidth utilization over all
+	// memory as a percentage.
+	BandwidthPercent int
 	// BlockSizeBytes shall be the block size in bytes of all structure elements.
 	BlockSizeBytes int
 	// CurrentPeriod shall contain properties which describe the CurrentPeriod
@@ -93,6 +98,8 @@ type MemoryMetrics struct {
 	// LifeTime shall contain properties which describe the LifeTime metrics for
 	// the current resource.
 	LifeTime LifeTime
+	// OperatingSpeedMHz is used by the memory device.
+	OperatingSpeedMHz int
 }
 
 // GetMemoryMetrics will get a MemoryMetrics instance from the service.

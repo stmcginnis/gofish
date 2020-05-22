@@ -1,0 +1,151 @@
+{
+    "$id": "http://redfish.dmtf.org/schemas/v1/AccountService.v1_0_8.json",
+    "$ref": "#/definitions/AccountService",
+    "$schema": "http://redfish.dmtf.org/schemas/v1/redfish-schema-v1.json",
+    "copyright": "Copyright 2014-2019 DMTF. For the full DMTF copyright policy, see http://www.dmtf.org/about/policies/copyright",
+    "definitions": {
+        "AccountService": {
+            "additionalProperties": false,
+            "description": "The AccountService schema defines an Account Service.  The properties are common to, and enable management of, all user accounts.  The properties include the password requirements and control features, such as account lockout.  The schema also contains links to the manager accounts and roles.",
+            "longDescription": "This Resource shall represent an Account Service for a Redfish implementation.  The properties are common to, and enable management of, all user accounts.  The properties include the password requirements and control features, such as account lockout.",
+            "patternProperties": {
+                "^([a-zA-Z_][a-zA-Z0-9_]*)?@(odata|Redfish|Message)\\.[a-zA-Z_][a-zA-Z0-9_]*$": {
+                    "description": "This property shall specify a valid odata or Redfish property.",
+                    "type": [
+                        "array",
+                        "boolean",
+                        "integer",
+                        "number",
+                        "null",
+                        "object",
+                        "string"
+                    ]
+                }
+            },
+            "properties": {
+                "@odata.context": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/odata-v4.json#/definitions/context"
+                },
+                "@odata.etag": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/odata-v4.json#/definitions/etag"
+                },
+                "@odata.id": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/odata-v4.json#/definitions/id"
+                },
+                "@odata.type": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/odata-v4.json#/definitions/type"
+                },
+                "AccountLockoutCounterResetAfter": {
+                    "description": "The period of time, in seconds, between the last failed login attempt and the reset of the lockout threshold counter.  This value must be less than or equal to the AccountLockoutDuration value.  A reset sets the counter to `0`.",
+                    "longDescription": "This property shall contain the period of time, in seconds, from the last failed login attempt when the AccountLockoutThreshold counter, which counts the number of failed login attempts, is reset to `0`.  Then, AccountLockoutThreshold failures are required before the account is locked.  This value shall be less than or equal to the AccountLockoutDuration value.  The threshold counter also resets to `0` after each successful login.  If the AccountLockoutCounterResetEnabled value is `false`, this property shall be ignored.",
+                    "minimum": 0,
+                    "readonly": false,
+                    "type": "integer",
+                    "units": "s"
+                },
+                "AccountLockoutDuration": {
+                    "description": "The period of time, in seconds, that an account is locked after the number of failed login attempts reaches the account lockout threshold, within the period between the last failed login attempt and the reset of the lockout threshold counter.  If this value is `0`, no lockout will occur.  If the AccountLockoutCounterResetEnabled value is `false`, this property is ignored.",
+                    "longDescription": "This property shall contain the period of time, in seconds, that an account is locked after the number of failed login attempts reaches the AccountLockoutThreshold value, within the AccountLockoutCounterResetAfter window of time.  The value shall be greater than or equal to the AccountLockoutResetAfter value.  If this value is `0`, no lockout shall occur.  If AccountLockoutCounterResetEnabled value is `false`, this property shall be ignored.",
+                    "minimum": 0,
+                    "readonly": false,
+                    "type": [
+                        "integer",
+                        "null"
+                    ],
+                    "units": "s"
+                },
+                "AccountLockoutThreshold": {
+                    "description": "The number of allowed failed login attempts before a user account is locked for a specified duration.  If `0`, the account is never locked.",
+                    "longDescription": "This property shall contain the threshold of failed login attempts before a user account is locked.  If `0`, the account shall never be locked.",
+                    "minimum": 0,
+                    "readonly": false,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "Accounts": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/ManagerAccountCollection.json#/definitions/ManagerAccountCollection",
+                    "description": "The collection of manager accounts.",
+                    "longDescription": "This property shall contain a link to a Resource Collection of type ManagerAccountCollection.",
+                    "readonly": true
+                },
+                "AuthFailureLoggingThreshold": {
+                    "description": "The number of authorization failures that are allowed before the failed attempt is logged to the manager log.",
+                    "longDescription": "This property shall contain the threshold for when an authorization failure is logged.  This value represents a modulo function.  The failure shall be logged every `n`th occurrence, where `n` represents this property.",
+                    "minimum": 0,
+                    "readonly": false,
+                    "type": "integer"
+                },
+                "Description": {
+                    "anyOf": [
+                        {
+                            "$ref": "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/Description"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "readonly": true
+                },
+                "Id": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/Id",
+                    "readonly": true
+                },
+                "MaxPasswordLength": {
+                    "description": "The maximum password length for this Account Service.",
+                    "longDescription": "This property shall contain the maximum password length that the implementation allows for this Account Service.",
+                    "minimum": 0,
+                    "readonly": true,
+                    "type": "integer"
+                },
+                "MinPasswordLength": {
+                    "description": "The minimum password length for this Account Service.",
+                    "longDescription": "This property shall contain the minimum password length that the implementation allows for this Account Service.",
+                    "minimum": 0,
+                    "readonly": true,
+                    "type": "integer"
+                },
+                "Name": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/Name",
+                    "readonly": true
+                },
+                "Oem": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/Oem",
+                    "description": "The OEM extension property.",
+                    "longDescription": "This property shall contain the OEM extensions.  All values for properties that this object contains shall conform to the Redfish Specification-described requirements."
+                },
+                "Roles": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/RoleCollection.json#/definitions/RoleCollection",
+                    "description": "The collection of Redfish Roles.",
+                    "longDescription": "This property shall contain a link to a Resource Collection of type RoleCollection.",
+                    "readonly": true
+                },
+                "ServiceEnabled": {
+                    "description": "An indication of whether the Account Service is enabled.  If `true`, it is enabled.  If `false`, it is disabled and users cannot be created, deleted, or modified, and new sessions cannot be started.  However, established sessions may still continue to run.  Any service, such as the Session Service, that attempts to access the disabled Account Service fails.  However, this does not affect HTTP Basic Authentication connections.",
+                    "longDescription": "This property shall indicate whether the Account Service is enabled.  If `true`, it is enabled.  If `false`, it is disabled and users cannot be created, deleted, or modified, and new sessions cannot be started.  However, established sessions may still continue to run.  Any service, such as the Session Service, that attempts to access the disabled Account Service fails.  However, this does not affect HTTP Basic Authentication connections.",
+                    "readonly": false,
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "Status": {
+                    "$ref": "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/Status",
+                    "description": "The status and health of the Resource and its subordinate or dependent Resources.",
+                    "longDescription": "This property shall contain any status or health properties of the Resource."
+                }
+            },
+            "required": [
+                "@odata.id",
+                "@odata.type",
+                "Id",
+                "Name"
+            ],
+            "type": "object"
+        }
+    },
+    "owningEntity": "DMTF",
+    "release": "1.0",
+    "title": "#AccountService.v1_0_8.AccountService"
+}

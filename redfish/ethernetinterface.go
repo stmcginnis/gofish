@@ -28,6 +28,21 @@ const (
 	DisabledDHCPv6OperatingMode DHCPv6OperatingMode = "Disabled"
 )
 
+// EthernetDeviceType is the device type.
+type EthernetDeviceType string
+
+const (
+
+	// PhysicalEthernetDeviceType shall indicate a physical traditional
+	// network interface.
+	PhysicalEthernetDeviceType EthernetDeviceType = "Physical"
+	// VirtualEthernetDeviceType shall indicate a network device function has
+	// multiple VLANs and is representing one of them as a virtual Ethernet
+	// interface.  The NetworkDeviceFunction property within Links shall
+	// contain the locator for the parent network device function.
+	VirtualEthernetDeviceType EthernetDeviceType = "Virtual"
+)
+
 // LinkStatus is the interface link status.
 type LinkStatus string
 
@@ -103,6 +118,8 @@ type EthernetInterface struct {
 	DHCPv6 DHCPv6Configuration
 	// Description provides a description of this resource.
 	Description string
+	// EthernetInterfaceType shall contain the type of interface.
+	EthernetInterfaceType EthernetDeviceType
 	// FQDN shall be the fully qualified domain name for this interface.
 	FQDN string
 	// FullDuplex shall represent the duplex status of the Ethernet connection

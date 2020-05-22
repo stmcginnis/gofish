@@ -83,6 +83,9 @@ type Controllers struct {
 	// FirmwarePackageVersion shall be the version number of the user-facing
 	// firmware package.
 	FirmwarePackageVersion string
+	// Identifiers shall contain a list of all known durable names for the
+	// associated network adapter.
+	Identifiers []common.Identifier
 	// Location shall contain location information of the associated network
 	// adapter controller.
 	Location common.Location

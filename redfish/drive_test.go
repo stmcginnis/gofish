@@ -65,6 +65,7 @@ var driveBody = `{
 		"Manufacturer": "Joe's Storage",
 		"MediaType": "SSD",
 		"Model": "Storage One",
+		"Multipath": true,
 		"NegotiatedSpeedGbps": 10,
 		"Operations": [],
 		"PartNumber": "12345",
@@ -84,7 +85,8 @@ var driveBody = `{
 			"State": "Enabled",
 			"Health": "OK"
 		},
-		"StatusIndicator": "Hotspare"
+		"StatusIndicator": "Hotspare",
+		"WriteCacheEnabled": true
 	}`
 
 // TestDrive tests the parsing of Drive objects.
@@ -156,6 +158,7 @@ func TestDriveUpdate(t *testing.T) {
 	result.AssetTag = "TestAssetTag"
 	result.IndicatorLED = common.LitIndicatorLED
 	result.StatusIndicator = HotspareStatusIndicator
+	result.WriteCacheEnabled = false
 	err = result.Update()
 
 	if err != nil {
@@ -174,5 +177,9 @@ func TestDriveUpdate(t *testing.T) {
 
 	if strings.Contains(calls[0].Payload, "StatusIndicator") {
 		t.Errorf("Unexpected update for StatusIndicator in payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "WriteCacheEnabled:false") {
+		t.Errorf("Unexpected WriteCacheEnabled update payload: %s", calls[0].Payload)
 	}
 }
