@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-PKGS := $(shell go list ./... | grep -v example)
+PKGS := $(shell go list ./... | grep -v example | grep -v tools)
 
 all: build test
 

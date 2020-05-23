@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var fileShareBody = strings.NewReader(
-	`{
+var fileShareBody = `{
 		"@odata.context": "/redfish/v1/$metadata#FileShare.FileShare",
 		"@odata.type": "#FileShare.v1_1_2.FileShare",
 		"@odata.id": "/redfish/v1/FileShare",
@@ -59,12 +60,12 @@ var fileShareBody = strings.NewReader(
 			"Health": "OK"
 		},
 		"WritePolicy": "Asynchronous"
-	}`)
+	}`
 
 // TestFileShare tests the parsing of FileShare objects.
 func TestFileShare(t *testing.T) {
 	var result FileShare
-	err := json.NewDecoder(fileShareBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(fileShareBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -124,5 +125,41 @@ func TestFileShare(t *testing.T) {
 
 	if result.WritePolicy != AsynchronousReplicaUpdateMode {
 		t.Errorf("Invalid WritePolicy: %s", result.WritePolicy)
+	}
+}
+
+// TestFileShareUpdate tests the Update call.
+func TestFileShareUpdate(t *testing.T) {
+	var result FileShare
+	err := json.NewDecoder(strings.NewReader(fileShareBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.CASupported = false
+	result.FileShareQuotaType = SoftQuotaType
+	result.FileShareTotalQuotaBytes = 1024
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "CASupported:false") {
+		t.Errorf("Unexpected CASupported update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "FileShareQuotaType:Soft") {
+		t.Errorf("Unexpected FileShareQuotaType update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "FileShareTotalQuotaBytes:1024") {
+		t.Errorf("Unexpected FileShareTotalQuotaBytes update payload: %s", calls[0].Payload)
 	}
 }

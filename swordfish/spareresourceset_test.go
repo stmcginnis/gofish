@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var spareResourceSetBody = strings.NewReader(
-	`{
+var spareResourceSetBody = `{
 		"@odata.context": "/redfish/v1/$metadata#SpareResourceSet.SpareResourceSet",
 		"@odata.type": "#SpareResourceSet.v1_0_0.SpareResourceSet",
 		"@odata.id": "/redfish/v1/SpareResourceSet",
@@ -72,12 +73,12 @@ var spareResourceSetBody = strings.NewReader(
 		"ResourceType": "Box",
 		"TimeToProvision": "P0DT12H30M5S",
 		"TimeToReplenish": "P5DT0H0M0S"
-	}`)
+	}`
 
 // TestSpareResourceSet tests the parsing of SpareResourceSet objects.
 func TestSpareResourceSet(t *testing.T) {
 	var result SpareResourceSet
-	err := json.NewDecoder(spareResourceSetBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(spareResourceSetBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -101,5 +102,46 @@ func TestSpareResourceSet(t *testing.T) {
 
 	if result.ResourceType != "Box" {
 		t.Errorf("Invalid resource type: %s", result.ResourceType)
+	}
+}
+
+// TestSpareResourceSetUpdate tests the Update call.
+func TestSpareResourceSetUpdate(t *testing.T) {
+	var result SpareResourceSet
+	err := json.NewDecoder(strings.NewReader(spareResourceSetBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.OnLine = true
+	result.ResourceType = "Hat"
+	result.TimeToProvision = "P0DT06H30M5S"
+	result.TimeToReplenish = "P5DT0H12M0S"
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if strings.Contains(calls[0].Payload, "OnLine") {
+		t.Errorf("Unexpected OnLine update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "ResourceType:Hat") {
+		t.Errorf("Unexpected ResourceType update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "TimeToProvision:P0DT06H30M5S") {
+		t.Errorf("Unexpected TimeToProvision update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "TimeToReplenish:P5DT0H12M0S") {
+		t.Errorf("Unexpected TimeToReplenish update payload: %s", calls[0].Payload)
 	}
 }

@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -111,6 +112,8 @@ type DataProtectionLoSCapabilities struct {
 	// supportedReplicaOptions shall contain known and supported replica Classes
 	// of Service.
 	supportedReplicaOptions []string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a DataProtectionLoSCapabilities object from the raw JSON.
@@ -142,7 +145,34 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) UnmarshalJSO
 	dataprotectionloscapabilities.SupportedReplicaOptionsCount = t.Links.SupportedReplicaOptionsCount
 	dataprotectionloscapabilities.supportedLinesOfService = t.SupportedLinesOfService.ToStrings()
 
+	// This is a read/write object, so we need to save the raw object data for later
+	dataprotectionloscapabilities.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(DataProtectionLoSCapabilities)
+	original.UnmarshalJSON(dataprotectionloscapabilities.rawData)
+
+	readWriteFields := []string{
+		"SupportedLinesOfService",
+		"SupportedMinLifetimes",
+		"SupportedRecoveryGeographicObjectives",
+		"SupportedRecoveryPointObjectiveTimes",
+		"SupportedRecoveryTimeObjectives",
+		"SupportedReplicaTypes",
+		"SupportsIsolated",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(dataprotectionloscapabilities).Elem()
+
+	return dataprotectionloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetDataProtectionLoSCapabilities will get a DataProtectionLoSCapabilities instance from the service.

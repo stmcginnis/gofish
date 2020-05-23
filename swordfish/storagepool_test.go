@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var storagePoolBody = strings.NewReader(
-	`{
+var storagePoolBody = `{
 		"@odata.context": "/redfish/v1/$metadata#StoragePool.StoragePool",
 		"@odata.type": "#StoragePool.v1_2_0.StoragePool",
 		"@odata.id": "/redfish/v1/StoragePool",
@@ -48,9 +49,12 @@ var storagePoolBody = strings.NewReader(
 		"ClassesOfService": {
 			"@odata.id": "/redfish/v1/ClassesOfService"
 		},
+		"Compressed": true,
+		"Deduplicated": true,
 		"DefaultClassOfService": {
 			"@odata.id": "/redfish/v1/ClassesOfService/1"
 		},
+		"Encrypted": false,
 		"IOStatistics": {
 			"NonIORequestTime": "P0Y0M0DT0H0M5S",
 			"NonIORequests": 1000,
@@ -86,12 +90,12 @@ var storagePoolBody = strings.NewReader(
 			"State": "Enabled",
 			"Health": "OK"
 		}
-	}`)
+	}`
 
 // TestStoragePool tests the parsing of StoragePool objects.
 func TestStoragePool(t *testing.T) {
 	var result StoragePool
-	err := json.NewDecoder(storagePoolBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(storagePoolBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -111,5 +115,46 @@ func TestStoragePool(t *testing.T) {
 
 	if result.MaxBlockSizeBytes != 2199023255600 {
 		t.Errorf("Invalid max block size: %d", result.MaxBlockSizeBytes)
+	}
+}
+
+// TestStoragePoolUpdate tests the Update call.
+func TestStoragePoolUpdate(t *testing.T) {
+	var result StoragePool
+	err := json.NewDecoder(strings.NewReader(storagePoolBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.Compressed = false
+	result.Deduplicated = false
+	result.Encrypted = false
+	result.RecoverableCapacitySourceCount = 2
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Compressed:false") {
+		t.Errorf("Unexpected Compressed update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "Deduplicated:false") {
+		t.Errorf("Unexpected Deduplicated update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "Encrypted") {
+		t.Errorf("Unexpected Encrypted update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "RecoverableCapacitySourceCount:2") {
+		t.Errorf("Unexpected RecoverableCapacitySourceCount update payload: %s", calls[0].Payload)
 	}
 }

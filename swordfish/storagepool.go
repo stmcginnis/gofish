@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/redfish"
 
@@ -44,10 +45,19 @@ type StoragePool struct {
 	// supported by this storage pool. Capacity allocated from this storage pool
 	// shall conform to one of the referenced classes of service.
 	classesOfService string
+	// Compressed shall contain a boolean indicator if the StoragePool is
+	// currently utilizing compression or not.
+	Compressed bool
+	// Deduplicted shall contain a boolean indicator if the StoragePool is
+	// currently utilizing deduplication or not.
+	Deduplicated bool
 	// DefaultClassOfService is used.
 	defaultClassOfService string
 	// Description provides a description of this resource.
 	Description string
+	// Encrypted shall contain a boolean indicator if the
+	// StoragePool is currently utilizing encryption or not.
+	Encrypted bool
 	// IOStatistics is the value shall represent IO statistics for this
 	// StoragePool.
 	IOStatistics IOStatistics
@@ -87,6 +97,8 @@ type StoragePool struct {
 	spareResourceSets []string
 	// SpareResourceSetsCount is the number of spare resource sets.
 	SpareResourceSetsCount int
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a StoragePool object from the raw JSON.
@@ -126,7 +138,36 @@ func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
 	storagepool.classesOfService = string(t.ClassesOfService)
 	storagepool.defaultClassOfService = string(t.DefaultClassOfService)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	storagepool.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (storagepool *StoragePool) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(StoragePool)
+	original.UnmarshalJSON(storagepool.rawData)
+
+	readWriteFields := []string{
+		"CapacitySources",
+		"ClassesOfService",
+		"Compressed",
+		"Deduplicated",
+		"DefaultClassOfService",
+		"Encrypted",
+		"LowSpaceWarningThresholdPercents",
+		"RecoverableCapacitySourceCount",
+		"SupportedProvisioningPolicies",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(storagepool).Elem()
+
+	return storagepool.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetStoragePool will get a StoragePool instance from the service.

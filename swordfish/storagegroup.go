@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -133,6 +134,8 @@ type StorageGroup struct {
 	exposeVolumesTarget string
 	// hideVolumesTarget is the URL to for the HideVolumes action.
 	hideVolumesTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a StorageGroup object from the raw JSON.
@@ -175,7 +178,32 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 	storagegroup.exposeVolumesTarget = t.Actions.ExposeVolumes.Target
 	storagegroup.hideVolumesTarget = t.Actions.HideVolumes.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	storagegroup.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (storagegroup *StorageGroup) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(StorageGroup)
+	original.UnmarshalJSON(storagegroup.rawData)
+
+	readWriteFields := []string{
+		"AccessState",
+		"AuthenticationMethod",
+		"ClientEndpointGroups",
+		"ServerEndpointGroups",
+		"VolumesAreExposed",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(storagegroup).Elem()
+
+	return storagegroup.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetStorageGroup will get a StorageGroup instance from the service.
