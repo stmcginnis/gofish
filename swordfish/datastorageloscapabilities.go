@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -78,6 +79,53 @@ type DataStorageLoSCapabilities struct {
 	// SupportsSpaceEfficiency specifies whether storage compression or
 	// deduplication is supported. The default value for this property is false.
 	SupportsSpaceEfficiency bool
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals a DataStorageLoSCapabilities object from the raw JSON.
+func (datastorageloscapabilities *DataStorageLoSCapabilities) UnmarshalJSON(b []byte) error {
+	type temp DataStorageLoSCapabilities
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*datastorageloscapabilities = DataStorageLoSCapabilities(t.temp)
+
+	// Extract the links to other entities for later
+
+	// This is a read/write object, so we need to save the raw object data for later
+	datastorageloscapabilities.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (datastorageloscapabilities *DataStorageLoSCapabilities) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(DataStorageLoSCapabilities)
+	original.UnmarshalJSON(datastorageloscapabilities.rawData)
+
+	readWriteFields := []string{
+		"MaximumRecoverableCapacitySourceCount",
+		"SupportedAccessCapabilities",
+		"SupportedLinesOfService",
+		"SupportedProvisioningPolicies",
+		"SupportedRecoveryTimeObjectives",
+		"SupportsSpaceEfficiency",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(datastorageloscapabilities).Elem()
+
+	return datastorageloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetDataStorageLoSCapabilities will get a DataStorageLoSCapabilities instance from the service.

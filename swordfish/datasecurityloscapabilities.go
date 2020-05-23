@@ -149,7 +149,57 @@ type DataSecurityLoSCapabilities struct {
 	// SupportedUserAuthenticationTypes shall specify supported authentication
 	// types for users (or programs).
 	SupportedUserAuthenticationTypes []AuthenticationType
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
+
+// // UnmarshalJSON unmarshals a DataSecurityLoSCapabilities object from the raw JSON.
+// func (datasecurityloscapabilities *DataSecurityLoSCapabilities) UnmarshalJSON(b []byte) error {
+// 	type temp DataSecurityLoSCapabilities
+// 	var t struct {
+// 		temp
+// 	}
+
+// 	err := json.Unmarshal(b, &t)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	*datasecurityloscapabilities = DataSecurityLoSCapabilities(t.temp)
+
+// 	// Extract the links to other entities for later
+
+// 	// This is a read/write object, so we need to save the raw object data for later
+// 	datasecurityloscapabilities.rawData = b
+
+// 	return nil
+// }
+
+// // Update commits updates to this object's properties to the running system.
+// func (datasecurityloscapabilities *DataSecurityLoSCapabilities) Update() error {
+
+// 	// Get a representation of the object's original state so we can find what
+// 	// to update.
+// 	original := new(DataSecurityLoSCapabilities)
+// 	original.UnmarshalJSON(datasecurityloscapabilities.rawData)
+
+// 	readWriteFields := []string{
+// 		"SupportedAntivirusEngineProviders",
+// 		"SupportedAntivirusScanPolicies",
+// 		"SupportedChannelEncryptionStrengths",
+// 		"SupportedDataSanitizationPolicies",
+// 		"SupportedHostAuthenticationTypes",
+// 		"SupportedLinesOfService",
+// 		"SupportedMediaEncryptionStrengths",
+// 		"SupportedSecureChannelProtocols",
+// 		"SupportedUserAuthenticationTypes",
+// 	}
+
+// 	originalElement := reflect.ValueOf(original).Elem()
+// 	currentElement := reflect.ValueOf(datasecurityloscapabilities).Elem()
+
+// 	return datasecurityloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
+// }
 
 // GetDataSecurityLoSCapabilities will get a DataSecurityLoSCapabilities instance from the service.
 func GetDataSecurityLoSCapabilities(c common.Client, uri string) (*DataSecurityLoSCapabilities, error) {

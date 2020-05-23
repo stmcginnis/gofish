@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -181,6 +182,8 @@ type FileSystem struct {
 	spareResourceSets      []string
 	// SpareResourceSetsCount is the number of spare resource sets.
 	SpareResourceSetsCount int
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a FileSystem object from the raw JSON.
@@ -221,7 +224,37 @@ func (filesystem *FileSystem) UnmarshalJSON(b []byte) error {
 	filesystem.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
 	filesystem.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
 
+	// This is a read/write object, so we need to save the raw object data for later
+	filesystem.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (filesystem *FileSystem) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(FileSystem)
+	original.UnmarshalJSON(filesystem.rawData)
+
+	readWriteFields := []string{
+		"AccessCapabilities",
+		"CapacitySources",
+		"CasePreserved",
+		"CaseSensitive",
+		"CharacterCodeSet",
+		"ClusterSizeBytes",
+		"ExportedShares",
+		"LowSpaceWarningThresholdPercents",
+		"MaxFileNameLengthBytes",
+		"RecoverableCapacitySourceCount",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(filesystem).Elem()
+
+	return filesystem.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetFileSystem will get a FileSystem instance from the service.

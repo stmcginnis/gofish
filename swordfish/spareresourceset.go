@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -43,6 +44,8 @@ type SpareResourceSet struct {
 	// ReplacementSpareSets are other spare sets that can be utilized to
 	// replenish this spare set.
 	replacementSpareSets string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a SpareResourceSet object from the raw JSON.
@@ -76,7 +79,31 @@ func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
 	spareresourceset.ReplacementSpareSetsCount = t.ReplacementSpareSetsCount
 	spareresourceset.replacementSpareSets = string(t.Links.ReplacementSpareSets)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	spareresourceset.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (spareresourceset *SpareResourceSet) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(SpareResourceSet)
+	original.UnmarshalJSON(spareresourceset.rawData)
+
+	readWriteFields := []string{
+		"OnLine",
+		"ResourceType",
+		"TimeToProvision",
+		"TimeToReplenish",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(spareresourceset).Elem()
+
+	return spareresourceset.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetSpareResourceSet will get a SpareResourceSet instance from the service.

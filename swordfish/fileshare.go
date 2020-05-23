@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -100,6 +101,8 @@ type FileShare struct {
 	classOfService string
 	// fileSystem shall be a link to the file system containing the file share.
 	fileSystem string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a FileShare object from the raw JSON.
@@ -126,7 +129,31 @@ func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
 	fileshare.fileSystem = string(t.Links.FileSystem)
 	fileshare.ethernetInterfaces = string(t.EthernetInterfaces)
 
+	// This is a read/write object, so we need to save the raw object data for later
+	fileshare.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (fileshare *FileShare) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(FileShare)
+	original.UnmarshalJSON(fileshare.rawData)
+
+	readWriteFields := []string{
+		"CASupported",
+		"FileShareQuotaType",
+		"FileShareTotalQuotaBytes",
+		"LowSpaceWarningThresholdPercents",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(fileshare).Elem()
+
+	return fileshare.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetFileShare will get a FileShare instance from the service.

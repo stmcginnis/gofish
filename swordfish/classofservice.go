@@ -10,7 +10,7 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// ClassOfService is This resource shall define a service option composed
+// ClassOfService shall define a service option composed
 // of one or more line of service entities. ITIL defines a service
 // option as a choice of utility or warranty for a service.
 type ClassOfService struct {
@@ -22,7 +22,7 @@ type ClassOfService struct {
 	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// ClassOfServiceVersion is The version describing the creation or last
+	// ClassOfServiceVersion is the version describing the creation or last
 	// modification of this service option specification. The string
 	// representing the version shall be in the form: M + '.' + N + '.' + U
 	// Where: M - The major version (in numeric form). N - The minor version

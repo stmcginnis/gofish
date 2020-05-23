@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -67,6 +68,52 @@ type IOPerformanceLoSCapabilities struct {
 	SupportedLinesOfService []IOPerformanceLineOfService
 	// SupportedLinesOfServiceCount is
 	SupportedLinesOfServiceCount int `json:"SupportedLinesOfService@odata.count"`
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals a IOPerformanceLoSCapabilities object from the raw JSON.
+func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) UnmarshalJSON(b []byte) error {
+	type temp IOPerformanceLoSCapabilities
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*ioperformanceloscapabilities = IOPerformanceLoSCapabilities(t.temp)
+
+	// Extract the links to other entities for later
+
+	// This is a read/write object, so we need to save the raw object data for later
+	ioperformanceloscapabilities.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(IOPerformanceLoSCapabilities)
+	original.UnmarshalJSON(ioperformanceloscapabilities.rawData)
+
+	readWriteFields := []string{
+		"IOLimitingIsSupported",
+		"MaxSamplePeriod",
+		"MinSamplePeriod",
+		"MinSupportedIoOperationLatencyMicroseconds",
+		"SupportedLinesOfService",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(ioperformanceloscapabilities).Elem()
+
+	return ioperformanceloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetIOPerformanceLoSCapabilities will get a IOPerformanceLoSCapabilities instance from the service.

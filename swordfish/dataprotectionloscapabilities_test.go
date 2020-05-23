@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var dataProtectionLoSCapabilitiesBody = strings.NewReader(
-	`{
+var dataProtectionLoSCapabilitiesBody = `{
 		"@odata.context": "/redfish/v1/$metadata#DataProtectionLoSCapabilities.DataProtectionLoSCapabilities",
 		"@odata.type": "#DataProtectionLoSCapabilities.v1_1_2.DataProtectionLoSCapabilities",
 		"@odata.id": "/redfish/v1/DataProtectionLoSCapabilities",
@@ -45,12 +46,12 @@ var dataProtectionLoSCapabilitiesBody = strings.NewReader(
 			"Clone"
 		],
 		"SupportsIsolated": true
-	}`)
+	}`
 
 // TestDataProtectionLoSCapabilities tests the parsing of DataProtectionLoSCapabilities objects.
 func TestDataProtectionLoSCapabilities(t *testing.T) {
 	var result DataProtectionLoSCapabilities
-	err := json.NewDecoder(dataProtectionLoSCapabilitiesBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(dataProtectionLoSCapabilitiesBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -75,5 +76,31 @@ func TestDataProtectionLoSCapabilities(t *testing.T) {
 
 	if result.SupportedReplicaTypes[0] != CloneReplicaType {
 		t.Errorf("Invalid supported replica type: %s", result.SupportedReplicaTypes[0])
+	}
+}
+
+// TestDataProtectionLoSCapabilitiesUpdate tests the Update call.
+func TestDataProtectionLoSCapabilitiesUpdate(t *testing.T) {
+	var result DataProtectionLoSCapabilities
+	err := json.NewDecoder(strings.NewReader(dataProtectionLoSCapabilitiesBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.SupportsIsolated = false
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "SupportsIsolated:false") {
+		t.Errorf("Unexpected SupportsIsolated update payload: %s", calls[0].Payload)
 	}
 }

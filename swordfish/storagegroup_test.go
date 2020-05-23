@@ -8,16 +8,18 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var storageGroupBody = strings.NewReader(
-	`{
+var storageGroupBody = `{
 		"@odata.context": "/redfish/v1/$metadata#StorageGroup.StorageGroup",
 		"@odata.type": "#StorageGroup.v1_2_0.StorageGroup",
 		"@odata.id": "/redfish/v1/StorageGroup",
 		"Id": "StorageGroup-1",
 		"Name": "StorageGroupOne",
 		"Description": "StorageGroup One",
+		"AccessState": "Optimized",
 		"AuthenticationMethod": "MutualCHAP",
 		"ChapInfo": [{
 			"InitiatorCHAPPassword": "abc123",
@@ -66,12 +68,12 @@ var storageGroupBody = strings.NewReader(
 				"target": "/redfish/v1/StorageGroup/Actions/StorageGroup.HideVolumes"
 			}
 		}
-	}`)
+	}`
 
 // TestStorageGroup tests the parsing of StorageGroup objects.
 func TestStorageGroup(t *testing.T) {
 	var result StorageGroup
-	err := json.NewDecoder(storageGroupBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(storageGroupBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -111,5 +113,41 @@ func TestStorageGroup(t *testing.T) {
 
 	if result.hideVolumesTarget != "/redfish/v1/StorageGroup/Actions/StorageGroup.HideVolumes" {
 		t.Errorf("Invalid HideVolumes target: %s", result.hideVolumesTarget)
+	}
+}
+
+// TestStorageGroupUpdate tests the Update call.
+func TestStorageGroupUpdate(t *testing.T) {
+	var result StorageGroup
+	err := json.NewDecoder(strings.NewReader(storageGroupBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.AccessState = NonOptimizedAccessState
+	result.AuthenticationMethod = NoneAuthenticationMethod
+	result.VolumesAreExposed = true
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "AccessState:NonOptimized") {
+		t.Errorf("Unexpected AccessState update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "AuthenticationMethod:None") {
+		t.Errorf("Unexpected AuthenticationMethod update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "VolumeAreExposed") {
+		t.Errorf("Unexpected VolumeAreExposed update payload: %s", calls[0].Payload)
 	}
 }

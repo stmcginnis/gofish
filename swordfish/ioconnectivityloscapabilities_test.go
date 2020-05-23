@@ -12,8 +12,7 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-var ioConnectivityLoSCapabilitiesBody = strings.NewReader(
-	`{
+var ioConnectivityLoSCapabilitiesBody = `{
 		"@odata.context": "/redfish/v1/$metadata#IOConnectivityLoSCapabilities.IOConnectivityLoSCapabilities",
 		"@odata.type": "#IOConnectivityLoSCapabilities.v1_1_1.IOConnectivityLoSCapabilities",
 		"@odata.id": "/redfish/v1/IOConnectivityLoSCapabilities",
@@ -60,12 +59,12 @@ var ioConnectivityLoSCapabilitiesBody = strings.NewReader(
 				"MaxIOPS": 1000000000
 			}
 		]
-	}`)
+	}`
 
 // TestIOConnectivityLoSCapabilities tests the parsing of IOConnectivityLoSCapabilities objects.
 func TestIOConnectivityLoSCapabilities(t *testing.T) {
 	var result IOConnectivityLoSCapabilities
-	err := json.NewDecoder(ioConnectivityLoSCapabilitiesBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(ioConnectivityLoSCapabilitiesBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -93,5 +92,36 @@ func TestIOConnectivityLoSCapabilities(t *testing.T) {
 
 	if result.SupportedLinesOfService[0].MaxBytesPerSecond != 5000000000 {
 		t.Errorf("Invalid MaxSupportedBytesPerSecond: %d", result.SupportedLinesOfService[0].MaxBytesPerSecond)
+	}
+}
+
+// TestIOConnectivityLoSCapabilitiesUpdate tests the Update call.
+func TestIOConnectivityLoSCapabilitiesUpdate(t *testing.T) {
+	var result IOConnectivityLoSCapabilities
+	err := json.NewDecoder(strings.NewReader(ioConnectivityLoSCapabilitiesBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.MaxSupportedBytesPerSecond = 500
+	result.MaxSupportedIOPS = 10000
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "MaxSupportedBytesPerSecond:500") {
+		t.Errorf("Unexpected MaxSupportedBytesPerSecond update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "MaxSupportedIOPS:10000") {
+		t.Errorf("Unexpected MaxSupportedIOPS update payload: %s", calls[0].Payload)
 	}
 }

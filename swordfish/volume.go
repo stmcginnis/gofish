@@ -7,6 +7,7 @@ package swordfish
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -131,6 +132,108 @@ const (
 	RAID10TripleRAIDType RAIDType = "RAID10Triple"
 )
 
+// ReadCachePolicyType is the type of read cache policy.
+type ReadCachePolicyType string
+
+const (
+
+	// ReadAheadReadCachePolicyType A caching technique in which the
+	// controller pre-fetches data anticipating future read requests.
+	ReadAheadReadCachePolicyType ReadCachePolicyType = "ReadAhead"
+	// AdaptiveReadAheadReadCachePolicyType A caching technique in which the
+	// controller dynamically determines whether to pre-fetch data
+	// anticipating future read requests, based on previous cache hit ratio.
+	AdaptiveReadAheadReadCachePolicyType ReadCachePolicyType = "AdaptiveReadAhead"
+	// OffReadCachePolicyType The read cache is disabled.
+	OffReadCachePolicyType ReadCachePolicyType = "Off"
+)
+
+// VolumeUsageType is the type of volume usage.
+type VolumeUsageType string
+
+const (
+
+	// DataVolumeUsageType shall be allocated for use as a consumable data
+	// volume.
+	DataVolumeUsageType VolumeUsageType = "Data"
+	// SystemDataVolumeUsageType shall be allocated for use as a consumable
+	// data volume reserved for system use.
+	SystemDataVolumeUsageType VolumeUsageType = "SystemData"
+	// CacheOnlyVolumeUsageType shall be allocated for use as a non-
+	// consumable cache only volume.
+	CacheOnlyVolumeUsageType VolumeUsageType = "CacheOnly"
+	// SystemReserveVolumeUsageType shall be allocated for use as a non-
+	// consumable system reserved volume.
+	SystemReserveVolumeUsageType VolumeUsageType = "SystemReserve"
+	// ReplicationReserveVolumeUsageType shall be allocated for use as a non-
+	// consumable reserved volume for replication use.
+	ReplicationReserveVolumeUsageType VolumeUsageType = "ReplicationReserve"
+)
+
+// WriteCachePolicyType is the type of write cache policy.
+type WriteCachePolicyType string
+
+const (
+
+	// WriteThroughWriteCachePolicyType A caching technique in which the
+	// completion of a write request is not signaled until data is safely
+	// stored on non-volatile media.
+	WriteThroughWriteCachePolicyType WriteCachePolicyType = "WriteThrough"
+	// ProtectedWriteBackWriteCachePolicyType A caching technique in which
+	// the completion of a write request is signaled as soon as the data is
+	// in cache, and actual writing to non-volatile media is guaranteed to
+	// occur at a later time.
+	ProtectedWriteBackWriteCachePolicyType WriteCachePolicyType = "ProtectedWriteBack"
+	// UnprotectedWriteBackWriteCachePolicyType A caching technique in which
+	// the completion of a write request is signaled as soon as the data is
+	// in cache; actual writing to non-volatile media is not guaranteed to
+	// occur at a later time.
+	UnprotectedWriteBackWriteCachePolicyType WriteCachePolicyType = "UnprotectedWriteBack"
+	// OffWriteCachePolicyType shall be disabled.
+	OffWriteCachePolicyType WriteCachePolicyType = "Off"
+)
+
+// WriteCacheStateType is the write cache state.
+type WriteCacheStateType string
+
+const (
+
+	// UnprotectedWriteCacheStateType Indicates that the cache state type in
+	// use generally does not protect write requests on non-volatile media.
+	UnprotectedWriteCacheStateType WriteCacheStateType = "Unprotected"
+	// ProtectedWriteCacheStateType Indicates that the cache state type in
+	// use generally protects write requests on non-volatile media.
+	ProtectedWriteCacheStateType WriteCacheStateType = "Protected"
+	// DegradedWriteCacheStateType Indicates an issue with the cache state in
+	// which the cache space is diminished or disabled due to a failure or an
+	// outside influence such as a discharged battery.
+	DegradedWriteCacheStateType WriteCacheStateType = "Degraded"
+)
+
+// WriteHoleProtectionPolicyType is the write hole protection policy.
+type WriteHoleProtectionPolicyType string
+
+const (
+
+	// OffWriteHoleProtectionPolicyType The support for addressing the write
+	// hole issue is disabled. The volume is not performing any additional
+	// activities to close the RAID write hole.
+	OffWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "Off"
+	// JournalingWriteHoleProtectionPolicyType The policy that uses separate
+	// block device for write-ahead logging to adddress write hole issue. All
+	// write operations on the RAID volume are first logged on dedicated
+	// journaling device that is not part of the volume.
+	JournalingWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "Journaling"
+	// DistributedLogWriteHoleProtectionPolicyType The policy that
+	// distributes additional log (e.q. cheksum of the parity) among the
+	// volume's capacity sources to address write hole issue. Additional data
+	// is used to detect data corruption on the volume.
+	DistributedLogWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "DistributedLog"
+	// OEMWriteHoleProtectionPolicyType The policy that is Oem specific. The
+	// mechanism details are unknown unless provided separatly by the Oem.
+	OEMWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "Oem"
+)
+
 // Volume is used to represent a volume, virtual disk, logical disk, LUN,
 // or other logical storage for a Redfish implementation.
 type Volume struct {
@@ -159,6 +262,12 @@ type Volume struct {
 	CapacitySources []CapacitySource
 	// CapacitySources@odata.count is
 	CapacitySourcesCount int `json:"CapacitySources@odata.count"`
+	// Compressed shall contain a boolean indicator if the Volume is currently
+	// utilizing compression or not.
+	Compressed bool
+	// Deduplicated shall contain a boolean indicator if the Volume is currently
+	// utilizing deduplication or not.
+	Deduplicated bool
 	// Description provides a description of this resource.
 	Description string
 	// Encrypted shall contain a boolean indicator if the
@@ -175,6 +284,10 @@ type Volume struct {
 	// Specification, shall contain references to resources that are related
 	// to, but not contained by (subordinate to), this resource.
 	Links string
+	// LogicalUnitNumber shall contain host-visible LogicalUnitNumber assigned
+	// to this Volume. This property shall only be used when in a single connect
+	// configuration and no StorageGroup configuration is used.
+	LogicalUnitNumber int
 	// LowSpaceWarningThresholdPercents is Each time the following value is
 	// less than one of the values in the array the
 	// LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all
@@ -187,12 +300,12 @@ type Volume struct {
 	// MaxBlockSizeBytes shall contain size of the largest
 	// addressable unit of this storage volume.
 	MaxBlockSizeBytes int
+	// MediaSpanCount shall indicate the number of media elements used per span
+	// in the secondary RAID for a hierarchical RAID type.
+	MediaSpanCount int
 	// Model is The value is assigned by the manufacturer and shall
 	// represents a specific storage volume implementation.
 	Model string
-	// Oem is The value of this string shall be of the format for the
-	// reserved word *Oem*.
-	OEM string `json:"Oem"`
 	// Operations shall contain a list of all currently
 	// running on the Volume.
 	Operations []common.Operations
@@ -201,14 +314,19 @@ type Volume struct {
 	// the stripe size. For physical disks, this describes the physical
 	// sector size.
 	OptimumIOSizeBytes int
-	// RAIDType shall contain the RAID type of the
-	// associated Volume.
+	// ProvisioningPolicy shall specify the volume's supported storage
+	// allocation policy.
+	ProvisioningPolicy ProvisioningPolicy
+	// RAIDType shall contain the RAID type of the associated Volume.
 	RAIDType RAIDType
-	// RecoverableCapacitySourceCount is The value is the number of available
+	// ReadCachePolicy shall contain a boolean indicator of the read cache
+	// policy for the Volume.
+	ReadCachePolicy ReadCachePolicyType
+	// RecoverableCapacitySourceCount is the number of available
 	// capacity source resources currently available in the event that an
 	// equivalent capacity source resource fails.
 	RecoverableCapacitySourceCount int
-	// RemainingCapacityPercent is If present, this value shall return
+	// RemainingCapacityPercent is if present, this value shall return
 	// {[(SUM(AllocatedBytes) - SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100
 	// represented as an integer value.
 	RemainingCapacityPercent int
@@ -222,6 +340,23 @@ type Volume struct {
 	ReplicaTargetsCount int `json:"ReplicaTargets@odata.count"`
 	// Status is
 	Status common.Status
+	// StripSizeBytes is the number of consecutively addressed virtual disk
+	// blocks (bytes) mapped to consecutively addressed blocks on a single
+	// member extent of a disk array. Synonym for stripe depth and chunk
+	// size.
+	StripSizeBytes int
+	// VolumeUsage shall contain the volume usage type for the Volume.
+	VolumeUsage VolumeUsageType
+	// WriteCachePolicy shall contain a boolean indicator of the write cache
+	// policy for the Volume.
+	WriteCachePolicy WriteCachePolicyType
+	// WriteCacheState shall contain the WriteCacheState policy setting for the
+	// Volume.
+	WriteCacheState WriteCacheStateType
+	// WriteHoleProtectionPolicy specifies the policy that is enabled to address
+	// the write hole issue on the RAID volume. If no policy is enabled at the
+	// moment, this property shall be set to 'Off'.
+	WriteHoleProtectionPolicy WriteHoleProtectionPolicyType
 	// classOfService shall contain a reference to the
 	// ClassOfService that this storage volume conforms to.
 	classOfService string
@@ -236,6 +371,8 @@ type Volume struct {
 	// This property shall only contain references to Drive entities which are
 	// currently assigned as a dedicated spare and are able to support this Volume.
 	dedicatedSpareDrives []string
+	// DisplayName shall contain a user-configurable string to name the volume.
+	DisplayName string
 	// drives shall be a reference to the resources that this volume is
 	// associated with and shall reference resources of type Drive. This
 	// property shall only contain references to Drive entities which are
@@ -271,6 +408,8 @@ type Volume struct {
 	splitReplicationTarget string
 	// suspendReplicationTarget is the URL to send SuspendReplication requests.
 	suspendReplicationTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Volume object from the raw JSON.
@@ -369,7 +508,42 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 	volume.splitReplicationTarget = t.Actions.SplitReplication.Target
 	volume.suspendReplicationTarget = t.Actions.SuspendReplication.Target
 
+	// This is a read/write object, so we need to save the raw object data for later
+	volume.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (volume *Volume) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Volume)
+	original.UnmarshalJSON(volume.rawData)
+
+	readWriteFields := []string{
+		"AccessCapabilities",
+		"CapacityBytes",
+		"CapacitySources",
+		"Compressed",
+		"Deduplicated",
+		"DisplayName",
+		"Encrypted",
+		"EncryptionTypes",
+		"LowSpaceWarningThresholdPercents",
+		"ProvisioningPolicy",
+		"ReadCachePolicy",
+		"RecoverableCapacitySourceCount",
+		"StripSizeBytes",
+		"WriteCachePolicy",
+		"WriteHoleProtectionPolicy",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(volume).Elem()
+
+	return volume.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetVolume will get a Volume instance from the service.

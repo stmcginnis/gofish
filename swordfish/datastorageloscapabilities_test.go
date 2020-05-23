@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var dataStorageLoSCapabilitiesBody = strings.NewReader(
-	`{
+var dataStorageLoSCapabilitiesBody = `{
 		"@odata.context": "/redfish/v1/$metadata#DataStorageLoSCapabilities.DataStorageLoSCapabilities",
 		"@odata.type": "#DataStorageLoSCapabilities.v1_2_0.DataStorageLoSCapabilities",
 		"@odata.id": "/redfish/v1/DataStorageLoSCapabilities",
@@ -44,12 +45,12 @@ var dataStorageLoSCapabilitiesBody = strings.NewReader(
 			"Offline"
 		],
 		"SupportsSpaceEfficiency": true
-	}`)
+	}`
 
 // TestDataStorageLoSCapabilities tests the parsing of DataStorageLoSCapabilities objects.
 func TestDataStorageLoSCapabilities(t *testing.T) {
 	var result DataStorageLoSCapabilities
-	err := json.NewDecoder(dataStorageLoSCapabilitiesBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(dataStorageLoSCapabilitiesBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -78,5 +79,36 @@ func TestDataStorageLoSCapabilities(t *testing.T) {
 
 	if !result.SupportsSpaceEfficiency {
 		t.Error("SupportsSpaceEfficiency should be true")
+	}
+}
+
+// TestDataStorageLoSCapabilitiesUpdate tests the Update call.
+func TestDataStorageLoSCapabilitiesUpdate(t *testing.T) {
+	var result DataStorageLoSCapabilities
+	err := json.NewDecoder(strings.NewReader(dataStorageLoSCapabilitiesBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.MaximumRecoverableCapacitySourceCount = 10
+	result.SupportsSpaceEfficiency = true
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "MaximumRecoverableCapacitySourceCount:10") {
+		t.Errorf("Unexpected MaximumRecoverableCapacitySourceCount update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "SupportsSpaceEfficiency") {
+		t.Errorf("Unexpected SupportsSpaceEfficiency update payload: %s", calls[0].Payload)
 	}
 }

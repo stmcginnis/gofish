@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -39,6 +40,51 @@ type IOConnectivityLoSCapabilities struct {
 	SupportedLinesOfService []IOConnectivityLineOfService
 	// SupportedLinesOfServiceCount is the number of IOConnectivityLineOfServices.
 	SupportedLinesOfServiceCount int `json:"SupportedLinesOfService@odata.count"`
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals a IOConnectivityLoSCapabilities object from the raw JSON.
+func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) UnmarshalJSON(b []byte) error {
+	type temp IOConnectivityLoSCapabilities
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*ioconnectivityloscapabilities = IOConnectivityLoSCapabilities(t.temp)
+
+	// Extract the links to other entities for later
+
+	// This is a read/write object, so we need to save the raw object data for later
+	ioconnectivityloscapabilities.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(IOConnectivityLoSCapabilities)
+	original.UnmarshalJSON(ioconnectivityloscapabilities.rawData)
+
+	readWriteFields := []string{
+		"MaxSupportedBytesPerSecond",
+		"MaxSupportedIOPS",
+		"SupportedAccessProtocols",
+		"SupportedLinesOfService",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(ioconnectivityloscapabilities).Elem()
+
+	return ioconnectivityloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetIOConnectivityLoSCapabilities will get a IOConnectivityLoSCapabilities

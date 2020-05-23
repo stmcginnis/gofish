@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var volumeBody = strings.NewReader(
-	`{
+var volumeBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Volume.Volume",
 		"@odata.type": "#Volume.v1_3_1.Volume",
 		"@odata.id": "/redfish/v1/Volume",
@@ -54,6 +55,9 @@ var volumeBody = strings.NewReader(
 			"@odata.id": "/redfish/v1/CapacitySource/1"
 		}],
 		"CapacitySources@odata.count": 1,
+		"Compressed": false,
+		"Deduplicated": false,
+		"DisplayName": "Test Volume 1",
 		"Encrypted": true,
 		"EncryptionTypes": [
 			"ControllerAssisted",
@@ -89,6 +93,7 @@ var volumeBody = strings.NewReader(
 		],
 		"Manufacturer": "Acme Storage",
 		"MaxBlockSizeBytes": 2199023255600,
+		"MediaSpanCount": 1,
 		"Model": "Kate Moss",
 		"Operations": [{
 				"OperationName": "Overlord",
@@ -100,8 +105,15 @@ var volumeBody = strings.NewReader(
 			}
 		],
 		"OptimumIOSizeBytes": 1024,
+		"ProvisioningPolicy": "Thin",
 		"RAIDType": "RAID10",
-		"RecoverableCapacitySourceCount": 0,
+		"ReadCachePolicy": "ReadAhead",
+		"RecoverableCapacitySourceCount": 2,
+		"StripSizeBytes": 1024,
+		"VolumeUsage": "Data",
+		"WriteCachePolicy": "WriteThrough",
+		"WriteCacheState": "Protected",
+		"WriteHoleProtectionPolicy": "Off",
 		"RemainingCapacityPercent": 24,
 		"Status": {
 			"State": "Enabled",
@@ -139,12 +151,12 @@ var volumeBody = strings.NewReader(
 				"target": "/redfish/v1/Volume/Actions/Volume.SuspendReplication"
 			}
 		}
-	}`)
+	}`
 
 // TestVolume tests the parsing of Volume objects.
 func TestVolume(t *testing.T) {
 	var result Volume
-	err := json.NewDecoder(volumeBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(volumeBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -216,5 +228,81 @@ func TestVolume(t *testing.T) {
 
 	if result.suspendReplicationTarget != "/redfish/v1/Volume/Actions/Volume.SuspendReplication" {
 		t.Errorf("Invalid SuspendReplication target: %s", result.suspendReplicationTarget)
+	}
+}
+
+// TestVolumeUpdate tests the Update call.
+func TestVolumeUpdate(t *testing.T) {
+	var result Volume
+	err := json.NewDecoder(strings.NewReader(volumeBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.CapacityBytes = 2199023255600
+	result.Compressed = false
+	result.Deduplicated = false
+	result.DisplayName = "Testing123"
+	result.Encrypted = false
+	result.ProvisioningPolicy = FixedProvisioningPolicy
+	result.ReadCachePolicy = OffReadCachePolicyType
+	result.RecoverableCapacitySourceCount = 2
+	result.StripSizeBytes = 1024
+	result.WriteCachePolicy = OffWriteCachePolicyType
+	result.WriteHoleProtectionPolicy = OEMWriteHoleProtectionPolicyType
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if strings.Contains(calls[0].Payload, "CapacityBytes") {
+		t.Errorf("Unexpected CapacityBytes update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "Compressed") {
+		t.Errorf("Unexpected Compressed update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "Deduplicated") {
+		t.Errorf("Unexpected Deduplicated update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "DisplayName:Testing123") {
+		t.Errorf("Unexpected DisplayName update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "Encrypted:false") {
+		t.Errorf("Unexpected Encrypted update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "ProvisioningPolicy:Fixed") {
+		t.Errorf("Unexpected ProvisioningPolicy update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "ReadCachePolicy:Off") {
+		t.Errorf("Unexpected ReadCachePolicy update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "RecoverableCapacitySourceCount") {
+		t.Errorf("Unexpected RecoverableCapacitySourceCount update payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "StripSizeBytes") {
+		t.Errorf("Unexpected StripSizeBytes update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "WriteCachePolicy:Off") {
+		t.Errorf("Unexpected WriteCachePolicy update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "WriteHoleProtectionPolicy:Oem") {
+		t.Errorf("Unexpected WriteHoleProtectionPolicy update payload: %s", calls[0].Payload)
 	}
 }

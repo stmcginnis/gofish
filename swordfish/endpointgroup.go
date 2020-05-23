@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -55,6 +56,8 @@ type EndpointGroup struct {
 	Description string
 	// endpoints shall reference an Endpoint resource.
 	endpoints string
+	// EndpointsCount is the number of Endpoints
+	EndpointsCount int
 	// GroupType contains only endpoints of a given type
 	// Client/Initiator or Server/Target.  If this endpoint group represents
 	// a SCSI target group, the value of GroupType shall be Server.
@@ -73,6 +76,8 @@ type EndpointGroup struct {
 	// TARGET PORT GROUP field in an INQUIRY VPD page 85 response, type 5h
 	// identifier. See the INCITS SAM-5 specification.
 	TargetEndpointGroupIdentifier int
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a EndpointGroup object from the raw JSON.
@@ -80,7 +85,8 @@ func (endpointgroup *EndpointGroup) UnmarshalJSON(b []byte) error {
 	type temp EndpointGroup
 	var t struct {
 		temp
-		Endpoints common.Link
+		Endpoints      common.Link
+		EndpointsCount int `json:"Endpoints@odata.count"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -92,8 +98,34 @@ func (endpointgroup *EndpointGroup) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	endpointgroup.endpoints = string(t.Endpoints)
+	endpointgroup.EndpointsCount = t.EndpointsCount
+
+	// This is a read/write object, so we need to save the raw object data for later
+	endpointgroup.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (endpointgroup *EndpointGroup) Update() error {
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(EndpointGroup)
+	original.UnmarshalJSON(endpointgroup.rawData)
+
+	readWriteFields := []string{
+		"AccessState",
+		"Endpoints",
+		"GroupType",
+		"Preferred",
+		"TargetEndpointGroupIdentifier",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(endpointgroup).Elem()
+
+	return endpointgroup.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetEndpointGroup will get a EndpointGroup instance from the service.

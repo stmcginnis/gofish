@@ -8,10 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
-var fileSystemBody = strings.NewReader(
-	`{
+var fileSystemBody = `{
 		"@odata.context": "/redfish/v1/$metadata#FileSystem.FileSystem",
 		"@odata.type": "#FileSystem.v1_2_1.FileSystem",
 		"@odata.id": "/redfish/v1/FileSystem",
@@ -121,12 +122,12 @@ var fileSystemBody = strings.NewReader(
 		"RemainingCapacityPercent": 43,
 		"ReplicaTargets": [],
 		"ReplicaTargets@odata.count": 0
-	}`)
+	}`
 
 // TestFileSystem tests the parsing of FileSystem objects.
 func TestFileSystem(t *testing.T) {
 	var result FileSystem
-	err := json.NewDecoder(fileSystemBody).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(fileSystemBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -170,5 +171,46 @@ func TestFileSystem(t *testing.T) {
 
 	if result.RemainingCapacityPercent != 43 {
 		t.Errorf("Invalid RemainingCapacityPercent: %d", result.RemainingCapacityPercent)
+	}
+}
+
+// TestFileSystemUpdate tests the Update call.
+func TestFileSystemUpdate(t *testing.T) {
+	var result FileSystem
+	err := json.NewDecoder(strings.NewReader(fileSystemBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	result.CasePreserved = true
+	result.CaseSensitive = false
+	result.ClusterSizeBytes = 1024
+	result.MaxFileNameLengthBytes = 1024
+	err = result.Update()
+
+	if err != nil {
+		t.Errorf("Error making Update call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if strings.Contains(calls[0].Payload, "CasePreserved") {
+		t.Errorf("Unexpected CasePreserved update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "CaseSensitive:false") {
+		t.Errorf("Unexpected CaseSensitive update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "ClusterSizeBytes:1024") {
+		t.Errorf("Unexpected ClusterSizeBytes update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "MaxFileNameLengthBytes:1024") {
+		t.Errorf("Unexpected MaxFileNameLengthBytes update payload: %s", calls[0].Payload)
 	}
 }
