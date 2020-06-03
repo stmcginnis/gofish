@@ -60,49 +60,18 @@ func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
 	return &virtualMedia, nil
 }
 
-// VirtualMediaCollection is a collection of virtual media resources.
-type VirtualMediaCollection struct {
-	common.Entity
-	common.LinksCollection
-
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string `json:"Description"`
-}
-
-// GetVirtualMediaCollection will get a VirtualMedia collection from the Redfish service.
-func GetVirtualMediaCollection(c common.Client, uri string) (*VirtualMediaCollection, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var virtualMediaCollection VirtualMediaCollection
-	err = json.NewDecoder(resp.Body).Decode(&virtualMediaCollection)
-
-	if err != nil {
-		return nil, err
-	}
-
-	virtualMediaCollection.SetClient(c)
-
-	return &virtualMediaCollection, nil
-}
-
-// VirtualMedia get this system's virtual media
-func (vmCollection *VirtualMediaCollection) VirtualMedia() ([]*VirtualMedia, error) {
+// ListReferencedVirtualMedia gets the collection of VirtualMedia
+func ListReferencedVirtualMedia(c common.Client, link string) ([]*VirtualMedia, error) {
 	var result []*VirtualMedia
+	links, err := common.GetCollection(c, link)
+	if err != nil {
+		return result, err
+	}
 
-	for _, link := range vmCollection.LinksCollection.Members.ToStrings() {
-		virtualMedia, err := GetVirtualMedia(vmCollection.Client, link)
+	for _, virtualMediaLink := range links.ItemLinks {
+		virtualMedia, err := GetVirtualMedia(c, virtualMediaLink)
 		if err != nil {
-			return nil, err
+			return result, err
 		}
 
 		result = append(result, virtualMedia)
