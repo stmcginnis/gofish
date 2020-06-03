@@ -449,6 +449,31 @@ func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
 	return ListReferencedEthernetInterfaces(manager.Client, manager.ethernetInterfaces)
 }
 
+// VirtualMediaCollection get this manager's collection of virtual media.
+func (manager *Manager) VirtualMediaCollection() (*VirtualMediaCollection, error) {
+	return GetVirtualMediaCollection(manager.Client, manager.virtualMedia)
+}
+
+// VirtualMedia get this manager's virtual media.
+func (manager *Manager) VirtualMedia() ([]*VirtualMedia, error) {
+	vmc, err := GetVirtualMediaCollection(manager.Client, manager.virtualMedia)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*VirtualMedia
+	for _, link := range vmc.LinksCollection.Members.ToStrings() {
+		vm, err := GetVirtualMedia(manager.Client, link)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, vm)
+	}
+
+	return result, nil
+}
+
 // LogServices get this manager's log services on this system.
 func (manager *Manager) LogServices() ([]*LogService, error) {
 	return ListReferencedLogServices(manager.Client, manager.logServices)
