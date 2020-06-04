@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -63,6 +64,13 @@ type Session struct {
 	// identified by a ManagerAccount resource registered with the Account
 	// Service.
 	UserName string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (session *Session) GetRawData() []byte {
+	return session.rawData
 }
 
 // AuthToken contains the authentication and session information.
@@ -112,13 +120,18 @@ func GetSession(c common.Client, uri string) (*Session, error) {
 	}
 	defer resp.Body.Close()
 
-	var t Session
-	err = json.NewDecoder(resp.Body).Decode(&t)
+	var session Session
+	session.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &t, nil
+	err = json.Unmarshal(session.rawData, &session)
+	if err != nil {
+		return nil, err
+	}
+
+	return &session, nil
 }
 
 // ListReferencedSessions gets the collection of Sessions
