@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -507,8 +508,13 @@ type ComputerSystem struct {
 	SupportedResetTypes []ResetType
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (computersystem *ComputerSystem) GetRawData() []byte {
+	return computersystem.rawData
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
@@ -602,7 +608,12 @@ func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 	defer resp.Body.Close()
 
 	var computersystem ComputerSystem
-	err = json.NewDecoder(resp.Body).Decode(&computersystem)
+	computersystem.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(computersystem.rawData, &computersystem)
 	if err != nil {
 		return nil, err
 	}
