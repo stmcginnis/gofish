@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -285,8 +286,13 @@ type Manager struct {
 	resetTarget string
 	// SupportedResetTypes, if provided, is the reset types this system supports.
 	SupportedResetTypes []ResetType
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (manager *Manager) GetRawData() []byte {
+	return manager.rawData
 }
 
 // UnmarshalJSON unmarshals a Manager object from the raw JSON.
@@ -377,7 +383,12 @@ func GetManager(c common.Client, uri string) (*Manager, error) {
 	defer resp.Body.Close()
 
 	var manager Manager
-	err = json.NewDecoder(resp.Body).Decode(&manager)
+	manager.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(manager.rawData, &manager)
 	if err != nil {
 		return nil, err
 	}
