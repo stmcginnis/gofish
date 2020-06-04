@@ -100,8 +100,13 @@ type Chassis struct {
 	resetTarget string
 	// SupportedResetTypes, if provided, is the reset types this chassis supports.
 	SupportedResetTypes []ResetType
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (chassis *Chassis) GetRawData() []byte {
+	return chassis.rawData
 }
 
 // UnmarshalJSON unmarshals a Chassis object from the raw JSON.
