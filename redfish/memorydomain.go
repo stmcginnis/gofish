@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -39,6 +40,13 @@ type MemoryDomain struct {
 	InterleavableMemorySets []MemorySet
 	// memoryChunks shall be a link to a collection of type MemoryChunkCollection.
 	memoryChunks string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (memorydomain *MemoryDomain) GetRawData() []byte {
+	return memorydomain.rawData
 }
 
 // UnmarshalJSON unmarshals a MemoryDomain object from the raw JSON.
@@ -69,14 +77,19 @@ func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
 	}
 	defer resp.Body.Close()
 
-	var memorydomain MemoryDomain
-	err = json.NewDecoder(resp.Body).Decode(&memorydomain)
+	var memoryDomain MemoryDomain
+	memoryDomain.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	memorydomain.SetClient(c)
-	return &memorydomain, nil
+	err = json.Unmarshal(memoryDomain.rawData, &memoryDomain)
+	if err != nil {
+		return nil, err
+	}
+
+	memoryDomain.SetClient(c)
+	return &memoryDomain, nil
 }
 
 // ListReferencedMemoryDomains gets the collection of MemoryDomain from
