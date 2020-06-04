@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -37,8 +38,13 @@ type VLanNetworkInterface struct {
 	VLANEnable bool
 	// VLANID is used to indicate the VLAN identifier for this VLAN.
 	VLANID int16 `json:"VLANId"`
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// rawData holds the original serialized JSON
+	rawData             []byte
+}
+
+// GetRawData get raw data json
+func (vlannetworkinterface *VLanNetworkInterface) GetRawData() []byte {
+	return vlannetworkinterface.rawData
 }
 
 // UnmarshalJSON unmarshals an object from the raw JSON.
@@ -88,14 +94,18 @@ func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface
 	}
 	defer resp.Body.Close()
 
-	var vlannetworkinterface VLanNetworkInterface
-	err = json.NewDecoder(resp.Body).Decode(&vlannetworkinterface)
+	var vlanNetworkInterface VLanNetworkInterface
+	vlanNetworkInterface.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	vlannetworkinterface.SetClient(c)
-	return &vlannetworkinterface, nil
+	err = json.Unmarshal(vlanNetworkInterface.rawData, &vlanNetworkInterface)
+	if err != nil {
+		return nil, err
+	}
+	vlanNetworkInterface.SetClient(c)
+	return &vlanNetworkInterface, nil
 }
 
 // ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from
