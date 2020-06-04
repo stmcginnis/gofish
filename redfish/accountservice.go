@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -325,14 +326,19 @@ func GetAccountService(c common.Client, uri string) (*AccountService, error) {
 	}
 	defer resp.Body.Close()
 
-	var t AccountService
-	err = json.NewDecoder(resp.Body).Decode(&t)
+	var accountService AccountService
+	accountService.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	t.SetClient(c)
-	return &t, nil
+	err = json.Unmarshal(accountService.rawData, &accountService)
+	if err != nil {
+		return nil, err
+	}
+
+	accountService.SetClient(c)
+	return &accountService, nil
 }
 
 // Accounts get the accounts from the account service
