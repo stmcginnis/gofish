@@ -8,6 +8,7 @@
 # https://help.github.com/articles/ignoring-files/#create-a-global-gitignore
 
 gofish
+/.idea
 bin/*
 **/env/*
 **/gofiles/*
