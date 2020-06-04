@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -290,8 +291,13 @@ type NetworkDeviceFunction struct {
 	// device function is currently assigned to. This value shall be one of the
 	// AssignablePhysicalPorts array members.
 	physicalPortAssignment string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (networkdevicefunction *NetworkDeviceFunction) GetRawData() []byte {
+	return networkdevicefunction.rawData
 }
 
 // UnmarshalJSON unmarshals a NetworkDeviceFunction object from the raw JSON.
@@ -356,14 +362,19 @@ func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFuncti
 	}
 	defer resp.Body.Close()
 
-	var networkdevicefunction NetworkDeviceFunction
-	err = json.NewDecoder(resp.Body).Decode(&networkdevicefunction)
+	var networkDeviceFunction NetworkDeviceFunction
+	networkDeviceFunction.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	networkdevicefunction.SetClient(c)
-	return &networkdevicefunction, nil
+	err = json.Unmarshal(networkDeviceFunction.rawData, &networkDeviceFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	networkDeviceFunction.SetClient(c)
+	return &networkDeviceFunction, nil
 }
 
 // ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
