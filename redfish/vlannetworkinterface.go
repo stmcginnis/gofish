@@ -104,6 +104,7 @@ func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface
 	if err != nil {
 		return nil, err
 	}
+
 	vlanNetworkInterface.SetClient(c)
 	return &vlanNetworkInterface, nil
 }
