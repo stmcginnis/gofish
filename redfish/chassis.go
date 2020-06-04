@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -184,7 +185,12 @@ func GetChassis(c common.Client, uri string) (*Chassis, error) {
 	defer resp.Body.Close()
 
 	var chassis Chassis
-	err = json.NewDecoder(resp.Body).Decode(&chassis)
+	chassis.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(chassis.rawData, &chassis)
 	if err != nil {
 		return nil, err
 	}
