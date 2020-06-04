@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -62,8 +63,13 @@ type Role struct {
 	// RoleID shall contain the string name of the Role.
 	// This property shall contain the same value as the Id property.
 	RoleID string `json:"RoleId"`
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (role *Role) GetRawData() []byte {
+	return role.rawData
 }
 
 // UnmarshalJSON unmarshals a Role object from the raw JSON.
@@ -114,7 +120,12 @@ func GetRole(c common.Client, uri string) (*Role, error) {
 	defer resp.Body.Close()
 
 	var role Role
-	err = json.NewDecoder(resp.Body).Decode(&role)
+	role.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(role.rawData, &role)
 	if err != nil {
 		return nil, err
 	}
