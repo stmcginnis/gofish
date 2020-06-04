@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -201,8 +202,13 @@ type NetworkPort struct {
 	// WakeOnLANEnabled shall be a boolean
 	// indicating whether Wake on LAN (WoL) is enabled for this network port.
 	WakeOnLANEnabled bool
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (networkport *NetworkPort) GetRawData() []byte {
+	return networkport.rawData
 }
 
 // UnmarshalJSON unmarshals a NetworkPort object from the raw JSON.
@@ -255,14 +261,19 @@ func GetNetworkPort(c common.Client, uri string) (*NetworkPort, error) {
 	}
 	defer resp.Body.Close()
 
-	var networkport NetworkPort
-	err = json.NewDecoder(resp.Body).Decode(&networkport)
+	var networkPort NetworkPort
+	networkPort.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	networkport.SetClient(c)
-	return &networkport, nil
+	err = json.Unmarshal(networkPort.rawData, &networkPort)
+	if err != nil {
+		return nil, err
+	}
+
+	networkPort.SetClient(c)
+	return &networkPort, nil
 }
 
 // ListReferencedNetworkPorts gets the collection of NetworkPort from
