@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 	"time"
 
@@ -130,8 +131,13 @@ type EventService struct {
 	subscriptions string
 	// submitTestEventTarget is the URL to send SubmitTestEvent actions.
 	submitTestEventTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (eventservice *EventService) GetRawData() []byte {
+	return eventservice.rawData
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
@@ -192,14 +198,19 @@ func GetEventService(c common.Client, uri string) (*EventService, error) {
 	}
 	defer resp.Body.Close()
 
-	var eventservice EventService
-	err = json.NewDecoder(resp.Body).Decode(&eventservice)
+	var eventService EventService
+	eventService.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	eventservice.SetClient(c)
-	return &eventservice, nil
+	err = json.Unmarshal(eventService.rawData, &eventService)
+	if err != nil {
+		return nil, err
+	}
+
+	eventService.SetClient(c)
+	return &eventService, nil
 }
 
 // ListReferencedEventServices gets the collection of EventService from

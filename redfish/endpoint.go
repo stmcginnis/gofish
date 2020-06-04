@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -161,6 +162,13 @@ type Endpoint struct {
 	connectedPorts []string
 	// ConnectedPortCount is the number of ConnectedPorts.
 	ConnectedPortsCount int
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (endpoint *Endpoint) GetRawData() []byte {
+	return endpoint.rawData
 }
 
 // UnmarshalJSON unmarshals a Endpoint object from the raw JSON.
@@ -226,7 +234,12 @@ func GetEndpoint(c common.Client, uri string) (*Endpoint, error) {
 	defer resp.Body.Close()
 
 	var endpoint Endpoint
-	err = json.NewDecoder(resp.Body).Decode(&endpoint)
+	endpoint.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(endpoint.rawData, &endpoint)
 	if err != nil {
 		return nil, err
 	}

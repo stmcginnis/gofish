@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -205,6 +206,13 @@ type NetworkAdapter struct {
 	Status common.Status
 	// resetSettingsToDefaultTarget is the URL for sending a ResetSettingsToDefault action
 	resetSettingsToDefaultTarget string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (networkadapter *NetworkAdapter) GetRawData() []byte {
+	return networkadapter.rawData
 }
 
 // UnmarshalJSON unmarshals a NetworkAdapter object from the raw JSON.
@@ -247,7 +255,12 @@ func GetNetworkAdapter(c common.Client, uri string) (*NetworkAdapter, error) {
 	defer resp.Body.Close()
 
 	var networkAdapter NetworkAdapter
-	err = json.NewDecoder(resp.Body).Decode(&networkAdapter)
+	networkAdapter.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(networkAdapter.rawData, &networkAdapter)
 	if err != nil {
 		return nil, err
 	}

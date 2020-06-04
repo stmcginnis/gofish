@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -131,6 +132,13 @@ type Task struct {
 	// Status section of the Redfish specification and shall not be set until
 	// the task has completed.
 	TaskStatus common.Health
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (task *Task) GetRawData() []byte {
+	return task.rawData
 }
 
 // UnmarshalJSON unmarshals a Task object from the raw JSON.
@@ -162,7 +170,12 @@ func GetTask(c common.Client, uri string) (*Task, error) {
 	defer resp.Body.Close()
 
 	var task Task
-	err = json.NewDecoder(resp.Body).Decode(&task)
+	task.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(task.rawData, &task)
 	if err != nil {
 		return nil, err
 	}

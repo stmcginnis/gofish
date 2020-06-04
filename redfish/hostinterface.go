@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -110,8 +111,13 @@ type HostInterface struct {
 	// KernelAuthRole shall be a link to a Role object instance, and should
 	// reference the object identified by property KernelAuthRoleId.
 	kernelAuthRole string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (hostinterface *HostInterface) GetRawData() []byte {
+	return hostinterface.rawData
 }
 
 // UnmarshalJSON unmarshals a HostInterface object from the raw JSON.
@@ -189,14 +195,19 @@ func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
 	}
 	defer resp.Body.Close()
 
-	var hostinterface HostInterface
-	err = json.NewDecoder(resp.Body).Decode(&hostinterface)
+	var hostInterface HostInterface
+	hostInterface.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	hostinterface.SetClient(c)
-	return &hostinterface, nil
+	err = json.Unmarshal(hostInterface.rawData, &hostInterface)
+	if err != nil {
+		return nil, err
+	}
+
+	hostInterface.SetClient(c)
+	return &hostInterface, nil
 }
 
 // ListReferencedHostInterfaces gets the collection of HostInterface from

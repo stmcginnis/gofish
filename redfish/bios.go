@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/stmcginnis/gofish/common"
@@ -81,6 +82,13 @@ type Bios struct {
 	changePasswordTarget string
 	// resetBiosTarget is the URL to send ResetBios requests.
 	resetBiosTarget string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (bios *Bios) GetRawData() []byte {
+	return bios.rawData
 }
 
 // UnmarshalJSON unmarshals an Bios object from the raw JSON.
@@ -122,7 +130,12 @@ func GetBios(c common.Client, uri string) (*Bios, error) {
 	defer resp.Body.Close()
 
 	var bios Bios
-	err = json.NewDecoder(resp.Body).Decode(&bios)
+	bios.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(bios.rawData, &bios)
 	if err != nil {
 		return nil, err
 	}

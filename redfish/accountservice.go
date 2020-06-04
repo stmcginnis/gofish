@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -250,8 +251,13 @@ type AccountService struct {
 	// Status shall contain any status or health properties
 	// of the Resource.
 	Status common.Status
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (accountservice *AccountService) GetRawData() []byte {
+	return accountservice.rawData
 }
 
 // UnmarshalJSON unmarshals an AccountService object from the raw JSON.
@@ -320,14 +326,19 @@ func GetAccountService(c common.Client, uri string) (*AccountService, error) {
 	}
 	defer resp.Body.Close()
 
-	var t AccountService
-	err = json.NewDecoder(resp.Body).Decode(&t)
+	var accountService AccountService
+	accountService.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	t.SetClient(c)
-	return &t, nil
+	err = json.Unmarshal(accountService.rawData, &accountService)
+	if err != nil {
+		return nil, err
+	}
+
+	accountService.SetClient(c)
+	return &accountService, nil
 }
 
 // Accounts get the accounts from the account service

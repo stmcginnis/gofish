@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -331,8 +332,13 @@ type Memory struct {
 	// Chassis shall be a reference to a resource of type Chassis that represent
 	// the physical container associated with this Memory.
 	chassis string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (memory *Memory) GetRawData() []byte {
+	return memory.rawData
 }
 
 // UnmarshalJSON unmarshals a Memory object from the raw JSON.
@@ -393,7 +399,12 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 	defer resp.Body.Close()
 
 	var memory Memory
-	err = json.NewDecoder(resp.Body).Decode(&memory)
+	memory.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(memory.rawData, &memory)
 	if err != nil {
 		return nil, err
 	}

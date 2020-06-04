@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -52,6 +53,13 @@ type SimpleStorage struct {
 	// chassis shall be a reference to a resource of type Chassis that
 	// represent the physical container associated with this Simple Storage.
 	chassis string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (simplestorage *SimpleStorage) GetRawData() []byte {
+	return simplestorage.rawData
 }
 
 // UnmarshalJSON unmarshals a SimpleStorage object from the raw JSON.
@@ -86,14 +94,19 @@ func GetSimpleStorage(c common.Client, uri string) (*SimpleStorage, error) {
 	}
 	defer resp.Body.Close()
 
-	var simplestorage SimpleStorage
-	err = json.NewDecoder(resp.Body).Decode(&simplestorage)
+	var simpleStorage SimpleStorage
+	simpleStorage.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	simplestorage.SetClient(c)
-	return &simplestorage, nil
+	err = json.Unmarshal(simpleStorage.rawData, &simpleStorage)
+	if err != nil {
+		return nil, err
+	}
+
+	simpleStorage.SetClient(c)
+	return &simpleStorage, nil
 }
 
 // ListReferencedSimpleStorages gets the collection of SimpleStorage from

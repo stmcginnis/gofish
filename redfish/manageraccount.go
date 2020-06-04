@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -82,10 +83,15 @@ type ManagerAccount struct {
 	SNMP SNMPUserInfo
 	// UserName shall contain the user name for this account.
 	UserName string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
 	// role is a link the the user roles.
 	role string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (manageraccount *ManagerAccount) GetRawData() []byte {
+	return manageraccount.rawData
 }
 
 // UnmarshalJSON unmarshals a ManagerAccount object from the raw JSON.
@@ -152,14 +158,19 @@ func GetManagerAccount(c common.Client, uri string) (*ManagerAccount, error) {
 	}
 	defer resp.Body.Close()
 
-	var manageraccount ManagerAccount
-	err = json.NewDecoder(resp.Body).Decode(&manageraccount)
+	var managerAccount ManagerAccount
+	managerAccount.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	manageraccount.SetClient(c)
-	return &manageraccount, nil
+	err = json.Unmarshal(managerAccount.rawData, &managerAccount)
+	if err != nil {
+		return nil, err
+	}
+
+	managerAccount.SetClient(c)
+	return &managerAccount, nil
 }
 
 // ListReferencedManagerAccounts gets the collection of ManagerAccount from

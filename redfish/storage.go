@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -65,6 +66,13 @@ type Storage struct {
 	EnclosuresCount int
 	// setEncryptionKeyTarget is the URL to send SetEncryptionKey requests.
 	setEncryptionKeyTarget string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (storage *Storage) GetRawData() []byte {
+	return storage.rawData
 }
 
 // UnmarshalJSON unmarshals a Storage object from the raw JSON.
@@ -113,7 +121,12 @@ func GetStorage(c common.Client, uri string) (*Storage, error) {
 	defer resp.Body.Close()
 
 	var storage Storage
-	err = json.NewDecoder(resp.Body).Decode(&storage)
+	storage.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(storage.rawData, &storage)
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -76,8 +77,13 @@ type SecureBoot struct {
 	SecureBootMode SecureBootModeType
 	// resetKeysTarget is the URL to send ResetKeys requests.
 	resetKeysTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (secureboot *SecureBoot) GetRawData() []byte {
+	return secureboot.rawData
 }
 
 // UnmarshalJSON unmarshals a SecureBoot object from the raw JSON.
@@ -134,14 +140,19 @@ func GetSecureBoot(c common.Client, uri string) (*SecureBoot, error) {
 	}
 	defer resp.Body.Close()
 
-	var secureboot SecureBoot
-	err = json.NewDecoder(resp.Body).Decode(&secureboot)
+	var secureBoot SecureBoot
+	secureBoot.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	secureboot.SetClient(c)
-	return &secureboot, nil
+	err = json.Unmarshal(secureBoot.rawData, &secureBoot)
+	if err != nil {
+		return nil, err
+	}
+
+	secureBoot.SetClient(c)
+	return &secureBoot, nil
 }
 
 // ListReferencedSecureBoots gets the collection of SecureBoot from

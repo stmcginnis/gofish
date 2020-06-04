@@ -12,63 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const virtualMediaCollectionBody = `{
-	  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia",
-	  "Name": "VirtualMediaCollection",
-	  "@odata.context": "/redfish/v1/$metadata#VirtualMediaCollection.VirtualMediaCollection",
-	  "Members": [
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/RDOC1"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/RDOC2"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/EXT1"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/EXT2"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/EXT3"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/EXT4"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/Remote1"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/Remote2"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/Remote3"
-		},
-		{
-		  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/Remote4"
-		}
-	  ],
-	  "@odata.type": "#VirtualMediaCollection.VirtualMediaCollection",
-	  "@odata.etag": "c54172a08a2b5db8321ef2d79e8850b2",
-	  "Members@odata.count": 10,
-	  "Description": "A collection of VirtualMedia resource instances"
-	}`
-
-// TestVirtualMediaCollection tests the parsing of VirtualMediaCollection objects.
-func TestVirtualMediaCollection(t *testing.T) {
-	var result VirtualMediaCollection
-	err := json.NewDecoder(strings.NewReader(virtualMediaCollectionBody)).Decode(&result)
-
-	assert.Nil(t, err, err)
-	assert.Equalf(t, result.ODataID, "/redfish/v1/Managers/1/VirtualMedia", "Received invalid ODataID: %s", result.ODataID)
-	assert.Equalf(t, result.Name, "VirtualMediaCollection", "Received invalid Name: %s", result.Name)
-	assert.Equalf(t, result.ODataContext, "/redfish/v1/$metadata#VirtualMediaCollection.VirtualMediaCollection", "Received invalid ODataContext: %s", result.ODataContext)
-	assert.Equalf(t, result.ODataType, "#VirtualMediaCollection.VirtualMediaCollection", "Received invalid ODataType: %s", result.ODataType)
-	assert.Equalf(t, result.ODataEtag, "c54172a08a2b5db8321ef2d79e8850b2", "Received invalid ODataType: %s", result.ODataEtag)
-	assert.Equalf(t, result.Description, "A collection of VirtualMedia resource instances", "Received invalid Description: %s", result.Description)
-	assert.Equalf(t, result.Count, len(result.LinksCollection.Members), "Received invalid Members@odata.count not equal len Members: %d != %d", result.Count, len(result.LinksCollection.Members))
-}
-
 const virtualMediaBody = `{
 	  "@odata.id": "/redfish/v1/Managers/1/VirtualMedia/EXT1",
 	  "@odata.context": "/redfish/v1/$metadata#VirtualMedia.VirtualMedia",
@@ -107,5 +50,5 @@ func TestVirtualMedia(t *testing.T) {
 	assert.Equalf(t, result.WriteProtected, true, "Received invalid WriteProtected: %b", result.WriteProtected)
 	assert.Equalf(t, result.Inserted, true, "Received invalid Inserted: %b", result.Inserted)
 	assert.Equalf(t, len(result.SupportedMediaTypes), 2, "Received invalid SupportedMediaTypes: %d", len(result.SupportedMediaTypes))
-
+	assert.Equalf(t, len(result.rawData) > 0, true, "Raw data not equal: %s", result.rawData)
 }

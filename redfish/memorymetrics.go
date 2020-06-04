@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -100,6 +101,13 @@ type MemoryMetrics struct {
 	LifeTime LifeTime
 	// OperatingSpeedMHz is used by the memory device.
 	OperatingSpeedMHz int
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (memorymetrics *MemoryMetrics) GetRawData() []byte {
+	return memorymetrics.rawData
 }
 
 // GetMemoryMetrics will get a MemoryMetrics instance from the service.
@@ -110,14 +118,19 @@ func GetMemoryMetrics(c common.Client, uri string) (*MemoryMetrics, error) {
 	}
 	defer resp.Body.Close()
 
-	var memorymetrics MemoryMetrics
-	err = json.NewDecoder(resp.Body).Decode(&memorymetrics)
+	var memoryMetrics MemoryMetrics
+	memoryMetrics.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	memorymetrics.SetClient(c)
-	return &memorymetrics, nil
+	err = json.Unmarshal(memoryMetrics.rawData, &memoryMetrics)
+	if err != nil {
+		return nil, err
+	}
+
+	memoryMetrics.SetClient(c)
+	return &memoryMetrics, nil
 }
 
 // ListReferencedMemoryMetricss gets the collection of MemoryMetrics from

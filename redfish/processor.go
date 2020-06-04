@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -367,6 +368,13 @@ type Processor struct {
 	pcieFunctions []string
 	// PCIeFunctions@odata.count is
 	PCIeFunctionsCount int
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (processor *Processor) GetRawData() []byte {
+	return processor.rawData
 }
 
 // UnmarshalJSON unmarshals a Processor object from the raw JSON.
@@ -423,7 +431,12 @@ func GetProcessor(c common.Client, uri string) (*Processor, error) {
 	defer resp.Body.Close()
 
 	var processor Processor
-	err = json.NewDecoder(resp.Body).Decode(&processor)
+	processor.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(processor.rawData, &processor)
 	if err != nil {
 		return nil, err
 	}

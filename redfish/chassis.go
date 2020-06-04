@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -100,8 +101,13 @@ type Chassis struct {
 	resetTarget string
 	// SupportedResetTypes, if provided, is the reset types this chassis supports.
 	SupportedResetTypes []ResetType
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (chassis *Chassis) GetRawData() []byte {
+	return chassis.rawData
 }
 
 // UnmarshalJSON unmarshals a Chassis object from the raw JSON.
@@ -179,7 +185,12 @@ func GetChassis(c common.Client, uri string) (*Chassis, error) {
 	defer resp.Body.Close()
 
 	var chassis Chassis
-	err = json.NewDecoder(resp.Body).Decode(&chassis)
+	chassis.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(chassis.rawData, &chassis)
 	if err != nil {
 		return nil, err
 	}

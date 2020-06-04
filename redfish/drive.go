@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -233,8 +234,13 @@ type Drive struct {
 	StoragePoolsCount int
 	// secureEraseTarget is the URL for SecureErase actions.
 	secureEraseTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (drive *Drive) GetRawData() []byte {
+	return drive.rawData
 }
 
 // UnmarshalJSON unmarshals a Drive object from the raw JSON.
@@ -321,7 +327,12 @@ func GetDrive(c common.Client, uri string) (*Drive, error) {
 	defer resp.Body.Close()
 
 	var drive Drive
-	err = json.NewDecoder(resp.Body).Decode(&drive)
+	drive.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(drive.rawData, &drive)
 	if err != nil {
 		return nil, err
 	}

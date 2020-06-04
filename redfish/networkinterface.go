@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -43,6 +44,13 @@ type NetworkInterface struct {
 	networkPorts string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (networkinterface *NetworkInterface) GetRawData() []byte {
+	return networkinterface.rawData
 }
 
 // UnmarshalJSON unmarshals a NetworkInterface object from the raw JSON.
@@ -77,14 +85,19 @@ func GetNetworkInterface(c common.Client, uri string) (*NetworkInterface, error)
 	}
 	defer resp.Body.Close()
 
-	var networkinterface NetworkInterface
-	err = json.NewDecoder(resp.Body).Decode(&networkinterface)
+	var networkInterface NetworkInterface
+	networkInterface.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	networkinterface.SetClient(c)
-	return &networkinterface, nil
+	err = json.Unmarshal(networkInterface.rawData, &networkInterface)
+	if err != nil {
+		return nil, err
+	}
+
+	networkInterface.SetClient(c)
+	return &networkInterface, nil
 }
 
 // ListReferencedNetworkInterfaces gets the collection of NetworkInterface from

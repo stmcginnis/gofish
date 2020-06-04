@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -135,6 +136,13 @@ type PCIeFunction struct {
 	storageControllers []string
 	// StorageControllersCount is the number of storage controllers.
 	StorageControllersCount int
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (pciefunction *PCIeFunction) GetRawData() []byte {
+	return pciefunction.rawData
 }
 
 // UnmarshalJSON unmarshals a PCIeFunction object from the raw JSON.
@@ -187,14 +195,19 @@ func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
 	}
 	defer resp.Body.Close()
 
-	var pciefunction PCIeFunction
-	err = json.NewDecoder(resp.Body).Decode(&pciefunction)
+	var pcieFunction PCIeFunction
+	pcieFunction.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	pciefunction.SetClient(c)
-	return &pciefunction, nil
+	err = json.Unmarshal(pcieFunction.rawData, &pcieFunction)
+	if err != nil {
+		return nil, err
+	}
+
+	pcieFunction.SetClient(c)
+	return &pcieFunction, nil
 }
 
 // ListReferencedPCIeFunctions gets the collection of PCIeFunction from

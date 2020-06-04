@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -86,8 +87,13 @@ type LogService struct {
 	Status common.Status
 	// clearLogTarget is the URL to send ClearLog actions to.
 	clearLogTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (logservice *LogService) GetRawData() []byte {
+	return logservice.rawData
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
@@ -148,14 +154,19 @@ func GetLogService(c common.Client, uri string) (*LogService, error) {
 	}
 	defer resp.Body.Close()
 
-	var logservice LogService
-	err = json.NewDecoder(resp.Body).Decode(&logservice)
+	var logService LogService
+	logService.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	logservice.SetClient(c)
-	return &logservice, nil
+	err = json.Unmarshal(logService.rawData, &logService)
+	if err != nil {
+		return nil, err
+	}
+
+	logService.SetClient(c)
+	return &logService, nil
 }
 
 // ListReferencedLogServices gets the collection of LogService from a provided reference.

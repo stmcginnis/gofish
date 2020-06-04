@@ -6,7 +6,9 @@ package redfish
 
 import (
 	"encoding/json"
-	"github.com/LRichi/gofish/common"
+	"io/ioutil"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
 // ResetType describe the type off reset to be issue by the resource
@@ -18,6 +20,7 @@ const (
 	USBStickVirtualMediaType VirtualMediaType = "USBStick"
 )
 
+// VirtualMediaConnectedMethod this is the type of virtual media connection method
 type VirtualMediaConnectedMethod string
 
 const (
@@ -26,7 +29,9 @@ const (
 	OemVirtualMediaConnectedMethod          VirtualMediaConnectedMethod = "Oem"
 )
 
-// VirtualMedia is used to represent virtual media resource.
+// VirtualMedia used to represent a virtual media resource.
+// Allows you to connect media types such as CD, DVD, USB Stick
+// and others. Media types and methods depend on the hardware manufacturer.
 type VirtualMedia struct {
 	common.Entity
 
@@ -40,6 +45,12 @@ type VirtualMedia struct {
 	WriteProtected      bool                        `json:"WriteProtected"` // WriteProtected ...
 	Inserted            bool                        `json:"Inserted"`       // Inserted status of connect image
 	SupportedMediaTypes []VirtualMediaType          `json:"MediaTypes"`     // MediaTypes allowed media types
+	rawData             []byte                      // rawData holds the original serialized JSON
+}
+
+// GetRawData get raw data json
+func (virtualMedia *VirtualMedia) GetRawData() []byte {
+	return virtualMedia.rawData
 }
 
 // GetVirtualMedia will get a VirtualMedia instance from the service.
@@ -51,7 +62,12 @@ func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
 	defer resp.Body.Close()
 
 	var virtualMedia VirtualMedia
-	err = json.NewDecoder(resp.Body).Decode(&virtualMedia)
+	virtualMedia.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(virtualMedia.rawData, &virtualMedia)
 	if err != nil {
 		return nil, err
 	}

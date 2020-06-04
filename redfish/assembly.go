@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -29,8 +30,13 @@ type Assembly struct {
 	AssembliesCount int `json:"Assemblies@odata.count"`
 	// Description provides a description of this resource.
 	Description string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (assembly *Assembly) GetRawData() []byte {
+	return assembly.rawData
 }
 
 // UnmarshalJSON unmarshals a Assembly object from the raw JSON.
@@ -80,7 +86,12 @@ func GetAssembly(c common.Client, uri string) (*Assembly, error) {
 	defer resp.Body.Close()
 
 	var assembly Assembly
-	err = json.NewDecoder(resp.Body).Decode(&assembly)
+	assembly.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(assembly.rawData, &assembly)
 	if err != nil {
 		return nil, err
 	}

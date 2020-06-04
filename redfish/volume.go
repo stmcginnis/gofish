@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -190,6 +191,13 @@ type Volume struct {
 	DrivesCount int
 	// drives contains references to associated drives.
 	drives []string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (volume *Volume) GetRawData() []byte {
+	return volume.rawData
 }
 
 // UnmarshalJSON unmarshals a Volume object from the raw JSON.
@@ -227,7 +235,12 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 	defer resp.Body.Close()
 
 	var volume Volume
-	err = json.NewDecoder(resp.Body).Decode(&volume)
+	volume.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(volume.rawData, &volume)
 	if err != nil {
 		return nil, err
 	}

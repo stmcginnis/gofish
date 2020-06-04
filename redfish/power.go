@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -144,6 +145,13 @@ type Power struct {
 	Voltages []Voltage
 	// VoltagesCount is the number of objects.
 	VoltagesCount int `json:"Voltages@odata.count"`
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (power *Power) GetRawData() []byte {
+	return power.rawData
 }
 
 // GetPower will get a Power instance from the service.
@@ -155,7 +163,12 @@ func GetPower(c common.Client, uri string) (*Power, error) {
 	defer resp.Body.Close()
 
 	var power Power
-	err = json.NewDecoder(resp.Body).Decode(&power)
+	power.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(power.rawData, &power)
 	if err != nil {
 		return nil, err
 	}
@@ -351,8 +364,13 @@ type PowerSupply struct {
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (powersupply *PowerSupply) GetRawData() []byte {
+	return powersupply.rawData
 }
 
 // UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.

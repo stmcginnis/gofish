@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -39,8 +40,13 @@ type CompositionService struct {
 	ServiceEnabled bool
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (compositionservice *CompositionService) GetRawData() []byte {
+	return compositionservice.rawData
 }
 
 // UnmarshalJSON unmarshals CompositionService object from the raw JSON.
@@ -96,7 +102,12 @@ func GetCompositionService(c common.Client, uri string) (*CompositionService, er
 	defer resp.Body.Close()
 
 	var compositionservice CompositionService
-	err = json.NewDecoder(resp.Body).Decode(&compositionservice)
+	compositionservice.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(compositionservice.rawData, &compositionservice)
 	if err != nil {
 		return nil, err
 	}
