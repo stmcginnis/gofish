@@ -107,8 +107,10 @@ def _get_type(name, obj):
         for kind in tipe:
             if kind == 'null':
                 continue
-            if kind == 'integer' or kind == 'number':
+            if kind == 'integer':
                 result = 'int'
+            elif kind == 'number':
+                result = 'float64'
             elif kind == 'boolean':
                 result = 'bool'
             else:

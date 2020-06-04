@@ -115,7 +115,7 @@ func TestDrive(t *testing.T) {
 	}
 
 	if result.CapableSpeedGbs != 40 {
-		t.Errorf("Incorrect capable speed: %d", result.CapableSpeedGbs)
+		t.Errorf("Incorrect capable speed: %f", result.CapableSpeedGbs)
 	}
 
 	if result.CapacityBytes != 1099511627776 {

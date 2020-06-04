@@ -276,7 +276,7 @@ type PowerSupply struct {
 	assembly string
 	// EfficiencyPercent shall contain the value of the measured power
 	// efficiency, as a percentage, of the associated power supply.
-	EfficiencyPercent int
+	EfficiencyPercent float32
 	// FirmwareVersion shall contain the firmware version as
 	// defined by the manufacturer for the associated power supply.
 	FirmwareVersion string
