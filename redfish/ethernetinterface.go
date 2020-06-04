@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -210,8 +211,13 @@ type EthernetInterface struct {
 	EndpointsCount int
 	// HostInterface is used by a host to communicate with a Manager.
 	hostInterface string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (ethernetinterface *EthernetInterface) GetRawData() []byte {
+	return ethernetinterface.rawData
 }
 
 // UnmarshalJSON unmarshals a EthernetInterface object from the raw JSON.
@@ -285,14 +291,19 @@ func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, erro
 	}
 	defer resp.Body.Close()
 
-	var ethernetinterface EthernetInterface
-	err = json.NewDecoder(resp.Body).Decode(&ethernetinterface)
+	var ethernetInterface EthernetInterface
+	ethernetInterface.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	ethernetinterface.SetClient(c)
-	return &ethernetinterface, nil
+	err = json.Unmarshal(ethernetInterface.rawData, &ethernetInterface)
+	if err != nil {
+		return nil, err
+	}
+
+	ethernetInterface.SetClient(c)
+	return &ethernetInterface, nil
 }
 
 // ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
