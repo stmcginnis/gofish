@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -90,8 +91,13 @@ type PCIeDevice struct {
 	pcieFunctions []string
 	// PCIeFunctionsCount is the number of PCIeFunctions.
 	PCIeFunctionsCount int
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (pciedevice *PCIeDevice) GetRawData() []byte {
+	return pciedevice.rawData
 }
 
 // UnmarshalJSON unmarshals a PCIeDevice object from the raw JSON.
@@ -155,14 +161,19 @@ func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
 	}
 	defer resp.Body.Close()
 
-	var pciedevice PCIeDevice
-	err = json.NewDecoder(resp.Body).Decode(&pciedevice)
+	var pcieDevice PCIeDevice
+	pcieDevice.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	pciedevice.SetClient(c)
-	return &pciedevice, nil
+	err = json.Unmarshal(pcieDevice.rawData, &pcieDevice)
+	if err != nil {
+		return nil, err
+	}
+
+	pcieDevice.SetClient(c)
+	return &pcieDevice, nil
 }
 
 // ListReferencedPCIeDevices gets the collection of PCIeDevice from
