@@ -50,5 +50,5 @@ func TestVirtualMedia(t *testing.T) {
 	assert.Equalf(t, result.WriteProtected, true, "Received invalid WriteProtected: %b", result.WriteProtected)
 	assert.Equalf(t, result.Inserted, true, "Received invalid Inserted: %b", result.Inserted)
 	assert.Equalf(t, len(result.SupportedMediaTypes), 2, "Received invalid SupportedMediaTypes: %d", len(result.SupportedMediaTypes))
-
+	assert.Equalf(t, len(result.rawData) > 0, true, "Raw data not equal: %s", result.rawData)
 }
