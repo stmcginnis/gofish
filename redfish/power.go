@@ -364,8 +364,13 @@ type PowerSupply struct {
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (powersupply *PowerSupply) GetRawData() []byte {
+	return powersupply.rawData
 }
 
 // UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.
