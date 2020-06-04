@@ -136,7 +136,7 @@ type Drive struct {
 	BlockSizeBytes int
 	// CapableSpeedGbs shall contain fastest capable bus speed of the associated
 	// drive.
-	CapableSpeedGbs int
+	CapableSpeedGbs float32
 	// CapacityBytes shall contain the raw size in bytes of the associated drive.
 	CapacityBytes int64
 	// Description provides a description of this resource.
@@ -179,7 +179,7 @@ type Drive struct {
 	Multipath bool
 	// NegotiatedSpeedGbs shall contain current bus speed of the associated
 	// drive.
-	NegotiatedSpeedGbs int
+	NegotiatedSpeedGbs float32
 	// Operations shall contain a list of all operations currently running on
 	// the Drive.
 	Operations []common.Operations
@@ -191,7 +191,7 @@ type Drive struct {
 	PhysicalLocation common.Location
 	// PredictedMediaLifeLeftPercent shall contain an indicator of the
 	// percentage of life remaining in the Drive's media.
-	PredictedMediaLifeLeftPercent int
+	PredictedMediaLifeLeftPercent float32
 	// Protocol shall contain the protocol the associated drive is using to
 	// communicate to the storage controller for this system.
 	Protocol common.Protocol
@@ -199,7 +199,7 @@ type Drive struct {
 	// the associated drive.
 	Revision string
 	// RotationSpeedRPM shall contain rotation speed of the associated drive.
-	RotationSpeedRPM int
+	RotationSpeedRPM float32
 	// SKU shall be the stock-keeping unit number for this drive.
 	SKU string
 	// SerialNumber is used to identify the drive.

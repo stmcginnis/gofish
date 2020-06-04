@@ -73,6 +73,74 @@ const (
 	ZoneChassisType ChassisType = "Zone"
 )
 
+// EnvironmentalClass is
+type EnvironmentalClass string
+
+const (
+
+	// A1EnvironmentalClass ASHRAE Environmental Class 'A1'.
+	A1EnvironmentalClass EnvironmentalClass = "A1"
+	// A2EnvironmentalClass ASHRAE Environmental Class 'A2'.
+	A2EnvironmentalClass EnvironmentalClass = "A2"
+	// A3EnvironmentalClass ASHRAE Environmental Class 'A3'.
+	A3EnvironmentalClass EnvironmentalClass = "A3"
+	// A4EnvironmentalClass ASHRAE Environmental Class 'A4'.
+	A4EnvironmentalClass EnvironmentalClass = "A4"
+)
+
+// IntrusionSensor is
+type IntrusionSensor string
+
+const (
+
+	// NormalIntrusionSensor No abnormal physical security condition is
+	// detected at this time.
+	NormalIntrusionSensor IntrusionSensor = "Normal"
+	// HardwareIntrusionIntrusionSensor A door, lock, or other mechanism
+	// protecting the internal system hardware from being accessed is
+	// detected to be in an insecure state.
+	HardwareIntrusionIntrusionSensor IntrusionSensor = "HardwareIntrusion"
+	// TamperingDetectedIntrusionSensor Physical tampering of the monitored
+	// entity is detected.
+	TamperingDetectedIntrusionSensor IntrusionSensor = "TamperingDetected"
+)
+
+// IntrusionSensorReArm is
+type IntrusionSensorReArm string
+
+const (
+
+	// ManualIntrusionSensorReArm A manual re-arm of this sensor restores it
+	// to the normal state.
+	ManualIntrusionSensorReArm IntrusionSensorReArm = "Manual"
+	// AutomaticIntrusionSensorReArm Because no abnormal physical security
+	// condition is detected, this sensor is automatically restored to the
+	// normal state.
+	AutomaticIntrusionSensorReArm IntrusionSensorReArm = "Automatic"
+)
+
+// PhysicalSecurity shall describe the sensor state of the physical
+// security.
+type PhysicalSecurity struct {
+
+	// IntrusionSensor is This property shall represent the state of this
+	// physical security sensor.  Hardware intrusion indicates the internal
+	// hardware is detected as being accessed in an insecure state.
+	// Tampering detected indicates the physical tampering of the monitored
+	// entity is detected.
+	IntrusionSensor IntrusionSensor
+	// IntrusionSensorNumber is This property shall contain a numerical
+	// identifier for this physical security sensor that is unique within
+	// this resource.
+	IntrusionSensorNumber int
+	// IntrusionSensorReArm is This property shall represent the method that
+	// restores this physical security sensor to the normal state.  Manual
+	// indicates manual re-arm is needed.  Automatic indicates the state is
+	// restored automatically because no abnormal physical security
+	// conditions are detected.
+	IntrusionSensorReArm IntrusionSensorReArm
+}
+
 // Chassis represents the physical components of a system. This
 // resource represents the sheet-metal confined spaces and logical zones such
 // as racks, enclosures, chassis and all other containers. Subsystems (like sensors)
@@ -81,15 +149,75 @@ const (
 // indirectly through this resource.
 type Chassis struct {
 	common.Entity
-	ChassisType     ChassisType   `json:"ChassisType"`
-	Manufacturer    string        `json:"Manufacturer"`
-	Model           string        `json:"Model"`
-	SKU             string        `json:"SKU"`
-	SerialNumber    string        `json:"SerialNumber"`
-	Version         string        `json:"Version"`
-	PartNumber      string        `json:"PartNumber"`
-	AssetTag        string        `json:"AssetTag"`
-	Status          common.Status `json:"Status"`
+
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataEtag is the odata etag.
+	ODataEtag string `json:"@odata.etag"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// AssetTag shall contain an identifying string that
+	// tracks the chassis for inventory purposes.
+	AssetTag string
+	// ChassisType shall indicate the physical form factor
+	// for the type of chassis.
+	ChassisType ChassisType
+	// DepthMm shall represent the depth (length) of the
+	// chassis, in millimeters, as specified by the manufacturer.
+	DepthMm float64
+	// Description provides a description of this resource.
+	Description string
+	// EnvironmentalClass shall contain the ASHRAE
+	// Environmental Class for this chassis, as defined by ASHRAE Thermal
+	// Guidelines for Data Processing Environments. These classes define
+	// respective environmental limits that include temperature, relative
+	// humidity, dew point, and maximum allowable elevation.
+	EnvironmentalClass EnvironmentalClass
+	// HeightMm shall represent the height of the chassis,
+	// in millimeters, as specified by the manufacturer.
+	HeightMm float64
+	// IndicatorLED shall contain the indicator light state
+	// for the indicator light associated with this system.
+	IndicatorLED common.IndicatorLED
+	// Location shall contain location information of the
+	// associated chassis.
+	Location common.Location
+	// Manufacturer shall contain the name of the
+	// organization responsible for producing the chassis. This organization
+	// might be the entity from whom the chassis is purchased, but this is
+	// not necessarily true.
+	Manufacturer string
+	// Model shall contain the name by which the
+	// manufacturer generally refers to the chassis.
+	Model string
+	// PartNumber shall contain a part number assigned by
+	// the organization that is responsible for producing or manufacturing
+	// the chassis.
+	PartNumber string
+	// PhysicalSecurity shall contain the sensor state of
+	// the physical security.
+	PhysicalSecurity PhysicalSecurity
+	// PowerState shall contain the power state of the
+	// chassis.
+	PowerState PowerState
+	// SKU shall contain the stock-keeping unit number for
+	// this chassis.
+	SKU string
+	// SerialNumber shall contain a manufacturer-allocated
+	// number that identifies the chassis.
+	SerialNumber string
+	// Status shall contain any status or health properties
+	// of the resource.
+	Status common.Status
+	// UUID shall contain the universal unique identifier
+	// number for this chassis.
+	UUID string
+	// WeightKg shall represent the published mass, commonly
+	// referred to as weight, of the chassis, in kilograms.
+	WeightKg float64
+	// WidthMm shall represent the width of the chassis, in
+	// millimeters, as specified by the manufacturer.
+	WidthMm         float64
 	thermal         string
 	power           string
 	networkAdapters string

@@ -56,9 +56,9 @@ type HealthData struct {
 	PerformanceDegraded bool
 	// PredictedMediaLifeLeftPercent shall contain an indicator
 	// of the percentage of life remaining in the media.
-	PredictedMediaLifeLeftPercent int
+	PredictedMediaLifeLeftPercent float32
 	// RemainingSpareBlockPercentage shall be the remaining spare blocks in percentage.
-	RemainingSpareBlockPercentage int
+	RemainingSpareBlockPercentage float32
 }
 
 // LifeTime shall describe the metrics of the memory since manufacturing.
@@ -84,7 +84,7 @@ type MemoryMetrics struct {
 	// percentage.  When this resource is subordinate to the MemorySummary
 	// object, this property shall be the memory bandwidth utilization over all
 	// memory as a percentage.
-	BandwidthPercent int
+	BandwidthPercent float32
 	// BlockSizeBytes shall be the block size in bytes of all structure elements.
 	BlockSizeBytes int
 	// CurrentPeriod shall contain properties which describe the CurrentPeriod
