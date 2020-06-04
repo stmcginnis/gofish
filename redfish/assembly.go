@@ -29,8 +29,13 @@ type Assembly struct {
 	AssembliesCount int `json:"Assemblies@odata.count"`
 	// Description provides a description of this resource.
 	Description string
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (assembly *Assembly) GetRawData() []byte {
+	return assembly.rawData
 }
 
 // UnmarshalJSON unmarshals a Assembly object from the raw JSON.
