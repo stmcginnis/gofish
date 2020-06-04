@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -101,7 +102,12 @@ func GetCompositionService(c common.Client, uri string) (*CompositionService, er
 	defer resp.Body.Close()
 
 	var compositionservice CompositionService
-	err = json.NewDecoder(resp.Body).Decode(&compositionservice)
+	compositionservice.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(compositionservice.rawData, &compositionservice)
 	if err != nil {
 		return nil, err
 	}
