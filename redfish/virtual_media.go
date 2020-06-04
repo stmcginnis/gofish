@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"github.com/LRichi/gofish/common"
+	"io/ioutil"
 )
 
 // ResetType describe the type off reset to be issue by the resource
@@ -40,6 +41,12 @@ type VirtualMedia struct {
 	WriteProtected      bool                        `json:"WriteProtected"` // WriteProtected ...
 	Inserted            bool                        `json:"Inserted"`       // Inserted status of connect image
 	SupportedMediaTypes []VirtualMediaType          `json:"MediaTypes"`     // MediaTypes allowed media types
+	rawData             []byte                      // rawData holds the original serialized JSON
+}
+
+// GetRawData get raw data json
+func (virtualMedia *VirtualMedia) GetRawData() []byte {
+	return virtualMedia.rawData
 }
 
 // GetVirtualMedia will get a VirtualMedia instance from the service.
@@ -51,7 +58,12 @@ func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
 	defer resp.Body.Close()
 
 	var virtualMedia VirtualMedia
-	err = json.NewDecoder(resp.Body).Decode(&virtualMedia)
+	virtualMedia.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(virtualMedia.rawData, &virtualMedia)
 	if err != nil {
 		return nil, err
 	}
