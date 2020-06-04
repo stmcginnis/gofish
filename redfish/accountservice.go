@@ -250,8 +250,13 @@ type AccountService struct {
 	// Status shall contain any status or health properties
 	// of the Resource.
 	Status common.Status
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (accountservice *AccountService) GetRawData() []byte {
+	return accountservice.rawData
 }
 
 // UnmarshalJSON unmarshals an AccountService object from the raw JSON.

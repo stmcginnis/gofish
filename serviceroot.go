@@ -6,6 +6,7 @@ package gofish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -149,6 +150,13 @@ type Service struct {
 	Vendor string
 	// Sessions shall contain the link to a collection of Sessions.
 	sessions string
+	// rawData raw data json
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (serviceroot *Service) GetRawData() []byte {
+	return serviceroot.rawData
 }
 
 // UnmarshalJSON unmarshals a Service object from the raw JSON.
@@ -218,7 +226,13 @@ func ServiceRoot(c common.Client) (*Service, error) {
 	defer resp.Body.Close()
 
 	var serviceroot Service
-	err = json.NewDecoder(resp.Body).Decode(&serviceroot)
+
+	serviceroot.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(serviceroot.rawData, &serviceroot)
 	if err != nil {
 		return nil, err
 	}
