@@ -39,8 +39,13 @@ type CompositionService struct {
 	ServiceEnabled bool
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (compositionservice *CompositionService) GetRawData() []byte {
+	return compositionservice.rawData
 }
 
 // UnmarshalJSON unmarshals CompositionService object from the raw JSON.
