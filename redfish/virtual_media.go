@@ -19,6 +19,7 @@ const (
 	USBStickVirtualMediaType VirtualMediaType = "USBStick"
 )
 
+// VirtualMediaConnectedMethod this is the type of virtual media connection method
 type VirtualMediaConnectedMethod string
 
 const (
@@ -27,7 +28,9 @@ const (
 	OemVirtualMediaConnectedMethod          VirtualMediaConnectedMethod = "Oem"
 )
 
-// VirtualMedia is used to represent virtual media resource.
+// VirtualMedia used to represent a virtual media resource.
+// Allows you to connect media types such as CD, DVD, USB Stick
+// and others. Media types and methods depend on the hardware manufacturer.
 type VirtualMedia struct {
 	common.Entity
 
