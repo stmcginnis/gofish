@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -283,8 +284,13 @@ type Thermal struct {
 	Temperatures []Temperature
 	// TemperaturesCount is the number of Temperature objects
 	TemperaturesCount int `json:"Temperatures@odata.count"`
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (thermal *Thermal) GetRawData() []byte {
+	return thermal.rawData
 }
 
 // UnmarshalJSON unmarshals an object from the raw JSON.
@@ -335,7 +341,12 @@ func GetThermal(c common.Client, uri string) (*Thermal, error) {
 	defer resp.Body.Close()
 
 	var thermal Thermal
-	err = json.NewDecoder(resp.Body).Decode(&thermal)
+	thermal.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(thermal.rawData, &thermal)
 	if err != nil {
 		return nil, err
 	}
