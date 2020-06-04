@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -85,7 +86,12 @@ func GetAssembly(c common.Client, uri string) (*Assembly, error) {
 	defer resp.Body.Close()
 
 	var assembly Assembly
-	err = json.NewDecoder(resp.Body).Decode(&assembly)
+	assembly.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(assembly.rawData, &assembly)
 	if err != nil {
 		return nil, err
 	}
