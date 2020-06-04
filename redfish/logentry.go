@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -392,6 +393,13 @@ type LogEntry struct {
 	// originOfCondition shall be an href that
 	// references the resource for which the log is associated.
 	originOfCondition string
+	// rawData holds the original serialized JSON
+	rawData []byte
+}
+
+// GetRawData get raw data json
+func (logentry *LogEntry) GetRawData() []byte {
+	return logentry.rawData
 }
 
 // UnmarshalJSON unmarshals a LogEntry object from the raw JSON.
@@ -426,14 +434,19 @@ func GetLogEntry(c common.Client, uri string) (*LogEntry, error) {
 	}
 	defer resp.Body.Close()
 
-	var logentry LogEntry
-	err = json.NewDecoder(resp.Body).Decode(&logentry)
+	var logEntry LogEntry
+	logEntry.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	logentry.SetClient(c)
-	return &logentry, nil
+	err = json.Unmarshal(logEntry.rawData, &logEntry)
+	if err != nil {
+		return nil, err
+	}
+
+	logEntry.SetClient(c)
+	return &logEntry, nil
 }
 
 // ListReferencedLogEntrys gets the collection of LogEntry from
