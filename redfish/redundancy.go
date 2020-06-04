@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -65,8 +66,13 @@ type Redundancy struct {
 	RedundancySetCount int `json:"RedundancySet@odata.count"`
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (redundancy *Redundancy) GetRawData() []byte {
+	return redundancy.rawData
 }
 
 // UnmarshalJSON unmarshals a Redundancy object from the raw JSON.
@@ -120,7 +126,12 @@ func GetRedundancy(c common.Client, uri string) (*Redundancy, error) {
 	defer resp.Body.Close()
 
 	var redundancy Redundancy
-	err = json.NewDecoder(resp.Body).Decode(&redundancy)
+	redundancy.rawData, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(redundancy.rawData, &redundancy)
 	if err != nil {
 		return nil, err
 	}

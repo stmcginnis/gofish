@@ -376,6 +376,7 @@ type Processor struct {
 func (processor *Processor) GetRawData() []byte {
 	return processor.rawData
 }
+
 // UnmarshalJSON unmarshals a Processor object from the raw JSON.
 func (processor *Processor) UnmarshalJSON(b []byte) error {
 	type temp Processor
