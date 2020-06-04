@@ -6,8 +6,9 @@ package redfish
 
 import (
 	"encoding/json"
-	"github.com/LRichi/gofish/common"
 	"io/ioutil"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
 // ResetType describe the type off reset to be issue by the resource
