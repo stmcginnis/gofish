@@ -205,6 +205,7 @@ func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	pcieFunction.SetClient(c)
 	return &pcieFunction, nil
 }
