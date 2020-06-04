@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -209,8 +210,13 @@ type EventDestination struct {
 	// this property is not present, the SubscriptionType shall be assumed to be
 	// RedfishEvent.
 	SubscriptionType SubscriptionType
-	// rawData holds the original serialized JSON so we can compare updates.
+	// rawData holds the original serialized JSON
 	rawData []byte
+}
+
+// GetRawData get raw data json
+func (eventdestination *EventDestination) GetRawData() []byte {
+	return eventdestination.rawData
 }
 
 // UnmarshalJSON unmarshals a EventDestination object from the raw JSON.
@@ -261,14 +267,19 @@ func GetEventDestination(c common.Client, uri string) (*EventDestination, error)
 	}
 	defer resp.Body.Close()
 
-	var eventdestination EventDestination
-	err = json.NewDecoder(resp.Body).Decode(&eventdestination)
+	var eventDestination EventDestination
+	eventDestination.rawData, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	eventdestination.SetClient(c)
-	return &eventdestination, nil
+	err = json.Unmarshal(eventDestination.rawData, &eventDestination)
+	if err != nil {
+		return nil, err
+	}
+
+	eventDestination.SetClient(c)
+	return &eventDestination, nil
 }
 
 // ListReferencedEventDestinations gets the collection of EventDestination from
