@@ -100,6 +100,7 @@ type Link string
 func (l *Link) UnmarshalJSON(b []byte) error {
 	var t struct {
 		ODataID string `json:"@odata.id"`
+		Href    string `json:"href"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -108,6 +109,9 @@ func (l *Link) UnmarshalJSON(b []byte) error {
 	}
 
 	*l = Link(t.ODataID)
+	if *l == "" {
+		*l = Link(t.Href)
+	}
 	return nil
 }
 
