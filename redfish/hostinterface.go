@@ -47,8 +47,6 @@ type HostInterface struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AuthNoneRoleID is used when no authentication on this interface is

@@ -27,8 +27,6 @@ type NetworkInterface struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.

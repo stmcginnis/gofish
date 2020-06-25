@@ -519,8 +519,6 @@ type Resource struct {
 	Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -531,8 +529,6 @@ type Resource struct {
 type ResourceCollection struct {
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataID is the odata identifier.
 	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.

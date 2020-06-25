@@ -234,8 +234,6 @@ type NetworkDeviceFunction struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AssignablePhysicalPorts shall be an array of physical port references

@@ -22,7 +22,6 @@ type StorageService struct {
 	// ODataContext is
 	ODataContext string `json:"@odata.context"`
 	// ODataEtag is
-	ODataEtag string `json:"@odata.etag"`
 	// ODataId is
 	// ODataType is
 	ODataType string `json:"@odata.type"`
