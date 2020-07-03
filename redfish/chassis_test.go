@@ -60,6 +60,44 @@ var chassisBody = `{
 		}
 	}`
 
+var supermicroRAIDChassisBody = `{
+    "@odata.type": "#Chassis.v1_9_1.Chassis",
+    "@odata.id": "/redfish/v1/Chassis/HA-RAID.0.StorageEnclosure.0",
+    "Id": "HA-RAID.0.StorageEnclosure.0",
+    "Name": "Internal Enclosure 0",
+    "ChassisType": "Enclosure",
+    "Model": "Internal Enclosure",
+    "SerialNumber": "",
+    "PartNumber": "",
+    "Links": {
+        "ManagedBy": [
+            {
+                "@odata.id": "/redfish/v1/Managers/1"
+            }
+        ],
+        "Storage": [
+            {
+                "@odata.id": "/redfish/v1/Systems/1/Storage/HA-RAID"
+            }
+        ],
+        "Drives": [
+            {
+                "@odata.id": "/redfish/v1/Chassis/HA-RAID.0.StorageEnclosure.0/Drives/Disk.Bay.0"
+            },
+            {
+                "@odata.id": "/redfish/v1/Chassis/HA-RAID.0.StorageEnclosure.0/Drives/Disk.Bay.1"
+            },
+            {
+                "@odata.id": "/redfish/v1/Chassis/HA-RAID.0.StorageEnclosure.0/Drives/Disk.Bay.2"
+            },
+            {
+                "@odata.id": "/redfish/v1/Chassis/HA-RAID.0.StorageEnclosure.0/Drives/Disk.Bay.3"
+            }
+        ]
+    },
+    "Oem": {}
+}`
+
 // TestChassis tests the parsing of Chassis objects.
 func TestChassis(t *testing.T) {
 	var result Chassis
@@ -124,6 +162,37 @@ func TestChassis(t *testing.T) {
 	if len(result.SupportedResetTypes) != 2 {
 		t.Errorf("Invalid allowable reset actions, expected 2, got %d",
 			len(result.SupportedResetTypes))
+	}
+}
+
+// TestMinimumChassis tests a failure we had from how SM returns a RAID
+// controller chassis.
+//
+// The required properties according to the spec are:
+// "required": [
+//	"ChassisType",
+//	"@odata.id",
+//	"@odata.type",
+//	"Id",
+//	"Name"]
+func TestMinimumChassis(t *testing.T) {
+	var result Chassis
+	err := json.NewDecoder(strings.NewReader(supermicroRAIDChassisBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.ID != "HA-RAID.0.StorageEnclosure.0" {
+		t.Errorf("Received invalid ID: %s", result.ID)
+	}
+
+	if result.Name != "Internal Enclosure 0" {
+		t.Errorf("Received invalid name: %s", result.Name)
+	}
+
+	if result.ChassisType != EnclosureChassisType {
+		t.Errorf("Received invalid chassis type: %s", result.ChassisType)
 	}
 }
 
