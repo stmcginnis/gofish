@@ -6,7 +6,10 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/url"
 	"reflect"
+	"strings"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -135,6 +138,9 @@ type EventDestination struct {
 	// this service will send to the EventDestination. If this property is not
 	// present, the EventFormatType shall be assumed to be Event.
 	EventFormatType EventFormatType
+	// EventTypes contains the types of events
+	// that will be sent to the destination.
+	EventTypes []EventType
 	// HTTPHeaders shall contain an object consisting of the names and values of
 	// of HTTP header to be included with every event POST to the Event
 	// Destination. This property shall be null or an empty array on a GET. An
@@ -267,6 +273,99 @@ func GetEventDestination(c common.Client, uri string) (*EventDestination, error)
 
 	eventdestination.SetClient(c)
 	return &eventdestination, nil
+}
+
+// subscriptionPayload is the payload to create the event subscription
+type subscriptionPayload struct {
+	Destination string            `json:"Destination"`
+	EventTypes  []EventType       `json:"EventTypes"`
+	HTTPHeaders map[string]string `json:"HttpHeaders"`
+	Oem         interface{}       `json:"Oem"`
+}
+
+// validateCreateEventDestinationParams will validate
+// CreateEventDestination parameters
+func validateCreateEventDestinationParams(
+	destination string,
+	eventTypes []EventType,
+) error {
+
+	// validate destination
+	if len(destination) == 0 {
+		return fmt.Errorf("empty destination is not valid")
+	}
+
+	if !strings.HasPrefix(destination, "http") {
+		return fmt.Errorf("destination should start with http")
+	}
+
+	// validate event types
+	for _, et := range eventTypes {
+		if !et.IsValidEventType() {
+			return fmt.Errorf("invalid event type")
+		}
+	}
+
+	return nil
+}
+
+// CreateEventDestination will create
+// a EventDestination instance.
+func CreateEventDestination(
+	c common.Client,
+	uri string,
+	destination string,
+	eventTypes []EventType,
+	httpHeaders map[string]string,
+	oem []byte,
+) (string, error) {
+
+	// validate parameters
+	err := validateCreateEventDestinationParams(destination, eventTypes)
+	if err != nil {
+		return "", err
+	}
+
+	// create subscription payload
+	s := &subscriptionPayload{
+		Destination: destination,
+	}
+
+	if len(eventTypes) > 0 {
+		s.EventTypes = eventTypes
+	}
+
+	if len(httpHeaders) > 0 {
+		s.HTTPHeaders = httpHeaders
+	}
+
+	if len(oem) > 0 {
+		var oemInterface interface{}
+		err := json.Unmarshal(oem, &oemInterface)
+		if err != nil {
+			return "", err
+		}
+		s.Oem = oemInterface
+	}
+
+	resp, err := c.Post(uri, s)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// return subscription link from returned location
+	subscriptionLink := resp.Header.Get("Location")
+	if urlParser, err := url.ParseRequestURI(subscriptionLink); err == nil {
+		subscriptionLink = urlParser.RequestURI()
+	}
+
+	return subscriptionLink, nil
+}
+
+// DeleteEventDestination will delete a EventDestination.
+func DeleteEventDestination(c common.Client, uri string) (err error) {
+	return c.Delete(uri)
 }
 
 // ListReferencedEventDestinations gets the collection of EventDestination from

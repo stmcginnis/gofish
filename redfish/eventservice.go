@@ -25,6 +25,42 @@ const (
 	MetricReportEventFormatType EventFormatType = "MetricReport"
 )
 
+// EventType is
+type EventType string
+
+const (
+	// AlertEventType indicates a condition exists which requires attention.
+	AlertEventType EventType = "Alert"
+	// ResourceAddedEventType indicates a resource has been added.
+	ResourceAddedEventType EventType = "ResourceAdded"
+	// ResourceRemovedEventType indicates a resource has been removed.
+	ResourceRemovedEventType EventType = "ResourceRemoved"
+	// ResourceUpdatedEventType indicates a resource has been updated.
+	ResourceUpdatedEventType EventType = "ResourceUpdated"
+	// StatusChangeEventType indicates the status of this resource has changed.
+	StatusChangeEventType EventType = "StatusChange"
+)
+
+// IsValidEventType will check if it is a valid EventType
+func (et EventType) IsValidEventType() bool {
+	switch et {
+	case AlertEventType, ResourceAddedEventType,
+		ResourceRemovedEventType, ResourceUpdatedEventType,
+		StatusChangeEventType:
+		return true
+	}
+	return false
+}
+
+// SupportedEventTypes contains a map of supported EventType
+var SupportedEventTypes = map[string]EventType{
+	"Alert":                    AlertEventType,
+	"ResourceAdded":            ResourceAddedEventType,
+	"ResourceRemovedEventType": ResourceRemovedEventType,
+	"ResourceUpdated":          ResourceUpdatedEventType,
+	"StatusChange":             StatusChangeEventType,
+}
+
 // SMTPAuthenticationMethods is
 type SMTPAuthenticationMethods string
 
@@ -89,11 +125,14 @@ type EventService struct {
 	DeliveryRetryIntervalSeconds int
 	// Description provides a description of this resource.
 	Description string
-	// EventFormatTypes shall indicate the the
+	// EventFormatTypes shall indicate the
 	// content types of the message that this service can send to the event
 	// destination.  If this property is not present, the EventFormatType
 	// shall be assumed to be Event.
 	EventFormatTypes []EventFormatType
+	// EventTypesForSubscription is the types of Events
+	// that can be subscribed to.
+	EventTypesForSubscription []EventType
 	// IncludeOriginOfConditionSupported shall indicate
 	// whether the service supports including the resource payload of the
 	// origin of condition in the event payload.  If `true`, event
@@ -124,7 +163,7 @@ type EventService struct {
 	// Subscriptions and on generated Events.
 	SubordinateResourcesSupported bool
 	// Subscriptions shall contain the link to a collection of type
-	// EventDestinationCollection.
+	// EventDestination.
 	subscriptions string
 	// submitTestEventTarget is the URL to send SubmitTestEvent actions.
 	submitTestEventTarget string
@@ -222,6 +261,49 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 	}
 
 	return result, nil
+}
+
+// GetEventSubscriptions gets all the subscriptions using the event service.
+func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
+	if eventservice.subscriptions == "" {
+		return nil, nil
+	}
+
+	return ListReferencedEventDestinations(eventservice.Client, eventservice.subscriptions)
+}
+
+// GetEventSubscription gets a specific subscription using the event service.
+func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
+	if eventservice.subscriptions == "" {
+		return nil, nil
+	}
+
+	return GetEventDestination(eventservice.Client, uri)
+}
+
+// CreateEventSubscription creates the subscription using the event service.
+func (eventservice *EventService) CreateEventSubscription(
+	destination string,
+	eventTypes []EventType,
+	httpHeaders map[string]string,
+	oem []byte,
+) (string, error) {
+	if eventservice.subscriptions == "" {
+		return "", nil
+	}
+
+	return CreateEventDestination(
+		eventservice.Client,
+		eventservice.subscriptions,
+		destination,
+		eventTypes,
+		httpHeaders,
+		oem)
+}
+
+// DeleteEventSubscription deletes a specific subscription using the event service.
+func (eventservice *EventService) DeleteEventSubscription(uri string) error {
+	return DeleteEventDestination(eventservice.Client, uri)
 }
 
 // SubmitTestEvent shall add a test event to the event service with the event
