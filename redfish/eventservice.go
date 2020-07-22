@@ -282,6 +282,14 @@ func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestin
 }
 
 // CreateEventSubscription creates the subscription using the event service.
+// destination should contain the URL of the destination for events to be sent.
+// eventTypes is a list of EventType to subscribe to.
+// httpHeaders gives the opportunity to specify any arbitrary HTTP headers
+// required for the event POST operation.
+// oem gives the opportunity to specify any OEM specific properties, it should
+// contain the vendor specific marshalled struct that goes inside the Oem session.
+// It returns the new subscription URI if the event subscription is created
+// with success or any error encountered.
 func (eventservice *EventService) CreateEventSubscription(
 	destination string,
 	eventTypes []EventType,
