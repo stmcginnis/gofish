@@ -317,7 +317,7 @@ func CreateEventDestination(
 	destination string,
 	eventTypes []EventType,
 	httpHeaders map[string]string,
-	oem []byte,
+	oem interface{},
 ) (string, error) {
 
 	// validate parameters
@@ -331,21 +331,19 @@ func CreateEventDestination(
 		Destination: destination,
 	}
 
+	// event types
 	if len(eventTypes) > 0 {
 		s.EventTypes = eventTypes
 	}
 
+	// HTTP headers
 	if len(httpHeaders) > 0 {
 		s.HTTPHeaders = httpHeaders
 	}
 
-	if len(oem) > 0 {
-		var oemInterface interface{}
-		err := json.Unmarshal(oem, &oemInterface)
-		if err != nil {
-			return "", err
-		}
-		s.Oem = oemInterface
+	// oem
+	if oem != nil {
+		s.Oem = oem
 	}
 
 	resp, err := c.Post(uri, s)
