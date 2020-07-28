@@ -22,6 +22,13 @@ var eventDestinationBody = `{
 		"Context": "MyContext",
 		"Destination": "http://example.com/events",
 		"EventFormatType": "MetricReport",
+		"EventTypes":[
+			"StatusChange",
+			"ResourceUpdated",
+			"ResourceAdded",
+			"ResourceRemoved",
+			"Alert"
+		],
 		"HttpHeaders": [],
 		"MessageIds": ["One", "Two"],
 		"Protocol": "Redfish",
@@ -62,6 +69,12 @@ func TestEventDestination(t *testing.T) {
 
 	if result.SubordinateResources {
 		t.Error("Subordinate resources should be False")
+	}
+
+	for _, et := range result.EventTypes {
+		if !et.IsValidEventType() {
+			t.Errorf("invalid event type: %s", et)
+		}
 	}
 }
 

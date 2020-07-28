@@ -25,6 +25,15 @@ type TestAPICall struct {
 type TestClient struct {
 	// calls collects any API calls made through the client
 	calls []TestAPICall
+	// CustomReturnForOperations can be used to define custom
+	// return for operations, valid keys are:
+	// http.MethodGet, http.MethodPost, http.MethodPut,
+	// http.MethodPatch, http.MethodDelete
+	// TODO: This can be improved to map cases where
+	// in the test we have more than one operation using
+	// the same method, for example, two posts with
+	// different returns.
+	CustomReturnForOperations map[string]interface{}
 }
 
 // CapturedCalls gets all calls that were made through this instance
@@ -49,30 +58,50 @@ func (c *TestClient) recordCall(action string, url string, payload interface{}) 
 
 // Get performs a GET request against the Redfish service.
 func (c *TestClient) Get(url string) (*http.Response, error) {
-	c.recordCall("GET", url, nil)
-	return nil, nil
+	c.recordCall(http.MethodGet, url, nil)
+	customReturnForOperation, ok := c.CustomReturnForOperations[http.MethodGet]
+	if !ok {
+		return nil, nil
+	}
+	return customReturnForOperation.(*http.Response), nil
 }
 
 // Post performs a Post request against the Redfish service.
 func (c *TestClient) Post(url string, payload interface{}) (*http.Response, error) {
-	c.recordCall("POST", url, payload)
-	return nil, nil
+	c.recordCall(http.MethodPost, url, payload)
+	customReturnForOperation, ok := c.CustomReturnForOperations[http.MethodPost]
+	if !ok {
+		return nil, nil
+	}
+	return customReturnForOperation.(*http.Response), nil
 }
 
 // Put performs a Put request against the Redfish service.
 func (c *TestClient) Put(url string, payload interface{}) (*http.Response, error) {
-	c.recordCall("PUT", url, payload)
-	return nil, nil
+	c.recordCall(http.MethodPut, url, payload)
+	customReturnForOperation, ok := c.CustomReturnForOperations[http.MethodPut]
+	if !ok {
+		return nil, nil
+	}
+	return customReturnForOperation.(*http.Response), nil
 }
 
 // Patch performs a Patch request against the Redfish service.
 func (c *TestClient) Patch(url string, payload interface{}) (*http.Response, error) {
-	c.recordCall("PATH", url, payload)
-	return nil, nil
+	c.recordCall(http.MethodPatch, url, payload)
+	customReturnForOperation, ok := c.CustomReturnForOperations[http.MethodPatch]
+	if !ok {
+		return nil, nil
+	}
+	return customReturnForOperation.(*http.Response), nil
 }
 
 // Delete performs a Delete request against the Redfish service.
 func (c *TestClient) Delete(url string) error {
-	c.recordCall("DELETE", url, nil)
-	return nil
+	c.recordCall(http.MethodDelete, url, nil)
+	customReturnForOperation, ok := c.CustomReturnForOperations[http.MethodDelete]
+	if !ok {
+		return nil
+	}
+	return customReturnForOperation.(error)
 }
