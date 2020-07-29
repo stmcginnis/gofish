@@ -160,27 +160,27 @@ func (c *APIClient) Get(url string) (*http.Response, error) {
 		relativePath = common.DefaultServiceRoot
 	}
 
-	return c.runRequest("GET", relativePath, nil)
+	return c.runRequest(http.MethodGet, relativePath, nil)
 }
 
 // Post performs a Post request against the Redfish service.
 func (c *APIClient) Post(url string, payload interface{}) (*http.Response, error) {
-	return c.runRequest("POST", url, payload)
+	return c.runRequest(http.MethodPost, url, payload)
 }
 
 // Put performs a Put request against the Redfish service.
 func (c *APIClient) Put(url string, payload interface{}) (*http.Response, error) {
-	return c.runRequest("PUT", url, payload)
+	return c.runRequest(http.MethodPut, url, payload)
 }
 
 // Patch performs a Patch request against the Redfish service.
 func (c *APIClient) Patch(url string, payload interface{}) (*http.Response, error) {
-	return c.runRequest("PATCH", url, payload)
+	return c.runRequest(http.MethodPatch, url, payload)
 }
 
 // Delete performs a Delete request against the Redfish service.
 func (c *APIClient) Delete(url string) error {
-	resp, err := c.runRequest("DELETE", url, nil)
+	resp, err := c.runRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		return err
 	}

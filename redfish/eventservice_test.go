@@ -174,29 +174,28 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 	// returned during create event subscription
 	expectedSubscriptionURI := "/redfish/v1/EventService/Subscriptions/SubscriptionId/"
 
-	// define the custom return for the operations
-	// during the use of the test client
-	customReturnForOperationsForTestClient := map[string]interface{}{
-		// custom return for the POST operation
-		http.MethodPost: &http.Response{
-			Status:        "201 Created",
-			StatusCode:    201,
-			Proto:         "HTTP/1.1",
-			ProtoMajor:    1,
-			ProtoMinor:    1,
-			Body:          ioutil.NopCloser(bytes.NewBufferString("")),
-			ContentLength: int64(len("")),
-			Header: http.Header{
-				"Location": []string{
-					fmt.Sprintf("https://redfish-server%s", expectedSubscriptionURI),
+	// create the custom test client
+	testClient := &common.TestClient{
+		CustomReturnForOperations: map[string][]interface{}{
+			http.MethodPost: {
+				// defining the custom return for the first POST operation
+				&http.Response{
+					Status:        "201 Created",
+					StatusCode:    201,
+					Proto:         "HTTP/1.1",
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Body:          ioutil.NopCloser(bytes.NewBufferString("")),
+					ContentLength: int64(len("")),
+					Header: http.Header{
+						"Location": []string{
+							fmt.Sprintf("https://redfish-server%s",
+								expectedSubscriptionURI),
+						},
+					},
 				},
 			},
 		},
-	}
-
-	// create the custom test client
-	testClient := &common.TestClient{
-		CustomReturnForOperations: customReturnForOperationsForTestClient,
 	}
 	result.SetClient(testClient)
 
@@ -215,6 +214,7 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 		},
 	)
 
+	// validate the return values
 	if err != nil {
 		t.Errorf("Error making CreateEventSubscription call: %s", err)
 	}
@@ -225,4 +225,411 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 			expectedSubscriptionURI)
 	}
 
+	// validate the payload
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Destination:https://myeventreciever/eventreceiver") {
+		t.Errorf("Unexpected Destination CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "EventTypes:[Alert]") {
+		t.Errorf("Unexpected EventTypes CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "HttpHeaders:map[Header:HeaderValue]") {
+		t.Errorf("Unexpected HttpHeaders CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "Oem:map[Vendor:map[FirstVendorSpecificConfiguration:1 SecondVendorSpecificConfiguration:2]") {
+		t.Errorf("Unexpected Oem CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+}
+
+// TestEventServiceDeleteEventSubscription tests the DeleteEventSubscription call.
+func TestEventServiceDeleteEventSubscription(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	// create the custom test client
+	testClient := &common.TestClient{
+		CustomReturnForOperations: map[string][]interface{}{
+			http.MethodDelete: {
+				// defining the custom return for the
+				// first DELETE operation
+				err,
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	// create event subscription
+	err = result.DeleteEventSubscription(
+		"/redfish/v1/EventService/Subscriptions/SubscriptionId/")
+
+	// validate the return values
+	if err != nil {
+		t.Errorf("Error making DeleteEventSubscription call: %s", err)
+	}
+}
+
+// TestEventServiceGetEventSubscription tests the GetEventSubscription call.
+func TestEventServiceGetEventSubscription(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	// create the custom test client
+	testClient := &common.TestClient{
+		CustomReturnForOperations: map[string][]interface{}{
+			http.MethodGet: {
+				// defining the custom return for the first GET operation
+				&http.Response{
+					Status:        "200 OK",
+					StatusCode:    200,
+					Proto:         "HTTP/1.1",
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationBody)),
+					ContentLength: int64(len(eventDestinationBody)),
+					Header:        make(http.Header, 0),
+				},
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	// create event subscription
+	eventDestination, err := result.GetEventSubscription(
+		"/redfish/v1/EventService/Subscriptions/EventDestination-1/")
+
+	// validate the return values
+	if eventDestination.ID != "EventDestination-1" {
+		t.Errorf("Error making GetEventSubscription call: %s", err)
+	}
+}
+
+// TestEventServiceGetEventSubscriptions tests the GetEventSubscriptions call.
+func TestEventServiceGetEventSubscriptions(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	// create the custom test client
+	testClient := &common.TestClient{
+		CustomReturnForOperations: map[string][]interface{}{
+			http.MethodGet: {
+				// defining the custom return for the first GET operation
+				&http.Response{
+					Status:        "200 OK",
+					StatusCode:    200,
+					Proto:         "HTTP/1.1",
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationsBody)),
+					ContentLength: int64(len(eventDestinationsBody)),
+					Header:        make(http.Header, 0),
+				},
+				// defining the custom return for the second GET operation
+				&http.Response{
+					Status:        "200 OK",
+					StatusCode:    200,
+					Proto:         "HTTP/1.1",
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationBody)),
+					ContentLength: int64(len(eventDestinationBody)),
+					Header:        make(http.Header, 0),
+				},
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	// create event subscription
+	eventDestinations, err := result.GetEventSubscriptions()
+
+	// validate the return values
+	if eventDestinations[0].ID != "EventDestination-1" {
+		t.Errorf("Error making GetEventSubscriptions call: %s", err)
+	}
+}
+
+// TestEventServiceCreateEventSubscriptionWithoutOptionalParameters
+// tests the CreateEventSubscription call without optional parameters.
+func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	// define the expected subscription URI that should be
+	// returned during create event subscription
+	expectedSubscriptionURI := "/redfish/v1/EventService/Subscriptions/SubscriptionId/"
+
+	// create the custom test client
+	testClient := &common.TestClient{
+		CustomReturnForOperations: map[string][]interface{}{
+			http.MethodPost: {
+				// defining the custom return for the first POST operation
+				&http.Response{
+					Status:        "201 Created",
+					StatusCode:    201,
+					Proto:         "HTTP/1.1",
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Body:          ioutil.NopCloser(bytes.NewBufferString("")),
+					ContentLength: int64(len("")),
+					Header: http.Header{
+						"Location": []string{
+							fmt.Sprintf("https://redfish-server%s",
+								expectedSubscriptionURI),
+						},
+					},
+				},
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	// create event subscription
+	subscriptionURI, err := result.CreateEventSubscription(
+		"https://myeventreciever/eventreceiver",
+		[]EventType{SupportedEventTypes["Alert"]},
+		nil,
+		nil,
+	)
+
+	// validate the return values
+	if err != nil {
+		t.Errorf("Error making CreateEventSubscription call: %s", err)
+	}
+
+	if subscriptionURI != expectedSubscriptionURI {
+		t.Errorf("Error CreateEventSubscription returned: %s expected: %s",
+			subscriptionURI,
+			expectedSubscriptionURI)
+	}
+
+	// validate the payload
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Destination:https://myeventreciever/eventreceiver") {
+		t.Errorf("Unexpected Destination CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "EventTypes:[Alert]") {
+		t.Errorf("Unexpected EventTypes CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "Oem") {
+		t.Errorf("Unexpected Oem CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+
+	if strings.Contains(calls[0].Payload, "HttpHeaders") {
+		t.Errorf("Unexpected HttpHeaders CreateEventSubscription payload: %s", calls[0].Payload)
+	}
+}
+
+// TestEventServiceCreateEventSubscriptionInputParametersValidation
+// tests the validation of input parameters for CreateEventSubscription.
+func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	// create event subscription invalid destination
+	invalidDestination := "myeventreciever/eventreceiver"
+	_, err = result.CreateEventSubscription(
+		invalidDestination,
+		[]EventType{SupportedEventTypes["Alert"]},
+		nil,
+		nil,
+	)
+
+	// validate the returned error
+	expectedError := "destination should start with http"
+	if err.Error() != expectedError {
+		t.Errorf("Error CreateEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+
+	// create event subscription invalid destination
+	invalidDestination = ""
+	_, err = result.CreateEventSubscription(
+		invalidDestination,
+		[]EventType{SupportedEventTypes["Alert"]},
+		nil,
+		nil,
+	)
+
+	// validate the returned error
+	expectedError = "empty destination is not valid"
+	if err.Error() != expectedError {
+		t.Errorf("Error CreateEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+
+	// create event subscription invalid destination
+	invalidDestination = "   "
+	_, err = result.CreateEventSubscription(
+		invalidDestination,
+		[]EventType{SupportedEventTypes["Alert"]},
+		nil,
+		nil,
+	)
+
+	// validate the returned error
+	expectedError = "empty destination is not valid"
+	if err.Error() != expectedError {
+		t.Errorf("Error CreateEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+
+	// create event subscription empty event type
+	_, err = result.CreateEventSubscription(
+		"https://myeventreciever/eventreceiver",
+		[]EventType{},
+		nil,
+		nil,
+	)
+
+	// validate the returned error
+	expectedError = "at least one event type for subscription should be defined"
+	if err.Error() != expectedError {
+		t.Errorf("Error CreateEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+
+	// create event subscription nil event type
+	_, err = result.CreateEventSubscription(
+		"https://myeventreciever/eventreceiver",
+		nil,
+		nil,
+		nil,
+	)
+
+	// validate the returned error
+	expectedError = "at least one event type for subscription should be defined"
+	if err.Error() != expectedError {
+		t.Errorf("Error CreateEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+
+	// create event subscription empty
+	// subscription link in the event service
+	result.subscriptions = ""
+	_, err = result.CreateEventSubscription(
+		"https://myeventreciever/eventreceiver",
+		[]EventType{SupportedEventTypes["Alert"]},
+		nil,
+		nil,
+	)
+
+	// validate the returned error
+	expectedError = "empty subscription link in the event service"
+	if err.Error() != expectedError {
+		t.Errorf("Error CreateEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+}
+
+// TestEventServiceDeleteEventSubscriptionInputParametersValidation
+// tests the validation of input parameters for DeleteEventSubscription.
+func TestEventServiceDeleteEventSubscriptionInputParametersValidation(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+	// delete event subscription
+	err = result.DeleteEventSubscription("")
+
+	// validate the returned error
+	expectedError := "uri should not be empty"
+	if err.Error() != expectedError {
+		t.Errorf("Error DeleteEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+
+	// delete event subscription
+	err = result.DeleteEventSubscription(" ")
+
+	// validate the returned error
+	expectedError = "uri should not be empty"
+	if err.Error() != expectedError {
+		t.Errorf("Error DeleteEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+}
+
+// TestEventServiceGetEventSubscriptionInputParametersValidation
+// tests the validation of input parameters for GetEventSubscription.
+func TestEventServiceGetEventSubscriptionInputParametersValidation(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+	// get event subscription
+	_, err = result.GetEventSubscription("")
+
+	// validate the returned error
+	expectedError := "uri should not be empty"
+	if err.Error() != expectedError {
+		t.Errorf("Error GetEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+
+	// get event subscription
+	_, err = result.GetEventSubscription(" ")
+
+	// validate the returned error
+	expectedError = "uri should not be empty"
+	if err.Error() != expectedError {
+		t.Errorf("Error GetEventSubscription returned: %s expected: %s",
+			err,
+			expectedError)
+	}
+}
+
+// TestEventServiceGetEventSubscriptionsEmptySubscriptionsLink
+// tests the GetEventSubscriptions when the subscriptions link
+// is empty.
+func TestEventServiceGetEventSubscriptionsEmptySubscriptionsLink(t *testing.T) {
+	var result EventService
+	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	// get event subscriptions with empty subscription link
+	result.subscriptions = ""
+	_, err = result.GetEventSubscriptions()
+
+	// validate the returned error
+	expectedError := "empty subscription link in the event service"
+	if err.Error() != expectedError {
+		t.Errorf("Error GetEventSubscriptions returned: %s expected: %s",
+			err,
+			expectedError)
+	}
 }

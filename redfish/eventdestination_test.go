@@ -38,6 +38,21 @@ var eventDestinationBody = `{
 		"SubscriptionType": "SSE"
 	}`
 
+var eventDestinationsBody = `{
+		"@odata.context": "/redfish/v1/$metadata#EventDestinationCollection.EventDestinationCollection",
+		"@odata.etag": "W/\"AA6D42B0\"",
+		"@odata.id": "/redfish/v1/EventService/Subscriptions/",
+		"@odata.type": "#EventDestinationCollection.EventDestinationCollection",
+		"Description": "User Event Subscriptions",
+		"Name": "EventSubscriptions",
+		"Members": [
+			{
+				"@odata.id": "/redfish/v1/EventService/Subscriptions/EventDestination-1/"
+			}
+		],
+		"Members@odata.count": 1
+	}`
+
 // TestEventDestination tests the parsing of EventDestination objects.
 func TestEventDestination(t *testing.T) {
 	var result EventDestination

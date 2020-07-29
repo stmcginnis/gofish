@@ -259,6 +259,11 @@ func (eventdestination *EventDestination) Update() error {
 
 // GetEventDestination will get a EventDestination instance from the service.
 func GetEventDestination(c common.Client, uri string) (*EventDestination, error) {
+	// validate uri
+	if len(strings.TrimSpace(uri)) == 0 {
+		return nil, fmt.Errorf("uri should not be empty")
+	}
+
 	resp, err := c.Get(uri)
 	if err != nil {
 		return nil, err
@@ -279,19 +284,24 @@ func GetEventDestination(c common.Client, uri string) (*EventDestination, error)
 type subscriptionPayload struct {
 	Destination string            `json:"Destination"`
 	EventTypes  []EventType       `json:"EventTypes"`
-	HTTPHeaders map[string]string `json:"HttpHeaders"`
-	Oem         interface{}       `json:"Oem"`
+	HTTPHeaders map[string]string `json:"HttpHeaders,omitempty"`
+	Oem         interface{}       `json:"Oem,omitempty"`
 }
 
 // validateCreateEventDestinationParams will validate
 // CreateEventDestination parameters
 func validateCreateEventDestinationParams(
+	uri string,
 	destination string,
 	eventTypes []EventType,
 ) error {
+	// validate uri
+	if len(strings.TrimSpace(uri)) == 0 {
+		return fmt.Errorf("uri should not be empty")
+	}
 
 	// validate destination
-	if len(destination) == 0 {
+	if len(strings.TrimSpace(destination)) == 0 {
 		return fmt.Errorf("empty destination is not valid")
 	}
 
@@ -300,6 +310,10 @@ func validateCreateEventDestinationParams(
 	}
 
 	// validate event types
+	if len(eventTypes) == 0 {
+		return fmt.Errorf("at least one event type for subscription should be defined")
+	}
+
 	for _, et := range eventTypes {
 		if !et.IsValidEventType() {
 			return fmt.Errorf("invalid event type")
@@ -309,8 +323,15 @@ func validateCreateEventDestinationParams(
 	return nil
 }
 
-// CreateEventDestination will create
-// a EventDestination instance.
+// CreateEventDestination will create a EventDestination instance.
+// destination should contain the URL of the destination for events to be sent.
+// eventTypes is a list of EventType to subscribe to.
+// httpHeaders is optional and gives the opportunity to specify any arbitrary
+// HTTP headers required for the event POST operation.
+// oem is optional and gives the opportunity to specify any OEM specific properties,
+// it should contain the vendor specific struct that goes inside the Oem session.
+// It returns the new subscription URI if the event subscription is created
+// with success or any error encountered.
 func CreateEventDestination(
 	c common.Client,
 	uri string,
@@ -320,8 +341,13 @@ func CreateEventDestination(
 	oem interface{},
 ) (string, error) {
 
-	// validate parameters
-	err := validateCreateEventDestinationParams(destination, eventTypes)
+	// validate input parameters
+	err := validateCreateEventDestinationParams(
+		uri,
+		destination,
+		eventTypes,
+	)
+
 	if err != nil {
 		return "", err
 	}
@@ -329,11 +355,7 @@ func CreateEventDestination(
 	// create subscription payload
 	s := &subscriptionPayload{
 		Destination: destination,
-	}
-
-	// event types
-	if len(eventTypes) > 0 {
-		s.EventTypes = eventTypes
+		EventTypes:  eventTypes,
 	}
 
 	// HTTP headers
@@ -341,7 +363,7 @@ func CreateEventDestination(
 		s.HTTPHeaders = httpHeaders
 	}
 
-	// oem
+	// Oem
 	if oem != nil {
 		s.Oem = oem
 	}
@@ -363,6 +385,11 @@ func CreateEventDestination(
 
 // DeleteEventDestination will delete a EventDestination.
 func DeleteEventDestination(c common.Client, uri string) (err error) {
+	// validate uri
+	if len(strings.TrimSpace(uri)) == 0 {
+		return fmt.Errorf("uri should not be empty")
+	}
+
 	return c.Delete(uri)
 }
 

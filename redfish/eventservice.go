@@ -6,7 +6,9 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/stmcginnis/gofish/common"
@@ -265,8 +267,8 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 
 // GetEventSubscriptions gets all the subscriptions using the event service.
 func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
-	if eventservice.subscriptions == "" {
-		return nil, nil
+	if len(strings.TrimSpace(eventservice.subscriptions)) == 0 {
+		return nil, fmt.Errorf("empty subscription link in the event service")
 	}
 
 	return ListReferencedEventDestinations(eventservice.Client, eventservice.subscriptions)
@@ -274,20 +276,16 @@ func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, 
 
 // GetEventSubscription gets a specific subscription using the event service.
 func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
-	if eventservice.subscriptions == "" {
-		return nil, nil
-	}
-
 	return GetEventDestination(eventservice.Client, uri)
 }
 
 // CreateEventSubscription creates the subscription using the event service.
 // destination should contain the URL of the destination for events to be sent.
 // eventTypes is a list of EventType to subscribe to.
-// httpHeaders gives the opportunity to specify any arbitrary HTTP headers
-// required for the event POST operation.
-// oem gives the opportunity to specify any OEM specific properties, it should
-// contain the vendor specific struct that goes inside the Oem session.
+// httpHeaders is optional and gives the opportunity to specify any arbitrary
+// HTTP headers required for the event POST operation.
+// oem is optional and gives the opportunity to specify any OEM specific properties,
+// it should contain the vendor specific struct that goes inside the Oem session.
 // It returns the new subscription URI if the event subscription is created
 // with success or any error encountered.
 func (eventservice *EventService) CreateEventSubscription(
@@ -296,8 +294,8 @@ func (eventservice *EventService) CreateEventSubscription(
 	httpHeaders map[string]string,
 	oem interface{},
 ) (string, error) {
-	if eventservice.subscriptions == "" {
-		return "", nil
+	if len(strings.TrimSpace(eventservice.subscriptions)) == 0 {
+		return "", fmt.Errorf("empty subscription link in the event service")
 	}
 
 	return CreateEventDestination(
