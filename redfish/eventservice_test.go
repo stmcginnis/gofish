@@ -176,7 +176,7 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForOperations: map[string][]interface{}{
+		CustomReturnForActions: map[string][]interface{}{
 			http.MethodPost: {
 				// defining the custom return for the first POST operation
 				&http.Response{
@@ -255,7 +255,7 @@ func TestEventServiceDeleteEventSubscription(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForOperations: map[string][]interface{}{
+		CustomReturnForActions: map[string][]interface{}{
 			http.MethodDelete: {
 				// defining the custom return for the
 				// first DELETE operation
@@ -285,7 +285,7 @@ func TestEventServiceGetEventSubscription(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForOperations: map[string][]interface{}{
+		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
 				// defining the custom return for the first GET operation
 				&http.Response{
@@ -323,7 +323,7 @@ func TestEventServiceGetEventSubscriptions(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForOperations: map[string][]interface{}{
+		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
 				// defining the custom return for the first GET operation
 				&http.Response{
@@ -376,7 +376,7 @@ func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForOperations: map[string][]interface{}{
+		CustomReturnForActions: map[string][]interface{}{
 			http.MethodPost: {
 				// defining the custom return for the first POST operation
 				&http.Response{

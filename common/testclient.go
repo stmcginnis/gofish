@@ -26,13 +26,13 @@ type TestAPICall struct {
 type TestClient struct {
 	// calls collects any API calls made through the client
 	calls []TestAPICall
-	// CustomReturnForOperations can be used to define custom
-	// return for operations, valid keys are:
+	// CustomReturnForActions can be used to define custom
+	// return for actions, valid keys are:
 	// http.MethodGet, http.MethodPost, http.MethodPut,
-	// http.MethodPatch, http.MethodDelete.
+	// http.MethodPatch and http.MethodDelete.
 	// For each key it is possible to define a list of
 	// returns (in the order they should be returned).
-	CustomReturnForOperations map[string][]interface{}
+	CustomReturnForActions map[string][]interface{}
 }
 
 // CapturedCalls gets all calls that were made through this instance
@@ -52,25 +52,25 @@ func (c *TestClient) actionCount(action string) int {
 	return actionCount
 }
 
-// getCustomReturnForOperation gets the custom return for the action
-func (c *TestClient) getCustomReturnForOperation(action string) interface{} {
+// getCustomReturnForAction gets the custom return for the action
+func (c *TestClient) getCustomReturnForAction(action string) interface{} {
 	switch action {
 	case http.MethodGet, http.MethodPost,
 		http.MethodPut, http.MethodPatch,
 		http.MethodDelete:
-		customReturnForOperation, ok := c.CustomReturnForOperations[action]
+		customReturnForAction, ok := c.CustomReturnForActions[action]
 		if !ok ||
-			customReturnForOperation == nil ||
-			customReturnForOperation[c.actionCountIndex(action)] == nil {
+			customReturnForAction == nil ||
+			customReturnForAction[c.actionCountIndex(action)] == nil {
 			return nil
 		}
-		return customReturnForOperation[c.actionCountIndex(action)]
+		return customReturnForAction[c.actionCountIndex(action)]
 	}
 	return nil
 }
 
 // actionCountIndex returns the index that should be used
-// to get the custom return from CustomReturnForOperations.
+// to get the custom return from CustomReturnForActions.
 func (c *TestClient) actionCountIndex(action string) int {
 	return c.actionCount(action) - 1
 }
@@ -100,7 +100,7 @@ func (c *TestClient) getPayloadToBeRecorded(payload interface{}) string {
 // Reset resets the captured information for this mock client.
 func (c *TestClient) Reset() {
 	c.calls = []TestAPICall{}
-	c.CustomReturnForOperations = map[string][]interface{}{}
+	c.CustomReturnForActions = map[string][]interface{}{}
 }
 
 // recordCall is a helper to record any API calls made through this client
@@ -117,49 +117,49 @@ func (c *TestClient) recordCall(action string, url string, payload interface{}) 
 // Get performs a GET request against the Redfish service.
 func (c *TestClient) Get(url string) (*http.Response, error) {
 	c.recordCall(http.MethodGet, url, nil)
-	customReturnForOperation := c.getCustomReturnForOperation(http.MethodGet)
-	if customReturnForOperation == nil {
+	customReturnForAction := c.getCustomReturnForAction(http.MethodGet)
+	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForOperation.(*http.Response), nil
+	return customReturnForAction.(*http.Response), nil
 }
 
 // Post performs a Post request against the Redfish service.
 func (c *TestClient) Post(url string, payload interface{}) (*http.Response, error) {
 	c.recordCall(http.MethodPost, url, payload)
-	customReturnForOperation := c.getCustomReturnForOperation(http.MethodPost)
-	if customReturnForOperation == nil {
+	customReturnForAction := c.getCustomReturnForAction(http.MethodPost)
+	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForOperation.(*http.Response), nil
+	return customReturnForAction.(*http.Response), nil
 }
 
 // Put performs a Put request against the Redfish service.
 func (c *TestClient) Put(url string, payload interface{}) (*http.Response, error) {
 	c.recordCall(http.MethodPut, url, payload)
-	customReturnForOperation := c.getCustomReturnForOperation(http.MethodPut)
-	if customReturnForOperation == nil {
+	customReturnForAction := c.getCustomReturnForAction(http.MethodPut)
+	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForOperation.(*http.Response), nil
+	return customReturnForAction.(*http.Response), nil
 }
 
 // Patch performs a Patch request against the Redfish service.
 func (c *TestClient) Patch(url string, payload interface{}) (*http.Response, error) {
 	c.recordCall(http.MethodPatch, url, payload)
-	customReturnForOperation := c.getCustomReturnForOperation(http.MethodPatch)
-	if customReturnForOperation == nil {
+	customReturnForAction := c.getCustomReturnForAction(http.MethodPatch)
+	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForOperation.(*http.Response), nil
+	return customReturnForAction.(*http.Response), nil
 }
 
 // Delete performs a Delete request against the Redfish service.
 func (c *TestClient) Delete(url string) error {
 	c.recordCall(http.MethodDelete, url, nil)
-	customReturnForOperation := c.getCustomReturnForOperation(http.MethodDelete)
-	if customReturnForOperation == nil {
+	customReturnForAction := c.getCustomReturnForAction(http.MethodDelete)
+	if customReturnForAction == nil {
 		return nil
 	}
-	return customReturnForOperation.(error)
+	return customReturnForAction.(error)
 }
