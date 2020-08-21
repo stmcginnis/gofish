@@ -38,7 +38,7 @@ type APIClient struct {
 	Service *Service
 
 	// Auth information saved for later to be able to log out
-	auth *redfish.AuthToken
+	Auth *redfish.AuthToken
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
@@ -128,7 +128,7 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 		}
 
 		client.Service = service
-		client.auth = auth
+		client.Auth = auth
 	}
 
 	return client, err
@@ -221,12 +221,12 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 	}
 
 	// Add auth info if authenticated
-	if c.auth != nil {
-		if c.auth.Token != "" {
-			req.Header.Set("X-Auth-Token", c.auth.Token)
+	if c.Auth != nil {
+		if c.Auth.Token != "" {
+			req.Header.Set("X-Auth-Token", c.Auth.Token)
 		} else {
-			if c.auth.BasicAuth == true && c.auth.Username != "" && c.auth.Password != "" {
-				encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", c.auth.Username, c.auth.Password)))
+			if c.Auth.BasicAuth == true && c.Auth.Username != "" && c.Auth.Password != "" {
+				encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", c.Auth.Username, c.Auth.Password)))
 				req.Header.Set("Authorization", fmt.Sprintf("Basic %v", encodedAuth))
 			}
 		}
@@ -282,7 +282,7 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 // Logout will delete any active session. Useful to defer logout when creating
 // a new connection.
 func (c *APIClient) Logout() {
-	if c.Service != nil && c.auth != nil {
-		_ = c.Service.DeleteSession(c.auth.Session)
+	if c.Service != nil && c.Auth != nil {
+		_ = c.Service.DeleteSession(c.Auth.Session)
 	}
 }
