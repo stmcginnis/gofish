@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/url"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -44,8 +45,6 @@ type Session struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -95,6 +94,10 @@ func CreateSession(c common.Client, uri string, username string, password string
 	auth = &AuthToken{}
 	auth.Token = resp.Header.Get("X-Auth-Token")
 	auth.Session = resp.Header.Get("Location")
+
+	if urlParser, err := url.ParseRequestURI(auth.Session); err == nil {
+		auth.Session = urlParser.RequestURI()
+	}
 
 	return auth, err
 }

@@ -6,7 +6,9 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/stmcginnis/gofish/common"
@@ -24,6 +26,42 @@ const (
 	// JSON Bodies of the Resource Type MetricReport.
 	MetricReportEventFormatType EventFormatType = "MetricReport"
 )
+
+// EventType is
+type EventType string
+
+const (
+	// AlertEventType indicates a condition exists which requires attention.
+	AlertEventType EventType = "Alert"
+	// ResourceAddedEventType indicates a resource has been added.
+	ResourceAddedEventType EventType = "ResourceAdded"
+	// ResourceRemovedEventType indicates a resource has been removed.
+	ResourceRemovedEventType EventType = "ResourceRemoved"
+	// ResourceUpdatedEventType indicates a resource has been updated.
+	ResourceUpdatedEventType EventType = "ResourceUpdated"
+	// StatusChangeEventType indicates the status of this resource has changed.
+	StatusChangeEventType EventType = "StatusChange"
+)
+
+// IsValidEventType will check if it is a valid EventType
+func (et EventType) IsValidEventType() bool {
+	switch et {
+	case AlertEventType, ResourceAddedEventType,
+		ResourceRemovedEventType, ResourceUpdatedEventType,
+		StatusChangeEventType:
+		return true
+	}
+	return false
+}
+
+// SupportedEventTypes contains a map of supported EventType
+var SupportedEventTypes = map[string]EventType{
+	"Alert":                    AlertEventType,
+	"ResourceAdded":            ResourceAddedEventType,
+	"ResourceRemovedEventType": ResourceRemovedEventType,
+	"ResourceUpdated":          ResourceUpdatedEventType,
+	"StatusChange":             StatusChangeEventType,
+}
 
 // SMTPAuthenticationMethods is
 type SMTPAuthenticationMethods string
@@ -73,8 +111,6 @@ type EventService struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// DeliveryRetryAttempts shall be the
@@ -91,11 +127,14 @@ type EventService struct {
 	DeliveryRetryIntervalSeconds int
 	// Description provides a description of this resource.
 	Description string
-	// EventFormatTypes shall indicate the the
+	// EventFormatTypes shall indicate the
 	// content types of the message that this service can send to the event
 	// destination.  If this property is not present, the EventFormatType
 	// shall be assumed to be Event.
 	EventFormatTypes []EventFormatType
+	// EventTypesForSubscription is the types of Events
+	// that can be subscribed to.
+	EventTypesForSubscription []EventType
 	// IncludeOriginOfConditionSupported shall indicate
 	// whether the service supports including the resource payload of the
 	// origin of condition in the event payload.  If `true`, event
@@ -126,7 +165,7 @@ type EventService struct {
 	// Subscriptions and on generated Events.
 	SubordinateResourcesSupported bool
 	// Subscriptions shall contain the link to a collection of type
-	// EventDestinationCollection.
+	// EventDestination.
 	subscriptions string
 	// submitTestEventTarget is the URL to send SubmitTestEvent actions.
 	submitTestEventTarget string
@@ -224,6 +263,53 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 	}
 
 	return result, nil
+}
+
+// GetEventSubscriptions gets all the subscriptions using the event service.
+func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
+	if len(strings.TrimSpace(eventservice.subscriptions)) == 0 {
+		return nil, fmt.Errorf("empty subscription link in the event service")
+	}
+
+	return ListReferencedEventDestinations(eventservice.Client, eventservice.subscriptions)
+}
+
+// GetEventSubscription gets a specific subscription using the event service.
+func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
+	return GetEventDestination(eventservice.Client, uri)
+}
+
+// CreateEventSubscription creates the subscription using the event service.
+// destination should contain the URL of the destination for events to be sent.
+// eventTypes is a list of EventType to subscribe to.
+// httpHeaders is optional and gives the opportunity to specify any arbitrary
+// HTTP headers required for the event POST operation.
+// oem is optional and gives the opportunity to specify any OEM specific properties,
+// it should contain the vendor specific struct that goes inside the Oem session.
+// It returns the new subscription URI if the event subscription is created
+// with success or any error encountered.
+func (eventservice *EventService) CreateEventSubscription(
+	destination string,
+	eventTypes []EventType,
+	httpHeaders map[string]string,
+	oem interface{},
+) (string, error) {
+	if len(strings.TrimSpace(eventservice.subscriptions)) == 0 {
+		return "", fmt.Errorf("empty subscription link in the event service")
+	}
+
+	return CreateEventDestination(
+		eventservice.Client,
+		eventservice.subscriptions,
+		destination,
+		eventTypes,
+		httpHeaders,
+		oem)
+}
+
+// DeleteEventSubscription deletes a specific subscription using the event service.
+func (eventservice *EventService) DeleteEventSubscription(uri string) error {
+	return DeleteEventDestination(eventservice.Client, uri)
 }
 
 // SubmitTestEvent shall add a test event to the event service with the event

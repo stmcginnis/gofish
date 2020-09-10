@@ -519,8 +519,6 @@ type Resource struct {
 	Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -531,8 +529,6 @@ type Resource struct {
 type ResourceCollection struct {
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataID is the odata identifier.
 	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
@@ -659,7 +655,7 @@ type OperationApplyTimeSupport struct {
 type PreferredApplyTime struct {
 	// ApplyTime shall indicate the preference
 	// on to when to apply the values in this Settings resource.
-	ApplyTime string
+	ApplyTime ApplyTime
 	// MaintenanceWindowDurationInSeconds shall
 	// indicate the end of the maintenance window as the number of seconds
 	// after the time specified by the MaintenanceWindowStartTime property.
@@ -692,7 +688,7 @@ type Settings struct {
 	Messages []Message
 	// SettingsObject shall be the URI of the resource to which a client must do
 	// a PUT or PATCH in order to modify this resource.
-	SettingsObject string
+	SettingsObject Link
 	// SupportedApplyTimes is A service shall advertise its applytime
 	// capabilities using this property as to when a Setting resource can be
 	// applied.

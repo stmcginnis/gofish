@@ -57,8 +57,6 @@ type Bios struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AttributeRegistry is the Resource ID of the Attribute Registry that has
@@ -81,6 +79,13 @@ type Bios struct {
 	changePasswordTarget string
 	// resetBiosTarget is the URL to send ResetBios requests.
 	resetBiosTarget string
+	// settingsTarget is the URL to send settings update requests to.
+	settingsTarget string
+	// settingsApplyTimes is a set of allowed settings update apply times. If none
+	// are specified, then the system does not provide that information.
+	settingsApplyTimes []common.ApplyTime
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals an Bios object from the raw JSON.
@@ -96,7 +101,8 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Actions Actions
+		Actions  Actions
+		Settings common.Settings `json:"@Redfish.Settings"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -109,6 +115,17 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	bios.changePasswordTarget = t.Actions.ChangePassword.Target
 	bios.resetBiosTarget = t.Actions.ResetBios.Target
+	bios.settingsApplyTimes = t.Settings.SupportedApplyTimes
+
+	// Some implementations use a @Redfish.Settings object to direct settings updates to a
+	// different URL than the object being updated. Others don't, so handle both.
+	bios.settingsTarget = string(t.Settings.SettingsObject)
+	if bios.settingsTarget == "" {
+		bios.settingsTarget = bios.ODataID
+	}
+
+	// This is a read/write object, so we need to save the raw object data for later
+	bios.rawData = b
 
 	return nil
 }
@@ -187,4 +204,48 @@ func (bios *Bios) ChangePassword(passwordName string, oldPassword string, newPas
 func (bios *Bios) ResetBios() error {
 	_, err := bios.Client.Post(bios.resetBiosTarget, nil)
 	return err
+}
+
+// AllowedAttributeUpdateApplyTimes returns the set of allowed apply times to request when
+// setting the Bios attribute values.
+func (bios *Bios) AllowedAttributeUpdateApplyTimes() []common.ApplyTime {
+	if len(bios.settingsApplyTimes) == 0 {
+		result := []common.ApplyTime{
+			common.ImmediateApplyTime,
+			common.OnResetApplyTime,
+			common.AtMaintenanceWindowStartApplyTime,
+			common.InMaintenanceWindowOnResetApplyTime,
+		}
+		return result
+	}
+	return bios.settingsApplyTimes
+}
+
+// UpdateBiosAttributes is used to update attribute values.
+func (bios *Bios) UpdateBiosAttributes(attrs BiosAttributes) error {
+
+	payload := make(map[string]interface{})
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Bios)
+	original.UnmarshalJSON(bios.rawData)
+
+	for key := range attrs {
+		if original.Attributes[key] != attrs[key] {
+			payload[key] = attrs[key]
+		}
+	}
+
+	// If there are any allowed updates, try to send updates to the system and
+	// return the result.
+	if len(payload) > 0 {
+		data := map[string]interface{}{"Attributes": payload}
+		_, err := bios.Client.Patch(bios.settingsTarget, data)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

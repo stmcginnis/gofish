@@ -22,6 +22,13 @@ var eventDestinationBody = `{
 		"Context": "MyContext",
 		"Destination": "http://example.com/events",
 		"EventFormatType": "MetricReport",
+		"EventTypes":[
+			"StatusChange",
+			"ResourceUpdated",
+			"ResourceAdded",
+			"ResourceRemoved",
+			"Alert"
+		],
 		"HttpHeaders": [],
 		"MessageIds": ["One", "Two"],
 		"Protocol": "Redfish",
@@ -29,6 +36,21 @@ var eventDestinationBody = `{
 		"ResourceTypes": ["one", "two"],
 		"SubordinateResources": false,
 		"SubscriptionType": "SSE"
+	}`
+
+var eventDestinationsBody = `{
+		"@odata.context": "/redfish/v1/$metadata#EventDestinationCollection.EventDestinationCollection",
+		"@odata.etag": "W/\"AA6D42B0\"",
+		"@odata.id": "/redfish/v1/EventService/Subscriptions/",
+		"@odata.type": "#EventDestinationCollection.EventDestinationCollection",
+		"Description": "User Event Subscriptions",
+		"Name": "EventSubscriptions",
+		"Members": [
+			{
+				"@odata.id": "/redfish/v1/EventService/Subscriptions/EventDestination-1/"
+			}
+		],
+		"Members@odata.count": 1
 	}`
 
 // TestEventDestination tests the parsing of EventDestination objects.
@@ -62,6 +84,12 @@ func TestEventDestination(t *testing.T) {
 
 	if result.SubordinateResources {
 		t.Error("Subordinate resources should be False")
+	}
+
+	for _, et := range result.EventTypes {
+		if !et.IsValidEventType() {
+			t.Errorf("invalid event type: %s", et)
+		}
 	}
 }
 
