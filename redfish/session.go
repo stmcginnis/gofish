@@ -104,7 +104,7 @@ func CreateSession(c common.Client, uri string, username string, password string
 
 // DeleteSession deletes a session using the location as argument
 func DeleteSession(c common.Client, url string) (err error) {
-	resp, err := c.Delete(uri, a)
+	resp, err := c.Delete(url)
 	if err != nil {
 		return err
 	}
