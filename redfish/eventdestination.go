@@ -389,8 +389,8 @@ func DeleteEventDestination(c common.Client, uri string) (err error) {
 	if len(strings.TrimSpace(uri)) == 0 {
 		return fmt.Errorf("uri should not be empty")
 	}
-	resp, err := c.Delete(uri)
-	defer resp.Body.Close()
+	_, err = c.Delete(uri)
+	//defer resp.Body.Close()
 
 	return err
 }
