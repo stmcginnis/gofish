@@ -155,11 +155,11 @@ func (c *TestClient) Patch(url string, payload interface{}) (*http.Response, err
 }
 
 // Delete performs a Delete request against the Redfish service.
-func (c *TestClient) Delete(url string) error {
+func (c *TestClient) Delete(url string) (*http.Response, error) {
 	c.recordCall(http.MethodDelete, url, nil)
 	customReturnForAction := c.getCustomReturnForAction(http.MethodDelete)
 	if customReturnForAction == nil {
-		return nil
+		return nil, nil
 	}
-	return customReturnForAction.(error)
+	return customReturnForAction.(*http.Response), nil
 }

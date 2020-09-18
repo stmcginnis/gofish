@@ -20,7 +20,7 @@ type Client interface {
 	Post(url string, payload interface{}) (*http.Response, error)
 	Patch(url string, payload interface{}) (*http.Response, error)
 	Put(url string, payload interface{}) (*http.Response, error)
-	Delete(url string) error
+	Delete(url string) (*http.Response, error)
 }
 
 // Entity provides the common basis for all Redfish and Swordfish objects.

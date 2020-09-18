@@ -104,7 +104,12 @@ func CreateSession(c common.Client, uri string, username string, password string
 
 // DeleteSession deletes a session using the location as argument
 func DeleteSession(c common.Client, url string) (err error) {
-	return c.Delete(url)
+	resp, err := c.Delete(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
 }
 
 // GetSession will get a Session instance from the Redfish service.

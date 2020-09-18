@@ -389,8 +389,10 @@ func DeleteEventDestination(c common.Client, uri string) (err error) {
 	if len(strings.TrimSpace(uri)) == 0 {
 		return fmt.Errorf("uri should not be empty")
 	}
+	_, err = c.Delete(uri)
+	//defer resp.Body.Close()
 
-	return c.Delete(uri)
+	return err
 }
 
 // ListReferencedEventDestinations gets the collection of EventDestination from

@@ -179,15 +179,15 @@ func (c *APIClient) Patch(url string, payload interface{}) (*http.Response, erro
 }
 
 // Delete performs a Delete request against the Redfish service.
-func (c *APIClient) Delete(url string) error {
+func (c *APIClient) Delete(url string) (*http.Response, error) {
 	resp, err := c.runRequest(http.MethodDelete, url, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if resp != nil && resp.Body != nil {
 		resp.Body.Close()
 	}
-	return nil
+	return resp, nil
 }
 
 // runRequest actually performs the REST calls.
