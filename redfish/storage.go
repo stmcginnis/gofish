@@ -187,6 +187,12 @@ func (storage *Storage) SetEncryptionKey(key string) error {
 	return err
 }
 
+// GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage
+func (storage *Storage) GetOperationApplyTimeValues() ([]common.OperationApplyTime, error) {
+	return AllowedVolumesUpdateApplyTimes(storage.Client, storage.volumes)
+
+}
+
 // StorageController is used to represent a resource that represents a
 // storage controller in the Redfish specification.
 type StorageController struct {
