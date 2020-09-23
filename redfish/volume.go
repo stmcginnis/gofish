@@ -192,15 +192,6 @@ type Volume struct {
 	drives []string
 }
 
-// Volumes is used to represent the volumes information related to a Storage
-type Volumes struct {
-	common.Entity
-	// OperationApplyTimeSupport contains, among other things, the types
-	// of apply times the client is allowed request when performing a Create,
-	// Delete, or Action operation.
-	OperationApplyTimeSupport common.OperationApplyTimeSupport `json:"@Redfish.OperationApplyTimeSupport"`
-}
-
 // UnmarshalJSON unmarshals a Volume object from the raw JSON.
 func (volume *Volume) UnmarshalJSON(b []byte) error {
 	type temp Volume
@@ -290,15 +281,17 @@ func AllowedVolumesUpdateApplyTimes(c common.Client, link string) ([]common.Oper
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var volumes Volumes
+	var temp struct {
+		OperationApplyTimeSupport common.OperationApplyTimeSupport `json:"@Redfish.OperationApplyTimeSupport"`
+	}
 
-	err = json.NewDecoder(resp.Body).Decode(&volumes)
+	err = json.NewDecoder(resp.Body).Decode(&temp)
 	if err != nil {
 		return nil, err
 	}
 
 	var applyTimes []common.OperationApplyTime
-	for _, v := range volumes.OperationApplyTimeSupport.SupportedValues {
+	for _, v := range temp.OperationApplyTimeSupport.SupportedValues {
 		applyTimes = append(applyTimes, v)
 	}
 	return applyTimes, nil
