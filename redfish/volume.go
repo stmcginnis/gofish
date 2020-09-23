@@ -273,3 +273,26 @@ func (volume *Volume) Drives() ([]*Drive, error) {
 
 	return result, nil
 }
+
+// AllowedVolumesUpdateApplyTimes returns the set of allowed apply times to request when setting the volumes values
+func AllowedVolumesUpdateApplyTimes(c common.Client, link string) ([]common.OperationApplyTime, error) {
+	resp, err := c.Get(link)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var temp struct {
+		OperationApplyTimeSupport common.OperationApplyTimeSupport `json:"@Redfish.OperationApplyTimeSupport"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&temp)
+	if err != nil {
+		return nil, err
+	}
+
+	var applyTimes []common.OperationApplyTime
+	for _, v := range temp.OperationApplyTimeSupport.SupportedValues {
+		applyTimes = append(applyTimes, v)
+	}
+	return applyTimes, nil
+}
