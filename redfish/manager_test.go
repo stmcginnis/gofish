@@ -6,12 +6,46 @@ package redfish
 
 import (
 	"encoding/json"
+	"github.com/stmcginnis/gofish/common"
+	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/stmcginnis/gofish/common"
 )
 
+var oemLinksBody = `
+			{
+				"Dell": {
+					"DellAttributes": [
+						{
+							"@odata.id": "/redfish/v1/Managers/iDRAC.Embedded.1/Attributes"
+						},
+						{
+							"@odata.id": "/redfish/v1/Managers/System.Embedded.1/Attributes"
+						},
+						{
+							"@odata.id": "/redfish/v1/Managers/LifecycleController.Embedded.1/Attributes"
+						}
+					],
+					"DellAttributes@odata.count": 3,
+					"DellTimeService": {
+						"@odata.id": "/redfish/v1/Managers/iDRAC.Embedded.1/DellTimeService"
+					}
+				}
+			}
+`
+var oemDataBody = `
+		{
+			"Dell": {
+				"DelliDRACCard": {
+					"@odata.context": "/redfish/v1/$metadata#DelliDRACCard.DelliDRACCard",
+					"@odata.id": "/redfish/v1/Managers/iDRAC.Embedded.1/DelliDRACCard/iDRAC.Embedded.1-1_0x23_IDRACinfo",
+					"@odata.type": "#DelliDRACCard.v1_1_0.DelliDRACCard",
+					"IPMIVersion": "2.0",
+					"URLString": "https://10.5.1.83:443"
+				}
+			}
+		}
+`
 var managerBody = `{
 		"@Redfish.Copyright": "Copyright 2014-2019 DMTF. All rights reserved.",
 		"@odata.context": "/redfish/v1/$metadata#Manager.Manager",
@@ -92,8 +126,10 @@ var managerBody = `{
 			],
 			"ManagerInChassis": {
 				"@odata.id": "/redfish/v1/Chassis/Chassis-1"
-			}
-		},
+			},
+			"Oem":
+` + oemLinksBody +
+`		},
 		"Actions": {
 			"#Manager.Reset": {
 				"target": "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset",
@@ -102,8 +138,10 @@ var managerBody = `{
 					"GracefulRestart"
 				]
 			}
-		}
-	}`
+		},
+		"Oem":
+` + oemDataBody +
+`	}`
 
 // TestManager tests the parsing of Manager objects.
 func TestManager(t *testing.T) {
@@ -145,6 +183,20 @@ func TestManager(t *testing.T) {
 
 	if result.resetTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset" {
 		t.Errorf("Invalid Reset target: %s", result.resetTarget)
+	}
+
+	var expectedOEM map[string]interface{}
+	if err := json.Unmarshal([]byte(oemLinksBody), &expectedOEM); err != nil {
+		t.Errorf("Failed to unmarshall link body: %v", err)
+	}
+	if !reflect.DeepEqual(result.OEMLinks, expectedOEM) {
+		t.Errorf("Invalid OEM Links: %+v", result.OEMLinks)
+	}
+	if err := json.Unmarshal([]byte(oemDataBody), &expectedOEM); err != nil {
+		t.Errorf("Failed to unmarshall data body: %v", err)
+	}
+	if !reflect.DeepEqual(result.OEMData, expectedOEM) {
+		t.Errorf("Invalid OEM Data: %+v", result.OEMData)
 	}
 }
 
