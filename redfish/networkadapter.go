@@ -181,6 +181,8 @@ type NetworkAdapter struct {
 	Controllers []Controllers
 	// Description provides a description of this resource.
 	Description string
+	// ID is the identifier of the network adapter.
+	ID string
 	// Manufacturer shall contain a value that represents the manufacturer of
 	// the network adapter.
 	Manufacturer string
@@ -219,6 +221,7 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 		NetworkDeviceFunctions common.Link
 		NetworkPorts           common.Link
 		Actions                actions
+		ID                     string `json:"Id"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -229,6 +232,7 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*networkadapter = NetworkAdapter(t.temp)
 	networkadapter.assembly = string(t.Assembly)
+	networkadapter.ID = t.ID
 	networkadapter.networkDeviceFunctions = string(t.NetworkDeviceFunctions)
 	networkadapter.networkPorts = string(t.NetworkPorts)
 	networkadapter.resetSettingsToDefaultTarget = t.Actions.ResetSettingsToDefault.Target
