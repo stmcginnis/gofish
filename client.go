@@ -44,6 +44,13 @@ type APIClient struct {
 	dumpWriter io.Writer
 }
 
+// Session holds the session ID and auth token needed to identify an
+// authenticated client
+type Session struct {
+	ID    string
+	Token string
+}
+
 // ClientConfig holds the settings for establishing a connection.
 type ClientConfig struct {
 	// Endpoint is the URL of the redfish service
@@ -54,6 +61,10 @@ type ClientConfig struct {
 
 	// Password is the password to use for authentication.
 	Password string
+
+	// Session is an optional session ID+token obtained from a previous session
+	// If this is set, it is preferred over Username and Password
+	Session *Session
 
 	// Insecure controls whether to enforce SSL certificate validity.
 	Insecure bool
@@ -106,29 +117,36 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 		client.HTTPClient = config.HTTPClient
 	}
 
-	if config.Username != "" {
-		// Authenticate with the service
-		service, err := ServiceRoot(client)
-		if err != nil {
-			return nil, err
-		}
+	// Authenticate with the service
+	service, err := ServiceRoot(client)
+	if err != nil {
+		return nil, err
+	}
+	client.Service = service
 
-		var auth *redfish.AuthToken
-		if config.BasicAuth {
-			auth = &redfish.AuthToken{
-				Username:  config.Username,
-				Password:  config.Password,
-				BasicAuth: true,
-			}
-		} else {
-			auth, err = service.CreateSession(config.Username, config.Password)
-			if err != nil {
-				return nil, err
-			}
+	if config.Session != nil {
+		client.auth = &redfish.AuthToken{
+			Session: config.Session.ID,
+			Token:   config.Session.Token,
 		}
+	} else {
+		if config.Username != "" {
+			var auth *redfish.AuthToken
+			if config.BasicAuth {
+				auth = &redfish.AuthToken{
+					Username:  config.Username,
+					Password:  config.Password,
+					BasicAuth: true,
+				}
+			} else {
+				auth, err = service.CreateSession(config.Username, config.Password)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-		client.Service = service
-		client.auth = auth
+			client.auth = auth
+		}
 	}
 
 	return client, err
@@ -151,6 +169,18 @@ func ConnectDefault(endpoint string) (c *APIClient, err error) {
 	client.Service = service
 
 	return client, err
+}
+
+// GetSession retrieves the session data from an initialized APIClient. An error
+// is returned if the client is not authenticated.
+func (c *APIClient) GetSession() (*Session, error) {
+	if c.auth.Session == "" {
+		return nil, fmt.Errorf("client not authenticated")
+	}
+	return &Session{
+		ID:    c.auth.Session,
+		Token: c.auth.Token,
+	}, nil
 }
 
 // Get performs a GET request against the Redfish service.
