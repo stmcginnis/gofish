@@ -284,3 +284,8 @@ func (serviceroot *Service) Systems() ([]*redfish.ComputerSystem, error) {
 func (serviceroot *Service) CompositionService() (*redfish.CompositionService, error) {
 	return redfish.GetCompositionService(serviceroot.Client, serviceroot.compositionService)
 }
+
+// UpdateService gets the update service instance
+func (serviceroot *Service) UpdateService() (*redfish.UpdateService, error) {
+	return redfish.GetUpdateService(serviceroot.Client, serviceroot.updateService)
+}
