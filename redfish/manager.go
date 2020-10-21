@@ -217,6 +217,10 @@ type Manager struct {
 	// ManagerNetworkProtocol which represents the network services for this
 	// manager.
 	networkProtocol string
+	// OEMData are all OEM data under top level manager section
+	OEMData map[string]interface{}
+	// OEMLinks are all OEM data under link section
+	OEMLinks map[string]interface{}
 	// PartNumber shall contain a part number assigned by the organization that
 	// is responsible for producing or manufacturing the manager.
 	PartNumber string
@@ -304,6 +308,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		ManagerForSwitches      common.Links
 		ManagerForSwitchesCount int `json:"ManagerForSwitches@odata.count"`
 		ManagerInChassis        common.Link
+		OEM                     map[string]interface{} `json:"Oem"`
 	}
 	var t struct {
 		temp
@@ -315,6 +320,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		VirtualMedia         common.Link
 		Links                linkReference
 		Actions              actions
+		OEM                  map[string]interface{} `json:"Oem"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -327,6 +333,8 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.ethernetInterfaces = string(t.EthernetInterfaces)
 	manager.logServices = string(t.LogServices)
 	manager.networkProtocol = string(t.NetworkProtocol)
+	manager.OEMData = t.OEM
+	manager.OEMLinks = t.Links.OEM
 	manager.remoteAccountService = string(t.RemoteAccountService)
 	manager.serialInterfaces = string(t.SerialInterfaces)
 	manager.virtualMedia = string(t.VirtualMedia)
