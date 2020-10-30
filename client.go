@@ -303,7 +303,11 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 			return nil, err
 		}
 		defer resp.Body.Close()
-		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
+		if resp.StatusCode != 400 {
+			return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
+		}
+
+		return nil, common.ConstructError(resp.StatusCode, payload)
 	}
 
 	return resp, err
