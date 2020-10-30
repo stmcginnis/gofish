@@ -706,3 +706,49 @@ type Settings struct {
 	// resource.
 	Time string
 }
+
+// ConstructError tries to create error if body is defined as redfish spec
+func ConstructError(statusCode int, b []byte) error {
+	var err struct {
+		Error *Error
+	}
+	if e := json.Unmarshal(b, &err); e != nil || err.Error == nil{
+		// return normal error
+		return fmt.Errorf("%d: %s", statusCode, string(b))
+	}
+	err.Error.rawData = b
+	return err.Error
+}
+
+// Error is redfish error response object for 400
+type Error struct {
+	rawData []byte
+	// A string indicating a specific MessageId from the message registry.
+	Code string `json:"code"`
+	// A human readable error message corresponding to the message in the message registry.
+	Message string `json:"message"`
+	// An array of message objects describing one or more error message(s).
+	ExtendedInfos []ErrExtendedInfo `json:"@Message.ExtendedInfo"`
+}
+
+func (e *Error) Error() string {
+	return string(e.rawData)
+}
+
+// ErrExtendedInfo is for redfish ExtendedInfo error response
+// TODO: support RelatedProperties
+type ErrExtendedInfo struct {
+	// Indicating a specific error or message (not to be confused with the HTTP status code).
+	// This code can be used to access a detailed message from a message registry.
+	MessageID string `json:"MessageId"`
+	// A human readable error message indicating the semantics associated with the error.
+	// This shall be the complete message, and not rely on substitution variables.
+	Message string
+	// An optional array of strings representing the substitution parameter values for the message.
+	// This shall be included in the response if a MessageId is specified for a parameterized message.
+	MessageArgs []string
+	// An optional string representing the severity of the error.
+	Severity string
+	//An optional string describing recommended action(s) to take to resolve the error.
+	Resolution string
+}
