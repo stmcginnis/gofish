@@ -282,10 +282,12 @@ func GetEventDestination(c common.Client, uri string) (*EventDestination, error)
 
 // subscriptionPayload is the payload to create the event subscription
 type subscriptionPayload struct {
-	Destination string            `json:"Destination"`
-	EventTypes  []EventType       `json:"EventTypes"`
-	HTTPHeaders map[string]string `json:"HttpHeaders,omitempty"`
-	Oem         interface{}       `json:"Oem,omitempty"`
+	Destination string                   `json:"Destination"`
+	EventTypes  []EventType              `json:"EventTypes"`
+	HTTPHeaders map[string]string        `json:"HttpHeaders,omitempty"`
+	Oem         interface{}              `json:"Oem,omitempty"`
+	Protocol    EventDestinationProtocol `json:"Protocol,omitempty"`
+	Context     string                   `json:"Context,omitempty"`
 }
 
 // validateCreateEventDestinationParams will validate
@@ -328,6 +330,9 @@ func validateCreateEventDestinationParams(
 // eventTypes is a list of EventType to subscribe to.
 // httpHeaders is optional and gives the opportunity to specify any arbitrary
 // HTTP headers required for the event POST operation.
+// protocol should be the communication protocol of the event endpoint,
+// usually RedfishEventDestinationProtocol
+// context is a required client-supplied string that is sent with the event notifications
 // oem is optional and gives the opportunity to specify any OEM specific properties,
 // it should contain the vendor specific struct that goes inside the Oem session.
 // It returns the new subscription URI if the event subscription is created
@@ -338,6 +343,8 @@ func CreateEventDestination(
 	destination string,
 	eventTypes []EventType,
 	httpHeaders map[string]string,
+	protocol EventDestinationProtocol,
+	context string,
 	oem interface{},
 ) (string, error) {
 
@@ -356,6 +363,8 @@ func CreateEventDestination(
 	s := &subscriptionPayload{
 		Destination: destination,
 		EventTypes:  eventTypes,
+		Protocol:    protocol,
+		Context:     context,
 	}
 
 	// HTTP headers
