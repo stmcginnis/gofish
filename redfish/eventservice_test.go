@@ -206,6 +206,8 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 		map[string]string{
 			"Header": "HeaderValue",
 		},
+		RedfishEventDestinationProtocol,
+		"Public",
 		OemVendor{
 			Vendor: Vendor{
 				FirstVendorSpecificConfiguration:  1,
@@ -404,6 +406,8 @@ func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing
 		"https://myeventreciever/eventreceiver",
 		[]EventType{SupportedEventTypes["Alert"]},
 		nil,
+		RedfishEventDestinationProtocol,
+		"Public",
 		nil,
 	)
 
@@ -453,6 +457,8 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 		invalidDestination,
 		[]EventType{SupportedEventTypes["Alert"]},
 		nil,
+		RedfishEventDestinationProtocol,
+		"Public",
 		nil,
 	)
 
@@ -470,6 +476,8 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 		invalidDestination,
 		[]EventType{SupportedEventTypes["Alert"]},
 		nil,
+		RedfishEventDestinationProtocol,
+		"Public",
 		nil,
 	)
 
@@ -487,6 +495,8 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 		invalidDestination,
 		[]EventType{SupportedEventTypes["Alert"]},
 		nil,
+		RedfishEventDestinationProtocol,
+		"Public",
 		nil,
 	)
 
@@ -503,6 +513,8 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 		"https://myeventreciever/eventreceiver",
 		[]EventType{},
 		nil,
+		RedfishEventDestinationProtocol,
+		"Public",
 		nil,
 	)
 
@@ -519,6 +531,8 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 		"https://myeventreciever/eventreceiver",
 		nil,
 		nil,
+		RedfishEventDestinationProtocol,
+		"Public",
 		nil,
 	)
 
@@ -537,6 +551,8 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 		"https://myeventreciever/eventreceiver",
 		[]EventType{SupportedEventTypes["Alert"]},
 		nil,
+		RedfishEventDestinationProtocol,
+		"Public",
 		nil,
 	)
 

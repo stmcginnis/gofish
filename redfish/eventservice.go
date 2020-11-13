@@ -284,6 +284,9 @@ func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestin
 // eventTypes is a list of EventType to subscribe to.
 // httpHeaders is optional and gives the opportunity to specify any arbitrary
 // HTTP headers required for the event POST operation.
+// protocol should be the communication protocol of the event endpoint,
+// usually RedfishEventDestinationProtocol
+// context is a required client-supplied string that is sent with the event notifications
 // oem is optional and gives the opportunity to specify any OEM specific properties,
 // it should contain the vendor specific struct that goes inside the Oem session.
 // It returns the new subscription URI if the event subscription is created
@@ -292,6 +295,8 @@ func (eventservice *EventService) CreateEventSubscription(
 	destination string,
 	eventTypes []EventType,
 	httpHeaders map[string]string,
+	protocol EventDestinationProtocol,
+	context string,
 	oem interface{},
 ) (string, error) {
 	if len(strings.TrimSpace(eventservice.subscriptions)) == 0 {
@@ -304,7 +309,10 @@ func (eventservice *EventService) CreateEventSubscription(
 		destination,
 		eventTypes,
 		httpHeaders,
-		oem)
+		protocol,
+		context,
+		oem,
+	)
 }
 
 // DeleteEventSubscription deletes a specific subscription using the event service.
