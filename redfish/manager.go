@@ -459,3 +459,8 @@ func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
 func (manager *Manager) LogServices() ([]*LogService, error) {
 	return ListReferencedLogServices(manager.Client, manager.logServices)
 }
+
+// VirtualMedia gets the virtual media associated with this manager.
+func (manager *Manager) VirtualMedia() ([]*VirtualMedia, error) {
+	return ListReferencedVirtualMedias(manager.Client, manager.virtualMedia)
+}
