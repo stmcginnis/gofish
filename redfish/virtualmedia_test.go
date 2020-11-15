@@ -112,3 +112,61 @@ func TestVirtualMediaUpdate(t *testing.T) {
 		t.Errorf("Unexpected WriteProtected update payload: %s", calls[0].Payload)
 	}
 }
+
+// TestVirtualMediaEject tests the EjectMedia call.
+func TestVirtualMediaEject(t *testing.T) {
+	var result VirtualMedia
+	err := json.NewDecoder(strings.NewReader(vmBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	err = result.EjectMedia()
+
+	if err != nil {
+		t.Errorf("Error making EjectMedia call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if calls[0].Payload != "" {
+		t.Errorf("Unexpected EjectMedia payload: %s", calls[0].Payload)
+	}
+}
+
+// TestVirtualMediaInser tests the InsertMedia call.
+func TestVirtualMediaInsert(t *testing.T) {
+	var result VirtualMedia
+	err := json.NewDecoder(strings.NewReader(vmBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	err = result.InsertMedia("https://example.com/image", false, true)
+
+	if err != nil {
+		t.Errorf("Error making InsertMedia call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Image:https://example.com/image") {
+		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "Inserted:false") {
+		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "WriteProtected:true") {
+		t.Errorf("Unexpected InsertMedia WriteProtected payload: %s", calls[0].Payload)
+	}
+}

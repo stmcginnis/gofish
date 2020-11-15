@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -191,6 +192,37 @@ func (virtualmedia *VirtualMedia) Update() error {
 	currentElement := reflect.ValueOf(virtualmedia).Elem()
 
 	return virtualmedia.Entity.Update(originalElement, currentElement, readWriteFields)
+}
+
+// EjectMedia sends a request to eject the media.
+func (virtualmedia *VirtualMedia) EjectMedia() error {
+	if !virtualmedia.SupportsMediaEject {
+		return errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
+	}
+
+	_, err := virtualmedia.Client.Post(virtualmedia.ejectMediaTarget, nil)
+	return err
+}
+
+// InsertMedia sends a request to insert virtual media.
+func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted bool, writeProtected bool) error {
+	if !virtualmedia.SupportsMediaInsert {
+		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
+	}
+
+	type temp struct {
+		Image          string
+		Inserted       bool
+		WriteProtected bool
+	}
+	t := temp{
+		Image:          image,
+		Inserted:       inserted,
+		WriteProtected: writeProtected,
+	}
+
+	_, err := virtualmedia.Client.Post(virtualmedia.insertMediaTarget, t)
+	return err
 }
 
 // GetVirtualMedia will get a VirtualMedia instance from the service.
