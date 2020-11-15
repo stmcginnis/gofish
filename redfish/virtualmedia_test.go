@@ -28,7 +28,8 @@ var vmBody = `{
 	},
 	"ConnectedVia": "NotConnected",
 	"Description": "Virtual Removable Media",
-	"Image": "",
+	"Image": "https://example.com/mygoldimage.iso",
+	"ImageName": "mygoldimage.iso",
 	"Inserted": false,
 	"MediaTypes": [
 	  "Floppy",
@@ -75,6 +76,22 @@ func TestVirtualMedia(t *testing.T) {
 
 	if result.insertMediaTarget != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia" {
 		t.Errorf("Received invalid InsertMedaiaAction target: %s", result.insertMediaTarget)
+	}
+
+	if result.Inserted == true {
+		t.Error("Expected Inserted to be false")
+	}
+
+	if result.WriteProtected == false {
+		t.Error("Expected WriteProtected to be true")
+	}
+
+	if result.Image != "https://example.com/mygoldimage.iso" {
+		t.Errorf("Expected Image to be 'https://example.com/mygoldimage.iso', got %s", result.Image)
+	}
+
+	if result.ImageName != "mygoldimage.iso" {
+		t.Errorf("Expected ImageName to be 'mygoldimage.iso', got %s", result.ImageName)
 	}
 
 	if result.SupportsMediaInsert == false {
