@@ -76,6 +76,10 @@ func TestVirtualMedia(t *testing.T) {
 	if result.insertMediaTarget != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia" {
 		t.Errorf("Received invalid InsertMedaiaAction target: %s", result.insertMediaTarget)
 	}
+
+	if result.SupportsMediaInsert == false {
+		t.Error("Expected SupportsMediaInsert to be true since target is set")
+	}
 }
 
 // TestVirtualMediaUpdate tests the Update call.

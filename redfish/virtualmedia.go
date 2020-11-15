@@ -125,6 +125,12 @@ type VirtualMedia struct {
 	insertMediaTarget string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+	// SupportsMediaEject indicates if this implementation supports ejecting
+	// virtual media or not (added in schema 1.2.0).
+	SupportsMediaEject bool
+	// SupportsMediaInsert indicates if this implementation supports inserting
+	// virtual media or not (added in schema 1.2.0).
+	SupportsMediaInsert bool
 }
 
 // UnmarshalJSON unmarshals a VirtualMedia object from the raw JSON.
@@ -153,6 +159,9 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	virtualmedia.ejectMediaTarget = t.Actions.EjectMedia.Target
 	virtualmedia.insertMediaTarget = t.Actions.InsertMedia.Target
+
+	virtualmedia.SupportsMediaEject = (virtualmedia.ejectMediaTarget != "")
+	virtualmedia.SupportsMediaInsert = (virtualmedia.insertMediaTarget != "")
 
 	// This is a read/write object, so we need to save the raw object data for later
 	virtualmedia.rawData = b
