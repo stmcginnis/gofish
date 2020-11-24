@@ -148,6 +148,76 @@ var processorBody = strings.NewReader(
 		"TotalThreads":24
 	 }`)
 
+var invalidProcessorBody = strings.NewReader(
+	`{
+		"@odata.context": "/redfish/v1/$metadata#Processor.Processor(*)",
+		"@odata.etag": "W/\"1604509181\"",
+		"@odata.id": "/redfish/v1/Systems/Self/Processors/1",
+		"@odata.type": "#Processor.v1_0_3.Processor",
+		"Id": "1",
+		"InstructionSet": "X86-64",
+		"Manufacturer": "Intel(R) Corporation",
+		"MaxSpeedMHz": "",
+		"Model": "Intel Xeon",
+		"Name": "Processor1",
+		"Oem": {
+		  "Intel_RackScale": {
+			"@odata.type": "#Intel.Oem.Processor",
+			"Brand": "E5",
+			"Capabilities": [
+			  "fpu",
+			  "vme",
+			  "de",
+			  "pse",
+			  "tsc",
+			  "msr",
+			  "pae",
+			  "mce",
+			  "cx8",
+			  "apic",
+			  "sep",
+			  "mtrr",
+			  "pge",
+			  "mca",
+			  "cmov",
+			  "pat",
+			  "pse-36",
+			  "clfsh",
+			  "ds",
+			  "acpi",
+			  "mmx",
+			  "fxsr",
+			  "sse",
+			  "sse2",
+			  "ss",
+			  "htt",
+			  "tm",
+			  "pbe"
+			]
+		  },
+		  "Quanta_RackScale": {
+			"Version": "Intel(R) Xeon(R) Gold 6242 CPU @ 2.80GHz"
+		  }
+		},
+		"ProcessorArchitecture": "x86",
+		"ProcessorId": {
+		  "EffectiveFamily": "0x6",
+		  "EffectiveModel": "0x55",
+		  "IdentificationRegisters": "0xbfebfbff00050657",
+		  "MicrocodeInfo": "0x50024",
+		  "Step": "0x7",
+		  "VendorId": "GenuineIntel"
+		},
+		"ProcessorType": "CPU",
+		"Socket": "CPU_0",
+		"Status": {
+		  "Health": "OK",
+		  "State": "Enabled"
+		},
+		"TotalCores": 16,
+		"TotalThreads": 32
+	  }`)
+
 // TestProcessor tests the parsing of Processor objects.
 func TestProcessor(t *testing.T) {
 	var result Processor
@@ -179,5 +249,20 @@ func TestProcessor(t *testing.T) {
 
 	if len(result.FPGA.ReconfigurationSlots) != 2 {
 		t.Errorf("Expected 2 ReconfigurationSlots, got %d", len(result.FPGA.ReconfigurationSlots))
+	}
+}
+
+// TestNonconformingProcessor tests the parsing of Processor objects from certain
+// Dell implementations that do not fully conform to the spec.
+func TestNonconformingProcessor(t *testing.T) {
+	var result Processor
+	err := json.NewDecoder(invalidProcessorBody).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.MaxSpeedMHz != 0 {
+		t.Errorf("Expected MaxSpeedMhz to be 0 but got %f", result.MaxSpeedMHz)
 	}
 }
