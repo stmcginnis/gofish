@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -291,7 +292,7 @@ type Processor struct {
 	Manufacturer string
 	// MaxSpeedMHz shall indicate the maximum rated clock
 	// speed of the processor in MHz.
-	MaxSpeedMHz int
+	MaxSpeedMHz float32
 	// MaxTDPWatts shall be the maximum Thermal
 	// Design Power (TDP) in watts.
 	MaxTDPWatts int
@@ -370,7 +371,7 @@ type Processor struct {
 // UnmarshalJSON unmarshals a Processor object from the raw JSON.
 func (processor *Processor) UnmarshalJSON(b []byte) error {
 	type temp Processor
-	var t struct {
+	type t1 struct {
 		temp
 		AccelerationFunctions common.Link
 		Assembly              common.Link
@@ -387,10 +388,31 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 			PCIeFunctionsCount       int `json:"PCIeFunctions@odata.count"`
 		}
 	}
+	var t t1
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		// Handle invalid data type returned for MaxSpeedMHz
+		var t2 struct {
+			t1
+			MaxSpeedMHz string
+		}
+		err2 := json.Unmarshal(b, &t2)
+
+		if err2 != nil {
+			// Return the original error
+			return err
+		}
+
+		// Extract the real Processor struct and replace its MaxSpeedMHz with
+		// the parsed string version
+		t = t2.t1
+		if t2.MaxSpeedMHz != "" {
+			mhz, err := strconv.ParseFloat(t2.MaxSpeedMHz, 32)
+			if err != nil {
+				t.MaxSpeedMHz = float32(mhz)
+			}
+		}
 	}
 
 	*processor = Processor(t.temp)

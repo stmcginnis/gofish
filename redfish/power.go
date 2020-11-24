@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -225,6 +226,39 @@ type PowerControl struct {
 	Status common.Status
 }
 
+// UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
+func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
+	type temp PowerControl
+	type t1 struct {
+		temp
+	}
+	var t t1
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		// See if we need to handle converting MemberID
+		var t2 struct {
+			t1
+			MemberID int `json:"MemberId"`
+		}
+		err2 := json.Unmarshal(b, &t2)
+
+		if err2 != nil {
+			// Return the original error
+			return err
+		}
+
+		// Convert the numeric member ID to a string
+		t = t2.t1
+		t.temp.MemberID = strconv.Itoa(t2.MemberID)
+	}
+
+	// Extract the links to other entities for later
+	*powercontrol = PowerControl(t.temp)
+
+	return nil
+}
+
 // PowerLimit shall contain power limit status and
 // configuration information for this chassis.
 type PowerLimit struct {
@@ -254,7 +288,8 @@ type PowerMetric struct {
 	// IntervalInMin shall represent the time
 	// interval (or window), in minutes, in which the PowerMetrics properties
 	// are measured over.
-	IntervalInMin int
+	// Should be an integer, but some Dell implementations return as a float.
+	IntervalInMin float32
 	// MaxConsumedWatts shall represent the
 	// maximum power level in watts that occurred within the last
 	// IntervalInMin minutes.
@@ -447,4 +482,37 @@ type Voltage struct {
 	// the present reading is above the normal range but is not critical.
 	// Units shall use the same units as the related ReadingVolts property.
 	UpperThresholdNonCritical float32
+}
+
+// UnmarshalJSON unmarshals a Voltage object from the raw JSON.
+func (voltage *Voltage) UnmarshalJSON(b []byte) error {
+	type temp Voltage
+	type t1 struct {
+		temp
+	}
+	var t t1
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		// See if we need to handle converting MemberID
+		var t2 struct {
+			t1
+			MemberID int `json:"MemberId"`
+		}
+		err2 := json.Unmarshal(b, &t2)
+
+		if err2 != nil {
+			// Return the original error
+			return err
+		}
+
+		// Convert the numeric member ID to a string
+		t = t2.t1
+		t.temp.MemberID = strconv.Itoa(t2.MemberID)
+	}
+
+	// Extract the links to other entities for later
+	*voltage = Voltage(t.temp)
+
+	return nil
 }
