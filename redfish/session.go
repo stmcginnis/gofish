@@ -74,14 +74,14 @@ type AuthToken struct {
 }
 
 type authPayload struct {
-	Username string `json:"UserName"`
+	UserName string `json:"UserName"`
 	Password string `json:"Password"`
 }
 
 // CreateSession creates a new session and returns the token and id
 func CreateSession(c common.Client, uri string, username string, password string) (auth *AuthToken, err error) {
 	a := &authPayload{
-		Username: username,
+		UserName: username,
 		Password: password,
 	}
 
