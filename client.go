@@ -171,6 +171,31 @@ func ConnectDefault(endpoint string) (c *APIClient, err error) {
 	return client, err
 }
 
+// CloneWithSession will create a new Client with a session instead of basic auth.
+func (c *APIClient) CloneWithSession() (*APIClient, error) {
+	if c.auth.Session != "" {
+		return nil, fmt.Errorf("client already has a session")
+	}
+
+	newClient := APIClient(*c)
+	newClient.HTTPClient = c.HTTPClient
+	service, err := ServiceRoot(&newClient)
+	if err != nil {
+		return nil, err
+	}
+	newClient.Service = service
+
+	auth, err := newClient.Service.CreateSession(
+		newClient.auth.Username,
+		newClient.auth.Password)
+	if err != nil {
+		return nil, err
+	}
+	newClient.auth = auth
+
+	return &newClient, err
+}
+
 // GetSession retrieves the session data from an initialized APIClient. An error
 // is returned if the client is not authenticated.
 func (c *APIClient) GetSession() (*Session, error) {
