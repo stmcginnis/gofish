@@ -301,7 +301,7 @@ func (c *APIClient) runRequestWithMultipartPayload(method string, url string, pa
 	return c.runRawRequest(method, url, bytes.NewReader(b.Bytes()), w.FormDataContentType())
 }
 
-// runRequest actually performs the REST calls.
+// runRawRequest actually performs the REST calls.
 func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.ReadSeeker, contentType string) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
