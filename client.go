@@ -223,6 +223,11 @@ func (c *APIClient) Post(url string, payload interface{}) (*http.Response, error
 	return c.runRequest(http.MethodPost, url, payload)
 }
 
+// PostMultipart performs a Post request against the Redfish service with multipart payload.
+func (c *APIClient) PostMultipart(url string, payload map[string]io.Reader) (*http.Response, error) {
+	return c.runRequestWithMultipartPayload(http.MethodPost, url, payload)
+}
+
 // Put performs a Put request against the Redfish service.
 func (c *APIClient) Put(url string, payload interface{}) (*http.Response, error) {
 	return c.runRequest(http.MethodPut, url, payload)
@@ -245,7 +250,7 @@ func (c *APIClient) Delete(url string) (*http.Response, error) {
 	return resp, nil
 }
 
-// runRequest actually performs the REST calls.
+// runRequest performs JSON REST calls
 func (c *APIClient) runRequest(method string, url string, payload interface{}) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
@@ -260,6 +265,46 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 		payloadBuffer = bytes.NewReader(body)
 	}
 
+	return c.runRawRequest(method, url, payloadBuffer, applicationJSON)
+}
+
+// runRequestWithMultipartPayload performs REST calls with a multipart payload
+func (c *APIClient) runRequestWithMultipartPayload(method string, url string, payload map[string]io.Reader) (*http.Response, error) {
+	if url == "" {
+		return nil, fmt.Errorf("unable to execute request, no target provided")
+	}
+
+	var b bytes.Buffer
+	var err error
+	w := multipart.NewWriter(&b)
+	for key, r := range payload {
+		var fw io.Writer
+		if x, ok := r.(*os.File); ok {
+			// Add a file stream
+			if fw, err = w.CreateFormFile(key, x.Name()); err != nil {
+				return nil, err
+			}
+		} else {
+			// Add other fields
+			if fw, err = w.CreateFormField(key); err != nil {
+				return nil, err
+			}
+		}
+		if _, err = io.Copy(fw, r); err != nil {
+			return nil, err
+		}
+	}
+	w.Close()
+
+	return c.runRawRequest(method, url, bytes.NewReader(b.Bytes()), w.FormDataContentType())
+}
+
+// runRequest actually performs the REST calls.
+func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.ReadSeeker, contentType string) (*http.Response, error) {
+	if url == "" {
+		return nil, fmt.Errorf("unable to execute request, no target provided")
+	}
+
 	endpoint := fmt.Sprintf("%s%s", c.endpoint, url)
 	req, err := http.NewRequest(method, endpoint, payloadBuffer)
 	if err != nil {
@@ -271,8 +316,8 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 	req.Header.Set("Accept", applicationJSON)
 
 	// Add content info if present
-	if payload != nil {
-		req.Header.Set("Content-Type", applicationJSON)
+	if contentType != "" {
+		req.Header.Set("Content-Type", contentType)
 	}
 
 	// Add auth info if authenticated
