@@ -393,3 +393,8 @@ func (c *APIClient) Logout() {
 		_ = c.Service.DeleteSession(c.auth.Session)
 	}
 }
+
+// SetDumpWriter sets the client the DumpWriter dynamically
+func (c *APIClient) SetDumpWriter(writer io.Writer) {
+	c.dumpWriter = writer
+}
