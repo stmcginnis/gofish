@@ -276,29 +276,29 @@ func (c *APIClient) runRequestWithMultipartPayload(method string, url string, pa
 		return nil, fmt.Errorf("unable to execute request, no target provided")
 	}
 
-	var b bytes.Buffer
+	var payloadBuffer bytes.Buffer
 	var err error
-	w := multipart.NewWriter(&b)
-	for key, r := range payload {
-		var fw io.Writer
-		if x, ok := r.(*os.File); ok {
+	payloadWriter := multipart.NewWriter(&payloadBuffer)
+	for key, reader := range payload {
+		var partWriter io.Writer
+		if file, ok := reader.(*os.File); ok {
 			// Add a file stream
-			if fw, err = w.CreateFormFile(key, x.Name()); err != nil {
+			if partWriter, err = payloadWriter.CreateFormFile(key, file.Name()); err != nil {
 				return nil, err
 			}
 		} else {
 			// Add other fields
-			if fw, err = w.CreateFormField(key); err != nil {
+			if partWriter, err = payloadWriter.CreateFormField(key); err != nil {
 				return nil, err
 			}
 		}
-		if _, err = io.Copy(fw, r); err != nil {
+		if _, err = io.Copy(partWriter, reader); err != nil {
 			return nil, err
 		}
 	}
-	w.Close()
+	payloadWriter.Close()
 
-	return c.runRawRequest(method, url, bytes.NewReader(b.Bytes()), w.FormDataContentType())
+	return c.runRawRequest(method, url, bytes.NewReader(payloadBuffer.Bytes()), payloadWriter.FormDataContentType())
 }
 
 // runRawRequest actually performs the REST calls.
