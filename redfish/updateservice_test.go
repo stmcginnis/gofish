@@ -53,7 +53,7 @@ func TestUpdateService(t *testing.T) {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	if result.FirmwareInventory != "/redfish/v1/UpdateService/FirmwareInventory" {
+	if result.firmwareInventory != "/redfish/v1/UpdateService/FirmwareInventory" {
 		t.Errorf("FirmwareInventory was wrong")
 	}
 

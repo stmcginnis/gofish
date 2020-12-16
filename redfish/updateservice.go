@@ -21,7 +21,7 @@ type UpdateService struct {
 	// Description provides a description of this resource.
 	Description string
 	// FirmwareInventory points towards the firmware store endpoint
-	FirmwareInventory string
+	firmwareInventory string
 	// HTTPPushURI endpoint is used to push (POST) firmware updates
 	HTTPPushURI string `json:"HttpPushUri"`
 	// ServiceEnabled indicates whether this service isenabled.
@@ -58,11 +58,16 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*updateService = UpdateService(t.temp)
-	updateService.FirmwareInventory = string(t.FirmwareInventory)
+	updateService.firmwareInventory = string(t.FirmwareInventory)
 	updateService.TransferProtocol = t.Actions.SimpleUpdate.AllowableValues
 	updateService.UpdateServiceTarget = t.Actions.SimpleUpdate.Target
 	updateService.rawData = b
 	return nil
+}
+
+// FirmwareInventory will get the firmware inventory from the service
+func (updateService *UpdateService) FirmwareInventory() (*SoftwareInventoryCollection, error) {
+	return GetSoftwareInventoryCollection(updateService.Client, updateService.firmwareInventory)
 }
 
 // GetUpdateService will get a UpdateService instance from the service.
