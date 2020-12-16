@@ -21,7 +21,7 @@ type SoftwareInventoryCollection struct {
 }
 
 // UnmarshalJSON unmarshals a SoftwareInventoryCollection object from the raw JSON
-func (softwareInventory *SoftwareInventoryCollection) UnmarshalJSON(b []byte) error {
+func (softwareInventoryCollection *SoftwareInventoryCollection) UnmarshalJSON(b []byte) error {
 	type temp SoftwareInventoryCollection
 	var t struct {
 		temp
@@ -34,9 +34,9 @@ func (softwareInventory *SoftwareInventoryCollection) UnmarshalJSON(b []byte) er
 	}
 
 	// Extract the links to other entities for later
-	*softwareInventory = SoftwareInventoryCollection(t.temp)
-	softwareInventory.rawData = b
-	softwareInventory.members = t.members.ToStrings()
+	*softwareInventoryCollection = SoftwareInventoryCollection(t.temp)
+	softwareInventoryCollection.rawData = b
+	softwareInventoryCollection.members = t.members.ToStrings()
 	return nil
 }
 
