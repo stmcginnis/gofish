@@ -12,8 +12,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/http/httputil"
+	"os"
 
 	"strings"
 	"time"
@@ -171,6 +173,31 @@ func ConnectDefault(endpoint string) (c *APIClient, err error) {
 	return client, err
 }
 
+// CloneWithSession will create a new Client with a session instead of basic auth.
+func (c *APIClient) CloneWithSession() (*APIClient, error) {
+	if c.auth.Session != "" {
+		return nil, fmt.Errorf("client already has a session")
+	}
+
+	newClient := APIClient(*c)
+	newClient.HTTPClient = c.HTTPClient
+	service, err := ServiceRoot(&newClient)
+	if err != nil {
+		return nil, err
+	}
+	newClient.Service = service
+
+	auth, err := newClient.Service.CreateSession(
+		newClient.auth.Username,
+		newClient.auth.Password)
+	if err != nil {
+		return nil, err
+	}
+	newClient.auth = auth
+
+	return &newClient, err
+}
+
 // GetSession retrieves the session data from an initialized APIClient. An error
 // is returned if the client is not authenticated.
 func (c *APIClient) GetSession() (*Session, error) {
@@ -198,6 +225,11 @@ func (c *APIClient) Post(url string, payload interface{}) (*http.Response, error
 	return c.runRequest(http.MethodPost, url, payload)
 }
 
+// PostMultipart performs a Post request against the Redfish service with multipart payload.
+func (c *APIClient) PostMultipart(url string, payload map[string]io.Reader) (*http.Response, error) {
+	return c.runRequestWithMultipartPayload(http.MethodPost, url, payload)
+}
+
 // Put performs a Put request against the Redfish service.
 func (c *APIClient) Put(url string, payload interface{}) (*http.Response, error) {
 	return c.runRequest(http.MethodPut, url, payload)
@@ -220,7 +252,7 @@ func (c *APIClient) Delete(url string) (*http.Response, error) {
 	return resp, nil
 }
 
-// runRequest actually performs the REST calls.
+// runRequest performs JSON REST calls
 func (c *APIClient) runRequest(method string, url string, payload interface{}) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
@@ -235,6 +267,46 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 		payloadBuffer = bytes.NewReader(body)
 	}
 
+	return c.runRawRequest(method, url, payloadBuffer, applicationJSON)
+}
+
+// runRequestWithMultipartPayload performs REST calls with a multipart payload
+func (c *APIClient) runRequestWithMultipartPayload(method string, url string, payload map[string]io.Reader) (*http.Response, error) {
+	if url == "" {
+		return nil, fmt.Errorf("unable to execute request, no target provided")
+	}
+
+	var payloadBuffer bytes.Buffer
+	var err error
+	payloadWriter := multipart.NewWriter(&payloadBuffer)
+	for key, reader := range payload {
+		var partWriter io.Writer
+		if file, ok := reader.(*os.File); ok {
+			// Add a file stream
+			if partWriter, err = payloadWriter.CreateFormFile(key, file.Name()); err != nil {
+				return nil, err
+			}
+		} else {
+			// Add other fields
+			if partWriter, err = payloadWriter.CreateFormField(key); err != nil {
+				return nil, err
+			}
+		}
+		if _, err = io.Copy(partWriter, reader); err != nil {
+			return nil, err
+		}
+	}
+	payloadWriter.Close()
+
+	return c.runRawRequest(method, url, bytes.NewReader(payloadBuffer.Bytes()), payloadWriter.FormDataContentType())
+}
+
+// runRawRequest actually performs the REST calls.
+func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.ReadSeeker, contentType string) (*http.Response, error) {
+	if url == "" {
+		return nil, fmt.Errorf("unable to execute request, no target provided")
+	}
+
 	endpoint := fmt.Sprintf("%s%s", c.endpoint, url)
 	req, err := http.NewRequest(method, endpoint, payloadBuffer)
 	if err != nil {
@@ -246,14 +318,15 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 	req.Header.Set("Accept", applicationJSON)
 
 	// Add content info if present
-	if payload != nil {
-		req.Header.Set("Content-Type", applicationJSON)
+	if contentType != "" {
+		req.Header.Set("Content-Type", contentType)
 	}
 
 	// Add auth info if authenticated
 	if c.auth != nil {
 		if c.auth.Token != "" {
 			req.Header.Set("X-Auth-Token", c.auth.Token)
+			req.Header.Set("Cookie", fmt.Sprintf("sessionKey=%s", c.auth.Token))
 		} else {
 			if c.auth.BasicAuth == true && c.auth.Username != "" && c.auth.Password != "" {
 				encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", c.auth.Username, c.auth.Password)))
@@ -319,4 +392,9 @@ func (c *APIClient) Logout() {
 	if c.Service != nil && c.auth != nil {
 		_ = c.Service.DeleteSession(c.auth.Session)
 	}
+}
+
+// SetDumpWriter sets the client the DumpWriter dynamically
+func (c *APIClient) SetDumpWriter(writer io.Writer) {
+	c.dumpWriter = writer
 }
