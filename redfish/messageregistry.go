@@ -137,7 +137,7 @@ func ListReferencedMessageRegistriesByLanguage(
 		if err != nil {
 			return nil, err
 		}
-		// get message registry from all location
+		// get message registry by language
 		for _, location := range mrf.Location {
 			if location.Language == language {
 				mr, err := GetMessageRegistry(c, location.URI)
