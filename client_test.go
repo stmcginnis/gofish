@@ -95,10 +95,10 @@ func TestErrorNon400(t *testing.T) {
 // TestConnectContextTimeout
 func TestConnectContextTimeout(t *testing.T) {
 
-	// ctx will timeout after 0.1 seconds
+	// ctx will timeout very quickly
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
-		100*time.Millisecond)
+		1*time.Microsecond)
 	defer cancel()
 
 	_, err := ConnectContext(
@@ -133,10 +133,10 @@ func TestConnectContextCancel(t *testing.T) {
 // TestConnectDefaultContextTimeout
 func TestConnectDefaultContextTimeout(t *testing.T) {
 
-	// ctx will timeout after 0.1 seconds
+	// ctx will timeout very quickly
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
-		100*time.Millisecond)
+		1*time.Microsecond)
 	defer cancel()
 
 	_, err := ConnectDefaultContext(
