@@ -6,6 +6,7 @@ package gofish
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -30,6 +31,9 @@ const applicationJSON = "application/json"
 // APIClient represents a connection to a Redfish/Swordfish enabled service
 // or device.
 type APIClient struct {
+	// ctx is the context used in the HTTP requests
+	ctx context.Context
+
 	// Endpoint is the URL of the *fish service
 	endpoint string
 
@@ -85,9 +89,8 @@ type ClientConfig struct {
 	BasicAuth bool
 }
 
-// Connect creates a new client connection to a Redfish service.
-func Connect(config ClientConfig) (c *APIClient, err error) {
-
+// setupClientWithConfig setups the client using the client config
+func setupClientWithConfig(ctx context.Context, config ClientConfig) (c *APIClient, err error) {
 	if !strings.HasPrefix(config.Endpoint, "http") {
 		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
@@ -95,6 +98,7 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 	client := &APIClient{
 		endpoint:   config.Endpoint,
 		dumpWriter: config.DumpWriter,
+		ctx:        ctx,
 	}
 
 	if config.TLSHandshakeTimeout == 0 {
@@ -119,15 +123,40 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 		client.HTTPClient = config.HTTPClient
 	}
 
-	// Authenticate with the service
-	service, err := ServiceRoot(client)
+	// Fetch the service root
+	client.Service, err = ServiceRoot(client)
 	if err != nil {
 		return nil, err
 	}
-	client.Service = service
 
+	return client, nil
+}
+
+// setupClientWithEndpoint setups the client using only the endpoint
+func setupClientWithEndpoint(ctx context.Context, endpoint string) (c *APIClient, err error) {
+	if !strings.HasPrefix(endpoint, "http") {
+		return c, fmt.Errorf("endpoint must starts with http or https")
+	}
+
+	client := &APIClient{
+		endpoint: endpoint,
+		ctx:      ctx,
+	}
+	client.HTTPClient = &http.Client{}
+
+	// Fetch the service root
+	client.Service, err = ServiceRoot(client)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+// setupClientAuth setups the authentication in the client using the client config
+func (c *APIClient) setupClientAuth(config ClientConfig) error {
 	if config.Session != nil {
-		client.auth = &redfish.AuthToken{
+		c.auth = &redfish.AuthToken{
 			Session: config.Session.ID,
 			Token:   config.Session.Token,
 		}
@@ -141,14 +170,48 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 					BasicAuth: true,
 				}
 			} else {
-				auth, err = service.CreateSession(config.Username, config.Password)
+				var err error
+				auth, err = c.Service.CreateSession(config.Username, config.Password)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			}
 
-			client.auth = auth
+			c.auth = auth
 		}
+	}
+
+	return nil
+}
+
+// Connect creates a new client connection to a Redfish service.
+func Connect(config ClientConfig) (c *APIClient, err error) {
+
+	client, err := setupClientWithConfig(context.Background(), config)
+	if err != nil {
+		return c, err
+	}
+
+	// Authenticate with the service
+	err = client.setupClientAuth(config)
+	if err != nil {
+		return c, err
+	}
+
+	return client, err
+}
+
+// ConnectContext is the same as Connect, but sets the ctx.
+func ConnectContext(ctx context.Context, config ClientConfig) (c *APIClient, err error) {
+	client, err := setupClientWithConfig(ctx, config)
+	if err != nil {
+		return c, err
+	}
+
+	// Authenticate with the service
+	err = client.setupClientAuth(config)
+	if err != nil {
+		return c, err
 	}
 
 	return client, err
@@ -156,19 +219,20 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 
 // ConnectDefault creates an unauthenticated connection to a Redfish service.
 func ConnectDefault(endpoint string) (c *APIClient, err error) {
-	if !strings.HasPrefix(endpoint, "http") {
-		return c, fmt.Errorf("endpoint must starts with http or https")
-	}
-
-	client := &APIClient{endpoint: endpoint}
-	client.HTTPClient = &http.Client{}
-
-	// Fetch the service root
-	service, err := ServiceRoot(client)
+	client, err := setupClientWithEndpoint(context.Background(), endpoint)
 	if err != nil {
-		return nil, err
+		return c, err
 	}
-	client.Service = service
+
+	return client, err
+}
+
+// ConnectDefaultContext is the same as ConnectDefault, but sets the ctx.
+func ConnectDefaultContext(ctx context.Context, endpoint string) (c *APIClient, err error) {
+	client, err := setupClientWithEndpoint(ctx, endpoint)
+	if err != nil {
+		return c, err
+	}
 
 	return client, err
 }
@@ -308,7 +372,7 @@ func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.Re
 	}
 
 	endpoint := fmt.Sprintf("%s%s", c.endpoint, url)
-	req, err := http.NewRequest(method, endpoint, payloadBuffer)
+	req, err := http.NewRequestWithContext(c.ctx, method, endpoint, payloadBuffer)
 	if err != nil {
 		return nil, err
 	}

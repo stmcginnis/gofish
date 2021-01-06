@@ -5,10 +5,13 @@
 package gofish
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -86,5 +89,79 @@ func TestErrorNon400(t *testing.T) {
 	}
 	if expectErrorStatus404 != err.Error() {
 		t.Errorf("Expect:\n%s\nGot:\n%s", expectErrorStatus404, err.Error())
+	}
+}
+
+// TestConnectContextTimeout
+func TestConnectContextTimeout(t *testing.T) {
+
+	// ctx will timeout very quickly
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		1*time.Microsecond)
+	defer cancel()
+
+	_, err := ConnectContext(
+		ctx,
+		ClientConfig{
+			Endpoint: "https://testContextTimeout.com",
+		})
+
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Error("Context should timeout")
+	}
+}
+
+// TestConnectContextCancel
+func TestConnectContextCancel(t *testing.T) {
+
+	// ctx will be cancelled
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := ConnectContext(
+		ctx,
+		ClientConfig{
+			Endpoint: "https://testContextCancel.com",
+		})
+
+	if !errors.Is(err, context.Canceled) {
+		t.Error("Context should be cancelled")
+	}
+}
+
+// TestConnectDefaultContextTimeout
+func TestConnectDefaultContextTimeout(t *testing.T) {
+
+	// ctx will timeout very quickly
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		1*time.Microsecond)
+	defer cancel()
+
+	_, err := ConnectDefaultContext(
+		ctx,
+		"https://testContextTimeout.com",
+	)
+
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Error("Context should timeout")
+	}
+}
+
+// TestConnectDefaultContextCancel
+func TestConnectDefaultContextCancel(t *testing.T) {
+
+	// ctx will be cancelled
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := ConnectDefaultContext(
+		ctx,
+		"https://testContextCancel.com",
+	)
+
+	if !errors.Is(err, context.Canceled) {
+		t.Error("Context should be cancelled")
 	}
 }
