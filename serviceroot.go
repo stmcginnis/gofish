@@ -275,6 +275,42 @@ func (serviceroot *Service) EventService() (*redfish.EventService, error) {
 	return redfish.GetEventService(serviceroot.Client, serviceroot.eventService)
 }
 
+// Registries gets the Redfish Registries
+func (serviceroot *Service) Registries() ([]*redfish.MessageRegistryFile, error) {
+	return redfish.ListReferencedMessageRegistryFiles(serviceroot.Client, serviceroot.registries)
+}
+
+// MessageRegistries gets all the available message registries in all languages
+func (serviceroot *Service) MessageRegistries() ([]*redfish.MessageRegistry, error) {
+	return redfish.ListReferencedMessageRegistries(serviceroot.Client, serviceroot.registries)
+}
+
+// MessageRegistriesByLanguage gets the message registries by language.
+// language is the RFC5646-conformant language code for the message registry, for example: "en".
+func (serviceroot *Service) MessageRegistriesByLanguage(language string) ([]*redfish.MessageRegistry, error) {
+	return redfish.ListReferencedMessageRegistriesByLanguage(serviceroot.Client, serviceroot.registries, language)
+}
+
+// MessageRegistryByLanguage gets a specific message registry by language.
+// registry is used to identify the correct Message Registry file and it shall
+// contain the Message Registry name and it major and minor versions, as defined
+// by the Redfish Specification, for example: "Alert.1.0.0".
+// language is the RFC5646-conformant language code for the message registry, for example: "en".
+func (serviceroot *Service) MessageRegistryByLanguage(registry string, language string) (*redfish.MessageRegistry, error) {
+	return redfish.GetMessageRegistryByLanguage(serviceroot.Client, serviceroot.registries, registry, language)
+}
+
+// MessageByLanguage tries to find and get the message in the correct language from the informed messageID.
+// messageID is the key used to find the registry, version and message, for example: "Alert.1.0.LanDisconnect"
+//  - The segment before the 1st period is the Registry Name (Registry Prefix): Alert
+//  - The segment between the 1st and 2nd period is the major version: 1
+//  - The segment between the 2nd and 3rd period is the minor version: 0
+//  - The segment after the 3rd period is the Message Identifier in the Registry: LanDisconnect
+// language is the RFC5646-conformant language code for the message registry, for example: "en".
+func (serviceroot *Service) MessageByLanguage(messageID string, language string) (*redfish.MessageRegistryMessage, error) {
+	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.Client, serviceroot.registries, messageID, language)
+}
+
 // Systems get the system instances from the service
 func (serviceroot *Service) Systems() ([]*redfish.ComputerSystem, error) {
 	return redfish.ListReferencedComputerSystems(serviceroot.Client, serviceroot.systems)
