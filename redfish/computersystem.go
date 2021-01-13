@@ -405,8 +405,8 @@ type ComputerSystem struct {
 	// describe the host watchdog timer functionality for this
 	// ComputerSystem.
 	HostWatchdogTimer WatchdogTimer
-	// HostedServices shall describe services supported by this computer system.
-	HostedServices string
+	// hostedServices shall describe services supported by this computer system.
+	hostedServices string
 	// HostingRoles shall be the hosting roles supported by this computer system.
 	HostingRoles []string
 
