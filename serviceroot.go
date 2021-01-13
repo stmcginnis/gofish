@@ -285,6 +285,12 @@ func (serviceroot *Service) MessageRegistries() ([]*redfish.MessageRegistry, err
 	return redfish.ListReferencedMessageRegistries(serviceroot.Client, serviceroot.registries)
 }
 
+// MessageRegistry gets a specific message registry.
+// uri is the uri for the message registry
+func (serviceroot *Service) MessageRegistry(uri string) (*redfish.MessageRegistry, error) {
+	return redfish.GetMessageRegistry(serviceroot.Client, uri)
+}
+
 // MessageRegistriesByLanguage gets the message registries by language.
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageRegistriesByLanguage(language string) ([]*redfish.MessageRegistry, error) {
