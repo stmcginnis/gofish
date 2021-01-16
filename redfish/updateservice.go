@@ -34,6 +34,10 @@ type UpdateService struct {
 	UpdateServiceTarget string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+	// Oem shall contain the OEM extensions. All values for properties that
+	// this object contains shall conform to the Redfish Specification
+	// described requirements.
+	Oem interface{}
 }
 
 // UnmarshalJSON unmarshals a UpdateService object from the raw JSON.

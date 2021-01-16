@@ -39,6 +39,12 @@ var simpleUpdateBody = `{
     "HttpPushUri": "/redfish/v1/UpdateService/FirmwareInventory",
     "Id": "UpdateService",
     "Name": "Update Service",
+    "Oem": {
+        "VendorName": {
+            "OemInfo1": "The Oem info 1.",
+            "OemInfoN": "The Oem info N."
+        }
+    },
     "ServiceEnabled": true,
     "Status": {
         "Health": "OK",
@@ -67,5 +73,31 @@ func TestUpdateService(t *testing.T) {
 
 	if result.UpdateServiceTarget != "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate" {
 		t.Errorf("UpdateServiceTarget was wrong")
+	}
+
+	// test oem
+	switch oem := result.Oem.(type) {
+	case map[string]interface{}:
+		for vendor, values := range oem {
+			if vendor != "VendorName" {
+				t.Errorf("Received invalid Oem vendor: %s", vendor)
+			}
+			switch val := values.(type) {
+			case map[string]interface{}:
+				for k, v := range val {
+					if k != "OemInfo1" && k != "OemInfoN" {
+						t.Errorf("Received invalid Oem key %s for vendor: %s", k, vendor)
+					}
+					if k == "OemInfo1" && v != "The Oem info 1." {
+						t.Errorf("Received invalid OemInfo1: %s", v)
+					}
+					if v == "OemInfoN" && v != "The Oem info N." {
+						t.Errorf("Received invalid OemInfoN: %s", v)
+					}
+				}
+			}
+		}
+	default:
+		t.Errorf("Received invalid Oem")
 	}
 }
