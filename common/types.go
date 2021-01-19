@@ -712,7 +712,7 @@ func ConstructError(statusCode int, b []byte) error {
 	var err struct {
 		Error *Error
 	}
-	if e := json.Unmarshal(b, &err); e != nil || err.Error == nil{
+	if e := json.Unmarshal(b, &err); e != nil || err.Error == nil {
 		// return normal error
 		return fmt.Errorf("%d: %s", statusCode, string(b))
 	}
@@ -720,7 +720,7 @@ func ConstructError(statusCode int, b []byte) error {
 	return err.Error
 }
 
-// Error is redfish error response object for 400
+// Error is redfish error response object for 400 or 404
 type Error struct {
 	rawData []byte
 	// A string indicating a specific MessageId from the message registry.
