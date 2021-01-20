@@ -716,13 +716,16 @@ func ConstructError(statusCode int, b []byte) error {
 		// return normal error
 		return fmt.Errorf("%d: %s", statusCode, string(b))
 	}
+	err.Error.HTTPReturnedStatusCode = statusCode
 	err.Error.rawData = b
 	return err.Error
 }
 
-// Error is redfish error response object for 400 or 404
+// Error is redfish error response object for HTTP status codes different from 200, 201 and 204
 type Error struct {
 	rawData []byte
+	// An integer that represents the status code returned by the API
+	HTTPReturnedStatusCode int
 	// A string indicating a specific MessageId from the message registry.
 	Code string `json:"code"`
 	// A human readable error message corresponding to the message in the message registry.

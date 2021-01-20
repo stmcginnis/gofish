@@ -440,11 +440,7 @@ func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.Re
 			return nil, err
 		}
 		defer resp.Body.Close()
-		if resp.StatusCode == 400 || resp.StatusCode == 404 {
-			return nil, common.ConstructError(resp.StatusCode, payload)
-		}
-
-		return nil, fmt.Errorf("%d: %s", resp.StatusCode, string(payload))
+		return nil, common.ConstructError(resp.StatusCode, payload)
 	}
 
 	return resp, err
