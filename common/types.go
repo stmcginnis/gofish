@@ -725,7 +725,7 @@ func ConstructError(statusCode int, b []byte) error {
 type Error struct {
 	rawData []byte
 	// An integer that represents the status code returned by the API
-	HTTPReturnedStatusCode int
+	HTTPReturnedStatusCode int `json:"-"`
 	// A string indicating a specific MessageId from the message registry.
 	Code string `json:"code"`
 	// A human readable error message corresponding to the message in the message registry.
