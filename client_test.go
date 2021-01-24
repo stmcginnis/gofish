@@ -42,15 +42,14 @@ const (
           }
       ]
   }`
-	expectErrorStatus400 = `{"error": ` + errMsg + "}"
-	expectErrorStatus404 = `404: {"error": ` + errMsg + "}"
+	expectErrorStatus = `{"error": ` + errMsg + "}"
 )
 
 // TestError400 tests the parsing of error reply.
 func TestError400(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
-		w.Write([]byte(expectErrorStatus400))
+		w.Write([]byte(expectErrorStatus))
 	}))
 	defer ts.Close()
 
@@ -64,6 +63,34 @@ func TestError400(t *testing.T) {
 	}
 	if errStruct.HTTPReturnedStatusCode != 400 {
 		t.Errorf("The error code is different from 400")
+	}
+	errBody, err := json.MarshalIndent(errStruct, "  ", "    ")
+	if err != nil {
+		t.Errorf("Marshall error %v got: %s", errStruct, err)
+	}
+	if errMsg != string(errBody) {
+		t.Errorf("Expect:\n%s\nGot:\n%s", errMsg, string(errBody))
+	}
+}
+
+// TestError404 tests the parsing of error reply.
+func TestError404(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+		w.Write([]byte(expectErrorStatus))
+	}))
+	defer ts.Close()
+
+	_, err := Connect(ClientConfig{Endpoint: ts.URL, HTTPClient: ts.Client()})
+	if err == nil {
+		t.Error("Update call should fail")
+	}
+	errStruct, ok := err.(*common.Error)
+	if !ok {
+		t.Errorf("404 should return known error type: %v", err)
+	}
+	if errStruct.HTTPReturnedStatusCode != 404 {
+		t.Errorf("The error code is different from 404")
 	}
 	errBody, err := json.MarshalIndent(errStruct, "  ", "    ")
 	if err != nil {

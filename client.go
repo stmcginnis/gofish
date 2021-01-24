@@ -368,7 +368,7 @@ func (c *APIClient) runRequestWithMultipartPayload(method string, url string, pa
 // runRawRequest actually performs the REST calls.
 func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.ReadSeeker, contentType string) (*http.Response, error) {
 	if url == "" {
-		return nil, fmt.Errorf("unable to execute request, no target provided")
+		return nil, common.ConstructError(0, []byte("unable to execute request, no target provided"))
 	}
 
 	endpoint := fmt.Sprintf("%s%s", c.endpoint, url)
@@ -404,7 +404,7 @@ func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.Re
 	if c.dumpWriter != nil {
 		d, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
-			return nil, err
+			return nil, common.ConstructError(0, []byte(err.Error()))
 		}
 
 		d = append(d, '\n')
@@ -424,7 +424,7 @@ func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.Re
 		d, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			defer resp.Body.Close()
-			return nil, err
+			return nil, common.ConstructError(0, []byte(err.Error()))
 		}
 
 		d = append(d, '\n')
@@ -437,7 +437,7 @@ func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.Re
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
 		payload, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, err
+			return nil, common.ConstructError(0, []byte(err.Error()))
 		}
 		defer resp.Body.Close()
 		return nil, common.ConstructError(resp.StatusCode, payload)
