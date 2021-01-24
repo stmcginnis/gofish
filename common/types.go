@@ -713,8 +713,9 @@ func ConstructError(statusCode int, b []byte) error {
 		Error *Error
 	}
 	if e := json.Unmarshal(b, &err); e != nil || err.Error == nil {
-		// return normal error
-		return fmt.Errorf("%d: %s", statusCode, string(b))
+		// Construct our own error
+		err.Error = new(Error)
+		err.Error.Message = string(b)
 	}
 	err.Error.HTTPReturnedStatusCode = statusCode
 	err.Error.rawData = b
@@ -735,6 +736,9 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
+	if e.HTTPReturnedStatusCode != 0 {
+		return fmt.Sprintf("%d: %s", e.HTTPReturnedStatusCode, e.rawData)
+	}
 	return string(e.rawData)
 }
 
