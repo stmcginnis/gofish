@@ -42,7 +42,8 @@ const (
           }
       ]
   }`
-	expectErrorStatus = `{"error": ` + errMsg + "}"
+	expectErrorStatus         = `{"error": ` + errMsg + "}"
+	nonErrorStructErrorStatus = "Internal Server Error"
 )
 
 // TestError400 tests the parsing of error reply.
@@ -98,6 +99,30 @@ func TestError404(t *testing.T) {
 	}
 	if errMsg != string(errBody) {
 		t.Errorf("Expect:\n%s\nGot:\n%s", errMsg, string(errBody))
+	}
+}
+
+// TestErrorOther tests failures that do not return an Error struct
+func TestErrorOther(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(500)
+		w.Write([]byte(nonErrorStructErrorStatus))
+	}))
+	defer ts.Close()
+
+	_, err := Connect(ClientConfig{Endpoint: ts.URL, HTTPClient: ts.Client()})
+	if err == nil {
+		t.Error("connect should fail")
+	}
+	errStruct, ok := err.(*common.Error)
+	if !ok {
+		t.Errorf("call should return known error type: %v", err)
+	}
+	if errStruct.HTTPReturnedStatusCode != 500 {
+		t.Errorf("The error code is different from 500")
+	}
+	if err.Error() != "500: Internal Server Error" {
+		t.Errorf("Expected '500: %s', got '%s'", nonErrorStructErrorStatus, err.Error())
 	}
 }
 
@@ -172,5 +197,18 @@ func TestConnectDefaultContextCancel(t *testing.T) {
 
 	if !errors.Is(err, context.Canceled) {
 		t.Error("Context should be cancelled")
+	}
+}
+
+func TestClientRunRawRequestNoURL(t *testing.T) {
+	client := APIClient{}
+
+	_, err := client.runRawRequest("", "", nil, "")
+	if err == nil {
+		t.Error("Request without relative path should have failed")
+	}
+
+	if err.Error() != "unable to execute request, no target provided" {
+		t.Errorf("Unexpected error response: %s", err.Error())
 	}
 }
