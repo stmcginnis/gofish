@@ -7,6 +7,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -121,7 +122,16 @@ func (c *TestClient) Get(url string) (*http.Response, error) {
 	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForAction.(*http.Response), nil
+	resp := customReturnForAction.(*http.Response)
+	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, ConstructError(resp.StatusCode, payload)
+	}
+	return resp, nil
 }
 
 // Post performs a Post request against the Redfish service.
@@ -131,7 +141,16 @@ func (c *TestClient) Post(url string, payload interface{}) (*http.Response, erro
 	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForAction.(*http.Response), nil
+	resp := customReturnForAction.(*http.Response)
+	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, ConstructError(resp.StatusCode, payload)
+	}
+	return resp, nil
 }
 
 // Put performs a Put request against the Redfish service.
@@ -141,7 +160,16 @@ func (c *TestClient) Put(url string, payload interface{}) (*http.Response, error
 	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForAction.(*http.Response), nil
+	resp := customReturnForAction.(*http.Response)
+	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, ConstructError(resp.StatusCode, payload)
+	}
+	return resp, nil
 }
 
 // Patch performs a Patch request against the Redfish service.
@@ -151,7 +179,16 @@ func (c *TestClient) Patch(url string, payload interface{}) (*http.Response, err
 	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForAction.(*http.Response), nil
+	resp := customReturnForAction.(*http.Response)
+	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, ConstructError(resp.StatusCode, payload)
+	}
+	return resp, nil
 }
 
 // Delete performs a Delete request against the Redfish service.
@@ -161,5 +198,14 @@ func (c *TestClient) Delete(url string) (*http.Response, error) {
 	if customReturnForAction == nil {
 		return nil, nil
 	}
-	return customReturnForAction.(*http.Response), nil
+	resp := customReturnForAction.(*http.Response)
+	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		payload, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return nil, ConstructError(resp.StatusCode, payload)
+	}
+	return resp, nil
 }
