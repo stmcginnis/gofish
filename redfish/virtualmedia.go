@@ -200,7 +200,7 @@ func (virtualmedia *VirtualMedia) EjectMedia() error {
 		return errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
 	}
 
-	_, err := virtualmedia.Client.Post(virtualmedia.ejectMediaTarget, nil)
+	_, err := virtualmedia.Client.Post(virtualmedia.ejectMediaTarget, struct{}{})
 	return err
 }
 
@@ -222,6 +222,26 @@ func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted bool, write
 	}
 
 	_, err := virtualmedia.Client.Post(virtualmedia.insertMediaTarget, t)
+	return err
+}
+
+// VirtualMediaConfig is an struct used to pass config data to build the HTTP body when inserting media
+type VirtualMediaConfig struct {
+	Image                string
+	Inserted             bool
+	Password             string `json:",omitempty"`
+	TransferMethod       string `json:",omitempty"`
+	TransferProtocolType string `json:",omitempty"`
+	UserName             string `json:",omitempty"`
+	WriteProtected       bool
+}
+
+// InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct
+func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) error {
+	if !virtualmedia.SupportsMediaInsert {
+		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
+	}
+	_, err := virtualmedia.Client.Post(virtualmedia.insertMediaTarget, config)
 	return err
 }
 
