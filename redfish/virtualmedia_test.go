@@ -150,7 +150,7 @@ func TestVirtualMediaEject(t *testing.T) {
 
 	calls := testClient.CapturedCalls()
 
-	if calls[0].Payload != "" {
+	if calls[0].Payload != "map[]" {
 		t.Errorf("Unexpected EjectMedia payload: %s", calls[0].Payload)
 	}
 }
@@ -185,5 +185,48 @@ func TestVirtualMediaInsert(t *testing.T) {
 
 	if !strings.Contains(calls[0].Payload, "WriteProtected:true") {
 		t.Errorf("Unexpected InsertMedia WriteProtected payload: %s", calls[0].Payload)
+	}
+}
+
+func TestVirtualMediaInsertConfig(t *testing.T) {
+	var result VirtualMedia
+	err := json.NewDecoder(strings.NewReader(vmBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	virtualMediaConfig := VirtualMediaConfig{
+		Image:          "https://example.com/image",
+		Inserted:       true,
+		Password:       "test1234",
+		UserName:       "root",
+		WriteProtected: true,
+	}
+
+	err = result.InsertMediaConfig(virtualMediaConfig)
+	if err != nil {
+		t.Errorf("Error making InsertMediaConfig call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if !strings.Contains(calls[0].Payload, "Image:https://example.com/image") {
+		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "Inserted:true") {
+		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "Password:test1234") {
+		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "UserName:root") {
+		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "WriteProtected:true") {
+		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
 	}
 }
