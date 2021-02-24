@@ -505,6 +505,10 @@ type ComputerSystem struct {
 	SupportedResetTypes []ResetType
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
+	// ManagedBy An array of references to the Managers responsible for this system.
+	// This is temporary until a proper method can be implemented to actually
+	// retrieve those objects directly.
+	ManagedBy []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -564,6 +568,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.resetTarget = t.Actions.ComputerSystemReset.Target
 	computersystem.SupportedResetTypes = t.Actions.ComputerSystemReset.AllowedResetTypes
 	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
+	computersystem.ManagedBy = t.Links.ManagedBy.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	computersystem.rawData = b
