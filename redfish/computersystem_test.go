@@ -248,6 +248,12 @@ func TestComputerSystem(t *testing.T) {
 		t.Errorf("Invalid allowable reset actions, expected 6, got %d",
 			len(result.SupportedResetTypes))
 	}
+	if len(result.ManagedBy) != 1 {
+		t.Errorf("Received invalid number of ManagedBy: %d", len(result.ManagedBy))
+	}
+	if result.ManagedBy[0] != "/redfish/v1/Managers/BMC-1" {
+		t.Errorf("Received invalid Managers reference: %s", result.ManagedBy[0])
+	}
 }
 
 // TestComputerSystemUpdate tests the Update call.
