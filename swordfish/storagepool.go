@@ -86,7 +86,7 @@ type StoragePool struct {
 	// StoragePool is associated with and shall reference resources of type
 	// Drive. This property shall only contain references to Drive entities
 	// which are currently assigned as a dedicated spare and are able to support
-	//this StoragePool.
+	// this StoragePool.
 	dedicatedSpareDrives []string
 	// DedicatedSpareDrivesCount is the number of drives.
 	DedicatedSpareDrivesCount int
@@ -144,11 +144,13 @@ func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (storagepool *StoragePool) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(StoragePool)
-	original.UnmarshalJSON(storagepool.rawData)
+	err := original.UnmarshalJSON(storagepool.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"CapacitySources",

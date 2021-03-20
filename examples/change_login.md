@@ -1,3 +1,8 @@
+# Change Login
+
+This is an example snippet of changing the username and password of an account.
+
+```go
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
@@ -49,3 +54,4 @@ func main() {
 		}
 	}
 }
+```

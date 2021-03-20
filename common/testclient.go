@@ -47,7 +47,7 @@ func (c *TestClient) actionCount(action string) int {
 	var actionCount int
 	for _, call := range c.calls {
 		if call.Action == action {
-			actionCount = actionCount + 1
+			actionCount++
 		}
 	}
 	return actionCount
@@ -105,7 +105,7 @@ func (c *TestClient) Reset() {
 }
 
 // recordCall is a helper to record any API calls made through this client
-func (c *TestClient) recordCall(action string, url string, payload interface{}) {
+func (c *TestClient) recordCall(action, url string, payload interface{}) {
 	call := TestAPICall{
 		Action:  action,
 		URL:     url,
@@ -115,10 +115,9 @@ func (c *TestClient) recordCall(action string, url string, payload interface{}) 
 	c.calls = append(c.calls, call)
 }
 
-// Get performs a GET request against the Redfish service.
-func (c *TestClient) Get(url string) (*http.Response, error) {
-	c.recordCall(http.MethodGet, url, nil)
-	customReturnForAction := c.getCustomReturnForAction(http.MethodGet)
+func (c *TestClient) performAction(action, url string, payload interface{}) (*http.Response, error) {
+	c.recordCall(action, url, payload)
+	customReturnForAction := c.getCustomReturnForAction(action)
 	if customReturnForAction == nil {
 		return nil, nil
 	}
@@ -132,80 +131,29 @@ func (c *TestClient) Get(url string) (*http.Response, error) {
 		return nil, ConstructError(resp.StatusCode, payload)
 	}
 	return resp, nil
+}
+
+// Get performs a GET request against the Redfish service.
+func (c *TestClient) Get(url string) (*http.Response, error) {
+	return c.performAction(http.MethodGet, url, nil)
 }
 
 // Post performs a Post request against the Redfish service.
 func (c *TestClient) Post(url string, payload interface{}) (*http.Response, error) {
-	c.recordCall(http.MethodPost, url, payload)
-	customReturnForAction := c.getCustomReturnForAction(http.MethodPost)
-	if customReturnForAction == nil {
-		return nil, nil
-	}
-	resp := customReturnForAction.(*http.Response)
-	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return nil, ConstructError(resp.StatusCode, payload)
-	}
-	return resp, nil
+	return c.performAction(http.MethodPost, url, payload)
 }
 
 // Put performs a Put request against the Redfish service.
 func (c *TestClient) Put(url string, payload interface{}) (*http.Response, error) {
-	c.recordCall(http.MethodPut, url, payload)
-	customReturnForAction := c.getCustomReturnForAction(http.MethodPut)
-	if customReturnForAction == nil {
-		return nil, nil
-	}
-	resp := customReturnForAction.(*http.Response)
-	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return nil, ConstructError(resp.StatusCode, payload)
-	}
-	return resp, nil
+	return c.performAction(http.MethodPut, url, payload)
 }
 
 // Patch performs a Patch request against the Redfish service.
 func (c *TestClient) Patch(url string, payload interface{}) (*http.Response, error) {
-	c.recordCall(http.MethodPatch, url, payload)
-	customReturnForAction := c.getCustomReturnForAction(http.MethodPatch)
-	if customReturnForAction == nil {
-		return nil, nil
-	}
-	resp := customReturnForAction.(*http.Response)
-	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return nil, ConstructError(resp.StatusCode, payload)
-	}
-	return resp, nil
+	return c.performAction(http.MethodPatch, url, payload)
 }
 
 // Delete performs a Delete request against the Redfish service.
 func (c *TestClient) Delete(url string) (*http.Response, error) {
-	c.recordCall(http.MethodDelete, url, nil)
-	customReturnForAction := c.getCustomReturnForAction(http.MethodDelete)
-	if customReturnForAction == nil {
-		return nil, nil
-	}
-	resp := customReturnForAction.(*http.Response)
-	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return nil, ConstructError(resp.StatusCode, payload)
-	}
-	return resp, nil
+	return c.performAction(http.MethodDelete, url, nil)
 }

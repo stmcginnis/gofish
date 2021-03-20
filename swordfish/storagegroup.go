@@ -96,7 +96,7 @@ type StorageGroup struct {
 	ReplicaInfo ReplicaInfo
 	// ReplicaTargets shall reference the target replicas that
 	// are sourced by this replica.
-	replicaTargets []string
+	// replicaTargets []string
 	// ReplicaTargetsCount is number of replica targets.
 	ReplicaTargetsCount int `json:"ReplicaTargets@odata.count"`
 	// serverEndpointGroups is used to make requests to the storage exposed
@@ -104,7 +104,7 @@ type StorageGroup struct {
 	// to the storage via any server-side endpoint. If empty, the
 	// implementation shall not allow access to the storage via any server-
 	// side endpoint.
-	serverEndpointGroups []string
+	// serverEndpointGroups []string
 	// ServerEndpointGroupsCount is the number of server endpoints.
 	ServerEndpointGroupsCount int `json:"ServerEndpointGroups@odata.count"`
 	// Status is the status of this group.
@@ -184,11 +184,13 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (storagegroup *StorageGroup) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(StorageGroup)
-	original.UnmarshalJSON(storagegroup.rawData)
+	err := original.UnmarshalJSON(storagegroup.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AccessState",
@@ -283,7 +285,7 @@ func (storagegroup *StorageGroup) ClassOfService() (*ClassOfService, error) {
 	return GetClassOfService(storagegroup.Client, storagegroup.classOfService)
 }
 
-//MappedVolume is an exposed volume mapping.
+// MappedVolume is an exposed volume mapping.
 type MappedVolume struct {
 	// LogicalUnitNumber is the value is a SCSI Logical Unit Number for the Volume.
 	LogicalUnitNumber int

@@ -1,3 +1,9 @@
+# Query Session
+
+This is an example of querying the current active session information from the
+service.
+
+```go
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
@@ -26,13 +32,15 @@ func main() {
 	// Retrieve the service root
 	service := c.Service
 
-	// Query the chassis data using the session token
-	chassis, err := service.Chassis()
+	// Query the active sessions using the session token
+	sessions, err := service.Sessions()
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("%+v\n", sessions)
 
-	for _, chass := range chassis {
-		fmt.Printf("Chassis: %#v\n\n", chass)
+	for _, session := range sessions {
+		fmt.Printf("Sessions: %#v\n\n", session)
 	}
 }
+```

@@ -251,11 +251,13 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (ethernetinterface *EthernetInterface) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(EthernetInterface)
-	original.UnmarshalJSON(ethernetinterface.rawData)
+	err := original.UnmarshalJSON(ethernetinterface.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AutoNeg",

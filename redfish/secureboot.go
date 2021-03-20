@@ -108,11 +108,13 @@ func (secureboot *SecureBoot) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (secureboot *SecureBoot) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(SecureBoot)
-	original.UnmarshalJSON(secureboot.rawData)
+	err := original.UnmarshalJSON(secureboot.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"SecureBootEnable",

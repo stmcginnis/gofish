@@ -66,11 +66,13 @@ func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) UnmarshalJSO
 
 // Update commits updates to this object's properties to the running system.
 func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(IOConnectivityLoSCapabilities)
-	original.UnmarshalJSON(ioconnectivityloscapabilities.rawData)
+	err := original.UnmarshalJSON(ioconnectivityloscapabilities.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"MaxSupportedBytesPerSecond",

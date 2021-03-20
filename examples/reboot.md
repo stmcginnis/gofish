@@ -1,3 +1,11 @@
+# Reboot
+
+This is an example of rebooting a system.
+
+```go
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
 package main
 
 import (
@@ -49,3 +57,4 @@ func main() {
 		}
 	}
 }
+```

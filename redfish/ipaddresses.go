@@ -93,7 +93,7 @@ type IPv6Address struct {
 // assigned on a network interface.
 type IPv6GatewayStaticAddress struct {
 	// Address provides access to a static IPv6 address that is currently
-	//assigned on a network interface.
+	// assigned on a network interface.
 	Address string
 	// PrefixLength provides the IPv6 network prefix length in bits for this address.
 	PrefixLength int8

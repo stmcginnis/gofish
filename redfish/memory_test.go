@@ -102,7 +102,7 @@ func TestMemory(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.chassis != "/redfish/v1/Chassis/Chassis-1" {
+	if result.chassis != TestChassisPath {
 		t.Errorf("Invalid chassis link: %s", result.chassis)
 	}
 
@@ -129,7 +129,7 @@ func TestMemory(t *testing.T) {
 }
 
 // TestMemoryUpdate tests the Update call.
-func TestMemoryUpdate(t *testing.T) {
+func TestMemoryUpdate(t *testing.T) { // nolint:dupl
 	var result Memory
 	err := json.NewDecoder(strings.NewReader(memoryBody)).Decode(&result)
 

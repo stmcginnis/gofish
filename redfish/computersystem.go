@@ -406,7 +406,7 @@ type ComputerSystem struct {
 	// ComputerSystem.
 	HostWatchdogTimer WatchdogTimer
 	// hostedServices shall describe services supported by this computer system.
-	hostedServices string
+	// hostedServices string
 	// HostingRoles shall be the hosting roles supported by this computer system.
 	HostingRoles []string
 
@@ -581,7 +581,10 @@ func (computersystem *ComputerSystem) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	cs := new(ComputerSystem)
-	cs.UnmarshalJSON(computersystem.rawData)
+	err := cs.UnmarshalJSON(computersystem.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AssetTag",
@@ -709,7 +712,7 @@ func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
 }
 
 // SetBoot set a boot object based on a payload request
-func (computersystem *ComputerSystem) SetBoot(b Boot) error {
+func (computersystem *ComputerSystem) SetBoot(b Boot) error { // nolint
 	type temp struct {
 		Boot Boot
 	}
@@ -762,7 +765,7 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 	// This action wasn't added until 1.5.0, make sure this is supported.
 	if computersystem.setDefaultBootOrderTarget == "" {
-		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
+		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") // nolint:golint
 	}
 
 	_, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, nil)

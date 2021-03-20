@@ -172,7 +172,7 @@ func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
 }
 
 // ChangePassword shall change the selected BIOS password.
-func (bios *Bios) ChangePassword(passwordName string, oldPassword string, newPassword string) error {
+func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) error {
 	if passwordName == "" {
 		return fmt.Errorf("password name must be supplied")
 	}
@@ -223,13 +223,15 @@ func (bios *Bios) AllowedAttributeUpdateApplyTimes() []common.ApplyTime {
 
 // UpdateBiosAttributes is used to update attribute values.
 func (bios *Bios) UpdateBiosAttributes(attrs BiosAttributes) error {
-
 	payload := make(map[string]interface{})
 
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Bios)
-	original.UnmarshalJSON(bios.rawData)
+	err := original.UnmarshalJSON(bios.rawData)
+	if err != nil {
+		return err
+	}
 
 	for key := range attrs {
 		if original.Attributes[key] != attrs[key] {

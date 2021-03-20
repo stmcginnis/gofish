@@ -12,6 +12,8 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+const MessageIDSectionLength = 4
+
 // MessageRegistryMessage is a message contained in the message registry.
 type MessageRegistryMessage struct {
 	// Description is a short description of how and when to use this message.
@@ -122,7 +124,7 @@ func ListReferencedMessageRegistriesByLanguage(
 	language string,
 ) ([]*MessageRegistry, error) {
 	language = strings.TrimSpace(language)
-	if len(language) == 0 {
+	if language == "" {
 		return nil, fmt.Errorf("received empty language")
 	}
 
@@ -165,12 +167,12 @@ func GetMessageRegistryByLanguage(
 	language string,
 ) (*MessageRegistry, error) {
 	registry = strings.TrimSpace(registry)
-	if len(registry) == 0 {
+	if registry == "" {
 		return nil, fmt.Errorf("received empty registry")
 	}
 
 	language = strings.TrimSpace(language)
-	if len(language) == 0 {
+	if language == "" {
 		return nil, fmt.Errorf("received empty language")
 	}
 
@@ -214,14 +216,13 @@ func GetMessageFromMessageRegistryByLanguage(
 	messageID string,
 	language string,
 ) (*MessageRegistryMessage, error) {
-
 	messageID = strings.TrimSpace(messageID)
-	if len(messageID) == 0 {
+	if messageID == "" {
 		return nil, fmt.Errorf("received empty messageID")
 	}
 
 	language = strings.TrimSpace(language)
-	if len(language) == 0 {
+	if language == "" {
 		return nil, fmt.Errorf("received empty language")
 	}
 
@@ -229,7 +230,7 @@ func GetMessageFromMessageRegistryByLanguage(
 	messageIDSplitted := strings.Split(messageID, ".")
 
 	// validate messageID
-	if len(messageIDSplitted) != 4 {
+	if len(messageIDSplitted) != MessageIDSectionLength {
 		return nil, fmt.Errorf("received invalid messageID %s", messageID)
 	}
 

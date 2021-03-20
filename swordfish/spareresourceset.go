@@ -85,11 +85,13 @@ func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (spareresourceset *SpareResourceSet) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(SpareResourceSet)
-	original.UnmarshalJSON(spareresourceset.rawData)
+	err := original.UnmarshalJSON(spareresourceset.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"OnLine",

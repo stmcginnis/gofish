@@ -164,7 +164,7 @@ type EventDestination struct {
 	// sent to the subscriber. If this property is absent or the array is
 	// empty, the service shall send metric reports originating from any
 	// metric report definition to the subscriber.
-	metricReportDefinitions []string
+	// metricReportDefinitions []string
 	// MetricReportDefinitions@odata.count is
 	MetricReportDefinitionsCount int `json:"MetricReportDefinitions@odata.count"`
 	// originResources shall specify an array of Resources, Resource Collections,
@@ -175,7 +175,7 @@ type EventDestination struct {
 	// If this property is absent or the array is empty, the service shall send
 	// Events originating from any Resource, Resource Collection, or
 	// Referenceable Member to the subscriber.
-	originResources []string
+	// originResources []string
 	// OriginResourcesCount is the number of OriginResources.
 	OriginResourcesCount int `json:"OriginResources@odata.count"`
 	// Protocol is used to indicate that the event type shall adhere to that
@@ -240,11 +240,13 @@ func (eventdestination *EventDestination) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (eventdestination *EventDestination) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(EventDestination)
-	original.UnmarshalJSON(eventdestination.rawData)
+	err := original.UnmarshalJSON(eventdestination.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"Context",
@@ -260,7 +262,7 @@ func (eventdestination *EventDestination) Update() error {
 // GetEventDestination will get a EventDestination instance from the service.
 func GetEventDestination(c common.Client, uri string) (*EventDestination, error) {
 	// validate uri
-	if len(strings.TrimSpace(uri)) == 0 {
+	if strings.TrimSpace(uri) == "" {
 		return nil, fmt.Errorf("uri should not be empty")
 	}
 
@@ -298,12 +300,12 @@ func validateCreateEventDestinationParams(
 	eventTypes []EventType,
 ) error {
 	// validate uri
-	if len(strings.TrimSpace(uri)) == 0 {
+	if strings.TrimSpace(uri) == "" {
 		return fmt.Errorf("uri should not be empty")
 	}
 
 	// validate destination
-	if len(strings.TrimSpace(destination)) == 0 {
+	if strings.TrimSpace(destination) == "" {
 		return fmt.Errorf("empty destination is not valid")
 	}
 
@@ -347,7 +349,6 @@ func CreateEventDestination(
 	context string,
 	oem interface{},
 ) (string, error) {
-
 	// validate input parameters
 	err := validateCreateEventDestinationParams(
 		uri,
@@ -395,11 +396,10 @@ func CreateEventDestination(
 // DeleteEventDestination will delete a EventDestination.
 func DeleteEventDestination(c common.Client, uri string) (err error) {
 	// validate uri
-	if len(strings.TrimSpace(uri)) == 0 {
+	if strings.TrimSpace(uri) == "" {
 		return fmt.Errorf("uri should not be empty")
 	}
 	_, err = c.Delete(uri)
-	//defer resp.Body.Close()
 
 	return err
 }

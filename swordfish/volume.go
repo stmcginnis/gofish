@@ -274,7 +274,7 @@ type Volume struct {
 	// EncryptionTypes is used by this Volume.
 	EncryptionTypes []redfish.EncryptionTypes
 	// IOStatistics shall represent IO statistics for this volume.
-	//IOStatistics IOStatistics
+	// IOStatistics IOStatistics
 	// Identifiers shall contain a list of all known durable
 	// names for the associated volume.
 	Identifiers []common.Identifier
@@ -330,7 +330,7 @@ type Volume struct {
 	RemainingCapacityPercent int
 	// ReplicaInfo shall describe the replica relationship
 	// between this storage volume and a corresponding source volume.
-	//ReplicaInfo redfish.ReplicaInfo
+	// ReplicaInfo redfish.ReplicaInfo
 	// ReplicaTargets shall reference the target replicas that
 	// are sourced by this replica.
 	ReplicaTargets []string
@@ -514,11 +514,13 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (volume *Volume) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Volume)
-	original.UnmarshalJSON(volume.rawData)
+	err := original.UnmarshalJSON(volume.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AccessCapabilities",
@@ -665,12 +667,10 @@ func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 // AssignReplicaTarget is used to establish a replication relationship by
 // assigning an existing volume to serve as a target replica for an existing
 // source volume.
-func (volume *Volume) AssignReplicaTarget(
-	replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) error {
-
+func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.assignReplicaTargetTarget == "" {
-		return fmt.Errorf("AssignReplicaTarget action is not supported by this system")
+		return fmt.Errorf("AssignReplicaTarget action is not supported by this system") // nolint
 	}
 
 	// Define this action's parameters
@@ -694,9 +694,8 @@ func (volume *Volume) AssignReplicaTarget(
 // CheckConsistency is used to force a check of the Volume's parity or redundant
 // data to ensure it matches calculated values.
 func (volume *Volume) CheckConsistency() error {
-
 	if volume.checkConsistencyTarget == "" {
-		return fmt.Errorf("CheckConsistency action is not supported by this system")
+		return fmt.Errorf("CheckConsistency action is not supported by this system") // nolint
 	}
 
 	_, err := volume.Client.Post(volume.checkConsistencyTarget, nil)
@@ -705,7 +704,6 @@ func (volume *Volume) CheckConsistency() error {
 
 // Initialize is used to prepare the contents of the volume for use by the system.
 func (volume *Volume) Initialize(initType InitializeType) error {
-
 	if volume.initializeTarget == "" {
 		return fmt.Errorf("initialize action is not supported by this system")
 	}
@@ -726,10 +724,9 @@ func (volume *Volume) Initialize(initType InitializeType) error {
 // source and target volume, remove the replication relationship, and optionally
 // delete the target volume.
 func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeODataID string) error {
-
 	// This action wasn't added until later revisions
 	if volume.removeReplicaRelationshipTarget == "" {
-		return fmt.Errorf("RemoveReplicaRelationship action is not supported by this system")
+		return fmt.Errorf("RemoveReplicaRelationship action is not supported by this system") // nolint
 	}
 
 	// Define this action's parameters
@@ -752,10 +749,9 @@ func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeO
 // source and target volume, without otherwise altering the replication
 // relationship.
 func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
-
 	// This action wasn't added until later revisions
 	if volume.resumeReplicationTarget == "" {
-		return fmt.Errorf("ResumeReplication action is not supported by this system")
+		return fmt.Errorf("ResumeReplication action is not supported by this system") // nolint
 	}
 
 	// Define this action's parameters
@@ -773,10 +769,9 @@ func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
 // ReverseReplicationRelationship is used to reverse the replication
 // relationship between a source and target volume.
 func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string) error {
-
 	// This action wasn't added until later revisions
 	if volume.reverseReplicationRelationshipTarget == "" {
-		return fmt.Errorf("ReverseReplicationRelationship action is not supported by this system")
+		return fmt.Errorf("ReverseReplicationRelationship action is not supported by this system") // nolint
 	}
 
 	// Define this action's parameters
@@ -794,10 +789,9 @@ func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string)
 // SplitReplication is used to split the replication relationship and suspend
 // data synchronization between a source and target volume.
 func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
-
 	// This action wasn't added until later revisions
 	if volume.splitReplicationTarget == "" {
-		return fmt.Errorf("SplitReplication action is not supported by this system")
+		return fmt.Errorf("SplitReplication action is not supported by this system") // nolint
 	}
 
 	// Define this action's parameters
@@ -816,10 +810,9 @@ func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
 // source and target volume, without otherwise altering the replication
 // relationship.
 func (volume *Volume) SuspendReplication(targetVolumeODataID string) error {
-
 	// This action wasn't added until later revisions
 	if volume.suspendReplicationTarget == "" {
-		return fmt.Errorf("SuspendReplication action is not supported by this system")
+		return fmt.Errorf("SuspendReplication action is not supported by this system") // nolint
 	}
 
 	// Define this action's parameters

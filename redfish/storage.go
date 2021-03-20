@@ -190,7 +190,6 @@ func (storage *Storage) SetEncryptionKey(key string) error {
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage
 func (storage *Storage) GetOperationApplyTimeValues() ([]common.OperationApplyTime, error) {
 	return AllowedVolumesUpdateApplyTimes(storage.Client, storage.volumes)
-
 }
 
 // StorageController is used to represent a resource that represents a
@@ -267,7 +266,7 @@ type StorageController struct {
 }
 
 // UnmarshalJSON unmarshals a StorageController object from the raw JSON.
-func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
+func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error { // nolint:dupl
 	type temp StorageController
 	type links struct {
 		Endpoints            common.Links
@@ -303,11 +302,13 @@ func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (storagecontroller *StorageController) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(StorageController)
-	original.UnmarshalJSON(storagecontroller.rawData)
+	err := original.UnmarshalJSON(storagecontroller.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AssetTag",

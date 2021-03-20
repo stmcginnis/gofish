@@ -127,11 +127,11 @@ type ExternalAccountProvider struct {
 	// certificates shall contain a link to a Resource
 	// Collection of certificates of the CertificateCollection type that the
 	// external account provider uses.
-	certificates string
+	// certificates string
 	// ldapService shall contain any additional mapping
 	// information needed to parse a generic LDAP service.  This property
 	// should only be present inside the LDAP property.
-	ldapService string
+	// ldapService string
 	// PasswordSet shall contain `true` if a valid value was
 	// provided for the Password property.  Otherwise, the property shall
 	// contain `false`.
@@ -201,10 +201,10 @@ type AccountService struct {
 	// Directory services as an external account provider, this entity shall
 	// be populated by default.  This entity shall not be present in the
 	// AdditionalExternalAccountProviders Resource Collection.
-	activeDirectory string
+	// activeDirectory string
 	// additionalExternalAccountProviders shall contain the
 	// additional external account providers that this Account Service uses.
-	additionalExternalAccountProviders string
+	// additionalExternalAccountProviders string
 	// AuthFailureLoggingThreshold shall contain the
 	// threshold for when an authorization failure is logged.  This value
 	// represents a modulo function.  The failure shall be logged every `n`th
@@ -233,7 +233,7 @@ type AccountService struct {
 	// type PrivilegeMapping that contains the privileges that are required
 	// for a user context to complete a requested operation on a URI
 	// associated with this Service.
-	privilegeMap string
+	// privilegeMap string
 	// roles shall contain a link to a Resource Collection
 	// of type RoleCollection.
 	roles string
@@ -287,11 +287,13 @@ func (accountservice *AccountService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (accountservice *AccountService) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(AccountService)
-	original.UnmarshalJSON(accountservice.rawData)
+	err := original.UnmarshalJSON(accountservice.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AccountLockoutCounterResetAfter",

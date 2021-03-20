@@ -45,10 +45,10 @@ type InstructionSet string
 
 const (
 
-	// x86InstructionSet x86 32-bit.
-	x86InstructionSet InstructionSet = "x86"
-	// x86_64InstructionSet x86 64-bit.
-	x8664InstructionSet InstructionSet = "x86-64"
+	// X86InstructionSet x86 32-bit.
+	X86InstructionSet InstructionSet = "x86"
+	// X86_64InstructionSet x86 64-bit.
+	X8664InstructionSet InstructionSet = "x86-64"
 	// IA64InstructionSet Intel IA-64.
 	IA64InstructionSet InstructionSet = "IA-64"
 	// ARMA32InstructionSet ARM 32-bit.
@@ -70,8 +70,8 @@ type ProcessorArchitecture string
 
 const (
 
-	// x86ProcessorArchitecture x86 or x86-64.
-	x86ProcessorArchitecture ProcessorArchitecture = "x86"
+	// X86ProcessorArchitecture x86 or x86-64.
+	X86ProcessorArchitecture ProcessorArchitecture = "x86"
 	// IA64ProcessorArchitecture Intel Itanium.
 	IA64ProcessorArchitecture ProcessorArchitecture = "IA-64"
 	// ARMProcessorArchitecture ARM.
@@ -228,7 +228,7 @@ type FpgaInterface struct {
 	InterfaceType FpgaInterfaceType
 	// pcie shall be an object the describes the PCI-e related information about
 	// this FPGA interface. TODO: Get link to PCIeInterface.
-	pcie string
+	// pcie string
 }
 
 // FpgaReconfigurationSlot shall contain information about the FPGA
@@ -238,7 +238,7 @@ type FpgaReconfigurationSlot struct {
 	// resources provided by the code programmed into a reconfiguration slot and
 	// shall reference a resource of type AccelerationFunction.
 	// TODO: Get link to resource.
-	accelerationFunction string
+	// accelerationFunction string
 	// ProgrammableFromHost shall indicate
 	// whether the reconfiguration slot can be reprogrammed from the host
 	// using system software. If set to false, system software shall not be
