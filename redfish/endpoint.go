@@ -79,7 +79,7 @@ type ConnectedEntity struct {
 	// entityLink shall be a reference to an entity of the
 	// type specified by the description of the value of the EntityType
 	// property.
-	entityLink common.Link
+	// entityLink common.Link
 	// EntityPciID shall be the PCI ID of the connected PCIe entity.
 	EntityPciID PciID `json:"entityPciId"`
 	// entityRole shall indicate if the specified entity is an initiator,
@@ -150,13 +150,13 @@ type Endpoint struct {
 	PortsCount int
 	// addressPools shall contain an array of links to
 	// resources of type AddressPool with which this endpoint is associated.
-	addressPools []string
+	// addressPools []string
 	// AddressPoolsCount is the number of AddressPools.
 	AddressPoolsCount int
 	// connectedPorts shall contain an array of links to
 	// resources of type Port that represent ports associated with this
 	// endpoint.
-	connectedPorts []string
+	// connectedPorts []string
 	// ConnectedPortCount is the number of ConnectedPorts.
 	ConnectedPortsCount int
 }

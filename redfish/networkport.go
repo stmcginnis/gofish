@@ -125,7 +125,7 @@ type NetworkPort struct {
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Actions shall contain the available actions for this resource.
-	actions string
+	// actions string
 	// ActiveLinkTechnology shall be the
 	// configured link technology of this port.
 	ActiveLinkTechnology LinkNetworkTechnology
@@ -225,11 +225,13 @@ func (networkport *NetworkPort) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (networkport *NetworkPort) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(NetworkPort)
-	original.UnmarshalJSON(networkport.rawData)
+	err := original.UnmarshalJSON(networkport.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"ActiveLinkTechnology",

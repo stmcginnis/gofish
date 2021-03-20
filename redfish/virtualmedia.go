@@ -42,7 +42,7 @@ const (
 	DVDMediaType VirtualMediaType = "DVD"
 )
 
-// TransferMethod is how the data is transfered.
+// TransferMethod is how the data is transferred.
 type TransferMethod string
 
 const (
@@ -172,11 +172,13 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (virtualmedia *VirtualMedia) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(VirtualMedia)
-	original.UnmarshalJSON(virtualmedia.rawData)
+	err := original.UnmarshalJSON(virtualmedia.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"Image",
@@ -205,7 +207,7 @@ func (virtualmedia *VirtualMedia) EjectMedia() error {
 }
 
 // InsertMedia sends a request to insert virtual media.
-func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted bool, writeProtected bool) error {
+func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProtected bool) error {
 	if !virtualmedia.SupportsMediaInsert {
 		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
@@ -237,7 +239,7 @@ type VirtualMediaConfig struct {
 }
 
 // InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct
-func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) error {
+func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) error { //nolint
 	if !virtualmedia.SupportsMediaInsert {
 		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}

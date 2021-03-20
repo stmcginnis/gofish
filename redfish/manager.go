@@ -196,7 +196,7 @@ type Manager struct {
 	GraphicalConsole GraphicalConsole
 	// hostInterfaces shall be a link to a collection of type
 	// HostInterfaceCollection.
-	hostInterfaces string
+	// hostInterfaces string
 	// logServices shall contain a reference to a collection of type
 	// LogServiceCollection which are for the use of this manager.
 	logServices string
@@ -356,11 +356,13 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (manager *Manager) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Manager)
-	original.UnmarshalJSON(manager.rawData)
+	err := original.UnmarshalJSON(manager.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AutoDSTEnabled",

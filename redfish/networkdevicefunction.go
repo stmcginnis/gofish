@@ -238,7 +238,7 @@ type NetworkDeviceFunction struct {
 	ODataType string `json:"@odata.type"`
 	// AssignablePhysicalPorts shall be an array of physical port references
 	// that this network device function may be assigned to.
-	assignablePhysicalPorts []string
+	// assignablePhysicalPorts []string
 	// AssignablePhysicalPortsCount is the number of assignable physical ports.
 	AssignablePhysicalPortsCount int `json:"AssignablePhysicalPorts@odata.count"`
 	// BootMode shall be the boot mode configured for this network device
@@ -328,11 +328,13 @@ func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) erro
 
 // Update commits updates to this object's properties to the running system.
 func (networkdevicefunction *NetworkDeviceFunction) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(NetworkDeviceFunction)
-	original.UnmarshalJSON(networkdevicefunction.rawData)
+	err := original.UnmarshalJSON(networkdevicefunction.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"BootMode",

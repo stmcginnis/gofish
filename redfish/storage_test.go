@@ -169,7 +169,7 @@ func TestStorageControllerUpdate(t *testing.T) {
 	}
 
 	scResult := result.StorageControllers[0]
-	scResult.AssetTag = "TestAssetTag"
+	scResult.AssetTag = TestAssetTag
 
 	// TODO: This highlights an issue that child objects of an object do not
 	// get their client set. Need to review objects like Storage that include

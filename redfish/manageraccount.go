@@ -90,7 +90,6 @@ type ManagerAccount struct {
 
 // UnmarshalJSON unmarshals a ManagerAccount object from the raw JSON.
 func (manageraccount *ManagerAccount) UnmarshalJSON(b []byte) error {
-
 	type temp ManagerAccount
 	type AccountLinks struct {
 		Role common.Link
@@ -120,11 +119,13 @@ func (manageraccount *ManagerAccount) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (manageraccount *ManagerAccount) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(ManagerAccount)
-	original.UnmarshalJSON(manageraccount.rawData)
+	err := original.UnmarshalJSON(manageraccount.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AccountTypes",

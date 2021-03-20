@@ -67,7 +67,7 @@ var messageRegistryBody = `{
 	}`
 
 // TestMessageRegistry tests the parsing of MessageRegistry objects.
-func TestMessageRegistry(t *testing.T) {
+func TestMessageRegistry(t *testing.T) { // nolint:funlen,gocyclo
 	var result MessageRegistry
 	err := json.NewDecoder(strings.NewReader(messageRegistryBody)).Decode(&result)
 
@@ -233,6 +233,8 @@ func TestMessageRegistry(t *testing.T) {
 							t.Errorf("Received invalid OemInfoN: %s for the messageKey: %s", v, messageKey)
 						}
 					}
+				default:
+					t.Error("Unexpected value format")
 				}
 			}
 		default:

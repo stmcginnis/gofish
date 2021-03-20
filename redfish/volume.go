@@ -291,8 +291,6 @@ func AllowedVolumesUpdateApplyTimes(c common.Client, link string) ([]common.Oper
 	}
 
 	var applyTimes []common.OperationApplyTime
-	for _, v := range temp.OperationApplyTimeSupport.SupportedValues {
-		applyTimes = append(applyTimes, v)
-	}
+	applyTimes = append(applyTimes, temp.OperationApplyTimeSupport.SupportedValues...)
 	return applyTimes, nil
 }

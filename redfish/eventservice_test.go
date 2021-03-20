@@ -112,7 +112,6 @@ func TestEventService(t *testing.T) {
 			t.Errorf("invalid event type: %s", et)
 		}
 	}
-
 }
 
 // TestEventServiceUpdate tests the Update call.
@@ -298,7 +297,7 @@ func TestEventServiceGetEventSubscription(t *testing.T) {
 					ProtoMinor:    1,
 					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationBody)),
 					ContentLength: int64(len(eventDestinationBody)),
-					Header:        make(http.Header, 0),
+					Header:        make(http.Header),
 				},
 			},
 		},
@@ -336,7 +335,7 @@ func TestEventServiceGetEventSubscriptions(t *testing.T) {
 					ProtoMinor:    1,
 					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationsBody)),
 					ContentLength: int64(len(eventDestinationsBody)),
-					Header:        make(http.Header, 0),
+					Header:        make(http.Header),
 				},
 				// defining the custom return for the second GET operation
 				&http.Response{
@@ -347,7 +346,7 @@ func TestEventServiceGetEventSubscriptions(t *testing.T) {
 					ProtoMinor:    1,
 					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationBody)),
 					ContentLength: int64(len(eventDestinationBody)),
-					Header:        make(http.Header, 0),
+					Header:        make(http.Header),
 				},
 			},
 		},
@@ -444,7 +443,7 @@ func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing
 
 // TestEventServiceCreateEventSubscriptionInputParametersValidation
 // tests the validation of input parameters for CreateEventSubscription.
-func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing.T) {
+func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing.T) { // nolint
 	var result EventService
 	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
 	if err != nil {

@@ -251,7 +251,7 @@ func (serviceroot *Service) Tasks() ([]*redfish.Task, error) {
 }
 
 // CreateSession creates a new session and returns the token and id
-func (serviceroot *Service) CreateSession(username string, password string) (*redfish.AuthToken, error) {
+func (serviceroot *Service) CreateSession(username, password string) (*redfish.AuthToken, error) {
 	return redfish.CreateSession(serviceroot.Client, serviceroot.sessions, username, password)
 }
 
@@ -302,7 +302,7 @@ func (serviceroot *Service) MessageRegistriesByLanguage(language string) ([]*red
 // contain the Message Registry name and it major and minor versions, as defined
 // by the Redfish Specification, for example: "Alert.1.0.0".
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
-func (serviceroot *Service) MessageRegistryByLanguage(registry string, language string) (*redfish.MessageRegistry, error) {
+func (serviceroot *Service) MessageRegistryByLanguage(registry, language string) (*redfish.MessageRegistry, error) {
 	return redfish.GetMessageRegistryByLanguage(serviceroot.Client, serviceroot.registries, registry, language)
 }
 
@@ -313,7 +313,7 @@ func (serviceroot *Service) MessageRegistryByLanguage(registry string, language 
 //  - The segment between the 2nd and 3rd period is the minor version: 0
 //  - The segment after the 3rd period is the Message Identifier in the Registry: LanDisconnect
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
-func (serviceroot *Service) MessageByLanguage(messageID string, language string) (*redfish.MessageRegistryMessage, error) {
+func (serviceroot *Service) MessageByLanguage(messageID, language string) (*redfish.MessageRegistryMessage, error) {
 	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.Client, serviceroot.registries, messageID, language)
 }
 

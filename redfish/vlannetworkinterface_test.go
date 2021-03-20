@@ -50,7 +50,7 @@ func TestVlanNetworkInterface(t *testing.T) {
 }
 
 // TestVlanNetworkInterfaceUpdate tests the Update call.
-func TestVlanNetworkInterfaceUpdate(t *testing.T) {
+func TestVlanNetworkInterfaceUpdate(t *testing.T) { // nolint:dupl
 	var result VLanNetworkInterface
 	err := json.NewDecoder(strings.NewReader(vlanNetworkInterfaceBody)).Decode(&result)
 

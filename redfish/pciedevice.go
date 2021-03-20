@@ -93,7 +93,7 @@ type PCIeDevice struct {
 }
 
 // UnmarshalJSON unmarshals a PCIeDevice object from the raw JSON.
-func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
+func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error { // nolint:dupl
 	type temp PCIeDevice
 	type links struct {
 		Chassis            common.Links
@@ -129,11 +129,13 @@ func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (pciedevice *PCIeDevice) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(PCIeDevice)
-	original.UnmarshalJSON(pciedevice.rawData)
+	err := original.UnmarshalJSON(pciedevice.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AssetTag",

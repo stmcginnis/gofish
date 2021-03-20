@@ -129,7 +129,7 @@ var computerSystemBody = `{
 	}`
 
 // TestComputerSystem tests the parsing of ComputerSystem objects.
-func TestComputerSystem(t *testing.T) {
+func TestComputerSystem(t *testing.T) { // nolint
 	var result ComputerSystem
 	err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&result)
 
@@ -236,7 +236,7 @@ func TestComputerSystem(t *testing.T) {
 		t.Errorf("Received invalid number of chassis: %d", len(result.chassis))
 	}
 
-	if result.chassis[0] != "/redfish/v1/Chassis/Chassis-1" {
+	if result.chassis[0] != TestChassisPath {
 		t.Errorf("Received invalid chassis reference: %s", result.chassis[0])
 	}
 
@@ -268,7 +268,7 @@ func TestComputerSystemUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.AssetTag = "TestAssetTag"
+	result.AssetTag = TestAssetTag
 	result.HostName = "TestHostName"
 	result.IndicatorLED = common.BlinkingIndicatorLED
 	err = result.Update()

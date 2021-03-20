@@ -151,11 +151,13 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) UnmarshalJSO
 
 // Update commits updates to this object's properties to the running system.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(DataProtectionLoSCapabilities)
-	original.UnmarshalJSON(dataprotectionloscapabilities.rawData)
+	err := original.UnmarshalJSON(dataprotectionloscapabilities.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"SupportedLinesOfService",

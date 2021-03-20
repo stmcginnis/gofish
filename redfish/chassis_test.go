@@ -12,6 +12,9 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+const TestAssetTag = "TestAssetTag"
+const TestChassisPath = "/redfish/v1/Chassis/Chassis-1"
+
 var chassisBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
 		"@odata.id": "/redfish/v1/Chassis/Chassis-1",
@@ -208,7 +211,7 @@ func TestChassisUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.AssetTag = "TestAssetTag"
+	result.AssetTag = TestAssetTag
 	err = result.Update()
 
 	if err != nil {

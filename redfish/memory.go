@@ -366,11 +366,13 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (memory *Memory) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Memory)
-	original.UnmarshalJSON(memory.rawData)
+	err := original.UnmarshalJSON(memory.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"SecurityState",

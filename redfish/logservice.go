@@ -89,7 +89,7 @@ type LogService struct {
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
-func (logservice *LogService) UnmarshalJSON(b []byte) error {
+func (logservice *LogService) UnmarshalJSON(b []byte) error { // nolint:dupl
 	type temp LogService
 	type Actions struct {
 		ClearLog struct {
@@ -120,11 +120,13 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (logservice *LogService) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(LogService)
-	original.UnmarshalJSON(logservice.rawData)
+	err := original.UnmarshalJSON(logservice.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"DateTime",

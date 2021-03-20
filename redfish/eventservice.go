@@ -174,7 +174,7 @@ type EventService struct {
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
-func (eventservice *EventService) UnmarshalJSON(b []byte) error {
+func (eventservice *EventService) UnmarshalJSON(b []byte) error { // nolint:dupl
 	type temp EventService
 	type Actions struct {
 		SubmitTestEvent struct {
@@ -205,11 +205,13 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (eventservice *EventService) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(EventService)
-	original.UnmarshalJSON(eventservice.rawData)
+	err := original.UnmarshalJSON(eventservice.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"DeliveryRetryAttempts",
@@ -267,7 +269,7 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 
 // GetEventSubscriptions gets all the subscriptions using the event service.
 func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
-	if len(strings.TrimSpace(eventservice.subscriptions)) == 0 {
+	if strings.TrimSpace(eventservice.subscriptions) == "" {
 		return nil, fmt.Errorf("empty subscription link in the event service")
 	}
 
@@ -299,7 +301,7 @@ func (eventservice *EventService) CreateEventSubscription(
 	context string,
 	oem interface{},
 ) (string, error) {
-	if len(strings.TrimSpace(eventservice.subscriptions)) == 0 {
+	if strings.TrimSpace(eventservice.subscriptions) == "" {
 		return "", fmt.Errorf("empty subscription link in the event service")
 	}
 

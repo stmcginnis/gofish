@@ -94,11 +94,13 @@ func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) UnmarshalJSON(
 
 // Update commits updates to this object's properties to the running system.
 func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(IOPerformanceLoSCapabilities)
-	original.UnmarshalJSON(ioperformanceloscapabilities.rawData)
+	err := original.UnmarshalJSON(ioperformanceloscapabilities.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"IOLimitingIsSupported",

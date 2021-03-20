@@ -53,7 +53,7 @@ type ControllerCapabilities struct {
 		// SRIOV shall contain Single-Root Input/Output Virtualization (SR-IOV)
 		// capabilities.
 		SRIOV struct {
-			//SRIOVVEPACapable shall be a boolean indicating whether this
+			// SRIOVVEPACapable shall be a boolean indicating whether this
 			// controller supports Single Root Input/Output Virtualization
 			// (SR-IOV) in Virtual Ethernet Port Aggregator (VEPA) mode.
 			SRIOVVEPACapable bool

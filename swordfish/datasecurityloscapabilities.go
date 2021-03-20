@@ -148,7 +148,7 @@ type DataSecurityLoSCapabilities struct {
 	// types for users (or programs).
 	SupportedUserAuthenticationTypes []AuthenticationType
 	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// rawData []byte
 }
 
 // // UnmarshalJSON unmarshals a DataSecurityLoSCapabilities object from the raw JSON.
