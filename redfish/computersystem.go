@@ -406,7 +406,7 @@ type ComputerSystem struct {
 	// ComputerSystem.
 	HostWatchdogTimer WatchdogTimer
 	// hostedServices shall describe services supported by this computer system.
-	hostedServices string
+	// hostedServices string
 	// HostingRoles shall be the hosting roles supported by this computer system.
 	HostingRoles []string
 
@@ -505,6 +505,10 @@ type ComputerSystem struct {
 	SupportedResetTypes []ResetType
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
+	// ManagedBy An array of references to the Managers responsible for this system.
+	// This is temporary until a proper method can be implemented to actually
+	// retrieve those objects directly.
+	ManagedBy []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -564,6 +568,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.resetTarget = t.Actions.ComputerSystemReset.Target
 	computersystem.SupportedResetTypes = t.Actions.ComputerSystemReset.AllowedResetTypes
 	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
+	computersystem.ManagedBy = t.Links.ManagedBy.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	computersystem.rawData = b
@@ -576,7 +581,10 @@ func (computersystem *ComputerSystem) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	cs := new(ComputerSystem)
-	cs.UnmarshalJSON(computersystem.rawData)
+	err := cs.UnmarshalJSON(computersystem.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AssetTag",
@@ -704,7 +712,7 @@ func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
 }
 
 // SetBoot set a boot object based on a payload request
-func (computersystem *ComputerSystem) SetBoot(b Boot) error {
+func (computersystem *ComputerSystem) SetBoot(b Boot) error { // nolint
 	type temp struct {
 		Boot Boot
 	}
@@ -757,7 +765,7 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 	// This action wasn't added until 1.5.0, make sure this is supported.
 	if computersystem.setDefaultBootOrderTarget == "" {
-		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
+		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") // nolint:golint
 	}
 
 	_, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, nil)

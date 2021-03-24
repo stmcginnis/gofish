@@ -168,9 +168,9 @@ type FileSystem struct {
 	// exportedShares shall be an array of exported file shares of this file
 	// system. Each entry shall define an exported file share of this file
 	// system.
-	exportedShares string //FileShareCollection
+	exportedShares string // FileShareCollection
 	// importedShares shall be an array of imported file shares.
-	importedShares []string //ImportedShare
+	// importedShares []string // ImportedShare
 	// ReplicaTargets shall reference the target replicas that
 	// are sourced by this replica.
 	replicaTargets []string
@@ -230,11 +230,13 @@ func (filesystem *FileSystem) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (filesystem *FileSystem) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(FileSystem)
-	original.UnmarshalJSON(filesystem.rawData)
+	err := original.UnmarshalJSON(filesystem.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AccessCapabilities",

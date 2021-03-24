@@ -105,11 +105,13 @@ func (datastorageloscapabilities *DataStorageLoSCapabilities) UnmarshalJSON(b []
 
 // Update commits updates to this object's properties to the running system.
 func (datastorageloscapabilities *DataStorageLoSCapabilities) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(DataStorageLoSCapabilities)
-	original.UnmarshalJSON(datastorageloscapabilities.rawData)
+	err := original.UnmarshalJSON(datastorageloscapabilities.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"MaximumRecoverableCapacitySourceCount",

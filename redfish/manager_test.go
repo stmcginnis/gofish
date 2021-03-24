@@ -6,10 +6,11 @@ package redfish
 
 import (
 	"encoding/json"
-	"github.com/stmcginnis/gofish/common"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
 var oemLinksBody = `
@@ -129,7 +130,7 @@ var managerBody = `{
 			},
 			"Oem":
 ` + oemLinksBody +
-`		},
+	`		},
 		"Actions": {
 			"#Manager.Reset": {
 				"target": "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset",
@@ -141,7 +142,7 @@ var managerBody = `{
 		},
 		"Oem":
 ` + oemDataBody +
-`	}`
+	`	}`
 
 // TestManager tests the parsing of Manager objects.
 func TestManager(t *testing.T) {

@@ -227,7 +227,7 @@ type Drive struct {
 	pcieFunctions []string
 	// PCIeFunctionCount is the number of PCIeFunctions.
 	PCIeFunctionCount int
-	storagePools      []string
+	// storagePools      []string
 	StoragePoolsCount int
 	// secureEraseTarget is the URL for SecureErase actions.
 	secureEraseTarget string
@@ -290,11 +290,13 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (drive *Drive) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Drive)
-	original.UnmarshalJSON(drive.rawData)
+	err := original.UnmarshalJSON(drive.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AssetTag",

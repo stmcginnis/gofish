@@ -8,6 +8,7 @@ on:
     - main
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
 
@@ -30,12 +31,18 @@ jobs:
     - name: Run build
       run: go build .
 
-    # Vet and lint
-    - name: Run vet & lint
-      run: |
-        go vet .
-        golint .
-
     # Run unit tests
     - name: Run tests
       run: make test
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.38.0
+        args: --timeout=5m -v

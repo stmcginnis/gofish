@@ -79,7 +79,7 @@ type authPayload struct {
 }
 
 // CreateSession creates a new session and returns the token and id
-func CreateSession(c common.Client, uri string, username string, password string) (auth *AuthToken, err error) {
+func CreateSession(c common.Client, uri, username, password string) (auth *AuthToken, err error) {
 	a := &authPayload{
 		UserName: username,
 		Password: password,
@@ -103,8 +103,8 @@ func CreateSession(c common.Client, uri string, username string, password string
 }
 
 // DeleteSession deletes a session using the location as argument
-func DeleteSession(c common.Client, url string) (err error) {
-	resp, err := c.Delete(url)
+func DeleteSession(c common.Client, sessionURL string) (err error) {
+	resp, err := c.Delete(sessionURL)
 	if err != nil {
 		return err
 	}

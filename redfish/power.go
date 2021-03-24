@@ -227,7 +227,7 @@ type PowerControl struct {
 }
 
 // UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
-func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
+func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error { // nolint:dupl
 	type temp PowerControl
 	type t1 struct {
 		temp
@@ -413,11 +413,13 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (powersupply *PowerSupply) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(PowerSupply)
-	original.UnmarshalJSON(powersupply.rawData)
+	err := original.UnmarshalJSON(powersupply.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"IndicatorLED",
@@ -485,7 +487,7 @@ type Voltage struct {
 }
 
 // UnmarshalJSON unmarshals a Voltage object from the raw JSON.
-func (voltage *Voltage) UnmarshalJSON(b []byte) error {
+func (voltage *Voltage) UnmarshalJSON(b []byte) error { // nolint:dupl
 	type temp Voltage
 	type t1 struct {
 		temp

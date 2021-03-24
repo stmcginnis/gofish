@@ -114,8 +114,8 @@ func TestHostInterfaceUpdate(t *testing.T) {
 
 	// TODO: Need to handle converted names
 	// result.AuthNoneRoleID = "role-test"
-	result.FirmwareAuthEnabled = true
 	// result.FirmwareAuthRoleID = "role-1"
+	result.FirmwareAuthEnabled = true
 	result.InterfaceEnabled = true
 	result.KernelAuthEnabled = true
 	err = result.Update()

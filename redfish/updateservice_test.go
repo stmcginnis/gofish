@@ -95,9 +95,11 @@ func TestUpdateService(t *testing.T) {
 						t.Errorf("Received invalid OemInfoN: %s", v)
 					}
 				}
+			default:
+				t.Error("Invalid Oem values")
 			}
 		}
 	default:
-		t.Errorf("Received invalid Oem")
+		t.Error("Received invalid Oem")
 	}
 }

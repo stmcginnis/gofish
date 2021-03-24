@@ -61,11 +61,13 @@ func (vlannetworkinterface *VLanNetworkInterface) UnmarshalJSON(b []byte) error 
 
 // Update commits updates to this object's properties to the running system.
 func (vlannetworkinterface *VLanNetworkInterface) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(VLanNetworkInterface)
-	original.UnmarshalJSON(vlannetworkinterface.rawData)
+	err := original.UnmarshalJSON(vlannetworkinterface.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"VLANEnable",

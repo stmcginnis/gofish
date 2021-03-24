@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const AssembyName = "Assembly One"
+
 var assemblyBody = strings.NewReader(
 	`{
 		"@odata.id": "/redfish/v1/Assembly/1",
@@ -84,7 +86,7 @@ func TestAssembly(t *testing.T) {
 		t.Errorf("Received invalid ID: %s", result.ID)
 	}
 
-	if result.Name != "Assembly One" {
+	if result.Name != AssembyName {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
@@ -111,7 +113,7 @@ func TestAssemblyData(t *testing.T) {
 		t.Errorf("Received invalid model: %s", result.Model)
 	}
 
-	if result.Name != "Assembly One" {
+	if result.Name != AssembyName {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 

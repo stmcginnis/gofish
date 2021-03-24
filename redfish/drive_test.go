@@ -134,7 +134,7 @@ func TestDrive(t *testing.T) {
 		t.Error("Failure predicted should be false.")
 	}
 
-	if result.chassis != "/redfish/v1/Chassis/Chassis-1" {
+	if result.chassis != TestChassisPath {
 		t.Errorf("Invalid chassis link: %s", result.chassis)
 	}
 
@@ -155,7 +155,7 @@ func TestDriveUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.AssetTag = "TestAssetTag"
+	result.AssetTag = TestAssetTag
 	result.IndicatorLED = common.LitIndicatorLED
 	result.StatusIndicator = HotspareStatusIndicator
 	result.WriteCacheEnabled = false

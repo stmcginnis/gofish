@@ -87,7 +87,7 @@ func TestPCIeDevice(t *testing.T) {
 }
 
 // TestPCIeDeviceUpdate tests the Update call.
-func TestPCIeDeviceUpdate(t *testing.T) {
+func TestPCIeDeviceUpdate(t *testing.T) { // nolint:dupl
 	var result PCIeDevice
 	err := json.NewDecoder(strings.NewReader(pcieDeviceBody)).Decode(&result)
 
@@ -98,7 +98,7 @@ func TestPCIeDeviceUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.AssetTag = "TestAssetTag"
+	result.AssetTag = TestAssetTag
 	err = result.Update()
 
 	if err != nil {

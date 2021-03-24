@@ -135,11 +135,13 @@ func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (fileshare *FileShare) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(FileShare)
-	original.UnmarshalJSON(fileshare.rawData)
+	err := original.UnmarshalJSON(fileshare.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"CASupported",

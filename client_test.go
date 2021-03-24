@@ -46,11 +46,10 @@ const (
 	nonErrorStructErrorStatus = "Internal Server Error"
 )
 
-// TestError400 tests the parsing of error reply.
-func TestError400(t *testing.T) {
+func testError(code int, t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(400)
-		w.Write([]byte(expectErrorStatus))
+		w.WriteHeader(code)
+		w.Write([]byte(expectErrorStatus)) // nolint
 	}))
 	defer ts.Close()
 
@@ -60,10 +59,10 @@ func TestError400(t *testing.T) {
 	}
 	errStruct, ok := err.(*common.Error)
 	if !ok {
-		t.Errorf("400 should return known error type: %v", err)
+		t.Errorf("%d should return known error type: %v", code, err)
 	}
-	if errStruct.HTTPReturnedStatusCode != 400 {
-		t.Errorf("The error code is different from 400")
+	if errStruct.HTTPReturnedStatusCode != code {
+		t.Errorf("The error code is different from %d", code)
 	}
 	errBody, err := json.MarshalIndent(errStruct, "  ", "    ")
 	if err != nil {
@@ -74,39 +73,21 @@ func TestError400(t *testing.T) {
 	}
 }
 
+// TestError400 tests the parsing of error reply.
+func TestError400(t *testing.T) {
+	testError(400, t)
+}
+
 // TestError404 tests the parsing of error reply.
 func TestError404(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(404)
-		w.Write([]byte(expectErrorStatus))
-	}))
-	defer ts.Close()
-
-	_, err := Connect(ClientConfig{Endpoint: ts.URL, HTTPClient: ts.Client()})
-	if err == nil {
-		t.Error("Update call should fail")
-	}
-	errStruct, ok := err.(*common.Error)
-	if !ok {
-		t.Errorf("404 should return known error type: %v", err)
-	}
-	if errStruct.HTTPReturnedStatusCode != 404 {
-		t.Errorf("The error code is different from 404")
-	}
-	errBody, err := json.MarshalIndent(errStruct, "  ", "    ")
-	if err != nil {
-		t.Errorf("Marshall error %v got: %s", errStruct, err)
-	}
-	if errMsg != string(errBody) {
-		t.Errorf("Expect:\n%s\nGot:\n%s", errMsg, string(errBody))
-	}
+	testError(404, t)
 }
 
 // TestErrorOther tests failures that do not return an Error struct
 func TestErrorOther(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
-		w.Write([]byte(nonErrorStructErrorStatus))
+		w.Write([]byte(nonErrorStructErrorStatus)) // nolint
 	}))
 	defer ts.Close()
 
@@ -128,7 +109,6 @@ func TestErrorOther(t *testing.T) {
 
 // TestConnectContextTimeout
 func TestConnectContextTimeout(t *testing.T) {
-
 	// ctx will timeout very quickly
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
@@ -148,7 +128,6 @@ func TestConnectContextTimeout(t *testing.T) {
 
 // TestConnectContextCancel
 func TestConnectContextCancel(t *testing.T) {
-
 	// ctx will be cancelled
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -166,7 +145,6 @@ func TestConnectContextCancel(t *testing.T) {
 
 // TestConnectDefaultContextTimeout
 func TestConnectDefaultContextTimeout(t *testing.T) {
-
 	// ctx will timeout very quickly
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
@@ -185,7 +163,6 @@ func TestConnectDefaultContextTimeout(t *testing.T) {
 
 // TestConnectDefaultContextCancel
 func TestConnectDefaultContextCancel(t *testing.T) {
-
 	// ctx will be cancelled
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -203,7 +180,7 @@ func TestConnectDefaultContextCancel(t *testing.T) {
 func TestClientRunRawRequestNoURL(t *testing.T) {
 	client := APIClient{}
 
-	_, err := client.runRawRequest("", "", nil, "")
+	_, err := client.runRawRequest("", "", nil, "") // nolint:bodyclose
 	if err == nil {
 		t.Error("Request without relative path should have failed")
 	}

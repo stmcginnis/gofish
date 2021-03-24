@@ -4,13 +4,16 @@
 
 PKGS := $(shell go list ./... | grep -v example | grep -v tools)
 
-all: build test
+all: lint build test
 
 test:
 	go test -v $(PKGS)
 
 build:
 	go build
+
+lint:
+	golangci-lint run -v
 
 clean:
 	go clean

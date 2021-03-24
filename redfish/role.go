@@ -86,11 +86,13 @@ func (role *Role) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (role *Role) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Role)
-	original.UnmarshalJSON(role.rawData)
+	err := original.UnmarshalJSON(role.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AssignedPrivileges",

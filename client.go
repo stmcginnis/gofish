@@ -90,7 +90,7 @@ type ClientConfig struct {
 }
 
 // setupClientWithConfig setups the client using the client config
-func setupClientWithConfig(ctx context.Context, config ClientConfig) (c *APIClient, err error) {
+func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APIClient, err error) {
 	if !strings.HasPrefix(config.Endpoint, "http") {
 		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
@@ -154,46 +154,43 @@ func setupClientWithEndpoint(ctx context.Context, endpoint string) (c *APIClient
 }
 
 // setupClientAuth setups the authentication in the client using the client config
-func (c *APIClient) setupClientAuth(config ClientConfig) error {
+func (c *APIClient) setupClientAuth(config *ClientConfig) error {
 	if config.Session != nil {
 		c.auth = &redfish.AuthToken{
 			Session: config.Session.ID,
 			Token:   config.Session.Token,
 		}
-	} else {
-		if config.Username != "" {
-			var auth *redfish.AuthToken
-			if config.BasicAuth {
-				auth = &redfish.AuthToken{
-					Username:  config.Username,
-					Password:  config.Password,
-					BasicAuth: true,
-				}
-			} else {
-				var err error
-				auth, err = c.Service.CreateSession(config.Username, config.Password)
-				if err != nil {
-					return err
-				}
+	} else if config.Username != "" {
+		var auth *redfish.AuthToken
+		if config.BasicAuth {
+			auth = &redfish.AuthToken{
+				Username:  config.Username,
+				Password:  config.Password,
+				BasicAuth: true,
 			}
-
-			c.auth = auth
+		} else {
+			var err error
+			auth, err = c.Service.CreateSession(config.Username, config.Password)
+			if err != nil {
+				return err
+			}
 		}
+
+		c.auth = auth
 	}
 
 	return nil
 }
 
 // Connect creates a new client connection to a Redfish service.
-func Connect(config ClientConfig) (c *APIClient, err error) {
-
-	client, err := setupClientWithConfig(context.Background(), config)
+func Connect(config ClientConfig) (c *APIClient, err error) { // nolint:gocritic
+	client, err := setupClientWithConfig(context.Background(), &config)
 	if err != nil {
 		return c, err
 	}
 
 	// Authenticate with the service
-	err = client.setupClientAuth(config)
+	err = client.setupClientAuth(&config)
 	if err != nil {
 		return c, err
 	}
@@ -202,14 +199,14 @@ func Connect(config ClientConfig) (c *APIClient, err error) {
 }
 
 // ConnectContext is the same as Connect, but sets the ctx.
-func ConnectContext(ctx context.Context, config ClientConfig) (c *APIClient, err error) {
-	client, err := setupClientWithConfig(ctx, config)
+func ConnectContext(ctx context.Context, config ClientConfig) (c *APIClient, err error) { // nolint:gocritic
+	client, err := setupClientWithConfig(ctx, &config)
 	if err != nil {
 		return c, err
 	}
 
 	// Authenticate with the service
-	err = client.setupClientAuth(config)
+	err = client.setupClientAuth(&config)
 	if err != nil {
 		return c, err
 	}
@@ -243,7 +240,7 @@ func (c *APIClient) CloneWithSession() (*APIClient, error) {
 		return nil, fmt.Errorf("client already has a session")
 	}
 
-	newClient := APIClient(*c)
+	newClient := *c
 	newClient.HTTPClient = c.HTTPClient
 	service, err := ServiceRoot(&newClient)
 	if err != nil {
@@ -317,7 +314,7 @@ func (c *APIClient) Delete(url string) (*http.Response, error) {
 }
 
 // runRequest performs JSON REST calls
-func (c *APIClient) runRequest(method string, url string, payload interface{}) (*http.Response, error) {
+func (c *APIClient) runRequest(method, url string, payload interface{}) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
 	}
@@ -335,7 +332,7 @@ func (c *APIClient) runRequest(method string, url string, payload interface{}) (
 }
 
 // runRequestWithMultipartPayload performs REST calls with a multipart payload
-func (c *APIClient) runRequestWithMultipartPayload(method string, url string, payload map[string]io.Reader) (*http.Response, error) {
+func (c *APIClient) runRequestWithMultipartPayload(method, url string, payload map[string]io.Reader) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
 	}
@@ -366,7 +363,7 @@ func (c *APIClient) runRequestWithMultipartPayload(method string, url string, pa
 }
 
 // runRawRequest actually performs the REST calls.
-func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.ReadSeeker, contentType string) (*http.Response, error) {
+func (c *APIClient) runRawRequest(method, url string, payloadBuffer io.ReadSeeker, contentType string) (*http.Response, error) {
 	if url == "" {
 		return nil, common.ConstructError(0, []byte("unable to execute request, no target provided"))
 	}
@@ -391,11 +388,9 @@ func (c *APIClient) runRawRequest(method string, url string, payloadBuffer io.Re
 		if c.auth.Token != "" {
 			req.Header.Set("X-Auth-Token", c.auth.Token)
 			req.Header.Set("Cookie", fmt.Sprintf("sessionKey=%s", c.auth.Token))
-		} else {
-			if c.auth.BasicAuth == true && c.auth.Username != "" && c.auth.Password != "" {
-				encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", c.auth.Username, c.auth.Password)))
-				req.Header.Set("Authorization", fmt.Sprintf("Basic %v", encodedAuth))
-			}
+		} else if c.auth.BasicAuth && c.auth.Username != "" && c.auth.Password != "" {
+			encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", c.auth.Username, c.auth.Password)))
+			req.Header.Set("Authorization", fmt.Sprintf("Basic %v", encodedAuth))
 		}
 	}
 	req.Close = true

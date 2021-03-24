@@ -219,7 +219,6 @@ func (storageservice *StorageService) DataSecurityLoSCapabilities() (*DataSecuri
 		return nil, nil
 	}
 	return GetDataSecurityLoSCapabilities(storageservice.Client, storageservice.dataSecurityLoSCapabilities)
-
 }
 
 // DataStorageLoSCapabilities references the data storage capabilities of this service.
@@ -228,7 +227,6 @@ func (storageservice *StorageService) DataStorageLoSCapabilities() (*DataStorage
 		return nil, nil
 	}
 	return GetDataStorageLoSCapabilities(storageservice.Client, storageservice.dataStorageLoSCapabilities)
-
 }
 
 // DefaultClassOfService references the default class of service for entities

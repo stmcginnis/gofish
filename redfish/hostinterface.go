@@ -157,11 +157,13 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (hostinterface *HostInterface) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(HostInterface)
-	original.UnmarshalJSON(hostinterface.rawData)
+	err := original.UnmarshalJSON(hostinterface.rawData)
+	if err != nil {
+		return err
+	}
 
 	readWriteFields := []string{
 		"AuthNoneRoleId",
