@@ -344,9 +344,9 @@ func (c *APIClient) DeleteWithHeaders(url string, customHeaders map[string]strin
 }
 
 // runRequest performs JSON REST calls
-func (c *APIClient) runRequest(method, url string, payload interface{}) (*http.Response, error) {
+/* func (c *APIClient) runRequest(method, url string, payload interface{}) (*http.Response, error) {
 	return c.runRequestWithHeaders(method, url, payload, nil)
-}
+} */
 
 // runRequestWithHeaders performs JSON REST calls but allowing custom headers
 func (c *APIClient) runRequestWithHeaders(method, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
@@ -367,9 +367,9 @@ func (c *APIClient) runRequestWithHeaders(method, url string, payload interface{
 }
 
 // runRequestWithMultipartPayload performs REST calls with a multipart payload
-func (c *APIClient) runRequestWithMultipartPayload(method, url string, payload map[string]io.Reader) (*http.Response, error) {
+/* func (c *APIClient) runRequestWithMultipartPayload(method, url string, payload map[string]io.Reader) (*http.Response, error) {
 	return c.runRequestWithMultipartPayloadWithHeaders(method, url, payload, nil)
-}
+} */
 
 // runRequestWithMultipartPayloadWithHeaders performs REST calls with a multipart payload but allowing custom headers
 func (c *APIClient) runRequestWithMultipartPayloadWithHeaders(method, url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error) {
@@ -423,9 +423,9 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", applicationJSON)
 
-	//Add custom headers
+	// Add custom headers
 	for k, v := range customHeaders {
-		if len(k) > 0 && len(v) > 0 { //Quick check to avoid empty headers
+		if len(k) > 0 && len(v) > 0 { // Quick check to avoid empty headers
 			req.Header.Set(k, v)
 		}
 	}
