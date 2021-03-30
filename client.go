@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"path/filepath"
 
 	"strings"
 	"time"
@@ -384,7 +385,7 @@ func (c *APIClient) runRequestWithMultipartPayloadWithHeaders(method, url string
 		var partWriter io.Writer
 		if file, ok := reader.(*os.File); ok {
 			// Add a file stream
-			if partWriter, err = payloadWriter.CreateFormFile(key, file.Name()); err != nil {
+			if partWriter, err = payloadWriter.CreateFormFile(key, filepath.Base(file.Name())); err != nil {
 				return nil, err
 			}
 		} else {
