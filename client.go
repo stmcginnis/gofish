@@ -273,37 +273,67 @@ func (c *APIClient) GetSession() (*Session, error) {
 
 // Get performs a GET request against the Redfish service.
 func (c *APIClient) Get(url string) (*http.Response, error) {
+	return c.GetWithHeaders(url, nil)
+}
+
+// GetWithHeaders performs a GET request against the Redfish service but allowing custom headers
+func (c *APIClient) GetWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
 	relativePath := url
 	if relativePath == "" {
 		relativePath = common.DefaultServiceRoot
 	}
 
-	return c.runRequest(http.MethodGet, relativePath, nil)
+	return c.runRequestWithHeaders(http.MethodGet, relativePath, nil, customHeaders)
 }
 
 // Post performs a Post request against the Redfish service.
 func (c *APIClient) Post(url string, payload interface{}) (*http.Response, error) {
-	return c.runRequest(http.MethodPost, url, payload)
+	return c.PostWithHeaders(url, payload, nil)
+}
+
+// PostWithHeaders performs a Post request against the Redfish service but allowing custom headers
+func (c *APIClient) PostWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.runRequestWithHeaders(http.MethodPost, url, payload, customHeaders)
 }
 
 // PostMultipart performs a Post request against the Redfish service with multipart payload.
 func (c *APIClient) PostMultipart(url string, payload map[string]io.Reader) (*http.Response, error) {
-	return c.runRequestWithMultipartPayload(http.MethodPost, url, payload)
+	return c.PostMultipartWithHeaders(url, payload, nil)
+}
+
+// PostMultipartWithHeadersperforms a Post request against the Redfish service with multipart payload but allowing custom headers
+func (c *APIClient) PostMultipartWithHeaders(url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error) {
+	return c.runRequestWithMultipartPayloadWithHeaders(http.MethodPost, url, payload, customHeaders)
 }
 
 // Put performs a Put request against the Redfish service.
 func (c *APIClient) Put(url string, payload interface{}) (*http.Response, error) {
-	return c.runRequest(http.MethodPut, url, payload)
+	return c.PutWithHeaders(url, payload, nil)
+}
+
+// PutWithHeaders performs a Put request against the Redfish service but allowing custom headers
+func (c *APIClient) PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.runRequestWithHeaders(http.MethodPut, url, payload, customHeaders)
 }
 
 // Patch performs a Patch request against the Redfish service.
 func (c *APIClient) Patch(url string, payload interface{}) (*http.Response, error) {
-	return c.runRequest(http.MethodPatch, url, payload)
+	return c.PatchWithHeaders(url, payload, nil)
 }
 
-// Delete performs a Delete request against the Redfish service.
+// PatchWithHeaders performs a Patch request against the Redfish service but allowing custom headers
+func (c *APIClient) PatchWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.runRequestWithHeaders(http.MethodPatch, url, payload, customHeaders)
+}
+
+// Delete performs a Delete request against the Redfish service
 func (c *APIClient) Delete(url string) (*http.Response, error) {
-	resp, err := c.runRequest(http.MethodDelete, url, nil)
+	return c.DeleteWithHeaders(url, nil)
+}
+
+// DeleteWithHeaders performs a Delete request against the Redfish service but allowing custom headers
+func (c *APIClient) DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
+	resp, err := c.runRequestWithHeaders(http.MethodDelete, url, nil, customHeaders)
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +344,12 @@ func (c *APIClient) Delete(url string) (*http.Response, error) {
 }
 
 // runRequest performs JSON REST calls
-func (c *APIClient) runRequest(method, url string, payload interface{}) (*http.Response, error) {
+/* func (c *APIClient) runRequest(method, url string, payload interface{}) (*http.Response, error) {
+	return c.runRequestWithHeaders(method, url, payload, nil)
+} */
+
+// runRequestWithHeaders performs JSON REST calls but allowing custom headers
+func (c *APIClient) runRequestWithHeaders(method, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
 	}
@@ -328,11 +363,16 @@ func (c *APIClient) runRequest(method, url string, payload interface{}) (*http.R
 		payloadBuffer = bytes.NewReader(body)
 	}
 
-	return c.runRawRequest(method, url, payloadBuffer, applicationJSON)
+	return c.runRawRequestWithHeaders(method, url, payloadBuffer, applicationJSON, customHeaders)
 }
 
 // runRequestWithMultipartPayload performs REST calls with a multipart payload
-func (c *APIClient) runRequestWithMultipartPayload(method, url string, payload map[string]io.Reader) (*http.Response, error) {
+/* func (c *APIClient) runRequestWithMultipartPayload(method, url string, payload map[string]io.Reader) (*http.Response, error) {
+	return c.runRequestWithMultipartPayloadWithHeaders(method, url, payload, nil)
+} */
+
+// runRequestWithMultipartPayloadWithHeaders performs REST calls with a multipart payload but allowing custom headers
+func (c *APIClient) runRequestWithMultipartPayloadWithHeaders(method, url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
 	}
@@ -359,11 +399,16 @@ func (c *APIClient) runRequestWithMultipartPayload(method, url string, payload m
 	}
 	payloadWriter.Close()
 
-	return c.runRawRequest(method, url, bytes.NewReader(payloadBuffer.Bytes()), payloadWriter.FormDataContentType())
+	return c.runRawRequestWithHeaders(method, url, bytes.NewReader(payloadBuffer.Bytes()), payloadWriter.FormDataContentType(), customHeaders)
 }
 
-// runRawRequest actually performs the REST calls.
+// runRawRequest actually performs the REST calls
 func (c *APIClient) runRawRequest(method, url string, payloadBuffer io.ReadSeeker, contentType string) (*http.Response, error) {
+	return c.runRawRequestWithHeaders(method, url, payloadBuffer, contentType, nil)
+}
+
+// runRawRequestWithHeaders actually performs the REST calls but allowing custom headers
+func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
 		return nil, common.ConstructError(0, []byte("unable to execute request, no target provided"))
 	}
@@ -377,6 +422,13 @@ func (c *APIClient) runRawRequest(method, url string, payloadBuffer io.ReadSeeke
 	// Add common headers
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", applicationJSON)
+
+	// Add custom headers
+	for k, v := range customHeaders {
+		if len(k) > 0 && len(v) > 0 { // Quick check to avoid empty headers
+			req.Header.Set(k, v)
+		}
+	}
 
 	// Add content info if present
 	if contentType != "" {
