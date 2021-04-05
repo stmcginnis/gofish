@@ -7,6 +7,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 )
@@ -17,10 +18,17 @@ const DefaultServiceRoot = "/redfish/v1/"
 // Client is a connection to a Redfish service.
 type Client interface {
 	Get(url string) (*http.Response, error)
+	GetWithHeaders(url string, customHeaders map[string]string) (*http.Response, error)
 	Post(url string, payload interface{}) (*http.Response, error)
+	PostWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
+	PostMultipart(url string, payload map[string]io.Reader) (*http.Response, error)
+	PostMultipartWithHeaders(url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error)
 	Patch(url string, payload interface{}) (*http.Response, error)
+	PatchWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
 	Put(url string, payload interface{}) (*http.Response, error)
+	PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
 	Delete(url string) (*http.Response, error)
+	DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error)
 }
 
 // Entity provides the common basis for all Redfish and Swordfish objects.
