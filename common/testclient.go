@@ -7,6 +7,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -19,6 +20,8 @@ type TestAPICall struct {
 	URL string
 	// Payload is the string representation of the payload
 	Payload string
+	// CustomHeaders is the Map that holds customer HTTP headers
+	CustomHeaders map[string]string
 }
 
 // TestClient is a mock client to use for unit testing some of the
@@ -105,18 +108,19 @@ func (c *TestClient) Reset() {
 }
 
 // recordCall is a helper to record any API calls made through this client
-func (c *TestClient) recordCall(action, url string, payload interface{}) {
+func (c *TestClient) recordCall(action, url string, payload interface{}, customHeaders map[string]string) {
 	call := TestAPICall{
-		Action:  action,
-		URL:     url,
-		Payload: c.getPayloadToBeRecorded(payload),
+		Action:        action,
+		URL:           url,
+		Payload:       c.getPayloadToBeRecorded(payload),
+		CustomHeaders: customHeaders,
 	}
 
 	c.calls = append(c.calls, call)
 }
 
-func (c *TestClient) performAction(action, url string, payload interface{}) (*http.Response, error) {
-	c.recordCall(action, url, payload)
+func (c *TestClient) performAction(action, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	c.recordCall(action, url, payload, customHeaders)
 	customReturnForAction := c.getCustomReturnForAction(action)
 	if customReturnForAction == nil {
 		return nil, nil
@@ -135,25 +139,60 @@ func (c *TestClient) performAction(action, url string, payload interface{}) (*ht
 
 // Get performs a GET request against the Redfish service.
 func (c *TestClient) Get(url string) (*http.Response, error) {
-	return c.performAction(http.MethodGet, url, nil)
+	return c.performAction(http.MethodGet, url, nil, nil)
+}
+
+// GetWithHeaders performs a GET request against the Redfish service.
+func (c *TestClient) GetWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
+	return c.performAction(http.MethodGet, url, nil, customHeaders)
 }
 
 // Post performs a Post request against the Redfish service.
 func (c *TestClient) Post(url string, payload interface{}) (*http.Response, error) {
-	return c.performAction(http.MethodPost, url, payload)
+	return c.performAction(http.MethodPost, url, payload, nil)
+}
+
+// PostWithHeaders performs a Post request against the Redfish service.
+func (c *TestClient) PostWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.performAction(http.MethodPost, url, payload, customHeaders)
+}
+
+// PostMultipart performs a Post request against the Redfish service.
+func (c *TestClient) PostMultipart(url string, payload map[string]io.Reader) (*http.Response, error) {
+	return c.performAction(http.MethodPost, url, payload, nil)
+}
+
+// PostMultipartWithHeaders performs a Post request against the Redfish service.
+func (c *TestClient) PostMultipartWithHeaders(url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error) {
+	return c.performAction(http.MethodPost, url, payload, customHeaders)
 }
 
 // Put performs a Put request against the Redfish service.
 func (c *TestClient) Put(url string, payload interface{}) (*http.Response, error) {
-	return c.performAction(http.MethodPut, url, payload)
+	return c.performAction(http.MethodPut, url, payload, nil)
+}
+
+// PutWithHeaders performs a Put request against the Redfish service.
+func (c *TestClient) PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.performAction(http.MethodPut, url, payload, customHeaders)
 }
 
 // Patch performs a Patch request against the Redfish service.
 func (c *TestClient) Patch(url string, payload interface{}) (*http.Response, error) {
-	return c.performAction(http.MethodPatch, url, payload)
+	return c.performAction(http.MethodPatch, url, payload, nil)
+}
+
+// PatchWithHeaders performs a Patch request against the Redfish service.
+func (c *TestClient) PatchWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.performAction(http.MethodPatch, url, payload, customHeaders)
 }
 
 // Delete performs a Delete request against the Redfish service.
 func (c *TestClient) Delete(url string) (*http.Response, error) {
-	return c.performAction(http.MethodDelete, url, nil)
+	return c.performAction(http.MethodDelete, url, nil, nil)
+}
+
+// DeleteWithHeaders performs a Delete request against the Redfish service.
+func (c *TestClient) DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
+	return c.performAction(http.MethodDelete, url, nil, customHeaders)
 }
