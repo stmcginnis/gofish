@@ -185,18 +185,7 @@ func (c *APIClient) setupClientAuth(config *ClientConfig) error {
 
 // Connect creates a new client connection to a Redfish service.
 func Connect(config ClientConfig) (c *APIClient, err error) { // nolint:gocritic
-	client, err := setupClientWithConfig(context.Background(), &config)
-	if err != nil {
-		return c, err
-	}
-
-	// Authenticate with the service
-	err = client.setupClientAuth(&config)
-	if err != nil {
-		return c, err
-	}
-
-	return client, err
+	return ConnectContext(context.Background(), config)
 }
 
 // ConnectContext is the same as Connect, but sets the ctx.
@@ -217,12 +206,7 @@ func ConnectContext(ctx context.Context, config ClientConfig) (c *APIClient, err
 
 // ConnectDefault creates an unauthenticated connection to a Redfish service.
 func ConnectDefault(endpoint string) (c *APIClient, err error) {
-	client, err := setupClientWithEndpoint(context.Background(), endpoint)
-	if err != nil {
-		return c, err
-	}
-
-	return client, err
+	return ConnectDefaultContext(context.Background(), endpoint)
 }
 
 // ConnectDefaultContext is the same as ConnectDefault, but sets the ctx.
@@ -344,11 +328,6 @@ func (c *APIClient) DeleteWithHeaders(url string, customHeaders map[string]strin
 	return resp, nil
 }
 
-// runRequest performs JSON REST calls
-/* func (c *APIClient) runRequest(method, url string, payload interface{}) (*http.Response, error) {
-	return c.runRequestWithHeaders(method, url, payload, nil)
-} */
-
 // runRequestWithHeaders performs JSON REST calls but allowing custom headers
 func (c *APIClient) runRequestWithHeaders(method, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
@@ -366,11 +345,6 @@ func (c *APIClient) runRequestWithHeaders(method, url string, payload interface{
 
 	return c.runRawRequestWithHeaders(method, url, payloadBuffer, applicationJSON, customHeaders)
 }
-
-// runRequestWithMultipartPayload performs REST calls with a multipart payload
-/* func (c *APIClient) runRequestWithMultipartPayload(method, url string, payload map[string]io.Reader) (*http.Response, error) {
-	return c.runRequestWithMultipartPayloadWithHeaders(method, url, payload, nil)
-} */
 
 // runRequestWithMultipartPayloadWithHeaders performs REST calls with a multipart payload but allowing custom headers
 func (c *APIClient) runRequestWithMultipartPayloadWithHeaders(method, url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error) {
