@@ -73,6 +73,7 @@ func TestManagerAccountUpdate(t *testing.T) {
 	result.Enabled = false
 	result.Locked = false
 	result.Password = "Test"
+	result.RoleID = "Administrator"
 	err = result.Update()
 
 	if err != nil {
@@ -91,5 +92,9 @@ func TestManagerAccountUpdate(t *testing.T) {
 
 	if !strings.Contains(calls[0].Payload, "Password:Test") {
 		t.Errorf("Unexpected Password update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "RoleId:Administrator") {
+		t.Errorf("Unexpected Role ID update payload: %s", calls[0].Payload)
 	}
 }

@@ -64,6 +64,10 @@ func (e *Entity) Update(originalEntity, currentEntity reflect.Value, allowedUpda
 			continue
 		}
 		fieldName := originalEntity.Type().Field(i).Name
+		jsonName := originalEntity.Type().Field(i).Tag.Get("json")
+		if jsonName != "" {
+			fieldName = jsonName
+		}
 		originalValue := originalEntity.Field(i).Interface()
 		currentValue := currentEntity.Field(i).Interface()
 		if originalValue == nil && currentValue == nil {
@@ -72,11 +76,9 @@ func (e *Entity) Update(originalEntity, currentEntity reflect.Value, allowedUpda
 			payload[fieldName] = currentValue
 		} else if reflect.TypeOf(originalValue).Kind() != reflect.Map {
 			if originalValue != currentValue {
-				// TODO: Handle JSON name being different than field name
 				payload[fieldName] = currentValue
 			}
 		} else if !reflect.DeepEqual(originalValue, currentValue) {
-			// TODO: Handle JSON name being different than field name
 			payload[fieldName] = currentValue
 		}
 	}
