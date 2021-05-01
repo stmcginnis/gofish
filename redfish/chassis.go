@@ -165,6 +165,12 @@ type Chassis struct {
 	DepthMm float64
 	// Description provides a description of this resource.
 	Description string
+	// Drives shall contain an array of links to resources
+	// of type Drive that are in this chassis.
+	// Office description is not right, it is a link to a collection.
+	drives string
+	// DrivesCount is the number of drives attached to this chassis.
+	DrivesCount int `json:"Drives@odata.count"`
 	// EnvironmentalClass shall contain the ASHRAE
 	// Environmental Class for this chassis, as defined by ASHRAE Thermal
 	// Guidelines for Data Processing Environments. These classes define
@@ -247,6 +253,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 
 	var t struct {
 		temp
+		Drives          common.Link
 		Thermal         common.Link
 		Power           common.Link
 		NetworkAdapters common.Link
@@ -262,6 +269,8 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	*chassis = Chassis(t.temp)
 
 	// Extract the links to other entities for later
+	fmt.Printf("+++++ Drives: %v\n", t.Drives)
+	chassis.drives = string(t.Drives)
 	chassis.thermal = string(t.Thermal)
 	chassis.power = string(t.Power)
 	chassis.networkAdapters = string(t.NetworkAdapters)
@@ -335,25 +344,41 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 	return result, nil
 }
 
+// Drives gets the drives attached to the storage controllers that this
+// resource represents.
+func (chassis *Chassis) Drives() ([]*Drive, error) {
+	if chassis.drives == "" {
+		return nil, nil
+	}
+
+	drives, err := common.GetCollection(chassis.Client, chassis.drives)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*Drive
+	for _, driveLink := range drives.ItemLinks {
+		drive, err := GetDrive(chassis.Client, driveLink)
+		if err != nil {
+			return result, nil
+		}
+		result = append(result, drive)
+	}
+	return result, nil
+}
+
 // Thermal gets the thermal temperature and cooling information for the chassis
 func (chassis *Chassis) Thermal() (*Thermal, error) {
 	if chassis.thermal == "" {
 		return nil, nil
 	}
 
-	resp, err := chassis.Client.Get(chassis.thermal)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var thermal Thermal
-	err = json.NewDecoder(resp.Body).Decode(&thermal)
+	thermal, err := GetThermal(chassis.Client, chassis.thermal)
 	if err != nil {
 		return nil, err
 	}
 
-	return &thermal, nil
+	return thermal, nil
 }
 
 // Power gets the power information for the chassis
@@ -362,19 +387,12 @@ func (chassis *Chassis) Power() (*Power, error) {
 		return nil, nil
 	}
 
-	resp, err := chassis.Client.Get(chassis.power)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var power Power
-	err = json.NewDecoder(resp.Body).Decode(&power)
+	power, err := GetPower(chassis.Client, chassis.power)
 	if err != nil {
 		return nil, err
 	}
 
-	return &power, nil
+	return power, nil
 }
 
 // ComputerSystems returns the collection of systems from this chassis

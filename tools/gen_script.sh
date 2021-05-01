@@ -7,7 +7,7 @@
 
 # Set correct name for python3 executable. Some platforms just call it python
 # while others call it python3.
-PYTHON="python"
+PYTHON="python3"
 
 # Find the schema document name by going here:
 #
@@ -15,7 +15,7 @@ PYTHON="python"
 #
 # Inspect the url for the schema you want - for example, the 2020.1 update
 # document is "DSP8010_2020.1.zip" on this page. The base name then is:
-schemadoc="DSP8010_2020.1"
+schemadoc="DSP8010_2020.4"
 
 # Check if filename provided on the command line
 if [[ "$#" -eq 1 ]]; then
