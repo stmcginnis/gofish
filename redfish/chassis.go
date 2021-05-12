@@ -165,9 +165,10 @@ type Chassis struct {
 	DepthMm float64
 	// Description provides a description of this resource.
 	Description string
-	// Drives shall contain an array of links to resources
+	// linkedDrives shall contain an array of links to resources
 	// of type Drive that are in this chassis.
-	// Office description is not right, it is a link to a collection.
+	linkedDrives []string
+	// Drives shall contain a link to a resource collection of type DriveCollection.
 	drives string
 	// DrivesCount is the number of drives attached to this chassis.
 	DrivesCount int `json:"Drives@odata.count"`
@@ -243,6 +244,8 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		ComputerSystems common.Links
 		ResourceBlocks  common.Links
 		ManagedBy       common.Links
+		Drives          common.Links
+		DrivesCount     int `json:"Drives@odata.count"`
 	}
 	type Actions struct {
 		ChassisReset struct {
@@ -270,6 +273,10 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	chassis.drives = string(t.Drives)
+	chassis.linkedDrives = t.Links.Drives.ToStrings()
+	if chassis.DrivesCount == 0 && t.Links.DrivesCount > 0 {
+		chassis.DrivesCount = t.Links.DrivesCount
+	}
 	chassis.thermal = string(t.Thermal)
 	chassis.power = string(t.Power)
 	chassis.networkAdapters = string(t.NetworkAdapters)
@@ -346,17 +353,24 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 // Drives gets the drives attached to the storage controllers that this
 // resource represents.
 func (chassis *Chassis) Drives() ([]*Drive, error) {
-	if chassis.drives == "" {
-		return nil, nil
-	}
-
-	drives, err := common.GetCollection(chassis.Client, chassis.drives)
-	if err != nil {
-		return nil, err
-	}
-
 	var result []*Drive
-	for _, driveLink := range drives.ItemLinks {
+	if chassis.drives == "" && len(chassis.linkedDrives) == 0 {
+		return result, nil
+	}
+
+	// In version v1.2.0 of the spec, Drives were added to the Chassis.Links
+	// property. But in v1.14.0 of the spec, Chassis.Drives was added as a
+	// direct property.
+	driveLinks := chassis.linkedDrives
+	if chassis.drives != "" {
+		drives, err := common.GetCollection(chassis.Client, chassis.drives)
+		if err != nil {
+			return nil, err
+		}
+		driveLinks = drives.ItemLinks
+	}
+
+	for _, driveLink := range driveLinks {
 		drive, err := GetDrive(chassis.Client, driveLink)
 		if err != nil {
 			return result, nil
