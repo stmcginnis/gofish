@@ -5,7 +5,10 @@
 package redfish
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -102,6 +105,18 @@ var supermicroRAIDChassisBody = `{
         ]
     },
     "Oem": {}
+}`
+
+var driveCollection = `{
+    "@odata.id": "/redfish/v1/Chassis/IPAttachedDrive/Drives",
+    "@odata.type": "#DriveCollection.DriveCollection",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/Chassis/IPAttachedDrive/Drives/IPAttachedDrive"
+        }
+    ],
+    "Members@odata.count": 1,
+    "Name": "Drive Collection"
 }`
 
 // TestChassis tests the parsing of Chassis objects.
@@ -206,6 +221,25 @@ func TestMinimumChassis(t *testing.T) {
 	}
 }
 
+// TestLinkedDriveChassis tests getting drives from versions supporting the older
+// Chassis.Links.Drives location.
+func TestLinkedDriveChassis(t *testing.T) {
+	var result Chassis
+	err := json.NewDecoder(strings.NewReader(supermicroRAIDChassisBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if len(result.linkedDrives) != 4 {
+		t.Errorf("Expected 3 drive links: %v", result.linkedDrives)
+	}
+
+	if result.drives != "" {
+		t.Errorf("Expected drives link to be empty, got %q", result.drives)
+	}
+}
+
 // TestChassisUpdate tests the Update call.
 func TestChassisUpdate(t *testing.T) {
 	var result Chassis
@@ -233,5 +267,91 @@ func TestChassisUpdate(t *testing.T) {
 
 	if !strings.Contains(calls[0].Payload, result.AssetTag) {
 		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
+	}
+}
+
+// getCall returns an http.Response for a GET request.
+func getCall(body string) *http.Response {
+	return &http.Response{
+		Status:        "200 OK",
+		StatusCode:    200,
+		Proto:         "HTTP/1.1",
+		ProtoMajor:    1,
+		ProtoMinor:    1,
+		Body:          ioutil.NopCloser(bytes.NewBufferString(body)),
+		ContentLength: int64(len(body)),
+		Header:        make(http.Header),
+	}
+}
+
+// TestChassisDrives tests getting the drives for a chassis.
+func TestChassisDrives(t *testing.T) {
+	var result Chassis
+	err := json.NewDecoder(strings.NewReader(chassisBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{
+		CustomReturnForActions: map[string][]interface{}{
+			http.MethodGet: {
+				getCall(driveCollection), // nolint
+				getCall(driveBody),       // nolint
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	drives, err := result.Drives()
+	if err != nil {
+		t.Errorf("Error getting drives: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 2 {
+		t.Errorf("Expected two calls to be made, captured: %v", calls)
+	}
+
+	if len(drives) != 1 {
+		t.Errorf("Expected 1 drive to be returned, got %d", len(drives))
+	}
+}
+
+// TestChassisLinkedDrives tests getting the drives returned through the links for a chassis.
+func TestChassisLinkedDrives(t *testing.T) {
+	var result Chassis
+	err := json.NewDecoder(strings.NewReader(supermicroRAIDChassisBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{
+		CustomReturnForActions: map[string][]interface{}{
+			http.MethodGet: {
+				getCall(driveBody), // nolint
+				getCall(driveBody), // nolint
+				getCall(driveBody), // nolint
+				getCall(driveBody), // nolint
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	drives, err := result.Drives()
+	if err != nil {
+		t.Errorf("Error getting drives: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 4 {
+		t.Errorf("Expected four calls to be made, captured: %v", calls)
+	}
+
+	if len(drives) != 4 {
+		t.Errorf("Expected 4 drives to be returned, got %d", len(drives))
 	}
 }
