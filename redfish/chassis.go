@@ -269,7 +269,6 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	*chassis = Chassis(t.temp)
 
 	// Extract the links to other entities for later
-	fmt.Printf("+++++ Drives: %v\n", t.Drives)
 	chassis.drives = string(t.Drives)
 	chassis.thermal = string(t.Thermal)
 	chassis.power = string(t.Power)
