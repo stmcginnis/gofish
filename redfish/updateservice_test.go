@@ -6,8 +6,12 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/redfish/dell"
 )
 
 var simpleUpdateBody = `{
@@ -38,68 +42,47 @@ var simpleUpdateBody = `{
     },
     "HttpPushUri": "/redfish/v1/UpdateService/FirmwareInventory",
     "Id": "UpdateService",
-    "Name": "Update Service",
-    "Oem": {
-        "VendorName": {
-            "OemInfo1": "The Oem info 1.",
-            "OemInfoN": "The Oem info N."
-        }
-    },
-    "ServiceEnabled": true,
-    "Status": {
-        "Health": "OK",
-        "State": "Enabled"
-    }
+    "Name": "Update Service"
 }`
 
 func TestUpdateService(t *testing.T) {
 	var result UpdateService
-	err := json.NewDecoder(strings.NewReader(simpleUpdateBody)).Decode(&result)
-	if err != nil {
-		t.Errorf("Error decoding JSON: %s", err)
-	}
-
-	if result.FirmwareInventory != "/redfish/v1/UpdateService/FirmwareInventory" {
-		t.Errorf("FirmwareInventory was wrong")
-	}
-
-	if result.HTTPPushURI != "/redfish/v1/UpdateService/FirmwareInventory" {
-		t.Errorf("HTTPPushURI was wrong")
-	}
-
-	if result.TransferProtocol[0] != "HTTP" {
-		t.Errorf("TransferProtocol was wrong")
-	}
-
-	if result.UpdateServiceTarget != "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate" {
-		t.Errorf("UpdateServiceTarget was wrong")
-	}
-
-	// test oem
-	switch oem := result.Oem.(type) {
-	case map[string]interface{}:
-		for vendor, values := range oem {
-			if vendor != "VendorName" {
-				t.Errorf("Received invalid Oem vendor: %s", vendor)
-			}
-			switch val := values.(type) {
-			case map[string]interface{}:
-				for k, v := range val {
-					if k != "OemInfo1" && k != "OemInfoN" {
-						t.Errorf("Received invalid Oem key %s for vendor: %s", k, vendor)
-					}
-					if k == "OemInfo1" && v != "The Oem info 1." {
-						t.Errorf("Received invalid OemInfo1: %s", v)
-					}
-					if v == "OemInfoN" && v != "The Oem info N." {
-						t.Errorf("Received invalid OemInfoN: %s", v)
-					}
-				}
-			default:
-				t.Error("Invalid Oem values")
-			}
+	assertMessage := func(t testing.TB, got string, want string) {
+		t.Helper()
+		if got != want {
+			t.Errorf("got %s, want %s", got, want)
 		}
-	default:
-		t.Error("Received invalid Oem")
 	}
+
+	t.Run("Check default redfish fields", func(t *testing.T) {
+		c := &common.TestClient{Vendor: "XXX"}
+		result.Client = c
+
+		err := json.NewDecoder(strings.NewReader(simpleUpdateBody)).Decode(&result)
+		if err != nil {
+			t.Errorf("Error decoding JSON: %s", err)
+		}
+		assertMessage(t, result.FirmwareInventory, "/redfish/v1/UpdateService/FirmwareInventory")
+		assertMessage(t, result.HTTPPushURI, "/redfish/v1/UpdateService/FirmwareInventory")
+		assertMessage(t, result.TransferProtocol[0], "HTTP")
+		assertMessage(t, result.UpdateServiceTarget, "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate")
+	})
+
+	t.Run("Check oem redfish fields - dell", func(t *testing.T) {
+		c := &common.TestClient{Vendor: "Dell"}
+		result.Client = c
+		var installUpon []string = []string{"Now", "NowAndReboot", "NextReboot"}
+
+		err := json.NewDecoder(strings.NewReader(simpleUpdateBody)).Decode(&result)
+		if err != nil {
+			t.Errorf("Error decoding JSON: %s", err)
+		}
+
+		assertMessage(t, result.Oem.(dell.DellUpdateService).Actions.Target, "/redfish/v1/UpdateService/Actions/Oem/DellUpdateService.Install")
+
+		if !reflect.DeepEqual(result.Oem.(dell.DellUpdateService).Actions.InstallUpon, installUpon) {
+			t.Errorf("got %v, want %v", result.Oem.(dell.DellUpdateService).Actions.InstallUpon, installUpon)
+		}
+	})
+
 }

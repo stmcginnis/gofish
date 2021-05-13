@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 
 	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/redfish/dell"
 )
 
 // UpdateService is used to represent the update service offered by the redfish API
@@ -50,6 +51,8 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 			AllowableValues []string `json:"TransferProtocol@Redfish.AllowableValues"`
 			Target          string
 		} `json:"#UpdateService.SimpleUpdate"`
+
+		Oem json.RawMessage // OEM actions will be stored here
 	}
 	var t struct {
 		temp
@@ -63,6 +66,22 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
+	var oem interface{} // Variable where Vendon OEM struct is stored
+
+	switch updateService.Client.GetVendor() {
+	case "Dell":
+		var dellUpdateService dell.DellUpdateServiceActions
+
+		err := json.Unmarshal(t.Actions.Oem, &dellUpdateService)
+		if err != nil {
+			return err
+		}
+		oem = dell.DellUpdateService{Actions: dellUpdateService}
+
+	case "Xxx":
+		// Here will be the code for another vendon OEM
+	}
+
 	// Extract the links to other entities for later
 	*updateService = UpdateService(t.temp)
 	updateService.FirmwareInventory = string(t.FirmwareInventory)
@@ -70,6 +89,8 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 	updateService.TransferProtocol = t.Actions.SimpleUpdate.AllowableValues
 	updateService.UpdateServiceTarget = t.Actions.SimpleUpdate.Target
 	updateService.rawData = b
+	updateService.Oem = oem
+
 	return nil
 }
 

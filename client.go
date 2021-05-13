@@ -49,6 +49,9 @@ type APIClient struct {
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
+
+	// oemExtensions sets if OEM vendor extensions are used
+	oemExtensions bool
 }
 
 // Session holds the session ID and auth token needed to identify an
@@ -88,6 +91,9 @@ type ClientConfig struct {
 
 	// BasicAuth tells the APIClient if basic auth should be used (true) or token based auth must be used (false)
 	BasicAuth bool
+
+	// OemExtensions configures if OEM extensions are used in the client instance
+	OemExtensions bool
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -123,6 +129,8 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 	} else {
 		client.HTTPClient = config.HTTPClient
 	}
+
+	client.oemExtensions = config.OemExtensions
 
 	// Fetch the service root
 	client.Service, err = ServiceRoot(client)
@@ -479,4 +487,12 @@ func (c *APIClient) Logout() {
 // SetDumpWriter sets the client the DumpWriter dynamically
 func (c *APIClient) SetDumpWriter(writer io.Writer) {
 	c.dumpWriter = writer
+}
+
+// GetVendor returns the HW vendor the client is dealing with
+func (c *APIClient) GetVendor() string {
+	if !c.oemExtensions {
+		return ""
+	}
+	return c.Service.Vendor
 }

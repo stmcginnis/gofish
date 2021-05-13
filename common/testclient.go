@@ -37,6 +37,9 @@ type TestClient struct {
 	// For each key it is possible to define a list of
 	// returns (in the order they should be returned).
 	CustomReturnForActions map[string][]interface{}
+	// Vendor represents the HW vendor the client is
+	// dealing with
+	Vendor string
 }
 
 // CapturedCalls gets all calls that were made through this instance
@@ -195,4 +198,8 @@ func (c *TestClient) Delete(url string) (*http.Response, error) {
 // DeleteWithHeaders performs a Delete request against the Redfish service.
 func (c *TestClient) DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
 	return c.performAction(http.MethodDelete, url, nil, customHeaders)
+}
+
+func (c *TestClient) GetVendor() string {
+	return c.Vendor
 }
