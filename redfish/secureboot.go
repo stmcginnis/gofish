@@ -157,15 +157,21 @@ func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, err
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, securebootLink := range links.ItemLinks {
 		secureboot, err := GetSecureBoot(c, securebootLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[securebootLink] = err
+		} else {
+			result = append(result, secureboot)
 		}
-		result = append(result, secureboot)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ResetKeys shall perform a reset of the Secure Boot key databases. The

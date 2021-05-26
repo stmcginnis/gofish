@@ -147,15 +147,21 @@ func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string) (
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, ioperformanceloscapabilitiesLink := range links.ItemLinks {
 		ioperformanceloscapabilities, err := GetIOPerformanceLoSCapabilities(c, ioperformanceloscapabilitiesLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ioperformanceloscapabilitiesLink] = err
+		} else {
+			result = append(result, ioperformanceloscapabilities)
 		}
-		result = append(result, ioperformanceloscapabilities)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // IOWorkload is used to describe an IO Workload.

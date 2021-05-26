@@ -278,13 +278,18 @@ func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia,
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, virtualmediaLink := range links.ItemLinks {
 		virtualmedia, err := GetVirtualMedia(c, virtualmediaLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[virtualmediaLink] = err
+		} else {
+			result = append(result, virtualmedia)
 		}
-		result = append(result, virtualmedia)
 	}
-
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

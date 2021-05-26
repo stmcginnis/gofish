@@ -354,13 +354,19 @@ func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, thermalLink := range links.ItemLinks {
 		thermal, err := GetThermal(c, thermalLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[thermalLink] = err
+		} else {
+			result = append(result, thermal)
 		}
-		result = append(result, thermal)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

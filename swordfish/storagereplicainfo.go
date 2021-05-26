@@ -474,13 +474,19 @@ func ListReferencedStorageReplicaInfos(c common.Client, link string) ([]*Storage
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, storagereplicainfoLink := range links.ItemLinks {
 		storagereplicainfo, err := GetStorageReplicaInfo(c, storagereplicainfoLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[storagereplicainfoLink] = err
+		} else {
+			result = append(result, storagereplicainfo)
 		}
-		result = append(result, storagereplicainfo)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

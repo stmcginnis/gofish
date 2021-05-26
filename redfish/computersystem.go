@@ -626,15 +626,21 @@ func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSys
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, computersystemLink := range links.ItemLinks {
 		computersystem, err := GetComputerSystem(c, computersystemLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[computersystemLink] = err
+		} else {
+			result = append(result, computersystem)
 		}
-		result = append(result, computersystem)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Bios gets the Bios information for this ComputerSystem.
@@ -674,27 +680,43 @@ func (computersystem *ComputerSystem) NetworkInterfaces() ([]*NetworkInterface, 
 // PCIeDevices gets all PCIeDevices for this system.
 func (computersystem *ComputerSystem) PCIeDevices() ([]*PCIeDevice, error) {
 	var result []*PCIeDevice
+
+	collectionError := common.NewCollectionError()
 	for _, pciedeviceLink := range computersystem.pcieDevices {
 		pciedevice, err := GetPCIeDevice(computersystem.Client, pciedeviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[pciedeviceLink] = err
+		} else {
+			result = append(result, pciedevice)
 		}
-		result = append(result, pciedevice)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // PCIeFunctions gets all PCIeFunctions for this system.
 func (computersystem *ComputerSystem) PCIeFunctions() ([]*PCIeFunction, error) {
 	var result []*PCIeFunction
+
+	collectionError := common.NewCollectionError()
 	for _, pciefunctionLink := range computersystem.pcieFunctions {
 		pciefunction, err := GetPCIeFunction(computersystem.Client, pciefunctionLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[pciefunctionLink] = err
+		} else {
+			result = append(result, pciefunction)
 		}
-		result = append(result, pciefunction)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Processors returns a collection of processors from this system

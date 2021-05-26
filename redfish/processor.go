@@ -460,15 +460,21 @@ func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, processorLink := range links.ItemLinks {
 		processor, err := GetProcessor(c, processorLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[processorLink] = err
+		} else {
+			result = append(result, processor)
 		}
-		result = append(result, processor)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ProcessorID shall contain identification information for a processor.

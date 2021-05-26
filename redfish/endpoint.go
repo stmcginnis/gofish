@@ -246,15 +246,21 @@ func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) 
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, endpointLink := range links.ItemLinks {
 		endpoint, err := GetEndpoint(c, endpointLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[endpointLink] = err
+		} else {
+			result = append(result, endpoint)
 		}
-		result = append(result, endpoint)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // GCID shall contain the Gen-Z Core Specification-defined Global

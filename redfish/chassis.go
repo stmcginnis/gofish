@@ -339,15 +339,21 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, chassisLink := range links.ItemLinks {
 		chassis, err := GetChassis(c, chassisLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[chassisLink] = err
+		} else {
+			result = append(result, chassis)
 		}
-		result = append(result, chassis)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Drives gets the drives attached to the storage controllers that this
@@ -370,14 +376,21 @@ func (chassis *Chassis) Drives() ([]*Drive, error) {
 		driveLinks = drives.ItemLinks
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, driveLink := range driveLinks {
 		drive, err := GetDrive(chassis.Client, driveLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[driveLink] = err
+		} else {
+			result = append(result, drive)
 		}
-		result = append(result, drive)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Thermal gets the thermal temperature and cooling information for the chassis
@@ -411,31 +424,43 @@ func (chassis *Chassis) Power() (*Power, error) {
 // ComputerSystems returns the collection of systems from this chassis
 func (chassis *Chassis) ComputerSystems() ([]*ComputerSystem, error) {
 	var result []*ComputerSystem
+
+	collectionError := common.NewCollectionError()
 	for _, uri := range chassis.computerSystems {
 		cs, err := GetComputerSystem(chassis.Client, uri)
 		if err != nil {
-			return nil, err
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, cs)
 		}
-
-		result = append(result, cs)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ManagedBy gets the collection of managers of this chassis
 func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 	var result []*Manager
+
+	collectionError := common.NewCollectionError()
 	for _, uri := range chassis.managedBy {
 		manager, err := GetManager(chassis.Client, uri)
 		if err != nil {
-			return nil, err
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
 		}
-
-		result = append(result, manager)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // NetworkAdapters gets the collection of network adapters of this chassis

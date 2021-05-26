@@ -178,15 +178,21 @@ func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, err
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, pciedeviceLink := range links.ItemLinks {
 		pciedevice, err := GetPCIeDevice(c, pciedeviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[pciedeviceLink] = err
+		} else {
+			result = append(result, pciedevice)
 		}
-		result = append(result, pciedevice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // PCIeInterface properties shall be the definition for a PCIe Interface for a
@@ -214,25 +220,41 @@ func (pciedevice *PCIeDevice) Assembly() (*Assembly, error) {
 // Chassis gets the chassis in which the PCIe device is contained.
 func (pciedevice *PCIeDevice) Chassis() ([]*Chassis, error) {
 	var result []*Chassis
+
+	collectionError := common.NewCollectionError()
 	for _, chassisLink := range pciedevice.chassis {
 		chassis, err := GetChassis(pciedevice.Client, chassisLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[chassisLink] = err
+		} else {
+			result = append(result, chassis)
 		}
-		result = append(result, chassis)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // PCIeFunctions get the PCIe functions that this device exposes.
 func (pciedevice *PCIeDevice) PCIeFunctions() ([]*PCIeDevice, error) {
 	var result []*PCIeDevice
+
+	collectionError := common.NewCollectionError()
 	for _, funcLink := range pciedevice.pcieFunctions {
 		pciFunction, err := GetPCIeDevice(pciedevice.Client, funcLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[funcLink] = err
+		} else {
+			result = append(result, pciFunction)
 		}
-		result = append(result, pciFunction)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

@@ -102,15 +102,21 @@ func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) 
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, assemblyLink := range links.ItemLinks {
 		assembly, err := GetAssembly(c, assemblyLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[assemblyLink] = err
+		} else {
+			result = append(result, assembly)
 		}
-		result = append(result, assembly)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // AssemblyData is information about an assembly.

@@ -119,13 +119,19 @@ func ListReferencedIOConnectivityLoSCapabilitiess(c common.Client, link string) 
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, ioconnectivityloscapabilitiesLink := range links.ItemLinks {
 		ioconnectivityloscapabilities, err := GetIOConnectivityLoSCapabilities(c, ioconnectivityloscapabilitiesLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ioconnectivityloscapabilitiesLink] = err
+		} else {
+			result = append(result, ioconnectivityloscapabilities)
 		}
-		result = append(result, ioconnectivityloscapabilities)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

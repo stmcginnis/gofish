@@ -99,13 +99,19 @@ func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*D
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, datastoragelineofserviceLink := range links.ItemLinks {
 		datastoragelineofservice, err := GetDataStorageLineOfService(c, datastoragelineofserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[datastoragelineofserviceLink] = err
+		} else {
+			result = append(result, datastoragelineofservice)
 		}
-		result = append(result, datastoragelineofservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

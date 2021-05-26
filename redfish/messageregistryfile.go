@@ -69,13 +69,19 @@ func ListReferencedMessageRegistryFiles(
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, sLink := range links.ItemLinks {
 		s, err := GetMessageRegistryFile(c, sLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[sLink] = err
+		} else {
+			result = append(result, s)
 		}
-		result = append(result, s)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

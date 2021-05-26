@@ -107,15 +107,21 @@ func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorag
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, simplestorageLink := range links.ItemLinks {
 		simplestorage, err := GetSimpleStorage(c, simplestorageLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[simplestorageLink] = err
+		} else {
+			result = append(result, simplestorage)
 		}
-		result = append(result, simplestorage)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Chassis gets the chassis containing this storage service.

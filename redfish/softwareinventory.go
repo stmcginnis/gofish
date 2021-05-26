@@ -92,13 +92,19 @@ func ListReferencedSoftwareInventories(c common.Client, link string) ([]*Softwar
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, softwareinventoryLink := range links.ItemLinks {
 		softwareinventory, err := GetSoftwareInventory(c, softwareinventoryLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[softwareinventoryLink] = err
+		} else {
+			result = append(result, softwareinventory)
 		}
-		result = append(result, softwareinventory)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

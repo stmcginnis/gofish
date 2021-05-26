@@ -206,43 +206,61 @@ func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) (
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, dataprotectionloscapabilitiesLink := range links.ItemLinks {
 		dataprotectionloscapabilities, err := GetDataProtectionLoSCapabilities(c, dataprotectionloscapabilitiesLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[dataprotectionloscapabilitiesLink] = err
+		} else {
+			result = append(result, dataprotectionloscapabilities)
 		}
-		result = append(result, dataprotectionloscapabilities)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptions() ([]*ClassOfService, error) {
 	var result []*ClassOfService
 
+	collectionError := common.NewCollectionError()
 	for _, link := range dataprotectionloscapabilities.supportedReplicaOptions {
 		classOfService, err := GetClassOfService(dataprotectionloscapabilities.Client, link)
 		if err != nil {
-			return result, err
+			collectionError.Failures[link] = err
+		} else {
+			result = append(result, classOfService)
 		}
-		result = append(result, classOfService)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // SupportedLinesOfService gets the supported lines of service.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLinesOfService() ([]*DataProtectionLineOfService, error) {
 	var result []*DataProtectionLineOfService
 
+	collectionError := common.NewCollectionError()
 	for _, link := range dataprotectionloscapabilities.supportedLinesOfService {
 		lineOfService, err := GetDataProtectionLineOfService(dataprotectionloscapabilities.Client, link)
 		if err != nil {
-			return result, err
+			collectionError.Failures[link] = err
+		} else {
+			result = append(result, lineOfService)
 		}
-		result = append(result, lineOfService)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

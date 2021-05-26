@@ -176,15 +176,21 @@ func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAcco
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, manageraccountLink := range links.ItemLinks {
 		manageraccount, err := GetManagerAccount(c, manageraccountLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[manageraccountLink] = err
+		} else {
+			result = append(result, manageraccount)
 		}
-		result = append(result, manageraccount)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // SNMPUserInfo is shall contain the SNMP settings for an account.

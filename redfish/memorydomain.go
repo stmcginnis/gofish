@@ -90,15 +90,21 @@ func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain,
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, memorydomainLink := range links.ItemLinks {
 		memorydomain, err := GetMemoryDomain(c, memorydomainLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[memorydomainLink] = err
+		} else {
+			result = append(result, memorydomain)
 		}
-		result = append(result, memorydomain)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // MemorySet shall represent the interleave sets for a memory chunk.

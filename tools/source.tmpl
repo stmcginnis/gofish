@@ -118,15 +118,21 @@ func ListReferenced{{ class.name }}s(c common.Client, link string) ([]*{{ class.
         return result, err
     }
 
+    collectionError := common.NewCollectionError()
     for _, {{ class.name|lower }}Link := range links.ItemLinks {
         {{ class.name|lower }}, err := Get{{ class.name }}(c, {{ class.name|lower }}Link)
         if err != nil {
-            return result, err
+            collectionError.Failures[{{ class.name|lower }}Link] = err
+        } else {
+            result = append(result, {{ class.name|lower }})
         }
-        result = append(result, {{ class.name|lower }})
     }
 
-    return result, nil
+    if collectionError.Empty() {
+        return result, nil
+    } else {
+        return result, collectionError
+    }
 }
 
 {% endif %}

@@ -256,15 +256,21 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, eventserviceLink := range links.ItemLinks {
 		eventservice, err := GetEventService(c, eventserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[eventserviceLink] = err
+		} else {
+			result = append(result, eventservice)
 		}
-		result = append(result, eventservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.

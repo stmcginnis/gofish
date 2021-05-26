@@ -342,15 +342,21 @@ func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, driveLink := range links.ItemLinks {
 		drive, err := GetDrive(c, driveLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[driveLink] = err
+		} else {
+			result = append(result, drive)
 		}
-		result = append(result, drive)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Assembly gets the Assembly for this drive.
@@ -375,45 +381,63 @@ func (drive *Drive) Chassis() (*Chassis, error) {
 func (drive *Drive) Endpoints() ([]*Endpoint, error) {
 	var result []*Endpoint
 
+	collectionError := common.NewCollectionError()
 	for _, endpointLink := range drive.endpoints {
 		endpoint, err := GetEndpoint(drive.Client, endpointLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[endpointLink] = err
+		} else {
+			result = append(result, endpoint)
 		}
-		result = append(result, endpoint)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Volumes references the Volumes that this drive is associated with.
 func (drive *Drive) Volumes() ([]*Volume, error) {
 	var result []*Volume
 
+	collectionError := common.NewCollectionError()
 	for _, volumeLink := range drive.volumes {
 		volume, err := GetVolume(drive.Client, volumeLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[volumeLink] = err
+		} else {
+			result = append(result, volume)
 		}
-		result = append(result, volume)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // PCIeFunctions references the PCIeFunctions that this drive is associated with.
 func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 	var result []*PCIeFunction
 
+	collectionError := common.NewCollectionError()
 	for _, pcieFunctionLink := range drive.pcieFunctions {
 		pcieFunction, err := GetPCIeFunction(drive.Client, pcieFunctionLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[pcieFunctionLink] = err
+		} else {
+			result = append(result, pcieFunction)
 		}
-		result = append(result, pcieFunction)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // // StoragePools references the StoragePools that this drive is associated with.

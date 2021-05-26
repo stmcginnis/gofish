@@ -262,15 +262,21 @@ func ListReferencedNetworkAdapter(c common.Client, link string) ([]*NetworkAdapt
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, networkAdapterLink := range links.ItemLinks {
 		networkAdapter, err := GetNetworkAdapter(c, networkAdapterLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[networkAdapterLink] = err
+		} else {
+			result = append(result, networkAdapter)
 		}
-		result = append(result, networkAdapter)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Assembly gets this adapter's assembly.

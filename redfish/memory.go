@@ -415,15 +415,21 @@ func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, memoryLink := range links.ItemLinks {
 		memory, err := GetMemory(c, memoryLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[memoryLink] = err
+		} else {
+			result = append(result, memory)
 		}
-		result = append(result, memory)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Assembly gets this memory's assembly.

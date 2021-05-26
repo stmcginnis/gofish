@@ -116,83 +116,129 @@ func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfServ
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, classofserviceLink := range links.ItemLinks {
 		classofservice, err := GetClassOfService(c, classofserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[classofserviceLink] = err
+		} else {
+			result = append(result, classofservice)
 		}
-		result = append(result, classofservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // DataProtectionLinesOfServices gets the DataProtectionLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) DataProtectionLinesOfServices() ([]*DataProtectionLineOfService, error) {
 	var result []*DataProtectionLineOfService
+
+	collectionError := common.NewCollectionError()
 	for _, dpLosLink := range classofservice.dataProtectionLinesOfService {
 		dpLos, err := GetDataProtectionLineOfService(classofservice.Client, dpLosLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[dpLosLink] = err
+		} else {
+			result = append(result, dpLos)
 		}
-		result = append(result, dpLos)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // DataSecurityLinesOfServices gets the DataSecurityLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) DataSecurityLinesOfServices() ([]*DataSecurityLineOfService, error) {
 	var result []*DataSecurityLineOfService
+
+	collectionError := common.NewCollectionError()
 	for _, dsLosLink := range classofservice.dataSecurityLinesOfService {
 		dsLos, err := GetDataSecurityLineOfService(classofservice.Client, dsLosLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[dsLosLink] = err
+		} else {
+			result = append(result, dsLos)
 		}
-		result = append(result, dsLos)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // DataStorageLinesOfServices gets the DataStorageLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) DataStorageLinesOfServices() ([]*DataStorageLineOfService, error) {
 	var result []*DataStorageLineOfService
+
+	collectionError := common.NewCollectionError()
 	for _, dsLosLink := range classofservice.dataStorageLinesOfService {
 		dsLos, err := GetDataStorageLineOfService(classofservice.Client, dsLosLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[dsLosLink] = err
+		} else {
+			result = append(result, dsLos)
 		}
-		result = append(result, dsLos)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // IOConnectivityLinesOfServices gets the IOConnectivityLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) IOConnectivityLinesOfServices() ([]*IOConnectivityLineOfService, error) {
 	var result []*IOConnectivityLineOfService
+
+	collectionError := common.NewCollectionError()
 	for _, ioLosLink := range classofservice.dataSecurityLinesOfService {
 		ioLos, err := GetIOConnectivityLineOfService(classofservice.Client, ioLosLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[ioLosLink] = err
+		} else {
+			result = append(result, ioLos)
 		}
-		result = append(result, ioLos)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // IOPerformanceLinesOfServices gets the IOPerformanceLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) IOPerformanceLinesOfServices() ([]*IOPerformanceLineOfService, error) {
 	var result []*IOPerformanceLineOfService
+
+	collectionError := common.NewCollectionError()
 	for _, ioLosLink := range classofservice.dataSecurityLinesOfService {
 		ioLos, err := GetIOPerformanceLineOfService(classofservice.Client, ioLosLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[ioLosLink] = err
+		} else {
+			result = append(result, ioLos)
 		}
-		result = append(result, ioLos)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

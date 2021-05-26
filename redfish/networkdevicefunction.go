@@ -379,15 +379,21 @@ func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*Netw
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, networkdevicefunctionLink := range links.ItemLinks {
 		networkdevicefunction, err := GetNetworkDeviceFunction(c, networkdevicefunctionLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[networkdevicefunctionLink] = err
+		} else {
+			result = append(result, networkdevicefunction)
 		}
-		result = append(result, networkdevicefunction)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ISCSIBoot shall describe the iSCSI boot capabilities, status, and

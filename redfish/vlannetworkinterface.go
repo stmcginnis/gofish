@@ -111,13 +111,19 @@ func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanN
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, vlannetworkinterfaceLink := range links.ItemLinks {
 		vlannetworkinterface, err := GetVLanNetworkInterface(c, vlannetworkinterfaceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[vlannetworkinterfaceLink] = err
+		} else {
+			result = append(result, vlannetworkinterface)
 		}
-		result = append(result, vlannetworkinterface)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

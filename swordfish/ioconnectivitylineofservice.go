@@ -66,13 +66,19 @@ func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, ioconnectivitylineofserviceLink := range links.ItemLinks {
 		ioconnectivitylineofservice, err := GetIOConnectivityLineOfService(c, ioconnectivitylineofserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ioconnectivitylineofserviceLink] = err
+		} else {
+			result = append(result, ioconnectivitylineofservice)
 		}
-		result = append(result, ioconnectivitylineofservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

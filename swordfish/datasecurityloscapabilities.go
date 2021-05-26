@@ -230,13 +230,19 @@ func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string) ([]
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, datasecurityloscapabilitiesLink := range links.ItemLinks {
 		datasecurityloscapabilities, err := GetDataSecurityLoSCapabilities(c, datasecurityloscapabilitiesLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[datasecurityloscapabilitiesLink] = err
+		} else {
+			result = append(result, datasecurityloscapabilities)
 		}
-		result = append(result, datasecurityloscapabilities)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

@@ -159,13 +159,19 @@ func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, datastorageloscapabilitiesLink := range links.ItemLinks {
 		datastorageloscapabilities, err := GetDataStorageLoSCapabilities(c, datastorageloscapabilitiesLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[datastorageloscapabilitiesLink] = err
+		} else {
+			result = append(result, datastorageloscapabilities)
 		}
-		result = append(result, datastorageloscapabilities)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

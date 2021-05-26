@@ -160,15 +160,21 @@ func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, biosLink := range links.ItemLinks {
 		bios, err := GetBios(c, biosLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[biosLink] = err
+		} else {
+			result = append(result, bios)
 		}
-		result = append(result, bios)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ChangePassword shall change the selected BIOS password.

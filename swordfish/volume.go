@@ -576,15 +576,21 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, volumeLink := range links.ItemLinks {
 		volume, err := GetVolume(c, volumeLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[volumeLink] = err
+		} else {
+			result = append(result, volume)
 		}
-		result = append(result, volume)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ClassOfService gets the class of service that this storage volume conforms to.
@@ -600,15 +606,21 @@ func (volume *Volume) ClassOfService() (*ClassOfService, error) {
 func (volume *Volume) getDrives(links []string) ([]*redfish.Drive, error) {
 	var result []*redfish.Drive
 
+	collectionError := common.NewCollectionError()
 	for _, driveLink := range links {
 		drive, err := redfish.GetDrive(volume.Client, driveLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[driveLink] = err
+		} else {
+			result = append(result, drive)
 		}
-		result = append(result, drive)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // DedicatedSpareDrives references the Drives that are dedicated spares for this
@@ -625,43 +637,64 @@ func (volume *Volume) Drives() ([]*redfish.Drive, error) {
 // SpareResourceSets gets the spare resources that can be used for this volume.
 func (volume *Volume) SpareResourceSets() ([]*SpareResourceSet, error) {
 	var result []*SpareResourceSet
+
+	collectionError := common.NewCollectionError()
 	for _, srsLink := range volume.spareResourceSets {
 		srs, err := GetSpareResourceSet(volume.Client, srsLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[srsLink] = err
+		} else {
+			result = append(result, srs)
 		}
-		result = append(result, srs)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // StorageGroups gets the storage groups that associated with this volume.
 func (volume *Volume) StorageGroups() ([]*StorageGroup, error) {
 	var result []*StorageGroup
+
+	collectionError := common.NewCollectionError()
 	for _, sgLink := range volume.storageGroups {
 		sg, err := GetStorageGroup(volume.Client, sgLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[sgLink] = err
+		} else {
+			result = append(result, sg)
 		}
-		result = append(result, sg)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // StoragePools gets the storage pools that associated with this volume.
 func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 	var result []*StoragePool
+
+	collectionError := common.NewCollectionError()
 	for _, sgLink := range volume.allocatedPools {
 		sg, err := GetStoragePool(volume.Client, sgLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[sgLink] = err
+		} else {
+			result = append(result, sg)
 		}
-		result = append(result, sg)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // AssignReplicaTarget is used to establish a replication relationship by

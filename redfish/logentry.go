@@ -447,13 +447,19 @@ func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) 
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, logentryLink := range links.ItemLinks {
 		logentry, err := GetLogEntry(c, logentryLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[logentryLink] = err
+		} else {
+			result = append(result, logentry)
 		}
-		result = append(result, logentry)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

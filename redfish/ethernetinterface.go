@@ -308,15 +308,21 @@ func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*Ethernet
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, ethernetinterfaceLink := range links.ItemLinks {
 		ethernetinterface, err := GetEthernetInterface(c, ethernetinterfaceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ethernetinterfaceLink] = err
+		} else {
+			result = append(result, ethernetinterface)
 		}
-		result = append(result, ethernetinterface)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // IPv6AddressPolicyEntry describes and entry in the Address Selection Policy

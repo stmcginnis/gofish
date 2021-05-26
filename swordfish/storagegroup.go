@@ -237,43 +237,63 @@ func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup,
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, storagegroupLink := range links.ItemLinks {
 		storagegroup, err := GetStorageGroup(c, storagegroupLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[storagegroupLink] = err
+		} else {
+			result = append(result, storagegroup)
 		}
-		result = append(result, storagegroup)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ChildStorageGroups gets child groups of this group.
 func (storagegroup *StorageGroup) ChildStorageGroups() ([]*StorageGroup, error) {
 	var result []*StorageGroup
+
+	collectionError := common.NewCollectionError()
 	for _, sgLink := range storagegroup.childStorageGroups {
 		sg, err := GetStorageGroup(storagegroup.Client, sgLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[sgLink] = err
+		} else {
+			result = append(result, sg)
 		}
-		result = append(result, sg)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ParentStorageGroups gets parent groups of this group.
 func (storagegroup *StorageGroup) ParentStorageGroups() ([]*StorageGroup, error) {
 	var result []*StorageGroup
+
+	collectionError := common.NewCollectionError()
 	for _, sgLink := range storagegroup.parentStorageGroups {
 		sg, err := GetStorageGroup(storagegroup.Client, sgLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[sgLink] = err
+		} else {
+			result = append(result, sg)
 		}
-		result = append(result, sg)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ClassOfService gets the ClassOfService that all storage in this StorageGroup

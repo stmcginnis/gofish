@@ -77,13 +77,19 @@ func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, ioperformancelineofserviceLink := range links.ItemLinks {
 		ioperformancelineofservice, err := GetIOPerformanceLineOfService(c, ioperformancelineofserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ioperformancelineofserviceLink] = err
+		} else {
+			result = append(result, ioperformancelineofservice)
 		}
-		result = append(result, ioperformancelineofservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

@@ -187,15 +187,21 @@ func ListReferencedStorageServices(c common.Client, link string) ([]*StorageServ
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, storageserviceLink := range links.ItemLinks {
 		storageservice, err := GetStorageService(c, storageserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[storageserviceLink] = err
+		} else {
+			result = append(result, storageservice)
 		}
-		result = append(result, storageservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // ClassesOfService gets the storage service's classes of service.
@@ -277,44 +283,65 @@ func (storageservice *StorageService) IOPerformanceLoSCapabilities() (*IOPerform
 // Redundancy gets the redundancy information for the storage subsystem.
 func (storageservice *StorageService) Redundancy() ([]*redfish.Redundancy, error) {
 	var result []*redfish.Redundancy
+
+	collectionError := common.NewCollectionError()
 	for _, redundancyLink := range storageservice.redundancy {
 		redundancy, err := redfish.GetRedundancy(storageservice.Client, redundancyLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[redundancyLink] = err
+		} else {
+			result = append(result, redundancy)
 		}
-		result = append(result, redundancy)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
 func (storageservice *StorageService) SpareResourceSets() ([]*SpareResourceSet, error) {
 	var result []*SpareResourceSet
+
+	collectionError := common.NewCollectionError()
 	for _, srsLink := range storageservice.spareResourceSets {
 		srs, err := GetSpareResourceSet(storageservice.Client, srsLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[srsLink] = err
+		} else {
+			result = append(result, srs)
 		}
-		result = append(result, srs)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // StorageGroups gets the storage groups that are a part of this storage service.
 func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
 	var result []*StorageGroup
+
+	collectionError := common.NewCollectionError()
 	for _, sgLink := range storageservice.spareResourceSets {
 		sg, err := GetStorageGroup(storageservice.Client, sgLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[sgLink] = err
+		} else {
+			result = append(result, sg)
 		}
-		result = append(result, sg)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // Volumes gets the volumes that are a part of this storage service.

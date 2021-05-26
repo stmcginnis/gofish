@@ -144,13 +144,19 @@ func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, er
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, redundancyLink := range links.ItemLinks {
 		redundancy, err := GetRedundancy(c, redundancyLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[redundancyLink] = err
+		} else {
+			result = append(result, redundancy)
 		}
-		result = append(result, redundancy)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

@@ -182,13 +182,19 @@ func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, taskLink := range links.ItemLinks {
 		task, err := GetTask(c, taskLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[taskLink] = err
+		} else {
+			result = append(result, task)
 		}
-		result = append(result, task)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }

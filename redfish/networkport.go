@@ -278,15 +278,21 @@ func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, e
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, networkportLink := range links.ItemLinks {
 		networkport, err := GetNetworkPort(c, networkportLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[networkportLink] = err
+		} else {
+			result = append(result, networkport)
 		}
-		result = append(result, networkport)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	} else {
+		return result, collectionError
+	}
 }
 
 // SupportedLinkCapabilities shall describe the static capabilities of an
