@@ -6,12 +6,10 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish/dell"
 )
 
 var simpleUpdateBody = `{
@@ -66,23 +64,6 @@ func TestUpdateService(t *testing.T) {
 		assertMessage(t, result.HTTPPushURI, "/redfish/v1/UpdateService/FirmwareInventory")
 		assertMessage(t, result.TransferProtocol[0], "HTTP")
 		assertMessage(t, result.UpdateServiceTarget, "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate")
-	})
-
-	t.Run("Check oem redfish fields - dell", func(t *testing.T) {
-		c := &common.TestClient{Vendor: "Dell"}
-		result.Client = c
-		var installUpon []string = []string{"Now", "NowAndReboot", "NextReboot"}
-
-		err := json.NewDecoder(strings.NewReader(simpleUpdateBody)).Decode(&result)
-		if err != nil {
-			t.Errorf("Error decoding JSON: %s", err)
-		}
-
-		assertMessage(t, result.Oem.(dell.DellUpdateService).Actions.Target, "/redfish/v1/UpdateService/Actions/Oem/DellUpdateService.Install")
-
-		if !reflect.DeepEqual(result.Oem.(dell.DellUpdateService).Actions.InstallUpon, installUpon) {
-			t.Errorf("got %v, want %v", result.Oem.(dell.DellUpdateService).Actions.InstallUpon, installUpon)
-		}
 	})
 
 }
