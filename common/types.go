@@ -29,7 +29,6 @@ type Client interface {
 	PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
 	Delete(url string) (*http.Response, error)
 	DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error)
-	GetVendor() string
 }
 
 // Entity provides the common basis for all Redfish and Swordfish objects.

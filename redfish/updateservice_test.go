@@ -53,7 +53,7 @@ func TestUpdateService(t *testing.T) {
 	}
 
 	t.Run("Check default redfish fields", func(t *testing.T) {
-		c := &common.TestClient{Vendor: "XXX"}
+		c := &common.TestClient{}
 		result.Client = c
 
 		err := json.NewDecoder(strings.NewReader(simpleUpdateBody)).Decode(&result)
@@ -65,5 +65,4 @@ func TestUpdateService(t *testing.T) {
 		assertMessage(t, result.TransferProtocol[0], "HTTP")
 		assertMessage(t, result.UpdateServiceTarget, "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate")
 	})
-
 }
