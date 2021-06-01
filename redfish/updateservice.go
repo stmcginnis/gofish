@@ -34,7 +34,7 @@ type UpdateService struct {
 	TransferProtocol []string
 	// UpdateServiceTarget indicates where theupdate image is to be applied.
 	UpdateServiceTarget string
-	// OemActions contains all the vendor specific actions. It is vendor responsability to parse this field accordingly
+	// OemActions contains all the vendor specific actions. It is vendor responsibility to parse this field accordingly
 	OemActions json.RawMessage
 	// Oem shall contain the OEM extensions. All values for properties that
 	// this object contains shall conform to the Redfish Specification
