@@ -34,12 +34,14 @@ type UpdateService struct {
 	TransferProtocol []string
 	// UpdateServiceTarget indicates where theupdate image is to be applied.
 	UpdateServiceTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// OemActions contains all the vendor specific actions. It is vendor responsibility to parse this field accordingly
+	OemActions json.RawMessage
 	// Oem shall contain the OEM extensions. All values for properties that
 	// this object contains shall conform to the Redfish Specification
 	// described requirements.
-	Oem interface{}
+	Oem json.RawMessage
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a UpdateService object from the raw JSON.
@@ -50,6 +52,8 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 			AllowableValues []string `json:"TransferProtocol@Redfish.AllowableValues"`
 			Target          string
 		} `json:"#UpdateService.SimpleUpdate"`
+
+		Oem json.RawMessage // OEM actions will be stored here
 	}
 	var t struct {
 		temp
@@ -69,7 +73,9 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 	updateService.SoftwareInventory = string(t.SoftwareInventory)
 	updateService.TransferProtocol = t.Actions.SimpleUpdate.AllowableValues
 	updateService.UpdateServiceTarget = t.Actions.SimpleUpdate.Target
+	updateService.OemActions = t.Actions.Oem
 	updateService.rawData = b
+
 	return nil
 }
 
