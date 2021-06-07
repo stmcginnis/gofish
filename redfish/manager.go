@@ -217,10 +217,12 @@ type Manager struct {
 	// ManagerNetworkProtocol which represents the network services for this
 	// manager.
 	networkProtocol string
-	// OEMData are all OEM data under top level manager section
-	OEMData map[string]interface{}
+	// OemActions contains all the vendor specific actions. It is vendor responsibility to parse this field accordingly
+	OemActions json.RawMessage
+	// Oem are all OEM data under top level manager section
+	Oem json.RawMessage
 	// OEMLinks are all OEM data under link section
-	OEMLinks map[string]interface{}
+	OemLinks json.RawMessage
 	// PartNumber shall contain a part number assigned by the organization that
 	// is responsible for producing or manufacturing the manager.
 	PartNumber string
@@ -299,6 +301,8 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
 			Target            string
 		} `json:"#Manager.Reset"`
+
+		Oem json.RawMessage // OEM actions will be stored here
 	}
 	type linkReference struct {
 		ManagerForChassis       common.Links
@@ -308,7 +312,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		ManagerForSwitches      common.Links
 		ManagerForSwitchesCount int `json:"ManagerForSwitches@odata.count"`
 		ManagerInChassis        common.Link
-		OEM                     map[string]interface{} `json:"Oem"`
+		Oem                     json.RawMessage
 	}
 	var t struct {
 		temp
@@ -320,7 +324,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		VirtualMedia         common.Link
 		Links                linkReference
 		Actions              actions
-		OEM                  map[string]interface{} `json:"Oem"`
+		Oem                  json.RawMessage
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -333,8 +337,9 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.ethernetInterfaces = string(t.EthernetInterfaces)
 	manager.logServices = string(t.LogServices)
 	manager.networkProtocol = string(t.NetworkProtocol)
-	manager.OEMData = t.OEM
-	manager.OEMLinks = t.Links.OEM
+	manager.OemActions = t.Actions.Oem
+	manager.Oem = t.Oem
+	manager.OemLinks = t.Links.Oem
 	manager.remoteAccountService = string(t.RemoteAccountService)
 	manager.serialInterfaces = string(t.SerialInterfaces)
 	manager.virtualMedia = string(t.VirtualMedia)
