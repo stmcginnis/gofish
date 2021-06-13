@@ -439,7 +439,7 @@ type PostalAddress struct {
 	Community string
 	// Country shall conform the requirements of the Country
 	// field as defined in RFC5139.
-	Country int
+	Country string
 	// District is used to name a county, parish, gun (JP), or district
 	// (IN).
 	District string

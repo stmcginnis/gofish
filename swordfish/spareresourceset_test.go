@@ -61,7 +61,7 @@ var spareResourceSetBody = `{
 			"PostalAddress": {
 				"Building": "The big one on the right",
 				"City": "London",
-				"Country": 826,
+				"Country": "UK",
 				"Floor": "Top floor",
 				"HouseNumber": 89,
 				"Name": "Big Data Center",
