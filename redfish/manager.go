@@ -196,7 +196,7 @@ type Manager struct {
 	GraphicalConsole GraphicalConsole
 	// hostInterfaces shall be a link to a collection of type
 	// HostInterfaceCollection.
-	// hostInterfaces string
+	hostInterfaces string
 	// logServices shall contain a reference to a collection of type
 	// LogServiceCollection which are for the use of this manager.
 	logServices string
@@ -317,6 +317,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		EthernetInterfaces   common.Link
+		HostInterfaces       common.Link
 		LogServices          common.Link
 		NetworkProtocol      common.Link
 		RemoteAccountService common.Link
@@ -335,6 +336,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities
 	*manager = Manager(t.temp)
 	manager.ethernetInterfaces = string(t.EthernetInterfaces)
+	manager.hostInterfaces = string(t.HostInterfaces)
 	manager.logServices = string(t.LogServices)
 	manager.networkProtocol = string(t.NetworkProtocol)
 	manager.OemActions = t.Actions.Oem
@@ -460,6 +462,11 @@ func (manager *Manager) Reset(resetType ResetType) error {
 // EthernetInterfaces get this system's ethernet interfaces.
 func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
 	return ListReferencedEthernetInterfaces(manager.Client, manager.ethernetInterfaces)
+}
+
+// HostInterfaces get this system's host interfaces.
+func (manager *Manager) HostInterfaces() ([]*HostInterface, error) {
+	return ListReferencedHostInterfaces(manager.Client, manager.hostInterfaces)
 }
 
 // LogServices get this manager's log services on this system.
