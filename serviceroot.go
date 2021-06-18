@@ -99,6 +99,9 @@ type Service struct {
 	// Managers shall only contain a reference to a collection of resources that
 	// comply to the Managers schema.
 	managers string
+	// Oem contains all the vendor specific actions. It is vendor responsibility to parse
+	// this field accordingly
+	Oem json.RawMessage
 	// Product shall include the name of the product represented by this Redfish
 	// service.
 	Product string
@@ -175,6 +178,7 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 		Links              struct {
 			Sessions common.Link
 		}
+		Oem json.RawMessage // OEM message will be stored here
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -203,6 +207,7 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 	serviceroot.sessionService = string(t.SessionService)
 	serviceroot.telemetryService = string(t.TelemetryService)
 	serviceroot.updateService = string(t.UpdateService)
+	serviceroot.Oem = t.Oem
 
 	return nil
 }
