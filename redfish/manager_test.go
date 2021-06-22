@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -46,6 +45,142 @@ var oemDataBody = `
 				}
 			}
 		}
+`
+
+var oemActions = `
+{
+	"#OemManager.v1_2_0.OemManager#OemManager.ExportSystemConfiguration": {
+		"ExportFormat@Redfish.AllowableValues": [
+			"XML",
+			"JSON"
+		],
+		"ExportUse@Redfish.AllowableValues": [
+			"Default",
+			"Clone",
+			"Replace"
+		],
+		"IncludeInExport@Redfish.AllowableValues": [
+			"Default",
+			"IncludeReadOnly",
+			"IncludePasswordHashValues",
+			"IncludeCustomTelemetry"
+		],
+		"ShareParameters": {
+			"IgnoreCertificateWarning@Redfish.AllowableValues": [
+				"Disabled",
+				"Enabled"
+			],
+			"ProxySupport@Redfish.AllowableValues": [
+				"Disabled",
+				"EnabledProxyDefault",
+				"Enabled"
+			],
+			"ProxyType@Redfish.AllowableValues": [
+				"HTTP",
+				"SOCKS4"
+			],
+			"ShareType@Redfish.AllowableValues": [
+				"LOCAL",
+				"NFS",
+				"CIFS",
+				"HTTP",
+				"HTTPS"
+			],
+			"Target@Redfish.AllowableValues": [
+				"ALL",
+				"IDRAC",
+				"BIOS",
+				"NIC",
+				"RAID"
+			]
+		},
+		"target": "/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ExportSystemConfiguration"
+	},
+	"#OemManager.v1_2_0.OemManager#OemManager.ImportSystemConfiguration": {
+		"HostPowerState@Redfish.AllowableValues": [
+			"On",
+			"Off"
+		],
+		"ImportSystemConfiguration@Redfish.AllowableValues": [
+			"TimeToWait",
+			"ImportBuffer"
+		],
+		"ShareParameters": {
+			"IgnoreCertificateWarning@Redfish.AllowableValues": [
+				"Disabled",
+				"Enabled"
+			],
+			"ProxySupport@Redfish.AllowableValues": [
+				"Disabled",
+				"EnabledProxyDefault",
+				"Enabled"
+			],
+			"ProxyType@Redfish.AllowableValues": [
+				"HTTP",
+				"SOCKS4"
+			],
+			"ShareType@Redfish.AllowableValues": [
+				"LOCAL",
+				"NFS",
+				"CIFS",
+				"HTTP",
+				"HTTPS"
+			],
+			"Target@Redfish.AllowableValues": [
+				"ALL",
+				"IDRAC",
+				"BIOS",
+				"NIC",
+				"RAID"
+			]
+		},
+		"ShutdownType@Redfish.AllowableValues": [
+			"Graceful",
+			"Forced",
+			"NoReboot"
+		],
+		"target": "/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration"
+	},
+	"#OemManager.v1_2_0.OemManager#OemManager.ImportSystemConfigurationPreview": {
+		"ImportSystemConfigurationPreview@Redfish.AllowableValues": [
+			"ImportBuffer"
+		],
+		"ShareParameters": {
+			"IgnoreCertificateWarning@Redfish.AllowableValues": [
+				"Disabled",
+				"Enabled"
+			],
+			"ProxySupport@Redfish.AllowableValues": [
+				"Disabled",
+				"EnabledProxyDefault",
+				"Enabled"
+			],
+			"ProxyType@Redfish.AllowableValues": [
+				"HTTP",
+				"SOCKS4"
+			],
+			"ShareType@Redfish.AllowableValues": [
+				"LOCAL",
+				"NFS",
+				"CIFS",
+				"HTTP",
+				"HTTPS"
+			],
+			"Target@Redfish.AllowableValues": [
+				"ALL"
+			]
+		},
+		"target": "/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfigurationPreview"
+	},
+	"DellManager.v1_0_0#DellManager.ResetToDefaults": {
+		"ResetType@Redfish.AllowableValues": [
+			"All",
+			"ResetAllWithRootDefaults",
+			"Default"
+		],
+		"target": "/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/DellManager.ResetToDefaults"
+	}
+}
 `
 var managerBody = `{
 		"@Redfish.Copyright": "Copyright 2014-2019 DMTF. All rights reserved.",
@@ -138,8 +273,10 @@ var managerBody = `{
 					"ForceRestart",
 					"GracefulRestart"
 				]
-			}
-		},
+			},
+			"Oem":
+` + oemActions +
+	`	},
 		"Oem":
 ` + oemDataBody +
 	`	}`
@@ -149,56 +286,62 @@ func TestManager(t *testing.T) {
 	var result Manager
 	err := json.NewDecoder(strings.NewReader(managerBody)).Decode(&result)
 
-	if err != nil {
-		t.Errorf("Error decoding JSON: %s", err)
-	}
+	t.Run("Check fields", func(t *testing.T) {
+		if err != nil {
+			t.Errorf("Error decoding JSON: %s", err)
+		}
 
-	if result.ID != "BMC-1" {
-		t.Errorf("Received invalid ID: %s", result.ID)
-	}
+		if result.ID != "BMC-1" {
+			t.Errorf("Received invalid ID: %s", result.ID)
+		}
 
-	if result.Name != "Manager" {
-		t.Errorf("Received invalid name: %s", result.Name)
-	}
+		if result.Name != "Manager" {
+			t.Errorf("Received invalid name: %s", result.Name)
+		}
 
-	if result.ManagerType != BMCManagerType {
-		t.Errorf("Received manager type: %s", result.ManagerType)
-	}
+		if result.ManagerType != BMCManagerType {
+			t.Errorf("Received manager type: %s", result.ManagerType)
+		}
 
-	if result.PowerState != OnPowerState {
-		t.Errorf("Received power state: %s", result.PowerState)
-	}
+		if result.PowerState != OnPowerState {
+			t.Errorf("Received power state: %s", result.PowerState)
+		}
 
-	if !result.GraphicalConsole.ServiceEnabled {
-		t.Error("Graphical console service state should be enabled")
-	}
+		if !result.GraphicalConsole.ServiceEnabled {
+			t.Error("Graphical console service state should be enabled")
+		}
 
-	if len(result.SerialConsole.ConnectTypesSupported) != 3 {
-		t.Errorf("Serial console should have 3 connect types, got %d",
-			len(result.SerialConsole.ConnectTypesSupported))
-	}
+		if len(result.SerialConsole.ConnectTypesSupported) != 3 {
+			t.Errorf("Serial console should have 3 connect types, got %d",
+				len(result.SerialConsole.ConnectTypesSupported))
+		}
 
-	if result.managerForServers[0] != "/redfish/v1/Systems/System-1" {
-		t.Errorf("Received manager for servers: %s", result.managerForServers)
-	}
+		if result.managerForServers[0] != "/redfish/v1/Systems/System-1" {
+			t.Errorf("Received manager for servers: %s", result.managerForServers)
+		}
 
-	if result.resetTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset" {
-		t.Errorf("Invalid Reset target: %s", result.resetTarget)
-	}
+		if result.resetTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset" {
+			t.Errorf("Invalid Reset target: %s", result.resetTarget)
+		}
 
-	var expectedOEM map[string]interface{}
-	if err := json.Unmarshal([]byte(oemLinksBody), &expectedOEM); err != nil {
-		t.Errorf("Failed to unmarshall link body: %v", err)
-	}
-	if !reflect.DeepEqual(result.OEMLinks, expectedOEM) {
-		t.Errorf("Invalid OEM Links: %+v", result.OEMLinks)
-	}
-	if err := json.Unmarshal([]byte(oemDataBody), &expectedOEM); err != nil {
-		t.Errorf("Failed to unmarshall data body: %v", err)
-	}
-	if !reflect.DeepEqual(result.OEMData, expectedOEM) {
-		t.Errorf("Invalid OEM Data: %+v", result.OEMData)
-	}
+		var expectedOEM map[string]interface{}
+		if err := json.Unmarshal([]byte(oemLinksBody), &expectedOEM); err != nil {
+			t.Errorf("Failed to unmarshall link body: %v", err)
+		}
+		if err := json.Unmarshal([]byte(oemDataBody), &expectedOEM); err != nil {
+			t.Errorf("Failed to unmarshall data body: %v", err)
+		}
+		// Check OEM fields
+		if len(result.Oem) == 0 {
+			t.Errorf("Oem field empty, expected not empty")
+		}
+		if len(result.OemLinks) == 0 {
+			t.Errorf("OemLinks field empty, expected not empty")
+		}
+		if len(result.OemActions) == 0 {
+			t.Errorf("OemActions field empty, expected not empty")
+		}
+	})
 }
 
 // TestManagerUpdate tests the Update call.

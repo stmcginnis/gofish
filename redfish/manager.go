@@ -196,7 +196,7 @@ type Manager struct {
 	GraphicalConsole GraphicalConsole
 	// hostInterfaces shall be a link to a collection of type
 	// HostInterfaceCollection.
-	// hostInterfaces string
+	hostInterfaces string
 	// logServices shall contain a reference to a collection of type
 	// LogServiceCollection which are for the use of this manager.
 	logServices string
@@ -217,10 +217,12 @@ type Manager struct {
 	// ManagerNetworkProtocol which represents the network services for this
 	// manager.
 	networkProtocol string
-	// OEMData are all OEM data under top level manager section
-	OEMData map[string]interface{}
+	// OemActions contains all the vendor specific actions. It is vendor responsibility to parse this field accordingly
+	OemActions json.RawMessage
+	// Oem are all OEM data under top level manager section
+	Oem json.RawMessage
 	// OEMLinks are all OEM data under link section
-	OEMLinks map[string]interface{}
+	OemLinks json.RawMessage
 	// PartNumber shall contain a part number assigned by the organization that
 	// is responsible for producing or manufacturing the manager.
 	PartNumber string
@@ -299,6 +301,8 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
 			Target            string
 		} `json:"#Manager.Reset"`
+
+		Oem json.RawMessage // OEM actions will be stored here
 	}
 	type linkReference struct {
 		ManagerForChassis       common.Links
@@ -308,11 +312,12 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		ManagerForSwitches      common.Links
 		ManagerForSwitchesCount int `json:"ManagerForSwitches@odata.count"`
 		ManagerInChassis        common.Link
-		OEM                     map[string]interface{} `json:"Oem"`
+		Oem                     json.RawMessage
 	}
 	var t struct {
 		temp
 		EthernetInterfaces   common.Link
+		HostInterfaces       common.Link
 		LogServices          common.Link
 		NetworkProtocol      common.Link
 		RemoteAccountService common.Link
@@ -320,7 +325,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		VirtualMedia         common.Link
 		Links                linkReference
 		Actions              actions
-		OEM                  map[string]interface{} `json:"Oem"`
+		Oem                  json.RawMessage
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -331,10 +336,12 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities
 	*manager = Manager(t.temp)
 	manager.ethernetInterfaces = string(t.EthernetInterfaces)
+	manager.hostInterfaces = string(t.HostInterfaces)
 	manager.logServices = string(t.LogServices)
 	manager.networkProtocol = string(t.NetworkProtocol)
-	manager.OEMData = t.OEM
-	manager.OEMLinks = t.Links.OEM
+	manager.OemActions = t.Actions.Oem
+	manager.Oem = t.Oem
+	manager.OemLinks = t.Links.Oem
 	manager.remoteAccountService = string(t.RemoteAccountService)
 	manager.serialInterfaces = string(t.SerialInterfaces)
 	manager.virtualMedia = string(t.VirtualMedia)
@@ -461,6 +468,11 @@ func (manager *Manager) Reset(resetType ResetType) error {
 // EthernetInterfaces get this system's ethernet interfaces.
 func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
 	return ListReferencedEthernetInterfaces(manager.Client, manager.ethernetInterfaces)
+}
+
+// HostInterfaces get this system's host interfaces.
+func (manager *Manager) HostInterfaces() ([]*HostInterface, error) {
+	return ListReferencedHostInterfaces(manager.Client, manager.hostInterfaces)
 }
 
 // LogServices get this manager's log services on this system.

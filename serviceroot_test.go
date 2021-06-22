@@ -193,3 +193,47 @@ func TestServiceRoot(t *testing.T) {
 		t.Errorf("Invalid UpdateService link: %s", result.updateService)
 	}
 }
+
+const oem = `{
+			"Dell": {
+			  "@odata.context": "/redfish/v1/$metadata#DellServiceRoot.DellServiceRoot",
+			  "@odata.type": "#DellServiceRoot.v1_0_0.DellServiceRoot",
+				"ManagerMACAddress": "4c:d9:8f:00:11:34",
+				"ServiceTag": "C3H3853"
+			}
+		}`
+
+var serviceRootBodyOEM = strings.NewReader(
+	`{
+		"@odata.context": "/redfish/v1/$metadata#ServiceRoot.ServiceRoot",
+		"@odata.type": "#ServiceRoot.v1_5_1.ServiceRoot",
+		"@odata.id": "/redfish/v1/ServiceRoot",
+		"Id": "ServiceRoot-1",
+		"Name": "ServiceRootOne",
+		"Description": "ServiceRoot One",
+		"Oem":` + oem + `,
+		"Vendor": "Dell"
+	}`)
+
+// TestServiceRootOEM tests the parsing of ServiceRoot objects with OEM field.
+func TestServiceRootOEM(t *testing.T) {
+	var result Service
+	err := json.NewDecoder(serviceRootBodyOEM).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.ID != "ServiceRoot-1" {
+		t.Errorf("Received invalid ID: %s", result.ID)
+	}
+
+	if result.Oem == nil {
+		t.Error("Invalid Oem link")
+	}
+	oemExp := strings.TrimSpace(oem)
+	oemObt := strings.TrimSpace(string(result.Oem))
+	if oemExp != oemObt {
+		t.Errorf("Expect\n%s\n,Obtain\n%s", oemExp, oemObt)
+	}
+}
