@@ -199,7 +199,7 @@ func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
 	return &hostinterface, nil
 }
 
-// ListReferencedHostInterfaces gets the collection of HostInterface from
+//nolint:dupl // ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
 func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) {
 	var result []*HostInterface
@@ -224,9 +224,9 @@ func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterfac
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.
@@ -245,9 +245,9 @@ func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error)
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // HostNetworkInterfaces gets the network interface controllers or cards (NICs)

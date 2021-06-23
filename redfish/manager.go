@@ -421,9 +421,9 @@ func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Reset shall perform a reset of the manager.

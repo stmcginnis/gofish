@@ -195,7 +195,7 @@ func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
 	return &pciefunction, nil
 }
 
-// ListReferencedPCIeFunctions gets the collection of PCIeFunction from
+//nolint:dupl // ListReferencedPCIeFunctions gets the collection of PCIeFunction from
 // a provided reference.
 func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) {
 	var result []*PCIeFunction
@@ -220,9 +220,9 @@ func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction,
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Drives gets the PCIe function's drives.
@@ -241,9 +241,9 @@ func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // EthernetInterfaces gets the PCIe function's ethernet interfaces.
@@ -262,9 +262,9 @@ func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, er
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // NetworkDeviceFunctions gets the PCIe function's ethernet interfaces.
@@ -283,9 +283,9 @@ func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunc
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // PCIeDevice gets the associated PCIe device for this function.
@@ -312,7 +312,7 @@ func (pciefunction *PCIeFunction) StorageControllers() ([]*StorageController, er
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

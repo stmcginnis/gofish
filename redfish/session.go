@@ -149,7 +149,7 @@ func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

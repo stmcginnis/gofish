@@ -169,7 +169,7 @@ func GetTask(c common.Client, uri string) (*Task, error) {
 	return &task, nil
 }
 
-// ListReferencedTasks gets the collection of Task from
+//nolint:dupl // ListReferencedTasks gets the collection of Task from
 // a provided reference.
 func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
 	var result []*Task
@@ -194,7 +194,7 @@ func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

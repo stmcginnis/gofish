@@ -224,7 +224,7 @@ func GetStorageGroup(c common.Client, uri string) (*StorageGroup, error) {
 	return &storagegroup, nil
 }
 
-// ListReferencedStorageGroups gets the collection of StorageGroup from
+//nolint:dupl // ListReferencedStorageGroups gets the collection of StorageGroup from
 // a provided reference.
 func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup, error) {
 	var result []*StorageGroup
@@ -249,9 +249,9 @@ func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup,
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ChildStorageGroups gets child groups of this group.
@@ -270,9 +270,9 @@ func (storagegroup *StorageGroup) ChildStorageGroups() ([]*StorageGroup, error) 
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ParentStorageGroups gets parent groups of this group.
@@ -291,9 +291,9 @@ func (storagegroup *StorageGroup) ParentStorageGroups() ([]*StorageGroup, error)
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ClassOfService gets the ClassOfService that all storage in this StorageGroup

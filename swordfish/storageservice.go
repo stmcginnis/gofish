@@ -199,9 +199,9 @@ func ListReferencedStorageServices(c common.Client, link string) ([]*StorageServ
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ClassesOfService gets the storage service's classes of service.
@@ -296,9 +296,9 @@ func (storageservice *StorageService) Redundancy() ([]*redfish.Redundancy, error
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
@@ -318,9 +318,9 @@ func (storageservice *StorageService) SpareResourceSets() ([]*SpareResourceSet, 
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // StorageGroups gets the storage groups that are a part of this storage service.
@@ -339,9 +339,9 @@ func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Volumes gets the volumes that are a part of this storage service.

@@ -351,9 +351,9 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Drives gets the drives attached to the storage controllers that this
@@ -388,9 +388,9 @@ func (chassis *Chassis) Drives() ([]*Drive, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Thermal gets the thermal temperature and cooling information for the chassis
@@ -437,9 +437,9 @@ func (chassis *Chassis) ComputerSystems() ([]*ComputerSystem, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ManagedBy gets the collection of managers of this chassis
@@ -458,9 +458,9 @@ func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // NetworkAdapters gets the collection of network adapters of this chassis

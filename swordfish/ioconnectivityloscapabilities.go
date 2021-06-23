@@ -106,7 +106,7 @@ func GetIOConnectivityLoSCapabilities(c common.Client, uri string) (*IOConnectiv
 	return &ioconnectivityloscapabilities, nil
 }
 
-// ListReferencedIOConnectivityLoSCapabilitiess gets the collection of
+//nolint:dupl // ListReferencedIOConnectivityLoSCapabilitiess gets the collection of
 // IOConnectivityLoSCapabilities from a provided reference.
 func ListReferencedIOConnectivityLoSCapabilitiess(c common.Client, link string) ([]*IOConnectivityLoSCapabilities, error) {
 	var result []*IOConnectivityLoSCapabilities
@@ -131,7 +131,7 @@ func ListReferencedIOConnectivityLoSCapabilitiess(c common.Client, link string) 
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

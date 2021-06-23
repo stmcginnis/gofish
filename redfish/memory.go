@@ -402,7 +402,7 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 	return &memory, nil
 }
 
-// ListReferencedMemorys gets the collection of Memory from
+//nolint:dupl // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
 func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
 	var result []*Memory
@@ -427,9 +427,9 @@ func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Assembly gets this memory's assembly.

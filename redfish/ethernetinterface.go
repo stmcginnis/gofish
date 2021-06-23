@@ -295,7 +295,7 @@ func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, erro
 	return &ethernetinterface, nil
 }
 
-// ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
+//nolint:dupl // ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
 // a provided reference.
 func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*EthernetInterface, error) {
 	var result []*EthernetInterface
@@ -320,9 +320,9 @@ func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*Ethernet
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // IPv6AddressPolicyEntry describes and entry in the Address Selection Policy

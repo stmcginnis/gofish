@@ -188,7 +188,7 @@ func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
 	return &storagepool, nil
 }
 
-// ListReferencedStoragePools gets the collection of StoragePool from
+//nolint:dupl // ListReferencedStoragePools gets the collection of StoragePool from
 // a provided reference.
 func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) {
 	var result []*StoragePool
@@ -213,9 +213,9 @@ func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, e
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // DedicatedSpareDrives gets the Drive entities which are currently assigned as
@@ -235,9 +235,9 @@ func (storagepool *StoragePool) DedicatedSpareDrives() ([]*redfish.Drive, error)
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
@@ -257,9 +257,9 @@ func (storagepool *StoragePool) SpareResourceSets() ([]*SpareResourceSet, error)
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // AllocatedPools gets the storage pools allocated from this storage pool.
@@ -288,9 +288,9 @@ func (storagepool *StoragePool) CapacitySources() ([]*CapacitySource, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ClassesOfService gets references to all classes of service supported by this

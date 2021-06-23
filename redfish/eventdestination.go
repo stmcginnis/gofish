@@ -404,7 +404,7 @@ func DeleteEventDestination(c common.Client, uri string) (err error) {
 	return err
 }
 
-// ListReferencedEventDestinations gets the collection of EventDestination from
+//nolint:dupl // ListReferencedEventDestinations gets the collection of EventDestination from
 // a provided reference.
 func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) {
 	var result []*EventDestination
@@ -429,9 +429,9 @@ func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDest
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included

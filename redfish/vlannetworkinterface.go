@@ -98,7 +98,7 @@ func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface
 	return &vlannetworkinterface, nil
 }
 
-// ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from
+//nolint:dupl // ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from
 // a provided reference.
 func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanNetworkInterface, error) {
 	var result []*VLanNetworkInterface
@@ -123,7 +123,7 @@ func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanN
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

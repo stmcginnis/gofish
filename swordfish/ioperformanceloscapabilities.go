@@ -134,7 +134,7 @@ func GetIOPerformanceLoSCapabilities(c common.Client, uri string) (*IOPerformanc
 	return &ioperformanceloscapabilities, nil
 }
 
-// ListReferencedIOPerformanceLoSCapabilitiess gets the collection of IOPerformanceLoSCapabilities from
+//nolint:dupl // ListReferencedIOPerformanceLoSCapabilitiess gets the collection of IOPerformanceLoSCapabilities from
 // a provided reference.
 func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string) ([]*IOPerformanceLoSCapabilities, error) {
 	var result []*IOPerformanceLoSCapabilities
@@ -159,9 +159,9 @@ func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string) (
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // IOWorkload is used to describe an IO Workload.

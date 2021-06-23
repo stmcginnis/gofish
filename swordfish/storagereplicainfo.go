@@ -461,7 +461,7 @@ func GetStorageReplicaInfo(c common.Client, uri string) (*StorageReplicaInfo, er
 	return &storagereplicainfo, nil
 }
 
-// ListReferencedStorageReplicaInfos gets the collection of StorageReplicaInfo from
+//nolint:dupl // ListReferencedStorageReplicaInfos gets the collection of StorageReplicaInfo from
 // a provided reference.
 func ListReferencedStorageReplicaInfos(c common.Client, link string) ([]*StorageReplicaInfo, error) {
 	var result []*StorageReplicaInfo
@@ -486,7 +486,7 @@ func ListReferencedStorageReplicaInfos(c common.Client, link string) ([]*Storage
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

@@ -94,7 +94,7 @@ func GetSimpleStorage(c common.Client, uri string) (*SimpleStorage, error) {
 	return &simplestorage, nil
 }
 
-// ListReferencedSimpleStorages gets the collection of SimpleStorage from
+//nolint:dupl // ListReferencedSimpleStorages gets the collection of SimpleStorage from
 // a provided reference.
 func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorage, error) {
 	var result []*SimpleStorage
@@ -119,9 +119,9 @@ func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorag
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Chassis gets the chassis containing this storage service.

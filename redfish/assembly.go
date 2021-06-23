@@ -89,7 +89,7 @@ func GetAssembly(c common.Client, uri string) (*Assembly, error) {
 	return &assembly, nil
 }
 
-// ListReferencedAssemblys gets the collection of Assembly from
+//nolint:dupl // ListReferencedAssemblys gets the collection of Assembly from
 // a provided reference.
 func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) {
 	var result []*Assembly
@@ -114,9 +114,9 @@ func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) 
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // AssemblyData is information about an assembly.

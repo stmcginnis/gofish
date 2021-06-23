@@ -564,7 +564,7 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 	return &volume, nil
 }
 
-// ListReferencedVolumes gets the collection of Volume from a provided reference.
+//nolint:dupl // ListReferencedVolumes gets the collection of Volume from a provided reference.
 func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 	var result []*Volume
 	if link == "" {
@@ -588,9 +588,9 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ClassOfService gets the class of service that this storage volume conforms to.
@@ -618,9 +618,9 @@ func (volume *Volume) getDrives(links []string) ([]*redfish.Drive, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // DedicatedSpareDrives references the Drives that are dedicated spares for this
@@ -650,9 +650,9 @@ func (volume *Volume) SpareResourceSets() ([]*SpareResourceSet, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // StorageGroups gets the storage groups that associated with this volume.
@@ -671,9 +671,9 @@ func (volume *Volume) StorageGroups() ([]*StorageGroup, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // StoragePools gets the storage pools that associated with this volume.
@@ -692,9 +692,9 @@ func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // AssignReplicaTarget is used to establish a replication relationship by

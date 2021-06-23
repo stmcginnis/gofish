@@ -236,7 +236,7 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 	return &volume, nil
 }
 
-// ListReferencedVolumes gets the collection of Volumes from a provided reference.
+//nolint:dupl // ListReferencedVolumes gets the collection of Volumes from a provided reference.
 func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 	var result []*Volume
 	if link == "" {
@@ -260,9 +260,9 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Drives references the Drives that this volume is associated with.
@@ -281,9 +281,9 @@ func (volume *Volume) Drives() ([]*Drive, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // AllowedVolumesUpdateApplyTimes returns the set of allowed apply times to request when setting the volumes values

@@ -54,7 +54,7 @@ func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSyste
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

@@ -265,7 +265,7 @@ func GetNetworkPort(c common.Client, uri string) (*NetworkPort, error) {
 	return &networkport, nil
 }
 
-// ListReferencedNetworkPorts gets the collection of NetworkPort from
+//nolint:dupl // ListReferencedNetworkPorts gets the collection of NetworkPort from
 // a provided reference.
 func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, error) {
 	var result []*NetworkPort
@@ -290,9 +290,9 @@ func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, e
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // SupportedLinkCapabilities shall describe the static capabilities of an

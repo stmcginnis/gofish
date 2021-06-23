@@ -78,7 +78,7 @@ func ListReferencedMessages(c Client, link string) ([]*Message, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

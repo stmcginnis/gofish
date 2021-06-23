@@ -103,7 +103,7 @@ func GetClassOfService(c common.Client, uri string) (*ClassOfService, error) {
 	return &classofservice, nil
 }
 
-// ListReferencedClassOfServices gets the collection of ClassOfService from
+//nolint:dupl // ListReferencedClassOfServices gets the collection of ClassOfService from
 // a provided reference.
 func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfService, error) {
 	var result []*ClassOfService
@@ -128,9 +128,9 @@ func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfServ
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // DataProtectionLinesOfServices gets the DataProtectionLinesOfService that are
@@ -150,9 +150,9 @@ func (classofservice *ClassOfService) DataProtectionLinesOfServices() ([]*DataPr
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // DataSecurityLinesOfServices gets the DataSecurityLinesOfService that are
@@ -172,9 +172,9 @@ func (classofservice *ClassOfService) DataSecurityLinesOfServices() ([]*DataSecu
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // DataStorageLinesOfServices gets the DataStorageLinesOfService that are
@@ -194,9 +194,9 @@ func (classofservice *ClassOfService) DataStorageLinesOfServices() ([]*DataStora
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // IOConnectivityLinesOfServices gets the IOConnectivityLinesOfService that are
@@ -216,9 +216,9 @@ func (classofservice *ClassOfService) IOConnectivityLinesOfServices() ([]*IOConn
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // IOPerformanceLinesOfServices gets the IOPerformanceLinesOfService that are
@@ -238,7 +238,7 @@ func (classofservice *ClassOfService) IOPerformanceLinesOfServices() ([]*IOPerfo
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

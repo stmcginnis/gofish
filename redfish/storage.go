@@ -120,7 +120,7 @@ func GetStorage(c common.Client, uri string) (*Storage, error) {
 	return &storage, nil
 }
 
-// ListReferencedStorages gets the collection of Storage from a provided
+//nolint:dupl // ListReferencedStorages gets the collection of Storage from a provided
 // reference.
 func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
 	var result []*Storage
@@ -145,9 +145,9 @@ func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Enclosures gets the physical containers attached to this resource.
@@ -166,9 +166,9 @@ func (storage *Storage) Enclosures() ([]*Chassis, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Drives gets the drives attached to the storage controllers that this
@@ -188,9 +188,9 @@ func (storage *Storage) Drives() ([]*Drive, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Volumes gets the volumes associated with this storage subsystem.
@@ -288,7 +288,7 @@ type StorageController struct {
 }
 
 // UnmarshalJSON unmarshals a StorageController object from the raw JSON.
-func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error { // nolint:dupl
+func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 	type temp StorageController
 	type links struct {
 		Endpoints            common.Links
@@ -360,7 +360,7 @@ func GetStorageController(c common.Client, uri string) (*StorageController, erro
 	return &storage, nil
 }
 
-// ListReferencedStorageControllers gets the collection of StorageControllers
+//nolint:dupl // ListReferencedStorageControllers gets the collection of StorageControllers
 // from a provided reference.
 func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageController, error) {
 	var result []*StorageController
@@ -385,9 +385,9 @@ func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageC
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Assembly gets the storage controller's assembly.
@@ -414,7 +414,7 @@ func (storagecontroller *StorageController) Endpoints() ([]*Endpoint, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

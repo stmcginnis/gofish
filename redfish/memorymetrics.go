@@ -118,7 +118,7 @@ func GetMemoryMetrics(c common.Client, uri string) (*MemoryMetrics, error) {
 	return &memorymetrics, nil
 }
 
-// ListReferencedMemoryMetricss gets the collection of MemoryMetrics from
+//nolint:dupl // ListReferencedMemoryMetricss gets the collection of MemoryMetrics from
 // a provided reference.
 func ListReferencedMemoryMetricss(c common.Client, link string) ([]*MemoryMetrics, error) {
 	var result []*MemoryMetrics
@@ -143,7 +143,7 @@ func ListReferencedMemoryMetricss(c common.Client, link string) ([]*MemoryMetric
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

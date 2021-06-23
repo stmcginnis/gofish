@@ -366,7 +366,7 @@ func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFuncti
 	return &networkdevicefunction, nil
 }
 
-// ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
+//nolint:dupl // ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
 // a provided reference.
 func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*NetworkDeviceFunction, error) {
 	var result []*NetworkDeviceFunction
@@ -391,9 +391,9 @@ func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*Netw
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ISCSIBoot shall describe the iSCSI boot capabilities, status, and

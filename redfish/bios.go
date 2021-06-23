@@ -148,7 +148,7 @@ func GetBios(c common.Client, uri string) (*Bios, error) {
 	return &bios, nil
 }
 
-// ListReferencedBioss gets the collection of Bios from a provided reference.
+//nolint:dupl // ListReferencedBioss gets the collection of Bios from a provided reference.
 func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
 	var result []*Bios
 	if link == "" {
@@ -172,9 +172,9 @@ func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // ChangePassword shall change the selected BIOS password.

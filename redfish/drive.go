@@ -330,7 +330,7 @@ func GetDrive(c common.Client, uri string) (*Drive, error) {
 	return &drive, nil
 }
 
-// ListReferencedDrives gets the collection of Drives from a provided reference.
+//nolint:dupl // ListReferencedDrives gets the collection of Drives from a provided reference.
 func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
 	var result []*Drive
 	if link == "" {
@@ -354,9 +354,9 @@ func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Assembly gets the Assembly for this drive.
@@ -393,9 +393,9 @@ func (drive *Drive) Endpoints() ([]*Endpoint, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Volumes references the Volumes that this drive is associated with.
@@ -414,9 +414,9 @@ func (drive *Drive) Volumes() ([]*Volume, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // PCIeFunctions references the PCIeFunctions that this drive is associated with.
@@ -435,9 +435,9 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // // StoragePools references the StoragePools that this drive is associated with.

@@ -93,7 +93,7 @@ type PCIeDevice struct {
 }
 
 // UnmarshalJSON unmarshals a PCIeDevice object from the raw JSON.
-func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error { // nolint:dupl
+func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 	type temp PCIeDevice
 	type links struct {
 		Chassis            common.Links
@@ -165,7 +165,7 @@ func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
 	return &pciedevice, nil
 }
 
-// ListReferencedPCIeDevices gets the collection of PCIeDevice from
+//nolint:dupl // ListReferencedPCIeDevices gets the collection of PCIeDevice from
 // a provided reference.
 func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, error) {
 	var result []*PCIeDevice
@@ -190,9 +190,9 @@ func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, err
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // PCIeInterface properties shall be the definition for a PCIe Interface for a
@@ -233,9 +233,9 @@ func (pciedevice *PCIeDevice) Chassis() ([]*Chassis, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // PCIeFunctions get the PCIe functions that this device exposes.
@@ -254,7 +254,7 @@ func (pciedevice *PCIeDevice) PCIeFunctions() ([]*PCIeDevice, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

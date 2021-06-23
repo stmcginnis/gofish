@@ -89,7 +89,7 @@ type LogService struct {
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
-func (logservice *LogService) UnmarshalJSON(b []byte) error { // nolint:dupl
+func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	type temp LogService
 	type Actions struct {
 		ClearLog struct {
@@ -158,7 +158,7 @@ func GetLogService(c common.Client, uri string) (*LogService, error) {
 	return &logservice, nil
 }
 
-// ListReferencedLogServices gets the collection of LogService from a provided reference.
+//nolint:dupl // ListReferencedLogServices gets the collection of LogService from a provided reference.
 func ListReferencedLogServices(c common.Client, link string) ([]*LogService, error) {
 	var result []*LogService
 	if link == "" {
@@ -182,9 +182,9 @@ func ListReferencedLogServices(c common.Client, link string) ([]*LogService, err
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Entries gets the log entries of this service.

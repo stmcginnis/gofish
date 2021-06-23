@@ -77,7 +77,7 @@ func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
 	return &memorydomain, nil
 }
 
-// ListReferencedMemoryDomains gets the collection of MemoryDomain from
+//nolint:dupl // ListReferencedMemoryDomains gets the collection of MemoryDomain from
 // a provided reference.
 func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) {
 	var result []*MemoryDomain
@@ -102,9 +102,9 @@ func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain,
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // MemorySet shall represent the interleave sets for a memory chunk.

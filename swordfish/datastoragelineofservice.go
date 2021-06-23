@@ -86,7 +86,7 @@ func GetDataStorageLineOfService(c common.Client, uri string) (*DataStorageLineO
 	return &datastoragelineofservice, nil
 }
 
-// ListReferencedDataStorageLineOfServices gets the collection of DataStorageLineOfService from
+//nolint:dupl // ListReferencedDataStorageLineOfServices gets the collection of DataStorageLineOfService from
 // a provided reference.
 func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*DataStorageLineOfService, error) {
 	var result []*DataStorageLineOfService
@@ -111,7 +111,7 @@ func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*D
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }

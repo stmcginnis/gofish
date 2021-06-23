@@ -638,9 +638,9 @@ func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSys
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Bios gets the Bios information for this ComputerSystem.
@@ -693,9 +693,9 @@ func (computersystem *ComputerSystem) PCIeDevices() ([]*PCIeDevice, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // PCIeFunctions gets all PCIeFunctions for this system.
@@ -714,9 +714,9 @@ func (computersystem *ComputerSystem) PCIeFunctions() ([]*PCIeFunction, error) {
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Processors returns a collection of processors from this system

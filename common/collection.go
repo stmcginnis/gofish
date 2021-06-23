@@ -58,19 +58,20 @@ func GetCollection(c Client, uri string) (*Collection, error) {
 	return &result, nil
 }
 
-type collectionError struct {
+// CollectionError is used for collecting errors when working with collections
+type CollectionError struct {
 	Failures map[string]error
 }
 
-// NewCollectionError gets you a new *collectionError
+// NewCollectionError gets you a new *CollectionError
 // it's useful for collecting and formatting errors that occur when fetching a collection
-func NewCollectionError() *collectionError {
-	return &collectionError{
+func NewCollectionError() *CollectionError {
+	return &CollectionError{
 		Failures: make(map[string]error),
 	}
 }
 
-func (cr *collectionError) Empty() bool {
+func (cr *CollectionError) Empty() bool {
 	return len(cr.Failures) == 0
 }
 
@@ -80,7 +81,7 @@ type entityError struct {
 	Error string `json:"error"`
 }
 
-func (cr *collectionError) Error() string {
+func (cr *CollectionError) Error() string {
 	var entityErrors []entityError
 	for link, err := range cr.Failures {
 		entityErrors = append(entityErrors, entityError{

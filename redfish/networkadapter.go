@@ -274,9 +274,9 @@ func ListReferencedNetworkAdapter(c common.Client, link string) ([]*NetworkAdapt
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // Assembly gets this adapter's assembly.

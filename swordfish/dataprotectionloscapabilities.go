@@ -193,7 +193,7 @@ func GetDataProtectionLoSCapabilities(c common.Client, uri string) (*DataProtect
 	return &dataprotectionloscapabilities, nil
 }
 
-// ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from
+//nolint:dupl // ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from
 // a provided reference.
 func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) ([]*DataProtectionLoSCapabilities, error) {
 	var result []*DataProtectionLoSCapabilities
@@ -218,9 +218,9 @@ func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) (
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.
@@ -239,9 +239,9 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedRep
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
 
 // SupportedLinesOfService gets the supported lines of service.
@@ -260,7 +260,7 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLin
 
 	if collectionError.Empty() {
 		return result, nil
-	} else {
-		return result, collectionError
 	}
+
+	return result, collectionError
 }
