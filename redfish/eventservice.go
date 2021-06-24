@@ -174,7 +174,7 @@ type EventService struct {
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
-func (eventservice *EventService) UnmarshalJSON(b []byte) error { // nolint:dupl
+func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 	type temp EventService
 	type Actions struct {
 		SubmitTestEvent struct {
@@ -243,7 +243,7 @@ func GetEventService(c common.Client, uri string) (*EventService, error) {
 	return &eventservice, nil
 }
 
-// ListReferencedEventServices gets the collection of EventService from
+//nolint:dupl // ListReferencedEventServices gets the collection of EventService from
 // a provided reference.
 func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) {
 	var result []*EventService
@@ -256,15 +256,21 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, eventserviceLink := range links.ItemLinks {
 		eventservice, err := GetEventService(c, eventserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[eventserviceLink] = err
+		} else {
+			result = append(result, eventservice)
 		}
-		result = append(result, eventservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.

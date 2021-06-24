@@ -120,7 +120,7 @@ func GetStorage(c common.Client, uri string) (*Storage, error) {
 	return &storage, nil
 }
 
-// ListReferencedStorages gets the collection of Storage from a provided
+//nolint:dupl // ListReferencedStorages gets the collection of Storage from a provided
 // reference.
 func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
 	var result []*Storage
@@ -133,42 +133,64 @@ func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, storageLink := range links.ItemLinks {
 		storage, err := GetStorage(c, storageLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[storageLink] = err
+		} else {
+			result = append(result, storage)
 		}
-		result = append(result, storage)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Enclosures gets the physical containers attached to this resource.
 func (storage *Storage) Enclosures() ([]*Chassis, error) {
 	var result []*Chassis
+
+	collectionError := common.NewCollectionError()
 	for _, chassisLink := range storage.enclosures {
 		chassis, err := GetChassis(storage.Client, chassisLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[chassisLink] = err
+		} else {
+			result = append(result, chassis)
 		}
-		result = append(result, chassis)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Drives gets the drives attached to the storage controllers that this
 // resource represents.
 func (storage *Storage) Drives() ([]*Drive, error) {
 	var result []*Drive
+
+	collectionError := common.NewCollectionError()
 	for _, driveLink := range storage.drives {
 		drive, err := GetDrive(storage.Client, driveLink)
 		if err != nil {
-			return result, nil
+			collectionError.Failures[driveLink] = err
+		} else {
+			result = append(result, drive)
 		}
-		result = append(result, drive)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Volumes gets the volumes associated with this storage subsystem.
@@ -266,7 +288,7 @@ type StorageController struct {
 }
 
 // UnmarshalJSON unmarshals a StorageController object from the raw JSON.
-func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error { // nolint:dupl
+func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 	type temp StorageController
 	type links struct {
 		Endpoints            common.Links
@@ -338,7 +360,7 @@ func GetStorageController(c common.Client, uri string) (*StorageController, erro
 	return &storage, nil
 }
 
-// ListReferencedStorageControllers gets the collection of StorageControllers
+//nolint:dupl // ListReferencedStorageControllers gets the collection of StorageControllers
 // from a provided reference.
 func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageController, error) {
 	var result []*StorageController
@@ -351,15 +373,21 @@ func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageC
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, storageLink := range links.ItemLinks {
 		storage, err := GetStorageController(c, storageLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[storageLink] = err
+		} else {
+			result = append(result, storage)
 		}
-		result = append(result, storage)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Assembly gets the storage controller's assembly.
@@ -373,12 +401,20 @@ func (storagecontroller *StorageController) Assembly() (*Assembly, error) {
 // Endpoints gets the storage controller's endpoints.
 func (storagecontroller *StorageController) Endpoints() ([]*Endpoint, error) {
 	var result []*Endpoint
+
+	collectionError := common.NewCollectionError()
 	for _, endpointLink := range storagecontroller.endpoints {
 		endpoint, err := GetEndpoint(storagecontroller.Client, endpointLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[endpointLink] = err
+		} else {
+			result = append(result, endpoint)
 		}
-		result = append(result, endpoint)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

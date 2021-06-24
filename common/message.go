@@ -66,13 +66,19 @@ func ListReferencedMessages(c Client, link string) ([]*Message, error) {
 		return result, err
 	}
 
+	collectionError := NewCollectionError()
 	for _, messageLink := range links.ItemLinks {
 		message, err := GetMessage(c, messageLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[messageLink] = err
+		} else {
+			result = append(result, message)
 		}
-		result = append(result, message)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

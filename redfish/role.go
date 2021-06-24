@@ -123,7 +123,7 @@ func GetRole(c common.Client, uri string) (*Role, error) {
 	return &role, nil
 }
 
-// ListReferencedRoles gets the collection of Role from
+//nolint:dupl // ListReferencedRoles gets the collection of Role from
 // a provided reference.
 func ListReferencedRoles(c common.Client, link string) ([]*Role, error) {
 	var result []*Role
@@ -136,13 +136,19 @@ func ListReferencedRoles(c common.Client, link string) ([]*Role, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, roleLink := range links.ItemLinks {
 		role, err := GetRole(c, roleLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[roleLink] = err
+		} else {
+			result = append(result, role)
 		}
-		result = append(result, role)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

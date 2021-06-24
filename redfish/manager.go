@@ -409,15 +409,21 @@ func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, managerLink := range links.ItemLinks {
 		manager, err := GetManager(c, managerLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[managerLink] = err
+		} else {
+			result = append(result, manager)
 		}
-		result = append(result, manager)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Reset shall perform a reset of the manager.

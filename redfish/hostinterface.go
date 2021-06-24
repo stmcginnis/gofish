@@ -199,7 +199,7 @@ func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
 	return &hostinterface, nil
 }
 
-// ListReferencedHostInterfaces gets the collection of HostInterface from
+//nolint:dupl // ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
 func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) {
 	var result []*HostInterface
@@ -212,30 +212,42 @@ func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterfac
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, hostinterfaceLink := range links.ItemLinks {
 		hostinterface, err := GetHostInterface(c, hostinterfaceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[hostinterfaceLink] = err
+		} else {
+			result = append(result, hostinterface)
 		}
-		result = append(result, hostinterface)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.
 func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error) {
 	var result []*ComputerSystem
 
+	collectionError := common.NewCollectionError()
 	for _, computerSystemLink := range hostinterface.computerSystems {
 		computerSystem, err := GetComputerSystem(hostinterface.Client, computerSystemLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[computerSystemLink] = err
+		} else {
+			result = append(result, computerSystem)
 		}
-		result = append(result, computerSystem)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // HostNetworkInterfaces gets the network interface controllers or cards (NICs)

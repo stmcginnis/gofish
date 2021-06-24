@@ -195,7 +195,7 @@ func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
 	return &pciefunction, nil
 }
 
-// ListReferencedPCIeFunctions gets the collection of PCIeFunction from
+//nolint:dupl // ListReferencedPCIeFunctions gets the collection of PCIeFunction from
 // a provided reference.
 func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) {
 	var result []*PCIeFunction
@@ -208,54 +208,84 @@ func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction,
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, pciefunctionLink := range links.ItemLinks {
 		pciefunction, err := GetPCIeFunction(c, pciefunctionLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[pciefunctionLink] = err
+		} else {
+			result = append(result, pciefunction)
 		}
-		result = append(result, pciefunction)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Drives gets the PCIe function's drives.
 func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
 	var result []*Drive
+
+	collectionError := common.NewCollectionError()
 	for _, driveLink := range pciefunction.drives {
 		drive, err := GetDrive(pciefunction.Client, driveLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[driveLink] = err
+		} else {
+			result = append(result, drive)
 		}
-		result = append(result, drive)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // EthernetInterfaces gets the PCIe function's ethernet interfaces.
 func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, error) {
 	var result []*EthernetInterface
+
+	collectionError := common.NewCollectionError()
 	for _, ethLink := range pciefunction.ethernetInterfaces {
 		eth, err := GetEthernetInterface(pciefunction.Client, ethLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
 		}
-		result = append(result, eth)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // NetworkDeviceFunctions gets the PCIe function's ethernet interfaces.
 func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
 	var result []*NetworkDeviceFunction
+
+	collectionError := common.NewCollectionError()
 	for _, netLink := range pciefunction.networkDeviceFunctions {
 		net, err := GetNetworkDeviceFunction(pciefunction.Client, netLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[netLink] = err
+		} else {
+			result = append(result, net)
 		}
-		result = append(result, net)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // PCIeDevice gets the associated PCIe device for this function.
@@ -269,12 +299,20 @@ func (pciefunction *PCIeFunction) PCIeDevice() (*PCIeDevice, error) {
 // StorageControllers gets the associated storage controllers.
 func (pciefunction *PCIeFunction) StorageControllers() ([]*StorageController, error) {
 	var result []*StorageController
+
+	collectionError := common.NewCollectionError()
 	for _, scLink := range pciefunction.storageControllers {
 		sc, err := GetStorageController(pciefunction.Client, scLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[scLink] = err
+		} else {
+			result = append(result, sc)
 		}
-		result = append(result, sc)
 	}
-	return result, nil
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

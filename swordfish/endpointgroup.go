@@ -146,7 +146,7 @@ func GetEndpointGroup(c common.Client, uri string) (*EndpointGroup, error) {
 	return &endpointgroup, nil
 }
 
-// ListReferencedEndpointGroups gets the collection of EndpointGroup from
+//nolint:dupl // ListReferencedEndpointGroups gets the collection of EndpointGroup from
 // a provided reference.
 func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) {
 	var result []*EndpointGroup
@@ -159,15 +159,21 @@ func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGrou
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, endpointgroupLink := range links.ItemLinks {
 		endpointgroup, err := GetEndpointGroup(c, endpointgroupLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[endpointgroupLink] = err
+		} else {
+			result = append(result, endpointgroup)
 		}
-		result = append(result, endpointgroup)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Endpoints gets the group's endpoints.

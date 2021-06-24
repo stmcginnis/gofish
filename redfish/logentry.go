@@ -434,7 +434,7 @@ func GetLogEntry(c common.Client, uri string) (*LogEntry, error) {
 	return &logentry, nil
 }
 
-// ListReferencedLogEntrys gets the collection of LogEntry from
+//nolint:dupl // ListReferencedLogEntrys gets the collection of LogEntry from
 // a provided reference.
 func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) {
 	var result []*LogEntry
@@ -447,13 +447,19 @@ func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) 
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, logentryLink := range links.ItemLinks {
 		logentry, err := GetLogEntry(c, logentryLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[logentryLink] = err
+		} else {
+			result = append(result, logentry)
 		}
-		result = append(result, logentry)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

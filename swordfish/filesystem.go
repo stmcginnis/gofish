@@ -275,7 +275,7 @@ func GetFileSystem(c common.Client, uri string) (*FileSystem, error) {
 	return &filesystem, nil
 }
 
-// ListReferencedFileSystems gets the collection of FileSystem from
+//nolint:dupl // ListReferencedFileSystems gets the collection of FileSystem from
 // a provided reference.
 func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, error) {
 	var result []*FileSystem
@@ -288,15 +288,21 @@ func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, err
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, filesystemLink := range links.ItemLinks {
 		filesystem, err := GetFileSystem(c, filesystemLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[filesystemLink] = err
+		} else {
+			result = append(result, filesystem)
 		}
-		result = append(result, filesystem)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ExportedShares gets the exported file shares for this file system.
@@ -316,13 +322,20 @@ func (filesystem *FileSystem) ClassOfService() (*ClassOfService, error) {
 // SpareResourceSets gets the spare resource sets used for this filesystem.
 func (filesystem *FileSystem) SpareResourceSets() ([]*SpareResourceSet, error) {
 	var result []*SpareResourceSet
+
+	collectionError := common.NewCollectionError()
 	for _, rsLink := range filesystem.spareResourceSets {
 		rs, err := GetSpareResourceSet(filesystem.Client, rsLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[rsLink] = err
+		} else {
+			result = append(result, rs)
 		}
-		result = append(result, rs)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

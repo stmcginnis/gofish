@@ -42,13 +42,19 @@ func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSyste
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, storageSystemLink := range links.ItemLinks {
 		storageSystem, err := GetStorageSystem(c, storageSystemLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[storageSystemLink] = err
+		} else {
+			result = append(result, storageSystem)
 		}
-		result = append(result, storageSystem)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

@@ -124,7 +124,7 @@ func GetSpareResourceSet(c common.Client, uri string) (*SpareResourceSet, error)
 	return &spareresourceset, nil
 }
 
-// ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
+//nolint:dupl // ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
 // a provided reference.
 func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareResourceSet, error) {
 	var result []*SpareResourceSet
@@ -137,15 +137,21 @@ func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareReso
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, spareresourcesetLink := range links.ItemLinks {
 		spareresourceset, err := GetSpareResourceSet(c, spareresourcesetLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[spareresourcesetLink] = err
+		} else {
+			result = append(result, spareresourceset)
 		}
-		result = append(result, spareresourceset)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ReplacementSpareSets gets other spare sets that can be utilized to replenish

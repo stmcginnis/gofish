@@ -137,13 +137,19 @@ func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, sLink := range links.ItemLinks {
 		s, err := GetSession(c, sLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[sLink] = err
+		} else {
+			result = append(result, s)
 		}
-		result = append(result, s)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

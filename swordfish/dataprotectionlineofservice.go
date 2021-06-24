@@ -77,7 +77,7 @@ func GetDataProtectionLineOfService(c common.Client, uri string) (*DataProtectio
 	return &dataprotectionlineofservice, nil
 }
 
-// ListReferencedDataProtectionLineOfServices gets the collection of DataProtectionLineOfService from
+//nolint:dupl // ListReferencedDataProtectionLineOfServices gets the collection of DataProtectionLineOfService from
 // a provided reference.
 func ListReferencedDataProtectionLineOfServices(c common.Client, link string) ([]*DataProtectionLineOfService, error) {
 	var result []*DataProtectionLineOfService
@@ -90,15 +90,21 @@ func ListReferencedDataProtectionLineOfServices(c common.Client, link string) ([
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, dataprotectionlineofserviceLink := range links.ItemLinks {
 		dataprotectionlineofservice, err := GetDataProtectionLineOfService(c, dataprotectionlineofserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[dataprotectionlineofserviceLink] = err
+		} else {
+			result = append(result, dataprotectionlineofservice)
 		}
-		result = append(result, dataprotectionlineofservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ReplicaRequest is a request for a replica.

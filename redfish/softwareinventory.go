@@ -79,7 +79,7 @@ func GetSoftwareInventory(c common.Client, uri string) (*SoftwareInventory, erro
 	return &softwareinventory, nil
 }
 
-// ListReferencedSoftwareInventories gets the collection of SoftwareInventory from
+//nolint:dupl // ListReferencedSoftwareInventories gets the collection of SoftwareInventory from
 // a provided reference.
 func ListReferencedSoftwareInventories(c common.Client, link string) ([]*SoftwareInventory, error) {
 	var result []*SoftwareInventory
@@ -92,13 +92,19 @@ func ListReferencedSoftwareInventories(c common.Client, link string) ([]*Softwar
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, softwareinventoryLink := range links.ItemLinks {
 		softwareinventory, err := GetSoftwareInventory(c, softwareinventoryLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[softwareinventoryLink] = err
+		} else {
+			result = append(result, softwareinventory)
 		}
-		result = append(result, softwareinventory)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

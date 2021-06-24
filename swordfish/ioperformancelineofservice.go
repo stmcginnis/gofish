@@ -64,7 +64,7 @@ func GetIOPerformanceLineOfService(c common.Client, uri string) (*IOPerformanceL
 	return &ioperformancelineofservice, nil
 }
 
-// ListReferencedIOPerformanceLineOfServices gets the collection of IOPerformanceLineOfService from
+//nolint:dupl // ListReferencedIOPerformanceLineOfServices gets the collection of IOPerformanceLineOfService from
 // a provided reference.
 func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]*IOPerformanceLineOfService, error) {
 	var result []*IOPerformanceLineOfService
@@ -77,13 +77,19 @@ func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, ioperformancelineofserviceLink := range links.ItemLinks {
 		ioperformancelineofservice, err := GetIOPerformanceLineOfService(c, ioperformancelineofserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ioperformancelineofserviceLink] = err
+		} else {
+			result = append(result, ioperformancelineofservice)
 		}
-		result = append(result, ioperformancelineofservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

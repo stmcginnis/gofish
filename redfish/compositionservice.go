@@ -105,7 +105,7 @@ func GetCompositionService(c common.Client, uri string) (*CompositionService, er
 	return &compositionservice, nil
 }
 
-// ListReferencedCompositionServices gets the collection of CompositionService from
+//nolint:dupl // ListReferencedCompositionServices gets the collection of CompositionService from
 // a provided reference.
 func ListReferencedCompositionServices(c common.Client, link string) ([]*CompositionService, error) {
 	var result []*CompositionService
@@ -118,13 +118,19 @@ func ListReferencedCompositionServices(c common.Client, link string) ([]*Composi
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, compositionserviceLink := range links.ItemLinks {
 		compositionservice, err := GetCompositionService(c, compositionserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[compositionserviceLink] = err
+		} else {
+			result = append(result, compositionservice)
 		}
-		result = append(result, compositionservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

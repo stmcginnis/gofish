@@ -85,7 +85,7 @@ func GetNetworkInterface(c common.Client, uri string) (*NetworkInterface, error)
 	return &networkinterface, nil
 }
 
-// ListReferencedNetworkInterfaces gets the collection of NetworkInterface from
+//nolint:dupl // ListReferencedNetworkInterfaces gets the collection of NetworkInterface from
 // a provided reference.
 func ListReferencedNetworkInterfaces(c common.Client, link string) ([]*NetworkInterface, error) {
 	var result []*NetworkInterface
@@ -98,15 +98,21 @@ func ListReferencedNetworkInterfaces(c common.Client, link string) ([]*NetworkIn
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, networkinterfaceLink := range links.ItemLinks {
 		networkinterface, err := GetNetworkInterface(c, networkinterfaceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[networkinterfaceLink] = err
+		} else {
+			result = append(result, networkinterface)
 		}
-		result = append(result, networkinterface)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // NetworkAdapter gets the NetworkAdapter for this interface.

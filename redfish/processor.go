@@ -408,7 +408,8 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 		// the parsed string version
 		t = t2.t1
 		if t2.MaxSpeedMHz != "" {
-			mhz, err := strconv.ParseFloat(t2.MaxSpeedMHz, 32)
+			bitSize := 32
+			mhz, err := strconv.ParseFloat(t2.MaxSpeedMHz, bitSize)
 			if err != nil {
 				t.MaxSpeedMHz = float32(mhz)
 			}
@@ -460,15 +461,21 @@ func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, processorLink := range links.ItemLinks {
 		processor, err := GetProcessor(c, processorLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[processorLink] = err
+		} else {
+			result = append(result, processor)
 		}
-		result = append(result, processor)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ProcessorID shall contain identification information for a processor.

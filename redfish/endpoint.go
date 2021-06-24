@@ -233,7 +233,7 @@ func GetEndpoint(c common.Client, uri string) (*Endpoint, error) {
 	return &endpoint, nil
 }
 
-// ListReferencedEndpoints gets the collection of Endpoint from
+//nolint:dupl // ListReferencedEndpoints gets the collection of Endpoint from
 // a provided reference.
 func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) {
 	var result []*Endpoint
@@ -246,15 +246,21 @@ func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) 
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, endpointLink := range links.ItemLinks {
 		endpoint, err := GetEndpoint(c, endpointLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[endpointLink] = err
+		} else {
+			result = append(result, endpoint)
 		}
-		result = append(result, endpoint)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // GCID shall contain the Gen-Z Core Specification-defined Global

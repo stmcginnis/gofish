@@ -53,7 +53,7 @@ func GetIOConnectivityLineOfService(c common.Client, uri string) (*IOConnectivit
 	return &ioconnectivitylineofservice, nil
 }
 
-// ListReferencedIOConnectivityLineOfServices gets the collection of IOConnectivityLineOfService from
+//nolint:dupl // ListReferencedIOConnectivityLineOfServices gets the collection of IOConnectivityLineOfService from
 // a provided reference.
 func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([]*IOConnectivityLineOfService, error) {
 	var result []*IOConnectivityLineOfService
@@ -66,13 +66,19 @@ func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, ioconnectivitylineofserviceLink := range links.ItemLinks {
 		ioconnectivitylineofservice, err := GetIOConnectivityLineOfService(c, ioconnectivitylineofserviceLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[ioconnectivitylineofserviceLink] = err
+		} else {
+			result = append(result, ioconnectivitylineofservice)
 		}
-		result = append(result, ioconnectivitylineofservice)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

@@ -6,6 +6,7 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 // Collection represents a collection of entity references.
@@ -55,4 +56,44 @@ func GetCollection(c Client, uri string) (*Collection, error) {
 		return nil, err
 	}
 	return &result, nil
+}
+
+// CollectionError is used for collecting errors when working with collections
+type CollectionError struct {
+	Failures map[string]error
+}
+
+// NewCollectionError gets you a new *CollectionError
+// it's useful for collecting and formatting errors that occur when fetching a collection
+func NewCollectionError() *CollectionError {
+	return &CollectionError{
+		Failures: make(map[string]error),
+	}
+}
+
+func (cr *CollectionError) Empty() bool {
+	return len(cr.Failures) == 0
+}
+
+// for associating a linked entity with its error
+type entityError struct {
+	Link  string `json:"link"`
+	Error string `json:"error"`
+}
+
+func (cr *CollectionError) Error() string {
+	var entityErrors []entityError
+	for link, err := range cr.Failures {
+		entityErrors = append(entityErrors, entityError{
+			Link:  link,
+			Error: err.Error(),
+		})
+	}
+
+	errorsJSON, err := json.Marshal(entityErrors)
+	if err != nil {
+		panic(err)
+	}
+
+	return fmt.Sprintf("failed to retrieve some items: %s", errorsJSON)
 }

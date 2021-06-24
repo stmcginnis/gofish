@@ -163,7 +163,7 @@ func GetManagerAccount(c common.Client, uri string) (*ManagerAccount, error) {
 	return &manageraccount, nil
 }
 
-// ListReferencedManagerAccounts gets the collection of ManagerAccount from
+//nolint:dupl // ListReferencedManagerAccounts gets the collection of ManagerAccount from
 // a provided reference.
 func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAccount, error) {
 	var result []*ManagerAccount
@@ -176,15 +176,21 @@ func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAcco
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, manageraccountLink := range links.ItemLinks {
 		manageraccount, err := GetManagerAccount(c, manageraccountLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[manageraccountLink] = err
+		} else {
+			result = append(result, manageraccount)
 		}
-		result = append(result, manageraccount)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // SNMPUserInfo is shall contain the SNMP settings for an account.

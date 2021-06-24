@@ -236,7 +236,7 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 	return &volume, nil
 }
 
-// ListReferencedVolumes gets the collection of Volumes from a provided reference.
+//nolint:dupl // ListReferencedVolumes gets the collection of Volumes from a provided reference.
 func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 	var result []*Volume
 	if link == "" {
@@ -248,30 +248,42 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, volumeLink := range links.ItemLinks {
 		volume, err := GetVolume(c, volumeLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[volumeLink] = err
+		} else {
+			result = append(result, volume)
 		}
-		result = append(result, volume)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Drives references the Drives that this volume is associated with.
 func (volume *Volume) Drives() ([]*Drive, error) {
 	var result []*Drive
 
+	collectionError := common.NewCollectionError()
 	for _, driveLink := range volume.drives {
 		drive, err := GetDrive(volume.Client, driveLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[driveLink] = err
+		} else {
+			result = append(result, drive)
 		}
-		result = append(result, drive)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // AllowedVolumesUpdateApplyTimes returns the set of allowed apply times to request when setting the volumes values

@@ -265,7 +265,7 @@ func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
 	return &virtualmedia, nil
 }
 
-// ListReferencedVirtualMedias gets the collection of VirtualMedia from
+//nolint:dupl // ListReferencedVirtualMedias gets the collection of VirtualMedia from
 // a provided reference.
 func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) {
 	var result []*VirtualMedia
@@ -278,13 +278,18 @@ func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia,
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, virtualmediaLink := range links.ItemLinks {
 		virtualmedia, err := GetVirtualMedia(c, virtualmediaLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[virtualmediaLink] = err
+		} else {
+			result = append(result, virtualmedia)
 		}
-		result = append(result, virtualmedia)
+	}
+	if collectionError.Empty() {
+		return result, nil
 	}
 
-	return result, nil
+	return result, collectionError
 }

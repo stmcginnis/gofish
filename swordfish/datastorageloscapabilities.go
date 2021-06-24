@@ -146,7 +146,7 @@ func GetDataStorageLoSCapabilities(c common.Client, uri string) (*DataStorageLoS
 	return &datastorageloscapabilities, nil
 }
 
-// ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
+//nolint:dupl // ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
 // a provided reference.
 func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) {
 	var result []*DataStorageLoSCapabilities
@@ -159,13 +159,19 @@ func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*
 		return result, err
 	}
 
+	collectionError := common.NewCollectionError()
 	for _, datastorageloscapabilitiesLink := range links.ItemLinks {
 		datastorageloscapabilities, err := GetDataStorageLoSCapabilities(c, datastorageloscapabilitiesLink)
 		if err != nil {
-			return result, err
+			collectionError.Failures[datastorageloscapabilitiesLink] = err
+		} else {
+			result = append(result, datastorageloscapabilities)
 		}
-		result = append(result, datastorageloscapabilities)
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
