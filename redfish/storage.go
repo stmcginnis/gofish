@@ -120,9 +120,9 @@ func GetStorage(c common.Client, uri string) (*Storage, error) {
 	return &storage, nil
 }
 
-//nolint:dupl // ListReferencedStorages gets the collection of Storage from a provided
+// ListReferencedStorages gets the collection of Storage from a provided
 // reference.
-func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
+func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) { //nolint:dupl
 	var result []*Storage
 	if link == "" {
 		return result, nil
@@ -360,9 +360,9 @@ func GetStorageController(c common.Client, uri string) (*StorageController, erro
 	return &storage, nil
 }
 
-//nolint:dupl // ListReferencedStorageControllers gets the collection of StorageControllers
+// ListReferencedStorageControllers gets the collection of StorageControllers
 // from a provided reference.
-func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageController, error) {
+func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageController, error) { //nolint:dupl
 	var result []*StorageController
 	if link == "" {
 		return result, nil

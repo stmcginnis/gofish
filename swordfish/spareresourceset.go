@@ -124,9 +124,9 @@ func GetSpareResourceSet(c common.Client, uri string) (*SpareResourceSet, error)
 	return &spareresourceset, nil
 }
 
-//nolint:dupl // ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
+// ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
 // a provided reference.
-func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareResourceSet, error) {
+func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareResourceSet, error) { //nolint:dupl
 	var result []*SpareResourceSet
 	if link == "" {
 		return result, nil

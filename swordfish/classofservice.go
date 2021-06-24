@@ -103,9 +103,9 @@ func GetClassOfService(c common.Client, uri string) (*ClassOfService, error) {
 	return &classofservice, nil
 }
 
-//nolint:dupl // ListReferencedClassOfServices gets the collection of ClassOfService from
+// ListReferencedClassOfServices gets the collection of ClassOfService from
 // a provided reference.
-func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfService, error) {
+func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfService, error) { //nolint:dupl
 	var result []*ClassOfService
 	if link == "" {
 		return result, nil

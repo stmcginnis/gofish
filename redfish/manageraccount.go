@@ -163,9 +163,9 @@ func GetManagerAccount(c common.Client, uri string) (*ManagerAccount, error) {
 	return &manageraccount, nil
 }
 
-//nolint:dupl // ListReferencedManagerAccounts gets the collection of ManagerAccount from
+// ListReferencedManagerAccounts gets the collection of ManagerAccount from
 // a provided reference.
-func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAccount, error) {
+func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAccount, error) { //nolint:dupl
 	var result []*ManagerAccount
 	if link == "" {
 		return result, nil

@@ -188,9 +188,9 @@ func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
 	return &storagepool, nil
 }
 
-//nolint:dupl // ListReferencedStoragePools gets the collection of StoragePool from
+// ListReferencedStoragePools gets the collection of StoragePool from
 // a provided reference.
-func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) {
+func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) { //nolint:dupl
 	var result []*StoragePool
 	if link == "" {
 		return result, nil

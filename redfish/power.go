@@ -163,9 +163,9 @@ func GetPower(c common.Client, uri string) (*Power, error) {
 	return &power, nil
 }
 
-//nolint:dupl // ListReferencedPowers gets the collection of Power from
+// ListReferencedPowers gets the collection of Power from
 // a provided reference.
-func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
+func ListReferencedPowers(c common.Client, link string) ([]*Power, error) { //nolint:dupl
 	var result []*Power
 	if link == "" {
 		return result, nil

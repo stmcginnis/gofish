@@ -404,9 +404,9 @@ func DeleteEventDestination(c common.Client, uri string) (err error) {
 	return err
 }
 
-//nolint:dupl // ListReferencedEventDestinations gets the collection of EventDestination from
+// ListReferencedEventDestinations gets the collection of EventDestination from
 // a provided reference.
-func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) {
+func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) { //nolint:dupl
 	var result []*EventDestination
 	if link == "" {
 		return result, nil

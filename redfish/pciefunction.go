@@ -195,9 +195,9 @@ func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
 	return &pciefunction, nil
 }
 
-//nolint:dupl // ListReferencedPCIeFunctions gets the collection of PCIeFunction from
+// ListReferencedPCIeFunctions gets the collection of PCIeFunction from
 // a provided reference.
-func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) {
+func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) { //nolint:dupl
 	var result []*PCIeFunction
 	if link == "" {
 		return result, nil

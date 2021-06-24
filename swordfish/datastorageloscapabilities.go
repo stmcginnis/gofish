@@ -146,9 +146,9 @@ func GetDataStorageLoSCapabilities(c common.Client, uri string) (*DataStorageLoS
 	return &datastorageloscapabilities, nil
 }
 
-//nolint:dupl // ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
+// ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
 // a provided reference.
-func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) {
+func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) { //nolint:dupl
 	var result []*DataStorageLoSCapabilities
 	if link == "" {
 		return result, nil

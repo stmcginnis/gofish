@@ -265,9 +265,9 @@ func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
 	return &virtualmedia, nil
 }
 
-//nolint:dupl // ListReferencedVirtualMedias gets the collection of VirtualMedia from
+// ListReferencedVirtualMedias gets the collection of VirtualMedia from
 // a provided reference.
-func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) {
+func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) { //nolint:dupl
 	var result []*VirtualMedia
 	if link == "" {
 		return result, nil

@@ -123,9 +123,9 @@ func GetRole(c common.Client, uri string) (*Role, error) {
 	return &role, nil
 }
 
-//nolint:dupl // ListReferencedRoles gets the collection of Role from
+// ListReferencedRoles gets the collection of Role from
 // a provided reference.
-func ListReferencedRoles(c common.Client, link string) ([]*Role, error) {
+func ListReferencedRoles(c common.Client, link string) ([]*Role, error) { //nolint:dupl
 	var result []*Role
 	if link == "" {
 		return result, nil

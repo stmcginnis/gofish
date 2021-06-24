@@ -79,9 +79,9 @@ func GetSoftwareInventory(c common.Client, uri string) (*SoftwareInventory, erro
 	return &softwareinventory, nil
 }
 
-//nolint:dupl // ListReferencedSoftwareInventories gets the collection of SoftwareInventory from
+// ListReferencedSoftwareInventories gets the collection of SoftwareInventory from
 // a provided reference.
-func ListReferencedSoftwareInventories(c common.Client, link string) ([]*SoftwareInventory, error) {
+func ListReferencedSoftwareInventories(c common.Client, link string) ([]*SoftwareInventory, error) { //nolint:dupl
 	var result []*SoftwareInventory
 	if link == "" {
 		return result, nil

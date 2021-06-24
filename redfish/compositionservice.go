@@ -105,9 +105,9 @@ func GetCompositionService(c common.Client, uri string) (*CompositionService, er
 	return &compositionservice, nil
 }
 
-//nolint:dupl // ListReferencedCompositionServices gets the collection of CompositionService from
+// ListReferencedCompositionServices gets the collection of CompositionService from
 // a provided reference.
-func ListReferencedCompositionServices(c common.Client, link string) ([]*CompositionService, error) {
+func ListReferencedCompositionServices(c common.Client, link string) ([]*CompositionService, error) { //nolint:dupl
 	var result []*CompositionService
 	if link == "" {
 		return result, nil

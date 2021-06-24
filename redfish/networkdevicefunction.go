@@ -366,9 +366,9 @@ func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFuncti
 	return &networkdevicefunction, nil
 }
 
-//nolint:dupl // ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
+// ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
 // a provided reference.
-func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*NetworkDeviceFunction, error) {
+func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*NetworkDeviceFunction, error) { //nolint:dupl
 	var result []*NetworkDeviceFunction
 	if link == "" {
 		return result, nil

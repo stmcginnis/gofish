@@ -199,9 +199,9 @@ func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
 	return &hostinterface, nil
 }
 
-//nolint:dupl // ListReferencedHostInterfaces gets the collection of HostInterface from
+// ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
-func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) {
+func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) { //nolint:dupl
 	var result []*HostInterface
 	if link == "" {
 		return result, nil

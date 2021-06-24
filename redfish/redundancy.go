@@ -131,9 +131,9 @@ func GetRedundancy(c common.Client, uri string) (*Redundancy, error) {
 	return &redundancy, nil
 }
 
-//nolint:dupl // ListReferencedRedundancies gets the collection of Redundancy from
+// ListReferencedRedundancies gets the collection of Redundancy from
 // a provided reference.
-func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, error) {
+func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, error) { //nolint:dupl
 	var result []*Redundancy
 	if link == "" {
 		return result, nil

@@ -148,8 +148,8 @@ func GetBios(c common.Client, uri string) (*Bios, error) {
 	return &bios, nil
 }
 
-//nolint:dupl // ListReferencedBioss gets the collection of Bios from a provided reference.
-func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
+// ListReferencedBioss gets the collection of Bios from a provided reference.
+func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) { //nolint:dupl
 	var result []*Bios
 	if link == "" {
 		return result, nil

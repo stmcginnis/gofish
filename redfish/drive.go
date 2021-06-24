@@ -330,8 +330,8 @@ func GetDrive(c common.Client, uri string) (*Drive, error) {
 	return &drive, nil
 }
 
-//nolint:dupl // ListReferencedDrives gets the collection of Drives from a provided reference.
-func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
+// ListReferencedDrives gets the collection of Drives from a provided reference.
+func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) { //nolint:dupl
 	var result []*Drive
 	if link == "" {
 		return result, nil

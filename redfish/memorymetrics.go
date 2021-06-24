@@ -118,9 +118,9 @@ func GetMemoryMetrics(c common.Client, uri string) (*MemoryMetrics, error) {
 	return &memorymetrics, nil
 }
 
-//nolint:dupl // ListReferencedMemoryMetricss gets the collection of MemoryMetrics from
+// ListReferencedMemoryMetricss gets the collection of MemoryMetrics from
 // a provided reference.
-func ListReferencedMemoryMetricss(c common.Client, link string) ([]*MemoryMetrics, error) {
+func ListReferencedMemoryMetricss(c common.Client, link string) ([]*MemoryMetrics, error) { //nolint:dupl
 	var result []*MemoryMetrics
 	if link == "" {
 		return result, nil

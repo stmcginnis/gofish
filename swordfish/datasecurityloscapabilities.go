@@ -217,9 +217,9 @@ func GetDataSecurityLoSCapabilities(c common.Client, uri string) (*DataSecurityL
 	return &datasecurityloscapabilities, nil
 }
 
-//nolint:dupl // ListReferencedDataSecurityLoSCapabilities gets the collection of DataSecurityLoSCapabilities from
+// ListReferencedDataSecurityLoSCapabilities gets the collection of DataSecurityLoSCapabilities from
 // a provided reference.
-func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string) ([]*DataSecurityLoSCapabilities, error) {
+func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string) ([]*DataSecurityLoSCapabilities, error) { //nolint:dupl
 	var result []*DataSecurityLoSCapabilities
 	if link == "" {
 		return result, nil

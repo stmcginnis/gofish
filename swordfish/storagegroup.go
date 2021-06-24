@@ -224,9 +224,9 @@ func GetStorageGroup(c common.Client, uri string) (*StorageGroup, error) {
 	return &storagegroup, nil
 }
 
-//nolint:dupl // ListReferencedStorageGroups gets the collection of StorageGroup from
+// ListReferencedStorageGroups gets the collection of StorageGroup from
 // a provided reference.
-func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup, error) {
+func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup, error) { //nolint:dupl
 	var result []*StorageGroup
 	if link == "" {
 		return result, nil

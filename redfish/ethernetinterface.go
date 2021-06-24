@@ -295,9 +295,9 @@ func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, erro
 	return &ethernetinterface, nil
 }
 
-//nolint:dupl // ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
+// ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
 // a provided reference.
-func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*EthernetInterface, error) {
+func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*EthernetInterface, error) { //nolint:dupl
 	var result []*EthernetInterface
 	if link == "" {
 		return result, nil

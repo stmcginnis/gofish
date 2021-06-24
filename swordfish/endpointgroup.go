@@ -146,9 +146,9 @@ func GetEndpointGroup(c common.Client, uri string) (*EndpointGroup, error) {
 	return &endpointgroup, nil
 }
 
-//nolint:dupl // ListReferencedEndpointGroups gets the collection of EndpointGroup from
+// ListReferencedEndpointGroups gets the collection of EndpointGroup from
 // a provided reference.
-func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) {
+func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) { //nolint:dupl
 	var result []*EndpointGroup
 	if link == "" {
 		return result, nil
