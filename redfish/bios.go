@@ -84,6 +84,9 @@ type Bios struct {
 	// settingsApplyTimes is a set of allowed settings update apply times. If none
 	// are specified, then the system does not provide that information.
 	settingsApplyTimes []common.ApplyTime
+	// activeSoftwareImage is the @odata.id of SoftwareInventory responsible
+	// for the active BIOS firmware image (see Links.ActiveSoftwareImage.@odata.id).
+	activeSoftwareImage string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -99,9 +102,15 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 			Target string
 		} `json:"#Bios.ResetBios"`
 	}
+	type Links struct {
+		ActiveSoftwareImage struct {
+			ODataID string `json:"@odata.id"`
+		}
+	}
 	var t struct {
 		temp
 		Actions  Actions
+		Links    Links
 		Settings common.Settings `json:"@Redfish.Settings"`
 	}
 
@@ -116,6 +125,7 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 	bios.changePasswordTarget = t.Actions.ChangePassword.Target
 	bios.resetBiosTarget = t.Actions.ResetBios.Target
 	bios.settingsApplyTimes = t.Settings.SupportedApplyTimes
+	bios.activeSoftwareImage = t.Links.ActiveSoftwareImage.ODataID
 
 	// Some implementations use a @Redfish.Settings object to direct settings updates to a
 	// different URL than the object being updated. Others don't, so handle both.
@@ -256,4 +266,14 @@ func (bios *Bios) UpdateBiosAttributes(attrs BiosAttributes) error {
 	}
 
 	return nil
+}
+
+// GetActiveSoftwareImage gets the SoftwareInventory which represents the
+// active BIOS firmware image.
+func (bios *Bios) GetActiveSoftwareImage() (*SoftwareInventory, error) {
+	if bios.activeSoftwareImage == "" {
+		return nil, nil
+	}
+
+	return GetSoftwareInventory(bios.Client, bios.activeSoftwareImage)
 }
