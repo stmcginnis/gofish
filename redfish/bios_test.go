@@ -54,6 +54,11 @@ var biosBody = `{
 			"#Bios.ChangePassword": {
 				"target": "/redfish/v1/Systems/437XR1138R2/BIOS/Actions/Bios.ChangePassword"
 			}
+		},
+		"Links": {
+			"ActiveSoftwareImage": {
+				"@odata.id": "/redfish/v1/Systems/437XR1138R2/BIOS/FirmwareInventory"
+			}
 		}
 	}`
 
@@ -145,6 +150,10 @@ func TestBios(t *testing.T) {
 
 	if len(result.settingsApplyTimes) != 3 {
 		t.Errorf("Invalid settings support apply times: %s", result.settingsApplyTimes)
+	}
+
+	if result.activeSoftwareImage != "/redfish/v1/Systems/437XR1138R2/BIOS/FirmwareInventory" {
+		t.Errorf("Invalid value of activeSoftwareImage: '%s'", result.activeSoftwareImage)
 	}
 }
 
