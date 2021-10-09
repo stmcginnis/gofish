@@ -260,8 +260,9 @@ const (
 
 // Status describes the status and health of a resource and its children.
 type Status struct {
-	Health Health `json:"Health"`
-	State  State  `json:"State"`
+	Health       Health `json:"Health"`
+	HealthRollup Health `json:"HealthRollup"`
+	State        State  `json:"State"`
 }
 
 // LocationType shall name the type of location in use.

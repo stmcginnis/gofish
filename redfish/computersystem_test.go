@@ -157,6 +157,10 @@ func TestComputerSystem(t *testing.T) { // nolint
 		t.Errorf("Received invalid health status: %s", result.Status.Health)
 	}
 
+	if result.Status.HealthRollup != common.OKHealth {
+		t.Errorf("Received invalid health rollup status: %s", result.Status.HealthRollup)
+	}
+
 	if result.IndicatorLED != common.OffIndicatorLED {
 		t.Errorf("Received invalid indicator status: %s", result.IndicatorLED)
 	}
