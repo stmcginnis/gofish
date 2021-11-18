@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -127,7 +126,7 @@ func (c *TestClient) performAction(action, url string, payload interface{}, cust
 	}
 	resp := customReturnForAction.(*http.Response)
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		payload, err := ioutil.ReadAll(resp.Body)
+		payload, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
