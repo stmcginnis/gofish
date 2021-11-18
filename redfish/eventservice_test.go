@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -184,7 +184,7 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 					Proto:         "HTTP/1.1",
 					ProtoMajor:    1,
 					ProtoMinor:    1,
-					Body:          ioutil.NopCloser(bytes.NewBufferString("")),
+					Body:          io.NopCloser(bytes.NewBufferString("")),
 					ContentLength: int64(len("")),
 					Header: http.Header{
 						"Location": []string{
@@ -295,7 +295,7 @@ func TestEventServiceGetEventSubscription(t *testing.T) {
 					Proto:         "HTTP/1.1",
 					ProtoMajor:    1,
 					ProtoMinor:    1,
-					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationBody)),
+					Body:          io.NopCloser(bytes.NewBufferString(eventDestinationBody)),
 					ContentLength: int64(len(eventDestinationBody)),
 					Header:        make(http.Header),
 				},
@@ -333,7 +333,7 @@ func TestEventServiceGetEventSubscriptions(t *testing.T) {
 					Proto:         "HTTP/1.1",
 					ProtoMajor:    1,
 					ProtoMinor:    1,
-					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationsBody)),
+					Body:          io.NopCloser(bytes.NewBufferString(eventDestinationsBody)),
 					ContentLength: int64(len(eventDestinationsBody)),
 					Header:        make(http.Header),
 				},
@@ -344,7 +344,7 @@ func TestEventServiceGetEventSubscriptions(t *testing.T) {
 					Proto:         "HTTP/1.1",
 					ProtoMajor:    1,
 					ProtoMinor:    1,
-					Body:          ioutil.NopCloser(bytes.NewBufferString(eventDestinationBody)),
+					Body:          io.NopCloser(bytes.NewBufferString(eventDestinationBody)),
 					ContentLength: int64(len(eventDestinationBody)),
 					Header:        make(http.Header),
 				},
@@ -386,7 +386,7 @@ func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing
 					Proto:         "HTTP/1.1",
 					ProtoMajor:    1,
 					ProtoMinor:    1,
-					Body:          ioutil.NopCloser(bytes.NewBufferString("")),
+					Body:          io.NopCloser(bytes.NewBufferString("")),
 					ContentLength: int64(len("")),
 					Header: http.Header{
 						"Location": []string{

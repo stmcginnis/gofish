@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -81,7 +81,7 @@ func TestCreateSession(t *testing.T) {
 					Proto:         "HTTP/1.1",
 					ProtoMajor:    1,
 					ProtoMinor:    1,
-					Body:          ioutil.NopCloser(bytes.NewBufferString("")),
+					Body:          io.NopCloser(bytes.NewBufferString("")),
 					ContentLength: int64(len("")),
 					Header: http.Header{
 						"Location": []string{
@@ -160,7 +160,7 @@ func TestCreateSessionFullURIPath(t *testing.T) {
 					Proto:         "HTTP/1.1",
 					ProtoMajor:    1,
 					ProtoMinor:    1,
-					Body:          ioutil.NopCloser(bytes.NewBufferString("")),
+					Body:          io.NopCloser(bytes.NewBufferString("")),
 					ContentLength: int64(len("")),
 					Header: http.Header{
 						"Location": []string{

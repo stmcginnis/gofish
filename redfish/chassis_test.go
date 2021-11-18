@@ -7,7 +7,7 @@ package redfish
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -278,7 +278,7 @@ func getCall(body string) *http.Response {
 		Proto:         "HTTP/1.1",
 		ProtoMajor:    1,
 		ProtoMinor:    1,
-		Body:          ioutil.NopCloser(bytes.NewBufferString(body)),
+		Body:          io.NopCloser(bytes.NewBufferString(body)),
 		ContentLength: int64(len(body)),
 		Header:        make(http.Header),
 	}
