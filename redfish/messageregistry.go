@@ -204,6 +204,7 @@ func GetMessageRegistryByLanguage(
 // from the informed messageID.
 // messageID is the key used to find the registry, version and message:
 // Example of messageID: Alert.1.0.LanDisconnect
+//
 //   - The segment before the 1st period is the Registry Name (Registry Prefix): Alert
 //   - The segment between the 1st and 2nd period is the major version: 1
 //   - The segment between the 2nd and 3rd period is the minor version: 0
