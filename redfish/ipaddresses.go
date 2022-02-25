@@ -86,7 +86,7 @@ type IPv6Address struct {
 	// condition.
 	AddressState AddressState
 	// PrefixLength shall be the IPv6 address prefix length for this interface.
-	PrefixLength int8
+	PrefixLength uint8
 }
 
 // IPv6GatewayStaticAddress shall represent a single IPv6 static address to be
@@ -96,7 +96,7 @@ type IPv6GatewayStaticAddress struct {
 	// assigned on a network interface.
 	Address string
 	// PrefixLength provides the IPv6 network prefix length in bits for this address.
-	PrefixLength int8
+	PrefixLength uint8
 }
 
 // IPv6StaticAddress shall represent a single IPv6 static address to be assigned
@@ -106,5 +106,5 @@ type IPv6StaticAddress struct {
 	// assigned on a network interface.
 	Address string
 	// PrefixLength provides the IPv6 network prefix length in bits for this address.
-	PrefixLength int8
+	PrefixLength uint8
 }
