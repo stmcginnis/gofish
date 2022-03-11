@@ -381,6 +381,11 @@ func (c *APIClient) runRawRequest(method, url string, payloadBuffer io.ReadSeeke
 	return c.runRawRequestWithHeaders(method, url, payloadBuffer, contentType, nil)
 }
 
+// RunRawRequestWithHeaders actually performs the REST calls but allowing custom headers
+func (c *APIClient) RunRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
+	return c.runRawRequestWithHeaders(method, url, payloadBuffer, contentType, customHeaders)
+}
+
 // runRawRequestWithHeaders actually performs the REST calls but allowing custom headers
 func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
