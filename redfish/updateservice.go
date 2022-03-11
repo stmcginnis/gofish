@@ -26,6 +26,8 @@ type UpdateService struct {
 	SoftwareInventory string
 	// HTTPPushURI endpoint is used to push (POST) firmware updates
 	HTTPPushURI string `json:"HttpPushUri"`
+	// MultipartHTTPPushURI endpoint is used to perform a multipart push (POST) updates
+	MultipartHTTPPushURI string `json:"MultiPartHttpPushUri"`
 	// ServiceEnabled indicates whether this service isenabled.
 	ServiceEnabled bool
 	// Status describes the status and health of a resource and its children.
