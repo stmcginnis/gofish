@@ -12,6 +12,8 @@ import (
 
 // Device shall describe a storage device visible to SimpleStorage.
 type Device struct {
+	// Name shall be a user-friendly name for the device.
+	Name string
 	// CapacityBytes shall represent the size (in bytes) of the Storage Device.
 	CapacityBytes int64
 	// Manufacturer shall indicate the name of the manufacturer of this storage device.
