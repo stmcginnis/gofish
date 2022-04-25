@@ -126,6 +126,19 @@ func TestConnectContextTimeout(t *testing.T) {
 	}
 }
 
+func TestServiceGetter(t *testing.T) {
+	type serviceGetter interface {
+		GetService() *Service
+	}
+
+	var sg serviceGetter
+	sg = &APIClient{}
+
+	if sg.GetService() != nil {
+		t.Errorf("Empty client should return a nil service")
+	}
+}
+
 // TestConnectContextCancel
 func TestConnectContextCancel(t *testing.T) {
 	// ctx will be cancelled

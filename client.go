@@ -218,6 +218,11 @@ func ConnectDefaultContext(ctx context.Context, endpoint string) (c *APIClient, 
 	return client, err
 }
 
+// GetService returns the APIClient's service.
+func (c *APIClient) GetService() *Service {
+	return c.Service
+}
+
 // CloneWithSession will create a new Client with a session instead of basic auth.
 func (c *APIClient) CloneWithSession() (*APIClient, error) {
 	if c.auth.Session != "" {
