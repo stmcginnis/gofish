@@ -210,7 +210,11 @@ func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) 
 		NewPassword:  newPassword,
 	}
 
-	_, err := bios.Client.Post(bios.changePasswordTarget, t)
+	resp, err := bios.Client.Post(bios.changePasswordTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
+
 	return err
 }
 
@@ -218,7 +222,10 @@ func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) 
 // A system reset may be required for the default values to be applied. This
 // action may impact other resources.
 func (bios *Bios) ResetBios() error {
-	_, err := bios.Client.Post(bios.resetBiosTarget, nil)
+	resp, err := bios.Client.Post(bios.resetBiosTarget, nil)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 
@@ -259,10 +266,11 @@ func (bios *Bios) UpdateBiosAttributes(attrs BiosAttributes) error {
 	// return the result.
 	if len(payload) > 0 {
 		data := map[string]interface{}{"Attributes": payload}
-		_, err := bios.Client.Patch(bios.settingsTarget, data)
+		resp, err := bios.Client.Patch(bios.settingsTarget, data)
 		if err != nil {
 			return err
 		}
+		defer resp.Body.Close()
 	}
 
 	return nil

@@ -742,7 +742,10 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error { // nolint
 		Boot: b,
 	}
 
-	_, err := computersystem.Client.Patch(computersystem.ODataID, t)
+	resp, err := computersystem.Client.Patch(computersystem.ODataID, t)
+	if err == nil {
+		return resp.Body.Close()
+	}
 	return err
 }
 
@@ -752,6 +755,7 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error { // nolint
 // the system or perform an ACPI Power Button Override (commonly known as a
 // 4-second hold of the Power Button). The ForceRestart value shall perform a
 // ForceOff action followed by a On action.
+//nolint:dupl
 func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 	// Make sure the requested reset type is supported by the system
 	valid := false
@@ -779,7 +783,10 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 		ResetType: resetType,
 	}
 
-	_, err := computersystem.Client.Post(computersystem.resetTarget, t)
+	resp, err := computersystem.Client.Post(computersystem.resetTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 
@@ -790,7 +797,10 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") // nolint:golint
 	}
 
-	_, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, nil)
+	resp, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, nil)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 

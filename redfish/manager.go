@@ -437,7 +437,10 @@ func (manager *Manager) Reset(resetType ResetType) error {
 			Action: "Manager.Reset",
 		}
 
-		_, err := manager.Client.Post(manager.resetTarget, t)
+		resp, err := manager.Client.Post(manager.resetTarget, t)
+		if err == nil {
+			defer resp.Body.Close()
+		}
 		return err
 	}
 	// Make sure the requested reset type is supported by the manager.
@@ -461,7 +464,10 @@ func (manager *Manager) Reset(resetType ResetType) error {
 		ResetType: resetType,
 	}
 
-	_, err := manager.Client.Post(manager.resetTarget, t)
+	resp, err := manager.Client.Post(manager.resetTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 

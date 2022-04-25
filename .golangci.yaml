@@ -31,8 +31,6 @@ linters-settings:
     min-complexity: 25
   goimports:
     local-prefixes: github.com/stmcginnis
-  golint:
-    min-confidence: 0
   gomnd:
     settings:
       mnd:
@@ -62,7 +60,6 @@ linters:
     - gocyclo
     - goheader
     - goimports
-    - golint
     - gomnd
     - goprintffuncname
     - gosec
@@ -73,6 +70,7 @@ linters:
     - nakedret
     - noctx
     - nolintlint
+    - revive
     - rowserrcheck
     - staticcheck
     - structcheck
@@ -111,8 +109,3 @@ issues:
 run:
   skip-dirs:
     - examples
-
-# golangci.com configuration
-# https://github.com/golangci/golangci/wiki/Configuration
-service:
-  golangci-lint-version: 1.38.0 # use the fixed version to not introduce new linters unexpectedly

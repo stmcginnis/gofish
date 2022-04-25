@@ -354,7 +354,10 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 		Severity:          "Informational",
 	}
 
-	_, err := eventservice.Client.Post(eventservice.submitTestEventTarget, t)
+	resp, err := eventservice.Client.Post(eventservice.submitTestEventTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 

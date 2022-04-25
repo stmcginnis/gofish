@@ -205,7 +205,10 @@ func (storage *Storage) SetEncryptionKey(key string) error {
 	}
 	t := temp{EncryptionKey: key}
 
-	_, err := storage.Client.Post(storage.setEncryptionKeyTarget, t)
+	resp, err := storage.Client.Post(storage.setEncryptionKeyTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // TestAPICall captures the arguments to one of the API calls.
@@ -122,8 +123,10 @@ func (c *TestClient) performAction(action, url string, payload interface{}, cust
 	c.recordCall(action, url, payload, customHeaders)
 	customReturnForAction := c.getCustomReturnForAction(action)
 	if customReturnForAction == nil {
-		return nil, nil
+		body := io.NopCloser(strings.NewReader(""))
+		return &http.Response{Body: body}, nil
 	}
+
 	resp := customReturnForAction.(*http.Response)
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
 		payload, err := io.ReadAll(resp.Body)

@@ -703,7 +703,7 @@ func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.assignReplicaTargetTarget == "" {
-		return fmt.Errorf("AssignReplicaTarget action is not supported by this system") // nolint
+		return fmt.Errorf("AssignReplicaTarget action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -728,7 +728,7 @@ func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode Re
 // data to ensure it matches calculated values.
 func (volume *Volume) CheckConsistency() error {
 	if volume.checkConsistencyTarget == "" {
-		return fmt.Errorf("CheckConsistency action is not supported by this system") // nolint
+		return fmt.Errorf("CheckConsistency action is not supported by this system")
 	}
 
 	_, err := volume.Client.Post(volume.checkConsistencyTarget, nil)
@@ -759,7 +759,7 @@ func (volume *Volume) Initialize(initType InitializeType) error {
 func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.removeReplicaRelationshipTarget == "" {
-		return fmt.Errorf("RemoveReplicaRelationship action is not supported by this system") // nolint
+		return fmt.Errorf("RemoveReplicaRelationship action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -784,7 +784,7 @@ func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeO
 func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.resumeReplicationTarget == "" {
-		return fmt.Errorf("ResumeReplication action is not supported by this system") // nolint
+		return fmt.Errorf("ResumeReplication action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -804,7 +804,7 @@ func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
 func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.reverseReplicationRelationshipTarget == "" {
-		return fmt.Errorf("ReverseReplicationRelationship action is not supported by this system") // nolint
+		return fmt.Errorf("ReverseReplicationRelationship action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -824,7 +824,7 @@ func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string)
 func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.splitReplicationTarget == "" {
-		return fmt.Errorf("SplitReplication action is not supported by this system") // nolint
+		return fmt.Errorf("SplitReplication action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -845,7 +845,7 @@ func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
 func (volume *Volume) SuspendReplication(targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.suspendReplicationTarget == "" {
-		return fmt.Errorf("SuspendReplication action is not supported by this system") // nolint
+		return fmt.Errorf("SuspendReplication action is not supported by this system")
 	}
 
 	// Define this action's parameters

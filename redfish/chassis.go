@@ -470,6 +470,7 @@ func (chassis *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
 
 // Reset shall reset the chassis. This action shall not reset Systems or other
 // contained resource, although side effects may occur which affect those resources.
+//nolint:dupl
 func (chassis *Chassis) Reset(resetType ResetType) error {
 	// Make sure the requested reset type is supported by the chassis
 	valid := false
@@ -497,6 +498,9 @@ func (chassis *Chassis) Reset(resetType ResetType) error {
 		ResetType: resetType,
 	}
 
-	_, err := chassis.Client.Post(chassis.resetTarget, t)
+	resp, err := chassis.Client.Post(chassis.resetTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
