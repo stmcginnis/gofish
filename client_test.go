@@ -131,9 +131,7 @@ func TestServiceGetter(t *testing.T) {
 		GetService() *Service
 	}
 
-	var sg serviceGetter
-	sg = &APIClient{}
-
+	var sg serviceGetter = &APIClient{}
 	if sg.GetService() != nil {
 		t.Errorf("Empty client should return a nil service")
 	}

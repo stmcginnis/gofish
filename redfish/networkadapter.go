@@ -300,6 +300,9 @@ func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
 // ResetSettingsToDefault shall perform a reset of all active and pending
 // settings back to factory default settings upon reset of the network adapter.
 func (networkadapter *NetworkAdapter) ResetSettingsToDefault() error {
-	_, err := networkadapter.Client.Post(networkadapter.resetSettingsToDefaultTarget, nil)
+	resp, err := networkadapter.Client.Post(networkadapter.resetSettingsToDefaultTarget, nil)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }

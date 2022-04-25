@@ -202,7 +202,10 @@ func (virtualmedia *VirtualMedia) EjectMedia() error {
 		return errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
 	}
 
-	_, err := virtualmedia.Client.Post(virtualmedia.ejectMediaTarget, struct{}{})
+	resp, err := virtualmedia.Client.Post(virtualmedia.ejectMediaTarget, struct{}{})
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 
@@ -223,7 +226,10 @@ func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProte
 		WriteProtected: writeProtected,
 	}
 
-	_, err := virtualmedia.Client.Post(virtualmedia.insertMediaTarget, t)
+	resp, err := virtualmedia.Client.Post(virtualmedia.insertMediaTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 
@@ -243,7 +249,10 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) e
 	if !virtualmedia.SupportsMediaInsert {
 		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
-	_, err := virtualmedia.Client.Post(virtualmedia.insertMediaTarget, config)
+	resp, err := virtualmedia.Client.Post(virtualmedia.insertMediaTarget, config)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }
 

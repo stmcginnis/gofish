@@ -185,6 +185,9 @@ func (secureboot *SecureBoot) ResetKeys(resetType ResetKeysType) error {
 	}
 	t := temp{ResetKeysType: resetType}
 
-	_, err := secureboot.Client.Post(secureboot.resetKeysTarget, t)
+	resp, err := secureboot.Client.Post(secureboot.resetKeysTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }

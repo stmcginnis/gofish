@@ -202,6 +202,9 @@ func (logservice *LogService) ClearLog() error {
 		Action: "LogService.ClearLog",
 	}
 
-	_, err := logservice.Client.Post(logservice.clearLogTarget, t)
+	resp, err := logservice.Client.Post(logservice.clearLogTarget, t)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 	return err
 }

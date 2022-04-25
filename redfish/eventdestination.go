@@ -394,12 +394,16 @@ func CreateEventDestination(
 }
 
 // DeleteEventDestination will delete a EventDestination.
-func DeleteEventDestination(c common.Client, uri string) (err error) {
+func DeleteEventDestination(c common.Client, uri string) error {
 	// validate uri
 	if strings.TrimSpace(uri) == "" {
 		return fmt.Errorf("uri should not be empty")
 	}
-	_, err = c.Delete(uri)
+
+	resp, err := c.Delete(uri)
+	if err == nil {
+		defer resp.Body.Close()
+	}
 
 	return err
 }
