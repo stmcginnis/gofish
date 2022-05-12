@@ -281,34 +281,7 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs BiosAttributes, applyTime co
 
 // UpdateBiosAttributes is used to update attribute values.
 func (bios *Bios) UpdateBiosAttributes(attrs BiosAttributes) error {
-	payload := make(map[string]interface{})
-
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Bios)
-	err := original.UnmarshalJSON(bios.rawData)
-	if err != nil {
-		return err
-	}
-
-	for key := range attrs {
-		if original.Attributes[key] != attrs[key] {
-			payload[key] = attrs[key]
-		}
-	}
-
-	// If there are any allowed updates, try to send updates to the system and
-	// return the result.
-	if len(payload) > 0 {
-		data := map[string]interface{}{"Attributes": payload}
-		resp, err := bios.Client.Patch(bios.settingsTarget, data)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-	}
-
-	return nil
+	return bios.UpdateBiosAttributesApplyAt(attrs, "")
 }
 
 // GetActiveSoftwareImage gets the SoftwareInventory which represents the
