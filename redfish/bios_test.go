@@ -213,4 +213,42 @@ func TestUpdateBiosAttributes(t *testing.T) {
 	if !strings.Contains(calls[0].Payload, "AssetTag") {
 		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
 	}
+
+	if strings.Contains(calls[0].Payload, "@Redfish.SettingsApplyTime") {
+		t.Error("Expected 'SettingsApplyTime' to not be present")
+	}
+}
+
+// TestUpdateBiosAttributesApplyAt tests the TestUpdateBiosAttributesApplyAt call.
+func TestUpdateBiosAttributesApplyAt(t *testing.T) {
+	var result Bios
+	err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &common.TestClient{}
+	result.SetClient(testClient)
+
+	update := BiosAttributes{"AssetTag": "test"}
+	err = result.UpdateBiosAttributesApplyAt(update, common.AtMaintenanceWindowStartApplyTime)
+
+	if err != nil {
+		t.Errorf("Error making UpdateBiosAttributesApplyAt call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected one call to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[0].Payload, "AssetTag") {
+		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "@Redfish.SettingsApplyTime") {
+		t.Error("Expected 'SettingsApplyTime' to be present")
+	}
 }
