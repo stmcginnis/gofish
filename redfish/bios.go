@@ -257,7 +257,8 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs BiosAttributes, applyTime co
 	}
 
 	for key := range attrs {
-		if original.Attributes[key] != attrs[key] {
+		if strings.HasPrefix(key, "BootTypeOrder") ||
+			original.Attributes[key] != attrs[key] {
 			payload[key] = attrs[key]
 		}
 	}
