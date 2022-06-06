@@ -511,6 +511,10 @@ type ComputerSystem struct {
 	ManagedBy []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+	// etag contains the etag header when fetching the object. This is used to
+	// control updates to make sure the object has not been modified my a different
+	// process between fetching and updating that could cause conflicts.
+	etag string
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
@@ -611,6 +615,10 @@ func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 	err = json.NewDecoder(resp.Body).Decode(&computersystem)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.Header["Etag"] != nil {
+		computersystem.etag = resp.Header["Etag"][0]
 	}
 
 	computersystem.SetClient(c)
@@ -742,7 +750,12 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error { // nolint
 		Boot: b,
 	}
 
-	resp, err := computersystem.Client.Patch(computersystem.ODataID, t)
+	var header = make(map[string]string)
+	if computersystem.etag != "" {
+		header["If-Match"] = computersystem.etag
+	}
+
+	resp, err := computersystem.Client.PatchWithHeaders(computersystem.ODataID, t, header)
 	if err == nil {
 		return resp.Body.Close()
 	}
@@ -755,7 +768,6 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error { // nolint
 // the system or perform an ACPI Power Button Override (commonly known as a
 // 4-second hold of the Power Button). The ForceRestart value shall perform a
 // ForceOff action followed by a On action.
-//nolint:dupl
 func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 	// Make sure the requested reset type is supported by the system
 	valid := false
@@ -783,7 +795,12 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 		ResetType: resetType,
 	}
 
-	resp, err := computersystem.Client.Post(computersystem.resetTarget, t)
+	var header = make(map[string]string)
+	if computersystem.etag != "" {
+		header["If-Match"] = computersystem.etag
+	}
+
+	resp, err := computersystem.Client.PostWithHeaders(computersystem.resetTarget, t, header)
 	if err == nil {
 		defer resp.Body.Close()
 	}
@@ -797,7 +814,12 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") // nolint:golint
 	}
 
-	resp, err := computersystem.Client.Post(computersystem.setDefaultBootOrderTarget, nil)
+	var header = make(map[string]string)
+	if computersystem.etag != "" {
+		header["If-Match"] = computersystem.etag
+	}
+
+	resp, err := computersystem.Client.PostWithHeaders(computersystem.resetTarget, nil, header)
 	if err == nil {
 		defer resp.Body.Close()
 	}
