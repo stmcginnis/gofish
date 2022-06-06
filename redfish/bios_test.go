@@ -206,15 +206,15 @@ func TestUpdateBiosAttributes(t *testing.T) {
 
 	calls := testClient.CapturedCalls()
 
-	if len(calls) != 2 {
+	if len(calls) != 1 {
 		t.Errorf("Expected one call to be made, captured: %v", calls)
 	}
 
-	if !strings.Contains(calls[1].Payload, "AssetTag") {
+	if !strings.Contains(calls[0].Payload, "AssetTag") {
 		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
 	}
 
-	if strings.Contains(calls[1].Payload, "@Redfish.SettingsApplyTime") {
+	if strings.Contains(calls[0].Payload, "@Redfish.SettingsApplyTime") {
 		t.Error("Expected 'SettingsApplyTime' to not be present")
 	}
 }
@@ -240,15 +240,15 @@ func TestUpdateBiosAttributesApplyAt(t *testing.T) {
 
 	calls := testClient.CapturedCalls()
 
-	if len(calls) != 2 {
+	if len(calls) != 1 {
 		t.Errorf("Expected one call to be made, captured: %v", calls)
 	}
 
-	if !strings.Contains(calls[1].Payload, "AssetTag") {
+	if !strings.Contains(calls[0].Payload, "AssetTag") {
 		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
 	}
 
-	if !strings.Contains(calls[1].Payload, "@Redfish.SettingsApplyTime") {
+	if !strings.Contains(calls[0].Payload, "@Redfish.SettingsApplyTime") {
 		t.Error("Expected 'SettingsApplyTime' to be present")
 	}
 }
