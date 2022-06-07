@@ -17,6 +17,7 @@ import (
 	"net/http/httputil"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"strings"
 	"time"
@@ -409,9 +410,22 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 
 	// Add custom headers
 	for k, v := range customHeaders {
-		if len(k) > 0 && len(v) > 0 { // Quick check to avoid empty headers
-			req.Header.Set(k, v)
+		if len(k) == 0 && len(v) == 0 { // Quick check to avoid empty headers
+			continue
 		}
+
+		// Set Content-Length custom headers on the request
+		// since its ignored when set using Header.Set()
+		if strings.EqualFold("Content-Length", k) {
+			req.ContentLength, err = strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				return nil, common.ConstructError(0, []byte("error parsing custom Content-Length header"))
+			}
+
+			continue
+		}
+
+		req.Header.Set(k, v)
 	}
 
 	// Add content info if present
