@@ -410,14 +410,14 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 
 	// Add custom headers
 	for k, v := range customHeaders {
-		if len(k) == 0 && len(v) == 0 { // Quick check to avoid empty headers
+		if k == "" && v == "" { // Quick check to avoid empty headers
 			continue
 		}
 
 		// Set Content-Length custom headers on the request
 		// since its ignored when set using Header.Set()
 		if strings.EqualFold("Content-Length", k) {
-			req.ContentLength, err = strconv.ParseInt(v, 10, 64)
+			req.ContentLength, err = strconv.ParseInt(v, 10, 64) // nolint:gomnd // base 10, 64 bit
 			if err != nil {
 				return nil, common.ConstructError(0, []byte("error parsing custom Content-Length header"))
 			}
@@ -447,15 +447,8 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 
 	// Dump request if needed.
 	if c.dumpWriter != nil {
-		d, err := httputil.DumpRequestOut(req, true)
-		if err != nil {
-			return nil, common.ConstructError(0, []byte(err.Error()))
-		}
-
-		d = append(d, '\n')
-		_, err = c.dumpWriter.Write(d)
-		if err != nil {
-			panic(err)
+		if err := c.dumpRequest(req); err != nil {
+			return nil, err
 		}
 	}
 
@@ -466,16 +459,9 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 
 	// Dump response if needed.
 	if c.dumpWriter != nil {
-		d, err := httputil.DumpResponse(resp, true)
-		if err != nil {
+		if err := c.dumpResponse(resp); err != nil {
 			defer resp.Body.Close()
-			return nil, common.ConstructError(0, []byte(err.Error()))
-		}
-
-		d = append(d, '\n')
-		_, err = c.dumpWriter.Write(d)
-		if err != nil {
-			panic(err)
+			return nil, err
 		}
 	}
 
@@ -489,6 +475,38 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 	}
 
 	return resp, err
+}
+
+// dumpRequest writes outgoing client requests to dumpWriter
+func (c *APIClient) dumpRequest(req *http.Request) error {
+	d, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		return common.ConstructError(0, []byte(err.Error()))
+	}
+
+	d = append(d, '\n')
+	_, err = c.dumpWriter.Write(d)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
+// dumpRequest writes incoming responses to dumpWriter
+func (c *APIClient) dumpResponse(resp *http.Response) error {
+	d, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		return common.ConstructError(0, []byte(err.Error()))
+	}
+
+	d = append(d, '\n')
+	_, err = c.dumpWriter.Write(d)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
 }
 
 // Logout will delete any active session. Useful to defer logout when creating
