@@ -278,8 +278,8 @@ type Boot struct {
 	// BootSourceOverrideEnabled = Continuous is not supported for UEFI
 	// BootNext as this setting is defined in UEFI as a one-time boot only.
 	BootNext string `json:",omitempty"`
-	// BootOptions shall be a link to a
-	// collection of type BootOptionCollection.
+	// bootOptions is a link to the collection of the UEFI boot options
+	// associated with this computer system.
 	bootOptions string
 	// BootOrder shall be an ordered array of
 	// BootOptionReference strings representing the persistent Boot Order of
@@ -658,6 +658,31 @@ func (computersystem *ComputerSystem) Bios() (*Bios, error) {
 	}
 
 	return GetBios(computersystem.Client, computersystem.bios)
+}
+
+// BootOptions gets all BootOption items for this system.
+func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
+	var result []*BootOption
+	links, err := common.GetCollection(computersystem.Client, computersystem.Boot.bootOptions)
+	if err != nil {
+		return result, err
+	}
+
+	collectionError := common.NewCollectionError()
+	for _, bootOptionLink := range links.ItemLinks {
+		bootOption, err := GetBootOption(computersystem.Client, bootOptionLink)
+		if err != nil {
+			collectionError.Failures[bootOptionLink] = err
+		} else {
+			result = append(result, bootOption)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // EthernetInterfaces get this system's ethernet interfaces.
