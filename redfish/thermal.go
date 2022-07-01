@@ -109,6 +109,10 @@ type Fan struct {
 	// range but is not critical. The units shall be the same units as the
 	// related Reading property.
 	UpperThresholdNonCritical float32
+	// Oem shall contain the OEM extensions. All values for properties that
+	// this object contains shall conform to the Redfish Specification
+	// described requirements.
+	Oem json.RawMessage
 }
 
 // UnmarshalJSON unmarshals a Fan object from the raw JSON.
@@ -281,6 +285,10 @@ type Thermal struct {
 	Temperatures []Temperature
 	// TemperaturesCount is the number of Temperature objects
 	TemperaturesCount int `json:"Temperatures@odata.count"`
+	// Oem shall contain the OEM extensions. All values for properties that
+	// this object contains shall conform to the Redfish Specification
+	// described requirements.
+	Oem json.RawMessage
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
