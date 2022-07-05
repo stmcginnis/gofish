@@ -7,11 +7,13 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stmcginnis/gofish/common"
+	oemDell "github.com/stmcginnis/gofish/oem/dell"
+	"github.com/stmcginnis/gofish/oem/hpe/events"
+	oemZt "github.com/stmcginnis/gofish/oem/zt"
 	"reflect"
 	"strings"
 	"time"
-
-	"github.com/stmcginnis/gofish/common"
 )
 
 // EventFormatType is
@@ -41,6 +43,13 @@ const (
 	ResourceUpdatedEventType EventType = "ResourceUpdated"
 	// StatusChangeEventType indicates the status of this resource has changed.
 	StatusChangeEventType EventType = "StatusChange"
+)
+
+// Server vendors
+const (
+	Dell string = "Dell"
+	HP   string = "HP"
+	ZT   string = "ZT"
 )
 
 // IsValidEventType will check if it is a valid EventType
@@ -358,6 +367,28 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 	if err == nil {
 		defer resp.Body.Close()
 	}
+	return err
+}
+
+// SendTestEvent simulates an event using the event service.
+// data specified in the action parameters. This message should then be sent to
+// any appropriate ListenerDestination targets.
+// This action is impended differently by OEM vendors.
+func (eventservice *EventService) SendTestEvent(messageID, oem string) error {
+	var err error
+
+	switch oem {
+	case Dell:
+		err = oemDell.SendEventDell(
+			eventservice.Client, messageID, string(SupportedEventTypes["Alert"]), string(RedfishEventDestinationProtocol))
+	case ZT:
+		err = oemZt.SendEventZt(eventservice.Client, messageID)
+	case HP:
+		err = events.SendEventHP(eventservice.Client, messageID)
+	default:
+		err = fmt.Errorf("missing oem Vendor in SendTestEvent() for %v", oem)
+	}
+
 	return err
 }
 

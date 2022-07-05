@@ -6,9 +6,38 @@ package hpe
 
 import (
 	"encoding/json"
-
 	"github.com/stmcginnis/gofish/redfish"
 )
+
+type Fan struct {
+	redfish.Fan
+	Oem FanOem
+}
+
+type FanOem struct {
+	Hpe struct {
+		OdataContext string `json:"@odata.context"`
+		OdataType    string `json:"@odata.type"`
+		Location     string `json:"Location"`
+		Redundant    bool   `json:"Redundant"`
+		HotPluggable bool   `json:"HotPluggable"`
+	} `json:"Hpe"`
+}
+
+type Thermal struct {
+	redfish.Thermal
+	Fans []Fan
+	Oem  ThermalOem
+}
+
+type ThermalOem struct {
+	Hpe struct {
+		OdataContext         string `json:"@odata.context"`
+		OdataType            string `json:"@odata.type"`
+		ThermalConfiguration string `json:"ThermalConfiguration"`
+		FanPercentMinimum    int    `json:"FanPercentMinimum"`
+	} `json:"Hpe"`
+}
 
 func FromThermal(thermal *redfish.Thermal) (Thermal, error) {
 	oem := ThermalOem{}
@@ -42,34 +71,4 @@ func FromFan(fan *redfish.Fan) (Fan, error) {
 		Fan: *fan,
 		Oem: oem,
 	}, nil
-}
-
-type Fan struct {
-	redfish.Fan
-	Oem FanOem
-}
-
-type FanOem struct {
-	Hpe struct {
-		OdataContext string `json:"@odata.context"`
-		OdataType    string `json:"@odata.type"`
-		Location     string `json:"Location"`
-		Redundant    bool   `json:"Redundant"`
-		HotPluggable bool   `json:"HotPluggable"`
-	} `json:"Hpe"`
-}
-
-type Thermal struct {
-	redfish.Thermal
-	Fans []Fan
-	Oem  ThermalOem
-}
-
-type ThermalOem struct {
-	Hpe struct {
-		OdataContext         string `json:"@odata.context"`
-		OdataType            string `json:"@odata.type"`
-		ThermalConfiguration string `json:"ThermalConfiguration"`
-		FanPercentMinimum    int    `json:"FanPercentMinimum"`
-	} `json:"Hpe"`
 }

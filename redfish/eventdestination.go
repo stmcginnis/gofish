@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	oemZt "github.com/stmcginnis/gofish/oem/zt"
 	"net/url"
 	"reflect"
 	"strings"
@@ -349,6 +350,10 @@ func CreateEventDestination(
 	context string,
 	oem interface{},
 ) (string, error) {
+	// ZT systems uses a different payload for this action
+	if oem == "ZT" {
+		return oemZt.SubscribeZT(c, uri, destination, string(protocol), context)
+	}
 	// validate input parameters
 	err := validateCreateEventDestinationParams(
 		uri,
@@ -377,8 +382,8 @@ func CreateEventDestination(
 	if oem != nil {
 		s.Oem = oem
 	}
-
 	resp, err := c.Post(uri, s)
+
 	if err != nil {
 		return "", err
 	}
@@ -389,7 +394,6 @@ func CreateEventDestination(
 	if urlParser, err := url.ParseRequestURI(subscriptionLink); err == nil {
 		subscriptionLink = urlParser.RequestURI()
 	}
-
 	return subscriptionLink, nil
 }
 
