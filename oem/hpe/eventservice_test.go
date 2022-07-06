@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package dell
+package hpe
 
 import (
 	"encoding/json"
@@ -13,92 +13,153 @@ import (
 
 	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
 )
 
 const serviceRootBody = `{
     "@odata.context": "/redfish/v1/$metadata#ServiceRoot.ServiceRoot",
-    "@odata.id": "/redfish/v1",
-    "@odata.type": "#ServiceRoot.v1_8_0.ServiceRoot",
+    "@odata.etag": "W/\"00000000\"",
+    "@odata.id": "/redfish/v1/",
+    "@odata.type": "#ServiceRoot.v1_5_1.ServiceRoot",
+    "Id": "RootService",
     "AccountService": {
-        "@odata.id": "/redfish/v1/AccountService"
-    },
-    "CertificateService": {
-        "@odata.id": "/redfish/v1/CertificateService"
+        "@odata.id": "/redfish/v1/AccountService/"
     },
     "Chassis": {
-        "@odata.id": "/redfish/v1/Chassis"
+        "@odata.id": "/redfish/v1/Chassis/"
     },
-    "Description": "Root Service",
     "EventService": {
-        "@odata.id": "/redfish/v1/EventService"
-    },
-    "Fabrics": {
-        "@odata.id": "/redfish/v1/Fabrics"
-    },
-    "Id": "RootService",
-    "JobService": {
-        "@odata.id": "/redfish/v1/JobService"
+        "@odata.id": "/redfish/v1/EventService/"
     },
     "JsonSchemas": {
-        "@odata.id": "/redfish/v1/JsonSchemas"
+        "@odata.id": "/redfish/v1/JsonSchemas/"
     },
     "Links": {
         "Sessions": {
-            "@odata.id": "/redfish/v1/SessionService/Sessions"
+            "@odata.id": "/redfish/v1/SessionService/Sessions/"
         }
     },
     "Managers": {
-        "@odata.id": "/redfish/v1/Managers"
+        "@odata.id": "/redfish/v1/Managers/"
     },
-    "Name": "Root Service",
+    "Name": "HPE RESTful Root Service",
     "Oem": {
-        "Dell": {
-            "@odata.context": "/redfish/v1/$metadata#DellServiceRoot.DellServiceRoot",
-            "@odata.type": "#DellServiceRoot.v1_0_0.DellServiceRoot",
-            "IsBranded": 0,
-            "ManagerMACAddress": "00:00:00:00:00:00",
-            "ServiceTag": "0000000"
+        "Hpe": {
+            "@odata.context": "/redfish/v1/$metadata#HpeiLOServiceExt.HpeiLOServiceExt",
+            "@odata.type": "#HpeiLOServiceExt.v2_3_0.HpeiLOServiceExt",
+            "Links": {
+                "ResourceDirectory": {
+                    "@odata.id": "/redfish/v1/ResourceDirectory/"
+                }
+            },
+            "Manager": [{
+                "DefaultLanguage": "en",
+                "FQDN": "bmc.fqdn",
+                "HostName": "bmc",
+                "Languages": [{
+                    "Language": "en",
+                    "TranslationName": "English",
+                    "Version": "2.10"
+                }],
+                "ManagerFirmwareVersion": "2.10",
+                "ManagerType": "iLO 5",
+                "Status": {
+                    "Health": "OK"
+                }
+            }],
+            "Moniker": {
+                "ADVLIC": "iLO Advanced",
+                "BMC": "iLO",
+                "BSYS": "BladeSystem",
+                "CLASS": "Baseboard Management Controller",
+                "FEDGRP": "DEFAULT",
+                "IPROV": "Intelligent Provisioning",
+                "PRODABR": "iLO",
+                "PRODFAM": "Integrated Lights-Out",
+                "PRODGEN": "iLO 5",
+                "PRODNAM": "Integrated Lights-Out 5",
+                "PRODTAG": "HPE iLO 5",
+                "STDLIC": "iLO Standard",
+                "SUMABR": "SUM",
+                "SUMGR": "Smart Update Manager",
+                "SYSFAM": "ProLiant",
+                "VENDABR": "HPE",
+                "VENDNAM": "Hewlett Packard Enterprise",
+                "WWW": "www.hpe.com",
+                "WWWAHSV": "www.hpe.com/servers/ahsv",
+                "WWWBMC": "www.hpe.com/info/ilo",
+                "WWWDOC": "www.hpe.com/support/ilo-docs",
+                "WWWERS": "www.hpe.com/services/getconnected",
+                "WWWGLIS": "reserved for liconf URI",
+                "WWWIOL": "www.hpe.com/info/insightonline",
+                "WWWLIC": "www.hpe.com/info/ilo",
+                "WWWLML": "www.hpe.com/support",
+                "WWWPASS": "www.hpe.com/support/hpesc",
+                "WWWPRV": "www.hpe.com/info/privacy",
+                "WWWQSPEC": "www.hpe.com/info/qs",
+                "WWWRESTDOC": "www.hpe.com/support/restfulinterface/docs",
+                "WWWSUP": "www.hpe.com/support/ilo5",
+                "WWWSWLIC": "www.hpe.com/software/SWLicensing"
+            },
+            "Sessions": {
+                "CertCommonName": "bmc.fqdn",
+                "CertificateLoginEnabled": false,
+                "KerberosEnabled": false,
+                "LDAPAuthLicenced": true,
+                "LDAPEnabled": false,
+                "LocalLoginEnabled": true,
+                "LoginFailureDelay": 0,
+                "LoginHint": {
+                    "Hint": "POST to /Sessions to login using the following JSON object:",
+                    "HintPOSTData": {
+                        "Password": "password",
+                        "UserName": "username"
+                    }
+                },
+                "SecurityOverride": false,
+                "ServerName": "bmc-serverName"
+            },
+            "System": [{
+                "Status": {
+                    "Health": "Warning"
+                }
+            }],
+            "Time": "2022-07-08T09:07:17Z"
         }
     },
-    "Product": "Integrated Dell Remote Access Controller",
+    "Product": "ProLiant DL380 Gen10",
     "ProtocolFeaturesSupported": {
-        "DeepOperations": {
-            "DeepPATCH": false,
-            "DeepPOST": false
-        },
-        "ExcerptQuery": false,
         "ExpandQuery": {
-            "ExpandAll": true,
+            "ExpandAll": false,
             "Levels": true,
-            "Links": true,
+            "Links": false,
             "MaxLevels": 1,
             "NoLinks": true
         },
         "FilterQuery": true,
         "OnlyMemberQuery": true,
-        "SelectQuery": true
+        "SelectQuery": false
     },
-    "RedfishVersion": "1.11.0",
+    "RedfishVersion": "1.6.0",
     "Registries": {
-        "@odata.id": "/redfish/v1/Registries"
+        "@odata.id": "/redfish/v1/Registries/"
     },
     "SessionService": {
-        "@odata.id": "/redfish/v1/SessionService"
+        "@odata.id": "/redfish/v1/SessionService/"
     },
     "Systems": {
-        "@odata.id": "/redfish/v1/Systems"
+        "@odata.id": "/redfish/v1/Systems/"
     },
     "Tasks": {
-        "@odata.id": "/redfish/v1/TaskService"
+        "@odata.id": "/redfish/v1/TaskService/"
     },
     "TelemetryService": {
-        "@odata.id": "/redfish/v1/TelemetryService"
+        "@odata.id": "/redfish/v1/TelemetryService/"
     },
+    "UUID": "00000000-0000-0000-0000-000000000000",
     "UpdateService": {
-        "@odata.id": "/redfish/v1/UpdateService"
+        "@odata.id": "/redfish/v1/UpdateService/"
     },
-    "Vendor": "Dell"
+    "Vendor": "HPE"
 }`
 
 const eventServiceBody = `{
@@ -189,8 +250,8 @@ func TestEventService(t *testing.T) {
 	}
 }
 
-// TestHpeSubmitTestEvent tests SubmitTestEvent for Dell using a mock server.
-func TestDellSubmitTestEvent(t *testing.T) {
+// TestHpeSubmitTestEvent tests SubmitTestEvent for Hpe using a mock server.
+func TestHpeSubmitTestEvent(t *testing.T) {
 	const redfishBaseURL = "/redfish/v1/"
 	var (
 		c              common.Client
@@ -217,7 +278,7 @@ func TestDellSubmitTestEvent(t *testing.T) {
 
 			rw.Write([]byte(serviceRootBody)) // nolint:errcheck
 		} else if req.Method == http.MethodGet && // Get event service
-			req.URL.String() == "/redfish/v1/EventService" &&
+			req.URL.String() == "/redfish/v1/EventService/" &&
 			requestCounter == 2 {
 			requestCounter++
 
@@ -227,7 +288,7 @@ func TestDellSubmitTestEvent(t *testing.T) {
 			requestCounter == 3 {
 			err := json.NewDecoder(req.Body).Decode(&PayloadType{})
 			if err != nil {
-				t.Errorf("error in SubmitTestEvent payload for Dell due to: %v", err)
+				t.Errorf("error in SubmitTestEvent payload for Hpe due to: %v", err)
 			}
 
 			requestCounter++
@@ -246,7 +307,6 @@ func TestDellSubmitTestEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to establish client to mock http server due to: %v", err)
 	}
-
 	serviceRoot, err := gofish.ServiceRoot(c)
 	if err != nil {
 		t.Errorf("failed to get redfish service root due to: %v", err)
@@ -255,15 +315,16 @@ func TestDellSubmitTestEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to get event service due to: %v", err)
 	}
-	dellEventService, err := FromEventService(eventService)
+	hpeEventService, err := FromEventService(eventService)
 	if err != nil {
-		t.Errorf("failed to get dell event service due to: %v", err)
+		t.Errorf("failed to get hpe event service due to: %v", err)
 	}
 
-	err = dellEventService.SubmitTestEvent(
-		"AMP0300",
+	err = hpeEventService.SubmitTestEvent(
+		"TestEventId",
+		"iLOEvents.2.1.ServerPoweredOff",
 		"Alert",
-		redfish.RedfishEventDestinationProtocol)
+		"Test Event")
 	if err != nil {
 		t.Errorf("failed to submit test event due to: %v", err)
 	}
