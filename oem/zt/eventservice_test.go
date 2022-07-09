@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package test
+package zt
 
 import (
 	"log"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/oem/zt"
 	"github.com/stmcginnis/gofish/redfish"
 )
 
@@ -197,7 +196,7 @@ func TestSubscribeZT(t *testing.T) {
 
 			rw.Write([]byte(eventServiceBody)) // nolint:errcheck
 		} else if req.Method == http.MethodPost && // Subscribe
-			req.URL.String() == zt.SubscriptionURL &&
+			req.URL.String() == "/redfish/v1/EventService/Subscriptions" &&
 			requestCounter == 3 {
 			log.Printf("Mock got suscription POST")
 
@@ -225,13 +224,13 @@ func TestSubscribeZT(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to get event service due to: %v", err)
 	}
-	ztEventService, err := zt.FromEventService(eventService)
+	ztEventService, err := FromEventService(eventService)
 	if err != nil {
 		t.Errorf("failed to get zt systems event service due to: %v", err)
 	}
 	url, err := ztEventService.Subscribe(
 		"https://events.receiver/events/",
-		string(redfish.RedfishEventDestinationProtocol))
+		redfish.RedfishEventDestinationProtocol)
 	if err != nil {
 		t.Errorf("failed to Subscribe() due to: %v", err)
 	}

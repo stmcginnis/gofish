@@ -103,8 +103,8 @@ func TestEventService(t *testing.T) {
 		t.Error("Message ID filter should be true")
 	}
 
-	if result.submitTestEventTarget != "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent" {
-		t.Errorf("Invalid SubmitTestEvent target: %s", result.submitTestEventTarget)
+	if result.SubmitTestEventTarget != "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent" {
+		t.Errorf("Invalid SubmitTestEvent target: %s", result.SubmitTestEventTarget)
 	}
 
 	for _, et := range result.EventTypesForSubscription {
@@ -545,7 +545,7 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 
 	// create event subscription empty
 	// subscription link in the event service
-	result.subscriptions = ""
+	result.Subscriptions = ""
 	_, err = result.CreateEventSubscription(
 		"https://myeventreciever/eventreceiver",
 		[]EventType{SupportedEventTypes["Alert"]},
@@ -637,7 +637,7 @@ func TestEventServiceGetEventSubscriptionsEmptySubscriptionsLink(t *testing.T) {
 	}
 
 	// get event subscriptions with empty subscription link
-	result.subscriptions = ""
+	result.Subscriptions = ""
 	_, err = result.GetEventSubscriptions()
 
 	// validate the returned error

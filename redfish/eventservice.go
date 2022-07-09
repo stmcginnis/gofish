@@ -166,11 +166,11 @@ type EventService struct {
 	SubordinateResourcesSupported bool
 	// Subscriptions shall contain the link to a collection of type
 	// EventDestination.
-	subscriptions string
-	// submitTestEventTarget is the URL to send SubmitTestEvent actions.
-	submitTestEventTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	Subscriptions string
+	// SubmitTestEventTarget is the URL to send SubmitTestEvent actions.
+	SubmitTestEventTarget string
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
@@ -194,11 +194,12 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*eventservice = EventService(t.temp)
-	eventservice.subscriptions = string(t.Subscriptions)
-	eventservice.submitTestEventTarget = t.Actions.SubmitTestEvent.Target
+	// Need to make these publicly available for OEM versions to access
+	eventservice.Subscriptions = string(t.Subscriptions)
+	eventservice.SubmitTestEventTarget = t.Actions.SubmitTestEvent.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
-	eventservice.rawData = b
+	eventservice.RawData = b
 
 	return nil
 }
@@ -208,7 +209,7 @@ func (eventservice *EventService) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(EventService)
-	err := original.UnmarshalJSON(eventservice.rawData)
+	err := original.UnmarshalJSON(eventservice.RawData)
 	if err != nil {
 		return err
 	}
@@ -275,11 +276,11 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 
 // GetEventSubscriptions gets all the subscriptions using the event service.
 func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
-	if strings.TrimSpace(eventservice.subscriptions) == "" {
+	if strings.TrimSpace(eventservice.Subscriptions) == "" {
 		return nil, fmt.Errorf("empty subscription link in the event service")
 	}
 
-	return ListReferencedEventDestinations(eventservice.Client, eventservice.subscriptions)
+	return ListReferencedEventDestinations(eventservice.Client, eventservice.Subscriptions)
 }
 
 // GetEventSubscription gets a specific subscription using the event service.
@@ -307,13 +308,13 @@ func (eventservice *EventService) CreateEventSubscription(
 	context string,
 	oem interface{},
 ) (string, error) {
-	if strings.TrimSpace(eventservice.subscriptions) == "" {
+	if strings.TrimSpace(eventservice.Subscriptions) == "" {
 		return "", fmt.Errorf("empty subscription link in the event service")
 	}
 
 	return CreateEventDestination(
 		eventservice.Client,
-		eventservice.subscriptions,
+		eventservice.Subscriptions,
 		destination,
 		eventTypes,
 		httpHeaders,
@@ -354,7 +355,7 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 		Severity:          "Informational",
 	}
 
-	resp, err := eventservice.Client.Post(eventservice.submitTestEventTarget, t)
+	resp, err := eventservice.Client.Post(eventservice.SubmitTestEventTarget, t)
 	if err == nil {
 		defer resp.Body.Close()
 	}
