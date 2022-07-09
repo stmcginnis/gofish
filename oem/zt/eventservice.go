@@ -13,37 +13,30 @@ import (
 	"github.com/stmcginnis/gofish/redfish"
 )
 
-const SubscriptionURL = "/redfish/v1/EventService/Subscriptions"
 const eventContext string = "root"
 
-var (
-	SubmitTestEventTarget = "/redfish/v1/EventService/Actions/EventService.SendTestEvent"
-)
-
 type SubscriptionZtRequestType struct {
-	Destination string            `json:"Destination"`
-	HTTPHeaders map[string]string `json:"HttpHeaders,omitempty"`
-	Protocol    string            `json:"Protocol,omitempty"`
-	Context     string            `json:"Context,omitempty"`
+	Destination string                           `json:"Destination"`
+	HTTPHeaders map[string]string                `json:"HttpHeaders,omitempty"`
+	Protocol    redfish.EventDestinationProtocol `json:"Protocol,omitempty"`
+	Context     string                           `json:"Context,omitempty"`
 }
 
 // SubscribeResponseType zt uses a unique subscription response.
 type SubscribeResponseType struct {
-	ODataContext        string `json:"@odata.context"`
-	ODataEtag           string `json:"@odata.etag"`
-	ODataID             string `json:"@odata.id"`
-	ODataType           string `json:"@odata.type"`
-	Context             string `json:"Context"`
-	DeliveryRetryPolicy string `json:"DeliveryRetryPolicy"`
-	Description         string `json:"Description"`
-	Destination         string `json:"Destination"`
-	EventFormatType     string `json:"EventFormatType"`
-	ID                  int    `json:"ID"`
-	Name                string `json:"Name"`
-	Protocol            string `json:"Protocol"`
-	Status              struct {
-		common.Status
-	}
+	ODataContext         string `json:"@odata.context"`
+	ODataEtag            string `json:"@odata.etag"`
+	ODataID              string `json:"@odata.id"`
+	ODataType            string `json:"@odata.type"`
+	Context              string `json:"Context"`
+	DeliveryRetryPolicy  string `json:"DeliveryRetryPolicy"`
+	Description          string `json:"Description"`
+	Destination          string `json:"Destination"`
+	EventFormatType      string `json:"EventFormatType"`
+	ID                   int    `json:"ID"`
+	Name                 string `json:"Name"`
+	Protocol             string `json:"Protocol"`
+	Status               common.Status
 	SubordinateResources bool   `json:"SubordinateResources"`
 	SubscriptionType     string `json:"SubscriptionType"`
 }
@@ -63,14 +56,14 @@ func getSubscriptionURL(ztSubscribeResponse *SubscribeResponseType) string {
 // Subscribe to ZT systems redfish
 // eventsReceiverURL is the http/s URL that will accept the events sent from redfish
 // protocol is usually "redfish"
-func (eventservice *EventService) Subscribe(eventsReceiverURL, protocol string) (string, error) {
+func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol redfish.EventDestinationProtocol) (string, error) {
 	z := &SubscriptionZtRequestType{
 		Destination: eventsReceiverURL,
 		Protocol:    protocol,
 		Context:     eventContext,
 	}
-	resp, err := eventservice.Client.Post(SubscriptionURL, z)
 
+	resp, err := eventservice.Client.Post(eventservice.Subscriptions, z)
 	if err != nil {
 		return "", fmt.Errorf("failed to POST subscribe request to redfish due to %w", err)
 	}
@@ -91,8 +84,8 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 	p := eventPayload{
 		MessageID: msgID,
 	}
-	resp, err := eventservice.Client.Post(SubmitTestEventTarget, p)
 
+	resp, err := eventservice.Client.Post(eventservice.SubmitTestEventTarget, p)
 	if err != nil {
 		return fmt.Errorf("failed to send submitTestEvent in SubmitTestEvent() due to: %w", err)
 	}
@@ -107,6 +100,14 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 	return nil
 }
 
-func FromEventService(eventservice *redfish.EventService) (EventService, error) {
-	return EventService{*eventservice}, nil
+// FromEventService converts a standard EventService object to the OEM implementation.
+func FromEventService(eventservice *redfish.EventService) (*EventService, error) {
+	es := &EventService{}
+	err := json.Unmarshal(eventservice.RawData, es)
+	if err != nil {
+		return nil, err
+	}
+
+	es.SetClient(eventservice.Client)
+	return es, nil
 }
