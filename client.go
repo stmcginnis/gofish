@@ -437,7 +437,6 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 	if c.auth != nil {
 		if c.auth.Token != "" {
 			req.Header.Set("X-Auth-Token", c.auth.Token)
-			req.Header.Set("Cookie", fmt.Sprintf("sessionKey=%s", c.auth.Token))
 		} else if c.auth.BasicAuth && c.auth.Username != "" && c.auth.Password != "" {
 			encodedAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", c.auth.Username, c.auth.Password)))
 			req.Header.Set("Authorization", fmt.Sprintf("Basic %v", encodedAuth))
