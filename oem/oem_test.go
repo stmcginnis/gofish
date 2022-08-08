@@ -2,20 +2,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package dell
+package oem
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/redfish"
 )
 
-const serviceRootBody = `{
+const serviceRootBodyDell = `{
     "@odata.context": "/redfish/v1/$metadata#ServiceRoot.ServiceRoot",
     "@odata.id": "/redfish/v1",
     "@odata.type": "#ServiceRoot.v1_8_0.ServiceRoot",
@@ -100,7 +98,7 @@ const serviceRootBody = `{
     "Vendor": "Dell"
 }`
 
-const eventServiceBody = `{
+const eventServiceBodyDell = `{
     "@odata.context": "/redfish/v1/$metadata#EventService.EventService",
     "@odata.id": "/redfish/v1/EventService",
     "@odata.type": "#EventService.v1_7_0.EventService",
@@ -150,47 +148,7 @@ const eventServiceBody = `{
     }
 }`
 
-// TestEventService tests the parsing of EventService objects.
-func TestEventService(t *testing.T) {
-	var result EventService
-	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
-
-	if err != nil {
-		t.Errorf("Error decoding JSON: %s", err)
-	}
-
-	if result.ID != "EventService" {
-		t.Errorf("Received invalid ID: %s", result.ID)
-	}
-
-	if result.Name != "Event Service" {
-		t.Errorf("Received invalid name: %s", result.Name)
-	}
-
-	if result.DeliveryRetryAttempts != 3 {
-		t.Errorf("Expected 3 retry attempts, got: %d", result.DeliveryRetryAttempts)
-	}
-
-	if result.DeliveryRetryIntervalSeconds != 5 {
-		t.Errorf("Expected 5 second retry interval, got: %d", result.DeliveryRetryIntervalSeconds)
-	}
-
-	if !result.SSEFilterPropertiesSupported.MetricReportDefinition {
-		t.Error("MetricReportDefinition filter should be true")
-	}
-
-	if !result.SSEFilterPropertiesSupported.MessageID {
-		t.Error("Message ID filter should be true")
-	}
-
-	if result.SubmitTestEventTarget != "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent" {
-		t.Errorf("Invalid SubmitTestEvent target: %s", result.SubmitTestEventTarget)
-	}
-}
-
-var server *httptest.Server
-
-func SubmitTestMock(t *testing.T) (server *httptest.Server) {
+func DellEventServiceMock(t *testing.T) (server *httptest.Server) {
 	const redfishBaseURL = "/redfish/v1/"
 	var requestCounter int // this counter is used to verify that the received requests are in the expected order
 
@@ -200,7 +158,7 @@ func SubmitTestMock(t *testing.T) (server *httptest.Server) {
 		// ServiceRoot
 		case req.Method == http.MethodGet &&
 			req.URL.String() == redfishBaseURL &&
-			requestCounter < 2:
+			requestCounter < 4:
 			contentType := req.Header.Get("Content-Type")
 			if contentType != "application/json" {
 				t.Errorf("gofish connect sent wrong header. Content-Type:"+
@@ -210,23 +168,13 @@ func SubmitTestMock(t *testing.T) (server *httptest.Server) {
 			rw.WriteHeader(http.StatusOK)
 			rw.Header().Set("Content-Type", "application/json")
 
-			rw.Write([]byte(serviceRootBody)) //nolint:errcheck
+			rw.Write([]byte(serviceRootBodyDell)) //nolint:errcheck
 
 		// Get event service
 		case req.Method == http.MethodGet &&
 			req.URL.String() == "/redfish/v1/EventService" &&
 			requestCounter == 2:
-			rw.Write([]byte(eventServiceBody)) //nolint:errcheck
-
-		// SubmitTestEvent
-		case req.Method == http.MethodPost &&
-			req.URL.String() == "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent" &&
-			requestCounter == 3:
-			err := json.NewDecoder(req.Body).Decode(&PayloadType{})
-			if err != nil {
-				t.Errorf("error in SubmitTestEvent payload for Dell due to: %v", err)
-			}
-			rw.WriteHeader(http.StatusCreated)
+			rw.Write([]byte(eventServiceBodyDell)) //nolint:errcheck
 
 		default:
 			t.Errorf("mock got unexpected %v request to path %v while request counter is %v",
@@ -237,8 +185,10 @@ func SubmitTestMock(t *testing.T) (server *httptest.Server) {
 	return server
 }
 
-func GetMockEventService(t *testing.T) *redfish.EventService {
-	server = SubmitTestMock(t)
+var server *httptest.Server
+
+func GetMockedEventService(t *testing.T) *redfish.EventService {
+	server = DellEventServiceMock(t) // For Dell
 
 	c, err := gofish.Connect(gofish.ClientConfig{Endpoint: server.URL, HTTPClient: server.Client()})
 
@@ -257,21 +207,26 @@ func GetMockEventService(t *testing.T) *redfish.EventService {
 	return eventService
 }
 
-func TestDellSubmitTestEvent(t *testing.T) {
-	eventService := GetMockEventService(t)
+func TestGetRedfishVendor(t *testing.T) {
+	eventService := GetMockedEventService(t)
 	// Close the server when test finishes
 	defer server.Close()
 
-	dellEventService, err := FromEventService(eventService)
+	vendor, err := GetRedfishVendor(eventService)
 	if err != nil {
-		t.Errorf("failed to get dell event service due to: %v", err)
+		t.Errorf("error received from GetRedfishVendor() due to: %v", err)
 	}
+	if vendor != Dell {
+		t.Errorf("expected to get Dell vendor but got: %v", vendor)
+	}
+}
 
-	err = dellEventService.SubmitTestEvent(
-		"AMP0300",
-		"Alert",
-		redfish.RedfishEventDestinationProtocol)
+func TestGetEventServiceByVendor(t *testing.T) {
+	eventService := GetMockedEventService(t)
+	// Close the server when test finishes
+	defer server.Close()
+	_, err := GetEventServiceByVendor(eventService)
 	if err != nil {
-		t.Errorf("failed to submit test event due to: %v", err)
+		t.Errorf("failed to get event service by vendor due to: %v", err)
 	}
 }
