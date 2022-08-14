@@ -89,10 +89,6 @@ type Bios struct {
 	activeSoftwareImage string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-	// etag contains the etag header when fetching the object. This is used to
-	// control updates to make sure the object has not been modified my a different
-	// process between fetching and updating that could cause conflicts.
-	etag string
 }
 
 // UnmarshalJSON unmarshals an Bios object from the raw JSON.
@@ -156,10 +152,6 @@ func GetBios(c common.Client, uri string) (*Bios, error) {
 	err = json.NewDecoder(resp.Body).Decode(&bios)
 	if err != nil {
 		return nil, err
-	}
-
-	if resp.Header["Etag"] != nil {
-		bios.etag = resp.Header["Etag"][0]
 	}
 
 	bios.SetClient(c)
@@ -271,6 +263,12 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs BiosAttributes, applyTime co
 		}
 	}
 
+	resp, err := bios.Client.Get(bios.settingsTarget)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
 	if len(payload) > 0 {
@@ -280,11 +278,11 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs BiosAttributes, applyTime co
 		}
 
 		var header = make(map[string]string)
-		if bios.etag != "" {
-			header["If-Match"] = bios.etag
+		if resp.Header["Etag"] != nil {
+			header["If-Match"] = resp.Header["Etag"][0]
 		}
 
-		resp, err := bios.Client.PatchWithHeaders(bios.settingsTarget, data, header)
+		resp, err = bios.Client.PatchWithHeaders(bios.settingsTarget, data, header)
 		if err != nil {
 			return err
 		}
