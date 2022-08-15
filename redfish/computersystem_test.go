@@ -129,7 +129,7 @@ var computerSystemBody = `{
 	}`
 
 // TestComputerSystem tests the parsing of ComputerSystem objects.
-func TestComputerSystem(t *testing.T) { // nolint
+func TestComputerSystem(t *testing.T) { //nolint
 	var result ComputerSystem
 	err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&result)
 

@@ -313,10 +313,11 @@ func (serviceroot *Service) MessageRegistryByLanguage(registry, language string)
 
 // MessageByLanguage tries to find and get the message in the correct language from the informed messageID.
 // messageID is the key used to find the registry, version and message, for example: "Alert.1.0.LanDisconnect"
-//  - The segment before the 1st period is the Registry Name (Registry Prefix): Alert
-//  - The segment between the 1st and 2nd period is the major version: 1
-//  - The segment between the 2nd and 3rd period is the minor version: 0
-//  - The segment after the 3rd period is the Message Identifier in the Registry: LanDisconnect
+//   - The segment before the 1st period is the Registry Name (Registry Prefix): Alert
+//   - The segment between the 1st and 2nd period is the major version: 1
+//   - The segment between the 2nd and 3rd period is the minor version: 0
+//   - The segment after the 3rd period is the Message Identifier in the Registry: LanDisconnect
+//
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageByLanguage(messageID, language string) (*redfish.MessageRegistryMessage, error) {
 	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.Client, serviceroot.registries, messageID, language)

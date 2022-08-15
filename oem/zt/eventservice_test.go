@@ -186,7 +186,7 @@ func TestSubscribeZT(t *testing.T) {
 			rw.WriteHeader(http.StatusOK)
 			rw.Header().Set("Content-Type", "application/json")
 
-			rw.Write([]byte(serviceRootBody)) // nolint:errcheck
+			rw.Write([]byte(serviceRootBody)) //nolint:errcheck
 		} else if req.Method == http.MethodGet && // Get event service
 			req.URL.String() == "/redfish/v1/EventService" &&
 			requestCounter == 2 {
@@ -194,7 +194,7 @@ func TestSubscribeZT(t *testing.T) {
 
 			requestCounter++
 
-			rw.Write([]byte(eventServiceBody)) // nolint:errcheck
+			rw.Write([]byte(eventServiceBody)) //nolint:errcheck
 		} else if req.Method == http.MethodPost && // Subscribe
 			req.URL.String() == "/redfish/v1/EventService/Subscriptions" &&
 			requestCounter == 3 {
@@ -202,7 +202,7 @@ func TestSubscribeZT(t *testing.T) {
 
 			requestCounter++
 
-			rw.Write([]byte(subscribeResponseBody)) // nolint:errcheck
+			rw.Write([]byte(subscribeResponseBody)) //nolint:errcheck
 		} else {
 			t.Errorf("mock got unexpected %v request to path %v while request counter is %v",
 				req.Method, req.URL.String(), requestCounter)
