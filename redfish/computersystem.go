@@ -812,7 +812,7 @@ func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
 }
 
 // SetBoot set a boot object based on a payload request
-func (computersystem *ComputerSystem) SetBoot(b Boot) error { // nolint
+func (computersystem *ComputerSystem) SetBoot(b Boot) error { //nolint
 	type temp struct {
 		Boot Boot
 	}
@@ -881,7 +881,7 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 	// This action wasn't added until 1.5.0, make sure this is supported.
 	if computersystem.setDefaultBootOrderTarget == "" {
-		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") // nolint:golint
+		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") //nolint:golint
 	}
 
 	var header = make(map[string]string)

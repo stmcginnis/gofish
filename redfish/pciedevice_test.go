@@ -87,7 +87,7 @@ func TestPCIeDevice(t *testing.T) {
 }
 
 // TestPCIeDeviceUpdate tests the Update call.
-func TestPCIeDeviceUpdate(t *testing.T) { // nolint:dupl
+func TestPCIeDeviceUpdate(t *testing.T) { //nolint:dupl
 	var result PCIeDevice
 	err := json.NewDecoder(strings.NewReader(pcieDeviceBody)).Decode(&result)
 

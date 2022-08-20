@@ -101,7 +101,7 @@ func (e *Entity) Update(originalEntity, currentEntity reflect.Value, allowedUpda
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
 	if len(payload) > 0 {
-		_, err := e.Client.Patch(e.ODataID, payload) // nolint:bodyclose
+		_, err := e.Client.Patch(e.ODataID, payload) //nolint:bodyclose
 		if err != nil {
 			return err
 		}

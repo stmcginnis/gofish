@@ -67,7 +67,7 @@ var messageRegistryBody = `{
 	}`
 
 // TestMessageRegistry tests the parsing of MessageRegistry objects.
-func TestMessageRegistry(t *testing.T) { // nolint:funlen,gocyclo
+func TestMessageRegistry(t *testing.T) { //nolint:funlen,gocyclo
 	var result MessageRegistry
 	err := json.NewDecoder(strings.NewReader(messageRegistryBody)).Decode(&result)
 

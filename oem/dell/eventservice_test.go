@@ -214,12 +214,12 @@ func TestDellSubmitTestEvent(t *testing.T) {
 			rw.WriteHeader(http.StatusOK)
 			rw.Header().Set("Content-Type", "application/json")
 
-			rw.Write([]byte(serviceRootBody)) // nolint:errcheck
+			rw.Write([]byte(serviceRootBody)) //nolint:errcheck
 		} else if req.Method == http.MethodGet && // Get event service
 			req.URL.String() == "/redfish/v1/EventService" &&
 			requestCounter == 2 {
 			requestCounter++
-			rw.Write([]byte(eventServiceBody)) // nolint:errcheck
+			rw.Write([]byte(eventServiceBody)) //nolint:errcheck
 		} else if req.Method == http.MethodPost && // SubmitTestEvent
 			req.URL.String() == "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent" &&
 			requestCounter == 3 {

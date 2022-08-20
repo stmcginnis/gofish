@@ -49,7 +49,7 @@ const (
 func testError(code int, t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(code)
-		w.Write([]byte(expectErrorStatus)) // nolint
+		w.Write([]byte(expectErrorStatus)) //nolint
 	}))
 	defer ts.Close()
 
@@ -87,7 +87,7 @@ func TestError404(t *testing.T) {
 func TestErrorOther(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
-		w.Write([]byte(nonErrorStructErrorStatus)) // nolint
+		w.Write([]byte(nonErrorStructErrorStatus)) //nolint
 	}))
 	defer ts.Close()
 
@@ -191,7 +191,7 @@ func TestConnectDefaultContextCancel(t *testing.T) {
 func TestClientRunRawRequestNoURL(t *testing.T) {
 	client := APIClient{}
 
-	_, err := client.runRawRequest("", "", nil, "") // nolint:bodyclose
+	_, err := client.runRawRequest("", "", nil, "") //nolint:bodyclose
 	if err == nil {
 		t.Error("Request without relative path should have failed")
 	}

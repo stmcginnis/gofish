@@ -233,7 +233,7 @@ type PowerControl struct {
 }
 
 // UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
-func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error { // nolint:dupl
+func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error { //nolint:dupl
 	type temp PowerControl
 	type t1 struct {
 		temp
@@ -493,7 +493,7 @@ type Voltage struct {
 }
 
 // UnmarshalJSON unmarshals a Voltage object from the raw JSON.
-func (voltage *Voltage) UnmarshalJSON(b []byte) error { // nolint:dupl
+func (voltage *Voltage) UnmarshalJSON(b []byte) error { //nolint:dupl
 	type temp Voltage
 	type t1 struct {
 		temp

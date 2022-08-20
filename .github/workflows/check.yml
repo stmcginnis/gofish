@@ -19,13 +19,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
-        go-version: '1.16.0'
-
-    # Install extra dependencies
-    - name: Install dependencies
-      run: |
-        go version
-        go get -u golang.org/x/lint/golint
+        go-version: '1.18.0'
 
     # Build the code
     - name: Run build
@@ -45,10 +39,10 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
-        go-version: '1.16.0'
+        go-version: '1.18.0'
 
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v2
       with:
-        version: v1.45.2
+        version: v1.48.0
         args: --timeout=5m -v

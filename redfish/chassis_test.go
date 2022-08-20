@@ -195,6 +195,7 @@ func TestChassis(t *testing.T) {
 //
 // The required properties according to the spec are:
 // "required": [
+//
 //	"ChassisType",
 //	"@odata.id",
 //	"@odata.type",
@@ -296,8 +297,8 @@ func TestChassisDrives(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(driveCollection), // nolint
-				getCall(driveBody),       // nolint
+				getCall(driveCollection), //nolint
+				getCall(driveBody),       //nolint
 			},
 		},
 	}
@@ -331,10 +332,10 @@ func TestChassisLinkedDrives(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(driveBody), // nolint
-				getCall(driveBody), // nolint
-				getCall(driveBody), // nolint
-				getCall(driveBody), // nolint
+				getCall(driveBody), //nolint
+				getCall(driveBody), //nolint
+				getCall(driveBody), //nolint
+				getCall(driveBody), //nolint
 			},
 		},
 	}
