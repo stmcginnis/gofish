@@ -70,9 +70,13 @@ def _ident(name):
     return outname
 
 
-def _format_comment(name, description, cutpoint='used', add=' is'):
+def _format_comment(name, description, cutpoint='shall', add=''):
     if name in COMMON_DESC:
         return '// %s' % COMMON_DESC[name]
+    elif description == '':
+        return '// %s is ' % name
+
+    description = description.replace('  ', ' ')
 
     if cutpoint not in description:
         cutpoint = ''
