@@ -15,7 +15,7 @@ PYTHON="python3"
 #
 # Inspect the url for the schema you want - for example, the 2020.1 update
 # document is "DSP8010_2020.1.zip" on this page. The base name then is:
-schemadoc="DSP8010_2020.4"
+schemadoc="DSP8010_2022.2"
 
 # Check if filename provided on the command line
 if [[ "$#" -eq 1 ]]; then
@@ -42,11 +42,11 @@ if [[ ! -d $schemadoc ]]; then
     if [[ ! -f "${schemadoc}.zip" ]]; then
         # Use curl instead of wget because it is more likely to be present
         echo "Fetching schema document $schemadoc"
-        curl -G -L "https://www.dmtf.org/sites/default/files/standards/documents/${schemadoc}.zip" > ${schemadoc}.zip
+        curl -G -L "https://www.dmtf.org/sites/default/files/standards/documents/${schemadoc}.zip" > "${schemadoc}.zip"
     fi
 
     echo "Extracting schema files..."
-    unzip "${schemadoc}.zip"
+    unzip "${schemadoc}.zip" -d "${schemadoc}"
 fi
 
 # Generate the object list. Not elegant, but it works well enough for now.
@@ -58,8 +58,7 @@ fi
 # General process is get a list of the json-schema objects from the zip, drop
 # things we don't need/want, and clip the column we want generating a file of
 # object names we can use later.
-schema_paths=$(find "$schemadoc" -name *.json)
-schema_objects=$(find "$schemadoc" -name *json | cut -d '/' -f 3 |  cut -d . -f 1 | grep -v Collection |  grep -v "redfish-" | grep -v odata | grep -v Protocol | sort | uniq)
+schema_objects=$(find "$schemadoc" -name "*json" | cut -d '/' -f 3 |  cut -d . -f 1 | grep -v Collection |  grep -v "redfish-" | grep -v odata | grep -v Protocol | sort | uniq)
 
 # Now we're ready to generate the go source based on these files
 if [[ ! -d gofiles ]]; then
@@ -69,7 +68,7 @@ fi
 # Loop through each one and generate the raw source file
 for object in $schema_objects; do
     echo "Processing object ${object}..."
-    $PYTHON generate_from_schema.py -l "${schemadoc}/json-schema" -t redfish $object -o "gofiles/${object}.go"
+    $PYTHON generate_from_schema.py -l "${schemadoc}/json-schema" -t redfish "${object}" -o "gofiles/${object}.go"
 done
 
 # Then clean them up
