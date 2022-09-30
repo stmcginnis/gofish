@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import textwrap
+import re
 
 import jinja2
 import requests
@@ -254,6 +255,7 @@ def main():
 
     # Get the most recent versioned schema from the base
     version_url = ''
+    major, minor, patch = 0, 0, 0
     for classdef in base_data.get('definitions', []):
         if classdef == args.object:
             refs = base_data['definitions'][classdef].get('anyOf', [])
@@ -262,8 +264,13 @@ def main():
                 if 'idRef' in reflink:
                     continue
                 refurl = reflink.split('#')[0]
-                if refurl > version_url:
-                    version_url = refurl
+                refver = re.search(r"v(\d+_\d+_\d+)", refurl)
+                if refver:
+                    v = refver.group(1).split('_')
+                    x, y, z = int(v[0]), int(v[1]), int(v[2])
+                    if x > major or y > minor or z > patch:
+                        major, minor, patch = x, y, z
+                        version_url = refurl
             break
 
     if version_url:
