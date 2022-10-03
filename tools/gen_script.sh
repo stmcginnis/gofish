@@ -58,7 +58,7 @@ fi
 # General process is get a list of the json-schema objects from the zip, drop
 # things we don't need/want, and clip the column we want generating a file of
 # object names we can use later.
-schema_objects=$(find "${schemadoc}/json-schema" -name "*.json" | cut -d '/' -f 3 | cut -d '.' -f 1 | grep -Fiv -e 'collection' -e 'redfish-' -e 'odata' -e 'protocol' | sort )
+schema_objects=$(find "${schemadoc}/json-schema" -name "*.json" | cut -d '/' -f 3 | cut -d '.' -f 1 | grep -Fiv -e 'collection' -e 'redfish-' -e 'odata' -e 'protocol' | sort | uniq )
 
 # Now we're ready to generate the go source based on these files
 if [[ ! -d gofiles ]]; then
