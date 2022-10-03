@@ -9,14 +9,15 @@ import json
 import logging
 import os
 import textwrap
+import re
 
 import jinja2
 import requests
 
 LOG = logging.getLogger(__name__)
 
-REDFISH_SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/v1/'
-SWORDFISH_SCHEMA_BASE = 'http://redfish.dmtf.org/schemas/swordfish/v1/'
+REDFISH_SCHEMA_BASE = 'https://redfish.dmtf.org/schemas/v1/'
+SWORDFISH_SCHEMA_BASE = 'https://redfish.dmtf.org/schemas/swordfish/v1/'
 
 COMMON_NAME_CHANGES = {
     'Oem': 'OEM',
@@ -34,43 +35,13 @@ COMMON_DESC = {
     'Identifier': 'Identifier shall be unique within the managed ecosystem.',
 }
 
-# Needed for some invalid variable names
-NUMBER_WORDS = {
-    '1': 'One',
-    '2': 'Two',
-    '3': 'Three',
-    '4': 'Four',
-    '5': 'Five',
-    '6': 'Six',
-    '7': 'Seven',
-    '8': 'Eight',
-    '9': 'Nine',
-}
-
 
 def _ident(name):
     """Gets an identifying name that has been cleaned up from the raw name."""
-    outname = name
-
-    # Convert dashes to underscores
-    outname = outname.replace('-', '_')
-    # Watch out for keyword switch
-    outname = outname.replace('switch', 'Switch')
-    # Collapse spaces
-    outname = outname.replace(' ', '')
-    # Replace special characters
-    outname = outname.replace(':', '_')
-    outname = outname.replace('/', '_div_')
-    outname = outname.replace('+', '_plus_')
-
-    if len(outname) == 1:
-        if outname[0].isdigit():
-            outname = NUMBER_WORDS.get(outname, "N%s" % outname)
-
-    return outname
+    return re.sub(r'[^a-zA-Z0-9]', r'', name)
 
 
-def _format_comment(name, description, cutpoint='used', add=' is'):
+def _format_comment(name, description, cutpoint='shall', add=''):
     if name in COMMON_DESC:
         return '// %s' % COMMON_DESC[name]
 
@@ -86,20 +57,22 @@ def _get_desc(obj):
     desc = obj.get('longDescription')
     if not desc:
         desc = obj.get('description', '')
-    return desc
+    return re.sub(r'  ', r' ', desc)
 
 
 def _get_type(name, obj):
     result = 'string'
     tipe = obj.get('type')
     anyof = obj.get('anyOf') or obj.get('items', {}).get('anyOf')
-    if 'count' in name.lower():
+    if name.endswith('Count'):
         result = 'int'
     elif name == 'Status':
         result = 'common.Status'
     elif name == 'Identifier':
         result = 'common.Identifier'
     elif name == 'Description':
+        result = 'string'
+    elif name == 'UUID':
         result = 'string'
     elif tipe == 'object':
         result = name
@@ -174,7 +147,7 @@ def _add_enum(params, name, enum):
     enum_info = {
         'name': name,
         'identname': _ident(name),
-        'description': _format_comment(name, _get_desc(enum)),
+        'description': _format_comment(_ident(name), _get_desc(enum), cutpoint='', add=' is'),
         'members': []}
 
     for en in enum.get('enum', []):
@@ -184,7 +157,7 @@ def _add_enum(params, name, enum):
         else:
             desc = enum.get('enumDescriptions', {}).get(en, '')
         member['description'] = _format_comment(
-            '%s%s' % (en, name), desc, cutpoint='shall', add='')
+            '%s%s' % (_ident(en), name), desc, cutpoint='shall', add='')
         enum_info['members'].append(member)
     params['enums'].append(enum_info)
 
@@ -250,6 +223,7 @@ def main():
 
     # Get the most recent versioned schema from the base
     version_url = ''
+    major, minor, errata = 0, 0, 0
     for classdef in base_data.get('definitions', []):
         if classdef == args.object:
             refs = base_data['definitions'][classdef].get('anyOf', [])
@@ -258,8 +232,13 @@ def main():
                 if 'idRef' in reflink:
                     continue
                 refurl = reflink.split('#')[0]
-                if refurl > version_url:
-                    version_url = refurl
+                refver = re.search(r'v(\d+_\d+_\d+)', refurl)
+                if refver:
+                    ver = refver.group(1).split('_')
+                    mjr, mnr, ert = int(ver[0]), int(ver[1]), int(ver[2])
+                    if mjr > major or mnr > minor or ert > errata:
+                        version_url = refurl
+                        major, minor, errata = mjr, mnr, ert
             break
 
     if version_url:

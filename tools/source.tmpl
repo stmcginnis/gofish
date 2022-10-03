@@ -17,20 +17,20 @@ import (
 type {{ enum.name }} string
 
 const (
-{% for enum_member in enum.members %}
+{%- for enum_member in enum.members %}
     {{ enum_member.description }}
     {{ enum_member.identname }}{{ enum.name }} {{ enum.name }} = "{{ enum_member.name }}"
 {%- endfor %}
 )
-{% endfor %}
+{%- endfor %}
 {% for class in classes -%}
 
 {{ class.description }}
 type {{ class.name }} struct {
-{% if class.isEntity %}
+{%- if class.isEntity %}
     common.Entity
-{% endif %}
-{% for attr in class.attrs %}
+{%- endif %}
+{%- for attr in class.attrs %}
     {{ attr.description }}
     {{ attr.name }}  {{ attr.type }}
 {%- endfor %}
