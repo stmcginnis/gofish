@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"reflect"
+	"sync"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -415,13 +416,33 @@ func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) { //
 		return result, err
 	}
 
+	type GetMemoryResult struct {
+		Item  *Memory
+		Error error
+	}
+
+	ch := make(chan GetMemoryResult)
+	var wg sync.WaitGroup
+
 	collectionError := common.NewCollectionError()
 	for _, memoryLink := range links.ItemLinks {
-		memory, err := GetMemory(c, memoryLink)
-		if err != nil {
-			collectionError.Failures[memoryLink] = err
+		go func(link string) {
+			defer wg.Done()
+			memory, err := GetMemory(c, link)
+			ch <- GetMemoryResult{Item: memory, Error: err}
+		}(memoryLink)
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[link] = r.Error
 		} else {
-			result = append(result, memory)
+			result = append(result, r.Item)
 		}
 	}
 
