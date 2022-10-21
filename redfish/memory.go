@@ -426,6 +426,7 @@ func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, memoryLink := range links.ItemLinks {
+		wg.Add(1)
 		go func(link string) {
 			defer wg.Done()
 			memory, err := GetMemory(c, link)
