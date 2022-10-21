@@ -405,19 +405,20 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
-func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
+func ListReferencedMemorys(c common.Client, collectionLink string) ([]*Memory, error) {
 	var result []*Memory
-	if link == "" {
+	if collectionLink == "" {
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
+	links, err := common.GetCollection(c, collectionLink)
 	if err != nil {
 		return result, err
 	}
 
 	type GetMemoryResult struct {
 		Item  *Memory
+		Link  string
 		Error error
 	}
 
@@ -426,10 +427,11 @@ func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, memoryLink := range links.ItemLinks {
+		wg.Add(1)
 		go func(link string) {
 			defer wg.Done()
 			memory, err := GetMemory(c, link)
-			ch <- GetMemoryResult{Item: memory, Error: err}
+			ch <- GetMemoryResult{Item: memory, Link: link, Error: err}
 		}(memoryLink)
 	}
 
@@ -440,7 +442,7 @@ func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
 
 	for r := range ch {
 		if r.Error != nil {
-			collectionError.Failures[link] = r.Error
+			collectionError.Failures[r.Link] = r.Error
 		} else {
 			result = append(result, r.Item)
 		}
