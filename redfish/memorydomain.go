@@ -85,18 +85,32 @@ func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain,
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *MemoryDomain
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, memorydomainLink := range links.ItemLinks {
-		memorydomain, err := GetMemoryDomain(c, memorydomainLink)
+	get := func(link string) {
+		memorydomain, err := GetMemoryDomain(c, link)
+		ch <- GetResult{Item: memorydomain, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[memorydomainLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, memorydomain)
+			result = append(result, r.Item)
 		}
 	}
 

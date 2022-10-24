@@ -255,20 +255,38 @@ func GetNetworkAdapter(c common.Client, uri string) (*NetworkAdapter, error) {
 }
 
 // ListReferencedNetworkAdapter gets the collection of Chassis from a provided reference.
-func ListReferencedNetworkAdapter(c common.Client, link string) ([]*NetworkAdapter, error) {
+func ListReferencedNetworkAdapter(c common.Client, link string) ([]*NetworkAdapter, error) { //nolint:dupl
 	var result []*NetworkAdapter
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	if link == "" {
+		return result, nil
 	}
 
+	type GetResult struct {
+		Item  *NetworkAdapter
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, networkAdapterLink := range links.ItemLinks {
-		networkAdapter, err := GetNetworkAdapter(c, networkAdapterLink)
+	get := func(link string) {
+		networkadapter, err := GetNetworkAdapter(c, link)
+		ch <- GetResult{Item: networkadapter, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[networkAdapterLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, networkAdapter)
+			result = append(result, r.Item)
 		}
 	}
 

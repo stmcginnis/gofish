@@ -165,18 +165,32 @@ func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) { //noli
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Bios
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, biosLink := range links.ItemLinks {
-		bios, err := GetBios(c, biosLink)
+	get := func(link string) {
+		bios, err := GetBios(c, link)
+		ch <- GetResult{Item: bios, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[biosLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, bios)
+			result = append(result, r.Item)
 		}
 	}
 

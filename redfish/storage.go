@@ -128,18 +128,32 @@ func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) { 
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Storage
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, storageLink := range links.ItemLinks {
-		storage, err := GetStorage(c, storageLink)
+	get := func(link string) {
+		storage, err := GetStorage(c, link)
+		ch <- GetResult{Item: storage, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[storageLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, storage)
+			result = append(result, r.Item)
 		}
 	}
 
@@ -371,18 +385,32 @@ func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageC
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *StorageController
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, storageLink := range links.ItemLinks {
-		storage, err := GetStorageController(c, storageLink)
+	get := func(link string) {
+		storagecontroller, err := GetStorageController(c, link)
+		ch <- GetResult{Item: storagecontroller, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[storageLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, storage)
+			result = append(result, r.Item)
 		}
 	}
 

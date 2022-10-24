@@ -61,18 +61,32 @@ func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *IOConnectivityLineOfService
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, ioconnectivitylineofserviceLink := range links.ItemLinks {
-		ioconnectivitylineofservice, err := GetIOConnectivityLineOfService(c, ioconnectivitylineofserviceLink)
+	get := func(link string) {
+		ioconnectivitylineofservice, err := GetIOConnectivityLineOfService(c, link)
+		ch <- GetResult{Item: ioconnectivitylineofservice, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[ioconnectivitylineofserviceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, ioconnectivitylineofservice)
+			result = append(result, r.Item)
 		}
 	}
 

@@ -7,6 +7,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 )
 
 // Collection represents a collection of entity references.
@@ -97,4 +98,36 @@ func (cr *CollectionError) Error() string {
 	}
 
 	return fmt.Sprintf("failed to retrieve some items: %s", errorsJSON)
+}
+
+// CollectList will retrieve a collection of entities from the Redfish service.
+func CollectList(get func(string), c Client, link string) error {
+	links, err := GetCollection(c, link)
+	if err != nil {
+		return err
+	}
+
+	CollectCollection(get, c, links.ItemLinks)
+	return nil
+}
+
+// CollectCollection will retrieve a collection of entitied from the Redfish service
+// when you already have the set of individual links in the collection.
+func CollectCollection(get func(string), c Client, links []string) {
+	// Only allow three concurrent requests to avoid overwhelming the service
+	limiter := make(chan struct{}, 3)
+	var wg sync.WaitGroup
+
+	for _, itemLink := range links {
+		wg.Add(1)
+		limiter <- struct{}{}
+
+		go func(itemLink string) {
+			defer wg.Done()
+			get(itemLink)
+			<-limiter
+		}(itemLink)
+	}
+
+	wg.Wait()
 }

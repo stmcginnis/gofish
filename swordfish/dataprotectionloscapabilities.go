@@ -201,18 +201,32 @@ func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) (
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *DataProtectionLoSCapabilities
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, dataprotectionloscapabilitiesLink := range links.ItemLinks {
-		dataprotectionloscapabilities, err := GetDataProtectionLoSCapabilities(c, dataprotectionloscapabilitiesLink)
+	get := func(link string) {
+		dataprotectionloscapabilities, err := GetDataProtectionLoSCapabilities(c, link)
+		ch <- GetResult{Item: dataprotectionloscapabilities, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[dataprotectionloscapabilitiesLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, dataprotectionloscapabilities)
+			result = append(result, r.Item)
 		}
 	}
 

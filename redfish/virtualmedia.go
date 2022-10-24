@@ -282,20 +282,35 @@ func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia,
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *VirtualMedia
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, virtualmediaLink := range links.ItemLinks {
-		virtualmedia, err := GetVirtualMedia(c, virtualmediaLink)
+	get := func(link string) {
+		virtualmedia, err := GetVirtualMedia(c, link)
+		ch <- GetResult{Item: virtualmedia, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[virtualmediaLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, virtualmedia)
+			result = append(result, r.Item)
 		}
 	}
+
 	if collectionError.Empty() {
 		return result, nil
 	}

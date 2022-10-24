@@ -61,18 +61,32 @@ func ListReferencedMessages(c Client, link string) ([]*Message, error) {
 		return result, nil
 	}
 
-	links, err := GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Message
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := NewCollectionError()
-	for _, messageLink := range links.ItemLinks {
-		message, err := GetMessage(c, messageLink)
+	get := func(link string) {
+		message, err := GetMessage(c, link)
+		ch <- GetResult{Item: message, Link: link, Error: err}
+	}
+
+	go func() {
+		err := CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[messageLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, message)
+			result = append(result, r.Item)
 		}
 	}
 

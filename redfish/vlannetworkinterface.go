@@ -106,18 +106,32 @@ func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanN
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *VLanNetworkInterface
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, vlannetworkinterfaceLink := range links.ItemLinks {
-		vlannetworkinterface, err := GetVLanNetworkInterface(c, vlannetworkinterfaceLink)
+	get := func(link string) {
+		vlannetworkinterface, err := GetVLanNetworkInterface(c, link)
+		ch <- GetResult{Item: vlannetworkinterface, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[vlannetworkinterfaceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, vlannetworkinterface)
+			result = append(result, r.Item)
 		}
 	}
 

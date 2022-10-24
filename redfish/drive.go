@@ -337,18 +337,32 @@ func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) { //no
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Drive
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, driveLink := range links.ItemLinks {
-		drive, err := GetDrive(c, driveLink)
+	get := func(link string) {
+		drive, err := GetDrive(c, link)
+		ch <- GetResult{Item: drive, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[driveLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, drive)
+			result = append(result, r.Item)
 		}
 	}
 

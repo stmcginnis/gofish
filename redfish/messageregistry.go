@@ -88,21 +88,20 @@ func GetMessageRegistry(
 }
 
 // ListReferencedMessageRegistries gets the collection of MessageRegistry.
-func ListReferencedMessageRegistries(
-	c common.Client,
-	link string,
-) ([]*MessageRegistry, error) {
+func ListReferencedMessageRegistries(c common.Client, link string) ([]*MessageRegistry, error) {
 	var result []*MessageRegistry
 	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO: Look at what to do to make parallel
 	for _, sLink := range links.ItemLinks {
 		mrf, err := GetMessageRegistryFile(c, sLink)
 		if err != nil {
 			return nil, err
 		}
+
 		// get message registry from all location
 		for _, location := range mrf.Location {
 			mr, err := GetMessageRegistry(c, location.URI)
@@ -118,16 +117,13 @@ func ListReferencedMessageRegistries(
 
 // ListReferencedMessageRegistriesByLanguage gets the collection of MessageRegistry.
 // language is the RFC5646-conformant language code for the message registry.
-func ListReferencedMessageRegistriesByLanguage(
-	c common.Client,
-	link string,
-	language string,
-) ([]*MessageRegistry, error) {
+func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language string) ([]*MessageRegistry, error) {
 	language = strings.TrimSpace(language)
 	if language == "" {
 		return nil, fmt.Errorf("received empty language")
 	}
 
+	// TODO: Looks at what to do to make parallel.
 	var result []*MessageRegistry
 	links, err := common.GetCollection(c, link)
 	if err != nil {
@@ -139,6 +135,7 @@ func ListReferencedMessageRegistriesByLanguage(
 		if err != nil {
 			return nil, err
 		}
+
 		// get message registry by language
 		for _, location := range mrf.Location {
 			if location.Language == language {
@@ -176,6 +173,7 @@ func GetMessageRegistryByLanguage(
 		return nil, fmt.Errorf("received empty language")
 	}
 
+	// TODO: Look at what to do to make parallel
 	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return nil, err

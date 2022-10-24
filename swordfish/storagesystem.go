@@ -35,20 +35,38 @@ func GetStorageSystem(c common.Client, uri string) (*StorageSystem, error) {
 }
 
 // ListReferencedStorageSystems gets the collection of StorageSystems.
-func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSystem, error) {
+func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSystem, error) { //nolint:dupl
 	var result []*StorageSystem
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	if link == "" {
+		return result, nil
 	}
 
+	type GetResult struct {
+		Item  *StorageSystem
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, storageSystemLink := range links.ItemLinks {
-		storageSystem, err := GetStorageSystem(c, storageSystemLink)
+	get := func(link string) {
+		storagesystem, err := GetStorageSystem(c, link)
+		ch <- GetResult{Item: storagesystem, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[storageSystemLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, storageSystem)
+			result = append(result, r.Item)
 		}
 	}
 

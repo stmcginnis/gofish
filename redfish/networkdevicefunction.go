@@ -374,18 +374,32 @@ func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*Netw
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *NetworkDeviceFunction
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, networkdevicefunctionLink := range links.ItemLinks {
-		networkdevicefunction, err := GetNetworkDeviceFunction(c, networkdevicefunctionLink)
+	get := func(link string) {
+		networkdevicefunction, err := GetNetworkDeviceFunction(c, link)
+		ch <- GetResult{Item: networkdevicefunction, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[networkdevicefunctionLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, networkdevicefunction)
+			result = append(result, r.Item)
 		}
 	}
 

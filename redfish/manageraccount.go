@@ -171,18 +171,32 @@ func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAcco
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *ManagerAccount
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, manageraccountLink := range links.ItemLinks {
-		manageraccount, err := GetManagerAccount(c, manageraccountLink)
+	get := func(link string) {
+		manageraccount, err := GetManagerAccount(c, link)
+		ch <- GetResult{Item: manageraccount, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[manageraccountLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, manageraccount)
+			result = append(result, r.Item)
 		}
 	}
 

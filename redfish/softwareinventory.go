@@ -87,18 +87,32 @@ func ListReferencedSoftwareInventories(c common.Client, link string) ([]*Softwar
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *SoftwareInventory
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, softwareinventoryLink := range links.ItemLinks {
-		softwareinventory, err := GetSoftwareInventory(c, softwareinventoryLink)
+	get := func(link string) {
+		softwareinventory, err := GetSoftwareInventory(c, link)
+		ch <- GetResult{Item: softwareinventory, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[softwareinventoryLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, softwareinventory)
+			result = append(result, r.Item)
 		}
 	}
 

@@ -152,18 +152,32 @@ func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, err
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *SecureBoot
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, securebootLink := range links.ItemLinks {
-		secureboot, err := GetSecureBoot(c, securebootLink)
+	get := func(link string) {
+		secureboot, err := GetSecureBoot(c, link)
+		ch <- GetResult{Item: secureboot, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[securebootLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, secureboot)
+			result = append(result, r.Item)
 		}
 	}
 

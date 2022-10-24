@@ -180,20 +180,38 @@ func GetStorageService(c common.Client, uri string) (*StorageService, error) {
 
 // ListReferencedStorageServices gets the collection of StorageService from
 // a provided reference.
-func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) {
+func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) { //nolint:dupl
 	var result []*StorageService
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	if link == "" {
+		return result, nil
 	}
 
+	type GetResult struct {
+		Item  *StorageService
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, storageserviceLink := range links.ItemLinks {
-		storageservice, err := GetStorageService(c, storageserviceLink)
+	get := func(link string) {
+		storageservice, err := GetStorageService(c, link)
+		ch <- GetResult{Item: storageservice, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[storageserviceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, storageservice)
+			result = append(result, r.Item)
 		}
 	}
 

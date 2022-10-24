@@ -85,18 +85,32 @@ func ListReferencedDataProtectionLineOfServices(c common.Client, link string) ([
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *DataProtectionLineOfService
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, dataprotectionlineofserviceLink := range links.ItemLinks {
-		dataprotectionlineofservice, err := GetDataProtectionLineOfService(c, dataprotectionlineofserviceLink)
+	get := func(link string) {
+		dataprotectionlineofservice, err := GetDataProtectionLineOfService(c, link)
+		ch <- GetResult{Item: dataprotectionlineofservice, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[dataprotectionlineofserviceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, dataprotectionlineofservice)
+			result = append(result, r.Item)
 		}
 	}
 

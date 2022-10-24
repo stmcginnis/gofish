@@ -273,18 +273,32 @@ func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, e
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *NetworkPort
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, networkportLink := range links.ItemLinks {
-		networkport, err := GetNetworkPort(c, networkportLink)
+	get := func(link string) {
+		networkport, err := GetNetworkPort(c, link)
+		ch <- GetResult{Item: networkport, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[networkportLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, networkport)
+			result = append(result, r.Item)
 		}
 	}
 

@@ -154,18 +154,32 @@ func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGrou
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *EndpointGroup
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, endpointgroupLink := range links.ItemLinks {
-		endpointgroup, err := GetEndpointGroup(c, endpointgroupLink)
+	get := func(link string) {
+		endpointgroup, err := GetEndpointGroup(c, link)
+		ch <- GetResult{Item: endpointgroup, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[endpointgroupLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, endpointgroup)
+			result = append(result, r.Item)
 		}
 	}
 
