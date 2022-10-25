@@ -49,7 +49,7 @@ def _format_comment(name, description, cutpoint='shall', add=''):
         cutpoint = ''
 
     lines = textwrap.wrap(
-        '%s%s %s' % (name, add, description[description.index(cutpoint):]))
+        '%s%s %s' % (name, add, description[description.index(cutpoint):]), 112)
     return '\n'.join([('// %s' % line) for line in lines])
 
 
@@ -57,14 +57,23 @@ def _get_desc(obj):
     desc = obj.get('longDescription')
     if not desc:
         desc = obj.get('description', '')
-    return re.sub(r'  ', r' ', desc)
+    desc = re.sub(r'`', "'", desc)
+    return re.sub(r'( ){2,}', ' ', desc)
+
+
+def _get_enum_dec(name, obj):
+    desc = obj.get('enumLongDescriptions', {}).get(name)
+    if not desc:
+        desc = obj.get('enumDescriptions', {}).get(name, '')
+    desc = re.sub(r'`', "'", desc)
+    return re.sub(r'( ){2,}', ' ', desc)
 
 
 def _get_type(name, obj):
     result = 'string'
     tipe = obj.get('type')
     anyof = obj.get('anyOf') or obj.get('items', {}).get('anyOf')
-    if name.endswith('Count'):
+    if name.lower().endswith('count'):
         result = 'int'
     elif name == 'Status':
         result = 'common.Status'
@@ -74,6 +83,8 @@ def _get_type(name, obj):
         result = 'string'
     elif name == 'UUID':
         result = 'string'
+    elif name == 'Oem':
+        result = 'json.RawMessage'
     elif tipe == 'object':
         result = name
     elif isinstance(tipe, list):
@@ -111,7 +122,7 @@ def _add_object(params, name, obj):
     class_info = {
         'name': name,
         'identname': _ident(name),
-        'description': _format_comment(name, _get_desc(obj), cutpoint='shall'),
+        'description': _format_comment(name, _get_desc(obj), cutpoint='shall', add=''),
         'isEntity': False,
         'attrs': [],
         'rwAttrs': []
@@ -152,10 +163,7 @@ def _add_enum(params, name, enum):
 
     for en in enum.get('enum', []):
         member = {'identname': _ident(en), 'name': en}
-        if enum.get('enumLongDescriptions', {}).get(en):
-            desc = enum.get('enumLongDescriptions', {}).get(en)
-        else:
-            desc = enum.get('enumDescriptions', {}).get(en, '')
+        desc = _get_enum_dec(en, enum)
         member['description'] = _format_comment(
             '%s%s' % (_ident(en), name), desc, cutpoint='shall', add='')
         enum_info['members'].append(member)
