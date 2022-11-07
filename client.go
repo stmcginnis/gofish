@@ -252,7 +252,7 @@ func (c *APIClient) CloneWithSession() (*APIClient, error) {
 // GetSession retrieves the session data from an initialized APIClient. An error
 // is returned if the client is not authenticated.
 func (c *APIClient) GetSession() (*Session, error) {
-	if c.auth.Session == "" {
+	if c.auth == nil || c.auth.Session == "" {
 		return nil, fmt.Errorf("client not authenticated")
 	}
 	return &Session{
