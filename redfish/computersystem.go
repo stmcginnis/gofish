@@ -267,10 +267,13 @@ const (
 
 // Boot contains properties which describe boot information for a system.
 type Boot struct {
+
 	// AliasBootOrder shall be an ordered array
 	// of boot source aliases (of type BootSource) representing the
 	// persistent Boot Order of this computer system.
-	AliasBootOrder []string `json:",omitempty"`
+	AliasBootOrder         []string `json:",omitempty"`
+	AutomaticRetryAttempts int      `json:",omitempty"`
+	AutomaticRetryConfig   string   `json:",omitempty"`
 	// BootNext shall be the
 	// BootOptionReference of the UEFI Boot Option for one time boot, as
 	// defined by the UEFI Specification. The valid values for this property

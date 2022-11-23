@@ -36,6 +36,12 @@ var computerSystemBody = `{
 		"IndicatorLED": "Off",
 		"PowerState": "On",
 		"Boot": {
+			"AutomaticRetryAttempts": 3,
+			"AutomaticRetryConfig": "Disabled",
+			"AutomaticRetryConfig@Redfish.AllowableValues": [
+				"Disabled",
+				"RetryAttempts"
+			],
 			"BootSourceOverrideEnabled": "Once",
 			"BootSourceOverrideMode": "UEFI",
 			"BootSourceOverrideTarget": "Pxe",
@@ -167,6 +173,13 @@ func TestComputerSystem(t *testing.T) { //nolint
 
 	if result.PowerState != OnPowerState {
 		t.Errorf("Received invalid power status: %s", result.PowerState)
+	}
+	if result.Boot.AutomaticRetryAttempts != 3 {
+		t.Errorf("Received invalid boot automatic retry attempts: %d", result.Boot.AutomaticRetryAttempts)
+	}
+
+	if result.Boot.AutomaticRetryConfig != "Disabled" {
+		t.Errorf("Received invalid boot automatic retry config: %s", result.Boot.AutomaticRetryConfig)
 	}
 
 	if result.Boot.BootSourceOverrideEnabled != "Once" {
