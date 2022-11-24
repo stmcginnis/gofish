@@ -6,6 +6,7 @@ package supermicro
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -17,22 +18,20 @@ type Manager struct {
 }
 
 type ManagerOem struct {
-	Supermicro ManagerOemSupermicro
-}
-
-type ManagerOemSupermicro struct {
-	OdataType string `json:"@odata.type"`
-	NTP       common.Link
-	Syslog    common.Link
-	IKVM      common.Link
-	m         *redfish.Manager
+	Supermicro struct {
+		OdataType string `json:"@odata.type"`
+		NTP       common.Link
+		Syslog    common.Link
+		IKVM      common.Link
+	} `json:"Supermicro"`
 }
 
 func FromManager(manager *redfish.Manager) (Manager, error) {
 	var oem ManagerOem
-	_ = json.Unmarshal(manager.Oem, &oem)
-
-	oem.Supermicro.m = manager
+	err := json.Unmarshal(manager.Oem, &oem)
+	if err != nil {
+		return Manager{}, fmt.Errorf("can't unmarshal OEM Manager: %v", err)
+	}
 
 	return Manager{
 		Manager: *manager,
@@ -40,14 +39,14 @@ func FromManager(manager *redfish.Manager) (Manager, error) {
 	}, nil
 }
 
-func (manager *ManagerOemSupermicro) NTPs() (*NTP, error) {
-	return GetNTP(manager.m.Client, string(manager.NTP))
+func (manager *Manager) NTP() (*NTP, error) {
+	return GetNTP(manager.Client, string(manager.Oem.Supermicro.NTP))
 }
 
-func (manager *ManagerOemSupermicro) Syslogs() (*Syslog, error) {
-	return GetSyslog(manager.m.Client, string(manager.Syslog))
+func (manager *Manager) Syslog() (*Syslog, error) {
+	return GetSyslog(manager.Client, string(manager.Oem.Supermicro.Syslog))
 }
 
-func (manager *ManagerOemSupermicro) IKVMs() (*IKVM, error) {
-	return GetIKVM(manager.m.Client, string(manager.IKVM))
+func (manager *Manager) IKVM() (*IKVM, error) {
+	return GetIKVM(manager.Client, string(manager.Oem.Supermicro.IKVM))
 }
