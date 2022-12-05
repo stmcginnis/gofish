@@ -197,6 +197,8 @@ type Manager struct {
 	// hostInterfaces shall be a link to a collection of type
 	// HostInterfaceCollection.
 	hostInterfaces string
+	// LastResetTime last BMC reset time
+	LastResetTime string `json:"LastResetTime,omitempty"`
 	// logServices shall contain a reference to a collection of type
 	// LogServiceCollection which are for the use of this manager.
 	logServices string
