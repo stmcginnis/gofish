@@ -188,6 +188,7 @@ var managerBody = `{
 		"@odata.id": "/redfish/v1/Managers/BMC-1",
 		"@odata.type": "#Manager.v1_1_0.Manager",
 		"Id": "BMC-1",
+		"LastResetTime": "2022-11-17T08:46:24+00:00",
 		"Name": "Manager",
 		"ManagerType": "BMC",
 		"Description": "BMC",
@@ -293,6 +294,10 @@ func TestManager(t *testing.T) {
 
 		if result.ID != "BMC-1" {
 			t.Errorf("Received invalid ID: %s", result.ID)
+		}
+
+		if result.LastResetTime != "2022-11-17T08:46:24+00:00" {
+			t.Errorf("Received invalid LastResetTime: %s", result.LastResetTime)
 		}
 
 		if result.Name != "Manager" {
