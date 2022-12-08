@@ -233,7 +233,7 @@ type Temperature struct {
 	ReadingCelsius float32
 	// SensorNumber shall be a numerical identifier for this temperature sensor
 	// that is unique within this resource.
-	SensorNumber int
+	SensorNumber float32
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// UpperThresholdCritical shall indicate
