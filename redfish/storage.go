@@ -263,7 +263,7 @@ type StorageController struct {
 	// interface (in Gigabits per second). The interface specified connects the
 	// controller to the storage devices, not the controller to a host (e.g. SAS
 	// bus, not PCIe host bus).
-	SpeedGbps int
+	SpeedGbps float32
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// SupportedControllerProtocols shall be the set of protocols this storage
