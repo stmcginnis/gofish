@@ -188,6 +188,10 @@ type Volume struct {
 	OptimumIOSizeBytes int
 	// DrivesCount is the number of associated drives.
 	DrivesCount int
+	// Oem shall contain the OEM extensions. All values for properties that
+	// this object contains shall conform to the Redfish Specification
+	// described requirements.
+	Oem json.RawMessage
 	// drives contains references to associated drives.
 	drives []string
 }
