@@ -229,6 +229,7 @@ type Chassis struct {
 	computerSystems []string
 	resourceBlocks  []string
 	managedBy       []string
+	assembly        string
 	// resetTarget is the internal URL to send reset actions to.
 	resetTarget string
 	// SupportedResetTypes, if provided, is the reset types this chassis supports.
@@ -256,6 +257,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 
 	var t struct {
 		temp
+		Assembly        common.Link
 		Drives          common.Link
 		Thermal         common.Link
 		Power           common.Link
@@ -272,6 +274,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	*chassis = Chassis(t.temp)
 
 	// Extract the links to other entities for later
+	chassis.assembly = string(t.Assembly)
 	chassis.drives = string(t.Drives)
 	chassis.linkedDrives = t.Links.Drives.ToStrings()
 	if chassis.DrivesCount == 0 && t.Links.DrivesCount > 0 {
@@ -466,6 +469,13 @@ func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 // NetworkAdapters gets the collection of network adapters of this chassis
 func (chassis *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
 	return ListReferencedNetworkAdapter(chassis.Client, chassis.networkAdapters)
+}
+
+// The Assembly schema defines an assembly.
+// Assembly information contains details about a device, such as part number, serial number, manufacturer, and production date.
+// It also provides access to the original data for the assembly.
+func (chassis *Chassis) Assembly() (*Assembly, error) {
+	return GetAssembly(chassis.Client, chassis.assembly)
 }
 
 // Reset shall reset the chassis. This action shall not reset Systems or other
