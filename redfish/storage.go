@@ -222,6 +222,8 @@ func (storage *Storage) GetOperationApplyTimeValues() ([]common.OperationApplyTi
 type StorageController struct {
 	common.Entity
 
+	// Description is used to describe the controller
+	Description string
 	// Assembly shall be a link to a resource of type Assembly.
 	assembly string
 	// AssetTag is used to track the storage controller for inventory
