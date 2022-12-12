@@ -315,7 +315,7 @@ type Processor struct {
 	ProcessorType ProcessorType
 	// Socket shall contain the string which identifies the
 	// physical location or socket of the processor.
-	Socket string
+	Socket interface{}
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
@@ -482,10 +482,10 @@ func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error
 type ProcessorID struct {
 	// EffectiveFamily shall indicate the effective Family
 	// information as provided by the manufacturer of this processor.
-	EffectiveFamily string
+	EffectiveFamily interface{}
 	// EffectiveModel shall indicate the effective Model
 	// information as provided by the manufacturer of this processor.
-	EffectiveModel string
+	EffectiveModel interface{}
 	// IdentificationRegisters shall include the raw CPUID
 	// instruction output as provided by the manufacturer of this processor.
 	IdentificationRegisters string
@@ -494,7 +494,7 @@ type ProcessorID struct {
 	MicrocodeInfo string
 	// Step shall indicate the Step or revision string
 	// information as provided by the manufacturer of this processor.
-	Step string
+	Step interface{}
 	// VendorID shall indicate the Vendor Identification
 	// string information as provided by the manufacturer of this processor.
 	VendorID string `json:"VendorId"`
