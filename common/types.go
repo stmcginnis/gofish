@@ -40,7 +40,7 @@ type Entity struct {
 	// Name is the name of the resource or array element.
 	Name string `json:"Name"`
 	// Client is the REST client interface to the system.
-	Client Client
+	Client Client `json:"-"`
 }
 
 // SetClient sets the API client connection to use for accessing this
