@@ -29,6 +29,12 @@ var accountServiceBody = `{
 			"Roles": {
 				"@odata.id": "/redfish/v1/AccountService/Roles"
 			}
+		},
+		"Oem": {
+			"VendorName": {
+				"PasswordChangeOnNextLogin": false,
+				"PasswordChangeOnFirstAccess": false
+			}
 		}
 	}`
 
@@ -64,6 +70,31 @@ func TestAccountService(t *testing.T) {
 
 	if result.roles != "/redfish/v1/AccountService/Roles" {
 		t.Errorf("Received invalid Roles: %s", result.roles)
+	}
+
+	switch oem := result.Oem.(type) {
+	case map[string]interface{}:
+		for vendor, values := range oem {
+			if vendor != "VendorName" {
+				t.Errorf("Received invalid Oem vendor: %s", vendor)
+			}
+			switch val := values.(type) {
+			case map[string]interface{}:
+				for k, v := range val {
+					if k != "PasswordChangeOnNextLogin" && k != "PasswordChangeOnFirstAccess" {
+						t.Errorf("Received invalid Oem key %s for vendor: %s", k, vendor)
+					}
+					if k == "PasswordChangeOnNextLogin" && v != false {
+						t.Errorf("Received invalid OemInfo1: %s", v)
+					}
+					if v == "PasswordChangeOnFirstAccess" && v != false {
+						t.Errorf("Received invalid OemInfoN: %s", v)
+					}
+				}
+			}
+		}
+	default:
+		t.Errorf("Received invalid Oem")
 	}
 }
 
