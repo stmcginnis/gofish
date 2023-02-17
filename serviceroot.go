@@ -178,7 +178,6 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 		Links              struct {
 			Sessions common.Link
 		}
-		Oem json.RawMessage // OEM message will be stored here
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -207,7 +206,6 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 	serviceroot.sessionService = t.SessionService.String()
 	serviceroot.telemetryService = t.TelemetryService.String()
 	serviceroot.updateService = t.UpdateService.String()
-	serviceroot.Oem = t.Oem
 
 	return nil
 }
