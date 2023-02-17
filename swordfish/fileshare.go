@@ -123,9 +123,9 @@ func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*fileshare = FileShare(t.temp)
-	fileshare.classOfService = string(t.Links.ClassOfService)
-	fileshare.fileSystem = string(t.Links.FileSystem)
-	fileshare.ethernetInterfaces = string(t.EthernetInterfaces)
+	fileshare.classOfService = t.Links.ClassOfService.String()
+	fileshare.fileSystem = t.Links.FileSystem.String()
+	fileshare.ethernetInterfaces = t.EthernetInterfaces.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	fileshare.rawData = b

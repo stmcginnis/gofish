@@ -489,7 +489,7 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 	*volume = Volume(t.temp)
 	volume.allocatedPools = t.AllocatedPools.ToStrings()
 	volume.storageGroups = t.StorageGroups.ToStrings()
-	volume.classOfService = string(t.Links.ClassOfService)
+	volume.classOfService = t.Links.ClassOfService.String()
 	volume.dedicatedSpareDrives = t.Links.DedicatedSpareDrives.ToStrings()
 	volume.drives = t.Links.Drives.ToStrings()
 	volume.spareResourceSets = t.Links.SpareResourceSets.ToStrings()

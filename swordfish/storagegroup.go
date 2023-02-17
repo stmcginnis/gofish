@@ -170,7 +170,7 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 	*storagegroup = StorageGroup(t.temp)
 	storagegroup.childStorageGroups = t.Links.ChildStorageGroups.ToStrings()
 	storagegroup.ChildStorageGroupsCount = t.Links.ChildStorageGroupsCount
-	storagegroup.classOfService = string(t.Links.ClassOfService)
+	storagegroup.classOfService = t.Links.ClassOfService.String()
 	storagegroup.parentStorageGroups = t.Links.ParentStorageGroups.ToStrings()
 	storagegroup.ParentStorageGroupsCount = t.Links.ParentStorageGroupsCount
 	storagegroup.exposeVolumesTarget = t.Actions.ExposeVolumes.Target
