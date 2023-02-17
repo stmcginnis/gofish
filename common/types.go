@@ -132,6 +132,10 @@ func (l *Link) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (l Link) String() string {
+	return string(l)
+}
+
 // Links are a collection of Link references
 type Links []Link
 
