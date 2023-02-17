@@ -355,9 +355,9 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 	*memory = Memory(t.temp)
 
 	// Extract the links to other entities for later
-	memory.assembly = string(t.Assembly)
-	memory.metrics = string(t.Metrics)
-	memory.chassis = string(t.Links.Chassis)
+	memory.assembly = t.Assembly.String()
+	memory.metrics = t.Metrics.String()
+	memory.chassis = t.Links.Chassis.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	memory.rawData = b

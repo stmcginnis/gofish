@@ -215,9 +215,9 @@ func (filesystem *FileSystem) UnmarshalJSON(b []byte) error {
 	*filesystem = FileSystem(t.temp)
 
 	// Extract the links to other entities for later
-	filesystem.exportedShares = string(t.ExportedShares)
+	filesystem.exportedShares = t.ExportedShares.String()
 	filesystem.replicaTargets = t.ReplicaTargets.ToStrings()
-	filesystem.classOfService = string(t.Links.ClassOfService)
+	filesystem.classOfService = t.Links.ClassOfService.String()
 	filesystem.ReplicaCollectionCount = t.Links.ReplicaCollectionCount
 	filesystem.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
 	filesystem.SpareResourceSetsCount = t.Links.SpareResourceSetsCount

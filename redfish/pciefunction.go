@@ -170,7 +170,7 @@ func (pciefunction *PCIeFunction) UnmarshalJSON(b []byte) error {
 	pciefunction.EthernetInterfacesCount = t.Links.EthernetInterfacesCount
 	pciefunction.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
 	pciefunction.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
-	pciefunction.pcieDevice = string(t.Links.PCIeDevice)
+	pciefunction.pcieDevice = t.Links.PCIeDevice.String()
 	pciefunction.storageControllers = t.Links.StorageControllers.ToStrings()
 	pciefunction.StorageControllersCount = t.Links.StorageControllersCount
 

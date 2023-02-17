@@ -54,7 +54,7 @@ func (memorydomain *MemoryDomain) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*memorydomain = MemoryDomain(t.temp)
-	memorydomain.memoryChunks = string(t.MemoryChunks)
+	memorydomain.memoryChunks = t.MemoryChunks.String()
 
 	return nil
 }

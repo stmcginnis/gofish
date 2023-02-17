@@ -274,15 +274,15 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	*chassis = Chassis(t.temp)
 
 	// Extract the links to other entities for later
-	chassis.assembly = string(t.Assembly)
-	chassis.drives = string(t.Drives)
+	chassis.assembly = t.Assembly.String()
+	chassis.drives = t.Drives.String()
 	chassis.linkedDrives = t.Links.Drives.ToStrings()
 	if chassis.DrivesCount == 0 && t.Links.DrivesCount > 0 {
 		chassis.DrivesCount = t.Links.DrivesCount
 	}
-	chassis.thermal = string(t.Thermal)
-	chassis.power = string(t.Power)
-	chassis.networkAdapters = string(t.NetworkAdapters)
+	chassis.thermal = t.Thermal.String()
+	chassis.power = t.Power.String()
+	chassis.networkAdapters = t.NetworkAdapters.String()
 	chassis.computerSystems = t.Links.ComputerSystems.ToStrings()
 	chassis.resourceBlocks = t.Links.ResourceBlocks.ToStrings()
 	chassis.managedBy = t.Links.ManagedBy.ToStrings()

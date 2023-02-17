@@ -337,23 +337,23 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities
 	*manager = Manager(t.temp)
-	manager.ethernetInterfaces = string(t.EthernetInterfaces)
-	manager.hostInterfaces = string(t.HostInterfaces)
-	manager.logServices = string(t.LogServices)
-	manager.networkProtocol = string(t.NetworkProtocol)
+	manager.ethernetInterfaces = t.EthernetInterfaces.String()
+	manager.hostInterfaces = t.HostInterfaces.String()
+	manager.logServices = t.LogServices.String()
+	manager.networkProtocol = t.NetworkProtocol.String()
 	manager.OemActions = t.Actions.Oem
 	manager.Oem = t.Oem
 	manager.OemLinks = t.Links.Oem
-	manager.remoteAccountService = string(t.RemoteAccountService)
-	manager.serialInterfaces = string(t.SerialInterfaces)
-	manager.virtualMedia = string(t.VirtualMedia)
+	manager.remoteAccountService = t.RemoteAccountService.String()
+	manager.serialInterfaces = t.SerialInterfaces.String()
+	manager.virtualMedia = t.VirtualMedia.String()
 	manager.managerForServers = t.Links.ManagerForServers.ToStrings()
 	manager.ManagerForServersCount = t.Links.ManagerForServersCount
 	manager.managerForChassis = t.Links.ManagerForChassis.ToStrings()
 	manager.ManagerForChassisCount = t.Links.ManagerForChassisCount
 	manager.ManagerForSwitchesCount = t.Links.ManagerForSwitchesCount
 	manager.managerForSwitches = t.Links.ManagerForSwitches.ToStrings()
-	manager.managerInChassis = string(t.Links.ManagerInChassis)
+	manager.managerInChassis = t.Links.ManagerInChassis.String()
 	manager.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
 	manager.resetTarget = t.Actions.Reset.Target
 

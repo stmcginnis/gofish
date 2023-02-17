@@ -419,18 +419,18 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	*processor = Processor(t.temp)
 
 	// Extract the links to other entities for later
-	processor.accelerationFunctions = string(t.AccelerationFunctions)
-	processor.assembly = string(t.Assembly)
-	processor.chassis = string(t.Links.Chassis)
+	processor.accelerationFunctions = t.AccelerationFunctions.String()
+	processor.assembly = t.Assembly.String()
+	processor.chassis = t.Links.Chassis.String()
 	processor.processorMemory = t.ProcessorMemory.ToStrings()
 	processor.connectedProcessors = t.Links.ConnectedProcessors.ToStrings()
 	processor.ConnectedProcessorsCount = t.Links.ConnectedProcessorsCount
 	processor.endpoints = t.Links.Endpoints.ToStrings()
 	processor.EndpointsCount = t.Links.EndpointsCount
-	processor.pcieDevice = string(t.Links.PCIeDevice)
+	processor.pcieDevice = t.Links.PCIeDevice.String()
 	processor.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	processor.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
-	processor.metrics = string(t.Metrics)
+	processor.metrics = t.Metrics.String()
 
 	return nil
 }

@@ -109,7 +109,7 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*logservice = LogService(t.temp)
-	logservice.entries = string(t.Entries)
+	logservice.entries = t.Entries.String()
 	logservice.clearLogTarget = t.Actions.ClearLog.Target
 
 	// This is a read/write object, so we need to save the raw object data for later

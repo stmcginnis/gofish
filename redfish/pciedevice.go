@@ -115,7 +115,7 @@ func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 	*pciedevice = PCIeDevice(t.temp)
 
 	// Extract the links to other entities for later
-	pciedevice.assembly = string(t.Assembly)
+	pciedevice.assembly = t.Assembly.String()
 	pciedevice.chassis = t.Links.Chassis.ToStrings()
 	pciedevice.ChassisCount = t.Links.ChassisCount
 	pciedevice.pcieFunctions = t.Links.PCIeFunctions.ToStrings()

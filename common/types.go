@@ -132,6 +132,10 @@ func (l *Link) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (l Link) String() string {
+	return string(l)
+}
+
 // Links are a collection of Link references
 type Links []Link
 
@@ -139,7 +143,7 @@ type Links []Link
 func (l Links) ToStrings() []string {
 	var result []string
 	for _, link := range l {
-		result = append(result, string(link))
+		result = append(result, link.String())
 	}
 	return result
 }

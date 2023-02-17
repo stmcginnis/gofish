@@ -426,7 +426,7 @@ func (replicainfo *ReplicaInfo) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*replicainfo = ReplicaInfo(t.temp)
 	replicainfo.dataProtectionLineOfService = t.DataProtectionLineOfService.ToStrings()
-	replicainfo.replica = string(t.Replica)
+	replicainfo.replica = t.Replica.String()
 
 	return nil
 }

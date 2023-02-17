@@ -60,9 +60,9 @@ func (networkinterface *NetworkInterface) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*networkinterface = NetworkInterface(t.temp)
-	networkinterface.networkAdapter = string(t.Links.NetworkAdapter)
-	networkinterface.networkDeviceFunctions = string(t.NetworkDeviceFunctions)
-	networkinterface.networkPorts = string(t.NetworkPorts)
+	networkinterface.networkAdapter = t.Links.NetworkAdapter.String()
+	networkinterface.networkDeviceFunctions = t.NetworkDeviceFunctions.String()
+	networkinterface.networkPorts = t.NetworkPorts.String()
 
 	return nil
 }

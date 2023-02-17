@@ -96,7 +96,7 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 	storage.enclosures = t.Links.Enclosures.ToStrings()
 	storage.EnclosuresCount = t.Links.EnclosuresCount
 	storage.drives = t.Drives.ToStrings()
-	storage.volumes = string(t.Volumes)
+	storage.volumes = t.Volumes.String()
 	storage.setEncryptionKeyTarget = t.Actions.SetEncryptionKey.Target
 
 	return nil
@@ -313,7 +313,7 @@ func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 	*storagecontroller = StorageController(t.temp)
 
 	// Extract the links to other entities for later
-	storagecontroller.assembly = string(t.Assembly)
+	storagecontroller.assembly = t.Assembly.String()
 	storagecontroller.endpoints = t.Links.StorageServices.ToStrings()
 	storagecontroller.EndpointsCount = t.Links.EndpointsCount
 	storagecontroller.storageServices = t.Links.StorageServices.ToStrings()

@@ -8,9 +8,8 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/redfish"
-
 	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/redfish"
 )
 
 // StoragePool is a container of data storage capable of providing
@@ -130,11 +129,11 @@ func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
 	storagepool.DedicatedSpareDrivesCount = t.Links.DedicatedSpareDrivesCount
 	storagepool.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
 	storagepool.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
-	storagepool.allocatedPools = string(t.AllocatedPools)
-	storagepool.allocatedVolumes = string(t.AllocatedVolumes)
+	storagepool.allocatedPools = t.AllocatedPools.String()
+	storagepool.allocatedVolumes = t.AllocatedVolumes.String()
 	storagepool.capacitySources = t.CapacitySource.ToStrings()
-	storagepool.classesOfService = string(t.ClassesOfService)
-	storagepool.defaultClassOfService = string(t.DefaultClassOfService)
+	storagepool.classesOfService = t.ClassesOfService.String()
+	storagepool.defaultClassOfService = t.DefaultClassOfService.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	storagepool.rawData = b

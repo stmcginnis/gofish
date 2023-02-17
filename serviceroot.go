@@ -178,7 +178,6 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 		Links              struct {
 			Sessions common.Link
 		}
-		Oem json.RawMessage // OEM message will be stored here
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -188,26 +187,25 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*serviceroot = Service(t.temp)
-	serviceroot.certificateService = string(t.CertificateService)
-	serviceroot.chassis = string(t.Chassis)
-	serviceroot.managers = string(t.Managers)
-	serviceroot.tasks = string(t.Tasks)
-	serviceroot.sessions = string(t.Links.Sessions)
-	serviceroot.storageServices = string(t.StorageServices)
-	serviceroot.storageSystems = string(t.StorageSystems)
-	serviceroot.accountService = string(t.AccountService)
-	serviceroot.eventService = string(t.EventService)
-	serviceroot.registries = string(t.Registries)
-	serviceroot.systems = string(t.Systems)
-	serviceroot.compositionService = string(t.CompositionService)
-	serviceroot.fabrics = string(t.Fabrics)
-	serviceroot.jobService = string(t.JobService)
-	serviceroot.jsonSchemas = string(t.JSONSchemas)
-	serviceroot.resourceBlocks = string(t.ResourceBlocks)
-	serviceroot.sessionService = string(t.SessionService)
-	serviceroot.telemetryService = string(t.TelemetryService)
-	serviceroot.updateService = string(t.UpdateService)
-	serviceroot.Oem = t.Oem
+	serviceroot.certificateService = t.CertificateService.String()
+	serviceroot.chassis = t.Chassis.String()
+	serviceroot.managers = t.Managers.String()
+	serviceroot.tasks = t.Tasks.String()
+	serviceroot.sessions = t.Links.Sessions.String()
+	serviceroot.storageServices = t.StorageServices.String()
+	serviceroot.storageSystems = t.StorageSystems.String()
+	serviceroot.accountService = t.AccountService.String()
+	serviceroot.eventService = t.EventService.String()
+	serviceroot.registries = t.Registries.String()
+	serviceroot.systems = t.Systems.String()
+	serviceroot.compositionService = t.CompositionService.String()
+	serviceroot.fabrics = t.Fabrics.String()
+	serviceroot.jobService = t.JobService.String()
+	serviceroot.jsonSchemas = t.JSONSchemas.String()
+	serviceroot.resourceBlocks = t.ResourceBlocks.String()
+	serviceroot.sessionService = t.SessionService.String()
+	serviceroot.telemetryService = t.TelemetryService.String()
+	serviceroot.updateService = t.UpdateService.String()
 
 	return nil
 }

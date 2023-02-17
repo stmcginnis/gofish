@@ -131,7 +131,7 @@ func (fan *Fan) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*fan = Fan(t.temp)
-	fan.assembly = string(t.Assembly)
+	fan.assembly = t.Assembly.String()
 
 	if t.FanName != "" {
 		fan.Name = t.FanName

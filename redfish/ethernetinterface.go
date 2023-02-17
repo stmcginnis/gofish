@@ -237,11 +237,11 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 	*ethernetinterface = EthernetInterface(t.temp)
 
 	// Extract the links to other entities for later
-	ethernetinterface.chassis = string(t.Links.Chassis)
+	ethernetinterface.chassis = t.Links.Chassis.String()
 	ethernetinterface.endpoints = t.Links.Endpoints.ToStrings()
 	ethernetinterface.EndpointsCount = t.Links.EndpointsCount
-	ethernetinterface.hostInterface = string(t.Links.HostInterface)
-	ethernetinterface.vlans = string(t.VLANs)
+	ethernetinterface.hostInterface = t.Links.HostInterface.String()
+	ethernetinterface.vlans = t.VLANs.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	ethernetinterface.rawData = b

@@ -409,7 +409,7 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*powersupply = PowerSupply(t.temp)
-	powersupply.assembly = string(t.Assembly)
+	powersupply.assembly = t.Assembly.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	powersupply.rawData = b

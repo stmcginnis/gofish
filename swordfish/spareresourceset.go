@@ -75,7 +75,7 @@ func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
 	spareresourceset.OnHandSparesCount = t.OnHandSparesCount
 	spareresourceset.onHandSpares = t.Links.OnHandSpares.ToStrings()
 	spareresourceset.ReplacementSpareSetsCount = t.ReplacementSpareSetsCount
-	spareresourceset.replacementSpareSets = string(t.Links.ReplacementSpareSets)
+	spareresourceset.replacementSpareSets = t.Links.ReplacementSpareSets.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	spareresourceset.rawData = b

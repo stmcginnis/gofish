@@ -95,7 +95,7 @@ func (endpointgroup *EndpointGroup) UnmarshalJSON(b []byte) error {
 	*endpointgroup = EndpointGroup(t.temp)
 
 	// Extract the links to other entities for later
-	endpointgroup.endpoints = string(t.Endpoints)
+	endpointgroup.endpoints = t.Endpoints.String()
 	endpointgroup.EndpointsCount = t.EndpointsCount
 
 	// This is a read/write object, so we need to save the raw object data for later

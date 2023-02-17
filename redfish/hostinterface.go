@@ -140,14 +140,14 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 	*hostinterface = HostInterface(t.temp)
 
 	// Extract the links to other entities for later
-	hostinterface.authNoneRole = string(t.Links.AuthNoneRole)
+	hostinterface.authNoneRole = t.Links.AuthNoneRole.String()
 	hostinterface.computerSystems = t.Links.ComputerSystems.ToStrings()
 	hostinterface.ComputerSystemsCount = t.Links.ComputerSystemsCount
-	hostinterface.firmwareAuthRole = string(t.Links.FirmwareAuthRole)
-	hostinterface.kernelAuthRole = string(t.Links.KernelAuthRole)
-	hostinterface.hostEthernetInterfaces = string(t.HostEthernetInterfaces)
-	hostinterface.managerEthernetInterface = string(t.ManagerEthernetInterface)
-	hostinterface.networkProtocol = string(t.NetworkProtocol)
+	hostinterface.firmwareAuthRole = t.Links.FirmwareAuthRole.String()
+	hostinterface.kernelAuthRole = t.Links.KernelAuthRole.String()
+	hostinterface.hostEthernetInterfaces = t.HostEthernetInterfaces.String()
+	hostinterface.managerEthernetInterface = t.ManagerEthernetInterface.String()
+	hostinterface.networkProtocol = t.NetworkProtocol.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	hostinterface.rawData = b

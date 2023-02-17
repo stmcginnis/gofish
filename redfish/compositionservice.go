@@ -57,8 +57,8 @@ func (compositionservice *CompositionService) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*compositionservice = CompositionService(t.temp)
-	compositionservice.resourceBlocks = string(t.ResourceBlocks)
-	compositionservice.resourceZones = string(t.ResourceZones)
+	compositionservice.resourceBlocks = t.ResourceBlocks.String()
+	compositionservice.resourceZones = t.ResourceZones.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	compositionservice.rawData = b

@@ -7,9 +7,8 @@ package swordfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/redfish"
-
 	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/redfish"
 )
 
 // Capacity is used to represent storage capacity. The sum of the values
@@ -107,12 +106,12 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 	*capacitysource = CapacitySource(t.temp)
 
 	// Extract the links to other entities for later
-	capacitysource.providedClassOfService = string(t.ProvidedClassOfService)
-	capacitysource.providingDrives = string(t.ProvidingDrives)
-	capacitysource.providingMemory = string(t.ProvidingMemory)
-	capacitysource.providingMemoryChunks = string(t.ProvidingMemoryChunks)
-	capacitysource.providingPools = string(t.ProvidingPools)
-	capacitysource.providingVolumes = string(t.ProvidingVolumes)
+	capacitysource.providedClassOfService = t.ProvidedClassOfService.String()
+	capacitysource.providingDrives = t.ProvidingDrives.String()
+	capacitysource.providingMemory = t.ProvidingMemory.String()
+	capacitysource.providingMemoryChunks = t.ProvidingMemoryChunks.String()
+	capacitysource.providingPools = t.ProvidingPools.String()
+	capacitysource.providingVolumes = t.ProvidingVolumes.String()
 
 	return nil
 }
