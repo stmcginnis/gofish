@@ -195,7 +195,7 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*eventservice = EventService(t.temp)
 	// Need to make these publicly available for OEM versions to access
-	eventservice.Subscriptions = string(t.Subscriptions)
+	eventservice.Subscriptions = t.Subscriptions.String()
 	eventservice.SubmitTestEventTarget = t.Actions.SubmitTestEvent.Target
 
 	// This is a read/write object, so we need to save the raw object data for later

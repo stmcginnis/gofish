@@ -172,8 +172,8 @@ func (ethernet *Ethernet) UnmarshalJSON(b []byte) error {
 	*ethernet = Ethernet(t.temp)
 
 	// Extract the links to other entities for later
-	ethernet.vlan = string(t.VLAN)
-	ethernet.vlans = string(t.VLANs)
+	ethernet.vlan = t.VLAN.String()
+	ethernet.vlans = t.VLANs.String()
 
 	return nil
 }
@@ -317,8 +317,8 @@ func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) erro
 	// Extract the links to other entities for later
 	networkdevicefunction.endpoints = t.Links.Endpoints.ToStrings()
 	networkdevicefunction.EndpointsCount = t.Links.EndpointsCount
-	networkdevicefunction.pcieFunction = string(t.Links.PCIeFunction)
-	networkdevicefunction.physicalPortAssignment = string(t.Links.PhysicalPortAssignment)
+	networkdevicefunction.pcieFunction = t.Links.PCIeFunction.String()
+	networkdevicefunction.physicalPortAssignment = t.Links.PhysicalPortAssignment.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	networkdevicefunction.rawData = b

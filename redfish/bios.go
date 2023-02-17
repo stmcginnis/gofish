@@ -129,7 +129,7 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 
 	// Some implementations use a @Redfish.Settings object to direct settings updates to a
 	// different URL than the object being updated. Others don't, so handle both.
-	bios.settingsTarget = string(t.Settings.SettingsObject)
+	bios.settingsTarget = t.Settings.SettingsObject.String()
 	if bios.settingsTarget == "" {
 		bios.settingsTarget = bios.ODataID
 	}

@@ -73,7 +73,7 @@ func (simplestorage *SimpleStorage) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*simplestorage = SimpleStorage(t.temp)
-	simplestorage.chassis = string(t.Links.Chassis)
+	simplestorage.chassis = t.Links.Chassis.String()
 
 	return nil
 }

@@ -143,7 +143,7 @@ type Links []Link
 func (l Links) ToStrings() []string {
 	var result []string
 	for _, link := range l {
-		result = append(result, string(link))
+		result = append(result, link.String())
 	}
 	return result
 }

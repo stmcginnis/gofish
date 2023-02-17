@@ -272,8 +272,8 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*drive = Drive(t.temp)
-	drive.assembly = string(t.Assembly)
-	drive.chassis = string(t.Links.Chassis)
+	drive.assembly = t.Assembly.String()
+	drive.chassis = t.Links.Chassis.String()
 	drive.endpoints = t.Links.Endpoints.ToStrings()
 	drive.EndpointsCount = t.Links.EndpointCount
 	drive.volumes = t.Links.Volumes.ToStrings()

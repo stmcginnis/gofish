@@ -71,8 +71,8 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*updateService = UpdateService(t.temp)
-	updateService.FirmwareInventory = string(t.FirmwareInventory)
-	updateService.SoftwareInventory = string(t.SoftwareInventory)
+	updateService.FirmwareInventory = t.FirmwareInventory.String()
+	updateService.SoftwareInventory = t.SoftwareInventory.String()
 	updateService.TransferProtocol = t.Actions.SimpleUpdate.AllowableValues
 	updateService.UpdateServiceTarget = t.Actions.SimpleUpdate.Target
 	updateService.OemActions = t.Actions.Oem

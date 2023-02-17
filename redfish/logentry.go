@@ -411,7 +411,7 @@ func (logentry *LogEntry) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*logentry = LogEntry(t.temp)
-	logentry.originOfCondition = string(t.Links.OriginOfCondition)
+	logentry.originOfCondition = t.Links.OriginOfCondition.String()
 
 	return nil
 }

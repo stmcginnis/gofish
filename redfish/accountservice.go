@@ -276,8 +276,8 @@ func (accountservice *AccountService) UnmarshalJSON(b []byte) error {
 	*accountservice = AccountService(t.temp)
 
 	// Extract the links to other entities for later
-	accountservice.accounts = string(t.Links.Accounts)
-	accountservice.roles = string(t.Links.Roles)
+	accountservice.accounts = t.Links.Accounts.String()
+	accountservice.roles = t.Links.Roles.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	accountservice.rawData = b

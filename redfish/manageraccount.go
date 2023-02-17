@@ -108,8 +108,8 @@ func (manageraccount *ManagerAccount) UnmarshalJSON(b []byte) error {
 	*manageraccount = ManagerAccount(t.temp)
 
 	// Extract the links to other entities for later
-	manageraccount.role = string(t.Links.Role)
-	manageraccount.certificates = string(t.Certificates)
+	manageraccount.role = t.Links.Role.String()
+	manageraccount.certificates = t.Certificates.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	manageraccount.rawData = b

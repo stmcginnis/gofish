@@ -228,9 +228,9 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*networkadapter = NetworkAdapter(t.temp)
-	networkadapter.assembly = string(t.Assembly)
-	networkadapter.networkDeviceFunctions = string(t.NetworkDeviceFunctions)
-	networkadapter.networkPorts = string(t.NetworkPorts)
+	networkadapter.assembly = t.Assembly.String()
+	networkadapter.networkDeviceFunctions = t.NetworkDeviceFunctions.String()
+	networkadapter.networkPorts = t.NetworkPorts.String()
 	networkadapter.resetSettingsToDefaultTarget = t.Actions.ResetSettingsToDefault.Target
 
 	return nil
