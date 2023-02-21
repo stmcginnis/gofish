@@ -15,6 +15,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httputil"
+	"net/textproto"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -369,7 +370,7 @@ func (c *APIClient) runRequestWithMultipartPayloadWithHeaders(method, url string
 			}
 		} else {
 			// Add other fields
-			if partWriter, err = payloadWriter.CreateFormField(key); err != nil {
+			if partWriter, err = createFormField(key, payloadWriter); err != nil {
 				return nil, err
 			}
 		}
@@ -380,6 +381,21 @@ func (c *APIClient) runRequestWithMultipartPayloadWithHeaders(method, url string
 	payloadWriter.Close()
 
 	return c.runRawRequestWithHeaders(method, url, bytes.NewReader(payloadBuffer.Bytes()), payloadWriter.FormDataContentType(), customHeaders)
+}
+
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+func escapeQuotes(s string) string {
+	return quoteEscaper.Replace(s)
+}
+
+// createFormField create form field with Content-Type
+func createFormField(fieldname string, w *multipart.Writer) (io.Writer, error) {
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition",
+		fmt.Sprintf(`form-data; name=%q`, escapeQuotes(fieldname)))
+	h.Set("Content-Type", "application/json")
+	return w.CreatePart(h)
 }
 
 // runRawRequest actually performs the REST calls
