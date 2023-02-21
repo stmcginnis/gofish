@@ -393,7 +393,7 @@ func escapeQuotes(s string) string {
 func createFormField(fieldname string, w *multipart.Writer) (io.Writer, error) {
 	h := make(textproto.MIMEHeader)
 	h.Set("Content-Disposition",
-		fmt.Sprintf(`form-data; name="%s"`, escapeQuotes(fieldname)))
+		fmt.Sprintf(`form-data; name=%q`, escapeQuotes(fieldname)))
 	h.Set("Content-Type", "application/json")
 	return w.CreatePart(h)
 }
