@@ -253,6 +253,11 @@ func (serviceroot *Service) Tasks() ([]*redfish.Task, error) {
 	return redfish.ListReferencedTasks(serviceroot.Client, serviceroot.tasks)
 }
 
+// TaskService gets the task service instance
+func (serviceroot *Service) TaskService() (*redfish.TaskService, error) {
+	return redfish.GetTaskService(serviceroot.Client, serviceroot.tasks)
+}
+
 // CreateSession creates a new session and returns the token and id
 func (serviceroot *Service) CreateSession(username, password string) (*redfish.AuthToken, error) {
 	return redfish.CreateSession(serviceroot.Client, serviceroot.sessions, username, password)
