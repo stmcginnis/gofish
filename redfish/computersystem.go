@@ -675,20 +675,38 @@ func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
 // a provided reference.
-func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) {
+func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) { //nolint:dupl
 	var result []*ComputerSystem
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	if link == "" {
+		return result, nil
 	}
 
+	type GetResult struct {
+		Item  *ComputerSystem
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, computersystemLink := range links.ItemLinks {
-		computersystem, err := GetComputerSystem(c, computersystemLink)
+	get := func(link string) {
+		computersystem, err := GetComputerSystem(c, link)
+		ch <- GetResult{Item: computersystem, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[computersystemLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, computersystem)
+			result = append(result, r.Item)
 		}
 	}
 
@@ -711,18 +729,37 @@ func (computersystem *ComputerSystem) Bios() (*Bios, error) {
 // BootOptions gets all BootOption items for this system.
 func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
 	var result []*BootOption
-	links, err := common.GetCollection(computersystem.Client, computersystem.Boot.bootOptions)
-	if err != nil {
-		return result, err
+	if computersystem.Boot.bootOptions == "" {
+		return result, nil
+	}
+	c := computersystem.Client
+
+	type GetResult struct {
+		Item  *BootOption
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, bootOptionLink := range links.ItemLinks {
-		bootOption, err := GetBootOption(computersystem.Client, bootOptionLink)
+	get := func(link string) {
+		bootoption, err := GetBootOption(c, link)
+		ch <- GetResult{Item: bootoption, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, computersystem.Boot.bootOptions)
 		if err != nil {
-			collectionError.Failures[bootOptionLink] = err
+			collectionError.Failures[computersystem.Boot.bootOptions] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, bootOption)
+			result = append(result, r.Item)
 		}
 	}
 

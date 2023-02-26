@@ -232,18 +232,32 @@ func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup,
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *StorageGroup
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, storagegroupLink := range links.ItemLinks {
-		storagegroup, err := GetStorageGroup(c, storagegroupLink)
+	get := func(link string) {
+		storagegroup, err := GetStorageGroup(c, link)
+		ch <- GetResult{Item: storagegroup, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[storagegroupLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, storagegroup)
+			result = append(result, r.Item)
 		}
 	}
 

@@ -132,18 +132,32 @@ func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareReso
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *SpareResourceSet
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, spareresourcesetLink := range links.ItemLinks {
-		spareresourceset, err := GetSpareResourceSet(c, spareresourcesetLink)
+	get := func(link string) {
+		spareresourceset, err := GetSpareResourceSet(c, link)
+		ch <- GetResult{Item: spareresourceset, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[spareresourcesetLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, spareresourceset)
+			result = append(result, r.Item)
 		}
 	}
 

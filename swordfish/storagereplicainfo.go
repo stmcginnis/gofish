@@ -469,18 +469,32 @@ func ListReferencedStorageReplicaInfos(c common.Client, link string) ([]*Storage
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *StorageReplicaInfo
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, storagereplicainfoLink := range links.ItemLinks {
-		storagereplicainfo, err := GetStorageReplicaInfo(c, storagereplicainfoLink)
+	get := func(link string) {
+		storagereplicainfo, err := GetStorageReplicaInfo(c, link)
+		ch <- GetResult{Item: storagereplicainfo, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[storagereplicainfoLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, storagereplicainfo)
+			result = append(result, r.Item)
 		}
 	}
 

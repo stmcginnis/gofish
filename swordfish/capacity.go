@@ -136,26 +136,46 @@ func GetCapacitySource(c common.Client, uri string) (*CapacitySource, error) {
 
 // ListReferencedCapacitySources gets the collection of CapacitySources from
 // a provided reference.
-func ListReferencedCapacitySources(c common.Client, link string) ([]*CapacitySource, error) {
+func ListReferencedCapacitySources(c common.Client, link string) ([]*CapacitySource, error) { //nolint:dupl
 	var result []*CapacitySource
 	if link == "" {
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *CapacitySource
+		Link  string
+		Error error
 	}
 
-	for _, capSourceLink := range links.ItemLinks {
-		capSource, err := GetCapacitySource(c, capSourceLink)
+	ch := make(chan GetResult)
+	collectionError := common.NewCollectionError()
+	get := func(link string) {
+		capacitysource, err := GetCapacitySource(c, link)
+		ch <- GetResult{Item: capacitysource, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			return result, err
+			collectionError.Failures[link] = err
 		}
-		result = append(result, capSource)
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
+		} else {
+			result = append(result, r.Item)
+		}
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ProvidedClassOfService gets the ClassOfService from the ProvidingDrives,

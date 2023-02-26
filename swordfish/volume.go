@@ -571,18 +571,32 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) { //
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Volume
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, volumeLink := range links.ItemLinks {
-		volume, err := GetVolume(c, volumeLink)
+	get := func(link string) {
+		volume, err := GetVolume(c, link)
+		ch <- GetResult{Item: volume, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[volumeLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, volume)
+			result = append(result, r.Item)
 		}
 	}
 

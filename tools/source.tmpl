@@ -109,30 +109,44 @@ func Get{{ class.name }}(c common.Client, uri string) (*{{ class.name }}, error)
 // a provided reference.
 func ListReferenced{{ class.name }}s(c common.Client, link string) ([]*{{ class.name }}, error) {
     var result []*{{ class.name }}
-    if link == "" {
-        return result, nil
-    }
+	if link == "" {
+		return result, nil
+	}
 
-    links, err := common.GetCollection(c, link)
-    if err != nil {
-        return result, err
-    }
+	type GetResult struct {
+		Item  *{{ class.name }}
+		Link  string
+		Error error
+	}
 
-    collectionError := common.NewCollectionError()
-    for _, {{ class.name|lower }}Link := range links.ItemLinks {
-        {{ class.name|lower }}, err := Get{{ class.name }}(c, {{ class.name|lower }}Link)
-        if err != nil {
-            collectionError.Failures[{{ class.name|lower }}Link] = err
-        } else {
-            result = append(result, {{ class.name|lower }})
-        }
-    }
+	ch := make(chan GetResult)
+	collectionError := common.NewCollectionError()
+	get := func(link string) {
+		{{ class.name|lower }}, err := Get{{ class.name }}(c, link)
+		ch <- GetResult{Item: {{ class.name|lower }}, Link: link, Error: err}
+	}
 
-    if collectionError.Empty() {
-        return result, nil
-    } else {
-        return result, collectionError
-    }
+	go func() {
+		err := common.CollectList(get, c, link)
+		if err != nil {
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
+		} else {
+			result = append(result, r.Item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 {% endif %}

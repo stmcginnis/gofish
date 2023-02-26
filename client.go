@@ -433,7 +433,7 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 		// Set Content-Length custom headers on the request
 		// since its ignored when set using Header.Set()
 		if strings.EqualFold("Content-Length", k) {
-			req.ContentLength, err = strconv.ParseInt(v, 10, 64) //nolint:gomnd // base 10, 64 bit
+			req.ContentLength, err = strconv.ParseInt(v, 10, 64) // base 10, 64 bit
 			if err != nil {
 				return nil, common.ConstructError(0, []byte("error parsing custom Content-Length header"))
 			}

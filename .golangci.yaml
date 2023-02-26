@@ -31,10 +31,6 @@ linters-settings:
     min-complexity: 25
   goimports:
     local-prefixes: github.com/stmcginnis
-  gomnd:
-    settings:
-      mnd:
-        checks: argument,case,condition,return
   govet:
     check-shadowing: true
   misspell:
@@ -59,7 +55,6 @@ linters:
     - gocyclo
     - goheader
     - goimports
-    - gomnd
     - goprintffuncname
     - gosec
     - gosimple

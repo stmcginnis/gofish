@@ -195,18 +195,32 @@ func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, e
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *StoragePool
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, storagepoolLink := range links.ItemLinks {
-		storagepool, err := GetStoragePool(c, storagepoolLink)
+	get := func(link string) {
+		storagepool, err := GetStoragePool(c, link)
+		ch <- GetResult{Item: storagepool, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[storagepoolLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, storagepool)
+			result = append(result, r.Item)
 		}
 	}
 

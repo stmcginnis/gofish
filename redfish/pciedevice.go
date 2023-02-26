@@ -173,18 +173,32 @@ func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, err
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *PCIeDevice
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, pciedeviceLink := range links.ItemLinks {
-		pciedevice, err := GetPCIeDevice(c, pciedeviceLink)
+	get := func(link string) {
+		pciedevice, err := GetPCIeDevice(c, link)
+		ch <- GetResult{Item: pciedevice, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[pciedeviceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, pciedevice)
+			result = append(result, r.Item)
 		}
 	}
 

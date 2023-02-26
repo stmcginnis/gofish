@@ -126,18 +126,32 @@ func ListReferencedMemoryMetricss(c common.Client, link string) ([]*MemoryMetric
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *MemoryMetrics
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, memorymetricsLink := range links.ItemLinks {
-		memorymetrics, err := GetMemoryMetrics(c, memorymetricsLink)
+	get := func(link string) {
+		memorymetrics, err := GetMemoryMetrics(c, link)
+		ch <- GetResult{Item: memorymetrics, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[memorymetricsLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, memorymetrics)
+			result = append(result, r.Item)
 		}
 	}
 

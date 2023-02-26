@@ -154,18 +154,32 @@ func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *DataStorageLoSCapabilities
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, datastorageloscapabilitiesLink := range links.ItemLinks {
-		datastorageloscapabilities, err := GetDataStorageLoSCapabilities(c, datastorageloscapabilitiesLink)
+	get := func(link string) {
+		datastorageloscapabilities, err := GetDataStorageLoSCapabilities(c, link)
+		ch <- GetResult{Item: datastorageloscapabilities, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[datastorageloscapabilitiesLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, datastorageloscapabilities)
+			result = append(result, r.Item)
 		}
 	}
 

@@ -252,18 +252,32 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *EventService
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, eventserviceLink := range links.ItemLinks {
-		eventservice, err := GetEventService(c, eventserviceLink)
+	get := func(link string) {
+		eventservice, err := GetEventService(c, link)
+		ch <- GetResult{Item: eventservice, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[eventserviceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, eventservice)
+			result = append(result, r.Item)
 		}
 	}
 

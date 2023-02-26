@@ -171,18 +171,32 @@ func ListReferencedPowers(c common.Client, link string) ([]*Power, error) { //no
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Power
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, powerLink := range links.ItemLinks {
-		power, err := GetPower(c, powerLink)
+	get := func(link string) {
+		power, err := GetPower(c, link)
+		ch <- GetResult{Item: power, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[powerLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, power)
+			result = append(result, r.Item)
 		}
 	}
 

@@ -416,18 +416,33 @@ func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDest
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *EventDestination
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, eventdestinationLink := range links.ItemLinks {
-		eventdestination, err := GetEventDestination(c, eventdestinationLink)
+
+	get := func(link string) {
+		eventdestination, err := GetEventDestination(c, link)
+		ch <- GetResult{Item: eventdestination, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[eventdestinationLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, eventdestination)
+			result = append(result, r.Item)
 		}
 	}
 

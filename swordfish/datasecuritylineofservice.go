@@ -65,24 +65,44 @@ func GetDataSecurityLineOfService(c common.Client, uri string) (*DataSecurityLin
 
 // ListReferencedDataSecurityLineOfServices gets the collection of DataSecurityLineOfService from
 // a provided reference.
-func ListReferencedDataSecurityLineOfServices(c common.Client, link string) ([]*DataSecurityLineOfService, error) {
+func ListReferencedDataSecurityLineOfServices(c common.Client, link string) ([]*DataSecurityLineOfService, error) { //nolint:dupl
 	var result []*DataSecurityLineOfService
 	if link == "" {
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *DataSecurityLineOfService
+		Link  string
+		Error error
 	}
 
-	for _, datasecuritylineofserviceLink := range links.ItemLinks {
-		datasecuritylineofservice, err := GetDataSecurityLineOfService(c, datasecuritylineofserviceLink)
+	ch := make(chan GetResult)
+	collectionError := common.NewCollectionError()
+	get := func(link string) {
+		datasecuritylineofservice, err := GetDataSecurityLineOfService(c, link)
+		ch <- GetResult{Item: datasecuritylineofservice, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			return result, err
+			collectionError.Failures[link] = err
 		}
-		result = append(result, datasecuritylineofservice)
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
+		} else {
+			result = append(result, r.Item)
+		}
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }

@@ -130,20 +130,38 @@ func GetSession(c common.Client, uri string) (*Session, error) {
 }
 
 // ListReferencedSessions gets the collection of Sessions
-func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
+func ListReferencedSessions(c common.Client, link string) ([]*Session, error) { //nolint:dupl
 	var result []*Session
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	if link == "" {
+		return result, nil
 	}
 
+	type GetResult struct {
+		Item  *Session
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, sLink := range links.ItemLinks {
-		s, err := GetSession(c, sLink)
+	get := func(link string) {
+		session, err := GetSession(c, link)
+		ch <- GetResult{Item: session, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[sLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, s)
+			result = append(result, r.Item)
 		}
 	}
 

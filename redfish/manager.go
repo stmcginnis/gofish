@@ -404,20 +404,38 @@ func GetManager(c common.Client, uri string) (*Manager, error) {
 }
 
 // ListReferencedManagers gets the collection of Managers
-func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
+func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) { //nolint:dupl
 	var result []*Manager
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	if link == "" {
+		return result, nil
 	}
 
+	type GetResult struct {
+		Item  *Manager
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, managerLink := range links.ItemLinks {
-		manager, err := GetManager(c, managerLink)
+	get := func(link string) {
+		manager, err := GetManager(c, link)
+		ch <- GetResult{Item: manager, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[managerLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, manager)
+			result = append(result, r.Item)
 		}
 	}
 

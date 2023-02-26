@@ -335,20 +335,38 @@ func GetChassis(c common.Client, uri string) (*Chassis, error) {
 }
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
-func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
+func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) { //nolint:dupl
 	var result []*Chassis
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	if link == "" {
+		return result, nil
 	}
 
+	type GetResult struct {
+		Item  *Chassis
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, chassisLink := range links.ItemLinks {
-		chassis, err := GetChassis(c, chassisLink)
+	get := func(link string) {
+		chassis, err := GetChassis(c, link)
+		ch <- GetResult{Item: chassis, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[chassisLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, chassis)
+			result = append(result, r.Item)
 		}
 	}
 
@@ -370,22 +388,40 @@ func (chassis *Chassis) Drives() ([]*Drive, error) {
 	// In version v1.2.0 of the spec, Drives were added to the Chassis.Links
 	// property. But in v1.14.0 of the spec, Chassis.Drives was added as a
 	// direct property.
+	// TODO: Update this to use the concurrent collection method
+	collectionError := common.NewCollectionError()
 	driveLinks := chassis.linkedDrives
 	if chassis.drives != "" {
 		drives, err := common.GetCollection(chassis.Client, chassis.drives)
 		if err != nil {
-			return nil, err
+			collectionError.Failures[chassis.drives] = err
+			return nil, collectionError
 		}
 		driveLinks = drives.ItemLinks
 	}
 
-	collectionError := common.NewCollectionError()
-	for _, driveLink := range driveLinks {
-		drive, err := GetDrive(chassis.Client, driveLink)
-		if err != nil {
-			collectionError.Failures[driveLink] = err
+	type GetResult struct {
+		Item  *Drive
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
+	get := func(link string) {
+		drive, err := GetDrive(chassis.Client, link)
+		ch <- GetResult{Item: drive, Link: link, Error: err}
+	}
+
+	go func() {
+		common.CollectCollection(get, chassis.Client, driveLinks)
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, drive)
+			result = append(result, r.Item)
 		}
 	}
 

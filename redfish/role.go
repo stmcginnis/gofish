@@ -131,18 +131,32 @@ func ListReferencedRoles(c common.Client, link string) ([]*Role, error) { //noli
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Role
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, roleLink := range links.ItemLinks {
-		role, err := GetRole(c, roleLink)
+	get := func(link string) {
+		role, err := GetRole(c, link)
+		ch <- GetResult{Item: role, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[roleLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, role)
+			result = append(result, r.Item)
 		}
 	}
 

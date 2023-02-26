@@ -104,18 +104,32 @@ func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorag
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *SimpleStorage
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, simplestorageLink := range links.ItemLinks {
-		simplestorage, err := GetSimpleStorage(c, simplestorageLink)
+	get := func(link string) {
+		simplestorage, err := GetSimpleStorage(c, link)
+		ch <- GetResult{Item: simplestorage, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[simplestorageLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, simplestorage)
+			result = append(result, r.Item)
 		}
 	}
 

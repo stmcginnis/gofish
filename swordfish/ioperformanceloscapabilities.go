@@ -142,18 +142,32 @@ func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string) (
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *IOPerformanceLoSCapabilities
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, ioperformanceloscapabilitiesLink := range links.ItemLinks {
-		ioperformanceloscapabilities, err := GetIOPerformanceLoSCapabilities(c, ioperformanceloscapabilitiesLink)
+	get := func(link string) {
+		ioperformanceloscapabilities, err := GetIOPerformanceLoSCapabilities(c, link)
+		ch <- GetResult{Item: ioperformanceloscapabilities, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[ioperformanceloscapabilitiesLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, ioperformanceloscapabilities)
+			result = append(result, r.Item)
 		}
 	}
 

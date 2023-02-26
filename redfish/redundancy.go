@@ -139,18 +139,32 @@ func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, er
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *Redundancy
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, redundancyLink := range links.ItemLinks {
-		redundancy, err := GetRedundancy(c, redundancyLink)
+	get := func(link string) {
+		redundancy, err := GetRedundancy(c, link)
+		ch <- GetResult{Item: redundancy, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[redundancyLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, redundancy)
+			result = append(result, r.Item)
 		}
 	}
 

@@ -176,26 +176,46 @@ func GetFileShare(c common.Client, uri string) (*FileShare, error) {
 
 // ListReferencedFileShares gets the collection of FileShare from a provided
 // reference.
-func ListReferencedFileShares(c common.Client, link string) ([]*FileShare, error) {
+func ListReferencedFileShares(c common.Client, link string) ([]*FileShare, error) { //nolint:dupl
 	var result []*FileShare
 	if link == "" {
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *FileShare
+		Link  string
+		Error error
 	}
 
-	for _, fileshareLink := range links.ItemLinks {
-		fileshare, err := GetFileShare(c, fileshareLink)
+	ch := make(chan GetResult)
+	collectionError := common.NewCollectionError()
+	get := func(link string) {
+		fileshare, err := GetFileShare(c, link)
+		ch <- GetResult{Item: fileshare, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			return result, err
+			collectionError.Failures[link] = err
 		}
-		result = append(result, fileshare)
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
+		} else {
+			result = append(result, r.Item)
+		}
 	}
 
-	return result, nil
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ClassOfService gets the file share's class of service.

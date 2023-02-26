@@ -207,18 +207,32 @@ func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterfac
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *HostInterface
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, hostinterfaceLink := range links.ItemLinks {
-		hostinterface, err := GetHostInterface(c, hostinterfaceLink)
+	get := func(link string) {
+		hostinterface, err := GetHostInterface(c, link)
+		ch <- GetResult{Item: hostinterface, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[hostinterfaceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, hostinterface)
+			result = append(result, r.Item)
 		}
 	}
 

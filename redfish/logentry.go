@@ -442,18 +442,32 @@ func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) 
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *LogEntry
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, logentryLink := range links.ItemLinks {
-		logentry, err := GetLogEntry(c, logentryLink)
+	get := func(link string) {
+		logentry, err := GetLogEntry(c, link)
+		ch <- GetResult{Item: logentry, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[logentryLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, logentry)
+			result = append(result, r.Item)
 		}
 	}
 

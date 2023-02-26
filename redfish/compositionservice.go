@@ -113,18 +113,32 @@ func ListReferencedCompositionServices(c common.Client, link string) ([]*Composi
 		return result, nil
 	}
 
-	links, err := common.GetCollection(c, link)
-	if err != nil {
-		return result, err
+	type GetResult struct {
+		Item  *CompositionService
+		Link  string
+		Error error
 	}
 
+	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-	for _, compositionserviceLink := range links.ItemLinks {
-		compositionservice, err := GetCompositionService(c, compositionserviceLink)
+	get := func(link string) {
+		compositionservice, err := GetCompositionService(c, link)
+		ch <- GetResult{Item: compositionservice, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[compositionserviceLink] = err
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, compositionservice)
+			result = append(result, r.Item)
 		}
 	}
 
