@@ -8,8 +8,6 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
-
-	"github.com/stmcginnis/gofish/common"
 )
 
 var simpleTaskServiceBody = `{
@@ -35,22 +33,25 @@ var simpleTaskServiceBody = `{
 
 func TestTaskService(t *testing.T) {
 	var result TaskService
-	assertMessage := func(t testing.TB, got string, want string) {
-		t.Helper()
-		if got != want {
-			t.Errorf("got %s, want %s", got, want)
-		}
+	err := json.NewDecoder(strings.NewReader(simpleTaskServiceBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	t.Run("Check default redfish fields", func(t *testing.T) {
-		c := &common.TestClient{}
-		result.Client = c
+	if result.ID != "TaskService" {
+		t.Errorf("Received invalid ID: %s", result.ID)
+	}
 
-		err := json.NewDecoder(strings.NewReader(simpleTaskServiceBody)).Decode(&result)
-		if err != nil {
-			t.Errorf("Error decoding JSON: %s", err)
-		}
-		assertMessage(t, result.tasks, "/redfish/v1/TaskService/Tasks")
-		assertMessage(t, result.CompletedTaskOverWritePolicy, "Oldest")
-	})
+	if result.Name != "Task Service" {
+		t.Errorf("Received invalid name: %s", result.Name)
+	}
+
+	if result.tasks != "/redfish/v1/TaskService/Tasks" {
+		t.Errorf("Received invalid tasks link: %s", result.tasks)
+	}
+
+	if result.CompletedTaskOverWritePolicy != "Oldest" {
+		t.Errorf("Received %s completed task overwrite policy", result.CompletedTaskOverWritePolicy)
+	}
 }
