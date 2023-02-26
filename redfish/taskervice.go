@@ -33,8 +33,6 @@ type TaskService struct {
 	Status common.Status
 	// tasks points towards the tasks store endpoint
 	tasks string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a TaskService object from the raw JSON.
@@ -53,7 +51,6 @@ func (taskService *TaskService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*taskService = TaskService(t.temp)
 	taskService.tasks = t.Tasks.String()
-	taskService.rawData = b
 
 	return nil
 }
