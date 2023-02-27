@@ -226,6 +226,8 @@ type Chassis struct {
 	thermal         string
 	power           string
 	networkAdapters string
+	// logServices shall be a link to a collection of type LogServiceCollection.
+	logServices     string
 	computerSystems []string
 	resourceBlocks  []string
 	managedBy       []string
@@ -262,6 +264,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		Thermal         common.Link
 		Power           common.Link
 		NetworkAdapters common.Link
+		LogServices     common.Link
 		Links           linkReference
 		Actions         Actions
 	}
@@ -283,6 +286,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	chassis.thermal = t.Thermal.String()
 	chassis.power = t.Power.String()
 	chassis.networkAdapters = t.NetworkAdapters.String()
+	chassis.logServices = t.LogServices.String()
 	chassis.computerSystems = t.Links.ComputerSystems.ToStrings()
 	chassis.resourceBlocks = t.Links.ResourceBlocks.ToStrings()
 	chassis.managedBy = t.Links.ManagedBy.ToStrings()
@@ -505,6 +509,11 @@ func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 // NetworkAdapters gets the collection of network adapters of this chassis
 func (chassis *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
 	return ListReferencedNetworkAdapter(chassis.Client, chassis.networkAdapters)
+}
+
+// LogServices get this chassis's log services.
+func (chassis *Chassis) LogServices() ([]*LogService, error) {
+	return ListReferencedLogServices(chassis.Client, chassis.logServices)
 }
 
 // The Assembly schema defines an assembly.
