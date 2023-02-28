@@ -75,6 +75,9 @@ var processorBody = strings.NewReader(
 		"Metrics": {
 			"@odata.id": "/redfish/v1/Systems/1/Processors/1/ProcessorMetrics"
 		},
+		"SubProcessors": {
+			"@odata.id": "/redfish/v1/Systems/Self/Processors/CPU_1/SubProcessors"
+		},
 		"Model":"Intel(R) Xeon(R) Gold 6136 CPU @ 3.00GHz",
 		"Name":"CPU 2",
 		"Oem":{

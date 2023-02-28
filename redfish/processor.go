@@ -321,7 +321,7 @@ type Processor struct {
 	Status common.Status
 	// SubProcessors shall be a link to a
 	// collection of type ProcessorCollection.
-	SubProcessors string
+	subProcessors string
 	// TDPWatts shall be the nominal Thermal
 	// Design Power (TDP) in watts.
 	TDPWatts int
@@ -376,6 +376,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 		AccelerationFunctions common.Link
 		Assembly              common.Link
 		Metrics               common.Link
+		SubProcessors         common.Link
 		ProcessorMemory       common.Links
 		Links                 struct {
 			Chassis                  common.Link
@@ -431,6 +432,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	processor.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	processor.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
 	processor.metrics = t.Metrics.String()
+	processor.subProcessors = t.SubProcessors.String()
 
 	return nil
 }
