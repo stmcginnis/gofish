@@ -410,7 +410,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 		if t2.MaxSpeedMHz != "" {
 			bitSize := 32
 			mhz, err := strconv.ParseFloat(t2.MaxSpeedMHz, bitSize)
-			if err != nil {
+			if err == nil {
 				t.MaxSpeedMHz = float32(mhz)
 			}
 		}
