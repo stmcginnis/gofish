@@ -50,7 +50,7 @@ type APIClient struct {
 	auth *redfish.AuthToken
 
 	// mu used to lock requests
-	mu sync.Mutex
+	mu *sync.Mutex
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
@@ -105,6 +105,7 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		endpoint:   config.Endpoint,
 		dumpWriter: config.DumpWriter,
 		ctx:        ctx,
+		mu:         &sync.Mutex{},
 	}
 
 	if config.TLSHandshakeTimeout == 0 {
@@ -147,6 +148,7 @@ func setupClientWithEndpoint(ctx context.Context, endpoint string) (c *APIClient
 	client := &APIClient{
 		endpoint: endpoint,
 		ctx:      ctx,
+		mu:       &sync.Mutex{},
 	}
 	client.HTTPClient = &http.Client{}
 
