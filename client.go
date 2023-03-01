@@ -416,9 +416,6 @@ func (c *APIClient) RunRawRequestWithHeaders(method, url string, payloadBuffer i
 
 // runRawRequestWithHeaders actually performs the REST calls but allowing custom headers
 func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	if url == "" {
 		return nil, common.ConstructError(0, []byte("unable to execute request, no target provided"))
 	}
@@ -475,8 +472,9 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 			return nil, err
 		}
 	}
-
+	c.mu.Lock()
 	resp, err := c.HTTPClient.Do(req)
+	c.mu.Unlock()
 	if err != nil {
 		return nil, err
 	}
