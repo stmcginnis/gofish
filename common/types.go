@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"reflect"
 )
 
 // DefaultServiceRoot is the default path to the Redfish service endpoint.
@@ -29,85 +28,6 @@ type Client interface {
 	PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
 	Delete(url string) (*http.Response, error)
 	DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error)
-}
-
-// Entity provides the common basis for all Redfish and Swordfish objects.
-type Entity struct {
-	// ODataID is the location of the resource.
-	ODataID string `json:"@odata.id"`
-	// ID uniquely identifies the resource.
-	ID string `json:"Id"`
-	// Name is the name of the resource or array element.
-	Name string `json:"Name"`
-	// Client is the REST client interface to the system.
-	Client Client `json:"-"`
-}
-
-// SetClient sets the API client connection to use for accessing this
-// entity.
-func (e *Entity) SetClient(c Client) {
-	e.Client = c
-}
-
-// Update commits changes to an entity.
-func (e *Entity) Update(originalEntity, currentEntity reflect.Value, allowedUpdates []string) error {
-	payload := make(map[string]interface{})
-
-	for i := 0; i < originalEntity.NumField(); i++ {
-		if !originalEntity.Field(i).CanInterface() {
-			// Private field or something that we can't access
-			continue
-		}
-		fieldType := originalEntity.Type().Field(i).Type.Kind()
-		if fieldType == reflect.Struct || fieldType == reflect.Ptr || fieldType == reflect.Slice {
-			// TODO: Handle more complicated data types
-			continue
-		}
-		fieldName := originalEntity.Type().Field(i).Name
-		jsonName := originalEntity.Type().Field(i).Tag.Get("json")
-		if jsonName != "" {
-			fieldName = jsonName
-		}
-		originalValue := originalEntity.Field(i).Interface()
-		currentValue := currentEntity.Field(i).Interface()
-		if originalValue == nil && currentValue == nil {
-			continue
-		} else if originalValue == nil {
-			payload[fieldName] = currentValue
-		} else if reflect.TypeOf(originalValue).Kind() != reflect.Map {
-			if originalValue != currentValue {
-				payload[fieldName] = currentValue
-			}
-		} else if !reflect.DeepEqual(originalValue, currentValue) {
-			payload[fieldName] = currentValue
-		}
-	}
-
-	// See if we are attempting to update anything that is not allowed
-	for field := range payload {
-		found := false
-		for _, name := range allowedUpdates {
-			if name == field {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return fmt.Errorf("%s field is read only", field)
-		}
-	}
-
-	// If there are any allowed updates, try to send updates to the system and
-	// return the result.
-	if len(payload) > 0 {
-		_, err := e.Client.Patch(e.ODataID, payload) //nolint:bodyclose
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // Link is an OData link reference
