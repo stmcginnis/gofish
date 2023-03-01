@@ -220,7 +220,7 @@ func (bios *Bios) AllowedAttributeUpdateApplyTimes() []common.ApplyTime {
 }
 
 // UpdateBiosAttributesApplyAt is used to update attribute values and set apply time together
-func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error {
+func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error { //nolint:dupl
 	payload := make(map[string]interface{})
 
 	// Get a representation of the object's original state so we can find what

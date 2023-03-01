@@ -932,7 +932,7 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 }
 
 // UpdateBootAttributesApplyAt is used to update attribute values and set apply time together
-func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error {
+func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error { //nolint:dupl
 	payload := make(map[string]interface{})
 
 	// Get a representation of the object's original state so we can find what
