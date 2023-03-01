@@ -158,20 +158,8 @@ func (fileshare *FileShare) Update() error {
 
 // GetFileShare will get a FileShare instance from the service.
 func GetFileShare(c common.Client, uri string) (*FileShare, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var fileshare FileShare
-	err = json.NewDecoder(resp.Body).Decode(&fileshare)
-	if err != nil {
-		return nil, err
-	}
-
-	fileshare.SetClient(c)
-	return &fileshare, nil
+	var fileShare FileShare
+	return &fileShare, fileShare.Get(c, uri, &fileShare)
 }
 
 // ListReferencedFileShares gets the collection of FileShare from a provided

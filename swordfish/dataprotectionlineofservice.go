@@ -5,8 +5,6 @@
 package swordfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -61,20 +59,8 @@ type DataProtectionLineOfService struct {
 
 // GetDataProtectionLineOfService will get a DataProtectionLineOfService instance from the service.
 func GetDataProtectionLineOfService(c common.Client, uri string) (*DataProtectionLineOfService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var dataprotectionlineofservice DataProtectionLineOfService
-	err = json.NewDecoder(resp.Body).Decode(&dataprotectionlineofservice)
-	if err != nil {
-		return nil, err
-	}
-
-	dataprotectionlineofservice.SetClient(c)
-	return &dataprotectionlineofservice, nil
+	var dataProtectionLineOfService DataProtectionLineOfService
+	return &dataProtectionLineOfService, dataProtectionLineOfService.Get(c, uri, &dataProtectionLineOfService)
 }
 
 // ListReferencedDataProtectionLineOfServices gets the collection of DataProtectionLineOfService from

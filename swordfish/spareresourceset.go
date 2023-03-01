@@ -108,20 +108,8 @@ func (spareresourceset *SpareResourceSet) Update() error {
 
 // GetSpareResourceSet will get a SpareResourceSet instance from the service.
 func GetSpareResourceSet(c common.Client, uri string) (*SpareResourceSet, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var spareresourceset SpareResourceSet
-	err = json.NewDecoder(resp.Body).Decode(&spareresourceset)
-	if err != nil {
-		return nil, err
-	}
-
-	spareresourceset.SetClient(c)
-	return &spareresourceset, nil
+	var spareResourceSet SpareResourceSet
+	return &spareResourceSet, spareResourceSet.Get(c, uri, &spareResourceSet)
 }
 
 // ListReferencedSpareResourceSets gets the collection of SpareResourceSet from

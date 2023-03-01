@@ -118,20 +118,8 @@ func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) Update() error
 
 // GetIOPerformanceLoSCapabilities will get a IOPerformanceLoSCapabilities instance from the service.
 func GetIOPerformanceLoSCapabilities(c common.Client, uri string) (*IOPerformanceLoSCapabilities, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ioperformanceloscapabilities IOPerformanceLoSCapabilities
-	err = json.NewDecoder(resp.Body).Decode(&ioperformanceloscapabilities)
-	if err != nil {
-		return nil, err
-	}
-
-	ioperformanceloscapabilities.SetClient(c)
-	return &ioperformanceloscapabilities, nil
+	var ioPerformanceLoSCapabilities IOPerformanceLoSCapabilities
+	return &ioPerformanceLoSCapabilities, ioPerformanceLoSCapabilities.Get(c, uri, &ioPerformanceLoSCapabilities)
 }
 
 // ListReferencedIOPerformanceLoSCapabilitiess gets the collection of IOPerformanceLoSCapabilities from

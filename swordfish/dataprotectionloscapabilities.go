@@ -177,20 +177,8 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) Update() err
 
 // GetDataProtectionLoSCapabilities will get a DataProtectionLoSCapabilities instance from the service.
 func GetDataProtectionLoSCapabilities(c common.Client, uri string) (*DataProtectionLoSCapabilities, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var dataprotectionloscapabilities DataProtectionLoSCapabilities
-	err = json.NewDecoder(resp.Body).Decode(&dataprotectionloscapabilities)
-	if err != nil {
-		return nil, err
-	}
-
-	dataprotectionloscapabilities.SetClient(c)
-	return &dataprotectionloscapabilities, nil
+	var dataProtectionLoSCapabilities DataProtectionLoSCapabilities
+	return &dataProtectionLoSCapabilities, dataProtectionLoSCapabilities.Get(c, uri, &dataProtectionLoSCapabilities)
 }
 
 // ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from

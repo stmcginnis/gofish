@@ -118,20 +118,8 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 
 // GetCapacitySource will get a CapacitySource instance from the service.
 func GetCapacitySource(c common.Client, uri string) (*CapacitySource, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var capacitysource CapacitySource
-	err = json.NewDecoder(resp.Body).Decode(&capacitysource)
-	if err != nil {
-		return nil, err
-	}
-
-	capacitysource.SetClient(c)
-	return &capacitysource, nil
+	var capacitySource CapacitySource
+	return &capacitySource, capacitySource.Get(c, uri, &capacitySource)
 }
 
 // ListReferencedCapacitySources gets the collection of CapacitySources from

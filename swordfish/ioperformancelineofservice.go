@@ -5,8 +5,6 @@
 package swordfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -48,20 +46,8 @@ type IOPerformanceLineOfService struct {
 
 // GetIOPerformanceLineOfService will get a IOPerformanceLineOfService instance from the service.
 func GetIOPerformanceLineOfService(c common.Client, uri string) (*IOPerformanceLineOfService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ioperformancelineofservice IOPerformanceLineOfService
-	err = json.NewDecoder(resp.Body).Decode(&ioperformancelineofservice)
-	if err != nil {
-		return nil, err
-	}
-
-	ioperformancelineofservice.SetClient(c)
-	return &ioperformancelineofservice, nil
+	var ioPerformanceLineOfService IOPerformanceLineOfService
+	return &ioPerformanceLineOfService, ioPerformanceLineOfService.Get(c, uri, &ioPerformanceLineOfService)
 }
 
 // ListReferencedIOPerformanceLineOfServices gets the collection of IOPerformanceLineOfService from

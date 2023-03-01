@@ -87,20 +87,8 @@ func (classofservice *ClassOfService) UnmarshalJSON(b []byte) error {
 
 // GetClassOfService will get a ClassOfService instance from the service.
 func GetClassOfService(c common.Client, uri string) (*ClassOfService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var classofservice ClassOfService
-	err = json.NewDecoder(resp.Body).Decode(&classofservice)
-	if err != nil {
-		return nil, err
-	}
-
-	classofservice.SetClient(c)
-	return &classofservice, nil
+	var classOfService ClassOfService
+	return &classOfService, classOfService.Get(c, uri, &classOfService)
 }
 
 // ListReferencedClassOfServices gets the collection of ClassOfService from
