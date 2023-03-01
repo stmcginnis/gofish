@@ -439,20 +439,8 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 
 // GetProcessor will get a Processor instance from the system
 func GetProcessor(c common.Client, uri string) (*Processor, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var processor Processor
-	err = json.NewDecoder(resp.Body).Decode(&processor)
-	if err != nil {
-		return nil, err
-	}
-
-	processor.SetClient(c)
-	return &processor, nil
+	return &processor, processor.Get(c, uri, &processor)
 }
 
 // ListReferencedProcessors gets the collection of Processor from a provided reference.

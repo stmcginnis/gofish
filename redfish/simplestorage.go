@@ -80,20 +80,8 @@ func (simplestorage *SimpleStorage) UnmarshalJSON(b []byte) error {
 
 // GetSimpleStorage will get a SimpleStorage instance from the service.
 func GetSimpleStorage(c common.Client, uri string) (*SimpleStorage, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var simplestorage SimpleStorage
-	err = json.NewDecoder(resp.Body).Decode(&simplestorage)
-	if err != nil {
-		return nil, err
-	}
-
-	simplestorage.SetClient(c)
-	return &simplestorage, nil
+	var simpleStorage SimpleStorage
+	return &simpleStorage, simpleStorage.Get(c, uri, &simpleStorage)
 }
 
 // ListReferencedSimpleStorages gets the collection of SimpleStorage from

@@ -149,20 +149,8 @@ func (pciedevice *PCIeDevice) Update() error {
 
 // GetPCIeDevice will get a PCIeDevice instance from the service.
 func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var pciedevice PCIeDevice
-	err = json.NewDecoder(resp.Body).Decode(&pciedevice)
-	if err != nil {
-		return nil, err
-	}
-
-	pciedevice.SetClient(c)
-	return &pciedevice, nil
+	var pcieDevice PCIeDevice
+	return &pcieDevice, pcieDevice.Get(c, uri, &pcieDevice)
 }
 
 // ListReferencedPCIeDevices gets the collection of PCIeDevice from

@@ -73,20 +73,8 @@ func (assembly *Assembly) Update() error {
 
 // GetAssembly will get a Assembly instance from the service.
 func GetAssembly(c common.Client, uri string) (*Assembly, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var assembly Assembly
-	err = json.NewDecoder(resp.Body).Decode(&assembly)
-	if err != nil {
-		return nil, err
-	}
-
-	assembly.SetClient(c)
-	return &assembly, nil
+	return &assembly, assembly.Get(c, uri, &assembly)
 }
 
 // ListReferencedAssemblys gets the collection of Assembly from

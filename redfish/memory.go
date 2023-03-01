@@ -386,20 +386,8 @@ func (memory *Memory) Update() error {
 
 // GetMemory will get a Memory instance from the service.
 func GetMemory(c common.Client, uri string) (*Memory, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var memory Memory
-	err = json.NewDecoder(resp.Body).Decode(&memory)
-	if err != nil {
-		return nil, err
-	}
-
-	memory.SetClient(c)
-	return &memory, nil
+	return &memory, memory.Get(c, uri, &memory)
 }
 
 // ListReferencedMemorys gets the collection of Memory from

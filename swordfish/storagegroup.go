@@ -208,20 +208,8 @@ func (storagegroup *StorageGroup) Update() error {
 
 // GetStorageGroup will get a StorageGroup instance from the service.
 func GetStorageGroup(c common.Client, uri string) (*StorageGroup, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var storagegroup StorageGroup
-	err = json.NewDecoder(resp.Body).Decode(&storagegroup)
-	if err != nil {
-		return nil, err
-	}
-
-	storagegroup.SetClient(c)
-	return &storagegroup, nil
+	var storageGroup StorageGroup
+	return &storageGroup, storageGroup.Get(c, uri, &storageGroup)
 }
 
 // ListReferencedStorageGroups gets the collection of StorageGroup from
@@ -332,7 +320,7 @@ type MappedVolume struct {
 // ClientEndpointGroups.  The property VolumesAreExposed shall be set to true
 // when this action is completed.
 func (storagegroup *StorageGroup) ExposeVolumes() error {
-	_, err := storagegroup.Client.Post(storagegroup.exposeVolumesTarget, nil)
+	err := storagegroup.Post(storagegroup.exposeVolumesTarget, nil)
 	if err == nil {
 		// Only set to exposed if no error. Calling expose when already exposed
 		// could fail so we don't want to indicate they are not exposed.
@@ -345,7 +333,7 @@ func (storagegroup *StorageGroup) ExposeVolumes() error {
 // named in the ClientEndpointGroups. The property VolumesAreExposed shall be
 // set to false when this action is completed.
 func (storagegroup *StorageGroup) HideVolumes() error {
-	_, err := storagegroup.Client.Post(storagegroup.hideVolumesTarget, nil)
+	err := storagegroup.Post(storagegroup.hideVolumesTarget, nil)
 	if err == nil {
 		storagegroup.VolumesAreExposed = false
 	}

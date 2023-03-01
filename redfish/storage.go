@@ -104,20 +104,8 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 
 // GetStorage will get a Storage instance from the service.
 func GetStorage(c common.Client, uri string) (*Storage, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var storage Storage
-	err = json.NewDecoder(resp.Body).Decode(&storage)
-	if err != nil {
-		return nil, err
-	}
-
-	storage.SetClient(c)
-	return &storage, nil
+	return &storage, storage.Get(c, uri, &storage)
 }
 
 // ListReferencedStorages gets the collection of Storage from a provided
@@ -214,16 +202,11 @@ func (storage *Storage) Volumes() ([]*Volume, error) {
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
 func (storage *Storage) SetEncryptionKey(key string) error {
-	type temp struct {
+	t := struct {
 		EncryptionKey string
-	}
-	t := temp{EncryptionKey: key}
+	}{EncryptionKey: key}
 
-	resp, err := storage.Client.Post(storage.setEncryptionKeyTarget, t)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return storage.Post(storage.setEncryptionKeyTarget, t)
 }
 
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage
@@ -361,20 +344,8 @@ func (storagecontroller *StorageController) Update() error {
 
 // GetStorageController will get a Storage controller instance from the service.
 func GetStorageController(c common.Client, uri string) (*StorageController, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var storage StorageController
-	err = json.NewDecoder(resp.Body).Decode(&storage)
-	if err != nil {
-		return nil, err
-	}
-
-	storage.SetClient(c)
-	return &storage, nil
+	var storageController StorageController
+	return &storageController, storageController.Get(c, uri, &storageController)
 }
 
 // ListReferencedStorageControllers gets the collection of StorageControllers

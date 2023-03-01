@@ -5,8 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -102,20 +100,8 @@ type MemoryMetrics struct {
 
 // GetMemoryMetrics will get a MemoryMetrics instance from the service.
 func GetMemoryMetrics(c common.Client, uri string) (*MemoryMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var memorymetrics MemoryMetrics
-	err = json.NewDecoder(resp.Body).Decode(&memorymetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	memorymetrics.SetClient(c)
-	return &memorymetrics, nil
+	var memoryMetrics MemoryMetrics
+	return &memoryMetrics, memoryMetrics.Get(c, uri, &memoryMetrics)
 }
 
 // ListReferencedMemoryMetricss gets the collection of MemoryMetrics from

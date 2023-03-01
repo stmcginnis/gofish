@@ -183,20 +183,8 @@ func (hostinterface *HostInterface) Update() error {
 
 // GetHostInterface will get a HostInterface instance from the service.
 func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var hostinterface HostInterface
-	err = json.NewDecoder(resp.Body).Decode(&hostinterface)
-	if err != nil {
-		return nil, err
-	}
-
-	hostinterface.SetClient(c)
-	return &hostinterface, nil
+	var hostInterface HostInterface
+	return &hostInterface, hostInterface.Get(c, uri, &hostInterface)
 }
 
 // ListReferencedHostInterfaces gets the collection of HostInterface from

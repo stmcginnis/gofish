@@ -171,20 +171,8 @@ func (storagepool *StoragePool) Update() error {
 
 // GetStoragePool will get a StoragePool instance from the service.
 func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var storagepool StoragePool
-	err = json.NewDecoder(resp.Body).Decode(&storagepool)
-	if err != nil {
-		return nil, err
-	}
-
-	storagepool.SetClient(c)
-	return &storagepool, nil
+	var storagePool StoragePool
+	return &storagePool, storagePool.Get(c, uri, &storagePool)
 }
 
 // ListReferencedStoragePools gets the collection of StoragePool from

@@ -259,20 +259,8 @@ func (filesystem *FileSystem) Update() error {
 
 // GetFileSystem will get a FileSystem instance from the service.
 func GetFileSystem(c common.Client, uri string) (*FileSystem, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var filesystem FileSystem
-	err = json.NewDecoder(resp.Body).Decode(&filesystem)
-	if err != nil {
-		return nil, err
-	}
-
-	filesystem.SetClient(c)
-	return &filesystem, nil
+	var fileSystem FileSystem
+	return &fileSystem, fileSystem.Get(c, uri, &fileSystem)
 }
 
 // ListReferencedFileSystems gets the collection of FileSystem from

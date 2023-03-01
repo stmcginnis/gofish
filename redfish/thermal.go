@@ -334,20 +334,8 @@ func (thermal *Thermal) UnmarshalJSON(b []byte) error {
 
 // GetThermal will get a Thermal instance from the service.
 func GetThermal(c common.Client, uri string) (*Thermal, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var thermal Thermal
-	err = json.NewDecoder(resp.Body).Decode(&thermal)
-	if err != nil {
-		return nil, err
-	}
-
-	thermal.SetClient(c)
-	return &thermal, nil
+	return &thermal, thermal.Get(c, uri, &thermal)
 }
 
 // ListReferencedThermals gets the collection of Thermal from a provided reference.

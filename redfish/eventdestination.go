@@ -266,20 +266,8 @@ func GetEventDestination(c common.Client, uri string) (*EventDestination, error)
 		return nil, fmt.Errorf("uri should not be empty")
 	}
 
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var eventdestination EventDestination
-	err = json.NewDecoder(resp.Body).Decode(&eventdestination)
-	if err != nil {
-		return nil, err
-	}
-
-	eventdestination.SetClient(c)
-	return &eventdestination, nil
+	return &eventdestination, eventdestination.Get(c, uri, &eventdestination)
 }
 
 // subscriptionPayload is the payload to create the event subscription

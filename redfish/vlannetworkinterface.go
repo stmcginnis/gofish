@@ -82,20 +82,8 @@ func (vlannetworkinterface *VLanNetworkInterface) Update() error {
 
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.
 func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var vlannetworkinterface VLanNetworkInterface
-	err = json.NewDecoder(resp.Body).Decode(&vlannetworkinterface)
-	if err != nil {
-		return nil, err
-	}
-
-	vlannetworkinterface.SetClient(c)
-	return &vlannetworkinterface, nil
+	var vLanNetworkInterface VLanNetworkInterface
+	return &vLanNetworkInterface, vLanNetworkInterface.Get(c, uri, &vLanNetworkInterface)
 }
 
 // ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from

@@ -90,20 +90,8 @@ func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) Update() err
 // GetIOConnectivityLoSCapabilities will get a IOConnectivityLoSCapabilities
 // instance from the service.
 func GetIOConnectivityLoSCapabilities(c common.Client, uri string) (*IOConnectivityLoSCapabilities, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ioconnectivityloscapabilities IOConnectivityLoSCapabilities
-	err = json.NewDecoder(resp.Body).Decode(&ioconnectivityloscapabilities)
-	if err != nil {
-		return nil, err
-	}
-
-	ioconnectivityloscapabilities.SetClient(c)
-	return &ioconnectivityloscapabilities, nil
+	var ioConnectivityLoSCapabilities IOConnectivityLoSCapabilities
+	return &ioConnectivityLoSCapabilities, ioConnectivityLoSCapabilities.Get(c, uri, &ioConnectivityLoSCapabilities)
 }
 
 // ListReferencedIOConnectivityLoSCapabilitiess gets the collection of

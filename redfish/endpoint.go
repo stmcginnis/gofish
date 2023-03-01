@@ -217,20 +217,8 @@ func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
 
 // GetEndpoint will get a Endpoint instance from the service.
 func GetEndpoint(c common.Client, uri string) (*Endpoint, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var endpoint Endpoint
-	err = json.NewDecoder(resp.Body).Decode(&endpoint)
-	if err != nil {
-		return nil, err
-	}
-
-	endpoint.SetClient(c)
-	return &endpoint, nil
+	return &endpoint, endpoint.Get(c, uri, &endpoint)
 }
 
 // ListReferencedEndpoints gets the collection of Endpoint from

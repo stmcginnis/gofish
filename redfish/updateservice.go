@@ -83,18 +83,8 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 
 // GetUpdateService will get a UpdateService instance from the service.
 func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
 	var updateService UpdateService
-	err = json.NewDecoder(resp.Body).Decode(&updateService)
-	if err != nil {
-		return nil, err
-	}
-	updateService.SetClient(c)
-	return &updateService, nil
+	return &updateService, updateService.Get(c, uri, &updateService)
 }
 
 // SoftwareInventories gets the collection of software inventories of this update service

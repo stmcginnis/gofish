@@ -5,8 +5,6 @@
 package swordfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -37,20 +35,8 @@ type IOConnectivityLineOfService struct {
 
 // GetIOConnectivityLineOfService will get a IOConnectivityLineOfService instance from the service.
 func GetIOConnectivityLineOfService(c common.Client, uri string) (*IOConnectivityLineOfService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ioconnectivitylineofservice IOConnectivityLineOfService
-	err = json.NewDecoder(resp.Body).Decode(&ioconnectivitylineofservice)
-	if err != nil {
-		return nil, err
-	}
-
-	ioconnectivitylineofservice.SetClient(c)
-	return &ioconnectivitylineofservice, nil
+	var ioConnectivityLineOfService IOConnectivityLineOfService
+	return &ioConnectivityLineOfService, ioConnectivityLineOfService.Get(c, uri, &ioConnectivityLineOfService)
 }
 
 // ListReferencedIOConnectivityLineOfServices gets the collection of IOConnectivityLineOfService from

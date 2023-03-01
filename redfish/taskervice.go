@@ -57,18 +57,8 @@ func (taskService *TaskService) UnmarshalJSON(b []byte) error {
 
 // GetTaskService will get a TaskService instance from the service.
 func GetTaskService(c common.Client, uri string) (*TaskService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
 	var taskService TaskService
-	err = json.NewDecoder(resp.Body).Decode(&taskService)
-	if err != nil {
-		return nil, err
-	}
-	taskService.SetClient(c)
-	return &taskService, nil
+	return &taskService, taskService.Get(c, uri, &taskService)
 }
 
 // Tasks gets the collection of tasks of this task service

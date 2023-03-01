@@ -162,20 +162,8 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 
 // GetStorageService will get a StorageService instance from the service.
 func GetStorageService(c common.Client, uri string) (*StorageService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var storageservice StorageService
-	err = json.NewDecoder(resp.Body).Decode(&storageservice)
-	if err != nil {
-		return nil, err
-	}
-
-	storageservice.SetClient(c)
-	return &storageservice, nil
+	var storageService StorageService
+	return &storageService, storageService.Get(c, uri, &storageService)
 }
 
 // ListReferencedStorageServices gets the collection of StorageService from
@@ -369,11 +357,9 @@ func (storageservice *StorageService) Volumes() ([]*Volume, error) {
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
 func (storageservice *StorageService) SetEncryptionKey(key string) error {
-	type temp struct {
+	t := struct {
 		EncryptionKey string
-	}
-	t := temp{EncryptionKey: key}
+	}{EncryptionKey: key}
 
-	_, err := storageservice.Client.Post(storageservice.setEncryptionKeyTarget, t)
-	return err
+	return storageservice.Post(storageservice.setEncryptionKeyTarget, t)
 }

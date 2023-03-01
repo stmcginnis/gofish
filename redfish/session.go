@@ -5,7 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
 	"net/url"
 
 	"github.com/stmcginnis/gofish/common"
@@ -114,19 +113,8 @@ func DeleteSession(c common.Client, sessionURL string) (err error) {
 
 // GetSession will get a Session instance from the Redfish service.
 func GetSession(c common.Client, uri string) (*Session, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var t Session
-	err = json.NewDecoder(resp.Body).Decode(&t)
-	if err != nil {
-		return nil, err
-	}
-
-	return &t, nil
+	var session Session
+	return &session, session.Get(c, uri, &session)
 }
 
 // ListReferencedSessions gets the collection of Sessions

@@ -418,20 +418,8 @@ func (logentry *LogEntry) UnmarshalJSON(b []byte) error {
 
 // GetLogEntry will get a LogEntry instance from the service.
 func GetLogEntry(c common.Client, uri string) (*LogEntry, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var logentry LogEntry
-	err = json.NewDecoder(resp.Body).Decode(&logentry)
-	if err != nil {
-		return nil, err
-	}
-
-	logentry.SetClient(c)
-	return &logentry, nil
+	var logEntry LogEntry
+	return &logEntry, logEntry.Get(c, uri, &logEntry)
 }
 
 // ListReferencedLogEntrys gets the collection of LogEntry from

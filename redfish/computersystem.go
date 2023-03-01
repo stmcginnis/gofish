@@ -377,20 +377,8 @@ type BootOption struct {
 
 // GetBootOption will get a BootOption instance from the service.
 func GetBootOption(c common.Client, uri string) (*BootOption, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var bootoption BootOption
-	err = json.NewDecoder(resp.Body).Decode(&bootoption)
-	if err != nil {
-		return nil, err
-	}
-
-	bootoption.SetClient(c)
-	return &bootoption, nil
+	return &bootoption, bootoption.Get(c, uri, &bootoption)
 }
 
 // ResetType describe the type off reset to be issue by the resource
@@ -559,10 +547,6 @@ type ComputerSystem struct {
 	ManagedBy []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-	// etag contains the etag header when fetching the object. This is used to
-	// control updates to make sure the object has not been modified my a different
-	// process between fetching and updating that could cause conflicts.
-	etag string
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
@@ -653,24 +637,8 @@ func (computersystem *ComputerSystem) Update() error {
 
 // GetComputerSystem will get a ComputerSystem instance from the service.
 func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var computersystem ComputerSystem
-	err = json.NewDecoder(resp.Body).Decode(&computersystem)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.Header["Etag"] != nil {
-		computersystem.etag = resp.Header["Etag"][0]
-	}
-
-	computersystem.SetClient(c)
-	return &computersystem, nil
+	return &computersystem, computersystem.Get(c, uri, &computersystem)
 }
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
@@ -853,23 +821,10 @@ func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
 
 // SetBoot set a boot object based on a payload request
 func (computersystem *ComputerSystem) SetBoot(b Boot) error { //nolint
-	type temp struct {
+	t := struct {
 		Boot Boot
-	}
-	t := temp{
-		Boot: b,
-	}
-
-	var header = make(map[string]string)
-	if computersystem.etag != "" {
-		header["If-Match"] = computersystem.etag
-	}
-
-	resp, err := computersystem.Client.PatchWithHeaders(computersystem.ODataID, t, header)
-	if err == nil {
-		return resp.Body.Close()
-	}
-	return err
+	}{Boot: b}
+	return computersystem.Patch(computersystem.ODataID, t)
 }
 
 // Reset shall perform a reset of the ComputerSystem. For systems which implement
@@ -898,23 +853,11 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 			resetType)
 	}
 
-	type temp struct {
+	t := struct {
 		ResetType ResetType
-	}
-	t := temp{
-		ResetType: resetType,
-	}
+	}{ResetType: resetType}
 
-	var header = make(map[string]string)
-	if computersystem.etag != "" {
-		header["If-Match"] = computersystem.etag
-	}
-
-	resp, err := computersystem.Client.PostWithHeaders(computersystem.resetTarget, t, header)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return computersystem.Post(computersystem.resetTarget, t)
 }
 
 // SetDefaultBootOrder shall set the BootOrder array to the default settings.
@@ -924,16 +867,7 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") //nolint:golint
 	}
 
-	var header = make(map[string]string)
-	if computersystem.etag != "" {
-		header["If-Match"] = computersystem.etag
-	}
-
-	resp, err := computersystem.Client.PostWithHeaders(computersystem.setDefaultBootOrderTarget, nil, header)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)
 }
 
 // SimpleStorages gets all simple storage services of this system.

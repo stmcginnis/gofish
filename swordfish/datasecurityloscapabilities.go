@@ -5,8 +5,6 @@
 package swordfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -201,20 +199,8 @@ type DataSecurityLoSCapabilities struct {
 
 // GetDataSecurityLoSCapabilities will get a DataSecurityLoSCapabilities instance from the service.
 func GetDataSecurityLoSCapabilities(c common.Client, uri string) (*DataSecurityLoSCapabilities, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var datasecurityloscapabilities DataSecurityLoSCapabilities
-	err = json.NewDecoder(resp.Body).Decode(&datasecurityloscapabilities)
-	if err != nil {
-		return nil, err
-	}
-
-	datasecurityloscapabilities.SetClient(c)
-	return &datasecurityloscapabilities, nil
+	var dataSecurityLoSCapabilities DataSecurityLoSCapabilities
+	return &dataSecurityLoSCapabilities, dataSecurityLoSCapabilities.Get(c, uri, &dataSecurityLoSCapabilities)
 }
 
 // ListReferencedDataSecurityLoSCapabilities gets the collection of DataSecurityLoSCapabilities from

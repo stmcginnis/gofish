@@ -89,20 +89,8 @@ func (compositionservice *CompositionService) Update() error {
 
 // GetCompositionService will get a CompositionService instance from the service.
 func GetCompositionService(c common.Client, uri string) (*CompositionService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var compositionservice CompositionService
-	err = json.NewDecoder(resp.Body).Decode(&compositionservice)
-	if err != nil {
-		return nil, err
-	}
-
-	compositionservice.SetClient(c)
-	return &compositionservice, nil
+	return &compositionservice, compositionservice.Get(c, uri, &compositionservice)
 }
 
 // ListReferencedCompositionServices gets the collection of CompositionService from

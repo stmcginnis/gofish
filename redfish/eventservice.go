@@ -228,20 +228,8 @@ func (eventservice *EventService) Update() error {
 
 // GetEventService will get a EventService instance from the service.
 func GetEventService(c common.Client, uri string) (*EventService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var eventservice EventService
-	err = json.NewDecoder(resp.Body).Decode(&eventservice)
-	if err != nil {
-		return nil, err
-	}
-
-	eventservice.SetClient(c)
-	return &eventservice, nil
+	var eventService EventService
+	return &eventService, eventService.Get(c, uri, &eventService)
 }
 
 // ListReferencedEventServices gets the collection of EventService from
@@ -369,11 +357,7 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 		Severity:          "Informational",
 	}
 
-	resp, err := eventservice.Client.Post(eventservice.SubmitTestEventTarget, t)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return eventservice.Post(eventservice.SubmitTestEventTarget, t)
 }
 
 // SSEFilterPropertiesSupported shall contain a set of properties that indicate

@@ -387,20 +387,8 @@ func (manager *Manager) Update() error {
 
 // GetManager will get a Manager instance from the Swordfish service.
 func GetManager(c common.Client, uri string) (*Manager, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var manager Manager
-	err = json.NewDecoder(resp.Body).Decode(&manager)
-	if err != nil {
-		return nil, err
-	}
-
-	manager.SetClient(c)
-	return &manager, nil
+	return &manager, manager.Get(c, uri, &manager)
 }
 
 // ListReferencedManagers gets the collection of Managers
@@ -450,18 +438,10 @@ func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) { 
 func (manager *Manager) Reset(resetType ResetType) error {
 	if len(manager.SupportedResetTypes) == 0 {
 		// reset directly without reset type. HPE server has the behavior
-		type temp struct {
+		t := struct {
 			Action string
-		}
-		t := temp{
-			Action: "Manager.Reset",
-		}
-
-		resp, err := manager.Client.Post(manager.resetTarget, t)
-		if err == nil {
-			defer resp.Body.Close()
-		}
-		return err
+		}{Action: "Manager.Reset"}
+		return manager.Post(manager.resetTarget, t)
 	}
 	// Make sure the requested reset type is supported by the manager.
 	valid := false
@@ -477,18 +457,10 @@ func (manager *Manager) Reset(resetType ResetType) error {
 			resetType)
 	}
 
-	type temp struct {
+	t := struct {
 		ResetType ResetType
-	}
-	t := temp{
-		ResetType: resetType,
-	}
-
-	resp, err := manager.Client.Post(manager.resetTarget, t)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	}{ResetType: resetType}
+	return manager.Post(manager.resetTarget, t)
 }
 
 // EthernetInterfaces get this system's ethernet interfaces.

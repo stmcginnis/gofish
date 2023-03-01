@@ -142,20 +142,8 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 
 // GetBios will get a Bios instance from the service.
 func GetBios(c common.Client, uri string) (*Bios, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var bios Bios
-	err = json.NewDecoder(resp.Body).Decode(&bios)
-	if err != nil {
-		return nil, err
-	}
-
-	bios.SetClient(c)
-	return &bios, nil
+	return &bios, bios.Get(c, uri, &bios)
 }
 
 // ListReferencedBioss gets the collection of Bios from a provided reference.
@@ -213,34 +201,23 @@ func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) 
 		return fmt.Errorf("new password must be supplied")
 	}
 
-	type temp struct {
+	t := struct {
 		PasswordName string
 		OldPassword  string
 		NewPassword  string
-	}
-	t := temp{
+	}{
 		PasswordName: passwordName,
 		OldPassword:  oldPassword,
 		NewPassword:  newPassword,
 	}
-
-	resp, err := bios.Client.Post(bios.changePasswordTarget, t)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-
-	return err
+	return bios.Post(bios.changePasswordTarget, t)
 }
 
 // ResetBios shall perform a reset of the BIOS attributes to their default values.
 // A system reset may be required for the default values to be applied. This
 // action may impact other resources.
 func (bios *Bios) ResetBios() error {
-	resp, err := bios.Client.Post(bios.resetBiosTarget, nil)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return bios.Post(bios.resetBiosTarget, nil)
 }
 
 // AllowedAttributeUpdateApplyTimes returns the set of allowed apply times to request when
