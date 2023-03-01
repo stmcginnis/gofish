@@ -254,6 +254,12 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs BiosAttributes, applyTime co
 		}
 	}
 
+	resp, err := bios.Client.Get(bios.settingsTarget)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
 	if len(payload) > 0 {
@@ -262,7 +268,16 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs BiosAttributes, applyTime co
 			data["@Redfish.SettingsApplyTime"] = map[string]string{"ApplyTime": string(applyTime)}
 		}
 
-		return bios.Patch(bios.settingsTarget, data)
+		var header = make(map[string]string)
+		if resp.Header["Etag"] != nil {
+			header["If-Match"] = resp.Header["Etag"][0]
+		}
+
+		resp, err = bios.Client.PatchWithHeaders(bios.settingsTarget, data, header)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
 	}
 
 	return nil
