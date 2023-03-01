@@ -929,7 +929,7 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 		header["If-Match"] = computersystem.etag
 	}
 
-	resp, err := computersystem.Client.PostWithHeaders(computersystem.resetTarget, nil, header)
+	resp, err := computersystem.Client.PostWithHeaders(computersystem.setDefaultBootOrderTarget, nil, header)
 	if err == nil {
 		defer resp.Body.Close()
 	}
