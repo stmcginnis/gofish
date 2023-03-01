@@ -249,20 +249,8 @@ func (networkport *NetworkPort) Update() error {
 
 // GetNetworkPort will get a NetworkPort instance from the service.
 func GetNetworkPort(c common.Client, uri string) (*NetworkPort, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var networkport NetworkPort
-	err = json.NewDecoder(resp.Body).Decode(&networkport)
-	if err != nil {
-		return nil, err
-	}
-
-	networkport.SetClient(c)
-	return &networkport, nil
+	var networkPort NetworkPort
+	return &networkPort, networkPort.Get(c, uri, &networkPort)
 }
 
 // ListReferencedNetworkPorts gets the collection of NetworkPort from

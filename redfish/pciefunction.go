@@ -179,20 +179,8 @@ func (pciefunction *PCIeFunction) UnmarshalJSON(b []byte) error {
 
 // GetPCIeFunction will get a PCIeFunction instance from the service.
 func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var pciefunction PCIeFunction
-	err = json.NewDecoder(resp.Body).Decode(&pciefunction)
-	if err != nil {
-		return nil, err
-	}
-
-	pciefunction.SetClient(c)
-	return &pciefunction, nil
+	var pcieFunction PCIeFunction
+	return &pcieFunction, pcieFunction.Get(c, uri, &pcieFunction)
 }
 
 // ListReferencedPCIeFunctions gets the collection of PCIeFunction from

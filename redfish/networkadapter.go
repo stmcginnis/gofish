@@ -238,20 +238,8 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 
 // GetNetworkAdapter will get a NetworkAdapter instance from the Redfish service.
 func GetNetworkAdapter(c common.Client, uri string) (*NetworkAdapter, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var networkAdapter NetworkAdapter
-	err = json.NewDecoder(resp.Body).Decode(&networkAdapter)
-	if err != nil {
-		return nil, err
-	}
-
-	networkAdapter.SetClient(c)
-	return &networkAdapter, nil
+	return &networkAdapter, networkAdapter.Get(c, uri, &networkAdapter)
 }
 
 // ListReferencedNetworkAdapter gets the collection of Chassis from a provided reference.
@@ -318,9 +306,5 @@ func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
 // ResetSettingsToDefault shall perform a reset of all active and pending
 // settings back to factory default settings upon reset of the network adapter.
 func (networkadapter *NetworkAdapter) ResetSettingsToDefault() error {
-	resp, err := networkadapter.Client.Post(networkadapter.resetSettingsToDefaultTarget, nil)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return networkadapter.Post(networkadapter.resetSettingsToDefaultTarget, nil)
 }

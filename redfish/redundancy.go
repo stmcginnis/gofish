@@ -115,20 +115,8 @@ func (redundancy *Redundancy) Update() error {
 
 // GetRedundancy will get a Redundancy instance from the service.
 func GetRedundancy(c common.Client, uri string) (*Redundancy, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var redundancy Redundancy
-	err = json.NewDecoder(resp.Body).Decode(&redundancy)
-	if err != nil {
-		return nil, err
-	}
-
-	redundancy.SetClient(c)
-	return &redundancy, nil
+	return &redundancy, redundancy.Get(c, uri, &redundancy)
 }
 
 // ListReferencedRedundancies gets the collection of Redundancy from

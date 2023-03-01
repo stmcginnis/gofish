@@ -128,20 +128,8 @@ func (secureboot *SecureBoot) Update() error {
 
 // GetSecureBoot will get a SecureBoot instance from the service.
 func GetSecureBoot(c common.Client, uri string) (*SecureBoot, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var secureboot SecureBoot
-	err = json.NewDecoder(resp.Body).Decode(&secureboot)
-	if err != nil {
-		return nil, err
-	}
-
-	secureboot.SetClient(c)
-	return &secureboot, nil
+	var secureBoot SecureBoot
+	return &secureBoot, secureBoot.Get(c, uri, &secureBoot)
 }
 
 // ListReferencedSecureBoots gets the collection of SecureBoot from
@@ -194,14 +182,9 @@ func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, err
 // UEFI Secure Boot key databases. The DeletePK value shall delete the content
 // of the PK Secure boot key.
 func (secureboot *SecureBoot) ResetKeys(resetType ResetKeysType) error {
-	type temp struct {
+	t := struct {
 		ResetKeysType ResetKeysType
-	}
-	t := temp{ResetKeysType: resetType}
+	}{ResetKeysType: resetType}
 
-	resp, err := secureboot.Client.Post(secureboot.resetKeysTarget, t)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return secureboot.Post(secureboot.resetKeysTarget, t)
 }

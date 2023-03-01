@@ -147,20 +147,8 @@ func (manageraccount *ManagerAccount) Update() error {
 
 // GetManagerAccount will get a ManagerAccount instance from the service.
 func GetManagerAccount(c common.Client, uri string) (*ManagerAccount, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var manageraccount ManagerAccount
-	err = json.NewDecoder(resp.Body).Decode(&manageraccount)
-	if err != nil {
-		return nil, err
-	}
-
-	manageraccount.SetClient(c)
-	return &manageraccount, nil
+	var managerAccount ManagerAccount
+	return &managerAccount, managerAccount.Get(c, uri, &managerAccount)
 }
 
 // ListReferencedManagerAccounts gets the collection of ManagerAccount from

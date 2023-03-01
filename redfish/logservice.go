@@ -142,20 +142,8 @@ func (logservice *LogService) Update() error {
 
 // GetLogService will get a LogService instance from the service.
 func GetLogService(c common.Client, uri string) (*LogService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var logservice LogService
-	err = json.NewDecoder(resp.Body).Decode(&logservice)
-	if err != nil {
-		return nil, err
-	}
-
-	logservice.SetClient(c)
-	return &logservice, nil
+	var logService LogService
+	return &logService, logService.Get(c, uri, &logService)
 }
 
 // ListReferencedLogServices gets the collection of LogService from a provided reference.
@@ -209,16 +197,11 @@ func (logservice *LogService) Entries() ([]*LogEntry, error) {
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
 func (logservice *LogService) ClearLog() error {
-	type temp struct {
+	t := struct {
 		Action string
-	}
-	t := temp{
+	}{
 		Action: "LogService.ClearLog",
 	}
 
-	resp, err := logservice.Client.Post(logservice.clearLogTarget, t)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return logservice.Post(logservice.clearLogTarget, t)
 }

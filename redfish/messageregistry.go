@@ -5,7 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -72,19 +71,8 @@ func GetMessageRegistry(
 	c common.Client,
 	uri string,
 ) (*MessageRegistry, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var t MessageRegistry
-	err = json.NewDecoder(resp.Body).Decode(&t)
-	if err != nil {
-		return nil, err
-	}
-
-	return &t, nil
+	var messageRegistry MessageRegistry
+	return &messageRegistry, messageRegistry.Get(c, uri, &messageRegistry)
 }
 
 // ListReferencedMessageRegistries gets the collection of MessageRegistry.

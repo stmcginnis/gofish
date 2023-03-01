@@ -61,20 +61,8 @@ func (memorydomain *MemoryDomain) UnmarshalJSON(b []byte) error {
 
 // GetMemoryDomain will get a MemoryDomain instance from the service.
 func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var memorydomain MemoryDomain
-	err = json.NewDecoder(resp.Body).Decode(&memorydomain)
-	if err != nil {
-		return nil, err
-	}
-
-	memorydomain.SetClient(c)
-	return &memorydomain, nil
+	var memoryDomain MemoryDomain
+	return &memoryDomain, memoryDomain.Get(c, uri, &memoryDomain)
 }
 
 // ListReferencedMemoryDomains gets the collection of MemoryDomain from

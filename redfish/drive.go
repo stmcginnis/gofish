@@ -314,20 +314,8 @@ func (drive *Drive) Update() error {
 
 // GetDrive will get a Drive instance from the service.
 func GetDrive(c common.Client, uri string) (*Drive, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var drive Drive
-	err = json.NewDecoder(resp.Body).Decode(&drive)
-	if err != nil {
-		return nil, err
-	}
-
-	drive.SetClient(c)
-	return &drive, nil
+	return &drive, drive.Get(c, uri, &drive)
 }
 
 // ListReferencedDrives gets the collection of Drives from a provided reference.
@@ -471,9 +459,5 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // SecureErase shall perform a secure erase of the drive.
 func (drive *Drive) SecureErase() error {
-	resp, err := drive.Client.Post(drive.secureEraseTarget, nil)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	return drive.Post(drive.secureEraseTarget, nil)
 }

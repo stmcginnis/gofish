@@ -279,20 +279,8 @@ func (ethernetinterface *EthernetInterface) Update() error {
 
 // GetEthernetInterface will get a EthernetInterface instance from the service.
 func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ethernetinterface EthernetInterface
-	err = json.NewDecoder(resp.Body).Decode(&ethernetinterface)
-	if err != nil {
-		return nil, err
-	}
-
-	ethernetinterface.SetClient(c)
-	return &ethernetinterface, nil
+	var ethernetInterface EthernetInterface
+	return &ethernetInterface, ethernetInterface.Get(c, uri, &ethernetInterface)
 }
 
 // ListReferencedEthernetInterfaces gets the collection of EthernetInterface from

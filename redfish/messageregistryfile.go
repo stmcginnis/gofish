@@ -5,8 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -43,19 +41,8 @@ func GetMessageRegistryFile(
 	c common.Client,
 	uri string,
 ) (*MessageRegistryFile, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var t MessageRegistryFile
-	err = json.NewDecoder(resp.Body).Decode(&t)
-	if err != nil {
-		return nil, err
-	}
-
-	return &t, nil
+	var messageRegistryFile MessageRegistryFile
+	return &messageRegistryFile, messageRegistryFile.Get(c, uri, &messageRegistryFile)
 }
 
 // ListReferencedMessageRegistryFiles gets the collection of MessageRegistryFile.

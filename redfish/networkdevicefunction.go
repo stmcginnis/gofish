@@ -350,20 +350,8 @@ func (networkdevicefunction *NetworkDeviceFunction) Update() error {
 
 // GetNetworkDeviceFunction will get a NetworkDeviceFunction instance from the service.
 func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFunction, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var networkdevicefunction NetworkDeviceFunction
-	err = json.NewDecoder(resp.Body).Decode(&networkdevicefunction)
-	if err != nil {
-		return nil, err
-	}
-
-	networkdevicefunction.SetClient(c)
-	return &networkdevicefunction, nil
+	var networkDeviceFunction NetworkDeviceFunction
+	return &networkDeviceFunction, networkDeviceFunction.Get(c, uri, &networkDeviceFunction)
 }
 
 // ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from

@@ -5,8 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -63,20 +61,8 @@ type SoftwareInventory struct {
 
 // GetSoftwareInventory will get a SoftwareInventory instance from the service.
 func GetSoftwareInventory(c common.Client, uri string) (*SoftwareInventory, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var softwareinventory SoftwareInventory
-	err = json.NewDecoder(resp.Body).Decode(&softwareinventory)
-	if err != nil {
-		return nil, err
-	}
-
-	softwareinventory.SetClient(c)
-	return &softwareinventory, nil
+	var softwareInventory SoftwareInventory
+	return &softwareInventory, softwareInventory.Get(c, uri, &softwareInventory)
 }
 
 // ListReferencedSoftwareInventories gets the collection of SoftwareInventory from

@@ -153,20 +153,8 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 
 // GetTask will get a Task instance from the service.
 func GetTask(c common.Client, uri string) (*Task, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var task Task
-	err = json.NewDecoder(resp.Body).Decode(&task)
-	if err != nil {
-		return nil, err
-	}
-
-	task.SetClient(c)
-	return &task, nil
+	return &task, task.Get(c, uri, &task)
 }
 
 // ListReferencedTasks gets the collection of Task from

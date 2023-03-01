@@ -322,20 +322,8 @@ func (chassis *Chassis) Update() error {
 
 // GetChassis will get a Chassis instance from the Redfish service.
 func GetChassis(c common.Client, uri string) (*Chassis, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var chassis Chassis
-	err = json.NewDecoder(resp.Body).Decode(&chassis)
-	if err != nil {
-		return nil, err
-	}
-
-	chassis.SetClient(c)
-	return &chassis, nil
+	return &chassis, chassis.Get(c, uri, &chassis)
 }
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
@@ -442,12 +430,7 @@ func (chassis *Chassis) Thermal() (*Thermal, error) {
 		return nil, nil
 	}
 
-	thermal, err := GetThermal(chassis.Client, chassis.thermal)
-	if err != nil {
-		return nil, err
-	}
-
-	return thermal, nil
+	return GetThermal(chassis.Client, chassis.thermal)
 }
 
 // Power gets the power information for the chassis
@@ -456,12 +439,7 @@ func (chassis *Chassis) Power() (*Power, error) {
 		return nil, nil
 	}
 
-	power, err := GetPower(chassis.Client, chassis.power)
-	if err != nil {
-		return nil, err
-	}
-
-	return power, nil
+	return GetPower(chassis.Client, chassis.power)
 }
 
 // ComputerSystems returns the collection of systems from this chassis
@@ -545,16 +523,8 @@ func (chassis *Chassis) Reset(resetType ResetType) error {
 			resetType)
 	}
 
-	type temp struct {
+	t := struct {
 		ResetType ResetType
-	}
-	t := temp{
-		ResetType: resetType,
-	}
-
-	resp, err := chassis.Client.Post(chassis.resetTarget, t)
-	if err == nil {
-		defer resp.Body.Close()
-	}
-	return err
+	}{ResetType: resetType}
+	return chassis.Post(chassis.resetTarget, t)
 }

@@ -314,20 +314,8 @@ func (accountservice *AccountService) Update() error {
 // GetAccountService will get the AccountService instance from the Redfish
 // service.
 func GetAccountService(c common.Client, uri string) (*AccountService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var t AccountService
-	err = json.NewDecoder(resp.Body).Decode(&t)
-	if err != nil {
-		return nil, err
-	}
-
-	t.SetClient(c)
-	return &t, nil
+	var accountService AccountService
+	return &accountService, accountService.Get(c, uri, &accountService)
 }
 
 // Accounts get the accounts from the account service

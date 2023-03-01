@@ -147,20 +147,8 @@ type Power struct {
 
 // GetPower will get a Power instance from the service.
 func GetPower(c common.Client, uri string) (*Power, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
 	var power Power
-	err = json.NewDecoder(resp.Body).Decode(&power)
-	if err != nil {
-		return nil, err
-	}
-
-	power.SetClient(c)
-	return &power, nil
+	return &power, power.Get(c, uri, &power)
 }
 
 // ListReferencedPowers gets the collection of Power from
