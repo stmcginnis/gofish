@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"strings"
 	"time"
@@ -48,6 +49,9 @@ type APIClient struct {
 	// Auth information saved for later to be able to log out
 	auth *redfish.AuthToken
 
+	// mu used to lock requests
+	mu *sync.Mutex
+
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
 }
@@ -76,6 +80,9 @@ type ClientConfig struct {
 
 	// Insecure controls whether to enforce SSL certificate validity.
 	Insecure bool
+
+	// SingleRequest tells the APIClient if request should be wrapped in mutuxes (true)
+	SingleRequest bool
 
 	// Controls TLS handshake timeout
 	TLSHandshakeTimeout int
@@ -123,6 +130,10 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		client.HTTPClient = &http.Client{Transport: transport}
 	} else {
 		client.HTTPClient = config.HTTPClient
+	}
+
+	if config.SingleRequest {
+		client.mu = &sync.Mutex{}
 	}
 
 	// Fetch the service root
@@ -467,7 +478,13 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 		}
 	}
 
+	if c.mu != nil {
+		c.mu.Lock()
+	}
 	resp, err := c.HTTPClient.Do(req)
+	if c.mu != nil {
+		c.mu.Unlock()
+	}
 	if err != nil {
 		return nil, err
 	}
