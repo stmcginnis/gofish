@@ -197,7 +197,7 @@ func TestUpdateBiosAttributes(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	update := BiosAttributes{"AssetTag": "test"}
+	update := SettingsAttributes{"AssetTag": "test"}
 	err = result.UpdateBiosAttributes(update)
 
 	if err != nil {
@@ -231,7 +231,7 @@ func TestUpdateBiosAttributesApplyAt(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	update := BiosAttributes{"AssetTag": "test"}
+	update := SettingsAttributes{"AssetTag": "test"}
 	err = result.UpdateBiosAttributesApplyAt(update, common.AtMaintenanceWindowStartApplyTime)
 
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -541,6 +542,10 @@ type ComputerSystem struct {
 	SupportedResetTypes []ResetType
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
+	settingsTarget            string
+	// settingsApplyTimes is a set of allowed settings update apply times. If none
+	// are specified, then the system does not provide that information.
+	settingsApplyTimes []common.ApplyTime
 	// ManagedBy An array of references to the Managers responsible for this system.
 	// This is temporary until a proper method can be implemented to actually
 	// retrieve those objects directly.
@@ -578,6 +583,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		PCIeDevices        common.Links
 		PCIeFunctions      common.Links
 		Links              CSLinks
+		Settings           common.Settings `json:"@Redfish.Settings"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -605,6 +611,14 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.SupportedResetTypes = t.Actions.ComputerSystemReset.AllowedResetTypes
 	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 	computersystem.ManagedBy = t.Links.ManagedBy.ToStrings()
+	computersystem.settingsApplyTimes = t.Settings.SupportedApplyTimes
+
+	// Some implementations use a @Redfish.Settings object to direct settings updates to a
+	// different URL than the object being updated. Others don't, so handle both.
+	computersystem.settingsTarget = t.Settings.SettingsObject.String()
+	if computersystem.settingsTarget == "" {
+		computersystem.settingsTarget = computersystem.ODataID
+	}
 
 	// This is a read/write object, so we need to save the raw object data for later
 	computersystem.rawData = b
@@ -858,6 +872,59 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 	}{ResetType: resetType}
 
 	return computersystem.Post(computersystem.resetTarget, t)
+}
+
+// UpdateBootAttributesApplyAt is used to update attribute values and set apply time together
+func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error { //nolint:dupl
+	payload := make(map[string]interface{})
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Bios)
+	err := original.UnmarshalJSON(computersystem.rawData)
+	if err != nil {
+		return err
+	}
+
+	for key := range attrs {
+		if strings.HasPrefix(key, "BootTypeOrder") ||
+			original.Attributes[key] != attrs[key] {
+			payload[key] = attrs[key]
+		}
+	}
+
+	resp, err := computersystem.Client.Get(computersystem.settingsTarget)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// If there are any allowed updates, try to send updates to the system and
+	// return the result.
+	if len(payload) > 0 {
+		data := map[string]interface{}{"Boot": payload}
+		if applyTime != "" {
+			data["@Redfish.SettingsApplyTime"] = map[string]string{"ApplyTime": string(applyTime)}
+		}
+
+		var header = make(map[string]string)
+		if resp.Header["Etag"] != nil {
+			header["If-Match"] = resp.Header["Etag"][0]
+		}
+
+		resp, err = computersystem.Client.PatchWithHeaders(computersystem.settingsTarget, data, header)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+	}
+
+	return nil
+}
+
+// UpdateBootAttributes is used to update attribute values.
+func (computersystem *ComputerSystem) UpdateBootAttributes(attrs SettingsAttributes) error {
+	return computersystem.UpdateBootAttributesApplyAt(attrs, "")
 }
 
 // SetDefaultBootOrder shall set the BootOrder array to the default settings.
