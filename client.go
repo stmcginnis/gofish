@@ -478,12 +478,14 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 		}
 	}
 
+	var resp *http.Response
+
 	if c.mu != nil {
 		c.mu.Lock()
-	}
-	resp, err := c.HTTPClient.Do(req)
-	if c.mu != nil {
+		resp, err = c.HTTPClient.Do(req)
 		c.mu.Unlock()
+	} else {
+		resp, err = c.HTTPClient.Do(req)
 	}
 	if err != nil {
 		return nil, err
