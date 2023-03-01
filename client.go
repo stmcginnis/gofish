@@ -50,7 +50,7 @@ type APIClient struct {
 	auth *redfish.AuthToken
 
 	// mu used to lock requests
-	mu *sync.Mutex
+	mu sync.Mutex
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
@@ -80,9 +80,6 @@ type ClientConfig struct {
 
 	// Insecure controls whether to enforce SSL certificate validity.
 	Insecure bool
-
-	// SingleRequest tells the APIClient if request should be wrapped in mutuxes (true)
-	SingleRequest bool
 
 	// Controls TLS handshake timeout
 	TLSHandshakeTimeout int
@@ -130,10 +127,6 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		client.HTTPClient = &http.Client{Transport: transport}
 	} else {
 		client.HTTPClient = config.HTTPClient
-	}
-
-	if config.SingleRequest {
-		client.mu = &sync.Mutex{}
 	}
 
 	// Fetch the service root
@@ -421,6 +414,9 @@ func (c *APIClient) RunRawRequestWithHeaders(method, url string, payloadBuffer i
 
 // runRawRequestWithHeaders actually performs the REST calls but allowing custom headers
 func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if url == "" {
 		return nil, common.ConstructError(0, []byte("unable to execute request, no target provided"))
 	}
@@ -478,15 +474,7 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 		}
 	}
 
-	var resp *http.Response
-
-	if c.mu != nil {
-		c.mu.Lock()
-		resp, err = c.HTTPClient.Do(req)
-		c.mu.Unlock()
-	} else {
-		resp, err = c.HTTPClient.Do(req)
-	}
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
