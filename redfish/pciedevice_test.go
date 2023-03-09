@@ -29,18 +29,13 @@ var pcieDeviceBody = `{
 			"Chassis": [{
 				"@odata.id": "/redfish/v1/Chassis/Chassis-1"
 			}],
-			"Chassis@odata.count": 1,
-			"PCIeFunctions": [{
-					"@odata.id": "/redfish/v1/Functions/1"
-				},
-				{
-					"@odata.id": "/redfish/v1/Functions/2"
-				}
-			],
-			"PCIeFunctions@odata.count": 1
+			"Chassis@odata.count": 1
 		},
 		"Manufacturer": "Acme Inc",
 		"Model": "A1",
+		"PCIeFunctions": {
+			"@odata.id": "/redfish/v1/Systems/system/PCIeDevices/AAABBCC/PCIeFunctions"
+		},
 		"PCIeInterface": {
 			"LanesInUse": 32,
 			"MaxLanes": 32,
