@@ -302,6 +302,9 @@ func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestin
 // it should contain the vendor specific struct that goes inside the Oem session.
 // It returns the new subscription URI if the event subscription is created
 // with success or any error encountered.
+
+// Deprecated: (v1.5) EventType-based eventing is DEPRECATED in the Redfish schema
+// in favor of using RegistryPrefix and ResourceTypes
 func (eventservice *EventService) CreateEventSubscription(
 	destination string,
 	eventTypes []EventType,
@@ -326,6 +329,53 @@ func (eventservice *EventService) CreateEventSubscription(
 	)
 }
 
+// For Redfish v1.5+
+// CreateEventSubscription creates the subscription using the event service.
+// Destination should contain the URL of the destination for events to be sent.
+// RegistryPrefixes is the list of the prefixes for the Message Registries
+// that contain the MessageIds that are sent to this event destination.
+// If RegistryPrefixes is empty on subscription, the client is subscribing to all Message Registries.
+// ResourceTypes is the list of Resource Type values (Schema names) that correspond to the OriginOfCondition,
+// the version and full namespace should not be specified.
+// If ResourceTypes is empty on subscription, the client is subscribing to receive events regardless of ResourceType.
+// HttpHeaders is optional and gives the opportunity to specify any arbitrary
+// HTTP headers required for the event POST operation.
+// Protocol should be the communication protocol of the event endpoint, usually RedfishEventDestinationProtocol.
+// Context is a required client-supplied string that is sent with the event notifications.
+// DeliveryRetryPolicy is optional, it should contain the subscription delivery retry policy for events,
+// where the subscription type is RedfishEvent.
+// Oem is optional and gives the opportunity to specify any OEM specific properties,
+// it should contain the vendor specific struct that goes inside the Oem session.
+// It returns the new subscription URI if the event subscription is created
+// with success or any error encountered.
+func (eventservice *EventService) CreateEventSubscriptionInstance(
+	destination string,
+	registryPrefixes []string,
+	resourceTypes []string,
+	httpHeaders map[string]string,
+	protocol EventDestinationProtocol,
+	context string,
+	deliveryRetryPolicy DeliveryRetryPolicy,
+	oem interface{},
+) (string, error) {
+	if strings.TrimSpace(eventservice.Subscriptions) == "" {
+		return "", fmt.Errorf("empty subscription link in the event service")
+	}
+
+	return CreateEventDestinationInstance(
+		eventservice.Client,
+		eventservice.Subscriptions,
+		destination,
+		registryPrefixes,
+		resourceTypes,
+		httpHeaders,
+		protocol,
+		context,
+		deliveryRetryPolicy,
+		oem,
+	)
+}
+
 // DeleteEventSubscription deletes a specific subscription using the event service.
 func (eventservice *EventService) DeleteEventSubscription(uri string) error {
 	return DeleteEventDestination(eventservice.Client, uri)
@@ -339,8 +389,8 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 		EventGroupID      string `json:"EventGroupId"`
 		EventID           string `json:"EventId"`
 		EventTimestamp    string
-		EventType         string
-		Message           string
+		EventType         string `json:"EventType,omitempty"`
+		Message           string `json:"Message,omitempty"`
 		MessageArgs       []string
 		MessageID         string `json:"MessageId"`
 		OriginOfCondition string
