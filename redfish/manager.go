@@ -485,5 +485,5 @@ func (manager *Manager) VirtualMedia() ([]*VirtualMedia, error) {
 
 // NetworkProtocol get this manager's network protocol settings.
 func (manager *Manager) NetworkProtocol() (*NetworkProtocolSettings, error) {
-	return GetReferencedNetworkProtocol(manager.Client, manager.networkProtocol)
+	return GetNetworkProtocol(manager.GetClient(), manager.networkProtocol)
 }

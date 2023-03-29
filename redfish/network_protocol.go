@@ -1,6 +1,15 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 package redfish
 
-import "github.com/stmcginnis/gofish/common"
+import (
+	"encoding/json"
+	"reflect"
+
+	"github.com/stmcginnis/gofish/common"
+)
 
 type Protocol struct {
 	// The protocol port
@@ -12,8 +21,24 @@ type Protocol struct {
 type HTTPS struct {
 	Protocol
 
-	// Certificates shall be a link to HTTP certificates resource
-	Certificates string
+	// certificates shall be a link to HTTP certificates resource
+	certificates string
+}
+
+func (https *HTTPS) UnmarshalJSON(b []byte) error {
+	type temp HTTPS
+
+	var t struct {
+		temp
+		Certificates common.Link
+	}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+	*https = HTTPS(t.temp)
+	https.certificates = t.Certificates.String()
+	return nil
 }
 
 type NTP struct {
@@ -35,17 +60,17 @@ const (
 	// SNMP community string authentication
 	SNMPAuthCommunityString SNMPAuthenticationProtocol = "CommunityString"
 	// HMAC-MD5-96 authentication
-	SNMPAuthHMAC_MD5 SNMPAuthenticationProtocol = "HMAC_MD5"
+	SNMPAuthHMAC_MD5 SNMPAuthenticationProtocol = "HMAC_MD5" // nolint
 	// HMAC-SHA-96 authentication
-	SNMPAuthHMAC_SHA96 SNMPAuthenticationProtocol = "HMAC_SHA96"
+	SNMPAuthHMAC_SHA96 SNMPAuthenticationProtocol = "HMAC_SHA96" // nolint
 	// HMAC-128-SHA-224 authentication
-	SNMPAuthHMAC128_SHA224 SNMPAuthenticationProtocol = "HMAC128_SHA224"
+	SNMPAuthHMAC128_SHA224 SNMPAuthenticationProtocol = "HMAC128_SHA224" // nolint
 	// HMAC-192-SHA-256 authentication
-	SNMPAuthHMAC192_SHA256 SNMPAuthenticationProtocol = "HMAC192_SHA256"
+	SNMPAuthHMAC192_SHA256 SNMPAuthenticationProtocol = "HMAC192_SHA256" // nolint
 	// HMAC-256-SHA-384 authentication
-	SNMPAuthHMAC256_SHA384 SNMPAuthenticationProtocol = "HMAC256_SHA384"
+	SNMPAuthHMAC256_SHA384 SNMPAuthenticationProtocol = "HMAC256_SHA384" // nolint
 	// HMAC-384-SHA-512 authentication
-	SNMPAuthHMAC384_SHA512 SNMPAuthenticationProtocol = "HMAC384_SHA512"
+	SNMPAuthHMAC384_SHA512 SNMPAuthenticationProtocol = "HMAC384_SHA512" // nolint
 )
 
 type SNMPCommunityAccessMode string
@@ -74,9 +99,9 @@ const (
 	// Encryption is determined by account settings
 	AccountEncryption SNMPEncryptionProtocol = "Account"
 	// CBC-DES encryption
-	CBC_DES_Encryption SNMPEncryptionProtocol = "CBC_DES"
+	CBC_DES_Encryption SNMPEncryptionProtocol = "CBC_DES" // nolint
 	// CFB128-AES-128 encryption
-	CFB128_AES128_Encryption SNMPEncryptionProtocol = "CFB128_AES128"
+	CFB128_AES128_Encryption SNMPEncryptionProtocol = "CFB128_AES128" // nolint
 )
 
 type EngineId struct {
@@ -204,4 +229,64 @@ type NetworkProtocolSettings struct {
 	// The settings for this manager's virtual media support that
 	// apply to all system instances controlled by this manager
 	VirtualMedia Protocol
+	// The OEM extension property
+	Oem json.RawMessage
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+func (networkProtocol *NetworkProtocolSettings) UnmarshalJSON(b []byte) error {
+	type temp NetworkProtocolSettings
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*networkProtocol = NetworkProtocolSettings(t.temp)
+
+	networkProtocol.rawData = b
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (networkProtocol *NetworkProtocolSettings) Update() error {
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(NetworkProtocolSettings)
+	err := original.UnmarshalJSON(networkProtocol.rawData)
+	if err != nil {
+		return err
+	}
+
+	readWriteFields := []string{
+		"DHCP",
+		"DHCPv6",
+		"HTTP",
+		"HTTPS",
+		"IPMI",
+		"KVMIP",
+		"NTP",
+		"Proxy",
+		"RDP",
+		"RFB",
+		"SNMP",
+		"SSDP",
+		"SSH",
+		"Telnet",
+		"VirtualMedia",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(networkProtocol).Elem()
+
+	return networkProtocol.Entity.Update(originalElement, currentElement, readWriteFields)
+}
+
+func GetNetworkProtocol(c common.Client, uri string) (*NetworkProtocolSettings, error) {
+	var networkProtocolSettings NetworkProtocolSettings
+	return &networkProtocolSettings, networkProtocolSettings.Get(c, uri, &networkProtocolSettings)
 }
