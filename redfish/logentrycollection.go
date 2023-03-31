@@ -5,8 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -26,24 +24,6 @@ type LogEntryCollection struct {
 	MembersCount int `json:"Members@odata.count"`
 	// MembersNextLink is the link used for pagination
 	MembersNextLink string `json:"Members@odata.nextLink"`
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
-}
-
-// UnmarshalJSON unmarshals a LogEntry object from the raw JSON.
-func (logEntryCollection *LogEntryCollection) UnmarshalJSON(b []byte) (err error) {
-	type temp LogEntryCollection
-	var t struct {
-		temp
-	}
-
-	if err = json.Unmarshal(b, &t); err != nil {
-		return
-	}
-
-	*logEntryCollection = LogEntryCollection(t.temp)
-	logEntryCollection.rawData = b
-	return
 }
 
 func GetLogEntryCollection(c common.Client, uri string) (*LogEntryCollection, error) {
