@@ -290,17 +290,17 @@ func (networkadapter *NetworkAdapter) Assembly() (*Assembly, error) {
 	if networkadapter.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(networkadapter.Client, networkadapter.assembly)
+	return GetAssembly(networkadapter.GetClient(), networkadapter.assembly)
 }
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network adapter
 func (networkadapter *NetworkAdapter) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return ListReferencedNetworkDeviceFunctions(networkadapter.Client, networkadapter.networkDeviceFunctions)
+	return ListReferencedNetworkDeviceFunctions(networkadapter.GetClient(), networkadapter.networkDeviceFunctions)
 }
 
 // NetworkPorts gets the collection of NetworkPorts for this network adapter
 func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
-	return ListReferencedNetworkPorts(networkadapter.Client, networkadapter.networkPorts)
+	return ListReferencedNetworkPorts(networkadapter.GetClient(), networkadapter.networkPorts)
 }
 
 // ResetSettingsToDefault shall perform a reset of all active and pending

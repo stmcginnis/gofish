@@ -65,7 +65,7 @@ func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol r
 		Context:     eventContext,
 	}
 
-	resp, err := eventservice.Client.Post(eventservice.Subscriptions, z)
+	resp, err := eventservice.GetClient().Post(eventservice.Subscriptions, z)
 	if err != nil {
 		return "", fmt.Errorf("failed to POST subscribe request to redfish due to %w", err)
 	}
@@ -100,7 +100,7 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 	}
 
 	for retryCounter := 0; retryCounter < retryAttempts; retryCounter++ {
-		resp, err = eventservice.Client.Post(eventservice.SubmitTestEventTarget, p)
+		resp, err = eventservice.GetClient().Post(eventservice.SubmitTestEventTarget, p)
 		if err == nil {
 			if retryCounter > retryReportThreshold {
 				log.Printf("Had to retry %v times to send SubmitTestEvent()", retryCounter)
@@ -138,6 +138,6 @@ func FromEventService(eventservice *redfish.EventService) (*EventService, error)
 		return nil, err
 	}
 
-	es.SetClient(eventservice.Client)
+	es.SetClient(eventservice.GetClient())
 	return es, nil
 }

@@ -705,7 +705,7 @@ func (computersystem *ComputerSystem) Bios() (*Bios, error) {
 		return nil, nil
 	}
 
-	return GetBios(computersystem.Client, computersystem.bios)
+	return GetBios(computersystem.GetClient(), computersystem.bios)
 }
 
 // BootOptions gets all BootOption items for this system.
@@ -714,7 +714,7 @@ func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
 	if computersystem.Boot.bootOptions == "" {
 		return result, nil
 	}
-	c := computersystem.Client
+	c := computersystem.GetClient()
 
 	type GetResult struct {
 		Item  *BootOption
@@ -754,27 +754,27 @@ func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
 
 // EthernetInterfaces get this system's ethernet interfaces.
 func (computersystem *ComputerSystem) EthernetInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(computersystem.Client, computersystem.ethernetInterfaces)
+	return ListReferencedEthernetInterfaces(computersystem.GetClient(), computersystem.ethernetInterfaces)
 }
 
 // LogServices get this system's log services.
 func (computersystem *ComputerSystem) LogServices() ([]*LogService, error) {
-	return ListReferencedLogServices(computersystem.Client, computersystem.logServices)
+	return ListReferencedLogServices(computersystem.GetClient(), computersystem.logServices)
 }
 
 // Memory gets this system's memory.
 func (computersystem *ComputerSystem) Memory() ([]*Memory, error) {
-	return ListReferencedMemorys(computersystem.Client, computersystem.memory)
+	return ListReferencedMemorys(computersystem.GetClient(), computersystem.memory)
 }
 
 // MemoryDomains gets this system's memory domains.
 func (computersystem *ComputerSystem) MemoryDomains() ([]*MemoryDomain, error) {
-	return ListReferencedMemoryDomains(computersystem.Client, computersystem.memoryDomains)
+	return ListReferencedMemoryDomains(computersystem.GetClient(), computersystem.memoryDomains)
 }
 
 // NetworkInterfaces returns a collection of network interfaces in this system.
 func (computersystem *ComputerSystem) NetworkInterfaces() ([]*NetworkInterface, error) {
-	return ListReferencedNetworkInterfaces(computersystem.Client, computersystem.networkInterfaces)
+	return ListReferencedNetworkInterfaces(computersystem.GetClient(), computersystem.networkInterfaces)
 }
 
 // PCIeDevices gets all PCIeDevices for this system.
@@ -783,7 +783,7 @@ func (computersystem *ComputerSystem) PCIeDevices() ([]*PCIeDevice, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, pciedeviceLink := range computersystem.pcieDevices {
-		pciedevice, err := GetPCIeDevice(computersystem.Client, pciedeviceLink)
+		pciedevice, err := GetPCIeDevice(computersystem.GetClient(), pciedeviceLink)
 		if err != nil {
 			collectionError.Failures[pciedeviceLink] = err
 		} else {
@@ -804,7 +804,7 @@ func (computersystem *ComputerSystem) PCIeFunctions() ([]*PCIeFunction, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, pciefunctionLink := range computersystem.pcieFunctions {
-		pciefunction, err := GetPCIeFunction(computersystem.Client, pciefunctionLink)
+		pciefunction, err := GetPCIeFunction(computersystem.GetClient(), pciefunctionLink)
 		if err != nil {
 			collectionError.Failures[pciefunctionLink] = err
 		} else {
@@ -821,7 +821,7 @@ func (computersystem *ComputerSystem) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // Processors returns a collection of processors from this system
 func (computersystem *ComputerSystem) Processors() ([]*Processor, error) {
-	return ListReferencedProcessors(computersystem.Client, computersystem.processors)
+	return ListReferencedProcessors(computersystem.GetClient(), computersystem.processors)
 }
 
 // SecureBoot gets the secure boot information for the system.
@@ -830,7 +830,7 @@ func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
 		return nil, nil
 	}
 
-	return GetSecureBoot(computersystem.Client, computersystem.secureBoot)
+	return GetSecureBoot(computersystem.GetClient(), computersystem.secureBoot)
 }
 
 // SetBoot set a boot object based on a payload request
@@ -893,7 +893,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 		}
 	}
 
-	resp, err := computersystem.Client.Get(computersystem.settingsTarget)
+	resp, err := computersystem.GetClient().Get(computersystem.settingsTarget)
 	if err != nil {
 		return err
 	}
@@ -912,7 +912,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 			header["If-Match"] = resp.Header["Etag"][0]
 		}
 
-		resp, err = computersystem.Client.PatchWithHeaders(computersystem.settingsTarget, data, header)
+		resp, err = computersystem.GetClient().PatchWithHeaders(computersystem.settingsTarget, data, header)
 		if err != nil {
 			return err
 		}
@@ -939,12 +939,12 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 
 // SimpleStorages gets all simple storage services of this system.
 func (computersystem *ComputerSystem) SimpleStorages() ([]*SimpleStorage, error) {
-	return ListReferencedSimpleStorages(computersystem.Client, computersystem.simpleStorage)
+	return ListReferencedSimpleStorages(computersystem.GetClient(), computersystem.simpleStorage)
 }
 
 // Storage gets the storage associated with this system.
 func (computersystem *ComputerSystem) Storage() ([]*Storage, error) {
-	return ListReferencedStorages(computersystem.Client, computersystem.storage)
+	return ListReferencedStorages(computersystem.GetClient(), computersystem.storage)
 }
 
 // CSLinks are references to resources that are related to, but not contained

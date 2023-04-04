@@ -237,7 +237,7 @@ func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error)
 
 	collectionError := common.NewCollectionError()
 	for _, computerSystemLink := range hostinterface.computerSystems {
-		computerSystem, err := GetComputerSystem(hostinterface.Client, computerSystemLink)
+		computerSystem, err := GetComputerSystem(hostinterface.GetClient(), computerSystemLink)
 		if err != nil {
 			collectionError.Failures[computerSystemLink] = err
 		} else {
@@ -255,13 +255,13 @@ func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error)
 // HostNetworkInterfaces gets the network interface controllers or cards (NICs)
 // that a Computer System uses to communicate with this Host Interface.
 func (hostinterface *HostInterface) HostNetworkInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(hostinterface.Client, hostinterface.managerEthernetInterface)
+	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.managerEthernetInterface)
 }
 
 // ManagerNetworkInterfaces gets the network interface controllers or cards
 // (NIC) that this Manager uses for network communication with this Host Interface.
 func (hostinterface *HostInterface) ManagerNetworkInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(hostinterface.Client, hostinterface.managerEthernetInterface)
+	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.managerEthernetInterface)
 }
 
 // TODO: Add access functions for linked objects

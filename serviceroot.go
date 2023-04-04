@@ -230,79 +230,79 @@ func ServiceRoot(c common.Client) (*Service, error) {
 
 // Chassis gets the chassis instances managed by this service.
 func (serviceroot *Service) Chassis() ([]*redfish.Chassis, error) {
-	return redfish.ListReferencedChassis(serviceroot.Client, serviceroot.chassis)
+	return redfish.ListReferencedChassis(serviceroot.GetClient(), serviceroot.chassis)
 }
 
 // Managers gets the manager instances of this service.
 func (serviceroot *Service) Managers() ([]*redfish.Manager, error) {
-	return redfish.ListReferencedManagers(serviceroot.Client, serviceroot.managers)
+	return redfish.ListReferencedManagers(serviceroot.GetClient(), serviceroot.managers)
 }
 
 // StorageSystems gets the storage system instances managed by this service.
 func (serviceroot *Service) StorageSystems() ([]*swordfish.StorageSystem, error) {
-	return swordfish.ListReferencedStorageSystems(serviceroot.Client, serviceroot.storageSystems)
+	return swordfish.ListReferencedStorageSystems(serviceroot.GetClient(), serviceroot.storageSystems)
 }
 
 // StorageServices gets the Swordfish storage services
 func (serviceroot *Service) StorageServices() ([]*swordfish.StorageService, error) {
-	return swordfish.ListReferencedStorageServices(serviceroot.Client, serviceroot.storageServices)
+	return swordfish.ListReferencedStorageServices(serviceroot.GetClient(), serviceroot.storageServices)
 }
 
 // Tasks gets the system's tasks
 func (serviceroot *Service) Tasks() ([]*redfish.Task, error) {
-	return redfish.ListReferencedTasks(serviceroot.Client, serviceroot.tasks)
+	return redfish.ListReferencedTasks(serviceroot.GetClient(), serviceroot.tasks)
 }
 
 // TaskService gets the task service instance
 func (serviceroot *Service) TaskService() (*redfish.TaskService, error) {
-	return redfish.GetTaskService(serviceroot.Client, serviceroot.tasks)
+	return redfish.GetTaskService(serviceroot.GetClient(), serviceroot.tasks)
 }
 
 // CreateSession creates a new session and returns the token and id
 func (serviceroot *Service) CreateSession(username, password string) (*redfish.AuthToken, error) {
-	return redfish.CreateSession(serviceroot.Client, serviceroot.sessions, username, password)
+	return redfish.CreateSession(serviceroot.GetClient(), serviceroot.sessions, username, password)
 }
 
 // Sessions gets the system's active sessions
 func (serviceroot *Service) Sessions() ([]*redfish.Session, error) {
-	return redfish.ListReferencedSessions(serviceroot.Client, serviceroot.sessions)
+	return redfish.ListReferencedSessions(serviceroot.GetClient(), serviceroot.sessions)
 }
 
 // DeleteSession logout the specified session
 func (serviceroot *Service) DeleteSession(url string) error {
-	return redfish.DeleteSession(serviceroot.Client, url)
+	return redfish.DeleteSession(serviceroot.GetClient(), url)
 }
 
 // AccountService gets the Redfish AccountService
 func (serviceroot *Service) AccountService() (*redfish.AccountService, error) {
-	return redfish.GetAccountService(serviceroot.Client, serviceroot.accountService)
+	return redfish.GetAccountService(serviceroot.GetClient(), serviceroot.accountService)
 }
 
 // EventService gets the Redfish EventService
 func (serviceroot *Service) EventService() (*redfish.EventService, error) {
-	return redfish.GetEventService(serviceroot.Client, serviceroot.eventService)
+	return redfish.GetEventService(serviceroot.GetClient(), serviceroot.eventService)
 }
 
 // Registries gets the Redfish Registries
 func (serviceroot *Service) Registries() ([]*redfish.MessageRegistryFile, error) {
-	return redfish.ListReferencedMessageRegistryFiles(serviceroot.Client, serviceroot.registries)
+	return redfish.ListReferencedMessageRegistryFiles(serviceroot.GetClient(), serviceroot.registries)
 }
 
 // MessageRegistries gets all the available message registries in all languages
 func (serviceroot *Service) MessageRegistries() ([]*redfish.MessageRegistry, error) {
-	return redfish.ListReferencedMessageRegistries(serviceroot.Client, serviceroot.registries)
+	return redfish.ListReferencedMessageRegistries(serviceroot.GetClient(), serviceroot.registries)
 }
 
 // MessageRegistry gets a specific message registry.
 // uri is the uri for the message registry
 func (serviceroot *Service) MessageRegistry(uri string) (*redfish.MessageRegistry, error) {
-	return redfish.GetMessageRegistry(serviceroot.Client, uri)
+	return redfish.GetMessageRegistry(serviceroot.GetClient(), uri)
 }
 
 // MessageRegistriesByLanguage gets the message registries by language.
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageRegistriesByLanguage(language string) ([]*redfish.MessageRegistry, error) {
-	return redfish.ListReferencedMessageRegistriesByLanguage(serviceroot.Client, serviceroot.registries, language)
+	return redfish.ListReferencedMessageRegistriesByLanguage(serviceroot.GetClient(), serviceroot.registries, language)
 }
 
 // MessageRegistryByLanguage gets a specific message registry by language.
@@ -311,7 +311,7 @@ func (serviceroot *Service) MessageRegistriesByLanguage(language string) ([]*red
 // by the Redfish Specification, for example: "Alert.1.0.0".
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageRegistryByLanguage(registry, language string) (*redfish.MessageRegistry, error) {
-	return redfish.GetMessageRegistryByLanguage(serviceroot.Client, serviceroot.registries, registry, language)
+	return redfish.GetMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.registries, registry, language)
 }
 
 // MessageByLanguage tries to find and get the message in the correct language from the informed messageID.
@@ -324,20 +324,20 @@ func (serviceroot *Service) MessageRegistryByLanguage(registry, language string)
 //
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageByLanguage(messageID, language string) (*redfish.MessageRegistryMessage, error) {
-	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.Client, serviceroot.registries, messageID, language)
+	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.registries, messageID, language)
 }
 
 // Systems get the system instances from the service
 func (serviceroot *Service) Systems() ([]*redfish.ComputerSystem, error) {
-	return redfish.ListReferencedComputerSystems(serviceroot.Client, serviceroot.systems)
+	return redfish.ListReferencedComputerSystems(serviceroot.GetClient(), serviceroot.systems)
 }
 
 // CompositionService gets the composition service instance
 func (serviceroot *Service) CompositionService() (*redfish.CompositionService, error) {
-	return redfish.GetCompositionService(serviceroot.Client, serviceroot.compositionService)
+	return redfish.GetCompositionService(serviceroot.GetClient(), serviceroot.compositionService)
 }
 
 // UpdateService gets the update service instance
 func (serviceroot *Service) UpdateService() (*redfish.UpdateService, error) {
-	return redfish.GetUpdateService(serviceroot.Client, serviceroot.updateService)
+	return redfish.GetUpdateService(serviceroot.GetClient(), serviceroot.updateService)
 }

@@ -439,7 +439,7 @@ func (memory *Memory) Assembly() (*Assembly, error) {
 	if memory.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(memory.Client, memory.assembly)
+	return GetAssembly(memory.GetClient(), memory.assembly)
 }
 
 // Metrics gets the memory metrics.
@@ -447,7 +447,7 @@ func (memory *Memory) Metrics() (*MemoryMetrics, error) {
 	if memory.metrics == "" {
 		return nil, nil
 	}
-	return GetMemoryMetrics(memory.Client, memory.metrics)
+	return GetMemoryMetrics(memory.GetClient(), memory.metrics)
 }
 
 // Chassis gets the containing chassis of this memory.
@@ -455,7 +455,7 @@ func (memory *Memory) Chassis() (*Chassis, error) {
 	if memory.chassis == "" {
 		return nil, nil
 	}
-	return GetChassis(memory.Client, memory.chassis)
+	return GetChassis(memory.GetClient(), memory.chassis)
 }
 
 // MemoryLocation shall contain properties which describe the Memory connection

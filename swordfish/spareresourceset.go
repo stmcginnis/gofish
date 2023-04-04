@@ -159,5 +159,5 @@ func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareReso
 // ReplacementSpareSets gets other spare sets that can be utilized to replenish
 // this spare set.
 func (spareresourceset *SpareResourceSet) ReplacementSpareSets() ([]*SpareResourceSet, error) {
-	return ListReferencedSpareResourceSets(spareresourceset.Client, spareresourceset.replacementSpareSets)
+	return ListReferencedSpareResourceSets(spareresourceset.GetClient(), spareresourceset.replacementSpareSets)
 }

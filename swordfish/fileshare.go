@@ -212,7 +212,7 @@ func (fileshare *FileShare) ClassOfService() (*ClassOfService, error) {
 	if fileshare.classOfService == "" {
 		return result, nil
 	}
-	return GetClassOfService(fileshare.Client, fileshare.classOfService)
+	return GetClassOfService(fileshare.GetClient(), fileshare.classOfService)
 }
 
 // FileSystem gets the file share's associated file system.
@@ -221,10 +221,10 @@ func (fileshare *FileShare) FileSystem() (*FileSystem, error) {
 	if fileshare.fileSystem == "" {
 		return result, nil
 	}
-	return GetFileSystem(fileshare.Client, fileshare.fileSystem)
+	return GetFileSystem(fileshare.GetClient(), fileshare.fileSystem)
 }
 
 // EthernetInterfaces gets the EthernetInterfaces associated with this share.
 func (fileshare *FileShare) EthernetInterfaces() ([]*redfish.EthernetInterface, error) {
-	return redfish.ListReferencedEthernetInterfaces(fileshare.Client, fileshare.ethernetInterfaces)
+	return redfish.ListReferencedEthernetInterfaces(fileshare.GetClient(), fileshare.ethernetInterfaces)
 }

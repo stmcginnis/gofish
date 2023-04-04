@@ -215,7 +215,7 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTim
 		}
 	}
 
-	resp, err := bios.Client.Get(bios.settingsTarget)
+	resp, err := bios.GetClient().Get(bios.settingsTarget)
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTim
 			header["If-Match"] = resp.Header["Etag"][0]
 		}
 
-		resp, err = bios.Client.PatchWithHeaders(bios.settingsTarget, data, header)
+		resp, err = bios.GetClient().PatchWithHeaders(bios.settingsTarget, data, header)
 		if err != nil {
 			return err
 		}
@@ -256,5 +256,5 @@ func (bios *Bios) GetActiveSoftwareImage() (*SoftwareInventory, error) {
 		return nil, nil
 	}
 
-	return GetSoftwareInventory(bios.Client, bios.activeSoftwareImage)
+	return GetSoftwareInventory(bios.GetClient(), bios.activeSoftwareImage)
 }

@@ -384,7 +384,7 @@ func (chassis *Chassis) Drives() ([]*Drive, error) {
 	collectionError := common.NewCollectionError()
 	driveLinks := chassis.linkedDrives
 	if chassis.drives != "" {
-		drives, err := common.GetCollection(chassis.Client, chassis.drives)
+		drives, err := common.GetCollection(chassis.GetClient(), chassis.drives)
 		if err != nil {
 			collectionError.Failures[chassis.drives] = err
 			return nil, collectionError
@@ -400,12 +400,12 @@ func (chassis *Chassis) Drives() ([]*Drive, error) {
 
 	ch := make(chan GetResult)
 	get := func(link string) {
-		drive, err := GetDrive(chassis.Client, link)
+		drive, err := GetDrive(chassis.GetClient(), link)
 		ch <- GetResult{Item: drive, Link: link, Error: err}
 	}
 
 	go func() {
-		common.CollectCollection(get, chassis.Client, driveLinks)
+		common.CollectCollection(get, chassis.GetClient(), driveLinks)
 		close(ch)
 	}()
 
@@ -430,7 +430,7 @@ func (chassis *Chassis) Thermal() (*Thermal, error) {
 		return nil, nil
 	}
 
-	return GetThermal(chassis.Client, chassis.thermal)
+	return GetThermal(chassis.GetClient(), chassis.thermal)
 }
 
 // Power gets the power information for the chassis
@@ -439,7 +439,7 @@ func (chassis *Chassis) Power() (*Power, error) {
 		return nil, nil
 	}
 
-	return GetPower(chassis.Client, chassis.power)
+	return GetPower(chassis.GetClient(), chassis.power)
 }
 
 // ComputerSystems returns the collection of systems from this chassis
@@ -448,7 +448,7 @@ func (chassis *Chassis) ComputerSystems() ([]*ComputerSystem, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, uri := range chassis.computerSystems {
-		cs, err := GetComputerSystem(chassis.Client, uri)
+		cs, err := GetComputerSystem(chassis.GetClient(), uri)
 		if err != nil {
 			collectionError.Failures[uri] = err
 		} else {
@@ -469,7 +469,7 @@ func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, uri := range chassis.managedBy {
-		manager, err := GetManager(chassis.Client, uri)
+		manager, err := GetManager(chassis.GetClient(), uri)
 		if err != nil {
 			collectionError.Failures[uri] = err
 		} else {
@@ -486,19 +486,19 @@ func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 
 // NetworkAdapters gets the collection of network adapters of this chassis
 func (chassis *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
-	return ListReferencedNetworkAdapter(chassis.Client, chassis.networkAdapters)
+	return ListReferencedNetworkAdapter(chassis.GetClient(), chassis.networkAdapters)
 }
 
 // LogServices get this chassis's log services.
 func (chassis *Chassis) LogServices() ([]*LogService, error) {
-	return ListReferencedLogServices(chassis.Client, chassis.logServices)
+	return ListReferencedLogServices(chassis.GetClient(), chassis.logServices)
 }
 
 // The Assembly schema defines an assembly.
 // Assembly information contains details about a device, such as part number, serial number, manufacturer, and production date.
 // It also provides access to the original data for the assembly.
 func (chassis *Chassis) Assembly() (*Assembly, error) {
-	return GetAssembly(chassis.Client, chassis.assembly)
+	return GetAssembly(chassis.GetClient(), chassis.assembly)
 }
 
 // Reset shall reset the chassis. This action shall not reset Systems or other

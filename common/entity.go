@@ -19,7 +19,7 @@ type Entity struct {
 	// Name is the name of the resource or array element.
 	Name string `json:"Name"`
 	// Client is the REST client interface to the system.
-	Client Client `json:"-"`
+	client Client
 	// etag contains the etag header when fetching the object. This is used to
 	// control updates to make sure the object has not been modified my a different
 	// process between fetching and updating that could cause conflicts.
@@ -29,7 +29,13 @@ type Entity struct {
 // SetClient sets the API client connection to use for accessing this
 // entity.
 func (e *Entity) SetClient(c Client) {
-	e.Client = c
+	e.client = c
+}
+
+// GetClient get the API client connection to use for accessing this
+// entity.
+func (e *Entity) GetClient() Client {
+	return e.client
 }
 
 // Update commits changes to an entity.
@@ -117,7 +123,7 @@ func (e *Entity) Patch(uri string, payload interface{}) error {
 		header["If-Match"] = e.etag
 	}
 
-	resp, err := e.Client.PatchWithHeaders(uri, payload, header)
+	resp, err := e.client.PatchWithHeaders(uri, payload, header)
 	if err == nil {
 		return resp.Body.Close()
 	}
@@ -131,7 +137,7 @@ func (e *Entity) Post(uri string, payload interface{}) error {
 		header["If-Match"] = e.etag
 	}
 
-	resp, err := e.Client.PostWithHeaders(uri, payload, header)
+	resp, err := e.client.PostWithHeaders(uri, payload, header)
 	if err == nil {
 		return resp.Body.Close()
 	}

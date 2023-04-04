@@ -54,7 +54,7 @@ func TestUpdateService(t *testing.T) {
 
 	t.Run("Check default redfish fields", func(t *testing.T) {
 		c := &common.TestClient{}
-		result.Client = c
+		result.SetClient(c)
 
 		err := json.NewDecoder(strings.NewReader(simpleUpdateBody)).Decode(&result)
 		if err != nil {

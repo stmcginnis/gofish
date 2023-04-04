@@ -367,7 +367,7 @@ func (drive *Drive) Assembly() (*Assembly, error) {
 		return nil, nil
 	}
 
-	return GetAssembly(drive.Client, drive.assembly)
+	return GetAssembly(drive.GetClient(), drive.assembly)
 }
 
 // Chassis gets the containing chassis for this drive.
@@ -376,7 +376,7 @@ func (drive *Drive) Chassis() (*Chassis, error) {
 		return nil, nil
 	}
 
-	return GetChassis(drive.Client, drive.chassis)
+	return GetChassis(drive.GetClient(), drive.chassis)
 }
 
 // Endpoints references the Endpoints that this drive is associated with.
@@ -385,7 +385,7 @@ func (drive *Drive) Endpoints() ([]*Endpoint, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, endpointLink := range drive.endpoints {
-		endpoint, err := GetEndpoint(drive.Client, endpointLink)
+		endpoint, err := GetEndpoint(drive.GetClient(), endpointLink)
 		if err != nil {
 			collectionError.Failures[endpointLink] = err
 		} else {
@@ -406,7 +406,7 @@ func (drive *Drive) Volumes() ([]*Volume, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, volumeLink := range drive.volumes {
-		volume, err := GetVolume(drive.Client, volumeLink)
+		volume, err := GetVolume(drive.GetClient(), volumeLink)
 		if err != nil {
 			collectionError.Failures[volumeLink] = err
 		} else {
@@ -427,7 +427,7 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, pcieFunctionLink := range drive.pcieFunctions {
-		pcieFunction, err := GetPCIeFunction(drive.Client, pcieFunctionLink)
+		pcieFunction, err := GetPCIeFunction(drive.GetClient(), pcieFunctionLink)
 		if err != nil {
 			collectionError.Failures[pcieFunctionLink] = err
 		} else {

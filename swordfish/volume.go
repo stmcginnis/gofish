@@ -601,7 +601,7 @@ func (volume *Volume) ClassOfService() (*ClassOfService, error) {
 		return nil, nil
 	}
 
-	return GetClassOfService(volume.Client, volume.classOfService)
+	return GetClassOfService(volume.GetClient(), volume.classOfService)
 }
 
 // getDrives gets a set of referenced drives.
@@ -610,7 +610,7 @@ func (volume *Volume) getDrives(links []string) ([]*redfish.Drive, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, driveLink := range links {
-		drive, err := redfish.GetDrive(volume.Client, driveLink)
+		drive, err := redfish.GetDrive(volume.GetClient(), driveLink)
 		if err != nil {
 			collectionError.Failures[driveLink] = err
 		} else {
@@ -642,7 +642,7 @@ func (volume *Volume) SpareResourceSets() ([]*SpareResourceSet, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, srsLink := range volume.spareResourceSets {
-		srs, err := GetSpareResourceSet(volume.Client, srsLink)
+		srs, err := GetSpareResourceSet(volume.GetClient(), srsLink)
 		if err != nil {
 			collectionError.Failures[srsLink] = err
 		} else {
@@ -663,7 +663,7 @@ func (volume *Volume) StorageGroups() ([]*StorageGroup, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, sgLink := range volume.storageGroups {
-		sg, err := GetStorageGroup(volume.Client, sgLink)
+		sg, err := GetStorageGroup(volume.GetClient(), sgLink)
 		if err != nil {
 			collectionError.Failures[sgLink] = err
 		} else {
@@ -684,7 +684,7 @@ func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, sgLink := range volume.allocatedPools {
-		sg, err := GetStoragePool(volume.Client, sgLink)
+		sg, err := GetStoragePool(volume.GetClient(), sgLink)
 		if err != nil {
 			collectionError.Failures[sgLink] = err
 		} else {

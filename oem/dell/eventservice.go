@@ -37,7 +37,7 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 		MessageID:   messageID,
 	}
 
-	resp, err := eventservice.Client.Post(eventservice.SubmitTestEventTarget, payload)
+	resp, err := eventservice.GetClient().Post(eventservice.SubmitTestEventTarget, payload)
 	if err != nil {
 		return fmt.Errorf("failed to post submitTestEvent due to: %w", err)
 	}
@@ -62,6 +62,6 @@ func FromEventService(eventservice *redfish.EventService) (*EventService, error)
 		return nil, err
 	}
 
-	es.SetClient(eventservice.Client)
+	es.SetClient(eventservice.GetClient())
 	return es, nil
 }

@@ -226,7 +226,7 @@ func (storagepool *StoragePool) DedicatedSpareDrives() ([]*redfish.Drive, error)
 
 	collectionError := common.NewCollectionError()
 	for _, driveLink := range storagepool.dedicatedSpareDrives {
-		drive, err := redfish.GetDrive(storagepool.Client, driveLink)
+		drive, err := redfish.GetDrive(storagepool.GetClient(), driveLink)
 		if err != nil {
 			collectionError.Failures[driveLink] = err
 		} else {
@@ -248,7 +248,7 @@ func (storagepool *StoragePool) SpareResourceSets() ([]*SpareResourceSet, error)
 
 	collectionError := common.NewCollectionError()
 	for _, srsLink := range storagepool.spareResourceSets {
-		srs, err := GetSpareResourceSet(storagepool.Client, srsLink)
+		srs, err := GetSpareResourceSet(storagepool.GetClient(), srsLink)
 		if err != nil {
 			collectionError.Failures[srsLink] = err
 		} else {
@@ -265,12 +265,12 @@ func (storagepool *StoragePool) SpareResourceSets() ([]*SpareResourceSet, error)
 
 // AllocatedPools gets the storage pools allocated from this storage pool.
 func (storagepool *StoragePool) AllocatedPools() ([]*StoragePool, error) {
-	return ListReferencedStoragePools(storagepool.Client, storagepool.allocatedPools)
+	return ListReferencedStoragePools(storagepool.GetClient(), storagepool.allocatedPools)
 }
 
 // AllocatedVolumes gets the volumes allocated from this storage pool.
 func (storagepool *StoragePool) AllocatedVolumes() ([]*Volume, error) {
-	return ListReferencedVolumes(storagepool.Client, storagepool.allocatedVolumes)
+	return ListReferencedVolumes(storagepool.GetClient(), storagepool.allocatedVolumes)
 }
 
 // CapacitySources gets space allocations to this pool.
@@ -279,7 +279,7 @@ func (storagepool *StoragePool) CapacitySources() ([]*CapacitySource, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, capLink := range storagepool.capacitySources {
-		capacity, err := GetCapacitySource(storagepool.Client, capLink)
+		capacity, err := GetCapacitySource(storagepool.GetClient(), capLink)
 		if err != nil {
 			collectionError.Failures[capLink] = err
 		} else {
@@ -298,7 +298,7 @@ func (storagepool *StoragePool) CapacitySources() ([]*CapacitySource, error) {
 // storage pool. Capacity allocated from this storage pool shall conform to one
 // of the referenced classes of service.
 func (storagepool *StoragePool) ClassesOfService() ([]*ClassOfService, error) {
-	return ListReferencedClassOfServices(storagepool.Client, storagepool.classesOfService)
+	return ListReferencedClassOfServices(storagepool.GetClient(), storagepool.classesOfService)
 }
 
 // DefaultClassOfService gets the default ClassOfService for this pool.
@@ -306,5 +306,5 @@ func (storagepool *StoragePool) DefaultClassOfService() (*ClassOfService, error)
 	if storagepool.defaultClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storagepool.Client, storagepool.defaultClassOfService)
+	return GetClassOfService(storagepool.GetClient(), storagepool.defaultClassOfService)
 }

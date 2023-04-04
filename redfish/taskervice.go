@@ -63,5 +63,5 @@ func GetTaskService(c common.Client, uri string) (*TaskService, error) {
 
 // Tasks gets the collection of tasks of this task service
 func (taskService *TaskService) Tasks() ([]*Task, error) {
-	return ListReferencedTasks(taskService.Client, taskService.tasks)
+	return ListReferencedTasks(taskService.GetClient(), taskService.tasks)
 }

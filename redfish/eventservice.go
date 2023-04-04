@@ -282,12 +282,12 @@ func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, 
 		return nil, fmt.Errorf("empty subscription link in the event service")
 	}
 
-	return ListReferencedEventDestinations(eventservice.Client, eventservice.Subscriptions)
+	return ListReferencedEventDestinations(eventservice.GetClient(), eventservice.Subscriptions)
 }
 
 // GetEventSubscription gets a specific subscription using the event service.
 func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
-	return GetEventDestination(eventservice.Client, uri)
+	return GetEventDestination(eventservice.GetClient(), uri)
 }
 
 // CreateEventSubscription creates the subscription using the event service.
@@ -318,7 +318,7 @@ func (eventservice *EventService) CreateEventSubscription(
 	}
 
 	return CreateEventDestination(
-		eventservice.Client,
+		eventservice.GetClient(),
 		eventservice.Subscriptions,
 		destination,
 		eventTypes,
@@ -363,7 +363,7 @@ func (eventservice *EventService) CreateEventSubscriptionInstance(
 	}
 
 	return CreateEventDestinationInstance(
-		eventservice.Client,
+		eventservice.GetClient(),
 		eventservice.Subscriptions,
 		destination,
 		registryPrefixes,
@@ -378,7 +378,7 @@ func (eventservice *EventService) CreateEventSubscriptionInstance(
 
 // DeleteEventSubscription deletes a specific subscription using the event service.
 func (eventservice *EventService) DeleteEventSubscription(uri string) error {
-	return DeleteEventDestination(eventservice.Client, uri)
+	return DeleteEventDestination(eventservice.GetClient(), uri)
 }
 
 // SubmitTestEvent shall add a test event to the event service with the event
