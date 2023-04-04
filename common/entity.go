@@ -143,3 +143,34 @@ func (e *Entity) Post(uri string, payload interface{}) error {
 	}
 	return err
 }
+
+type Filter string
+
+type FilterOption func(*Filter)
+
+func WithSkip(skipNum int) FilterOption {
+	return func(e *Filter) {
+		*e = Filter(fmt.Sprintf("%s$skip=%d", *e, skipNum))
+	}
+}
+
+func WithTop(topNum int) FilterOption {
+	return func(e *Filter) {
+		*e = Filter(fmt.Sprintf("%s$top=%d", *e, topNum))
+	}
+}
+
+func (e *Filter) SetFilter(opts ...FilterOption) {
+	*e = "?"
+	lastIdx := len(opts) - 1
+	for idx, opt := range opts {
+		opt(e)
+		if idx < lastIdx {
+			*e += "&"
+		}
+	}
+}
+
+func (e *Filter) ClearFilter() {
+	*e = ""
+}
