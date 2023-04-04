@@ -199,7 +199,7 @@ func (logservice *LogService) Entries() ([]*LogEntry, error) {
 func (logservice *LogService) FilteredEntries(options ...common.FilterOption) ([]*LogEntry, error) {
 	var filter common.Filter
 	filter.SetFilter(options...)
-	return ListReferencedLogEntrys(logservice.Client, fmt.Sprintf("%s%s", logservice.entries, filter))
+	return ListReferencedLogEntrys(logservice.GetClient(), fmt.Sprintf("%s%s", logservice.entries, filter))
 }
 
 // ClearLog shall delete all entries found in the Entries collection for this
