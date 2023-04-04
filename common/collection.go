@@ -12,8 +12,9 @@ import (
 
 // Collection represents a collection of entity references.
 type Collection struct {
-	Name      string `json:"Name"`
-	ItemLinks []string
+	Name            string `json:"Name"`
+	ItemLinks       []string
+	MembersNextLink string `json:"Members@odata.nextLink,omitempty"`
 }
 
 // UnmarshalJSON unmarshals a collection from the raw JSON.
@@ -102,12 +103,18 @@ func (cr *CollectionError) Error() string {
 
 // CollectList will retrieve a collection of entities from the Redfish service.
 func CollectList(get func(string), c Client, link string) error {
-	links, err := GetCollection(c, link)
+	collection, err := GetCollection(c, link)
 	if err != nil {
 		return err
 	}
 
-	CollectCollection(get, c, links.ItemLinks)
+	CollectCollection(get, c, collection.ItemLinks)
+	if collection.MembersNextLink != "" {
+		err := CollectList(get, c, collection.MembersNextLink)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
