@@ -89,10 +89,10 @@ func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
 
 // SoftwareInventories gets the collection of software inventories of this update service
 func (updateService *UpdateService) SoftwareInventories() ([]*SoftwareInventory, error) {
-	return ListReferencedSoftwareInventories(updateService.Client, updateService.SoftwareInventory)
+	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.SoftwareInventory)
 }
 
 // FirmwareInventories gets the collection of firmware inventories of this update service
 func (updateService *UpdateService) FirmwareInventories() ([]*SoftwareInventory, error) {
-	return ListReferencedSoftwareInventories(updateService.Client, updateService.FirmwareInventory)
+	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.FirmwareInventory)
 }

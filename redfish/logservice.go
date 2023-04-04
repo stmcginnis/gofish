@@ -191,7 +191,7 @@ func ListReferencedLogServices(c common.Client, link string) ([]*LogService, err
 
 // Entries gets the log entries of this service.
 func (logservice *LogService) Entries() ([]*LogEntry, error) {
-	return ListReferencedLogEntrys(logservice.Client, logservice.entries)
+	return ListReferencedLogEntrys(logservice.GetClient(), logservice.entries)
 }
 
 // ClearLog shall delete all entries found in the Entries collection for this

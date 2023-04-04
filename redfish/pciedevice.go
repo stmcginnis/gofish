@@ -212,7 +212,7 @@ func (pciedevice *PCIeDevice) Assembly() (*Assembly, error) {
 	if pciedevice.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(pciedevice.Client, pciedevice.assembly)
+	return GetAssembly(pciedevice.GetClient(), pciedevice.assembly)
 }
 
 // Chassis gets the chassis in which the PCIe device is contained.
@@ -221,7 +221,7 @@ func (pciedevice *PCIeDevice) Chassis() ([]*Chassis, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, chassisLink := range pciedevice.chassis {
-		chassis, err := GetChassis(pciedevice.Client, chassisLink)
+		chassis, err := GetChassis(pciedevice.GetClient(), chassisLink)
 		if err != nil {
 			collectionError.Failures[chassisLink] = err
 		} else {
@@ -238,5 +238,5 @@ func (pciedevice *PCIeDevice) Chassis() ([]*Chassis, error) {
 
 // PCIeFunctions get the PCIe functions that this device exposes.
 func (pciedevice *PCIeDevice) PCIeFunctions() ([]*PCIeFunction, error) {
-	return ListReferencedPCIeFunctions(pciedevice.Client, pciedevice.pcieFunctions)
+	return ListReferencedPCIeFunctions(pciedevice.GetClient(), pciedevice.pcieFunctions)
 }

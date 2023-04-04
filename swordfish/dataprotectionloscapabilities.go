@@ -231,7 +231,7 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedRep
 
 	collectionError := common.NewCollectionError()
 	for _, link := range dataprotectionloscapabilities.supportedReplicaOptions {
-		classOfService, err := GetClassOfService(dataprotectionloscapabilities.Client, link)
+		classOfService, err := GetClassOfService(dataprotectionloscapabilities.GetClient(), link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		} else {
@@ -252,7 +252,7 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLin
 
 	collectionError := common.NewCollectionError()
 	for _, link := range dataprotectionloscapabilities.supportedLinesOfService {
-		lineOfService, err := GetDataProtectionLineOfService(dataprotectionloscapabilities.Client, link)
+		lineOfService, err := GetDataProtectionLineOfService(dataprotectionloscapabilities.GetClient(), link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		} else {

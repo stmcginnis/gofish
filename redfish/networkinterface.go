@@ -123,17 +123,17 @@ func (networkinterface *NetworkInterface) NetworkAdapter() (*NetworkAdapter, err
 		return nil, nil
 	}
 
-	return GetNetworkAdapter(networkinterface.Client, networkinterface.networkAdapter)
+	return GetNetworkAdapter(networkinterface.GetClient(), networkinterface.networkAdapter)
 }
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network interface
 func (networkinterface *NetworkInterface) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
 	return ListReferencedNetworkDeviceFunctions(
-		networkinterface.Client, networkinterface.networkDeviceFunctions)
+		networkinterface.GetClient(), networkinterface.networkDeviceFunctions)
 }
 
 // NetworkPorts gets the collection of NetworkPorts of this network interface
 func (networkinterface *NetworkInterface) NetworkPorts() ([]*NetworkPort, error) {
 	return ListReferencedNetworkPorts(
-		networkinterface.Client, networkinterface.networkPorts)
+		networkinterface.GetClient(), networkinterface.networkPorts)
 }

@@ -172,27 +172,27 @@ func (capacitysource *CapacitySource) ProvidedClassOfService() (*ClassOfService,
 	if capacitysource.providedClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(capacitysource.Client, capacitysource.providedClassOfService)
+	return GetClassOfService(capacitysource.GetClient(), capacitysource.providedClassOfService)
 }
 
 // ProvidingDrives gets contributing drives.
 func (capacitysource *CapacitySource) ProvidingDrives() ([]*redfish.Drive, error) {
-	return redfish.ListReferencedDrives(capacitysource.Client, capacitysource.providingDrives)
+	return redfish.ListReferencedDrives(capacitysource.GetClient(), capacitysource.providingDrives)
 }
 
 // ProvidingMemory gets contributing memory.
 func (capacitysource *CapacitySource) ProvidingMemory() ([]*redfish.Memory, error) {
-	return redfish.ListReferencedMemorys(capacitysource.Client, capacitysource.providingMemory)
+	return redfish.ListReferencedMemorys(capacitysource.GetClient(), capacitysource.providingMemory)
 }
 
 // TODO: Add memory chunks
 
 // ProvidingPools gets contributing pools.
 func (capacitysource *CapacitySource) ProvidingPools() ([]*StoragePool, error) {
-	return ListReferencedStoragePools(capacitysource.Client, capacitysource.providingPools)
+	return ListReferencedStoragePools(capacitysource.GetClient(), capacitysource.providingPools)
 }
 
 // ProvidingVolumes gets contributing volumes.
 func (capacitysource *CapacitySource) ProvidingVolumes() ([]*Volume, error) {
-	return ListReferencedVolumes(capacitysource.Client, capacitysource.providingVolumes)
+	return ListReferencedVolumes(capacitysource.GetClient(), capacitysource.providingVolumes)
 }

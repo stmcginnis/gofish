@@ -180,5 +180,5 @@ func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGrou
 
 // Endpoints gets the group's endpoints.
 func (endpointgroup *EndpointGroup) Endpoints() ([]*redfish.Endpoint, error) {
-	return redfish.ListReferencedEndpoints(endpointgroup.Client, endpointgroup.endpoints)
+	return redfish.ListReferencedEndpoints(endpointgroup.GetClient(), endpointgroup.endpoints)
 }

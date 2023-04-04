@@ -134,5 +134,5 @@ func (simplestorage *SimpleStorage) Chassis() (*Chassis, error) {
 		return nil, nil
 	}
 
-	return GetChassis(simplestorage.Client, simplestorage.chassis)
+	return GetChassis(simplestorage.GetClient(), simplestorage.chassis)
 }

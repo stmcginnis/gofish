@@ -233,7 +233,7 @@ func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, driveLink := range pciefunction.drives {
-		drive, err := GetDrive(pciefunction.Client, driveLink)
+		drive, err := GetDrive(pciefunction.GetClient(), driveLink)
 		if err != nil {
 			collectionError.Failures[driveLink] = err
 		} else {
@@ -254,7 +254,7 @@ func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, er
 
 	collectionError := common.NewCollectionError()
 	for _, ethLink := range pciefunction.ethernetInterfaces {
-		eth, err := GetEthernetInterface(pciefunction.Client, ethLink)
+		eth, err := GetEthernetInterface(pciefunction.GetClient(), ethLink)
 		if err != nil {
 			collectionError.Failures[ethLink] = err
 		} else {
@@ -275,7 +275,7 @@ func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunc
 
 	collectionError := common.NewCollectionError()
 	for _, netLink := range pciefunction.networkDeviceFunctions {
-		net, err := GetNetworkDeviceFunction(pciefunction.Client, netLink)
+		net, err := GetNetworkDeviceFunction(pciefunction.GetClient(), netLink)
 		if err != nil {
 			collectionError.Failures[netLink] = err
 		} else {
@@ -295,7 +295,7 @@ func (pciefunction *PCIeFunction) PCIeDevice() (*PCIeDevice, error) {
 	if pciefunction.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(pciefunction.Client, pciefunction.pcieDevice)
+	return GetPCIeDevice(pciefunction.GetClient(), pciefunction.pcieDevice)
 }
 
 // StorageControllers gets the associated storage controllers.
@@ -304,7 +304,7 @@ func (pciefunction *PCIeFunction) StorageControllers() ([]*StorageController, er
 
 	collectionError := common.NewCollectionError()
 	for _, scLink := range pciefunction.storageControllers {
-		sc, err := GetStorageController(pciefunction.Client, scLink)
+		sc, err := GetStorageController(pciefunction.GetClient(), scLink)
 		if err != nil {
 			collectionError.Failures[scLink] = err
 		} else {

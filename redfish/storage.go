@@ -158,7 +158,7 @@ func (storage *Storage) Enclosures() ([]*Chassis, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, chassisLink := range storage.enclosures {
-		chassis, err := GetChassis(storage.Client, chassisLink)
+		chassis, err := GetChassis(storage.GetClient(), chassisLink)
 		if err != nil {
 			collectionError.Failures[chassisLink] = err
 		} else {
@@ -180,7 +180,7 @@ func (storage *Storage) Drives() ([]*Drive, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, driveLink := range storage.drives {
-		drive, err := GetDrive(storage.Client, driveLink)
+		drive, err := GetDrive(storage.GetClient(), driveLink)
 		if err != nil {
 			collectionError.Failures[driveLink] = err
 		} else {
@@ -197,7 +197,7 @@ func (storage *Storage) Drives() ([]*Drive, error) {
 
 // Volumes gets the volumes associated with this storage subsystem.
 func (storage *Storage) Volumes() ([]*Volume, error) {
-	return ListReferencedVolumes(storage.Client, storage.volumes)
+	return ListReferencedVolumes(storage.GetClient(), storage.volumes)
 }
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
@@ -211,7 +211,7 @@ func (storage *Storage) SetEncryptionKey(key string) error {
 
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage
 func (storage *Storage) GetOperationApplyTimeValues() ([]common.OperationApplyTime, error) {
-	return AllowedVolumesUpdateApplyTimes(storage.Client, storage.volumes)
+	return AllowedVolumesUpdateApplyTimes(storage.GetClient(), storage.volumes)
 }
 
 // StorageController is used to represent a resource that represents a
@@ -397,7 +397,7 @@ func (storagecontroller *StorageController) Assembly() (*Assembly, error) {
 	if storagecontroller.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(storagecontroller.Client, storagecontroller.assembly)
+	return GetAssembly(storagecontroller.GetClient(), storagecontroller.assembly)
 }
 
 // Endpoints gets the storage controller's endpoints.
@@ -406,7 +406,7 @@ func (storagecontroller *StorageController) Endpoints() ([]*Endpoint, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, endpointLink := range storagecontroller.endpoints {
-		endpoint, err := GetEndpoint(storagecontroller.Client, endpointLink)
+		endpoint, err := GetEndpoint(storagecontroller.GetClient(), endpointLink)
 		if err != nil {
 			collectionError.Failures[endpointLink] = err
 		} else {

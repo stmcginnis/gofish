@@ -273,7 +273,7 @@ func (volume *Volume) Drives() ([]*Drive, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, driveLink := range volume.drives {
-		drive, err := GetDrive(volume.Client, driveLink)
+		drive, err := GetDrive(volume.GetClient(), driveLink)
 		if err != nil {
 			collectionError.Failures[driveLink] = err
 		} else {

@@ -142,7 +142,7 @@ func (classofservice *ClassOfService) DataProtectionLinesOfServices() ([]*DataPr
 
 	collectionError := common.NewCollectionError()
 	for _, dpLosLink := range classofservice.dataProtectionLinesOfService {
-		dpLos, err := GetDataProtectionLineOfService(classofservice.Client, dpLosLink)
+		dpLos, err := GetDataProtectionLineOfService(classofservice.GetClient(), dpLosLink)
 		if err != nil {
 			collectionError.Failures[dpLosLink] = err
 		} else {
@@ -164,7 +164,7 @@ func (classofservice *ClassOfService) DataSecurityLinesOfServices() ([]*DataSecu
 
 	collectionError := common.NewCollectionError()
 	for _, dsLosLink := range classofservice.dataSecurityLinesOfService {
-		dsLos, err := GetDataSecurityLineOfService(classofservice.Client, dsLosLink)
+		dsLos, err := GetDataSecurityLineOfService(classofservice.GetClient(), dsLosLink)
 		if err != nil {
 			collectionError.Failures[dsLosLink] = err
 		} else {
@@ -186,7 +186,7 @@ func (classofservice *ClassOfService) DataStorageLinesOfServices() ([]*DataStora
 
 	collectionError := common.NewCollectionError()
 	for _, dsLosLink := range classofservice.dataStorageLinesOfService {
-		dsLos, err := GetDataStorageLineOfService(classofservice.Client, dsLosLink)
+		dsLos, err := GetDataStorageLineOfService(classofservice.GetClient(), dsLosLink)
 		if err != nil {
 			collectionError.Failures[dsLosLink] = err
 		} else {
@@ -208,7 +208,7 @@ func (classofservice *ClassOfService) IOConnectivityLinesOfServices() ([]*IOConn
 
 	collectionError := common.NewCollectionError()
 	for _, ioLosLink := range classofservice.dataSecurityLinesOfService {
-		ioLos, err := GetIOConnectivityLineOfService(classofservice.Client, ioLosLink)
+		ioLos, err := GetIOConnectivityLineOfService(classofservice.GetClient(), ioLosLink)
 		if err != nil {
 			collectionError.Failures[ioLosLink] = err
 		} else {
@@ -230,7 +230,7 @@ func (classofservice *ClassOfService) IOPerformanceLinesOfServices() ([]*IOPerfo
 
 	collectionError := common.NewCollectionError()
 	for _, ioLosLink := range classofservice.dataSecurityLinesOfService {
-		ioLos, err := GetIOPerformanceLineOfService(classofservice.Client, ioLosLink)
+		ioLos, err := GetIOPerformanceLineOfService(classofservice.GetClient(), ioLosLink)
 		if err != nil {
 			collectionError.Failures[ioLosLink] = err
 		} else {

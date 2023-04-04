@@ -465,20 +465,20 @@ func (manager *Manager) Reset(resetType ResetType) error {
 
 // EthernetInterfaces get this system's ethernet interfaces.
 func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(manager.Client, manager.ethernetInterfaces)
+	return ListReferencedEthernetInterfaces(manager.GetClient(), manager.ethernetInterfaces)
 }
 
 // HostInterfaces get this system's host interfaces.
 func (manager *Manager) HostInterfaces() ([]*HostInterface, error) {
-	return ListReferencedHostInterfaces(manager.Client, manager.hostInterfaces)
+	return ListReferencedHostInterfaces(manager.GetClient(), manager.hostInterfaces)
 }
 
 // LogServices get this manager's log services on this system.
 func (manager *Manager) LogServices() ([]*LogService, error) {
-	return ListReferencedLogServices(manager.Client, manager.logServices)
+	return ListReferencedLogServices(manager.GetClient(), manager.logServices)
 }
 
 // VirtualMedia gets the virtual media associated with this manager.
 func (manager *Manager) VirtualMedia() ([]*VirtualMedia, error) {
-	return ListReferencedVirtualMedias(manager.Client, manager.virtualMedia)
+	return ListReferencedVirtualMedias(manager.GetClient(), manager.virtualMedia)
 }

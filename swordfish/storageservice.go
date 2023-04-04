@@ -212,7 +212,7 @@ func ListReferencedStorageServices(c common.Client, link string) ([]*StorageServ
 
 // ClassesOfService gets the storage service's classes of service.
 func (storageservice *StorageService) ClassesOfService() ([]*ClassOfService, error) {
-	return ListReferencedClassOfServices(storageservice.Client, storageservice.classesOfService)
+	return ListReferencedClassOfServices(storageservice.GetClient(), storageservice.classesOfService)
 }
 
 // DataProtectionLoSCapabilities gets the storage service's data protection
@@ -221,7 +221,7 @@ func (storageservice *StorageService) DataProtectionLoSCapabilities() (*DataProt
 	if storageservice.dataProtectionLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataProtectionLoSCapabilities(storageservice.Client, storageservice.dataProtectionLoSCapabilities)
+	return GetDataProtectionLoSCapabilities(storageservice.GetClient(), storageservice.dataProtectionLoSCapabilities)
 }
 
 // DataSecurityLoSCapabilities gets the storage service's data security
@@ -230,7 +230,7 @@ func (storageservice *StorageService) DataSecurityLoSCapabilities() (*DataSecuri
 	if storageservice.dataSecurityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataSecurityLoSCapabilities(storageservice.Client, storageservice.dataSecurityLoSCapabilities)
+	return GetDataSecurityLoSCapabilities(storageservice.GetClient(), storageservice.dataSecurityLoSCapabilities)
 }
 
 // DataStorageLoSCapabilities references the data storage capabilities of this service.
@@ -238,7 +238,7 @@ func (storageservice *StorageService) DataStorageLoSCapabilities() (*DataStorage
 	if storageservice.dataStorageLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataStorageLoSCapabilities(storageservice.Client, storageservice.dataStorageLoSCapabilities)
+	return GetDataStorageLoSCapabilities(storageservice.GetClient(), storageservice.dataStorageLoSCapabilities)
 }
 
 // DefaultClassOfService references the default class of service for entities
@@ -247,27 +247,27 @@ func (storageservice *StorageService) DefaultClassOfService() (*ClassOfService, 
 	if storageservice.defaultClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storageservice.Client, storageservice.defaultClassOfService)
+	return GetClassOfService(storageservice.GetClient(), storageservice.defaultClassOfService)
 }
 
 // Drives gets the storage service's drives.
 func (storageservice *StorageService) Drives() ([]*redfish.Drive, error) {
-	return redfish.ListReferencedDrives(storageservice.Client, storageservice.drives)
+	return redfish.ListReferencedDrives(storageservice.GetClient(), storageservice.drives)
 }
 
 // EndpointGroups gets the storage service's endpoint groups.
 func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(storageservice.Client, storageservice.endpointGroups)
+	return ListReferencedEndpointGroups(storageservice.GetClient(), storageservice.endpointGroups)
 }
 
 // Endpoints gets the storage service's endpoints.
 func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
-	return redfish.ListReferencedEndpoints(storageservice.Client, storageservice.endpoints)
+	return redfish.ListReferencedEndpoints(storageservice.GetClient(), storageservice.endpoints)
 }
 
 // FileSystems gets all filesystems available through this storage service.
 func (storageservice *StorageService) FileSystems() ([]*FileSystem, error) {
-	return ListReferencedFileSystems(storageservice.Client, storageservice.fileSystems)
+	return ListReferencedFileSystems(storageservice.GetClient(), storageservice.fileSystems)
 }
 
 // IOConnectivityLoSCapabilities references the IO connectivity capabilities of this service.
@@ -275,7 +275,7 @@ func (storageservice *StorageService) IOConnectivityLoSCapabilities() (*IOConnec
 	if storageservice.ioConnectivityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetIOConnectivityLoSCapabilities(storageservice.Client, storageservice.ioConnectivityLoSCapabilities)
+	return GetIOConnectivityLoSCapabilities(storageservice.GetClient(), storageservice.ioConnectivityLoSCapabilities)
 }
 
 // IOPerformanceLoSCapabilities references the IO performance capabilities of this service.
@@ -283,7 +283,7 @@ func (storageservice *StorageService) IOPerformanceLoSCapabilities() (*IOPerform
 	if storageservice.ioConnectivityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetIOPerformanceLoSCapabilities(storageservice.Client, storageservice.ioPerformanceLoSCapabilities)
+	return GetIOPerformanceLoSCapabilities(storageservice.GetClient(), storageservice.ioPerformanceLoSCapabilities)
 }
 
 // Redundancy gets the redundancy information for the storage subsystem.
@@ -292,7 +292,7 @@ func (storageservice *StorageService) Redundancy() ([]*redfish.Redundancy, error
 
 	collectionError := common.NewCollectionError()
 	for _, redundancyLink := range storageservice.redundancy {
-		redundancy, err := redfish.GetRedundancy(storageservice.Client, redundancyLink)
+		redundancy, err := redfish.GetRedundancy(storageservice.GetClient(), redundancyLink)
 		if err != nil {
 			collectionError.Failures[redundancyLink] = err
 		} else {
@@ -314,7 +314,7 @@ func (storageservice *StorageService) SpareResourceSets() ([]*SpareResourceSet, 
 
 	collectionError := common.NewCollectionError()
 	for _, srsLink := range storageservice.spareResourceSets {
-		srs, err := GetSpareResourceSet(storageservice.Client, srsLink)
+		srs, err := GetSpareResourceSet(storageservice.GetClient(), srsLink)
 		if err != nil {
 			collectionError.Failures[srsLink] = err
 		} else {
@@ -335,7 +335,7 @@ func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, sgLink := range storageservice.spareResourceSets {
-		sg, err := GetStorageGroup(storageservice.Client, sgLink)
+		sg, err := GetStorageGroup(storageservice.GetClient(), sgLink)
 		if err != nil {
 			collectionError.Failures[sgLink] = err
 		} else {
@@ -352,7 +352,7 @@ func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
 
 // Volumes gets the volumes that are a part of this storage service.
 func (storageservice *StorageService) Volumes() ([]*Volume, error) {
-	return ListReferencedVolumes(storageservice.Client, storageservice.volumes)
+	return ListReferencedVolumes(storageservice.GetClient(), storageservice.volumes)
 }
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.

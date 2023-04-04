@@ -309,7 +309,7 @@ func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, err
 
 // ExportedShares gets the exported file shares for this file system.
 func (filesystem *FileSystem) ExportedShares() ([]*FileShare, error) {
-	return ListReferencedFileShares(filesystem.Client, filesystem.exportedShares)
+	return ListReferencedFileShares(filesystem.GetClient(), filesystem.exportedShares)
 }
 
 // ClassOfService gets the filesystem's class of service.
@@ -318,7 +318,7 @@ func (filesystem *FileSystem) ClassOfService() (*ClassOfService, error) {
 	if filesystem.classOfService == "" {
 		return result, nil
 	}
-	return GetClassOfService(filesystem.Client, filesystem.classOfService)
+	return GetClassOfService(filesystem.GetClient(), filesystem.classOfService)
 }
 
 // SpareResourceSets gets the spare resource sets used for this filesystem.
@@ -327,7 +327,7 @@ func (filesystem *FileSystem) SpareResourceSets() ([]*SpareResourceSet, error) {
 
 	collectionError := common.NewCollectionError()
 	for _, rsLink := range filesystem.spareResourceSets {
-		rs, err := GetSpareResourceSet(filesystem.Client, rsLink)
+		rs, err := GetSpareResourceSet(filesystem.GetClient(), rsLink)
 		if err != nil {
 			collectionError.Failures[rsLink] = err
 		} else {

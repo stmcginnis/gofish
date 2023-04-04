@@ -320,10 +320,10 @@ func GetAccountService(c common.Client, uri string) (*AccountService, error) {
 
 // Accounts get the accounts from the account service
 func (accountservice *AccountService) Accounts() ([]*ManagerAccount, error) {
-	return ListReferencedManagerAccounts(accountservice.Client, accountservice.accounts)
+	return ListReferencedManagerAccounts(accountservice.GetClient(), accountservice.accounts)
 }
 
 // Roles gets the roles from the account service
 func (accountservice *AccountService) Roles() ([]*Role, error) {
-	return ListReferencedRoles(accountservice.Client, accountservice.roles)
+	return ListReferencedRoles(accountservice.GetClient(), accountservice.roles)
 }

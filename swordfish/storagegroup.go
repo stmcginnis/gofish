@@ -262,7 +262,7 @@ func (storagegroup *StorageGroup) ChildStorageGroups() ([]*StorageGroup, error) 
 
 	collectionError := common.NewCollectionError()
 	for _, sgLink := range storagegroup.childStorageGroups {
-		sg, err := GetStorageGroup(storagegroup.Client, sgLink)
+		sg, err := GetStorageGroup(storagegroup.GetClient(), sgLink)
 		if err != nil {
 			collectionError.Failures[sgLink] = err
 		} else {
@@ -283,7 +283,7 @@ func (storagegroup *StorageGroup) ParentStorageGroups() ([]*StorageGroup, error)
 
 	collectionError := common.NewCollectionError()
 	for _, sgLink := range storagegroup.parentStorageGroups {
-		sg, err := GetStorageGroup(storagegroup.Client, sgLink)
+		sg, err := GetStorageGroup(storagegroup.GetClient(), sgLink)
 		if err != nil {
 			collectionError.Failures[sgLink] = err
 		} else {
@@ -304,7 +304,7 @@ func (storagegroup *StorageGroup) ClassOfService() (*ClassOfService, error) {
 	if storagegroup.classOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storagegroup.Client, storagegroup.classOfService)
+	return GetClassOfService(storagegroup.GetClient(), storagegroup.classOfService)
 }
 
 // MappedVolume is an exposed volume mapping.
