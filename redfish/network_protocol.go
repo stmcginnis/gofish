@@ -60,17 +60,17 @@ const (
 	// SNMP community string authentication
 	SNMPAuthCommunityString SNMPAuthenticationProtocol = "CommunityString"
 	// HMAC-MD5-96 authentication
-	SNMPAuthHMAC_MD5 SNMPAuthenticationProtocol = "HMAC_MD5" // nolint
+	SNMPAuthHMAC_MD5 SNMPAuthenticationProtocol = "HMAC_MD5" //nolint
 	// HMAC-SHA-96 authentication
-	SNMPAuthHMAC_SHA96 SNMPAuthenticationProtocol = "HMAC_SHA96" // nolint
+	SNMPAuthHMAC_SHA96 SNMPAuthenticationProtocol = "HMAC_SHA96" //nolint
 	// HMAC-128-SHA-224 authentication
-	SNMPAuthHMAC128_SHA224 SNMPAuthenticationProtocol = "HMAC128_SHA224" // nolint
+	SNMPAuthHMAC128_SHA224 SNMPAuthenticationProtocol = "HMAC128_SHA224" //nolint
 	// HMAC-192-SHA-256 authentication
-	SNMPAuthHMAC192_SHA256 SNMPAuthenticationProtocol = "HMAC192_SHA256" // nolint
+	SNMPAuthHMAC192_SHA256 SNMPAuthenticationProtocol = "HMAC192_SHA256" //nolint
 	// HMAC-256-SHA-384 authentication
-	SNMPAuthHMAC256_SHA384 SNMPAuthenticationProtocol = "HMAC256_SHA384" // nolint
+	SNMPAuthHMAC256_SHA384 SNMPAuthenticationProtocol = "HMAC256_SHA384" //nolint
 	// HMAC-384-SHA-512 authentication
-	SNMPAuthHMAC384_SHA512 SNMPAuthenticationProtocol = "HMAC384_SHA512" // nolint
+	SNMPAuthHMAC384_SHA512 SNMPAuthenticationProtocol = "HMAC384_SHA512" //nolint
 )
 
 type SNMPCommunityAccessMode string
@@ -99,18 +99,18 @@ const (
 	// Encryption is determined by account settings
 	AccountEncryption SNMPEncryptionProtocol = "Account"
 	// CBC-DES encryption
-	CBC_DES_Encryption SNMPEncryptionProtocol = "CBC_DES" // nolint
+	CBC_DES_Encryption SNMPEncryptionProtocol = "CBC_DES" //nolint
 	// CFB128-AES-128 encryption
-	CFB128_AES128_Encryption SNMPEncryptionProtocol = "CFB128_AES128" // nolint
+	CFB128_AES128_Encryption SNMPEncryptionProtocol = "CFB128_AES128" //nolint
 )
 
-type EngineId struct {
+type EngineID struct {
 	// The architecture identifier
-	ArchitectureId string
+	ArchitectureID string `json:"ArchitectureId"`
 	// The enterprise specific method
 	EnterpriseSpecificMethod string
 	// The private enterprise ID
-	PrivateEnterpriseId string
+	PrivateEnterpriseID string `json:"PrivateEnterpriseId"`
 }
 
 type SNMP struct {
@@ -131,7 +131,7 @@ type SNMP struct {
 	// The encryption protocol used for SNMPv3 access to this manager
 	EncryptionProtocol SNMPEncryptionProtocol
 	// The engine ID
-	EngineId EngineId
+	EngineID EngineID `json:"EngineId"`
 	// Indicates if the community strings should be hidden
 	HideCommunityStrings bool
 }
@@ -179,7 +179,7 @@ type SSDP struct {
 }
 
 type NetworkProtocolSettings struct {
-	common.Entity
+	common.Ent3ity
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`

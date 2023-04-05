@@ -142,7 +142,7 @@ func TestNetworkProtocol(t *testing.T) {
 	if result.NTP.NTPServers[0] != "0.africa.pool.ntp.org" {
 		t.Errorf("NTPServers should be set")
 	}
-	if result.SNMP.EngineId.PrivateEnterpriseId != "20 10 af 68" {
+	if result.SNMP.EngineID.PrivateEnterpriseID != "20 10 af 68" {
 		t.Errorf("Wrong SNMP EngineID PrivateEnterpriseId property")
 	}
 	if result.rawData == nil {
