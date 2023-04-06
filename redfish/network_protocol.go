@@ -179,7 +179,7 @@ type SSDP struct {
 }
 
 type NetworkProtocolSettings struct {
-	common.Ent3ity
+	common.Entity
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`

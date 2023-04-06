@@ -22,7 +22,7 @@ type testStruct struct {
 	E nestedStruct
 }
 
-func TestGetPatchPayloadFromUpdate(t *testing.T) {
+func TestGetPatchPayloadFromUpdate(t *testing.T) { //nolint:funlen
 	testcases := []struct {
 		name           string
 		originalEntity interface{}

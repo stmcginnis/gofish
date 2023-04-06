@@ -7,7 +7,7 @@ linters-settings:
   goheader:
     values:
       const:
-       - LICENSE: BSD-3-Clause
+        - LICENSE: BSD-3-Clause
     template: |-
       SPDX-License-Identifier: {{ LICENSE }}
   goconst:
@@ -95,9 +95,9 @@ linters:
 issues:
   exclude:
     - 'declaration of "(err|ctx)" shadows declaration at'
-    - 'G402: TLS InsecureSkipVerify may be true'
-    - '`(F|f)ibre` is a misspelling'
-    - '`(C|c)ancell.*` is a misspelling'
+    - "G402: TLS InsecureSkipVerify may be true"
+    - "`(F|f)ibre` is a misspelling"
+    - "`(C|c)ancell.*` is a misspelling"
 run:
   skip-dirs:
     - examples
