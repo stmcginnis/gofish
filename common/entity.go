@@ -39,38 +39,8 @@ func (e *Entity) GetClient() Client {
 }
 
 // Update commits changes to an entity.
-func (e *Entity) Update(originalEntity, currentEntity reflect.Value, allowedUpdates []string) error {
-	payload := make(map[string]interface{})
-
-	for i := 0; i < originalEntity.NumField(); i++ {
-		if !originalEntity.Field(i).CanInterface() {
-			// Private field or something that we can't access
-			continue
-		}
-		fieldType := originalEntity.Type().Field(i).Type.Kind()
-		if fieldType == reflect.Struct || fieldType == reflect.Ptr || fieldType == reflect.Slice {
-			// TODO: Handle more complicated data types
-			continue
-		}
-		fieldName := originalEntity.Type().Field(i).Name
-		jsonName := originalEntity.Type().Field(i).Tag.Get("json")
-		if jsonName != "" {
-			fieldName = jsonName
-		}
-		originalValue := originalEntity.Field(i).Interface()
-		currentValue := currentEntity.Field(i).Interface()
-		if originalValue == nil && currentValue == nil {
-			continue
-		} else if originalValue == nil {
-			payload[fieldName] = currentValue
-		} else if reflect.TypeOf(originalValue).Kind() != reflect.Map {
-			if originalValue != currentValue {
-				payload[fieldName] = currentValue
-			}
-		} else if !reflect.DeepEqual(originalValue, currentValue) {
-			payload[fieldName] = currentValue
-		}
-	}
+func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpdates []string) error {
+	payload := getPatchPayloadFromUpdate(originalEntity, updatedEntity)
 
 	// See if we are attempting to update anything that is not allowed
 	for field := range payload {
@@ -173,4 +143,54 @@ func (e *Filter) SetFilter(opts ...FilterOption) {
 
 func (e *Filter) ClearFilter() {
 	*e = ""
+}
+
+func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (payload map[string]interface{}) {
+	payload = make(map[string]interface{})
+
+	for i := 0; i < originalEntity.NumField(); i++ {
+		if !originalEntity.Field(i).CanInterface() {
+			// Private field or something that we can't access
+			continue
+		}
+		fieldType := originalEntity.Type().Field(i).Type.Kind()
+		if fieldType == reflect.Ptr {
+			continue
+		}
+		fieldName := originalEntity.Type().Field(i).Name
+		jsonName := originalEntity.Type().Field(i).Tag.Get("json")
+		if jsonName == "-" {
+			continue
+		}
+		if jsonName != "" {
+			fieldName = jsonName
+		}
+		originalValue := originalEntity.Field(i).Interface()
+		currentValue := updatedEntity.Field(i).Interface()
+		if originalValue == nil && currentValue == nil {
+			continue
+		}
+
+		if originalValue == nil {
+			payload[fieldName] = currentValue
+			continue
+		}
+
+		switch reflect.TypeOf(originalValue).Kind() {
+		case reflect.Slice, reflect.Map:
+			if !reflect.DeepEqual(originalValue, currentValue) {
+				payload[fieldName] = currentValue
+			}
+		case reflect.Struct:
+			structPayload := getPatchPayloadFromUpdate(originalEntity.Field(i), updatedEntity.Field(i))
+			if len(structPayload) != 0 {
+				payload[fieldName] = structPayload
+			}
+		default:
+			if originalValue != currentValue {
+				payload[fieldName] = currentValue
+			}
+		}
+	}
+	return payload
 }

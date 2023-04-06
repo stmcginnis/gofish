@@ -482,3 +482,8 @@ func (manager *Manager) LogServices() ([]*LogService, error) {
 func (manager *Manager) VirtualMedia() ([]*VirtualMedia, error) {
 	return ListReferencedVirtualMedias(manager.GetClient(), manager.virtualMedia)
 }
+
+// NetworkProtocol get this manager's network protocol settings.
+func (manager *Manager) NetworkProtocol() (*NetworkProtocolSettings, error) {
+	return GetNetworkProtocol(manager.GetClient(), manager.networkProtocol)
+}
