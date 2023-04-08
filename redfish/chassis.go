@@ -405,7 +405,7 @@ func (chassis *Chassis) Drives() ([]*Drive, error) {
 	}
 
 	go func() {
-		common.CollectCollection(get, chassis.GetClient(), driveLinks)
+		common.CollectCollection(get, driveLinks)
 		close(ch)
 	}()
 
