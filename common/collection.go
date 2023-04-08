@@ -108,7 +108,7 @@ func CollectList(get func(string), c Client, link string) error {
 		return err
 	}
 
-	CollectCollection(get, c, collection.ItemLinks)
+	CollectCollection(get, collection.ItemLinks)
 	if collection.MembersNextLink != "" {
 		err := CollectList(get, c, collection.MembersNextLink)
 		if err != nil {
@@ -120,7 +120,7 @@ func CollectList(get func(string), c Client, link string) error {
 
 // CollectCollection will retrieve a collection of entitied from the Redfish service
 // when you already have the set of individual links in the collection.
-func CollectCollection(get func(string), c Client, links []string) {
+func CollectCollection(get func(string), links []string) {
 	// Only allow three concurrent requests to avoid overwhelming the service
 	limiter := make(chan struct{}, 3)
 	var wg sync.WaitGroup
