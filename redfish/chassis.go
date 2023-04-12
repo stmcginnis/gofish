@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -503,7 +504,7 @@ func (chassis *Chassis) Assembly() (*Assembly, error) {
 
 // Reset shall reset the chassis. This action shall not reset Systems or other
 // contained resource, although side effects may occur which affect those resources.
-func (chassis *Chassis) Reset(resetType ResetType) error {
+func (chassis *Chassis) Reset(resetType ResetType) (*http.Response, error) {
 	// Make sure the requested reset type is supported by the chassis
 	valid := false
 	if len(chassis.SupportedResetTypes) > 0 {
@@ -519,7 +520,7 @@ func (chassis *Chassis) Reset(resetType ResetType) error {
 	}
 
 	if !valid {
-		return fmt.Errorf("reset type '%s' is not supported by this chassis",
+		return nil, fmt.Errorf("reset type '%s' is not supported by this chassis",
 			resetType)
 	}
 

@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -435,7 +436,7 @@ func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) { 
 }
 
 // Reset shall perform a reset of the manager.
-func (manager *Manager) Reset(resetType ResetType) error {
+func (manager *Manager) Reset(resetType ResetType) (*http.Response, error) {
 	if len(manager.SupportedResetTypes) == 0 {
 		// reset directly without reset type. HPE server has the behavior
 		t := struct {
@@ -453,7 +454,7 @@ func (manager *Manager) Reset(resetType ResetType) error {
 	}
 
 	if !valid {
-		return fmt.Errorf("reset type '%s' is not supported by this manager",
+		return nil, fmt.Errorf("reset type '%s' is not supported by this manager",
 			resetType)
 	}
 

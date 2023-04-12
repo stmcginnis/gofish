@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package redfish
+package common
 
 import (
 	"encoding/json"
-
-	"github.com/stmcginnis/gofish/common"
 )
 
 // TaskState indicates the state of a task.
@@ -71,7 +69,7 @@ type Payload struct {
 
 // Task is used to represent a Task for a Redfish implementation.
 type Task struct {
-	common.Entity
+	Entity
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
@@ -128,7 +126,7 @@ type Task struct {
 	// TaskStatus shall be the completion status of the task, as defined in the
 	// Status section of the Redfish specification and shall not be set until
 	// the task has completed.
-	TaskStatus common.Health
+	TaskStatus Health
 }
 
 // UnmarshalJSON unmarshals a Task object from the raw JSON.
@@ -136,7 +134,7 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 	type temp Task
 	var t struct {
 		temp
-		Messages common.Links
+		Messages Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -152,14 +150,14 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 }
 
 // GetTask will get a Task instance from the service.
-func GetTask(c common.Client, uri string) (*Task, error) {
+func GetTask(c Client, uri string) (*Task, error) {
 	var task Task
 	return &task, task.Get(c, uri, &task)
 }
 
 // ListReferencedTasks gets the collection of Task from
 // a provided reference.
-func ListReferencedTasks(c common.Client, link string) ([]*Task, error) { //nolint:dupl
+func ListReferencedTasks(c Client, link string) ([]*Task, error) { //nolint:dupl
 	var result []*Task
 	if link == "" {
 		return result, nil
@@ -172,14 +170,14 @@ func ListReferencedTasks(c common.Client, link string) ([]*Task, error) { //noli
 	}
 
 	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
+	collectionError := NewCollectionError()
 	get := func(link string) {
 		task, err := GetTask(c, link)
 		ch <- GetResult{Item: task, Link: link, Error: err}
 	}
 
 	go func() {
-		err := common.CollectList(get, c, link)
+		err := CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}

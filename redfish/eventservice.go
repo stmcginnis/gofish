@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -384,7 +385,7 @@ func (eventservice *EventService) DeleteEventSubscription(uri string) error {
 // SubmitTestEvent shall add a test event to the event service with the event
 // data specified in the action parameters. This message should then be sent to
 // any appropriate ListenerDestination targets.
-func (eventservice *EventService) SubmitTestEvent(message string) error {
+func (eventservice *EventService) SubmitTestEvent(message string) (*http.Response, error) {
 	type temp struct {
 		EventGroupID      string `json:"EventGroupId"`
 		EventID           string `json:"EventId"`

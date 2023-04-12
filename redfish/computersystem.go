@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 
@@ -847,7 +848,7 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error { //nolint
 // the system or perform an ACPI Power Button Override (commonly known as a
 // 4-second hold of the Power Button). The ForceRestart value shall perform a
 // ForceOff action followed by a On action.
-func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
+func (computersystem *ComputerSystem) Reset(resetType ResetType) (*common.Task, error) {
 	// Make sure the requested reset type is supported by the system
 	valid := false
 	if len(computersystem.SupportedResetTypes) > 0 {
@@ -863,7 +864,7 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 	}
 
 	if !valid {
-		return fmt.Errorf("reset type '%s' is not supported by this service",
+		return nil, fmt.Errorf("reset type '%s' is not supported by this service",
 			resetType)
 	}
 
@@ -871,7 +872,23 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 		ResetType ResetType
 	}{ResetType: resetType}
 
-	return computersystem.Post(computersystem.resetTarget, t)
+	resp, err := computersystem.Post(computersystem.resetTarget, t)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var resetResponse common.Task
+	if resp.StatusCode == 202 {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		if err := resetResponse.UnmarshalJSON(body); err != nil {
+			return nil, err
+		}
+	}
+	return &resetResponse, nil
 }
 
 // UpdateBootAttributesApplyAt is used to update attribute values and set apply time together
@@ -934,7 +951,11 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") //nolint:golint
 	}
 
-	return computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)
+	_, err := computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // SimpleStorages gets all simple storage services of this system.
@@ -1025,6 +1046,11 @@ type ProcessorSummary struct {
 	Model string
 	// Status is any status or health properties of the resource.
 	Status common.Status
+}
+
+// Reset may return a Task object depending on the Redfish implementation
+type ResetResponse struct {
+	Task common.Task
 }
 
 // TrustedModules is This type shall describe a trusted module for a system.

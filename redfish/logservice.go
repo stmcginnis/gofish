@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -204,7 +205,7 @@ func (logservice *LogService) FilteredEntries(options ...common.FilterOption) ([
 
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
-func (logservice *LogService) ClearLog() error {
+func (logservice *LogService) ClearLog() (*http.Response, error) {
 	t := struct {
 		Action string
 	}{

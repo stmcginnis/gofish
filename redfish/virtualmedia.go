@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -197,18 +198,18 @@ func (virtualmedia *VirtualMedia) Update() error {
 }
 
 // EjectMedia sends a request to eject the media.
-func (virtualmedia *VirtualMedia) EjectMedia() error {
+func (virtualmedia *VirtualMedia) EjectMedia() (*http.Response, error) {
 	if !virtualmedia.SupportsMediaEject {
-		return errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
+		return nil, errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
 	}
 
 	return virtualmedia.Post(virtualmedia.ejectMediaTarget, struct{}{})
 }
 
 // InsertMedia sends a request to insert virtual media.
-func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProtected bool) error {
+func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProtected bool) (*http.Response, error) {
 	if !virtualmedia.SupportsMediaInsert {
-		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
+		return nil, errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
 
 	t := struct {
@@ -236,9 +237,9 @@ type VirtualMediaConfig struct {
 }
 
 // InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct
-func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) error { //nolint
+func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (*http.Response, error) { //nolint
 	if !virtualmedia.SupportsMediaInsert {
-		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
+		return nil, errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
 
 	return virtualmedia.Post(virtualmedia.insertMediaTarget, config)

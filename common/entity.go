@@ -7,6 +7,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 )
 
@@ -101,17 +102,17 @@ func (e *Entity) Patch(uri string, payload interface{}) error {
 }
 
 // Post performs a Post request against the Redfish service with etag
-func (e *Entity) Post(uri string, payload interface{}) error {
+func (e *Entity) Post(uri string, payload interface{}) (*http.Response, error) {
 	header := make(map[string]string)
 	if e.etag != "" {
 		header["If-Match"] = e.etag
 	}
 
 	resp, err := e.client.PostWithHeaders(uri, payload, header)
-	if err == nil {
-		return resp.Body.Close()
+	if err != nil {
+		return nil, err
 	}
-	return err
+	return resp, nil
 }
 
 type Filter string

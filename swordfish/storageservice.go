@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -356,7 +357,7 @@ func (storageservice *StorageService) Volumes() ([]*Volume, error) {
 }
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
-func (storageservice *StorageService) SetEncryptionKey(key string) error {
+func (storageservice *StorageService) SetEncryptionKey(key string) (*http.Response, error) {
 	t := struct {
 		EncryptionKey string
 	}{EncryptionKey: key}

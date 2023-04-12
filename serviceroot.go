@@ -249,8 +249,8 @@ func (serviceroot *Service) StorageServices() ([]*swordfish.StorageService, erro
 }
 
 // Tasks gets the system's tasks
-func (serviceroot *Service) Tasks() ([]*redfish.Task, error) {
-	return redfish.ListReferencedTasks(serviceroot.GetClient(), serviceroot.tasks)
+func (serviceroot *Service) Tasks() ([]*common.Task, error) {
+	return common.ListReferencedTasks(serviceroot.GetClient(), serviceroot.tasks)
 }
 
 // TaskService gets the task service instance

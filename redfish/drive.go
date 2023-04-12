@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -458,6 +459,6 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 // }
 
 // SecureErase shall perform a secure erase of the drive.
-func (drive *Drive) SecureErase() error {
+func (drive *Drive) SecureErase() (*http.Response, error) {
 	return drive.Post(drive.secureEraseTarget, nil)
 }
