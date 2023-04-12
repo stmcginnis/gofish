@@ -250,7 +250,11 @@ func (serviceroot *Service) StorageServices() ([]*swordfish.StorageService, erro
 
 // Tasks gets the system's tasks
 func (serviceroot *Service) Tasks() ([]*common.Task, error) {
-	return common.ListReferencedTasks(serviceroot.GetClient(), serviceroot.tasks)
+	taskService, err := redfish.GetTaskService(serviceroot.GetClient(), serviceroot.tasks)
+	if err != nil {
+		return nil, err
+	}
+	return taskService.Tasks()
 }
 
 // TaskService gets the task service instance
