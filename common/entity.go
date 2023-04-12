@@ -153,12 +153,12 @@ func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (pay
 			// Private field or something that we can't access
 			continue
 		}
-		fieldType := originalEntity.Type().Field(i).Type.Kind()
-		if fieldType == reflect.Ptr {
+		field := originalEntity.Type().Field(i)
+		if field.Type.Kind() == reflect.Ptr {
 			continue
 		}
-		fieldName := originalEntity.Type().Field(i).Name
-		jsonName := originalEntity.Type().Field(i).Tag.Get("json")
+		fieldName := field.Name
+		jsonName := field.Tag.Get("json")
 		if jsonName == "-" {
 			continue
 		}
@@ -183,7 +183,11 @@ func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (pay
 			}
 		case reflect.Struct:
 			structPayload := getPatchPayloadFromUpdate(originalEntity.Field(i), updatedEntity.Field(i))
-			if len(structPayload) != 0 {
+			if field.Anonymous {
+				for k, v := range structPayload {
+					payload[k] = v
+				}
+			} else if len(structPayload) != 0 {
 				payload[fieldName] = structPayload
 			}
 		default:

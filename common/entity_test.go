@@ -13,6 +13,9 @@ type nestedStruct struct {
 	X bool `json:"x"`
 	Y []string
 }
+type F struct {
+	Field string
+}
 
 type testStruct struct {
 	A string `json:"a"`
@@ -20,6 +23,7 @@ type testStruct struct {
 	C map[string]string
 	D int
 	E nestedStruct
+	F
 }
 
 func TestGetPatchPayloadFromUpdate(t *testing.T) { //nolint:funlen
@@ -188,6 +192,44 @@ func TestGetPatchPayloadFromUpdate(t *testing.T) { //nolint:funlen
 					"x": false,
 					"Y": []string{"Z"},
 				},
+			},
+		},
+		{
+			name: "embedded struct updated",
+			originalEntity: &testStruct{
+				A: "abcd",
+				B: []string{"A", "B", "C", "D"},
+				C: map[string]string{
+					"A": "a",
+					"B": "b",
+					"C": "c",
+					"D": "d",
+				},
+				D: 1,
+				E: nestedStruct{
+					X: true,
+					Y: []string{"X", "Y"},
+				},
+				F: F{Field: "f"},
+			},
+			updatedEntity: &testStruct{
+				A: "abcd",
+				B: []string{"A", "B", "C", "D"},
+				C: map[string]string{
+					"A": "a",
+					"B": "b",
+					"C": "c",
+					"D": "d",
+				},
+				D: 1,
+				E: nestedStruct{
+					X: true,
+					Y: []string{"X", "Y"},
+				},
+				F: F{Field: "fuuuu"},
+			},
+			expected: map[string]interface{}{
+				"Field": "fuuuu",
 			},
 		},
 	}
