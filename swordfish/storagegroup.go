@@ -321,8 +321,9 @@ type MappedVolume struct {
 // ClientEndpointGroups.  The property VolumesAreExposed shall be set to true
 // when this action is completed.
 func (storagegroup *StorageGroup) ExposeVolumes() (*http.Response, error) {
-	_, err := storagegroup.Post(storagegroup.exposeVolumesTarget, nil)
+	resp, err := storagegroup.Post(storagegroup.exposeVolumesTarget, nil)
 	if err == nil {
+		defer resp.Body.Close()
 		// Only set to exposed if no error. Calling expose when already exposed
 		// could fail so we don't want to indicate they are not exposed.
 		storagegroup.VolumesAreExposed = true
@@ -334,8 +335,9 @@ func (storagegroup *StorageGroup) ExposeVolumes() (*http.Response, error) {
 // named in the ClientEndpointGroups. The property VolumesAreExposed shall be
 // set to false when this action is completed.
 func (storagegroup *StorageGroup) HideVolumes() (*http.Response, error) {
-	_, err := storagegroup.Post(storagegroup.hideVolumesTarget, nil)
+	resp, err := storagegroup.Post(storagegroup.hideVolumesTarget, nil)
 	if err == nil {
+		defer resp.Body.Close()
 		storagegroup.VolumesAreExposed = false
 	}
 	return nil, err

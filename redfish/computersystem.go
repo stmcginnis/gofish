@@ -951,10 +951,12 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") //nolint:golint
 	}
 
-	_, err := computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)
+	resp, err := computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	return nil
 }
 
