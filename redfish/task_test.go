@@ -22,7 +22,14 @@ var taskBody = strings.NewReader(
 		"Description": "Task One",
 		"EndTime": "2012-03-07T14:44+06:00",
 		"HidePayload": false,
-		"Messages": [],
+		"Messages": [{
+            "Resolution": "None",
+            "@odata.type": "#Message.v1_1_2.Message",
+            "Message": "An update is in progress.",
+            "MessageArgs": [],
+            "MessageId": "Update.1.0.UpdateInProgress",
+            "MessageSeverity": "OK"
+        }],
 		"Payload": {
 			"HttpHeaders": ["User-Agent: Tadpole"],
 			"HttpOperation": "POST",
@@ -63,5 +70,9 @@ func TestTask(t *testing.T) {
 
 	if result.TaskStatus != common.OKHealth {
 		t.Errorf("Invalid TaskStatus: %s", result.TaskStatus)
+	}
+
+	if len(result.Messages) != 1 {
+		t.Errorf("Incorrect number of task messages: %d", len(result.Messages))
 	}
 }
