@@ -99,6 +99,13 @@ func assertError(t testing.TB, expected, actual string) {
 	}
 }
 
+func assertEquals(t testing.TB, expected, actual string) {
+	t.Helper()
+	if expected != actual {
+		t.Errorf("\nExpected value: %s \nActual value: %s", expected, actual)
+	}
+}
+
 // TestEventService tests the parsing of EventService objects.
 func TestEventService(t *testing.T) {
 	var result EventService
@@ -106,13 +113,6 @@ func TestEventService(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
-	}
-
-	assertEquals := func(t testing.TB, expected string, actual string) {
-		t.Helper()
-		if expected != actual {
-			t.Errorf("\nExpected value: %s \nActual value: %s", expected, actual)
-		}
 	}
 
 	assertEquals(t, "EventService", result.ID)
