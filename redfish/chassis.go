@@ -222,9 +222,11 @@ type Chassis struct {
 	WeightKg float64
 	// WidthMm shall represent the width of the chassis, in
 	// millimeters, as specified by the manufacturer.
-	WidthMm         float64
-	thermal         string
-	power           string
+	WidthMm float64
+	thermal string
+	power   string
+	// pcieSlots shall be a link to the PCIe slot properties for this chassis
+	pcieSlots       string
 	networkAdapters string
 	// logServices shall be a link to a collection of type LogServiceCollection.
 	logServices     string
@@ -263,6 +265,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		Drives          common.Link
 		Thermal         common.Link
 		Power           common.Link
+		PCIeSlots       common.Link
 		NetworkAdapters common.Link
 		LogServices     common.Link
 		Links           linkReference
@@ -285,6 +288,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	}
 	chassis.thermal = t.Thermal.String()
 	chassis.power = t.Power.String()
+	chassis.pcieSlots = t.PCIeSlots.String()
 	chassis.networkAdapters = t.NetworkAdapters.String()
 	chassis.logServices = t.LogServices.String()
 	chassis.computerSystems = t.Links.ComputerSystems.ToStrings()
@@ -440,6 +444,15 @@ func (chassis *Chassis) Power() (*Power, error) {
 	}
 
 	return GetPower(chassis.GetClient(), chassis.power)
+}
+
+// PCIeSlots gets the PCIe slots properties for the chassis
+func (chassis *Chassis) PCIeSlots() (*PCIeSlots, error) {
+	if chassis.pcieSlots == "" {
+		return nil, nil
+	}
+
+	return GetPCIeSlots(chassis.GetClient(), chassis.pcieSlots)
 }
 
 // ComputerSystems returns the collection of systems from this chassis
