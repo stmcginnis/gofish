@@ -85,7 +85,10 @@ type PCIeDevice struct {
 	ChassisCount int
 	// PCIeFunctions shall be a reference to the resources that this device
 	// exposes and shall reference a resource of type PCIeFunction.
-	pcieFunctions string
+	pcieFunctions      string
+	pcieFunctionsArray []string
+	// PCIeFunctionsCount is the number of PCIeFunctions.
+	PCIeFunctionsCount int
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -94,8 +97,10 @@ type PCIeDevice struct {
 func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 	type temp PCIeDevice
 	type links struct {
-		Chassis      common.Links
-		ChassisCount int `json:"Chassis@odata.count"`
+		Chassis            common.Links
+		ChassisCount       int `json:"Chassis@odata.count"`
+		PCIeFunctions      common.Links
+		PCIeFunctionsCount int `json:"PCIeFunctions@odata.count"`
 	}
 	var t struct {
 		temp
@@ -116,6 +121,13 @@ func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 	pciedevice.chassis = t.Links.Chassis.ToStrings()
 	pciedevice.ChassisCount = t.Links.ChassisCount
 	pciedevice.pcieFunctions = t.PCIeFunctions.String()
+
+	if t.Links.PCIeFunctionsCount != 0 {
+		pciedevice.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
+		pciedevice.pcieFunctionsArray = t.Links.PCIeFunctions.ToStrings()
+	} else {
+		pciedevice.pcieFunctions = t.PCIeFunctions.String()
+	}
 
 	// This is a read/write object, so we need to save the raw object data for later
 	pciedevice.rawData = b
@@ -238,5 +250,23 @@ func (pciedevice *PCIeDevice) Chassis() ([]*Chassis, error) {
 
 // PCIeFunctions get the PCIe functions that this device exposes.
 func (pciedevice *PCIeDevice) PCIeFunctions() ([]*PCIeFunction, error) {
+	if len(pciedevice.pcieFunctionsArray) > 0 {
+		var result []*PCIeFunction
+
+		collectionError := common.NewCollectionError()
+		for _, funcLink := range pciedevice.pcieFunctionsArray {
+			pciefunction, err := GetPCIeFunction(pciedevice.GetClient(), funcLink)
+			if err != nil {
+				collectionError.Failures[funcLink] = err
+			} else {
+				result = append(result, pciefunction)
+			}
+		}
+		if collectionError.Empty() {
+			return result, nil
+		}
+
+		return result, collectionError
+	}
 	return ListReferencedPCIeFunctions(pciedevice.GetClient(), pciedevice.pcieFunctions)
 }
