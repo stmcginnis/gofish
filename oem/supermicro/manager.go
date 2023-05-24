@@ -40,13 +40,13 @@ func FromManager(manager *redfish.Manager) (Manager, error) {
 }
 
 func (manager *Manager) NTP() (*NTP, error) {
-	return GetNTP(manager.Client, string(manager.Oem.Supermicro.NTP))
+	return GetNTP(manager.GetClient(), string(manager.Oem.Supermicro.NTP))
 }
 
 func (manager *Manager) Syslog() (*Syslog, error) {
-	return GetSyslog(manager.Client, string(manager.Oem.Supermicro.Syslog))
+	return GetSyslog(manager.GetClient(), string(manager.Oem.Supermicro.Syslog))
 }
 
 func (manager *Manager) IKVM() (*IKVM, error) {
-	return GetIKVM(manager.Client, string(manager.Oem.Supermicro.IKVM))
+	return GetIKVM(manager.GetClient(), string(manager.Oem.Supermicro.IKVM))
 }
