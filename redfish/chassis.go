@@ -226,7 +226,10 @@ type Chassis struct {
 	thermal string
 	power   string
 	// pcieSlots shall be a link to the PCIe slot properties for this chassis
-	pcieSlots       string
+	pcieSlots string
+	// sensors shall be a link to to the collection of sensors
+	// located in the equipment and sub-components
+	sensors         string
 	networkAdapters string
 	// logServices shall be a link to a collection of type LogServiceCollection.
 	logServices     string
@@ -266,6 +269,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		Thermal         common.Link
 		Power           common.Link
 		PCIeSlots       common.Link
+		Sensors         common.Link
 		NetworkAdapters common.Link
 		LogServices     common.Link
 		Links           linkReference
@@ -289,6 +293,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	chassis.thermal = t.Thermal.String()
 	chassis.power = t.Power.String()
 	chassis.pcieSlots = t.PCIeSlots.String()
+	chassis.sensors = t.Sensors.String()
 	chassis.networkAdapters = t.NetworkAdapters.String()
 	chassis.logServices = t.LogServices.String()
 	chassis.computerSystems = t.Links.ComputerSystems.ToStrings()
@@ -495,6 +500,11 @@ func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 	}
 
 	return result, collectionError
+}
+
+// Sensors gets the collection of sensors located in the equipment and sub-components of this chassis
+func (chassis *Chassis) Sensors() ([]*Sensor, error) {
+	return ListReferencedSensors(chassis.GetClient(), chassis.sensors)
 }
 
 // NetworkAdapters gets the collection of network adapters of this chassis

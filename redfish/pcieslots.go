@@ -67,7 +67,7 @@ type Slot struct {
 }
 
 // UnmarshalJSON unmarshals a Slot object from the raw JSON.
-func (slot *Slot) UnmarshalJSON(b []byte) (err error) {
+func (slot *Slot) UnmarshalJSON(b []byte) error {
 	type temp Slot
 	type linkReference struct {
 		PCIeDevice      common.Links
@@ -82,8 +82,7 @@ func (slot *Slot) UnmarshalJSON(b []byte) (err error) {
 		Links linkReference
 	}
 
-	err = json.Unmarshal(b, &t)
-	if err != nil {
+	if err := json.Unmarshal(b, &t); err != nil {
 		return err
 	}
 
@@ -94,7 +93,7 @@ func (slot *Slot) UnmarshalJSON(b []byte) (err error) {
 	slot.ProcessorsCount = t.Links.ProcessorsCount
 	slot.OemLinks = t.Links.Oem
 
-	return
+	return nil
 }
 
 // PCIeSlots is used to represent a PCIeSlots resource for a Redfish
@@ -118,7 +117,7 @@ type PCIeSlots struct {
 }
 
 // UnmarshalJSON unmarshals a Slot object from the raw JSON.
-func (pcieSlots *PCIeSlots) UnmarshalJSON(b []byte) (err error) {
+func (pcieSlots *PCIeSlots) UnmarshalJSON(b []byte) error {
 	type temp PCIeSlots
 	type actions struct {
 		Oem json.RawMessage // OEM actions will be stored here
@@ -128,15 +127,14 @@ func (pcieSlots *PCIeSlots) UnmarshalJSON(b []byte) (err error) {
 		Actions actions
 	}
 
-	err = json.Unmarshal(b, &t)
-	if err != nil {
+	if err := json.Unmarshal(b, &t); err != nil {
 		return err
 	}
 
 	*pcieSlots = PCIeSlots(t.temp)
 	pcieSlots.OemActions = t.Actions.Oem
 
-	return
+	return nil
 }
 
 // GetPCIeSlots will get a PCIeSlots instance from the chassis.

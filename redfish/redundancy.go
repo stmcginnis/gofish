@@ -162,3 +162,58 @@ func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, er
 
 	return result, collectionError
 }
+
+// The redundancy mode of the group.
+type RedundancyType string
+
+const (
+	// Failure of one unit automatically causes a standby or offline unit in the redundancy set to take over its functions.
+	FailoverRedundancyType RedundancyType = "Failover"
+	// Multiple units are available and active such that normal operation will continue if one or more units fail.
+	NPlusMRedundancyType RedundancyType = "NPlusm"
+	// The subsystem is not configured in a redundancy mode, either due to configuration or the functionality has been disabled by the user.
+	NotRedundantRedundancyType RedundancyType = "NotRedundant"
+	//  Multiple units contribute or share such that operation will continue, but at a reduced capacity, if one or more units fail.
+	SharingRedundancyType RedundancyType = "Sharing"
+	// One or more spare units are available to take over the function of a failed unit, but takeover is not automatic.
+	SparingRedundancyType RedundancyType = "Sparing"
+)
+
+// The redundancy information for the devices in a redundancy group.
+type RedundantGroup struct {
+	// The maximum number of devices supported in this redundancy group.
+	MaxSupportedInGroup int64
+	// The minimum number of devices needed for this group to be redundant.
+	MinNeededInGroup int64
+	// The links to the devices included in this redundancy group.
+	redundancyGroup      []string
+	RedundancyGroupCount int
+	// The redundancy mode of the group.
+	RedundancyType RedundancyType
+	// The status and health of the resource and its subordinate or dependent resources
+	Status common.Status
+}
+
+// UnmarshalJSON unmarshals a RedundancyGroup object from the raw JSON.
+func (redundantGroup *RedundantGroup) UnmarshalJSON(b []byte) error {
+	type temp RedundantGroup
+	type groupReference struct {
+		RedundancyGroup      common.Links
+		RedundancyGroupCount int `json:"RedundancyGroup@odata.count"`
+	}
+
+	var t struct {
+		temp
+		Group groupReference
+	}
+
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	*redundantGroup = RedundantGroup(t.temp)
+	redundantGroup.redundancyGroup = t.Group.RedundancyGroup.ToStrings()
+	redundantGroup.RedundancyGroupCount = t.Group.RedundancyGroupCount
+
+	return nil
+}

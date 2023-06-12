@@ -95,6 +95,16 @@ const (
 	ACOutputPhysicalContext PhysicalContext = "ACOutput"
 	// ACInputPhysicalContext An AC Input.
 	ACInputPhysicalContext PhysicalContext = "ACInput"
+	// A battery.
+	BatteryPhysicalContext PhysicalContext = "Battery"
+	// A circuit board.
+	BoardPhysicalContext PhysicalContext = "Board"
+	// A pump.
+	PumpPhysicalContext PhysicalContext = "Pump"
+	// A transceiver.
+	TransceiverPhysicalContext PhysicalContext = "Transceiver"
+	// A trusted module.
+	TrustedModulePhysicalContext PhysicalContext = "TrustedModule"
 )
 
 // PhysicalSubContext is the physical subcontext.
