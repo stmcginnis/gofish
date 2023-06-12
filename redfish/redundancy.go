@@ -170,7 +170,7 @@ const (
 	// Failure of one unit automatically causes a standby or offline unit in the redundancy set to take over its functions.
 	FailoverRedundancyType RedundancyType = "Failover"
 	// Multiple units are available and active such that normal operation will continue if one or more units fail.
-	NPlusMRedundancyType RedundancyType = "NPlusm"
+	NPlusMRedundancyType RedundancyType = "NPlusM"
 	// The subsystem is not configured in a redundancy mode, either due to configuration or the functionality has been disabled by the user.
 	NotRedundantRedundancyType RedundancyType = "NotRedundant"
 	//  Multiple units contribute or share such that operation will continue, but at a reduced capacity, if one or more units fail.
