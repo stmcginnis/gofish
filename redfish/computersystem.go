@@ -326,6 +326,8 @@ type Boot struct {
 	// one time boot only. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
 	UefiTargetBootSourceOverride string `json:",omitempty"`
+	// The link to a collection of certificates used for booting through HTTPS by this computer system.
+	certificates string
 }
 
 // UnmarshalJSON unmarshals a Boot object from the raw JSON.
@@ -333,7 +335,8 @@ func (boot *Boot) UnmarshalJSON(b []byte) error {
 	type temp Boot
 	var t struct {
 		temp
-		BootOptions common.Link
+		BootOptions  common.Link
+		Certificates common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -345,6 +348,7 @@ func (boot *Boot) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	boot.bootOptions = t.BootOptions.String()
+	boot.certificates = t.Certificates.String()
 
 	return nil
 }
@@ -750,6 +754,10 @@ func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
 	}
 
 	return result, collectionError
+}
+
+func (computersystem *ComputerSystem) BootCertificates() ([]*Certificate, error) {
+	return ListReferencedCertificates(computersystem.GetClient(), computersystem.Boot.certificates)
 }
 
 // EthernetInterfaces get this system's ethernet interfaces.
