@@ -341,3 +341,8 @@ func (serviceroot *Service) CompositionService() (*redfish.CompositionService, e
 func (serviceroot *Service) UpdateService() (*redfish.UpdateService, error) {
 	return redfish.GetUpdateService(serviceroot.GetClient(), serviceroot.updateService)
 }
+
+// JobService gets the Redfish JobService
+func (serviceroot *Service) JobService() (*redfish.JobService, error) {
+	return redfish.GetJobService(serviceroot.GetClient(), serviceroot.jobService)
+}
