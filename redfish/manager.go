@@ -463,14 +463,19 @@ func (manager *Manager) Reset(resetType ResetType) error {
 	return manager.Post(manager.resetTarget, t)
 }
 
-// EthernetInterfaces get this system's ethernet interfaces.
+// EthernetInterfaces get this manager's ethernet interfaces.
 func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
 	return ListReferencedEthernetInterfaces(manager.GetClient(), manager.ethernetInterfaces)
 }
 
-// HostInterfaces get this system's host interfaces.
+// HostInterfaces get this manager's host interfaces.
 func (manager *Manager) HostInterfaces() ([]*HostInterface, error) {
 	return ListReferencedHostInterfaces(manager.GetClient(), manager.hostInterfaces)
+}
+
+// SerialInterfaces get this manager's serial interfaces.
+func (manager *Manager) SerialInterfaces() ([]*SerialInterface, error) {
+	return ListReferencedSerialInterfaces(manager.GetClient(), manager.serialInterfaces)
 }
 
 // LogServices get this manager's log services on this system.
