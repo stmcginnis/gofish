@@ -22,8 +22,6 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/sync/semaphore"
-
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
 )
@@ -50,7 +48,7 @@ type APIClient struct {
 	auth *redfish.AuthToken
 
 	// sem used to limit number of concurrent requests
-	sem *semaphore.Weighted
+	sem chan bool
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
@@ -111,9 +109,9 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 	}
 
 	if config.MaxConcurrentRequests <= 0 {
-		client.sem = semaphore.NewWeighted(1)
+		client.sem = make(chan bool, 1)
 	} else {
-		client.sem = semaphore.NewWeighted(config.MaxConcurrentRequests)
+		client.sem = make(chan bool, config.MaxConcurrentRequests)
 	}
 
 	if config.TLSHandshakeTimeout == 0 {
@@ -156,7 +154,7 @@ func setupClientWithEndpoint(ctx context.Context, endpoint string) (c *APIClient
 	client := &APIClient{
 		endpoint: endpoint,
 		ctx:      ctx,
-		sem:      semaphore.NewWeighted(1),
+		sem:      make(chan bool, 1),
 	}
 	client.HTTPClient = &http.Client{}
 
@@ -481,11 +479,16 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 		}
 	}
 
-	if err := c.sem.Acquire(c.ctx, 1); err != nil {
-		return nil, err
+	// Block until the semaphore is acquired or the context is done
+	select {
+	case <-c.ctx.Done():
+		return nil, c.ctx.Err()
+	case c.sem <- true:
+		break
 	}
 	resp, err := c.HTTPClient.Do(req)
-	c.sem.Release(1)
+	// Release the semaphore
+	<-c.sem
 	if err != nil {
 		return nil, err
 	}
