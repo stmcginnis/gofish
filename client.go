@@ -420,6 +420,21 @@ func (c *APIClient) RunRawRequestWithHeaders(method, url string, payloadBuffer i
 	return c.runRawRequestWithHeaders(method, url, payloadBuffer, contentType, customHeaders)
 }
 
+// acquireSemaphore blocks until either the http concurrency semaphore is acquired or the context is cancelled
+func (c *APIClient) acquireSemaphore() error {
+	select {
+	case <-c.ctx.Done():
+		return c.ctx.Err()
+	case c.sem <- true:
+		return nil
+	}
+}
+
+// releaseSemaphore releases the http concurrency semaphore
+func (c *APIClient) releaseSemaphore() {
+	<-c.sem
+}
+
 // runRawRequestWithHeaders actually performs the REST calls but allowing custom headers
 func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
@@ -479,16 +494,11 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 		}
 	}
 
-	// Block until the semaphore is acquired or the context is done
-	select {
-	case <-c.ctx.Done():
-		return nil, c.ctx.Err()
-	case c.sem <- true:
-		break
+	if err := c.acquireSemaphore(); err != nil {
+		return nil, err
 	}
 	resp, err := c.HTTPClient.Do(req)
-	// Release the semaphore
-	<-c.sem
+	c.releaseSemaphore()
 	if err != nil {
 		return nil, err
 	}
