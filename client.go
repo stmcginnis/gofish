@@ -19,8 +19,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
-
 	"strings"
 	"time"
 
@@ -49,8 +47,8 @@ type APIClient struct {
 	// Auth information saved for later to be able to log out
 	auth *redfish.AuthToken
 
-	// mu used to lock requests
-	mu *sync.Mutex
+	// sem used to limit number of concurrent requests
+	sem chan bool
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
@@ -93,6 +91,9 @@ type ClientConfig struct {
 
 	// BasicAuth tells the APIClient if basic auth should be used (true) or token based auth must be used (false)
 	BasicAuth bool
+
+	// The maximum number of concurrent HTTP requests that will be made (default: 1)
+	MaxConcurrentRequests int64
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -105,7 +106,12 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		endpoint:   config.Endpoint,
 		dumpWriter: config.DumpWriter,
 		ctx:        ctx,
-		mu:         &sync.Mutex{},
+	}
+
+	if config.MaxConcurrentRequests <= 0 {
+		client.sem = make(chan bool, 1)
+	} else {
+		client.sem = make(chan bool, config.MaxConcurrentRequests)
 	}
 
 	if config.TLSHandshakeTimeout == 0 {
@@ -148,7 +154,7 @@ func setupClientWithEndpoint(ctx context.Context, endpoint string) (c *APIClient
 	client := &APIClient{
 		endpoint: endpoint,
 		ctx:      ctx,
-		mu:       &sync.Mutex{},
+		sem:      make(chan bool, 1),
 	}
 	client.HTTPClient = &http.Client{}
 
@@ -414,6 +420,21 @@ func (c *APIClient) RunRawRequestWithHeaders(method, url string, payloadBuffer i
 	return c.runRawRequestWithHeaders(method, url, payloadBuffer, contentType, customHeaders)
 }
 
+// acquireSemaphore blocks until either the http concurrency semaphore is acquired or the context is cancelled
+func (c *APIClient) acquireSemaphore() error {
+	select {
+	case <-c.ctx.Done():
+		return c.ctx.Err()
+	case c.sem <- true:
+		return nil
+	}
+}
+
+// releaseSemaphore releases the http concurrency semaphore
+func (c *APIClient) releaseSemaphore() {
+	<-c.sem
+}
+
 // runRawRequestWithHeaders actually performs the REST calls but allowing custom headers
 func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
@@ -472,9 +493,12 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 			return nil, err
 		}
 	}
-	c.mu.Lock()
+
+	if err := c.acquireSemaphore(); err != nil {
+		return nil, err
+	}
 	resp, err := c.HTTPClient.Do(req)
-	c.mu.Unlock()
+	c.releaseSemaphore()
 	if err != nil {
 		return nil, err
 	}

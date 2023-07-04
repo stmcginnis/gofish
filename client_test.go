@@ -10,7 +10,6 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"testing"
 	"time"
 
@@ -190,7 +189,7 @@ func TestConnectDefaultContextCancel(t *testing.T) {
 }
 
 func TestClientRunRawRequestNoURL(t *testing.T) {
-	client := APIClient{mu: &sync.Mutex{}}
+	client := APIClient{sem: make(chan bool, 1)}
 
 	_, err := client.runRawRequest("", "", nil, "") //nolint:bodyclose
 	if err == nil {
