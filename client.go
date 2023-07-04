@@ -19,10 +19,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
-
 	"strings"
 	"time"
+
+	"golang.org/x/sync/semaphore"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -49,8 +49,8 @@ type APIClient struct {
 	// Auth information saved for later to be able to log out
 	auth *redfish.AuthToken
 
-	// mu used to lock requests
-	mu *sync.Mutex
+	// sem used to limit number of concurrent requests
+	sem *semaphore.Weighted
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
@@ -93,6 +93,9 @@ type ClientConfig struct {
 
 	// BasicAuth tells the APIClient if basic auth should be used (true) or token based auth must be used (false)
 	BasicAuth bool
+
+	// The maximum number of concurrent HTTP requests that will be made (default: 1)
+	MaxConcurrentRequests int64
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -105,7 +108,12 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		endpoint:   config.Endpoint,
 		dumpWriter: config.DumpWriter,
 		ctx:        ctx,
-		mu:         &sync.Mutex{},
+	}
+
+	if config.MaxConcurrentRequests <= 0 {
+		client.sem = semaphore.NewWeighted(1)
+	} else {
+		client.sem = semaphore.NewWeighted(config.MaxConcurrentRequests)
 	}
 
 	if config.TLSHandshakeTimeout == 0 {
@@ -148,7 +156,7 @@ func setupClientWithEndpoint(ctx context.Context, endpoint string) (c *APIClient
 	client := &APIClient{
 		endpoint: endpoint,
 		ctx:      ctx,
-		mu:       &sync.Mutex{},
+		sem:      semaphore.NewWeighted(1),
 	}
 	client.HTTPClient = &http.Client{}
 
@@ -472,9 +480,12 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 			return nil, err
 		}
 	}
-	c.mu.Lock()
+
+	if err := c.sem.Acquire(c.ctx, 1); err != nil {
+		return nil, err
+	}
 	resp, err := c.HTTPClient.Do(req)
-	c.mu.Unlock()
+	c.sem.Release(1)
 	if err != nil {
 		return nil, err
 	}
