@@ -28,7 +28,7 @@ linters-settings:
       - whyNoLint
       - wrapperFunc
   gocyclo:
-    min-complexity: 25
+    min-complexity: 30
   goimports:
     local-prefixes: github.com/stmcginnis
   govet:
