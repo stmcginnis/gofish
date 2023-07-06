@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -201,7 +202,7 @@ func (storage *Storage) Volumes() ([]*Volume, error) {
 }
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
-func (storage *Storage) SetEncryptionKey(key string) error {
+func (storage *Storage) SetEncryptionKey(key string) (*http.Response, error) {
 	t := struct {
 		EncryptionKey string
 	}{EncryptionKey: key}

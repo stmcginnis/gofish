@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/stmcginnis/gofish/common"
@@ -151,15 +152,15 @@ func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) { //noli
 }
 
 // ChangePassword shall change the selected BIOS password.
-func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) error {
+func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) (*http.Response, error) {
 	if passwordName == "" {
-		return fmt.Errorf("password name must be supplied")
+		return nil, fmt.Errorf("password name must be supplied")
 	}
 	if oldPassword == "" {
-		return fmt.Errorf("existing password must be supplied")
+		return nil, fmt.Errorf("existing password must be supplied")
 	}
 	if newPassword == "" {
-		return fmt.Errorf("new password must be supplied")
+		return nil, fmt.Errorf("new password must be supplied")
 	}
 
 	t := struct {
@@ -177,7 +178,7 @@ func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) 
 // ResetBios shall perform a reset of the BIOS attributes to their default values.
 // A system reset may be required for the default values to be applied. This
 // action may impact other resources.
-func (bios *Bios) ResetBios() error {
+func (bios *Bios) ResetBios() (*http.Response, error) {
 	return bios.Post(bios.resetBiosTarget, nil)
 }
 

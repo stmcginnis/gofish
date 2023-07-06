@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -319,23 +320,25 @@ type MappedVolume struct {
 // named in the ServerEndpointGroups to the initiator endpoints named in the
 // ClientEndpointGroups.  The property VolumesAreExposed shall be set to true
 // when this action is completed.
-func (storagegroup *StorageGroup) ExposeVolumes() error {
-	err := storagegroup.Post(storagegroup.exposeVolumesTarget, nil)
+func (storagegroup *StorageGroup) ExposeVolumes() (*http.Response, error) {
+	resp, err := storagegroup.Post(storagegroup.exposeVolumesTarget, nil)
 	if err == nil {
+		defer resp.Body.Close()
 		// Only set to exposed if no error. Calling expose when already exposed
 		// could fail so we don't want to indicate they are not exposed.
 		storagegroup.VolumesAreExposed = true
 	}
-	return err
+	return nil, err
 }
 
 // HideVolumes hides the storage of this group from the initiator endpoints
 // named in the ClientEndpointGroups. The property VolumesAreExposed shall be
 // set to false when this action is completed.
-func (storagegroup *StorageGroup) HideVolumes() error {
-	err := storagegroup.Post(storagegroup.hideVolumesTarget, nil)
+func (storagegroup *StorageGroup) HideVolumes() (*http.Response, error) {
+	resp, err := storagegroup.Post(storagegroup.hideVolumesTarget, nil)
 	if err == nil {
+		defer resp.Body.Close()
 		storagegroup.VolumesAreExposed = false
 	}
-	return err
+	return nil, err
 }

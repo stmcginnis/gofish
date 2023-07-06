@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -181,7 +182,7 @@ func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, err
 // their default values. The DeleteAllKeys value shall delete the content of the
 // UEFI Secure Boot key databases. The DeletePK value shall delete the content
 // of the PK Secure boot key.
-func (secureboot *SecureBoot) ResetKeys(resetType ResetKeysType) error {
+func (secureboot *SecureBoot) ResetKeys(resetType ResetKeysType) (*http.Response, error) {
 	t := struct {
 		ResetKeysType ResetKeysType
 	}{ResetKeysType: resetType}

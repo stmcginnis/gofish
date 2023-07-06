@@ -118,7 +118,7 @@ func CollectList(get func(string), c Client, link string) error {
 	return nil
 }
 
-// CollectCollection will retrieve a collection of entitied from the Redfish service
+// CollectCollection will retrieve a collection of entities from the Redfish service
 // when you already have the set of individual links in the collection.
 func CollectCollection(get func(string), links []string) {
 	// Only allow three concurrent requests to avoid overwhelming the service

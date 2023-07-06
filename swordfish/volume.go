@@ -7,6 +7,7 @@ package swordfish
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -702,10 +703,10 @@ func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 // AssignReplicaTarget is used to establish a replication relationship by
 // assigning an existing volume to serve as a target replica for an existing
 // source volume.
-func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) error {
+func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) (*http.Response, error) {
 	// This action wasn't added until later revisions
 	if volume.assignReplicaTargetTarget == "" {
-		return fmt.Errorf("AssignReplicaTarget action is not supported by this system")
+		return nil, fmt.Errorf("AssignReplicaTarget action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -725,18 +726,18 @@ func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode Re
 
 // CheckConsistency is used to force a check of the Volume's parity or redundant
 // data to ensure it matches calculated values.
-func (volume *Volume) CheckConsistency() error {
+func (volume *Volume) CheckConsistency() (*http.Response, error) {
 	if volume.checkConsistencyTarget == "" {
-		return fmt.Errorf("CheckConsistency action is not supported by this system")
+		return nil, fmt.Errorf("CheckConsistency action is not supported by this system")
 	}
 
 	return volume.Post(volume.checkConsistencyTarget, nil)
 }
 
 // Initialize is used to prepare the contents of the volume for use by the system.
-func (volume *Volume) Initialize(initType InitializeType) error {
+func (volume *Volume) Initialize(initType InitializeType) (*http.Response, error) {
 	if volume.initializeTarget == "" {
-		return fmt.Errorf("initialize action is not supported by this system")
+		return nil, fmt.Errorf("initialize action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -751,10 +752,10 @@ func (volume *Volume) Initialize(initType InitializeType) error {
 // RemoveReplicaRelationship is used to disable data synchronization between a
 // source and target volume, remove the replication relationship, and optionally
 // delete the target volume.
-func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeODataID string) error {
+func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeODataID string) (*http.Response, error) {
 	// This action wasn't added until later revisions
 	if volume.removeReplicaRelationshipTarget == "" {
-		return fmt.Errorf("RemoveReplicaRelationship action is not supported by this system")
+		return nil, fmt.Errorf("RemoveReplicaRelationship action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -773,10 +774,10 @@ func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeO
 // ResumeReplication is used to resume the active data synchronization between a
 // source and target volume, without otherwise altering the replication
 // relationship.
-func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
+func (volume *Volume) ResumeReplication(targetVolumeODataID string) (*http.Response, error) {
 	// This action wasn't added until later revisions
 	if volume.resumeReplicationTarget == "" {
-		return fmt.Errorf("ResumeReplication action is not supported by this system")
+		return nil, fmt.Errorf("ResumeReplication action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -790,10 +791,10 @@ func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
 
 // ReverseReplicationRelationship is used to reverse the replication
 // relationship between a source and target volume.
-func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string) error {
+func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string) (*http.Response, error) {
 	// This action wasn't added until later revisions
 	if volume.reverseReplicationRelationshipTarget == "" {
-		return fmt.Errorf("ReverseReplicationRelationship action is not supported by this system")
+		return nil, fmt.Errorf("ReverseReplicationRelationship action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -807,10 +808,10 @@ func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string)
 
 // SplitReplication is used to split the replication relationship and suspend
 // data synchronization between a source and target volume.
-func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
+func (volume *Volume) SplitReplication(targetVolumeODataID string) (*http.Response, error) {
 	// This action wasn't added until later revisions
 	if volume.splitReplicationTarget == "" {
-		return fmt.Errorf("SplitReplication action is not supported by this system")
+		return nil, fmt.Errorf("SplitReplication action is not supported by this system")
 	}
 
 	// Define this action's parameters
@@ -825,10 +826,10 @@ func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
 // SuspendReplication is used to suspend active data synchronization between a
 // source and target volume, without otherwise altering the replication
 // relationship.
-func (volume *Volume) SuspendReplication(targetVolumeODataID string) error {
+func (volume *Volume) SuspendReplication(targetVolumeODataID string) (*http.Response, error) {
 	// This action wasn't added until later revisions
 	if volume.suspendReplicationTarget == "" {
-		return fmt.Errorf("SuspendReplication action is not supported by this system")
+		return nil, fmt.Errorf("SuspendReplication action is not supported by this system")
 	}
 
 	// Define this action's parameters

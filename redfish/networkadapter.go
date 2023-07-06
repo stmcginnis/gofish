@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -305,6 +306,6 @@ func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
 
 // ResetSettingsToDefault shall perform a reset of all active and pending
 // settings back to factory default settings upon reset of the network adapter.
-func (networkadapter *NetworkAdapter) ResetSettingsToDefault() error {
+func (networkadapter *NetworkAdapter) ResetSettingsToDefault() (*http.Response, error) {
 	return networkadapter.Post(networkadapter.resetSettingsToDefaultTarget, nil)
 }

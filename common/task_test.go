@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package redfish
+package common
 
 import (
 	"encoding/json"
 	"strings"
 	"testing"
-
-	"github.com/stmcginnis/gofish/common"
 )
 
 var taskBody = strings.NewReader(
@@ -61,7 +59,7 @@ func TestTask(t *testing.T) {
 		t.Errorf("Invalid TaskState: %s", result.TaskState)
 	}
 
-	if result.TaskStatus != common.OKHealth {
+	if result.TaskStatus != OKHealth {
 		t.Errorf("Invalid TaskStatus: %s", result.TaskStatus)
 	}
 }

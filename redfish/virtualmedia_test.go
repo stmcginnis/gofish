@@ -142,11 +142,12 @@ func TestVirtualMediaEject(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.EjectMedia()
+	resp, err := result.EjectMedia()
 
 	if err != nil {
 		t.Errorf("Error making EjectMedia call: %s", err)
 	}
+	defer resp.Body.Close()
 
 	calls := testClient.CapturedCalls()
 
@@ -167,11 +168,12 @@ func TestVirtualMediaInsert(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.InsertMedia("https://example.com/image", false, true)
+	resp, err := result.InsertMedia("https://example.com/image", false, true)
 
 	if err != nil {
 		t.Errorf("Error making InsertMedia call: %s", err)
 	}
+	defer resp.Body.Close()
 
 	calls := testClient.CapturedCalls()
 
@@ -207,10 +209,11 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 		WriteProtected: true,
 	}
 
-	err = result.InsertMediaConfig(virtualMediaConfig)
+	resp, err := result.InsertMediaConfig(virtualMediaConfig)
 	if err != nil {
 		t.Errorf("Error making InsertMediaConfig call: %s", err)
 	}
+	defer resp.Body.Close()
 
 	calls := testClient.CapturedCalls()
 
