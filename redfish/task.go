@@ -86,9 +86,8 @@ type Task struct {
 	// returned normally. If this property is not specified when the Task is
 	// created, the default value shall be False.
 	HidePayload bool
-	// messages shall be an array of messages associated with the task.
-	// TODO: Add processing of messages.
-	messages []string
+	// Messages shall be an array of messages associated with the task.
+	Messages []common.Message
 	// Payload shall contain information detailing the HTTP and JSON payload
 	// information for executing this task. This object shall not be included in
 	// the response if the HidePayload property is set to True.
@@ -136,7 +135,6 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 	type temp Task
 	var t struct {
 		temp
-		Messages common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -146,7 +144,6 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*task = Task(t.temp)
-	task.messages = t.Messages.ToStrings()
 
 	return nil
 }
