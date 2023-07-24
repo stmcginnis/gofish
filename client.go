@@ -274,6 +274,21 @@ func (c *APIClient) GetSession() (*Session, error) {
 	}, nil
 }
 
+// Get performs a HEAD request against the Redfish service.
+func (c *APIClient) Head(url string) (*http.Response, error) {
+	return c.HeadWithHeaders(url, nil)
+}
+
+// GetWithHeaders performs a HEAD request against the Redfish service but allowing custom headers
+func (c *APIClient) HeadWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
+	relativePath := url
+	if relativePath == "" {
+		relativePath = common.DefaultServiceRoot
+	}
+
+	return c.runRequestWithHeaders(http.MethodHead, relativePath, nil, customHeaders)
+}
+
 // Get performs a GET request against the Redfish service.
 func (c *APIClient) Get(url string) (*http.Response, error) {
 	return c.GetWithHeaders(url, nil)
