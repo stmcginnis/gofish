@@ -62,9 +62,9 @@ type JobPayload struct {
 	// HTTPOperation shall contain the HTTP operation that executes this Job.
 	HTTPOperation string `json:"HttpOperation"`
 	// JsonBody shall contain JSON-formatted payload for this Job.
-	JsonBody string
+	JSONBody string
 	// TargetUri shall contain link to a target location for an HTTP operation.
-	TargetUri string
+	TargetURI string
 }
 
 // Job shall contain a job in a Redfish implementation.
