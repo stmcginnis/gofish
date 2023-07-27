@@ -58,13 +58,13 @@ const (
 // information for executing this Job.
 type JobPayload struct {
 	// HTTPHeaders shall contain an array of HTTP headers in this Job.
-	HTTPHeaders []string
+	HTTPHeaders []string `json:"HttpHeaders"`
 	// HTTPOperation shall contain the HTTP operation that executes this Job.
 	HTTPOperation string `json:"HttpOperation"`
 	// JsonBody shall contain JSON-formatted payload for this Job.
-	JSONBody string
+	JSONBody string `json:"JsonBody"`
 	// TargetUri shall contain link to a target location for an HTTP operation.
-	TargetURI string
+	TargetURI string `json:"TargetUri"`
 }
 
 // Job shall contain a job in a Redfish implementation.
