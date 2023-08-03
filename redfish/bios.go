@@ -178,7 +178,8 @@ func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) 
 // A system reset may be required for the default values to be applied. This
 // action may impact other resources.
 func (bios *Bios) ResetBios() error {
-	return bios.Post(bios.resetBiosTarget, nil)
+	payload := make(map[string]interface{})
+	return bios.Post(bios.resetBiosTarget, payload)
 }
 
 // AllowedAttributeUpdateApplyTimes returns the set of allowed apply times to request when
