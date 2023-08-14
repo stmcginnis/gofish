@@ -518,6 +518,9 @@ type ComputerSystem struct {
 	// storage shall be a link to a collection
 	// of type StorageCollection.
 	storage string
+	// virtualMedia shall contain a reference to a collection of type
+	// VirtualMediaCollection which are for the use of this system.
+	virtualMedia string
 	// SubModel shall contain the information
 	// about the sub-model (or config) of the system. This shall not include
 	// the model/product name or the manufacturer name.
@@ -586,6 +589,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		MemoryDomains      common.Link
 		PCIeDevices        common.Links
 		PCIeFunctions      common.Links
+		VirtualMedia       common.Link
 		Links              CSLinks
 		Settings           common.Settings `json:"@Redfish.Settings"`
 	}
@@ -608,6 +612,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.storage = t.Storage.String()
 	computersystem.logServices = t.LogServices.String()
 	computersystem.memoryDomains = t.MemoryDomains.String()
+	computersystem.virtualMedia = t.VirtualMedia.String()
 	computersystem.pcieDevices = t.PCIeDevices.ToStrings()
 	computersystem.pcieFunctions = t.PCIeFunctions.ToStrings()
 	computersystem.chassis = t.Links.Chassis.ToStrings()
@@ -953,6 +958,11 @@ func (computersystem *ComputerSystem) SimpleStorages() ([]*SimpleStorage, error)
 // Storage gets the storage associated with this system.
 func (computersystem *ComputerSystem) Storage() ([]*Storage, error) {
 	return ListReferencedStorages(computersystem.GetClient(), computersystem.storage)
+}
+
+// VirtualMedia gets the virtual media associated with this system.
+func (computersystem *ComputerSystem) VirtualMedia() ([]*VirtualMedia, error) {
+	return ListReferencedVirtualMedias(computersystem.GetClient(), computersystem.virtualMedia)
 }
 
 // CSLinks are references to resources that are related to, but not contained
