@@ -152,6 +152,45 @@ const (
 	SpannedStripesWithParityVolumeType VolumeType = "SpannedStripesWithParity"
 )
 
+// ReadCachePolicyType is the type of read cache policy.
+type ReadCachePolicyType string
+
+const (
+
+	// ReadAheadReadCachePolicyType A caching technique in which the
+	// controller pre-fetches data anticipating future read requests.
+	ReadAheadReadCachePolicyType ReadCachePolicyType = "ReadAhead"
+	// AdaptiveReadAheadReadCachePolicyType A caching technique in which the
+	// controller dynamically determines whether to pre-fetch data
+	// anticipating future read requests, based on previous cache hit ratio.
+	AdaptiveReadAheadReadCachePolicyType ReadCachePolicyType = "AdaptiveReadAhead"
+	// OffReadCachePolicyType The read cache is disabled.
+	OffReadCachePolicyType ReadCachePolicyType = "Off"
+)
+
+// WriteCachePolicyType is the type of write cache policy.
+type WriteCachePolicyType string
+
+const (
+
+	// WriteThroughWriteCachePolicyType A caching technique in which the
+	// completion of a write request is not signaled until data is safely
+	// stored on non-volatile media.
+	WriteThroughWriteCachePolicyType WriteCachePolicyType = "WriteThrough"
+	// ProtectedWriteBackWriteCachePolicyType A caching technique in which
+	// the completion of a write request is signaled as soon as the data is
+	// in cache, and actual writing to non-volatile media is guaranteed to
+	// occur at a later time.
+	ProtectedWriteBackWriteCachePolicyType WriteCachePolicyType = "ProtectedWriteBack"
+	// UnprotectedWriteBackWriteCachePolicyType A caching technique in which
+	// the completion of a write request is signaled as soon as the data is
+	// in cache; actual writing to non-volatile media is not guaranteed to
+	// occur at a later time.
+	UnprotectedWriteBackWriteCachePolicyType WriteCachePolicyType = "UnprotectedWriteBack"
+	// OffWriteCachePolicyType shall be disabled.
+	OffWriteCachePolicyType WriteCachePolicyType = "Off"
+)
+
 // Volume is used to represent a volume, virtual disk, logical disk, LUN,
 // or other logical storage for a Redfish implementation.
 type Volume struct {
@@ -180,6 +219,12 @@ type Volume struct {
 	// BlockSizeBytes shall contain size of the smallest addressable unit of the
 	// associated volume.
 	BlockSizeBytes int
+	// ReadCachePolicy shall contain a boolean indicator of the read cache
+	// policy for the Volume.
+	ReadCachePolicy ReadCachePolicyType
+	// WriteCachePolicy shall contain a boolean indicator of the write cache
+	// policy for the Volume.
+	WriteCachePolicy WriteCachePolicyType
 	// Operations shall contain a list of all currently running on the Volume.
 	Operations []common.Operations
 	// OptimumIOSizeBytes shall contain the optimum IO size to use when
