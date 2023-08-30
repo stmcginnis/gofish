@@ -328,6 +328,8 @@ type Boot struct {
 	UefiTargetBootSourceOverride string `json:",omitempty"`
 	// The link to a collection of certificates used for booting through HTTPS by this computer system.
 	certificates string
+	// The URI to boot from when BootSourceOverrideTarget is set to UefiHttp.
+	HTTPBootURI string `json:",omitempty"`
 }
 
 // UnmarshalJSON unmarshals a Boot object from the raw JSON.
