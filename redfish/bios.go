@@ -155,12 +155,6 @@ func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) 
 	if passwordName == "" {
 		return fmt.Errorf("password name must be supplied")
 	}
-	if oldPassword == "" {
-		return fmt.Errorf("existing password must be supplied")
-	}
-	if newPassword == "" {
-		return fmt.Errorf("new password must be supplied")
-	}
 
 	t := struct {
 		PasswordName string
