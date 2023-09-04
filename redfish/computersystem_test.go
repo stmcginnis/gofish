@@ -59,7 +59,8 @@ var computerSystemBody = `{
 				"SDCard",
 				"UefiHttp"
 			],
-			"UefiTargetBootSourceOverride": "uefi device path"
+			"UefiTargetBootSourceOverride": "uefi device path",
+			"HttpBootURI": "http://localhost/boot.efi"
 		},
 		"BiosVersion": "P79 v1.00 (09/20/2013)",
 		"ProcessorSummary": {
@@ -196,6 +197,10 @@ func TestComputerSystem(t *testing.T) { //nolint
 
 	if result.Boot.UefiTargetBootSourceOverride != "uefi device path" {
 		t.Errorf("Received invalid uefi target boot source: %s", result.Boot.UefiTargetBootSourceOverride)
+	}
+
+	if result.Boot.HTTPBootURI != "http://localhost/boot.efi" {
+		t.Errorf("Received invalid http boot uri: %s", result.Boot.HTTPBootURI)
 	}
 
 	if result.ProcessorSummary.Status.State != common.EnabledState {
