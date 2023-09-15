@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // Entity provides the common basis for all Redfish and Swordfish objects.
@@ -24,6 +25,9 @@ type Entity struct {
 	// control updates to make sure the object has not been modified my a different
 	// process between fetching and updating that could cause conflicts.
 	etag string
+	// Removes surrounding quotes of etag used in If-Match header of PATCH and POST requests.
+	// Only use this option to resolve bad vendor implementation where If-Match only matches the unquoted etag string.
+	stripEtagQuotes bool
 }
 
 // SetClient sets the API client connection to use for accessing this
@@ -36,6 +40,11 @@ func (e *Entity) SetClient(c Client) {
 // entity.
 func (e *Entity) GetClient() Client {
 	return e.client
+}
+
+// Set stripEtagQuotes to enable/disable strupping etag quotes
+func (e *Entity) StripEtagQuotes(b bool) {
+	e.stripEtagQuotes = b
 }
 
 // Update commits changes to an entity.
@@ -90,6 +99,10 @@ func (e *Entity) Get(c Client, uri string, payload interface{}) error {
 func (e *Entity) Patch(uri string, payload interface{}) error {
 	header := make(map[string]string)
 	if e.etag != "" {
+		if e.stripEtagQuotes {
+			e.etag = strings.Trim(e.etag, "\"")
+		}
+
 		header["If-Match"] = e.etag
 	}
 
@@ -104,6 +117,10 @@ func (e *Entity) Patch(uri string, payload interface{}) error {
 func (e *Entity) Post(uri string, payload interface{}) error {
 	header := make(map[string]string)
 	if e.etag != "" {
+		if e.stripEtagQuotes {
+			e.etag = strings.Trim(e.etag, "\"")
+		}
+
 		header["If-Match"] = e.etag
 	}
 
