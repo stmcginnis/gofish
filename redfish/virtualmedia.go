@@ -105,6 +105,8 @@ type VirtualMedia struct {
 	// MediaTypes shall be the supported media
 	// types for this connection.
 	MediaTypes []VirtualMediaType
+	// Indicates which MediaTypes is used
+	MediaType string
 	// Password shall represent the password to access the
 	// Image parameter-specified URI. The value shall be null in responses.
 	Password string
