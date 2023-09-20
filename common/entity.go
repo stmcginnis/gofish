@@ -28,6 +28,11 @@ type Entity struct {
 	// Removes surrounding quotes of etag used in If-Match header of PATCH and POST requests.
 	// Only use this option to resolve bad vendor implementation where If-Match only matches the unquoted etag string.
 	stripEtagQuotes bool
+	// DisableEtagMatch when set will skip the If-Match header from PATCH and POST requests.
+	//
+	// This is a work around for bad vendor implementations where the If-Match header does not work - even with the '*' value
+	// and requests are incorrectly denied with an ETag mismatch error.
+	disableEtagMatch bool
 }
 
 // SetClient sets the API client connection to use for accessing this
@@ -45,6 +50,11 @@ func (e *Entity) GetClient() Client {
 // Set stripEtagQuotes to enable/disable strupping etag quotes
 func (e *Entity) StripEtagQuotes(b bool) {
 	e.stripEtagQuotes = b
+}
+
+// Disable Etag Match header from being sent by the client.
+func (e *Entity) DisableEtagMatch(b bool) {
+	e.disableEtagMatch = b
 }
 
 // Update commits changes to an entity.
@@ -98,7 +108,7 @@ func (e *Entity) Get(c Client, uri string, payload interface{}) error {
 // Patch performs a Patch request against the Redfish service with etag
 func (e *Entity) Patch(uri string, payload interface{}) error {
 	header := make(map[string]string)
-	if e.etag != "" {
+	if e.etag != "" && !e.disableEtagMatch {
 		if e.stripEtagQuotes {
 			e.etag = strings.Trim(e.etag, "\"")
 		}
@@ -116,7 +126,7 @@ func (e *Entity) Patch(uri string, payload interface{}) error {
 // Post performs a Post request against the Redfish service with etag
 func (e *Entity) Post(uri string, payload interface{}) error {
 	header := make(map[string]string)
-	if e.etag != "" {
+	if e.etag != "" && !e.disableEtagMatch {
 		if e.stripEtagQuotes {
 			e.etag = strings.Trim(e.etag, "\"")
 		}
