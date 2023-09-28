@@ -11,6 +11,17 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+// The state of the base frequency settings of
+// the operation configuration applied to this processor.
+type BaseSpeedPriorityState string
+
+const (
+	// Base speed priority is disabled.
+	DisabledBaseSpeedPriority BaseSpeedPriorityState = "Disabled"
+	// Base speed priority is enabled.
+	EnabledBaseSpeedPriority BaseSpeedPriorityState = "Enabled"
+)
+
 // FpgaInterfaceType is
 type FpgaInterfaceType string
 
@@ -180,6 +191,51 @@ const (
 	OEMProcessorType ProcessorType = "OEM"
 )
 
+// The causes of the processor being throttled.
+type ThrottleCauses string
+
+const (
+	// The cause of the processor being throttled is a clock limit.
+	ClockLimitThrottleCause ThrottleCauses = "ClockLimit"
+	// The cause of the processor being throttled is a fault
+	// detected by management hardware or firmware.
+	ManagementDetectedFaultThrottleCause ThrottleCauses = "ManagementDetectedFault"
+	// The cause of the processor being throttled is OEM-specific.
+	OEMThrottleCause ThrottleCauses = "OEM"
+	// The cause of the processor being throttled is a power limit.
+	PowerLimitThrottleCause ThrottleCauses = "PowerLimit"
+	// The cause of the processor being throttled is a thermal limit.
+	ThermalLimitThrottleCause ThrottleCauses = "ThermalLimit"
+	// The cause of the processor being throttled is not known.
+	UnknownThrottleCause ThrottleCauses = "Unknown"
+)
+
+// The state of the turbo for this processor.
+type TurboState string
+
+const (
+	// Turbo is disabled.
+	DisabledTurboState TurboState = "Disabled"
+	// Turbo is enabled.
+	EnabledTurboState TurboState = "Enabled"
+)
+
+// AdditionalFirmwareVersions shall contain the additional firmware versions of the processor..
+type AdditionalFirmwareVersions struct {
+	// (v1.7+) The bootloader version contained in this software, such as U-Boot or UEFI.
+	Bootloader string
+	// (v1.7+) The kernel version contained in this software.
+	// For strict POSIX software, the value shall contain the output of uname -srm.
+	// For Microsoft Windows, the value shall contain the output of ver.
+	Kernel string
+	// (v1.7+)The microcode version contained in this software, such as processor microcode.
+	Microcode string
+	// (v1.7+) Oem contains vendor-specific data.
+	Oem json.RawMessage
+	// (v1.8+) The operating system name of this software.
+	OSDistribution string
+}
+
 // FPGA shall contain the properties of the FPGA device represented by a
 // Processor.
 type FPGA struct {
@@ -268,14 +324,34 @@ type Processor struct {
 	// Actions is The Actions property shall contain the available actions
 	// for this resource.
 	Actions string
+	// The additional firmware versions of the processor.
+	AdditionalFirmwareVersions AdditionalFirmwareVersions
+	// The link to the operating configuration that is applied to this processor.
+	appliedOperatingConfig string
+	// (v1.10+) The base (nominal) clock speed of the processor in MHz.
+	BaseSpeedMHz int
+	// (v1.9+) The state of the base frequency settings of
+	// the operation configuration applied to this processor.
+	BaseSpeedPriorityState BaseSpeedPriorityState
 	// Assembly shall be a link to a resource
 	// of type Assembly.
 	assembly string
 	// Description provides a description of this resource.
 	Description string
+	// (v1.12+) An indication of whether this processor is enabled.
+	Enabled bool
+	// (v1.16+) The processor family, as specified by the combination of
+	// the EffectiveFamily and EffectiveModel properties.
+	Family string
+	// (v1.7+) This property shall contain a string describing the firmware version of
+	// the processor as provided by the manufacturer.
+	FirmwareVersion string
 	// FPGA shall be an object containing
 	// properties specific for Processors of type FPGA.
 	FPGA FPGA
+	// (v1.9+) The list of core identifiers corresponding to the cores that have been configured with
+	// the higher clock speed from the operating configuration applied to this processor.
+	HighSpeedCoreIDs []int
 	// InstructionSet shall contain the string which
 	// identifies the instruction set of the processor contained in this
 	// socket.
@@ -287,6 +363,8 @@ type Processor struct {
 	// Location shall contain location information of the
 	// associated processor.
 	Location common.Location
+	// (v1.10+) An indicator allowing an operator to physically locate this resource.
+	LocationIndicatorActive bool
 	// Manufacturer shall contain a string which identifies
 	// the manufacturer of the processor.
 	Manufacturer string
@@ -299,23 +377,46 @@ type Processor struct {
 	// Metrics shall be a reference to the Metrics
 	// associated with this Processor.
 	metrics string
+	// (v1.8+) The minimum clock speed of the processor in MHz.
+	MinSpeedMHz int
 	// Model shall indicate the model information as
 	// provided by the manufacturer of this processor.
 	Model string
+	// (v1.9+) The link to the collection operating configurations
+	// that can be applied to this processor.
+	operatingConfigs string
+	// (v1.8+) This property shall contain the operating speed of the processor in MHz.
+	// The operating speed of the processor may change more frequently
+	// than the manager is able to monitor.
+	OperatingSpeedMHz int
 	// ProcessorArchitecture shall contain the string which
 	// identifies the architecture of the processor contained in this Socket.
 	ProcessorArchitecture ProcessorArchitecture
 	// ProcessorID shall contain identification information for this processor.
 	ProcessorID ProcessorID `json:"ProcessorId"`
+	// (v1.16+) This property shall contain the zero-based index of the processor,
+	// indexed within the next unit of containment.
+	ProcessorIndex int
 	// ProcessorMemory shall be the memory
 	// directly attached or integrated within this Processor.
 	processorMemory []string
 	// ProcessorType shall contain the string which
 	// identifies the type of processor contained in this Socket.
 	ProcessorType ProcessorType
+	// (v1.16+) An indication of whether this component can be independently replaced
+	// as allowed by the vendor's replacement policy.
+	Replaceable bool
+	// (v1.7+) The serial number of the processor.
+	SerialNumber string
 	// Socket shall contain the string which identifies the
 	// physical location or socket of the processor.
 	Socket string
+	// (v1.11+) The spare part number of the processor.
+	SparePartNumber string
+	// (v1.10+) The clock limit of the processor in MHz.
+	SpeedLimitMHz int
+	// (v1.10+)	Indicates whether the clock speed of the processor is fixed at the value specified in the SpeedLimitMHz property.
+	SpeedLocked bool
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
@@ -325,6 +426,10 @@ type Processor struct {
 	// TDPWatts shall be the nominal Thermal
 	// Design Power (TDP) in watts.
 	TDPWatts int
+	// (v1.16+) The causes of the processor being throttled.
+	ThrottleCauses []ThrottleCauses
+	// (v1.16+) An indication of whether the processor is throttled.
+	Throttled bool
 	// TotalCores shall indicate the total count of
 	// independent processor cores contained within this processor.
 	TotalCores int
@@ -334,6 +439,8 @@ type Processor struct {
 	// TotalThreads shall indicate the total count of
 	// independent execution threads supported by this processor.
 	TotalThreads int
+	// (v1.9+) The state of the turbo for this processor.
+	TurboState TurboState
 	// UUID is used to contain a universal unique identifier number for the
 	// processor. RFC4122 describes methods that can be used to create the
 	// value. The value should be considered to be opaque. Client software
@@ -373,12 +480,14 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	type temp Processor
 	type t1 struct {
 		temp
-		AccelerationFunctions common.Link
-		Assembly              common.Link
-		Metrics               common.Link
-		SubProcessors         common.Link
-		ProcessorMemory       common.Links
-		Links                 struct {
+		AccelerationFunctions  common.Link
+		AppliedOperatingConfig common.Link
+		Assembly               common.Link
+		Metrics                common.Link
+		OperatingConfigs       common.Link
+		SubProcessors          common.Link
+		ProcessorMemory        common.Links
+		Links                  struct {
 			Chassis                  common.Link
 			ConnectedProcessors      common.Links
 			ConnectedProcessorsCount int `json:"ConnectedProcessors@odata.count"`
@@ -421,6 +530,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	processor.accelerationFunctions = t.AccelerationFunctions.String()
+	processor.appliedOperatingConfig = t.AppliedOperatingConfig.String()
 	processor.assembly = t.Assembly.String()
 	processor.chassis = t.Links.Chassis.String()
 	processor.processorMemory = t.ProcessorMemory.ToStrings()
@@ -432,6 +542,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	processor.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	processor.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
 	processor.metrics = t.Metrics.String()
+	processor.operatingConfigs = t.OperatingConfigs.String()
 	processor.subProcessors = t.SubProcessors.String()
 
 	return nil
@@ -500,6 +611,8 @@ type ProcessorID struct {
 	// MicrocodeInfo shall indicate the Microcode
 	// Information as provided by the manufacturer of this processor.
 	MicrocodeInfo string
+	// (v1.10+) The Protected Processor Identification Number (PPIN) for this processor.
+	ProtectedIdentificationNumber string
 	// Step shall indicate the Step or revision string
 	// information as provided by the manufacturer of this processor.
 	Step string
