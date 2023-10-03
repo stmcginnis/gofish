@@ -438,10 +438,7 @@ func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) { 
 func (manager *Manager) Reset(resetType ResetType) error {
 	if len(manager.SupportedResetTypes) == 0 {
 		// reset directly without reset type. HPE server has the behavior
-		t := struct {
-			Action string
-		}{Action: "Manager.Reset"}
-		return manager.Post(manager.resetTarget, t)
+		return manager.Post(manager.resetTarget, struct{}{})
 	}
 	// Make sure the requested reset type is supported by the manager.
 	valid := false
