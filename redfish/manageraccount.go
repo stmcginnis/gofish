@@ -56,6 +56,8 @@ type ManagerAccount struct {
 	// duration period, an administrator shall be able to change the property
 	// to `false` to clear the lockout condition.
 	Locked bool
+	// Oem object used on this account.
+	Oem json.RawMessage
 	// Password shall contain the password for this account.
 	// The value shall be `null` in responses.
 	Password string
