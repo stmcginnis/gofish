@@ -102,6 +102,9 @@ type Service struct {
 	// Oem contains all the vendor specific actions. It is vendor responsibility to parse
 	// this field accordingly
 	Oem json.RawMessage
+	// (v1.6+) PowerEquipment shall only contain a reference to a collection of resources that
+	// comply to the PowerEquipment schema.
+	powerEquipment string
 	// Product shall include the name of the product represented by this Redfish
 	// service.
 	Product string
@@ -165,6 +168,7 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 		StorageSystems     common.Link
 		AccountService     common.Link
 		EventService       common.Link
+		PowerEquipment     common.Link
 		Registries         common.Link
 		Systems            common.Link
 		CompositionService common.Link
@@ -196,6 +200,7 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 	serviceroot.storageSystems = t.StorageSystems.String()
 	serviceroot.accountService = t.AccountService.String()
 	serviceroot.eventService = t.EventService.String()
+	serviceroot.powerEquipment = t.PowerEquipment.String()
 	serviceroot.registries = t.Registries.String()
 	serviceroot.systems = t.Systems.String()
 	serviceroot.compositionService = t.CompositionService.String()
@@ -350,4 +355,9 @@ func (serviceroot *Service) UpdateService() (*redfish.UpdateService, error) {
 // JobService gets the job service instance
 func (serviceroot *Service) JobService() (*redfish.JobService, error) {
 	return redfish.GetJobService(serviceroot.GetClient(), serviceroot.jobService)
+}
+
+// PowerEquipment gets the powerEquipment instances of this service.
+func (serviceroot *Service) PowerEquipment() (*redfish.PowerEquipment, error) {
+	return redfish.GetPowerEquipment(serviceroot.GetClient(), serviceroot.powerEquipment)
 }

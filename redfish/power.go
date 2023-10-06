@@ -419,6 +419,12 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// GetPowerSupply will get a PowerSupply instance from the Redfish service.
+func GetPowerSupply(c common.Client, uri string) (*PowerSupply, error) {
+	var powerSupply PowerSupply
+	return &powerSupply, powerSupply.Get(c, uri, &powerSupply)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (powersupply *PowerSupply) Update() error {
 	// Get a representation of the object's original state so we can find what
@@ -525,4 +531,46 @@ func (voltage *Voltage) UnmarshalJSON(b []byte) error { //nolint:dupl
 	*voltage = Voltage(t.temp)
 
 	return nil
+}
+
+func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) { //nolint:dupl
+	var result []*PowerSupply
+	if link == "" {
+		return result, nil
+	}
+
+	type GetResult struct {
+		Item  *PowerSupply
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
+	collectionError := common.NewCollectionError()
+	get := func(link string) {
+		powerSupply, err := GetPowerSupply(c, link)
+		ch <- GetResult{Item: powerSupply, Link: link, Error: err}
+	}
+
+	go func() {
+		err := common.CollectList(get, c, link)
+		if err != nil {
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
+		} else {
+			result = append(result, r.Item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
