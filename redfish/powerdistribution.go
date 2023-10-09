@@ -397,27 +397,25 @@ func (powerDistribution *PowerDistribution) Chassis() ([]*Chassis, error) {
 	return result, collectionError
 }
 
-// TODO:
-
 // Branches gets the collection that contains the branch circuits for this equipment.
-// func (powerDistribution *PowerDistribution) Branches() ([]*Circuit, error) {
-// 	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.branches)
-// }
+func (powerDistribution *PowerDistribution) Branches() ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.branches)
+}
 
 // Feeders gets the collection that contains the feeder circuits for this equipment.
-// func (powerDistribution *PowerDistribution) Feeders() ([]*Circuit, error) {
-// 	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.feeders)
-// }
+func (powerDistribution *PowerDistribution) Feeders() ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.feeders)
+}
 
 // Mains gets the collection that contains the power input circuits for this equipment.
-// func (powerDistribution *PowerDistribution) Mains() ([]*Circuit, error) {
-// 	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.mains)
-// }
+func (powerDistribution *PowerDistribution) Mains() ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.mains)
+}
 
 // Subfeeds gets the collection that contains the subfeed circuits for this equipment.
-// func (powerDistribution *PowerDistribution) Subfeeds() ([]*Circuit, error) {
-// 	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.subfeeds)
-// }
+func (powerDistribution *PowerDistribution) Subfeeds() ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.subfeeds)
+}
 
 // Facility gets a resource that represents the facility that contains this equipment.
 // func (powerDistribution *PowerDistribution) Facility() (*Facility, error) {

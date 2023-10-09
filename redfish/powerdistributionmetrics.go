@@ -11,42 +11,6 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// Energy consumption (kWh).
-type EnergykWh struct {
-	// The apparent energy, in kilovolt-ampere-hour units
-	// for an electrical energy measurement.
-	ApparentkVAh float32
-	// The link to the resource that provides the data for this sensor.
-	DataSourceURI string `json:"DataSourceUri"`
-	// The total accumulation value for this sensor.
-	LifetimeReading float32
-	// The reactive energy, in kilovolt-ampere-hours (reactive) units
-	// for an electrical energy measurement.
-	ReactivekVARh float32
-	// The sensor value.
-	Reading float32
-	// The date and time when the time-based properties were last reset.
-	SensorResetTime string
-}
-
-// Power consumption (W).
-type PowerWatts struct {
-	// The product of voltage and current for an AC circuit, in volt-ampere units.
-	ApparentVA float32
-	// The link to the resource that provides the data for this sensor.
-	DataSourceURI string `json:"DataSourceUri"`
-	// The phase angle (degrees) between the current and voltage waveforms.
-	PhaseAngleDegrees float32
-	// The quotient of real power (W) and apparent power (VA) for a circuit.
-	// PowerFactor is expressed in unit-less 1/100ths.
-	PowerFactor float32
-	// The square root of the difference term of squared apparent VA and
-	// squared power (Reading) for a circuit, in VAR units.
-	ReactiveVAR float32
-	// The sensor value.
-	Reading float32
-}
-
 // PowerDistributionMetrics shall be used to represent
 // the metrics of a power distribution component or unit for a Redfish implementation.
 type PowerDistributionMetrics struct {
@@ -65,7 +29,7 @@ type PowerDistributionMetrics struct {
 	// The total energy, in kilowatt-hours
 	// that represents the Total ElectricalContext sensor
 	// when multiple energy sensors exist.
-	EnergykWh EnergykWh
+	EnergykWh SensorEnergykWhExcerpt
 	// The humidity, in percent units
 	HumidityPercent SensorExcerpt
 	// The power load, in percent units, for this device
@@ -74,7 +38,7 @@ type PowerDistributionMetrics struct {
 	// The total power, in watt units
 	// that represents the Total ElectricalContext sensor
 	// when multiple power sensors exist.
-	PowerWatts PowerWatts
+	PowerWatts SensorPowerExcerpt
 	// The temperature, in degrees Celsius units.
 	TemperatureCelsius SensorExcerpt
 	Oem                json.RawMessage

@@ -146,6 +146,56 @@ type SensorExcerpt struct {
 	Reading float32
 }
 
+// Energy consumption (kWh).
+type SensorEnergykWhExcerpt struct {
+	// The apparent energy, in kilovolt-ampere-hour units
+	// for an electrical energy measurement.
+	ApparentkVAh float32
+	// The link to the resource that provides the data for this sensor.
+	DataSourceURI string `json:"DataSourceUri"`
+	// The total accumulation value for this sensor.
+	LifetimeReading float32
+	// The reactive energy, in kilovolt-ampere-hours (reactive) units
+	// for an electrical energy measurement.
+	ReactivekVARh float32
+	// The sensor value.
+	Reading float32
+	// The date and time when the time-based properties were last reset.
+	SensorResetTime string
+}
+
+// Power consumption (W).
+type SensorPowerExcerpt struct {
+	// The product of voltage and current for an AC circuit, in volt-ampere units.
+	ApparentVA float32
+	// The link to the resource that provides the data for this sensor.
+	DataSourceURI string `json:"DataSourceUri"`
+	// The phase angle (degrees) between the current and voltage waveforms.
+	PhaseAngleDegrees float32
+	// The quotient of real power (W) and apparent power (VA) for a circuit.
+	// PowerFactor is expressed in unit-less 1/100ths.
+	PowerFactor float32
+	// The square root of the difference term of squared apparent VA and
+	// squared power (Reading) for a circuit, in VAR units.
+	ReactiveVAR float32
+	// The sensor value.
+	Reading float32
+}
+
+// Voltage consumption (V).
+type SensorVoltageExcerpt struct {
+	// (v1.1+) The crest factor for this sensor.
+	// The ratio of the peak measurement divided by the RMS measurement
+	// and calculated over same N line cycles.
+	CrestFactor float32
+	// The link to the resource that provides the data for this sensor.
+	DataSourceURI string `json:"DataSourceUri"`
+	// The sensor value.
+	Reading float32
+	// (v1.1+) The total harmonic distortion (THD).
+	THDPercent float32
+}
+
 // Sensor represents the sensors located in the chassis and sub-components. (v1.9+)
 type Sensor struct {
 	common.Entity

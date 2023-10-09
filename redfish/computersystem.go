@@ -182,12 +182,13 @@ const (
 type PowerState string
 
 const (
-
 	// OnPowerState the system is powered on.
 	OnPowerState PowerState = "On"
 	// OffPowerState the system is powered off, although some components may
 	// continue to have AUX power such as management controller.
 	OffPowerState PowerState = "Off"
+	// PausedPowerState the system is paused.
+	PausedPowerState PowerState = "Paused"
 	// PoweringOnPowerState A temporary state between Off and On. This
 	// temporary state can be very short.
 	PoweringOnPowerState PowerState = "PoweringOn"
