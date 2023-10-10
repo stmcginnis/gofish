@@ -350,9 +350,9 @@ func (powerDistribution *PowerDistribution) Sensors() ([]*Sensor, error) {
 	return ListReferencedSensors(powerDistribution.GetClient(), powerDistribution.sensors)
 }
 
-// Deprecated: (v1.3) in favor of the Sensors link in the Chassis resource.
-func (powerDistribution *PowerDistribution) PowerSupplies() ([]*PowerSupply, error) {
-	return ListReferencedPowerSupplies(powerDistribution.GetClient(), powerDistribution.sensors)
+// Deprecated: (v1.3) in favor of the PowerSupplies link in the Chassis resource.
+func (powerDistribution *PowerDistribution) PowerSupplies() ([]*PowerSupplyUnit, error) {
+	return ListReferencedPowerSupplyUnits(powerDistribution.GetClient(), powerDistribution.powerSupplies)
 }
 
 // ManagedBy gets the collection of managers for this equipment.
