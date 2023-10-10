@@ -411,6 +411,15 @@ const (
 	PowerCycleResetType ResetType = "PowerCycle"
 	// NmiResetType shall be used to trigger a crash/core dump file
 	NmiResetType ResetType = "Nmi"
+	// Pause execution on the unit but do not remove power.
+	// This is typically a feature of virtual machine hypervisors
+	PauseResetType ResetType = "Pause"
+	// Resume execution on the paused unit.
+	// This is typically a feature of virtual machine hypervisors
+	ResumeResetType ResetType = "Resume"
+	// Write the state of the unit to disk before powering off.
+	// This allows for the state to be restored when powered back on
+	SuspendResetType ResetType = "Suspend"
 )
 
 // ComputerSystem is used to represent resources that represent a
