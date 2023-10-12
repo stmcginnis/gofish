@@ -66,3 +66,54 @@ func TestUpdateService(t *testing.T) {
 		assertMessage(t, result.UpdateServiceTarget, "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate")
 	})
 }
+
+var startUpdateBody = `{
+    "@odata.type": "#UpdateService.v1_8_0.UpdateService",
+    "@odata.id": "/redfish/v1/UpdateService",
+    "Id": "UpdateService",
+    "Name": "Update Service",
+    "Description": "Service for updating firmware and includes inventory of firmware",
+    "Status": {
+      "State": "Enabled",
+      "Health": "OK",
+      "HealthRollup": "OK"
+    },
+    "ServiceEnabled": true,
+    "MultipartHttpPushUri": "/redfish/v1/UpdateService/upload",
+    "FirmwareInventory": {
+      "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory"
+    },
+    "Actions": {
+      "Oem": {},
+      "#UpdateService.SimpleUpdate": {
+        "target": "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate",
+        "@Redfish.ActionInfo": "/redfish/v1/UpdateService/SimpleUpdateActionInfo"
+      },
+      "#UpdateService.StartUpdate": {
+        "target": "/redfish/v1/UpdateService/Actions/UpdateService.StartUpdate"
+      }
+    },
+    "Oem": {}
+    }
+  }`
+
+func TestUpdateServiceStartUpdate(t *testing.T) {
+	var result UpdateService
+	assertMessage := func(t testing.TB, got string, want string) {
+		t.Helper()
+		if got != want {
+			t.Errorf("got %s, want %s", got, want)
+		}
+	}
+
+	t.Run("Check UpdateService.StartUpdate field", func(t *testing.T) {
+		c := &common.TestClient{}
+		result.SetClient(c)
+
+		err := json.NewDecoder(strings.NewReader(startUpdateBody)).Decode(&result)
+		if err != nil {
+			t.Errorf("Error decoding JSON: %s", err)
+		}
+		assertMessage(t, result.StartUpdateTarget, "/redfish/v1/UpdateService/Actions/UpdateService.StartUpdate")
+	})
+}
