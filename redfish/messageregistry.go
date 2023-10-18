@@ -96,6 +96,7 @@ func ListReferencedMessageRegistries(c common.Client, link string) ([]*MessageRe
 			if err != nil {
 				return nil, err
 			}
+			// TODO: exclude attribute and privilege registries
 			result = append(result, mr)
 		}
 	}
