@@ -139,7 +139,7 @@ type PowerDistribution struct {
 	powerSupplies string
 	// Deprecated: (v1.3) The redundancy information for the devices in a redundancy group.
 	// This property has been deprecated in favor of the PowerSupplyRedundancy property in the Chassis resource.
-	PowerSupplyRedundancy RedundantGroup
+	PowerSupplyRedundancy []RedundantGroup
 	// The production or manufacturing date of this equipment.
 	ProductionDate string
 	// Deprecated: (v1.3) A link to the collection of sensors located in the equipment and sub-components.
