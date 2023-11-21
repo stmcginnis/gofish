@@ -128,6 +128,8 @@ type Task struct {
 	// Status section of the Redfish specification and shall not be set until
 	// the task has completed.
 	TaskStatus common.Health
+	// Oem property contains OEM specific task information
+	Oem json.RawMessage `json:"Oem,omitempty"`
 }
 
 // UnmarshalJSON unmarshals a Task object from the raw JSON.
