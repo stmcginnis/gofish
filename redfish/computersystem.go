@@ -470,6 +470,8 @@ type ComputerSystem struct {
 	logServices string
 	// Manufacturer shall contain a value that represents the manufacturer of the system.
 	Manufacturer string
+	// Main Board CPLD version
+	MBCpldVersion string
 	// Memory shall be a link to a collection of type MemoryCollection.
 	memory string
 	// memoryDomains shall be a link to a collection of type MemoryDomainCollection.
