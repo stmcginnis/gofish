@@ -78,6 +78,8 @@ type PCIeDevice struct {
 	SerialNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// PCIe device type (NIC, HBA, etc.)
+	Type string
 	// Chassis shall reference a resource of type Chassis that represents the
 	// physical container associated with this resource.
 	chassis []string
