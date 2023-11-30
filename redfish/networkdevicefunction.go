@@ -284,10 +284,12 @@ type NetworkDeviceFunction struct {
 	// PCIeFunction shall be a references of type PCIeFunction that represents
 	// the PCI-e Function associated with this Network Device Function.
 	pcieFunction string
-	// PhysicalPortAssignment shall be the physical port that this network
+	// Deprecated (v1.5): PhysicalPortAssignment shall be the physical port that this network
 	// device function is currently assigned to. This value shall be one of the
 	// AssignablePhysicalPorts array members.
 	physicalPortAssignment string
+	// (v1.5+) The physical port to which this network device function is currently assigned.
+	physicalNetworkPortAssignment string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -296,10 +298,11 @@ type NetworkDeviceFunction struct {
 func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) error {
 	type temp NetworkDeviceFunction
 	type links struct {
-		Endpoints              common.Links
-		EndpointsCount         int `json:"Endpoints@odata.count"`
-		PCIeFunction           common.Link
-		PhysicalPortAssignment common.Link
+		Endpoints                     common.Links
+		EndpointsCount                int `json:"Endpoints@odata.count"`
+		PCIeFunction                  common.Link
+		PhysicalPortAssignment        common.Link
+		PhysicalNetworkPortAssignment common.Link
 	}
 	var t struct {
 		temp
@@ -319,6 +322,7 @@ func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) erro
 	networkdevicefunction.EndpointsCount = t.Links.EndpointsCount
 	networkdevicefunction.pcieFunction = t.Links.PCIeFunction.String()
 	networkdevicefunction.physicalPortAssignment = t.Links.PhysicalPortAssignment.String()
+	networkdevicefunction.physicalNetworkPortAssignment = t.Links.PhysicalNetworkPortAssignment.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	networkdevicefunction.rawData = b
@@ -489,4 +493,13 @@ type ISCSIBoot struct {
 	// indicating whether the iSCSI boot target name, LUN, IP address, and
 	// netmask should be obtained from DHCP.
 	TargetInfoViaDHCP bool
+}
+
+// PhysicalNetworkPortAssignment gets the physical port
+// to which this network device function is currently assigned.
+func (networkdevicefunction *NetworkDeviceFunction) PhysicalNetworkPortAssignment() (port *Port, err error) {
+	if networkdevicefunction.physicalNetworkPortAssignment == "" {
+		return
+	}
+	return GetPort(networkdevicefunction.GetClient(), networkdevicefunction.physicalNetworkPortAssignment)
 }
