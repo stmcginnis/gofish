@@ -41,16 +41,43 @@ const (
 	// FibreChannelLinkNetworkTechnology means the port is capable of connecting to
 	// a Fibre Channel network.
 	FibreChannelLinkNetworkTechnology LinkNetworkTechnology = "FibreChannel"
+
+	// The port is capable of connecting to a Gen-Z fabric.
+	GenZLinkNetworkTechnology LinkNetworkTechnology = "GenZ"
+	// (v1.8+) The port is capable of connecting to PCIe and CXL fabrics.
+	PCIeLinkNetworkTechnology LinkNetworkTechnology = "PCIe"
 )
 
 // PortConnectionType is
 type PortConnectionType string
 
 const (
+	// (v1.5+) This port connection type is a diagnostic port.
+	DPortPortConnectionType PortConnectionType = "DPort"
+	// (v1.5+) This port connection type is an extender fabric port.
+	EPortPortConnectionType PortConnectionType = "EPort"
+	// (v1.5+) This port connection type is an external fabric port.
+	EXPortPortConnectionType PortConnectionType = "EXPort"
+	// ExtenderFabricPortConnectionType means this port connection type is an
+	// extender fabric port.
+	ExtenderFabricPortConnectionType PortConnectionType = "ExtenderFabric"
+	// (v1.5+) This port connects in a fabric loop configuration.
+	FLPortPortConnectionType PortConnectionType = "FLPort"
+	// (v1.5+) This port connection type is a fabric port.
+	FPortPortConnectionType PortConnectionType = "FPort"
+	// (v1.5+) This port connection type is a generic fabric port.
+	GPortPortConnectionType PortConnectionType = "GPort"
+	// GenericPortConnectionType means this port connection type is a generic
+	// fabric port.
+	GenericPortConnectionType PortConnectionType = "Generic"
+	// (v1.5+) This port connects in a node loop configuration.
+	NLPortPortConnectionType PortConnectionType = "NLPort"
 	// NotConnectedPortConnectionType means this port is not connected.
 	NotConnectedPortConnectionType PortConnectionType = "NotConnected"
 	// NPortPortConnectionType means this port connects via an N-Port to a switch.
 	NPortPortConnectionType PortConnectionType = "NPort"
+	// (v1.5+) This port connection type is a proxy N port for N-Port virtualization.
+	NPPortPortConnectionType PortConnectionType = "NPPort"
 	// PointToPointPortConnectionType means this port connects in a Point-to-point
 	// configuration.
 	PointToPointPortConnectionType PortConnectionType = "PointToPoint"
@@ -60,12 +87,10 @@ const (
 	// PublicLoopPortConnectionType means this port connects in a public
 	// configuration.
 	PublicLoopPortConnectionType PortConnectionType = "PublicLoop"
-	// GenericPortConnectionType means this port connection type is a generic
-	// fabric port.
-	GenericPortConnectionType PortConnectionType = "Generic"
-	// ExtenderFabricPortConnectionType means this port connection type is an
-	// extender fabric port.
-	ExtenderFabricPortConnectionType PortConnectionType = "ExtenderFabric"
+	// (v1.5+) This port connection type is an trunking extender fabric port.
+	TEPortPortConnectionType PortConnectionType = "TEPort"
+	// (v1.5+) This port connection type is unassigned.
+	UPortPortConnectionType PortConnectionType = "UPort"
 )
 
 // SupportedEthernetCapabilities is
@@ -106,16 +131,16 @@ type NetDevFuncMinBWAlloc struct {
 }
 
 // PortLinkStatus is the port link status.
-type PortLinkStatus string
+type NetworkPortLinkStatus string
 
 const (
 	// UpPortLinkStatus The port is enabled and link is good (up).
-	UpPortLinkStatus PortLinkStatus = "Up"
+	UpPortLinkStatus NetworkPortLinkStatus = "Up"
 	// DownPortLinkStatus  The port is enabled but link is down.
-	DownPortLinkStatus PortLinkStatus = "Down"
+	DownPortLinkStatus NetworkPortLinkStatus = "Down"
 )
 
-// NetworkPort represents a discrete physical port capable of connecting to a
+// Deprecated (v1.4+): NetworkPort represents a discrete physical port capable of connecting to a
 // network.
 type NetworkPort struct {
 	common.Entity
@@ -156,7 +181,7 @@ type NetworkPort struct {
 	FlowControlStatus FlowControl
 	// LinkStatus shall be the link status between this port and its link
 	// partner.
-	LinkStatus PortLinkStatus
+	LinkStatus NetworkPortLinkStatus
 	// MaxFrameSize shall be the maximum frame size supported by the port.
 	MaxFrameSize int
 	// NetDevFuncMaxBWAlloc shall be an array of maximum bandwidth allocation
