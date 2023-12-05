@@ -106,7 +106,7 @@ type VirtualMedia struct {
 	// types for this connection.
 	MediaTypes []VirtualMediaType
 	// Indicates which MediaTypes is used
-	MediaType string
+	MediaType VirtualMediaType
 	// Password shall represent the password to access the
 	// Image parameter-specified URI. The value shall be null in responses.
 	Password string
@@ -185,6 +185,7 @@ func (virtualmedia *VirtualMedia) Update() error {
 	readWriteFields := []string{
 		"Image",
 		"Inserted",
+		"MediaType",
 		"Password",
 		"TransferMethod",
 		"TransferProtocolType",
@@ -229,12 +230,13 @@ func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProte
 // VirtualMediaConfig is an struct used to pass config data to build the HTTP body when inserting media
 type VirtualMediaConfig struct {
 	Image                string
-	Inserted             bool   `json:",omitempty"`
-	Password             string `json:",omitempty"`
-	TransferMethod       string `json:",omitempty"`
-	TransferProtocolType string `json:",omitempty"`
-	UserName             string `json:",omitempty"`
-	WriteProtected       bool   `json:",omitempty"`
+	Inserted             bool                 `json:",omitempty"`
+	MediaType            VirtualMediaType     `json:",omitempty"`
+	Password             string               `json:",omitempty"`
+	TransferMethod       TransferMethod       `json:",omitempty"`
+	TransferProtocolType TransferProtocolType `json:",omitempty"`
+	UserName             string               `json:",omitempty"`
+	WriteProtected       bool                 `json:",omitempty"`
 }
 
 // InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct

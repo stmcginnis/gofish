@@ -114,7 +114,6 @@ func TestVirtualMediaUpdate(t *testing.T) {
 
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
-
 	result.UserName = "Fred"
 	result.WriteProtected = false
 	err = result.Update()
@@ -206,6 +205,7 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 	virtualMediaConfig := VirtualMediaConfig{
 		Image:          "https://example.com/image",
 		Inserted:       true,
+		MediaType:      "CD",
 		Password:       "test1234",
 		UserName:       "root",
 		WriteProtected: true,
@@ -222,6 +222,9 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "Inserted:true") {
+		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "MediaType:CD") {
 		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "Password:test1234") {
