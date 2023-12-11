@@ -60,7 +60,7 @@ var computerSystemBody = `{
 				"UefiHttp"
 			],
 			"UefiTargetBootSourceOverride": "uefi device path",
-			"HttpBootURI": "http://localhost/boot.efi"
+			"HttpBootUri": "http://localhost/boot.efi"
 		},
 		"BiosVersion": "P79 v1.00 (09/20/2013)",
 		"ProcessorSummary": {
