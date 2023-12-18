@@ -55,7 +55,7 @@ type PowerSupplyInputRange struct {
 // The input ranges that the power supply can use.
 type OutputRail struct {
 	// The nominal voltage of this output power rail.
-	NominalVoltage string // fixme
+	NominalVoltage float32
 	// The area or device to which this power rail applies.
 	PhysicalContext common.PhysicalContext
 }
