@@ -121,7 +121,7 @@ type PowerDistribution struct {
 	// A link to the power input circuits for this equipment.
 	mains string
 	// The redundancy information for the mains (input) circuits for this equipment.
-	MainsRedundancy []RedundantGroup // ??
+	MainsRedundancy RedundantGroup
 	// The manufacturer of this equipment.
 	Manufacturer string
 	// A link to the summary metrics for this equipment.
