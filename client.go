@@ -395,6 +395,10 @@ func (c *APIClient) runRequestWithMultipartPayloadWithHeaders(method, url string
 			if partWriter, err = payloadWriter.CreateFormFile(key, filepath.Base(file.Name())); err != nil {
 				return nil, err
 			}
+		} else if key == "UpdateFile" {
+			if partWriter, err = payloadWriter.CreateFormFile(key, "update"); err != nil {
+				return nil, err
+			}
 		} else {
 			// Add other fields
 			if partWriter, err = createFormField(key, payloadWriter); err != nil {
