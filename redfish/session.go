@@ -103,13 +103,11 @@ func CreateSession(c common.Client, uri, username, password string) (auth *AuthT
 
 // DeleteSession deletes a session using the location as argument
 func DeleteSession(c common.Client, sessionURL string) (err error) {
-	URL := "/redfish/v1/SessionService/Sessions/" + sessionURL
-	resp, err := c.Delete(URL)
+	resp, err := c.Delete("/redfish/v1/SessionService/Sessions/" + sessionURL)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	fmt.Println("session deleted of url: ",URL)
 	return nil
 }
 
