@@ -574,7 +574,10 @@ func (c *APIClient) dumpResponse(resp *http.Response) error {
 // a new connection.
 func (c *APIClient) Logout() {
 	if c.Service != nil && c.auth != nil {
-		_ = c.Service.DeleteSession(c.auth.Session)
+		err := c.Service.DeleteSession(c.auth.Session)
+		if err!=nil{
+			fmt.Println("error deleting session: ",err)
+		}
 	}
 }
 
