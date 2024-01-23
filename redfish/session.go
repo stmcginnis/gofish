@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"net/url"
-	"fmt"
 	"github.com/stmcginnis/gofish/common"
 )
 
