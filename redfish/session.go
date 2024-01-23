@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"net/url"
-	"fmt"
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -106,7 +105,6 @@ func DeleteSession(c common.Client, sessionURL string) (err error) {
 	URL := "/redfish/v1/SessionService/Sessions/" + sessionURL
 	resp, err := c.Delete(URL)
 	if err != nil {
-		fmt.Println("DeleteSession : Error in deleting session", err)
 		return err
 	}
 	defer resp.Body.Close()
