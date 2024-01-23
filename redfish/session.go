@@ -6,7 +6,7 @@ package redfish
 
 import (
 	"net/url"
-
+	"fmt"
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -103,11 +103,14 @@ func CreateSession(c common.Client, uri, username, password string) (auth *AuthT
 
 // DeleteSession deletes a session using the location as argument
 func DeleteSession(c common.Client, sessionURL string) (err error) {
-	resp, err := c.Delete(sessionURL)
+	URL := "/redfish/v1/SessionService/Sessions/" + sessionURL
+	resp, err := c.Delete(URL)
 	if err != nil {
+		fmt.Println("DeleteSession : Error in deleting session", err)
 		return err
 	}
 	defer resp.Body.Close()
+	fmt.Println("session deleted of url: ",URL)
 	return nil
 }
 
