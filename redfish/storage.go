@@ -63,6 +63,8 @@ type Storage struct {
 	EnclosuresCount int
 	// setEncryptionKeyTarget is the URL to send SetEncryptionKey requests.
 	setEncryptionKeyTarget string
+	// Oem are all OEM data under top level storage section
+	Oem json.RawMessage `json:"Oem"`
 }
 
 // UnmarshalJSON unmarshals a Storage object from the raw JSON.
