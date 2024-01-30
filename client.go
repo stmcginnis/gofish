@@ -573,7 +573,7 @@ func (c *APIClient) dumpResponse(resp *http.Response) error {
 // Logout will delete any active session. Useful to defer logout when creating
 // a new connection.
 func (c *APIClient) Logout() {
-	if c.Service != nil && c.auth != nil {
+	if c != nil && c.Service != nil && c.auth != nil {
 		_ = c.Service.DeleteSession(c.auth.Session)
 	}
 }
