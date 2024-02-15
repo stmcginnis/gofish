@@ -52,11 +52,7 @@ var networkAdapterBody = strings.NewReader(
 				"NetworkDeviceFunctions@odata.count": 1,
 				"NetworkPorts": [{
 						"@odata.id": "/redfish/v1/NetworkAdapters/Port-1"
-					},
-					{
-						"@odata.id": "/redfish/v1/NetworkAdapters/Port-2"
-					}
-				],
+					}],
 				"NetworkPorts@odata.count": 2,
 				"PCIeDevices": [{
 					"@odata.id": "/redfish/v1/NetworkAdapters/PCIeDevice-1"
@@ -108,21 +104,31 @@ func TestNetworkAdapter(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if !result.Controllers[0].ControllerCapabilities.DataCenterBridging.Capable {
+	if !result.controllers[0].ControllerCapabilities.DataCenterBridging.Capable {
 		t.Error("DCB should be enabled")
 	}
 
-	if result.Controllers[0].ControllerCapabilities.NPIV.MaxDeviceLogins != 1024 {
+	if result.controllers[0].ControllerCapabilities.NPIV.MaxDeviceLogins != 1024 {
 		t.Errorf("Received incorrect Controller NPIC max device logins: %d",
-			result.Controllers[0].ControllerCapabilities.NPIV.MaxDeviceLogins)
+			result.controllers[0].ControllerCapabilities.NPIV.MaxDeviceLogins)
 	}
 
-	if result.Controllers[0].PCIeInterface.MaxPCIeType != Gen4PCIeTypes {
-		t.Errorf("Received incorrect max PCIe type: %s", result.Controllers[0].PCIeInterface.MaxPCIeType)
+	if result.controllers[0].PCIeInterface.MaxPCIeType != Gen4PCIeTypes {
+		t.Errorf("Received incorrect max PCIe type: %s", result.controllers[0].PCIeInterface.MaxPCIeType)
 	}
 
-	if result.Controllers[0].PCIeInterface.PCIeType != Gen4PCIeTypes {
-		t.Errorf("Received incorrect PCIe type: %s", result.Controllers[0].PCIeInterface.PCIeType)
+	if result.controllers[0].PCIeInterface.PCIeType != Gen4PCIeTypes {
+		t.Errorf("Received incorrect PCIe type: %s", result.controllers[0].PCIeInterface.PCIeType)
+	}
+
+	if PCIeTypes(result.controllers[0].pcieDevices[0]) != "/redfish/v1/NetworkAdapters/PCIeDevice-1" {
+		t.Errorf("Received incorrect PCIeDevice  Link: %s", "/redfish/v1/NetworkAdapters/PCIeDevice-1")
+	}
+	if PCIeTypes(result.controllers[0].networkPorts[0]) != "/redfish/v1/NetworkAdapters/Port-1" {
+		t.Errorf("Received incorrect NetworkPorts  Link: %s", "/redfish/v1/NetworkAdapters/Port-1")
+	}
+	if PCIeTypes(result.controllers[0].networkDeviceFunctions[0]) != "/redfish/v1/NetworkAdapters/DeviceFunction-1" {
+		t.Errorf("Received incorrect NetworkDeviceFunctions  Link: %s", "/redfish/v1/NetworkAdapters/DeviceFunction-1")
 	}
 
 	if result.resetSettingsToDefaultTarget != "/redfish/v1/NetworkAdapter/Actions/NetworkAdapter.ResetSettingsToDefault" {
