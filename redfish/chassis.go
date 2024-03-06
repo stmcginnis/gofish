@@ -183,6 +183,7 @@ type Chassis struct {
 	HeightMm float64
 	// IndicatorLED shall contain the indicator light state
 	// for the indicator light associated with this system.
+	// Deprecated v1.14+ in favor of LocationIndicatorActive property
 	IndicatorLED common.IndicatorLED
 	// Location shall contain location information of the
 	// associated chassis.
