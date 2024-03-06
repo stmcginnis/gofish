@@ -183,10 +183,13 @@ type Chassis struct {
 	HeightMm float64
 	// IndicatorLED shall contain the indicator light state
 	// for the indicator light associated with this system.
+	// Deprecated v1.14+ in favor of LocationIndicatorActive property
 	IndicatorLED common.IndicatorLED
 	// Location shall contain location information of the
 	// associated chassis.
 	Location common.Location
+	// An indicator allowing an operator to physically locate this resource. (v1.14+)
+	LocationIndicatorActive bool
 	// Manufacturer shall contain the name of the
 	// organization responsible for producing the chassis. This organization
 	// might be the entity from whom the chassis is purchased, but this is
@@ -321,6 +324,7 @@ func (chassis *Chassis) Update() error {
 	readWriteFields := []string{
 		"AssetTag",
 		"IndicatorLED",
+		"LocationIndicatorActive",
 	}
 
 	originalElement := reflect.ValueOf(original).Elem()
