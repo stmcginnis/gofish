@@ -459,7 +459,7 @@ func sendCreateEventDestinationRequest(
 
 	resp, err := c.Post(uri, s)
 	if err != nil {
-		return
+		return err.Error(), err
 	}
 	defer resp.Body.Close()
 
