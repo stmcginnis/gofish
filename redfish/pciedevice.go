@@ -93,6 +93,9 @@ type PCIeDevice struct {
 	PCIeFunctionsCount int
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+	// Oem contains all the vendor specific actions. It is vendor responsibility to parse
+	// this field accordingly
+	Oem json.RawMessage
 }
 
 // UnmarshalJSON unmarshals a PCIeDevice object from the raw JSON.
