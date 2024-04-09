@@ -86,7 +86,7 @@ func GetSimpleStorage(c common.Client, uri string) (*SimpleStorage, error) {
 
 // ListReferencedSimpleStorages gets the collection of SimpleStorage from
 // a provided reference.
-func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorage, error) { //nolint:dupl
+func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorage, error) {
 	var result []*SimpleStorage
 	if link == "" {
 		return result, nil

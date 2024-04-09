@@ -97,7 +97,7 @@ func GetAddressPool(c common.Client, uri string) (*AddressPool, error) {
 
 // ListReferencedAddressPools gets the collection of AddressPool from
 // a provided reference.
-func ListReferencedAddressPools(c common.Client, link string) ([]*AddressPool, error) { //nolint:dupl
+func ListReferencedAddressPools(c common.Client, link string) ([]*AddressPool, error) {
 	var result []*AddressPool
 	if link == "" {
 		return result, nil

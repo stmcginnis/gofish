@@ -521,7 +521,7 @@ func (circuit *Circuit) ResetMetrics() error {
 
 // ListReferencedCircuits gets the collection of Circuits from
 // a provided reference.
-func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) { //nolint:dupl
+func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) {
 	var result []*Circuit
 	if link == "" {
 		return result, nil

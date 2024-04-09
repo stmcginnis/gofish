@@ -223,7 +223,7 @@ func GetEndpoint(c common.Client, uri string) (*Endpoint, error) {
 
 // ListReferencedEndpoints gets the collection of Endpoint from
 // a provided reference.
-func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) { //nolint:dupl
+func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) {
 	var result []*Endpoint
 	if link == "" {
 		return result, nil

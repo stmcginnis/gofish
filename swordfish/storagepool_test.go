@@ -119,7 +119,7 @@ func TestStoragePool(t *testing.T) {
 }
 
 // TestStoragePoolUpdate tests the Update call.
-func TestStoragePoolUpdate(t *testing.T) { //nolint:dupl
+func TestStoragePoolUpdate(t *testing.T) {
 	var result StoragePool
 	err := json.NewDecoder(strings.NewReader(storagePoolBody)).Decode(&result)
 

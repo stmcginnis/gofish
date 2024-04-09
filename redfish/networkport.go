@@ -280,7 +280,7 @@ func GetNetworkPort(c common.Client, uri string) (*NetworkPort, error) {
 
 // ListReferencedNetworkPorts gets the collection of NetworkPort from
 // a provided reference.
-func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, error) { //nolint:dupl
+func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, error) {
 	var result []*NetworkPort
 	if link == "" {
 		return result, nil

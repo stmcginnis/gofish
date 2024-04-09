@@ -340,7 +340,7 @@ func GetChassis(c common.Client, uri string) (*Chassis, error) {
 }
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
-func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) { //nolint:dupl
+func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 	var result []*Chassis
 	if link == "" {
 		return result, nil

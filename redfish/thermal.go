@@ -339,7 +339,7 @@ func GetThermal(c common.Client, uri string) (*Thermal, error) {
 }
 
 // ListReferencedThermals gets the collection of Thermal from a provided reference.
-func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) { //nolint:dupl
+func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) {
 	var result []*Thermal
 	if link == "" {
 		return result, nil

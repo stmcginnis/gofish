@@ -64,7 +64,7 @@ func TestSecureBoot(t *testing.T) {
 }
 
 // TestSecureBootUpdate tests the Update call.
-func TestSecureBootUpdate(t *testing.T) { //nolint:dupl
+func TestSecureBootUpdate(t *testing.T) {
 	var result SecureBoot
 	err := json.NewDecoder(strings.NewReader(secureBootBody)).Decode(&result)
 

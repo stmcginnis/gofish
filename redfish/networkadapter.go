@@ -243,7 +243,7 @@ func GetNetworkAdapter(c common.Client, uri string) (*NetworkAdapter, error) {
 }
 
 // ListReferencedNetworkAdapter gets the collection of Chassis from a provided reference.
-func ListReferencedNetworkAdapter(c common.Client, link string) ([]*NetworkAdapter, error) { //nolint:dupl
+func ListReferencedNetworkAdapter(c common.Client, link string) ([]*NetworkAdapter, error) {
 	var result []*NetworkAdapter
 	if link == "" {
 		return result, nil

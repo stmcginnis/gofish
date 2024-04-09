@@ -424,7 +424,7 @@ func GetLogEntry(c common.Client, uri string) (*LogEntry, error) {
 
 // ListReferencedLogEntrys gets the collection of LogEntry from
 // a provided reference.
-func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) { //nolint:dupl
+func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) {
 	var result []*LogEntry
 	if link == "" {
 		return result, nil

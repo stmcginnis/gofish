@@ -265,7 +265,7 @@ func GetFileSystem(c common.Client, uri string) (*FileSystem, error) {
 
 // ListReferencedFileSystems gets the collection of FileSystem from
 // a provided reference.
-func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, error) { //nolint:dupl
+func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, error) {
 	var result []*FileSystem
 	if link == "" {
 		return result, nil

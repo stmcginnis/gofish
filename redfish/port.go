@@ -723,7 +723,7 @@ func GetPort(c common.Client, uri string) (*Port, error) {
 
 // ListReferencedPorts gets the collection of Port from
 // a provided reference.
-func ListReferencedPorts(c common.Client, link string) ([]*Port, error) { //nolint:dupl
+func ListReferencedPorts(c common.Client, link string) ([]*Port, error) {
 	var result []*Port
 	if link == "" {
 		return result, nil

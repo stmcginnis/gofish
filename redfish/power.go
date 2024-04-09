@@ -153,7 +153,7 @@ func GetPower(c common.Client, uri string) (*Power, error) {
 
 // ListReferencedPowers gets the collection of Power from
 // a provided reference.
-func ListReferencedPowers(c common.Client, link string) ([]*Power, error) { //nolint:dupl
+func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
 	var result []*Power
 	if link == "" {
 		return result, nil
@@ -235,7 +235,7 @@ type PowerControl struct {
 }
 
 // UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
-func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error { //nolint:dupl
+func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
 	type temp PowerControl
 	type t1 struct {
 		temp
@@ -501,7 +501,7 @@ type Voltage struct {
 }
 
 // UnmarshalJSON unmarshals a Voltage object from the raw JSON.
-func (voltage *Voltage) UnmarshalJSON(b []byte) error { //nolint:dupl
+func (voltage *Voltage) UnmarshalJSON(b []byte) error {
 	type temp Voltage
 	type t1 struct {
 		temp
@@ -533,7 +533,7 @@ func (voltage *Voltage) UnmarshalJSON(b []byte) error { //nolint:dupl
 	return nil
 }
 
-func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) { //nolint:dupl
+func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) {
 	var result []*PowerSupply
 	if link == "" {
 		return result, nil

@@ -678,7 +678,7 @@ func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
 // a provided reference.
-func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) { //nolint:dupl
+func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) {
 	var result []*ComputerSystem
 	if link == "" {
 		return result, nil

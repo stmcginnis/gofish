@@ -59,7 +59,7 @@ func TestRedundancy(t *testing.T) {
 }
 
 // TestRedundancyUpdate tests the Update call.
-func TestRedundancyUpdate(t *testing.T) { //nolint:dupl
+func TestRedundancyUpdate(t *testing.T) {
 	var result Redundancy
 	err := json.NewDecoder(strings.NewReader(redundancyBody)).Decode(&result)
 

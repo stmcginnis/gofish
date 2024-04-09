@@ -206,7 +206,7 @@ func GetCertificate(c common.Client, uri string) (*Certificate, error) {
 }
 
 // ListReferencedCertificates gets the Certificates collection.
-func ListReferencedCertificates(c common.Client, link string) ([]*Certificate, error) { //nolint:dupl
+func ListReferencedCertificates(c common.Client, link string) ([]*Certificate, error) {
 	var result []*Certificate
 	if link == "" {
 		return result, nil

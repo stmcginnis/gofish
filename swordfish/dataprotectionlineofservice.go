@@ -65,7 +65,7 @@ func GetDataProtectionLineOfService(c common.Client, uri string) (*DataProtectio
 
 // ListReferencedDataProtectionLineOfServices gets the collection of DataProtectionLineOfService from
 // a provided reference.
-func ListReferencedDataProtectionLineOfServices(c common.Client, link string) ([]*DataProtectionLineOfService, error) { //nolint:dupl
+func ListReferencedDataProtectionLineOfServices(c common.Client, link string) ([]*DataProtectionLineOfService, error) {
 	var result []*DataProtectionLineOfService
 	if link == "" {
 		return result, nil

@@ -363,7 +363,7 @@ func GetSensor(c common.Client, uri string) (*Sensor, error) {
 }
 
 // ListReferencedSensor gets the Sensor collection.
-func ListReferencedSensors(c common.Client, link string) ([]*Sensor, error) { //nolint:dupl
+func ListReferencedSensors(c common.Client, link string) ([]*Sensor, error) {
 	var result []*Sensor
 	if link == "" {
 		return result, nil

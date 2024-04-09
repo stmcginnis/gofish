@@ -76,7 +76,7 @@ func GetDataStorageLineOfService(c common.Client, uri string) (*DataStorageLineO
 
 // ListReferencedDataStorageLineOfServices gets the collection of DataStorageLineOfService from
 // a provided reference.
-func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*DataStorageLineOfService, error) { //nolint:dupl
+func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*DataStorageLineOfService, error) {
 	var result []*DataStorageLineOfService
 	if link == "" {
 		return result, nil

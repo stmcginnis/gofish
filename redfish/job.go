@@ -172,7 +172,7 @@ func GetJob(c common.Client, uri string) (*Job, error) {
 
 // ListReferencedJobs gets the collection of Job from
 // a provided reference.
-func ListReferencedJobs(c common.Client, link string) ([]*Job, error) { //nolint:dupl
+func ListReferencedJobs(c common.Client, link string) ([]*Job, error) {
 	var result []*Job
 	if link == "" {
 		return result, nil

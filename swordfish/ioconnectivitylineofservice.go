@@ -41,7 +41,7 @@ func GetIOConnectivityLineOfService(c common.Client, uri string) (*IOConnectivit
 
 // ListReferencedIOConnectivityLineOfServices gets the collection of IOConnectivityLineOfService from
 // a provided reference.
-func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([]*IOConnectivityLineOfService, error) { //nolint:dupl
+func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([]*IOConnectivityLineOfService, error) {
 	var result []*IOConnectivityLineOfService
 	if link == "" {
 		return result, nil

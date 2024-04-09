@@ -183,7 +183,7 @@ func GetDataProtectionLoSCapabilities(c common.Client, uri string) (*DataProtect
 
 // ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from
 // a provided reference.
-func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) ([]*DataProtectionLoSCapabilities, error) { //nolint:dupl
+func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) ([]*DataProtectionLoSCapabilities, error) {
 	var result []*DataProtectionLoSCapabilities
 	if link == "" {
 		return result, nil

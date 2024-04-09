@@ -221,7 +221,7 @@ func GetSerialInterface(c common.Client, uri string) (*SerialInterface, error) {
 
 // ListReferencedSerialInterfaces gets the collection of SerialInterface from
 // a provided reference.
-func ListReferencedSerialInterfaces(c common.Client, link string) ([]*SerialInterface, error) { //nolint:dupl
+func ListReferencedSerialInterfaces(c common.Client, link string) ([]*SerialInterface, error) {
 	var result []*SerialInterface
 	if link == "" {
 		return result, nil

@@ -51,7 +51,7 @@ func GetDataSecurityLineOfService(c common.Client, uri string) (*DataSecurityLin
 
 // ListReferencedDataSecurityLineOfServices gets the collection of DataSecurityLineOfService from
 // a provided reference.
-func ListReferencedDataSecurityLineOfServices(c common.Client, link string) ([]*DataSecurityLineOfService, error) { //nolint:dupl
+func ListReferencedDataSecurityLineOfServices(c common.Client, link string) ([]*DataSecurityLineOfService, error) {
 	var result []*DataSecurityLineOfService
 	if link == "" {
 		return result, nil

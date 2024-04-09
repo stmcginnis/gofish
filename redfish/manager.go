@@ -392,7 +392,7 @@ func GetManager(c common.Client, uri string) (*Manager, error) {
 }
 
 // ListReferencedManagers gets the collection of Managers
-func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) { //nolint:dupl
+func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
 	var result []*Manager
 	if link == "" {
 		return result, nil

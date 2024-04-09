@@ -253,7 +253,7 @@ func (powerSupplyUnit *PowerSupplyUnit) Reset(resetType ResetType) error {
 
 // ListReferencedPowerSupplyUnits gets the collection of PowerSupplies from
 // a provided reference.
-func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSupplyUnit, error) { //nolint:dupl
+func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSupplyUnit, error) {
 	var result []*PowerSupplyUnit
 	if link == "" {
 		return result, nil

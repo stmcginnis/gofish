@@ -46,7 +46,7 @@ func GetMessageRegistryFile(
 }
 
 // ListReferencedMessageRegistryFiles gets the collection of MessageRegistryFile.
-func ListReferencedMessageRegistryFiles(c common.Client, link string) ([]*MessageRegistryFile, error) { //nolint:dupl
+func ListReferencedMessageRegistryFiles(c common.Client, link string) ([]*MessageRegistryFile, error) {
 	var result []*MessageRegistryFile
 	if link == "" {
 		return result, nil
