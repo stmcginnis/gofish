@@ -134,6 +134,11 @@ type AssemblyData struct {
 	// EngineeringChangeLevel shall be the Engineering Change Level (ECL) or
 	// revision of the assembly.
 	EngineeringChangeLevel string
+	// ISOCountryCodeOfOrigin shall contain the ISO 3166-1-defined alpha-2 or alpha-3 country code that reflects the
+	// manufacturing country of origin.
+	ISOCountryCodeOfOrigin string
+	// Location shall contain the location information of the associated assembly.
+	Location common.Location
 	// MemberID shall uniquely identify the member within the collection.
 	MemberID string
 	// Model shall be the name by which the manufacturer generally refers to the
@@ -154,6 +159,11 @@ type AssemblyData struct {
 	// assembly. The time of day portion of the property shall be '00:00:00Z' if
 	// the time of day is unknown.
 	ProductionDate string
+	// Replaceable shall indicate whether the component associated this assembly can be independently replaced as
+	// allowed by the vendor's replacement policy. A value of 'false' indicates the component needs to be replaced by
+	// policy as part of another component. If the 'LocationType' property of this assembly contains 'Embedded', this
+	// property shall contain 'false'.
+	Replaceable bool
 	// SKU shall be the name of the assembly.
 	SKU string
 	// SerialNumber is used to identify the assembly.
