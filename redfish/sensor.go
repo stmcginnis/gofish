@@ -11,6 +11,18 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+type ImplementationType string
+
+const (
+	// PhysicalSensorImplementationType The reading is acquired from a physical sensor.
+	PhysicalSensorImplementationType ImplementationType = "PhysicalSensor"
+	// SynthesizedImplementationType The reading is obtained by applying a calculation on one or more properties or
+	// multiple sensors. The calculation is not provided.
+	SynthesizedImplementationType ImplementationType = "Synthesized"
+	// ReportedImplementationType The reading is obtained from software or a device.
+	ReportedImplementationType ImplementationType = "Reported"
+)
+
 // The implementation of the sensor.
 type SensorImplementation string
 
@@ -139,6 +151,21 @@ type Thresholds struct {
 	UpperFatal Threshold
 }
 
+// SensorCurrentExcerpt shall represent a sensor for a Redfish implementation.
+type SensorCurrentExcerpt struct {
+	// CrestFactor shall contain the ratio of the peak measurement divided by the RMS measurement and calculated over
+	// same N line cycles. A sine wave would have a value of 1.414.
+	CrestFactor float64
+	// DataSourceUri shall contain a URI to the resource that provides the source of the excerpt contained within this
+	// copy.
+	DataSourceURI string `json:"DataSourceUri"`
+	// Reading shall contain the sensor value.
+	Reading float64
+	// THDPercent shall contain the total harmonic distortion of the Reading property in percent units, typically '0'
+	// to '100'.
+	THDPercent float64
+}
+
 type SensorExcerpt struct {
 	// The link to the resource that provides the data for this sensor.
 	DataSourceURI string `json:"DataSourceUri"`
@@ -180,6 +207,17 @@ type SensorPowerExcerpt struct {
 	ReactiveVAR float32
 	// The sensor value.
 	Reading float32
+}
+
+// SensorPumpExcerpt shall represent a sensor for a Redfish implementation.
+type SensorPumpExcerpt struct {
+	// DataSourceUri shall contain a URI to the resource that provides the source of the excerpt contained within this
+	// copy.
+	DataSourceURI string `json:"DataSourceUri"`
+	// Reading shall contain the sensor value.
+	Reading float64
+	// SpeedRPM shall contain a reading of the rotational speed of the device in revolutions per minute (RPM) units.
+	SpeedRPM float64
 }
 
 // Voltage consumption (V).
@@ -264,6 +302,10 @@ type Sensor struct {
 	ReactiveVAR float32
 	// The sensor value.
 	Reading float32
+	// ReadingAccuracy shall contain the accuracy of the value of the Reading for this sensor. The value shall be the
+	// absolute value of the maximum deviation of the Reading from its actual value. The value shall be in units that
+	// follow the ReadingUnits for this sensor.
+	ReadingAccuracy float64
 	// The basis for the reading of this sensor.
 	ReadingBasis ReadingBasisType
 	// The maximum possible value for this sensor.
