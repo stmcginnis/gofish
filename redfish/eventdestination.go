@@ -442,7 +442,7 @@ func sendCreateEventDestinationRequest(
 	protocol EventDestinationProtocol,
 	context string,
 	oem interface{},
-) (subscriptionLink string, err error) {
+) (string, error) {
 	s.Destination = destination
 	s.Protocol = protocol
 	s.Context = context
@@ -459,12 +459,12 @@ func sendCreateEventDestinationRequest(
 
 	resp, err := c.Post(uri, s)
 	if err != nil {
-		return
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	// return subscription link from returned location
-	subscriptionLink = resp.Header.Get("Location")
+	subscriptionLink := resp.Header.Get("Location")
 	urlParser, err := url.ParseRequestURI(subscriptionLink)
 	if err == nil {
 		subscriptionLink = urlParser.RequestURI()
