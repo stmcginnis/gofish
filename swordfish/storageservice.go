@@ -168,7 +168,7 @@ func GetStorageService(c common.Client, uri string) (*StorageService, error) {
 
 // ListReferencedStorageServices gets the collection of StorageService from
 // a provided reference.
-func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) { //nolint:dupl
+func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) {
 	var result []*StorageService
 	if link == "" {
 		return result, nil

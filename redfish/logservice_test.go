@@ -81,7 +81,7 @@ func TestLogService(t *testing.T) {
 }
 
 // TestLogServiceUpdate tests the Update call.
-func TestLogServiceUpdate(t *testing.T) { //nolint:dupl
+func TestLogServiceUpdate(t *testing.T) {
 	var result LogService
 	err := json.NewDecoder(strings.NewReader(logServiceBody)).Decode(&result)
 

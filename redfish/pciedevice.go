@@ -163,7 +163,7 @@ func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
 
 // ListReferencedPCIeDevices gets the collection of PCIeDevice from
 // a provided reference.
-func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, error) { //nolint:dupl
+func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, error) {
 	var result []*PCIeDevice
 	if link == "" {
 		return result, nil

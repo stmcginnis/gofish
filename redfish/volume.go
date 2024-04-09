@@ -270,7 +270,7 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 }
 
 // ListReferencedVolumes gets the collection of Volumes from a provided reference.
-func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) { //nolint:dupl
+func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 	var result []*Volume
 	if link == "" {
 		return result, nil

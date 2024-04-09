@@ -319,7 +319,7 @@ func GetDrive(c common.Client, uri string) (*Drive, error) {
 }
 
 // ListReferencedDrives gets the collection of Drives from a provided reference.
-func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) { //nolint:dupl
+func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
 	var result []*Drive
 	if link == "" {
 		return result, nil

@@ -106,7 +106,7 @@ func TestSpareResourceSet(t *testing.T) {
 }
 
 // TestSpareResourceSetUpdate tests the Update call.
-func TestSpareResourceSetUpdate(t *testing.T) { //nolint:dupl
+func TestSpareResourceSetUpdate(t *testing.T) {
 	var result SpareResourceSet
 	err := json.NewDecoder(strings.NewReader(spareResourceSetBody)).Decode(&result)
 

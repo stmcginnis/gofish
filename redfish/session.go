@@ -118,7 +118,7 @@ func GetSession(c common.Client, uri string) (*Session, error) {
 }
 
 // ListReferencedSessions gets the collection of Sessions
-func ListReferencedSessions(c common.Client, link string) ([]*Session, error) { //nolint:dupl
+func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
 	var result []*Session
 	if link == "" {
 		return result, nil

@@ -155,7 +155,7 @@ func GetManagerAccount(c common.Client, uri string) (*ManagerAccount, error) {
 
 // ListReferencedManagerAccounts gets the collection of ManagerAccount from
 // a provided reference.
-func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAccount, error) { //nolint:dupl
+func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAccount, error) {
 	var result []*ManagerAccount
 	if link == "" {
 		return result, nil

@@ -303,7 +303,7 @@ func (powerDistribution *PowerDistribution) TransferControl() error {
 
 // ListReferencedPowerDistribution gets the collection of PowerDistribution from
 // a provided reference.
-func ListReferencedPowerDistributionUnits(c common.Client, link string) ([]*PowerDistribution, error) { //nolint:dupl
+func ListReferencedPowerDistributionUnits(c common.Client, link string) ([]*PowerDistribution, error) {
 	var result []*PowerDistribution
 	if link == "" {
 		return result, nil

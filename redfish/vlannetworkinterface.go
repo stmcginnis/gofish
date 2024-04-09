@@ -88,7 +88,7 @@ func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface
 
 // ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from
 // a provided reference.
-func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanNetworkInterface, error) { //nolint:dupl
+func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanNetworkInterface, error) {
 	var result []*VLanNetworkInterface
 	if link == "" {
 		return result, nil

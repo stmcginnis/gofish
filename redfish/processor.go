@@ -555,7 +555,7 @@ func GetProcessor(c common.Client, uri string) (*Processor, error) {
 }
 
 // ListReferencedProcessors gets the collection of Processor from a provided reference.
-func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error) { //nolint:dupl
+func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error) {
 	var result []*Processor
 	if link == "" {
 		return result, nil

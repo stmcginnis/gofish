@@ -124,7 +124,7 @@ func GetCapacitySource(c common.Client, uri string) (*CapacitySource, error) {
 
 // ListReferencedCapacitySources gets the collection of CapacitySources from
 // a provided reference.
-func ListReferencedCapacitySources(c common.Client, link string) ([]*CapacitySource, error) { //nolint:dupl
+func ListReferencedCapacitySources(c common.Client, link string) ([]*CapacitySource, error) {
 	var result []*CapacitySource
 	if link == "" {
 		return result, nil

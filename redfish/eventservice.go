@@ -234,7 +234,7 @@ func GetEventService(c common.Client, uri string) (*EventService, error) {
 
 // ListReferencedEventServices gets the collection of EventService from
 // a provided reference.
-func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) { //nolint:dupl
+func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) {
 	var result []*EventService
 	if link == "" {
 		return result, nil

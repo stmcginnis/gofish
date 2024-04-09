@@ -67,7 +67,7 @@ func TestEndpointGroup(t *testing.T) {
 }
 
 // TestEndpointGroupUpdate tests the Update call.
-func TestEndpointGroupUpdate(t *testing.T) { //nolint:dupl
+func TestEndpointGroupUpdate(t *testing.T) {
 	var result EndpointGroup
 	err := json.NewDecoder(strings.NewReader(endpointGroupBody)).Decode(&result)
 

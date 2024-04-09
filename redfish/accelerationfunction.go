@@ -121,7 +121,7 @@ func GetAccelerationFunction(c common.Client, uri string) (*AccelerationFunction
 
 // ListReferencedAccelerationFunctions gets the collection of AccelerationFunction from
 // a provided reference.
-func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*AccelerationFunction, error) { //nolint:dupl
+func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*AccelerationFunction, error) {
 	var result []*AccelerationFunction
 	if link == "" {
 		return result, nil

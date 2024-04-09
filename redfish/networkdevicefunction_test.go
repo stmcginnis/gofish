@@ -118,7 +118,7 @@ func TestNetworkDeviceFunction(t *testing.T) {
 }
 
 // TestNetworkDeviceFunctionUpdate tests the Update call.
-func TestNetworkDeviceFunctionUpdate(t *testing.T) { //nolint:dupl
+func TestNetworkDeviceFunctionUpdate(t *testing.T) {
 	var result NetworkDeviceFunction
 	err := json.NewDecoder(strings.NewReader(networkDeviceFunctionBody)).Decode(&result)
 

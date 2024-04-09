@@ -129,7 +129,7 @@ func TestMemory(t *testing.T) {
 }
 
 // TestMemoryUpdate tests the Update call.
-func TestMemoryUpdate(t *testing.T) { //nolint:dupl
+func TestMemoryUpdate(t *testing.T) {
 	var result Memory
 	err := json.NewDecoder(strings.NewReader(memoryBody)).Decode(&result)
 

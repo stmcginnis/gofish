@@ -79,7 +79,7 @@ func GetAssembly(c common.Client, uri string) (*Assembly, error) {
 
 // ListReferencedAssemblys gets the collection of Assembly from
 // a provided reference.
-func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) { //nolint:dupl
+func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) {
 	var result []*Assembly
 	if link == "" {
 		return result, nil

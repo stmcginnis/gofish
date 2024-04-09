@@ -122,7 +122,7 @@ func TestIOPerformanceLoSCapabilities(t *testing.T) {
 }
 
 // TestIOPerformanceLoSCapabilitiesUpdate tests the Update call.
-func TestIOPerformanceLoSCapabilitiesUpdate(t *testing.T) { //nolint:dupl
+func TestIOPerformanceLoSCapabilitiesUpdate(t *testing.T) {
 	var result IOPerformanceLoSCapabilities
 	err := json.NewDecoder(strings.NewReader(ioPerformanceLoSCapabilitiesBody)).Decode(&result)
 

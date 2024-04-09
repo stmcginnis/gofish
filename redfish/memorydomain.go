@@ -67,7 +67,7 @@ func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
 
 // ListReferencedMemoryDomains gets the collection of MemoryDomain from
 // a provided reference.
-func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) { //nolint:dupl
+func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) {
 	var result []*MemoryDomain
 	if link == "" {
 		return result, nil

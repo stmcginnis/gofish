@@ -148,7 +148,7 @@ func GetLogService(c common.Client, uri string) (*LogService, error) {
 }
 
 // ListReferencedLogServices gets the collection of LogService from a provided reference.
-func ListReferencedLogServices(c common.Client, link string) ([]*LogService, error) { //nolint:dupl
+func ListReferencedLogServices(c common.Client, link string) ([]*LogService, error) {
 	var result []*LogService
 	if link == "" {
 		return result, nil
