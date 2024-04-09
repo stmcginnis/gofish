@@ -47,7 +47,7 @@ const (
 )
 
 func testError(code int, t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(code)
 		w.Write([]byte(expectErrorStatus)) //nolint
 	}))
@@ -85,7 +85,7 @@ func TestError404(t *testing.T) {
 
 // TestErrorOther tests failures that do not return an Error struct
 func TestErrorOther(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(500)
 		w.Write([]byte(nonErrorStructErrorStatus)) //nolint
 	}))
