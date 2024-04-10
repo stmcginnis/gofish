@@ -7,6 +7,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 )
@@ -139,6 +140,22 @@ func (e *Entity) Post(uri string, payload interface{}) error {
 		return resp.Body.Close()
 	}
 	return err
+}
+
+// PostWithResponse performs a Post request against the Redfish service with etag,
+// returning the response from the service.
+// Callers should make sure to call `resp.Body.Close()` when done with the response.
+func (e *Entity) PostWithResponse(uri string, payload interface{}) (*http.Response, error) {
+	header := make(map[string]string)
+	if e.etag != "" && !e.disableEtagMatch {
+		if e.stripEtagQuotes {
+			e.etag = strings.Trim(e.etag, "\"")
+		}
+
+		header["If-Match"] = e.etag
+	}
+
+	return e.client.PostWithHeaders(uri, payload, header)
 }
 
 type Filter string
