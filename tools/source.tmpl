@@ -67,7 +67,6 @@ func ({{ class.name|lower }} *{{ class.name }}) UnmarshalJSON(b []byte) error {
 {%- if class.isEntity and class.rwAttrs|length > 0 %}
 // Update commits updates to this object's properties to the running system.
 func ({{ class.name|lower }} *{{ class.name }}) Update() error {
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new({{ class.name }})
