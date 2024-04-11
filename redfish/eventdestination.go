@@ -52,41 +52,6 @@ const (
 	SMTPEventDestinationProtocol EventDestinationProtocol = "SMTP"
 )
 
-// SNMPAuthenticationProtocols is
-type SNMPAuthenticationProtocols string
-
-const (
-
-	// NoneSNMPAuthenticationProtocols shall indicate authentication is not
-	// required.
-	NoneSNMPAuthenticationProtocols SNMPAuthenticationProtocols = "None"
-	// CommunityStringSNMPAuthenticationProtocols shall indicate
-	// authentication using SNMP community strings and the value of
-	// TrapCommunity.
-	CommunityStringSNMPAuthenticationProtocols SNMPAuthenticationProtocols = "CommunityString"
-	// HMACMD5SNMPAuthenticationProtocols shall indicate authentication
-	// conforms to the RFC3414-defined HMAC-MD5-96 authentication protocol.
-	HMACMD5SNMPAuthenticationProtocols SNMPAuthenticationProtocols = "HMAC_MD5"
-	// HMACSHA96SNMPAuthenticationProtocols shall indicate authentication
-	// conforms to the RFC3414-defined HMAC-SHA-96 authentication protocol.
-	HMACSHA96SNMPAuthenticationProtocols SNMPAuthenticationProtocols = "HMAC_SHA96"
-)
-
-// SNMPEncryptionProtocols is
-type SNMPEncryptionProtocols string
-
-const (
-
-	// NoneSNMPEncryptionProtocols shall indicate there is no encryption.
-	NoneSNMPEncryptionProtocols SNMPEncryptionProtocols = "None"
-	// CBCDESSNMPEncryptionProtocols shall indicate encryption conforms to
-	// the RFC3414-defined CBC-DES encryption protocol.
-	CBCDESSNMPEncryptionProtocols SNMPEncryptionProtocols = "CBC_DES"
-	// CFB128AES128SNMPEncryptionProtocols shall indicate encryption
-	// conforms to the RFC3826-defined CFB128-AES-128 encryption protocol.
-	CFB128AES128SNMPEncryptionProtocols SNMPEncryptionProtocols = "CFB128_AES128"
-)
-
 // SubscriptionType is the type of subscription used.
 type SubscriptionType string
 
@@ -536,24 +501,3 @@ func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDest
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included
 // with every event POST to the Event Destination.
 type HTTPHeaderProperty map[string][]string
-
-// SNMPSettings is shall contain the settings for an SNMP event
-// destination.
-type SNMPSettings struct {
-
-	// AuthenticationKey is used for SNMPv3 authentication. The value shall
-	// be `null` in responses.
-	AuthenticationKey string
-	// AuthenticationProtocol is This property shall contain the SNMPv3
-	// authentication protocol.
-	AuthenticationProtocol SNMPAuthenticationProtocols
-	// EncryptionKey is This property shall contain the key for SNMPv3
-	// encryption. The value shall be `null` in responses.
-	EncryptionKey string
-	// EncryptionProtocol is This property shall contain the SNMPv3
-	// encryption protocol.
-	EncryptionProtocol SNMPEncryptionProtocols
-	// TrapCommunity is This property shall contain the SNMP trap community
-	// string. The value shall be `null` in responses.
-	TrapCommunity string
-}
