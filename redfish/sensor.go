@@ -166,11 +166,44 @@ type SensorCurrentExcerpt struct {
 	THDPercent float64
 }
 
+// SensorExcerpt shall represent a sensor for a Redfish implementation.
 type SensorExcerpt struct {
 	// The link to the resource that provides the data for this sensor.
 	DataSourceURI string `json:"DataSourceUri"`
 	// The sensor value.
 	Reading float32
+}
+
+// SensorFanArrayExcerpt shall represent a sensor for a Redfish implementation.
+type SensorFanArrayExcerpt struct {
+	// DataSourceURI shall contain a URI to the resource that provides the source of the excerpt contained within this
+	// copy.
+	DataSourceURI string
+	// DeviceName shall contain the name of the device associated with this sensor. If the device is represented by a
+	// resource, the value shall contain the value of the Name property of the associated resource.
+	DeviceName string
+	// PhysicalContext shall contain a description of the affected component or region within the equipment to which
+	// this sensor measurement applies.
+	PhysicalContext PhysicalContext
+	// PhysicalSubContext shall contain a description of the usage or sub-region within the equipment to which this
+	// sensor measurement applies. This property generally differentiates multiple sensors within the same
+	// PhysicalContext instance.
+	PhysicalSubContext PhysicalSubContext
+	// Reading shall contain the sensor value.
+	Reading float64
+	// SpeedRPM shall contain a reading of the rotational speed of the device in revolutions per minute (RPM) units.
+	SpeedRPM float64
+}
+
+// SensorFanExcerpt shall represent a sensor for a Redfish implementation.
+type SensorFanExcerpt struct {
+	// DataSourceURI shall contain a URI to the resource that provides the source of the excerpt contained within this
+	// copy.
+	DataSourceURI string
+	// Reading shall contain the sensor value.
+	Reading float64
+	// SpeedRPM shall contain a reading of the rotational speed of the device in revolutions per minute (RPM) units.
+	SpeedRPM float64
 }
 
 // Energy consumption (kWh).
@@ -189,6 +222,36 @@ type SensorEnergykWhExcerpt struct {
 	Reading float32
 	// The date and time when the time-based properties were last reset.
 	SensorResetTime string
+}
+
+type SensorPowerArrayExcerpt struct {
+	// ApparentVA shall contain the product of voltage (RMS) multiplied by current (RMS) for a circuit. This property
+	// can appear in sensors of the Power ReadingType, and shall not appear in sensors of other ReadingType values.
+	ApparentVA float64
+	// DataSourceUri shall contain a URI to the resource that provides the source of the excerpt contained within this
+	// copy.
+	DataSourceURI string
+	// PhaseAngleDegrees shall contain the phase angle, in degree units, between the current and voltage waveforms for
+	// an electrical measurement. This property can appear in sensors with a ReadingType containing 'Power', and shall
+	// not appear in sensors with other ReadingType values.
+	PhaseAngleDegrees float64
+	// PhysicalContext shall contain a description of the affected component or region within the equipment to which
+	// this sensor measurement applies.
+	PhysicalContext PhysicalContext
+	// PhysicalSubContext shall contain a description of the usage or sub-region within the equipment to which this
+	// sensor measurement applies. This property generally differentiates multiple sensors within the same
+	// PhysicalContext instance.
+	PhysicalSubContext PhysicalSubContext
+	// PowerFactor shall identify the quotient of real power (W) and apparent power (VA) for a circuit. PowerFactor is
+	// expressed in unit-less 1/100ths. This property can appear in sensors containing a ReadingType value of 'Power',
+	// and shall not appear in sensors of other ReadingType values.
+	PowerFactor float64
+	// ReactiveVAR shall contain the arithmetic mean of product terms of instantaneous voltage and quadrature current
+	// measurements calculated over an integer number of line cycles for a circuit. This property can appear in sensors
+	// of the Power ReadingType, and shall not appear in sensors of other ReadingType values.
+	ReactiveVAR float64
+	// Reading shall contain the sensor value.
+	Reading float64
 }
 
 // Power consumption (W).
