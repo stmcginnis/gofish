@@ -58,6 +58,48 @@ const (
 	LinkDownLinkStatus LinkStatus = "LinkDown"
 )
 
+type RoutingScope string
+
+const (
+	// ExternalRoutingScope shall indicate this interface is externally accessible as if it were physically on the same
+	// network as the hosting system.
+	ExternalRoutingScope RoutingScope = "External"
+	// HostOnlyRoutingScope shall indicate this interface is only accessible to a dedicated interface on the hosting
+	// system.
+	HostOnlyRoutingScope RoutingScope = "HostOnly"
+	// InternalRoutingScope shall indicate this interface is only accessible to internal networking on the host, such
+	// as when virtual machines or containers are allowed to communicate with each other on the same host system as
+	// well as a dedicated interface on the hosting system.
+	InternalRoutingScope RoutingScope = "Internal"
+	// LimitedRoutingScope shall indicate this interface is accessible through IP translation provided by the hosting
+	// system, such as a NAT (network address translation).
+	LimitedRoutingScope RoutingScope = "Limited"
+)
+
+type TeamMode string
+
+const (
+	// NoneTeamMode No teaming.
+	NoneTeamMode TeamMode = "None"
+	// RoundRobinTeamMode Packets are transmitted in sequential order from the teamed interfaces.
+	RoundRobinTeamMode TeamMode = "RoundRobin"
+	// ActiveBackupTeamMode One interface in the team is active and the others are kept in standby until a failure
+	// occurs.
+	ActiveBackupTeamMode TeamMode = "ActiveBackup"
+	// XORTeamMode Transmitting is determined based upon a hash policy.
+	XORTeamMode TeamMode = "XOR"
+	// BroadcastTeamMode Packets are transmitted on all interfaces in the team.
+	BroadcastTeamMode TeamMode = "Broadcast"
+	// IEEE8023adTeamMode The interfaces in the team create an IEEE802.3ad link aggregation group.
+	IEEE8023adTeamMode TeamMode = "IEEE802_3ad"
+	// AdaptiveTransmitLoadBalancingTeamMode Packets are transmitted based upon the current load of each interface in
+	// the team.
+	AdaptiveTransmitLoadBalancingTeamMode TeamMode = "AdaptiveTransmitLoadBalancing"
+	// AdaptiveLoadBalancingTeamMode Packets are transmitted and received based upon the current load of each interface
+	// in the team.
+	AdaptiveLoadBalancingTeamMode TeamMode = "AdaptiveLoadBalancing"
+)
+
 // DHCPv4Configuration describes the configuration of DHCP v4.
 type DHCPv4Configuration struct {
 	// DHCPEnabled shall indicate whether DHCP v4 is enabled for this
@@ -144,6 +186,11 @@ type EthernetInterface struct {
 	// IPv6DefaultGateway shall be the current
 	// IPv6 default gateway address that is in use on this interface.
 	IPv6DefaultGateway string
+	// IPv6Enabled shall indicate whether IPv6 is enabled on this interface. If this property contains 'false', the
+	// interface shall not contain any assigned IPv6 addresses, shall not initiate DHCPv6 requests, and shall not send
+	// or process ICMPv6 packets. If this property is not present, but this interface contains other IPv6 properties,
+	// the value shall be assumed to be 'true'.
+	IPv6Enabled bool
 	// IPv6StaticAddresses is used to represent the IPv6 static connection
 	// characteristics for this interface.
 	IPv6StaticAddresses []IPv6StaticAddress
@@ -168,11 +215,14 @@ type EthernetInterface struct {
 	// NameServers used on this interface.
 	NameServers []string
 	// Oem object used on this interface.
-	Oem interface{}
+	Oem json.RawMessage
 	// PermanentMACAddress shall be the Permanent MAC Address of this interface
 	// (port). This value is typically programmed during the manufacturing time.
 	// This address is not assignable.
 	PermanentMACAddress string
+	// RoutingScope shall contain the routing scope for this interface. This property shall only be present if this
+	// interface belongs to a virtual machine or container.
+	RoutingScope RoutingScope
 	// SpeedMbps shall be the link speed of the interface in Mbps.
 	SpeedMbps int
 	// StatelessAddressAutoConfig is This object shall contain the IPv4 and
@@ -187,6 +237,9 @@ type EthernetInterface struct {
 	// Status shall contain any status or health properties
 	// of the resource.
 	Status common.Status
+	// TeamMode shall contain the team mode for this interface. If this property is not present, the value shall be
+	// assumed to be 'None'.
+	TeamMode TeamMode
 	// UefiDevicePath shall be the UEFI device path to the device which
 	// implements this interface (port).
 	UefiDevicePath string
@@ -194,9 +247,13 @@ type EthernetInterface struct {
 	// more than one VLAN, the VLAN property shall not be present and the VLANS
 	// collection link shall be present instead.
 	VLAN VLAN
-	// VLANs is a collection of VLANs and is only used if the interface supports
-	// more than one VLANs.
-	vlans string
+	// VLAN shall contain the VLAN for this interface. If this interface supports more than one VLAN, the VLAN property
+	// shall be absent and, instead, the VLAN collection link shall be present.
+	vlan string
+
+	affiliatedInterfaces []string
+	// AffiliatedInterfacesCount is the number of affiliated interfaces.
+	AffiliatedInterfacesCount int
 	// Chassis shall be a reference to a resource of type Chassis that represent
 	// the physical container associated with this Ethernet Interface.
 	chassis string
@@ -207,7 +264,17 @@ type EthernetInterface struct {
 	// EndpointsCount is the number of endpoints.
 	EndpointsCount int
 	// HostInterface is used by a host to communicate with a Manager.
-	hostInterface string
+	hostInterface          string
+	networkDeviceFunctions []string
+	// NetworkDeviceFunctionsCount are the number of network device functions associated with this interface.
+	NetworkDeviceFunctionsCount int
+	ports                       []string
+	// PortsCount is the number of ports associated with this interface.
+	PortsCount        int
+	relatedInterfaces []string
+	// RelatedInterfacesCount is the number of related interfaces.
+	RelatedInterfacesCount int
+
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -217,16 +284,37 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 	type temp EthernetInterface
 
 	type links struct {
-		Chassis        common.Link
-		Endpoints      common.Links
-		EndpointsCount int `json:"Endpoints@odata.count"`
-		HostInterface  common.Link
+		// AffiliatedInterfaces shall contain an array of links to resources of type EthernetInterface that represent the
+		// Ethernet interfaces that are affiliated with this interface. EthernetInterface resources referenced in this
+		// property shall reference this resource in their RelatedInterfaces property.
+		AffiliatedInterfaces      common.Links
+		AffiliatedInterfacesCount int `json:"AffiliatedInterfaces@odata.count"`
+		Chassis                   common.Link
+		Endpoints                 common.Links
+		EndpointsCount            int `json:"Endpoints@odata.count"`
+		HostInterface             common.Link
+		// NetworkDeviceFunctions shall contain an array of links to resources of type NetworkDeviceFunction.
+		NetworkDeviceFunctions common.Links
+		// NetworkDeviceFunctions@odata.count
+		NetworkDeviceFunctionsCount int `json:"NetworkDeviceFunctions@odata.count"`
+		// Ports shall contain an array of links to resources of type Port that represent the ports providing this Ethernet
+		// interface. This property shall not be present if the Ethernet interface is not directly associated to a physical
+		// port.
+		Ports common.Links
+		// Ports@odata.count
+		PortsCount int `json:"Ports@odata.count"`
+		// RelatedInterfaces shall contain an array of links to resources of type EthernetInterface. If TeamMode contains
+		// 'None', this property shall contain one member that represents the parent interface for the VLAN. For other
+		// values of TeamMode, this property shall contain the members of the team.
+		RelatedInterfaces common.Links
+		// RelatedInterfaces@odata.count
+		RelatedInterfacesCount int `json:"RelatedInterfaces@odata.count"`
 	}
 
 	var t struct {
 		temp
 		Links links
-		VLANs common.Link
+		VLAN  common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -237,11 +325,20 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 	*ethernetinterface = EthernetInterface(t.temp)
 
 	// Extract the links to other entities for later
+	ethernetinterface.affiliatedInterfaces = t.Links.AffiliatedInterfaces.ToStrings()
+	ethernetinterface.AffiliatedInterfacesCount = t.Links.AffiliatedInterfacesCount
 	ethernetinterface.chassis = t.Links.Chassis.String()
 	ethernetinterface.endpoints = t.Links.Endpoints.ToStrings()
 	ethernetinterface.EndpointsCount = t.Links.EndpointsCount
 	ethernetinterface.hostInterface = t.Links.HostInterface.String()
-	ethernetinterface.vlans = t.VLANs.String()
+	ethernetinterface.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
+	ethernetinterface.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
+	ethernetinterface.ports = t.Links.Ports.ToStrings()
+	ethernetinterface.PortsCount = t.Links.PortsCount
+	ethernetinterface.relatedInterfaces = t.Links.RelatedInterfaces.ToStrings()
+	ethernetinterface.RelatedInterfacesCount = t.Links.RelatedInterfacesCount
+
+	ethernetinterface.vlan = t.VLAN.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	ethernetinterface.rawData = b
@@ -264,11 +361,13 @@ func (ethernetinterface *EthernetInterface) Update() error {
 		"FQDN",
 		"FullDuplex",
 		"HostName",
+		"IPv6Enabled",
 		"InterfaceEnabled",
 		"MACAddress",
 		"MTUSize",
 		"SpeedMbps",
 		"StaticNameServers",
+		"TeamMode",
 	}
 
 	originalElement := reflect.ValueOf(original).Elem()
@@ -353,3 +452,117 @@ type StatelessAddressAutoConfiguration struct {
 }
 
 // TODO: Add vlans
+
+// AffiliatedInterfaces gets any ethernet interfaces that are affiliated with this interface.
+func (ethernetinterface *EthernetInterface) AffiliatedInterfaces() ([]*EthernetInterface, error) {
+	var result []*EthernetInterface
+	if len(ethernetinterface.affiliatedInterfaces) == 0 {
+		return result, nil
+	}
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range ethernetinterface.affiliatedInterfaces {
+		rb, err := GetEthernetInterface(ethernetinterface.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, rb)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Chassis gets the containing chassis.
+func (ethernetinterface *EthernetInterface) Chassis() (*Chassis, error) {
+	if ethernetinterface.chassis == "" {
+		return nil, nil
+	}
+
+	return GetChassis(ethernetinterface.GetClient(), ethernetinterface.chassis)
+}
+
+// Endpoints gets any endpoints associated with this interface.
+func (ethernetinterface *EthernetInterface) Endpoints() ([]*Endpoint, error) {
+	var result []*Endpoint
+	if len(ethernetinterface.endpoints) == 0 {
+		return result, nil
+	}
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range ethernetinterface.endpoints {
+		rb, err := GetEndpoint(ethernetinterface.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, rb)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// HostInterface gets the associated host interface.
+func (ethernetinterface *EthernetInterface) HostInterface() (*HostInterface, error) {
+	if ethernetinterface.hostInterface == "" {
+		return nil, nil
+	}
+
+	return GetHostInterface(ethernetinterface.GetClient(), ethernetinterface.hostInterface)
+}
+
+// NetworkDeviceFunctions gets any device functions associated with this interface.
+func (ethernetinterface *EthernetInterface) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
+	var result []*NetworkDeviceFunction
+	if len(ethernetinterface.networkDeviceFunctions) == 0 {
+		return result, nil
+	}
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range ethernetinterface.networkDeviceFunctions {
+		rb, err := GetNetworkDeviceFunction(ethernetinterface.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, rb)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Ports gets any ports associated with this interface.
+func (ethernetinterface *EthernetInterface) Ports() ([]*Port, error) {
+	var result []*Port
+	if len(ethernetinterface.ports) == 0 {
+		return result, nil
+	}
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range ethernetinterface.ports {
+		rb, err := GetPort(ethernetinterface.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, rb)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
