@@ -27,6 +27,27 @@ const (
 	OEMLogEntryTypes LogEntryTypes = "OEM"
 )
 
+type LogPurpose string
+
+const (
+	// DiagnosticLogPurpose provides information for diagnosing hardware or software issues, such as error
+	// conditions, sensor threshold trips, or exception cases.
+	DiagnosticLogPurpose LogPurpose = "Diagnostic"
+	// OperationsLogPurpose provides information about management operations that have a significant impact on
+	// the system, such as firmware updates, system resets, and storage volume creation.
+	OperationsLogPurpose LogPurpose = "Operations"
+	// SecurityLogPurpose provides security-related information such as authentication, authorization, and data
+	// access logging required for security audits.
+	SecurityLogPurpose LogPurpose = "Security"
+	// TelemetryLogPurpose provides telemetry history, typically collected on a regular basis.
+	TelemetryLogPurpose LogPurpose = "Telemetry"
+	// ExternalEntityLogPurpose The log exposes log entries provided by external entities, such as external users,
+	// system firmware, operating systems, or management applications.
+	ExternalEntityLogPurpose LogPurpose = "ExternalEntity"
+	// OEMLogPurpose The log is used for an OEM-defined purpose.
+	OEMLogPurpose LogPurpose = "OEM"
+)
+
 // OverWritePolicy is the log overwriting policy.
 type OverWritePolicy string
 
@@ -51,6 +72,9 @@ type LogService struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	// AutoDSTEnabled shall indicate whether the log service is configured for automatic Daylight Saving Time (DST)
+	// adjustment. DST adjustment shall not modify the timestamp of existing log entries.
+	AutoDSTEnabled bool
 	// DateTime shall represent the current DateTime value that the log service
 	// is using, with offset from UTC, in Redfish Timestamp format.
 	DateTime string
@@ -70,6 +94,11 @@ type LogService struct {
 	// MaxNumberOfRecords shall be the maximum numbers of LogEntry resources in
 	// the Entries collection for this service.
 	MaxNumberOfRecords uint64
+	// OEMLogPurpose shall contain the OEM-specified purpose of the log if LogPurposes contains 'OEM'.
+	OEMLogPurpose string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// OverWritePolicy shall indicate the
 	// policy of the log service when the MaxNumberOfRecords has been
 	// reached. Unknown indicates the log overwrite policy is unknown.
@@ -78,15 +107,23 @@ type LogService struct {
 	// indicates that the log never overwrites its entries by the new entries
 	// and ceases logging when the limit has been reached.
 	OverWritePolicy OverWritePolicy
+	// Overflow shall indicate whether the log service has overflowed and is no longer able to store new logs.
+	Overflow bool
+	// Persistency shall indicate whether the log service is persistent across a cold reset of the device.
+	Persistency bool
 	// ServiceEnabled shall be a boolean
 	// indicating whether this service is enabled.
 	ServiceEnabled bool
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// clearLogTarget is the URL to send ClearLog actions to.
-	clearLogTarget string
+	// SyslogFilters shall describe all desired syslog messages to be logged locally. If this property contains an
+	// empty array, all messages shall be logged.
+	SyslogFilters []SyslogFilter
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+
+	// clearLogTarget is the URL to send ClearLog actions to.
+	clearLogTarget string
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
@@ -130,6 +167,7 @@ func (logservice *LogService) Update() error {
 	}
 
 	readWriteFields := []string{
+		"AutoDSTEnabled",
 		"DateTime",
 		"DateTimeLocalOffset",
 		"ServiceEnabled",
