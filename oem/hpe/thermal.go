@@ -66,7 +66,7 @@ func FromThermal(thermal *redfish.Thermal) (Thermal, error) {
 func FromFan(fan *redfish.Fan) (Fan, error) {
 	oem := FanOem{}
 
-	_ = json.Unmarshal(fan.Oem, &oem)
+	_ = json.Unmarshal(fan.OEM, &oem)
 
 	return Fan{
 		Fan: *fan,
