@@ -11,7 +11,7 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-type Protocol struct {
+type NetworkProtocol struct {
 	// The protocol port
 	Port int64
 	// An indication of whether the protocol is enabled
@@ -19,7 +19,7 @@ type Protocol struct {
 }
 
 type HTTPS struct {
-	Protocol
+	NetworkProtocol
 
 	// certificates shall be a link to HTTP certificates resource
 	certificates string
@@ -42,7 +42,7 @@ func (https *HTTPS) UnmarshalJSON(b []byte) error {
 }
 
 type NTP struct {
-	Protocol
+	NetworkProtocol
 
 	// Indicates to which user-supplied NTP servers this manager is
 	// subscribed
@@ -114,7 +114,7 @@ type EngineID struct {
 }
 
 type SNMP struct {
-	Protocol
+	NetworkProtocol
 
 	// The authentication protocol used for SNMP access to this manager
 	AuthenticationProtocol SNMPAuthenticationProtocol
@@ -167,7 +167,7 @@ const (
 )
 
 type SSDP struct {
-	Protocol
+	NetworkProtocol
 
 	// The IPv6 scope for multicast NOTIFY messages for SSDP
 	NotifyIPv6Scope NotifyIPv6Scope
@@ -191,44 +191,44 @@ type NetworkProtocolSettings struct {
 	// dependent Resources
 	Status common.Status
 	// The settings for this manager's DHCPv4 protocol support
-	DHCP Protocol
+	DHCP NetworkProtocol
 	// The settings for this manager's DHCPv6 protocol support
-	DHCPv6 Protocol
+	DHCPv6 NetworkProtocol
 	// The fully qualified domain name for the manager obtained by
 	// DNS including the host name and top-level domain name
 	FQDN string
 	// The settings for this manager's HTTP protocol support
-	HTTP Protocol
+	HTTP NetworkProtocol
 	// The settings for this manager's HTTPS protocol support
 	HTTPS HTTPS
 	// The DNS host name of this manager, without any domain information
 	HostName string
 	// The settings for this manager's IPMI-over-LAN protocol support
-	IPMI Protocol
+	IPMI NetworkProtocol
 	// The settings for this manager's KVM-IP protocol support that
 	// apply to all system instances controlled by this manager
-	KVMIP Protocol
+	KVMIP NetworkProtocol
 	// The settings for this manager's NTP protocol support
 	NTP NTP
 	// The HTTP/HTTPS proxy information for this manager
 	Proxy Proxy
 	// The settings for this manager's Remote Desktop Protocol support
-	RDP Protocol
+	RDP NetworkProtocol
 	// The settings for this manager's Remote Frame Buffer protocol
 	// support, which can support VNC
-	RFB Protocol
+	RFB NetworkProtocol
 	// The settings for this manager's SNMP support
 	SNMP SNMP
 	// The settings for this manager's SSDP support
 	SSDP SSDP
 	// The settings for this manager's Secure Shell (SSH) protocol
 	// support
-	SSH Protocol
+	SSH NetworkProtocol
 	// The settings for this manager's Telnet protocol support
-	Telnet Protocol
+	Telnet NetworkProtocol
 	// The settings for this manager's virtual media support that
 	// apply to all system instances controlled by this manager
-	VirtualMedia Protocol
+	VirtualMedia NetworkProtocol
 	// The OEM extension property
 	Oem json.RawMessage
 	// rawData holds the original serialized JSON so we can compare updates.
