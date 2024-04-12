@@ -130,7 +130,7 @@ type Control struct {
 	// properties. The units shall follow the value of SetPointUnits.
 	Increment float64
 	// Location shall indicate the location information for this control.
-	Location string
+	Location common.Location
 	// PhysicalContext shall contain a description of the affected component or region within the equipment to which
 	// this control applies.
 	PhysicalContext PhysicalContext
