@@ -126,7 +126,7 @@ type Job struct {
 	PercentComplete int
 	// Schedule shall contain the scheduling details for this job and the
 	// recurrence frequency for future instances of this job.
-	Schedule string
+	Schedule common.Schedule
 	// StartTime shall indicate the date and time when the job was last
 	// started or is scheduled to start.
 	StartTime string
@@ -162,6 +162,11 @@ func (job *Job) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	job.steps = t.Steps.String()
 	return nil
+}
+
+// Steps gets the collection of steps for this job.
+func (job *Job) Steps() ([]*Job, error) {
+	return ListReferencedJobs(job.GetClient(), job.steps)
 }
 
 // GetJob will get a Job instance from the service.
