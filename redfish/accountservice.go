@@ -179,26 +179,6 @@ type MultiFactorAuth struct {
 	SecurID SecurID
 }
 
-// RoleMapping shall contain mapping rules that are used to convert
-// the external account providers account information to the local
-// Redfish Role.
-type RoleMapping struct {
-	// LocalRole shall contain the RoleId property value
-	// within a Role Resource on this Redfish Service to which to map the
-	// remote user or group.
-	LocalRole string
-	// MFABypass shall contain the multi-factor authentication bypass settings.
-	// (Added in schema v1.15.0)
-	MFABypass MFABypass
-	// RemoteGroup shall contain the name of the remote
-	// group, or the remote role in the case of a Redfish Service, that maps
-	// to the local Redfish Role to which this entity links.
-	RemoteGroup string
-	// RemoteUser shall contain the name of the remote user
-	// that maps to the local Redfish Role to which this entity links.
-	RemoteUser string
-}
-
 // Authentication is shall contain the information required to
 // authenticate to the external service.
 type Authentication struct {
@@ -220,47 +200,6 @@ type Authentication struct {
 	// Username shall contain the user name for this
 	// Service.
 	Username string
-}
-
-// ExternalAccountProvider shall contain properties that represent
-// external account provider services that can provide accounts for this
-// manager to use for authentication.
-type ExternalAccountProvider struct {
-	// Authentication shall contain the authentication
-	// information for the external account provider.
-	Authentication Authentication
-	// certificates shall contain a link to a Resource
-	// Collection of certificates of the CertificateCollection type that the
-	// external account provider uses.
-	// certificates string
-	// ldapService shall contain any additional mapping
-	// information needed to parse a generic LDAP service.  This property
-	// should only be present inside the LDAP property.
-	// ldapService string
-	// PasswordSet shall contain `true` if a valid value was
-	// provided for the Password property.  Otherwise, the property shall
-	// contain `false`.
-	PasswordSet bool
-	// RemoteRoleMapping is used to convert the external account providers
-	// account information to the local Redfish Role.
-	RemoteRoleMapping []RoleMapping
-	// Retries shall contain the number of retries to attempt a connection to an address in the ServiceAddresses
-	// property before attempting a connection to the next address in the array or giving up. If this property is not
-	// present, the service has internal policies for handling retries.
-	Retries int
-	// ServiceAddresses shall contain the addresses of the
-	// account providers to which this external account provider links.  The
-	// format of this field depends on the type of external account provider.
-	// Each item in the array shall contain a single address.  Services may
-	// define their own behavior for managing multiple addresses.
-	ServiceAddresses []string
-	// ServiceEnabled shall indicate whether this service is
-	// enabled.
-	ServiceEnabled bool
-	// TimeoutSeconds shall contain the period of time, in seconds, this account service will wait for a response from
-	// an address of a user account provider before timing out. If this property is not present, the service has
-	// internal policies for handling timeouts.
-	TimeoutSeconds int
 }
 
 // GoogleAuthenticator shall contain settings for Google Authenticator multi-factor authentication.
