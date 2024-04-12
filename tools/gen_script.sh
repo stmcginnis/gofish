@@ -15,7 +15,7 @@ PYTHON="python3"
 #
 # Inspect the url for the schema you want - for example, the 2020.1 update
 # document is "DSP8010_2020.1.zip" on this page. The base name then is:
-schemadoc="DSP8010_2022.2"
+schemadoc="DSP8010_2023.3"
 
 # Check if filename provided on the command line
 if [[ "$#" -eq 1 ]]; then
