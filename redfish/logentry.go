@@ -6,11 +6,26 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// EventSeverity is
+type CXLEntryType string
+
+const (
+	// DynamicCapacityCXLEntryType is a CXL Dynamic Capacity log entry.
+	DynamicCapacityCXLEntryType CXLEntryType = "DynamicCapacity"
+	// InformationalCXLEntryType is a CXL informational log entry.
+	InformationalCXLEntryType CXLEntryType = "Informational"
+	// WarningCXLEntryType is a CXL warning log entry.
+	WarningCXLEntryType CXLEntryType = "Warning"
+	// FailureCXLEntryType is a CXL failure log entry.
+	FailureCXLEntryType CXLEntryType = "Failure"
+	// FatalCXLEntryType is a CXL fatal log entry.
+	FatalCXLEntryType CXLEntryType = "Fatal"
+)
+
 type EventSeverity string
 
 const (
@@ -24,7 +39,27 @@ const (
 	CriticalEventSeverity EventSeverity = "Critical"
 )
 
-// LogEntryCode is
+type LogDiagnosticDataTypes string
+
+const (
+	// ManagerLogDiagnosticDataTypes Manager diagnostic data.
+	ManagerLogDiagnosticDataTypes LogDiagnosticDataTypes = "Manager"
+	// PreOSLogDiagnosticDataTypes Pre-OS diagnostic data.
+	PreOSLogDiagnosticDataTypes LogDiagnosticDataTypes = "PreOS"
+	// OSLogDiagnosticDataTypes Operating system (OS) diagnostic data.
+	OSLogDiagnosticDataTypes LogDiagnosticDataTypes = "OS"
+	// OEMLogDiagnosticDataTypes OEM diagnostic data.
+	OEMLogDiagnosticDataTypes LogDiagnosticDataTypes = "OEM"
+	// CPERLogDiagnosticDataTypes shall indicate the data provided at the URI specified by the AdditionalDataURI
+	// property is a complete UEFI Specification-defined Common Platform Error Record. The CPER data shall contain a
+	// Record Header and at least one Section as defined by the UEFI Specification.
+	CPERLogDiagnosticDataTypes LogDiagnosticDataTypes = "CPER"
+	// CPERSectionLogDiagnosticDataTypes shall indicate the data provided at the URI specified by the AdditionalDataURI
+	// property is a single Section of a UEFI Specification-defined Common Platform Error Record. The CPER data shall
+	// contain one Section as defined by the UEFI Specification, with no Record Header.
+	CPERSectionLogDiagnosticDataTypes LogDiagnosticDataTypes = "CPERSection"
+)
+
 type LogEntryCode string
 
 const (
@@ -187,7 +222,6 @@ const (
 	OEMLogEntryCode LogEntryCode = "OEM"
 )
 
-// LogEntryType is
 type LogEntryType string
 
 const (
@@ -198,110 +232,123 @@ const (
 	SELLogEntryType LogEntryType = "SEL"
 	// OemLogEntryType Contains an entry in an OEM-defined format.
 	OemLogEntryType LogEntryType = "Oem"
+	// CXLLogEntryType is a CXL log entry.
+	CXLLogEntryType LogEntryType = "CXL"
 )
 
-// SensorType is
+type OriginatorTypes string
+
+const (
+	// ClientOriginatorTypes is a client of the service created this log entry.
+	ClientOriginatorTypes OriginatorTypes = "Client"
+	// InternalOriginatorTypes is a process running on the service created this log entry.
+	InternalOriginatorTypes OriginatorTypes = "Internal"
+	// SupportingServiceOriginatorTypes is a process not running on the service but running on a supporting service, such
+	// as RDE implementations, UEFI, or host processes, created this log entry.
+	SupportingServiceOriginatorTypes OriginatorTypes = "SupportingService"
+)
+
 type SensorType string
 
 const (
 
-	// PlatformSecurityViolationAttemptSensorType A platform security
+	// PlatformSecurityViolationAttemptSensorType is a platform security
 	// sensor.
 	PlatformSecurityViolationAttemptSensorType SensorType = "Platform Security Violation Attempt"
-	// TemperatureSensorType A temperature sensor.
+	// TemperatureSensorType is a temperature sensor.
 	TemperatureSensorType SensorType = "Temperature"
-	// VoltageSensorType A voltage sensor.
+	// VoltageSensorType is a voltage sensor.
 	VoltageSensorType SensorType = "Voltage"
-	// CurrentSensorType A current sensor.
+	// CurrentSensorType is a current sensor.
 	CurrentSensorType SensorType = "Current"
-	// FanSensorType A fan sensor.
+	// FanSensorType is a fan sensor.
 	FanSensorType SensorType = "Fan"
-	// PhysicalChassisSecuritySensorType A physical security sensor.
+	// PhysicalChassisSecuritySensorType is a physical security sensor.
 	PhysicalChassisSecuritySensorType SensorType = "Physical Chassis Security"
-	// ProcessorSensorType A sensor for a processor.
+	// ProcessorSensorType is a sensor for a processor.
 	ProcessorSensorType SensorType = "Processor"
-	// PowerSupplyConverterSensorType A sensor for a power supply or DC-
+	// PowerSupplyConverterSensorType is a sensor for a power supply or DC-
 	// to-DC converter.
 	PowerSupplyConverterSensorType SensorType = "Power Supply / Converter"
-	// PowerUnitSensorType A sensor for a power unit.
+	// PowerUnitSensorType is a sensor for a power unit.
 	PowerUnitSensorType SensorType = "PowerUnit"
-	// CoolingDeviceSensorType A sensor for a cooling device.
+	// CoolingDeviceSensorType is a sensor for a cooling device.
 	CoolingDeviceSensorType SensorType = "CoolingDevice"
-	// OtherUnitsBasedSensorSensorType A sensor for a miscellaneous analog
+	// OtherUnitsBasedSensorSensorType is a sensor for a miscellaneous analog
 	// sensor.
 	OtherUnitsBasedSensorSensorType SensorType = "Other Units-based Sensor"
-	// MemorySensorType A sensor for a memory device.
+	// MemorySensorType is a sensor for a memory device.
 	MemorySensorType SensorType = "Memory"
-	// DriveSlotBaySensorType A sensor for a drive slot or bay.
+	// DriveSlotBaySensorType is a sensor for a drive slot or bay.
 	DriveSlotBaySensorType SensorType = "Drive Slot/Bay"
-	// POSTMemoryResizeSensorType A sensor for a POST memory resize event.
+	// POSTMemoryResizeSensorType is a sensor for a POST memory resize event.
 	POSTMemoryResizeSensorType SensorType = "POST Memory Resize"
-	// SystemFirmwareProgressSensorType A sensor for a system firmware
+	// SystemFirmwareProgressSensorType is a sensor for a system firmware
 	// progress event.
 	SystemFirmwareProgressSensorType SensorType = "System Firmware Progress"
-	// EventLoggingDisabledSensorType A sensor for the event log.
+	// EventLoggingDisabledSensorType is a sensor for the event log.
 	EventLoggingDisabledSensorType SensorType = "Event Logging Disabled"
-	// SystemEventSensorType A sensor for a system event.
+	// SystemEventSensorType is a sensor for a system event.
 	SystemEventSensorType SensorType = "System Event"
-	// CriticalInterruptSensorType A sensor for a critical interrupt event.
+	// CriticalInterruptSensorType is a sensor for a critical interrupt event.
 	CriticalInterruptSensorType SensorType = "Critical Interrupt"
-	// ButtonSwitchSensorType A sensor for a button or switch.
+	// ButtonSwitchSensorType is a sensor for a button or switch.
 	ButtonSwitchSensorType SensorType = "Button/Switch"
-	// ModuleBoardSensorType A sensor for a module or board.
+	// ModuleBoardSensorType is a sensor for a module or board.
 	ModuleBoardSensorType SensorType = "Module/Board"
-	// MicrocontrollerCoprocessorSensorType A sensor for a microcontroller
+	// MicrocontrollerCoprocessorSensorType is a sensor for a microcontroller
 	// or coprocessor.
 	MicrocontrollerCoprocessorSensorType SensorType = "Microcontroller/Coprocessor"
-	// AddinCardSensorType A sensor for an add-in card.
+	// AddinCardSensorType is a sensor for an add-in card.
 	AddinCardSensorType SensorType = "Add-in Card"
-	// ChassisSensorType A sensor for a chassis.
+	// ChassisSensorType is a sensor for a chassis.
 	ChassisSensorType SensorType = "Chassis"
-	// ChipSetSensorType A sensor for a chipset.
+	// ChipSetSensorType is a sensor for a chipset.
 	ChipSetSensorType SensorType = "ChipSet"
-	// OtherFRUSensorType A sensor for an other type of FRU.
+	// OtherFRUSensorType is a sensor for an other type of FRU.
 	OtherFRUSensorType SensorType = "Other FRU"
-	// CableInterconnectSensorType A sensor for a cable or interconnect type
+	// CableInterconnectSensorType is a sensor for a cable or interconnect type
 	// of device.
 	CableInterconnectSensorType SensorType = "Cable/Interconnect"
-	// TerminatorSensorType A sensor for a terminator.
+	// TerminatorSensorType is a sensor for a terminator.
 	TerminatorSensorType SensorType = "Terminator"
-	// SystemBootRestartSensorType A sensor for a system boot or restart
+	// SystemBootRestartSensorType is a sensor for a system boot or restart
 	// event.
 	SystemBootRestartSensorType SensorType = "SystemBoot/Restart"
-	// BootErrorSensorType A sensor for a boot error event.
+	// BootErrorSensorType is a sensor for a boot error event.
 	BootErrorSensorType SensorType = "Boot Error"
-	// BaseOSBootInstallationStatusSensorType A sensor for a base OS boot or
+	// BaseOSBootInstallationStatusSensorType is a sensor for a base OS boot or
 	// installation status event.
 	BaseOSBootInstallationStatusSensorType SensorType = "BaseOSBoot/InstallationStatus"
-	// OSStopShutdownSensorType A sensor for an OS stop or shutdown event
+	// OSStopShutdownSensorType is a sensor for an OS stop or shutdown event
 	OSStopShutdownSensorType SensorType = "OS Stop/Shutdown"
-	// SlotConnectorSensorType A sensor for a slot or connector.
+	// SlotConnectorSensorType is a sensor for a slot or connector.
 	SlotConnectorSensorType SensorType = "Slot/Connector"
-	// SystemACPIPowerStateSensorType A sensor for an ACPI power state
+	// SystemACPIPowerStateSensorType is a sensor for an ACPI power state
 	// event.
 	SystemACPIPowerStateSensorType SensorType = "System ACPI PowerState"
-	// WatchdogSensorType A sensor for a watchdog event.
+	// WatchdogSensorType is a sensor for a watchdog event.
 	WatchdogSensorType SensorType = "Watchdog"
-	// PlatformAlertSensorType A sensor for a platform alert event.
+	// PlatformAlertSensorType is a sensor for a platform alert event.
 	PlatformAlertSensorType SensorType = "Platform Alert"
-	// EntityPresenceSensorType A sensor for an entity presence event.
+	// EntityPresenceSensorType is a sensor for an entity presence event.
 	EntityPresenceSensorType SensorType = "Entity Presence"
-	// MonitorASICICSensorType A sensor for a monitor ASIC or IC.
+	// MonitorASICICSensorType is a sensor for a monitor ASIC or IC.
 	MonitorASICICSensorType SensorType = "Monitor ASIC/IC"
-	// LANSensorType A sensor for a LAN device.
+	// LANSensorType is a sensor for a LAN device.
 	LANSensorType SensorType = "LAN"
-	// ManagementSubsystemHealthSensorType A sensor for a management
+	// ManagementSubsystemHealthSensorType is a sensor for a management
 	// subsystem health event.
 	ManagementSubsystemHealthSensorType SensorType = "Management Subsystem Health"
-	// BatterySensorType A sensor for a battery.
+	// BatterySensorType is a sensor for a battery.
 	BatterySensorType SensorType = "Battery"
-	// SessionAuditSensorType A sensor for a session audit event.
+	// SessionAuditSensorType is a sensor for a session audit event.
 	SessionAuditSensorType SensorType = "Session Audit"
-	// VersionChangeSensorType A sensor for a version change event.
+	// VersionChangeSensorType is a sensor for a version change event.
 	VersionChangeSensorType SensorType = "Version Change"
-	// FRUStateSensorType A sensor for a FRU state event.
+	// FRUStateSensorType is a sensor for a FRU state event.
 	FRUStateSensorType SensorType = "FRUState"
-	// OEMSensorType An OEM defined sensor.
+	// OEMSensorType is an OEM defined sensor.
 	OEMSensorType SensorType = "OEM"
 )
 
@@ -313,10 +360,32 @@ type LogEntry struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	// AdditionalDataSizeBytes shall contain the size of the additional data retrieved from the URI specified by the
+	// AdditionalDataURI property for this log entry.
+	AdditionalDataSizeBytes int
+	// AdditionalDataURI shall contain the URI at which to access the additional data for this log entry, using the
+	// Redfish protocol and authentication methods. If both DiagnosticData and AdditionalDataURI are present,
+	// DiagnosticData shall contain the Base64-encoding of the data retrieved from the URI specified by the
+	// AdditionalDataURI property.
+	AdditionalDataURI string
+	// CPER shall contain the details for a CPER section or record that is the source of this log entry.
+	CPER CPER
+	// CXLEntryType shall contain the specific CXL entry type. This property shall only be present if EntryType
+	// contains 'CXL'.
+	CXLEntryType CXLEntryType
 	// Created shall be the time at which the log entry was created.
 	Created string
 	// Description provides a description of this resource.
 	Description string
+	// DiagnosticData shall contain a Base64-encoded string that represents diagnostic data associated with this log
+	// entry. The contents shall depend on the value of the DiagnosticDataType property. The length of the value should
+	// not exceed 4 KB. Larger diagnostic data payloads should omit this property and use the AdditionalDataURI
+	// property to reference the data. If both DiagnosticData and AdditionalDataURI are present, DiagnosticData shall
+	// contain the Base64-encoding of the data retrieved from the URI specified by the AdditionalDataURI property.
+	DiagnosticData string
+	// DiagnosticDataType shall contain the type of data available in the DiagnosticData property or retrieved from the
+	// URI specified by the AdditionalDataURI property.
+	DiagnosticDataType LogDiagnosticDataTypes
 	// EntryCode shall be present if the EntryType value is
 	// SEL. These enumerations are the values from tables 42-1 and 42-2 of
 	// the IPMI specification.
@@ -338,10 +407,22 @@ type LogEntry struct {
 	// EventTimestamp records an Event and the value shall be the time the event
 	// occurred.
 	EventTimestamp string
+	// FirstOverflowTimestamp shall contain the timestamp of the first overflow captured after this log entry. If this
+	// log entry is the most recent log entry in the log service, this property shall not be present if no overflow
+	// errors occurred after the time of this log entry. If this log entry is not the most recent log entry in the log
+	// service, this property shall not be present if no overflow errors occurred between the time of this log entry
+	// and the time of the next log entry.
+	FirstOverflowTimestamp string
 	// GeneratorId if EntryType is `SEL`, this property shall contain the
 	// 'Generator ID' field of the IPMI SEL Event Record. If EntryType is
 	// not `SEL`, this property should not be present.
 	GeneratorID string `json:"GeneratorId"`
+	// LastOverflowTimestamp shall contain the timestamp of the last overflow captured after this log entry. If this
+	// log entry is the most recent log entry in the log service, this property shall not be present if no overflow
+	// errors occurred after the time of this log entry. If this log entry is not the most recent log entry in the log
+	// service, this property shall not be present if no overflow errors occurred between the time of this log entry
+	// and the time of the next log entry.
+	LastOverflowTimestamp string
 	// Message shall be the Message property of
 	// the event if the EntryType is Event, the Description if the EntryType
 	// is SEL, and OEM Specific if the EntryType is Oem.
@@ -363,6 +444,13 @@ type LogEntry struct {
 	// entry was last modified. This property shall not appear if the log
 	// entry has not been modified since it was created.
 	Modified string
+	// OEMDiagnosticDataType shall contain the OEM-defined type of data available in the DiagnosticData property or
+	// retrieved from the URI specified by the AdditionalDataURI property. This property shall be present if
+	// DiagnosticDataType is 'OEM'.
+	OEMDiagnosticDataType string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// OemLogEntryCode shall represent the OEM
 	// specific Log Entry Code type of the Entry. This property shall only
 	// be present if the value of EntryType is SEL and the value of
@@ -375,6 +463,31 @@ type LogEntry struct {
 	// OemSensorType is used if the value of EntryType is SEL and the value
 	// of SensorType is OEM.
 	OemSensorType string
+	// Originator shall contain the source of the log entry.
+	Originator string
+	// OriginatorType shall contain the type of originator data.
+	OriginatorType OriginatorTypes
+	// OverflowErrorCount shall contain the count of overflow errors that occurred after this log entry. If this log
+	// entry is the most recent log entry in the log service, this property shall not be present if no overflow errors
+	// occurred after the time of this log entry. If this log entry is not the most recent log entry in the log
+	// service, this property shall not be present if no overflow errors occurred between the time of this log entry
+	// and the time of the next log entry.
+	OverflowErrorCount int
+	// Persistency shall indicate whether the log entry is persistent across a cold reset of the device.
+	Persistency bool
+	// Resolution shall contain the resolution of the log entry. Services should replace the resolution defined in the
+	// message registry with a more specific resolution in a log entry.
+	Resolution string
+	// ResolutionSteps shall contain an array of recommended steps to resolve the cause of the log entry. This property
+	// shall not be present if the Severity property contains 'OK'. A client can stop executing the resolution steps
+	// once the Resolved property resource contains 'true' or the Health property in the associated resource referenced
+	// by the OriginOfCondition property contains 'OK'.
+	ResolutionSteps []ResolutionStep
+	// Resolved shall contain an indication if the cause of the log entry has been resolved or repaired. The value
+	// 'true' shall indicate if the cause of the log entry has been resolved or repaired. This property shall contain
+	// the value 'false' if the log entry is still active. The value 'false' shall be the initial state. Clients should
+	// ignore this property if Severity contains 'OK'.
+	Resolved bool
 	// SensorNumber shall be the IPMI sensor
 	// number if the EntryType is SEL, the count of events if the EntryType
 	// is Event, and OEM Specific if EntryType is Oem.
@@ -383,13 +496,31 @@ type LogEntry struct {
 	// SEL. These enumerations are the values from table 42-3 of the IPMI
 	// specification.
 	SensorType SensorType
+	// ServiceProviderNotified shall contain an indication if the log entry has been sent to the service provider.
+	ServiceProviderNotified bool
 	// Severity shall be the severity of the
 	// condition resulting in the log entry, as defined in the Status section
 	// of the Redfish specification.
 	Severity EventSeverity
-	// originOfCondition shall be an href that
-	// references the resource for which the log is associated.
-	originOfCondition string
+	// SpecificEventExistsInGroup shall indicate that this log entry is equivalent to another log entry, with a more
+	// specific definition, within the same EventGroupId. For example, the 'DriveFailed' message from the Storage
+	// Device Message Registry is more specific than the 'ResourceStatusChangedCritical' message from the Resource
+	// Event Message Registry, when both occur with the same EventGroupId. This property shall contain 'true' if a more
+	// specific event is available, and shall contain 'false' if no equivalent event exists in the same EventGroupId.
+	// If this property is absent, the value shall be assumed to be 'false'.
+	SpecificEventExistsInGroup bool
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+
+	// originOfCondition shall be an href that references the resource for which the log is associated.
+	OriginOfCondition string
+	// RelatedItem shall contain an array of links to resources that are related to this log entry.
+	RelatedItem []string
+	// RelatedItemCount is the number of related items.
+	RelatedItemCount  int
+	relatedLogEntries []string
+	// RelatedLogEntriesCount is the number of related log entries.
+	RelatedLogEntriesCount int
 }
 
 // UnmarshalJSON unmarshals a LogEntry object from the raw JSON.
@@ -401,6 +532,15 @@ func (logentry *LogEntry) UnmarshalJSON(b []byte) error {
 			// OriginOfCondition shall be an href that
 			// references the resource for which the log is associated.
 			OriginOfCondition common.Link
+			// RelatedItem shall contain an array of links to resources that are related to this log entry. It shall not
+			// contain links to LogEntry resources. RelatedLogEntries is used to reference related log entries. This property
+			// shall not contain the value of the OriginOfCondition property.
+			RelatedItem      []string
+			RelatedItemCount int `json:"RelatedItem@odata.count"`
+			// RelatedLogEntries shall contain an array of links to resources of type LogEntry in this or other log services
+			// that are related to this log entry.
+			RelatedLogEntries      common.Links
+			RelatedLogEntriesCount int `json:"RelatedLogEntries@odata.count"`
 		}
 	}
 
@@ -411,9 +551,54 @@ func (logentry *LogEntry) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*logentry = LogEntry(t.temp)
-	logentry.originOfCondition = t.Links.OriginOfCondition.String()
+	logentry.OriginOfCondition = t.Links.OriginOfCondition.String()
+	logentry.RelatedItem = t.Links.RelatedItem
+	logentry.RelatedItemCount = t.Links.RelatedItemCount
+	logentry.relatedLogEntries = t.Links.RelatedLogEntries.ToStrings()
+	logentry.RelatedItemCount = t.Links.RelatedLogEntriesCount
+
+	// This is a read/write object, so we need to save the raw object data for later
+	logentry.rawData = b
 
 	return nil
+}
+
+// RelatedLogEntries gets the set of LogEntry in this or other log services that are related to this log entry.
+func (logentry *LogEntry) RelatedLogEntries() ([]*LogEntry, error) {
+	var result []*LogEntry
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range logentry.relatedLogEntries {
+		unit, err := GetLogEntry(logentry.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Update commits updates to this object's properties to the running system.
+func (logentry *LogEntry) Update() error {
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(LogEntry)
+	original.UnmarshalJSON(logentry.rawData)
+
+	readWriteFields := []string{
+		"Resolved",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(logentry).Elem()
+
+	return logentry.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetLogEntry will get a LogEntry instance from the service.
