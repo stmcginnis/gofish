@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -132,9 +133,15 @@ type EventService struct {
 	// destination.  If this property is not present, the EventFormatType
 	// shall be assumed to be Event.
 	EventFormatTypes []EventFormatType
-	// EventTypesForSubscription is the types of Events
-	// that can be subscribed to.
+	// EventTypesForSubscription is the types of Events that can be subscribed to.
+	// This property has been deprecated. Starting with Redfish Specification v1.6 (Event v1.3),
+	// subscriptions are based on the RegistryPrefix and ResourceType properties and not on the EventType property.
 	EventTypesForSubscription []EventType
+	// ExcludeMessageID shall indicate whether this service supports filtering by the ExcludeMessageIds property.
+	ExcludeMessageID bool
+	// ExcludeRegistryPrefix shall indicate whether this service supports filtering by the ExcludeRegistryPrefixes
+	// property.
+	ExcludeRegistryPrefix bool
 	// IncludeOriginOfConditionSupported shall indicate
 	// whether the service supports including the resource payload of the
 	// origin of condition in the event payload.  If `true`, event
@@ -157,6 +164,9 @@ type EventService struct {
 	ServerSentEventURI string `json:"ServerSentEventUri"`
 	// ServiceEnabled shall be a boolean indicating whether this service is enabled.
 	ServiceEnabled bool
+	// Severities shall specify an array of the allowable severities that can be used for an event subscription. If
+	// this property is absent or contains an empty array, the service does not support severity-based subscriptions.
+	Severities []common.Health
 	// Status is This property shall contain any status or health properties of
 	// the resource.
 	Status common.Status
@@ -167,10 +177,13 @@ type EventService struct {
 	// Subscriptions shall contain the link to a collection of type
 	// EventDestination.
 	Subscriptions string
-	// SubmitTestEventTarget is the URL to send SubmitTestEvent actions.
-	SubmitTestEventTarget string
 	// RawData holds the original serialized JSON so we can compare updates.
 	RawData []byte
+
+	// SubmitTestEventTarget is the URL to send SubmitTestEvent actions.
+	SubmitTestEventTarget string
+	// TestEventSubscriptionTarget is the URL to test event using the pre-defined test message.
+	testEventSubscriptionTarget string
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
@@ -180,6 +193,9 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 		SubmitTestEvent struct {
 			Target string
 		} `json:"#EventService.SubmitTestEvent"`
+		TestEventSubscription struct {
+			Target string
+		} `json:"#EventService.TestEventSubscription"`
 	}
 	var t struct {
 		temp
@@ -197,6 +213,7 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 	// Need to make these publicly available for OEM versions to access
 	eventservice.Subscriptions = t.Subscriptions.String()
 	eventservice.SubmitTestEventTarget = t.Actions.SubmitTestEvent.Target
+	eventservice.testEventSubscriptionTarget = t.Actions.TestEventSubscription.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
 	eventservice.RawData = b
@@ -408,6 +425,17 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 	}
 
 	return eventservice.Post(eventservice.SubmitTestEventTarget, t)
+}
+
+// TestEventSubscription will send an event containing the TestMessage message from the
+// Resource Event Message Registry to all appropriate event destinations.
+func (eventservice *EventService) TestEventSubscription() error {
+	if eventservice.testEventSubscriptionTarget == "" {
+		return errors.New("TestEventSubsciption not supported by this service") //nolint:error-strings
+	}
+
+	var payload struct{}
+	return eventservice.Post(eventservice.testEventSubscriptionTarget, payload)
 }
 
 // SSEFilterPropertiesSupported shall contain a set of properties that indicate
