@@ -6,7 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -487,7 +487,7 @@ func (circuit *Circuit) Update() error {
 // This action shall control the state of the circuit breaker or over-current protection device.
 func (circuit *Circuit) BreakerControl(powerState ActionPowerState) error {
 	if circuit.breakerControlTarget == "" {
-		return fmt.Errorf("BreakerControl is not supported") //nolint:golint
+		return errors.New("BreakerControl is not supported")
 	}
 
 	t := struct {
@@ -500,7 +500,7 @@ func (circuit *Circuit) BreakerControl(powerState ActionPowerState) error {
 // This action shall control the power state of the circuit.
 func (circuit *Circuit) PowerControl(powerState ActionPowerState) error {
 	if circuit.powerControlTarget == "" {
-		return fmt.Errorf("PowerControl is not supported") //nolint:golint
+		return errors.New("PowerControl is not supported")
 	}
 
 	t := struct {
@@ -513,7 +513,7 @@ func (circuit *Circuit) PowerControl(powerState ActionPowerState) error {
 // This action shall reset any time intervals or counted values for this circuit.
 func (circuit *Circuit) ResetMetrics() error {
 	if circuit.resetMetricsTarget == "" {
-		return fmt.Errorf("ResetMetrics is not supported") //nolint:golint
+		return errors.New("ResetMetrics is not supported")
 	}
 
 	return circuit.Post(circuit.resetMetricsTarget, nil)

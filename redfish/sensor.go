@@ -151,6 +151,25 @@ type Thresholds struct {
 	UpperFatal Threshold
 }
 
+// SensorArrayExcerpt shall represent a sensor for a Redfish implementation.
+type SensorArrayExcerpt struct {
+	// DataSourceURI shall contain a URI to the resource that provides the source of the excerpt contained within this
+	// copy.
+	DataSourceURI string
+	// DeviceName shall contain the name of the device associated with this sensor. If the device is represented by a
+	// resource, the value shall contain the value of the Name property of the associated resource.
+	DeviceName string
+	// PhysicalContext shall contain a description of the affected component or region within the equipment to which
+	// this sensor measurement applies.
+	PhysicalContext PhysicalContext
+	// PhysicalSubContext shall contain a description of the usage or sub-region within the equipment to which this
+	// sensor measurement applies. This property generally differentiates multiple sensors within the same
+	// PhysicalContext instance.
+	PhysicalSubContext PhysicalSubContext
+	// Reading shall contain the sensor value.
+	Reading float64
+}
+
 // SensorCurrentExcerpt shall represent a sensor for a Redfish implementation.
 type SensorCurrentExcerpt struct {
 	// CrestFactor shall contain the ratio of the peak measurement divided by the RMS measurement and calculated over
