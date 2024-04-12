@@ -40,6 +40,17 @@ const (
 	NetworkHostInterfaceHostInterfaceType HostInterfaceType = "NetworkHostInterface"
 )
 
+type CredentialBootstrapping struct {
+	// EnableAfterReset shall indicate whether credential bootstrapping is enabled after a reset for this interface. If
+	// 'true', services shall set the Enabled property to 'true' after a reset of the host or the service.
+	EnableAfterReset bool
+	// Enabled shall indicate whether credential bootstrapping is enabled for this interface.
+	Enabled bool
+	// RoleID shall contain the ID property of the role resource that is used for the bootstrap account created for
+	// this interface.
+	RoleID string
+}
+
 // HostInterface is used to represent Host Interface resources as part of
 // the Redfish specification.
 type HostInterface struct {
@@ -56,6 +67,10 @@ type HostInterface struct {
 	// AuthenticationModes shall be an array consisting of the authentication
 	// modes allowed on this interface.
 	AuthenticationModes []AuthenticationMode
+	// CredentialBootstrapping shall contain settings for the Redfish Host Interface Specification-defined 'credential
+	// bootstrapping via IPMI commands' feature for this interface. This property shall be absent if credential
+	// bootstrapping is not supported by the service.
+	CredentialBootstrapping string
 	// Description provides a description of this resource.
 	Description string
 	// ExternallyAccessible is used by external clients, and this property
@@ -64,9 +79,11 @@ type HostInterface struct {
 	// FirmwareAuthEnabled shall be a boolean
 	// indicating whether firmware authentication for this interface is
 	// enabled.
+	// This property has been deprecated in favor of newer methods of negotiating credentials.
 	FirmwareAuthEnabled bool
 	// FirmwareAuthRoleID shall be the ID of the Role resource that is
 	// configured for firmware authentication on this interface.
+	// This property has been deprecated in favor of newer methods of negotiating credentials.
 	FirmwareAuthRoleID string `json:"FirmwareAuthRoleId"`
 	// HostEthernetInterfaces shall be a link to a collection of type
 	// EthernetInterfaceCollection that Computer Systems use as the Host
@@ -79,9 +96,11 @@ type HostInterface struct {
 	InterfaceEnabled bool
 	// KernelAuthEnabled shall be a boolean indicating whether kernel
 	// authentication for this interface is enabled.
+	// This property has been deprecated in favor of newer methods of negotiating credentials.
 	KernelAuthEnabled bool
 	// KernelAuthRoleID shall be the ID of the Role resource that is configured
 	// for kernel authentication on this interface.
+	// This property has been deprecated in favor of newer methods of negotiating credentials.
 	KernelAuthRoleID string `json:"KernelAuthRoleId"`
 	// ManagerEthernetInterface is used by this Manager as the HostInterface.
 	managerEthernetInterface string
@@ -92,6 +111,7 @@ type HostInterface struct {
 	// Status is This property shall contain any status or health properties
 	// of the resource.
 	Status common.Status
+
 	// AuthNoneRole shall be a link to a Role object instance, and should
 	// reference the object identified by property AuthNoneRoleId. This property
 	// shall be absent if AuthNone is not supported by the service for the
@@ -102,11 +122,18 @@ type HostInterface struct {
 	computerSystems []string
 	// ComputerSystemsCount is the number of computer systems.
 	ComputerSystemsCount int
+	// CredentialBootstrappingRole shall contain a link to a resource of type Role, and should
+	// link to the resource identified by the RoleId property within CredentialBootstrapping.
+	// This property shall be absent if the Redfish Host Interface Specification-defined
+	// 'credential bootstrapping via IPMI commands' feature is not supported by the service.
+	credentialBootstrappingRole string
 	// FirmwareAuthRole shall be a link to a Role object instance, and should
 	// reference the object identified by property FirmwareAuthRoleID.
+	// This property has been deprecated in favor of newer methods of negotiating credentials.
 	firmwareAuthRole string
 	// KernelAuthRole shall be a link to a Role object instance, and should
 	// reference the object identified by property KernelAuthRoleId.
+	// This property has been deprecated in favor of newer methods of negotiating credentials.
 	kernelAuthRole string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
@@ -117,11 +144,12 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 	type temp HostInterface
 
 	type links struct {
-		AuthNoneRole         common.Link
-		ComputerSystems      common.Links
-		ComputerSystemsCount int `json:"ComputerSystems@odata.count"`
-		FirmwareAuthRole     common.Link
-		KernelAuthRole       common.Link
+		AuthNoneRole                common.Link
+		ComputerSystems             common.Links
+		ComputerSystemsCount        int `json:"ComputerSystems@odata.count"`
+		CredentialBootstrappingRole common.Link
+		FirmwareAuthRole            common.Link
+		KernelAuthRole              common.Link
 	}
 
 	var t struct {
@@ -143,8 +171,10 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 	hostinterface.authNoneRole = t.Links.AuthNoneRole.String()
 	hostinterface.computerSystems = t.Links.ComputerSystems.ToStrings()
 	hostinterface.ComputerSystemsCount = t.Links.ComputerSystemsCount
+	hostinterface.credentialBootstrappingRole = t.Links.CredentialBootstrappingRole.String()
 	hostinterface.firmwareAuthRole = t.Links.FirmwareAuthRole.String()
 	hostinterface.kernelAuthRole = t.Links.KernelAuthRole.String()
+
 	hostinterface.hostEthernetInterfaces = t.HostEthernetInterfaces.String()
 	hostinterface.managerEthernetInterface = t.ManagerEthernetInterface.String()
 	hostinterface.networkProtocol = t.NetworkProtocol.String()
@@ -168,11 +198,7 @@ func (hostinterface *HostInterface) Update() error {
 	readWriteFields := []string{
 		"AuthNoneRoleId",
 		"AuthenticationModes",
-		"FirmwareAuthEnabled",
-		"FirmwareAuthRoleId",
 		"InterfaceEnabled",
-		"KernelAuthEnabled",
-		"KernelAuthRoleId",
 	}
 
 	originalElement := reflect.ValueOf(original).Elem()
@@ -252,10 +278,10 @@ func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error)
 	return result, collectionError
 }
 
-// HostNetworkInterfaces gets the network interface controllers or cards (NICs)
+// HostEthernetInterfaces gets the network interface controllers or cards (NICs)
 // that a Computer System uses to communicate with this Host Interface.
-func (hostinterface *HostInterface) HostNetworkInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.managerEthernetInterface)
+func (hostinterface *HostInterface) HostEthernetInterfaces() ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.hostEthernetInterfaces)
 }
 
 // ManagerNetworkInterfaces gets the network interface controllers or cards
@@ -264,4 +290,18 @@ func (hostinterface *HostInterface) ManagerNetworkInterfaces() ([]*EthernetInter
 	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.managerEthernetInterface)
 }
 
-// TODO: Add access functions for linked objects
+// AuthRoleNone gets the role that contains the privileges on this host interface when no authentication is performed.
+func (hostinterface *HostInterface) AuthNoneRole() (*Role, error) {
+	if hostinterface.authNoneRole == "" {
+		return nil, nil
+	}
+	return GetRole(hostinterface.GetClient(), hostinterface.authNoneRole)
+}
+
+// CredentialBootstrappingRole gets the role that contains the privileges for the bootstrap account created for this interface.
+func (hostinterface *HostInterface) CredentialBootstrappingRole() (*Role, error) {
+	if hostinterface.credentialBootstrappingRole == "" {
+		return nil, nil
+	}
+	return GetRole(hostinterface.GetClient(), hostinterface.credentialBootstrappingRole)
+}
