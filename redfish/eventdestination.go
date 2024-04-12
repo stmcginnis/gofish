@@ -18,7 +18,6 @@ import (
 type DeliveryRetryPolicy string
 
 const (
-
 	// TerminateAfterRetriesDeliveryRetryPolicy The subscription is
 	// terminated after the maximum number of retries is reached.
 	TerminateAfterRetriesDeliveryRetryPolicy DeliveryRetryPolicy = "TerminateAfterRetries"
@@ -28,53 +27,167 @@ const (
 	// RetryForeverDeliveryRetryPolicy shall continue even after the after
 	// the maximum number of retries is reached.
 	RetryForeverDeliveryRetryPolicy DeliveryRetryPolicy = "RetryForever"
+	// RetryForeverWithBackoffDeliveryRetryPolicy shall indicate the subscription is not suspended or terminated, and
+	// attempts at delivery of future events shall continue regardless of the number of retries. Retry attempts are
+	// issued over time according to a service-defined backoff algorithm. The backoff algorithm may insert an
+	// increasing amount of delay between retry attempts and may reach a maximum.
+	RetryForeverWithBackoffDeliveryRetryPolicy DeliveryRetryPolicy = "RetryForeverWithBackoff"
 )
 
 // EventDestinationProtocol is the communication protocol of the event destination.
 type EventDestinationProtocol string
 
 const (
-
-	// RedfishEventDestinationProtocol The destination follows the Redfish
-	// specification for event notifications.
+	// RedfishEventDestinationProtocol shall indicate the destination follows the Redfish Specification for event
+	// notifications. Destinations requesting EventFormatType of 'Event' shall receive a Redfish resource of type
+	// Event. Destinations requesting EventFormatType of 'MetricReport' shall receive a Redfish resource of type
+	// MetricReport.
 	RedfishEventDestinationProtocol EventDestinationProtocol = "Redfish"
-	// SNMPv1EventDestinationProtocol shall indicate the destination follows
-	// the RFC1157-defined SNMPv1 protocol.
+	// KafkaEventDestinationProtocol shall indicate the destination follows the Apache-defined Kafka protocol as
+	// defined by the Kafka Protocol Guide. The Context property shall contain the Kafka topic of the destination
+	// broker.
+	KafkaEventDestinationProtocol EventDestinationProtocol = "Kafka"
+	// SNMPv1EventDestinationProtocol shall indicate the destination follows the RFC1157-defined SNMPv1 protocol.
 	SNMPv1EventDestinationProtocol EventDestinationProtocol = "SNMPv1"
-	// SNMPv2cEventDestinationProtocol shall indicate the destination follows
-	// the SNMPv2c protocol as defined by RFC1441 and RFC1452.
+	// SNMPv2cEventDestinationProtocol shall indicate the destination follows the SNMPv2c protocol as defined by
+	// RFC1441 and RFC1452.
 	SNMPv2cEventDestinationProtocol EventDestinationProtocol = "SNMPv2c"
-	// SNMPv3EventDestinationProtocol shall indicate the destination follows
-	// the SNMPv3 protocol as defined by RFC3411 and RFC3418.
+	// SNMPv3EventDestinationProtocol shall indicate the destination follows the SNMPv3 protocol as defined by RFC3411
+	// and RFC3418.
 	SNMPv3EventDestinationProtocol EventDestinationProtocol = "SNMPv3"
-	// SMTPEventDestinationProtocol shall indicate the destination follows
-	// the RFC5321-defined SMTP specification.
+	// SMTPEventDestinationProtocol shall indicate the destination follows the RFC5321-defined SMTP specification.
 	SMTPEventDestinationProtocol EventDestinationProtocol = "SMTP"
+	// SyslogTLSEventDestinationProtocol shall indicate the destination follows the TLS-based transport for syslog as
+	// defined in RFC5424.
+	SyslogTLSEventDestinationProtocol EventDestinationProtocol = "SyslogTLS"
+	// SyslogTCPEventDestinationProtocol shall indicate the destination follows the TCP-based transport for syslog as
+	// defined in RFC6587.
+	SyslogTCPEventDestinationProtocol EventDestinationProtocol = "SyslogTCP"
+	// SyslogUDPEventDestinationProtocol shall indicate the destination follows the UDP-based transport for syslog as
+	// defined in RFC5424.
+	SyslogUDPEventDestinationProtocol EventDestinationProtocol = "SyslogUDP"
+	// SyslogRELPEventDestinationProtocol shall indicate the destination follows the Reliable Event Logging Protocol
+	// (RELP) transport for syslog as defined by www.rsyslog.com.
+	SyslogRELPEventDestinationProtocol EventDestinationProtocol = "SyslogRELP"
+	// OEMEventDestinationProtocol shall indicate an OEM-specific protocol. The OEMProtocol property shall contain the
+	// specific OEM event destination protocol.
+	OEMEventDestinationProtocol EventDestinationProtocol = "OEM"
 )
 
 // SubscriptionType is the type of subscription used.
 type SubscriptionType string
 
 const (
-
-	// RedfishEventSubscriptionType The subscription follows the Redfish
-	// specification for event notifications, which is done by a service
-	// sending an HTTP POST to the subscriber's destination URI.
+	// RedfishEventSubscriptionType The subscription follows the Redfish Specification for event notifications. To send
+	// an event notification, a service sends an HTTP POST to the subscriber's destination URI.
 	RedfishEventSubscriptionType SubscriptionType = "RedfishEvent"
-	// SSESubscriptionType The subscription follows the HTML5 Server-Sent
-	// Event definition for event notifications.
+	// SSESubscriptionType The subscription follows the HTML5 server-sent event definition for event notifications.
 	SSESubscriptionType SubscriptionType = "SSE"
-	// SNMPTrapSubscriptionType shall indicate the subscription follows the
-	// various versions of SNMP Traps for event notifications.
-	// EventDestinationProtocol shall specify the appropriate version of
-	// SNMP.
+	// SNMPTrapSubscriptionType shall indicate the subscription follows the various versions of SNMP Traps for event
+	// notifications. Protocol shall specify the appropriate version of SNMP.
 	SNMPTrapSubscriptionType SubscriptionType = "SNMPTrap"
-	// SNMPInformSubscriptionType shall indicate the subscription follows
-	// versions 2 and 3 of SNMP Inform for event notifications.
-	// EventDestinationProtocol shall specify the appropriate version of
-	// SNMP.
+	// SNMPInformSubscriptionType shall indicate the subscription follows versions 2 and 3 of SNMP Inform for event
+	// notifications. Protocol shall specify the appropriate version of SNMP.
 	SNMPInformSubscriptionType SubscriptionType = "SNMPInform"
+	// SyslogSubscriptionType shall indicate the subscription forwards syslog messages to the event destination.
+	// Protocol shall specify the appropriate syslog protocol.
+	SyslogSubscriptionType SubscriptionType = "Syslog"
+	// OEMSubscriptionType shall indicate an OEM subscription type. The OEMSubscriptionType property shall contain the
+	// specific OEM subscription type.
+	OEMSubscriptionType SubscriptionType = "OEM"
 )
+
+// SyslogFacility shall specify the syslog facility codes as program types. Facility values are
+// described in the RFC5424.
+type SyslogFacility string
+
+const (
+	// KernSyslogFacility Kernel messages.
+	KernSyslogFacility SyslogFacility = "Kern"
+	// UserSyslogFacility User-level messages.
+	UserSyslogFacility SyslogFacility = "User"
+	// MailSyslogFacility Mail system.
+	MailSyslogFacility SyslogFacility = "Mail"
+	// DaemonSyslogFacility System daemons.
+	DaemonSyslogFacility SyslogFacility = "Daemon"
+	// AuthSyslogFacility Security/authentication messages.
+	AuthSyslogFacility SyslogFacility = "Auth"
+	// SyslogSyslogFacility Messages generated internally by syslogd.
+	SyslogSyslogFacility SyslogFacility = "Syslog"
+	// LPRSyslogFacility Line printer subsystem.
+	LPRSyslogFacility SyslogFacility = "LPR"
+	// NewsSyslogFacility Network news subsystem.
+	NewsSyslogFacility SyslogFacility = "News"
+	// UUCPSyslogFacility UUCP subsystem.
+	UUCPSyslogFacility SyslogFacility = "UUCP"
+	// CronSyslogFacility Clock daemon.
+	CronSyslogFacility SyslogFacility = "Cron"
+	// AuthprivSyslogFacility Security/authentication messages.
+	AuthprivSyslogFacility SyslogFacility = "Authpriv"
+	// FTPSyslogFacility FTP daemon.
+	FTPSyslogFacility SyslogFacility = "FTP"
+	// NTPSyslogFacility NTP subsystem.
+	NTPSyslogFacility SyslogFacility = "NTP"
+	// SecuritySyslogFacility Log audit.
+	SecuritySyslogFacility SyslogFacility = "Security"
+	// ConsoleSyslogFacility Log alert.
+	ConsoleSyslogFacility SyslogFacility = "Console"
+	// SolarisCronSyslogFacility Scheduling daemon.
+	SolarisCronSyslogFacility SyslogFacility = "SolarisCron"
+	// Local0SyslogFacility Locally used facility 0.
+	Local0SyslogFacility SyslogFacility = "Local0"
+	// Local1SyslogFacility Locally used facility 1.
+	Local1SyslogFacility SyslogFacility = "Local1"
+	// Local2SyslogFacility Locally used facility 2.
+	Local2SyslogFacility SyslogFacility = "Local2"
+	// Local3SyslogFacility Locally used facility 3.
+	Local3SyslogFacility SyslogFacility = "Local3"
+	// Local4SyslogFacility Locally used facility 4.
+	Local4SyslogFacility SyslogFacility = "Local4"
+	// Local5SyslogFacility Locally used facility 5.
+	Local5SyslogFacility SyslogFacility = "Local5"
+	// Local6SyslogFacility Locally used facility 6.
+	Local6SyslogFacility SyslogFacility = "Local6"
+	// Local7SyslogFacility Locally used facility 7.
+	Local7SyslogFacility SyslogFacility = "Local7"
+)
+
+// SyslogSeverity shall specify the syslog severity levels as an application-specific rating used to
+// describe the urgency of the message. 'Emergency' should be reserved for messages indicating the system is
+// unusable and 'Debug' should only be used when debugging a program. Severity values are described in RFC5424.
+type SyslogSeverity string
+
+const (
+	// EmergencySyslogSeverity A panic condition.
+	EmergencySyslogSeverity SyslogSeverity = "Emergency"
+	// AlertSyslogSeverity A condition that should be corrected immediately, such as a corrupted system database.
+	AlertSyslogSeverity SyslogSeverity = "Alert"
+	// CriticalSyslogSeverity Hard device errors.
+	CriticalSyslogSeverity SyslogSeverity = "Critical"
+	// ErrorSyslogSeverity An Error.
+	ErrorSyslogSeverity SyslogSeverity = "Error"
+	// WarningSyslogSeverity A Warning.
+	WarningSyslogSeverity SyslogSeverity = "Warning"
+	// NoticeSyslogSeverity Conditions that are not error conditions, but that might require special handling.
+	NoticeSyslogSeverity SyslogSeverity = "Notice"
+	// InformationalSyslogSeverity Informational only.
+	InformationalSyslogSeverity SyslogSeverity = "Informational"
+	// DebugSyslogSeverity Messages that contain information normally of use only when debugging a program.
+	DebugSyslogSeverity SyslogSeverity = "Debug"
+	// AllSyslogSeverity A message of any severity.
+	AllSyslogSeverity SyslogSeverity = "All"
+)
+
+// SyslogFilter shall contain the filter for a syslog message. The filter shall describe the desired syslog message
+// to forward to a remote syslog server.
+type SyslogFilter struct {
+	// LogFacilities shall contain the types of programs that can log messages. If this property contains an empty
+	// array or is absent, all facilities shall be indicated.
+	LogFacilities []SyslogFacility
+	// LowestSeverity shall contain the lowest syslog severity level that will be forwarded. The service shall forward
+	// all messages equal to or greater than the value in this property. The value 'All' shall indicate all severities.
+	LowestSeverity SyslogSeverity
+}
 
 // EventDestination is used to represent the target of an event
 // subscription, including the types of events subscribed and context to
@@ -86,6 +199,19 @@ type EventDestination struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	// Certificates shall contain a link to a resource collection of type CertificateCollection that represent the
+	// server certificates for the server referenced by the Destination property. If VerifyCertificate is 'true',
+	// services shall compare the certificates in this collection with the certificate obtained during handshaking with
+	// the event destination in order to verify the identity of the event destination prior to sending an event. If the
+	// server cannot be verified, the service shall not send the event. If VerifyCertificate is 'false', the service
+	// shall not perform certificate verification with certificates in this collection. Regardless of the contents of
+	// this collection, services may perform additional verification based on other factors, such as the configuration
+	// of the SecurityPolicy resource.
+	certificates string
+	// ClientCertificates shall contain a link to a resource collection of type CertificateCollection that represents
+	// the client identity certificates that are provided to the server referenced by the Destination property as part
+	// of TLS handshaking.
+	clientCertificates string
 	// Context shall contain a client supplied context that will remain with the
 	// connection through the connections lifetime.
 	Context string
@@ -103,9 +229,28 @@ type EventDestination struct {
 	// this service will send to the EventDestination. If this property is not
 	// present, the EventFormatType shall be assumed to be Event.
 	EventFormatType EventFormatType
-	// EventTypes contains the types of events
-	// that will be sent to the destination.
+	// EventTypes contains the types of events that will be sent to the destination.
+	// This property has been deprecated. Starting with Redfish Specification v1.6 (Event v1.3),
+	// subscriptions are based on the RegistryPrefix and ResourceType properties and not on the
+	// EventType property. Use EventFormatType to create subscriptions for metric reports.
 	EventTypes []EventType
+	// ExcludeMessageIDs shall contain an array of excluded MessageIds that are not allowed values for the MessageId
+	// property within an event sent to the subscriber. The MessageId shall be in the
+	// 'MessageRegistryPrefix.MessageKey' format. If included, the MessageId major and minor version details should be
+	// ignored. Events with a MessageId that is contained in this array shall not be sent to the subscriber. If this
+	// property is an empty array or is absent, no exclusive filtering based upon the MessageId of an event is
+	// performed.
+	ExcludeMessageIDs []string
+	// ExcludeRegistryPrefixes shall contain an array of prefixes of excluded message registries that contain the
+	// MessageIds that are not allowed values for the MessageId property within an event sent to the subscriber. Events
+	// with a MessageId that is from a message registry contained in this array shall not be sent to the subscriber. If
+	// this property is an empty array or is absent, no exclusive filtering based upon message registry of the
+	// MessageId of an event is performed.
+	ExcludeRegistryPrefixes []string
+	// HeartbeatIntervalMinutes shall indicate the interval for sending periodic heartbeat events to the subscriber.
+	// The value shall be the interval, in minutes, between each periodic event. This property shall not be present if
+	// the SendHeartbeat property is not present.
+	HeartbeatIntervalMinutes int
 	// HTTPHeaders shall contain an object consisting of the names and values of
 	// of HTTP header to be included with every event POST to the Event
 	// Destination. This property shall be null or an empty array on a GET. An
@@ -122,17 +267,23 @@ type EventDestination struct {
 	// not be sent to the subscriber. If this property is absent or the array is
 	// empty, the service shall send Events with any MessageId to the subscriber.
 	MessageIDs []string `json:"MessageIds"`
-	// metricReportDefinitions shall specify an array of
-	// metric report definitions that are the only allowable generators of
-	// metric reports for this subscription. Metric reports originating from
-	// metric report definitions not contained in this array shall not be
-	// sent to the subscriber. If this property is absent or the array is
-	// empty, the service shall send metric reports originating from any
-	// metric report definition to the subscriber.
-	// metricReportDefinitions []string
-	// MetricReportDefinitions@odata.count is
+	// MetricReportDefinitions shall specify an array of metric report definitions that are the only allowable
+	// generators of metric reports for this subscription. Metric reports originating from metric report definitions
+	// not contained in this array shall not be sent to the subscriber. If this property is absent or the array is
+	// empty, the service shall send metric reports originating from any metric report definition to the subscriber.
+	MetricReportDefinitions []string
+	// MetricReportDefinitionsCount is the number of MetricReportDefinitions.
 	MetricReportDefinitionsCount int `json:"MetricReportDefinitions@odata.count"`
-	// originResources shall specify an array of Resources, Resource Collections,
+	// OEMProtocol shall contain the protocol type that the event uses to send the event to the destination. This
+	// property shall be present if Protocol is 'OEM'.
+	OEMProtocol string
+	// OEMSubscriptionType shall indicate the OEM-defined type of subscription for events. This property shall be
+	// present if SubscriptionType is 'OEM'.
+	OEMSubscriptionType string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OriginResources shall specify an array of Resources, Resource Collections,
 	// or Referenceable Members that are the only allowable values for the
 	// OriginOfCondition property within an EventRecord sent to the subscriber.
 	// Events originating from Resources, Resource Collections, or Referenceable
@@ -140,7 +291,7 @@ type EventDestination struct {
 	// If this property is absent or the array is empty, the service shall send
 	// Events originating from any Resource, Resource Collection, or
 	// Referenceable Member to the subscriber.
-	// originResources []string
+	OriginResources []string
 	// OriginResourcesCount is the number of OriginResources.
 	OriginResourcesCount int `json:"OriginResources@odata.count"`
 	// Protocol is used to indicate that the event type shall adhere to that
@@ -178,6 +329,15 @@ type EventDestination struct {
 	// this property is not present, the SubscriptionType shall be assumed to be
 	// RedfishEvent.
 	SubscriptionType SubscriptionType
+	// SyslogFilters shall describe all desired syslog messages to send to a remote syslog server. If this property
+	// contains an empty array or is absent, all messages shall be sent.
+	SyslogFilters []SyslogFilter
+	// VerifyCertificate shall indicate whether the service will verify the certificate of the server referenced by the
+	// Destination property prior to sending the event with the certificates found in the collection referenced by the
+	// Certificates property. If this property is not supported by the service or specified by the client in the create
+	// request, it shall be assumed to be 'false'. Regardless of the value of this property, services may perform
+	// additional verification based on other factors, such as the configuration of the SecurityPolicy resource.
+	VerifyCertificate bool
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -187,6 +347,8 @@ func (eventdestination *EventDestination) UnmarshalJSON(b []byte) error {
 	type temp EventDestination
 	var t struct {
 		temp
+		Certificates       common.Link
+		ClientCertificates common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -196,6 +358,8 @@ func (eventdestination *EventDestination) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*eventdestination = EventDestination(t.temp)
+	eventdestination.certificates = t.Certificates.String()
+	eventdestination.clientCertificates = t.ClientCertificates.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	eventdestination.rawData = b
@@ -216,6 +380,7 @@ func (eventdestination *EventDestination) Update() error {
 	readWriteFields := []string{
 		"Context",
 		"DeliveryRetryPolicy",
+		"VerifyCertificate",
 	}
 
 	originalElement := reflect.ValueOf(original).Elem()
@@ -501,3 +666,21 @@ func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDest
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included
 // with every event POST to the Event Destination.
 type HTTPHeaderProperty map[string][]string
+
+// Certificates gets the server certificates for the server referenced by the Destination property.
+func (eventdestination *EventDestination) Certificates() ([]*Certificate, error) {
+	if eventdestination.certificates == "" {
+		return []*Certificate{}, nil
+	}
+
+	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.certificates)
+}
+
+// ClientCertificates gets the client identity certificates for the server referenced by the Destination property.
+func (eventdestination *EventDestination) ClientCertificates() ([]*Certificate, error) {
+	if eventdestination.clientCertificates == "" {
+		return []*Certificate{}, nil
+	}
+
+	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.clientCertificates)
+}
