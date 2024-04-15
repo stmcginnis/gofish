@@ -5,6 +5,8 @@
 package redfish
 
 import (
+	"encoding/json"
+
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -28,6 +30,26 @@ type AlarmTrips struct {
 	UncorrectableECCError bool
 }
 
+// AlertCapabilities shall contain the conditions that would generate an alert to the CXL Fabric Manager or host.
+type AlertCapabilities struct {
+	// CorrectableECCError shall indicate whether correctable ECC errors generate an alert to the CXL Fabric Manager or
+	// host.
+	CorrectableECCError bool
+	// SpareBlock shall indicate whether spare block conditions generate an alert to the CXL Fabric Manager or host.
+	SpareBlock bool
+	// Temperature shall indicate whether temperature conditions generate an alert to the CXL Fabric Manager or host.
+	Temperature bool
+	// UncorrectableECCError shall indicate whether uncorrectable ECC errors generate an alert to the CXL Fabric
+	// Manager or host.
+	UncorrectableECCError bool
+}
+
+// CXLMemoryMetrics shall contain the memory metrics specific to CXL devices.
+type CXLMemoryMetrics struct {
+	// AlertCapabilities shall contain the conditions that would generate an alert to the CXL Fabric Manager or host.
+	AlertCapabilities AlertCapabilities
+}
+
 // CurrentPeriod shall describe the metrics of the memory since last time the
 // ClearCurrentPeriod Action was performed or the system reset.
 type CurrentPeriod struct {
@@ -35,6 +57,26 @@ type CurrentPeriod struct {
 	BlocksRead uint
 	// BlocksWritten shall be number of blocks written since reset.
 	BlocksWritten uint
+	// CorrectableECCErrorCount shall contain the number of correctable errors since reset. When this resource is
+	// subordinate to the MemorySummary object, this property shall be the sum of CorrectableECCErrorCount over all
+	// memory.
+	CorrectableECCErrorCount int
+	// IndeterminateCorrectableErrorCount shall contain the number of indeterminate correctable errors since reset.
+	// Since the error origin is indeterminate, the same error can be duplicated across multiple MemoryMetrics
+	// resources. When this resource is subordinate to the MemorySummary object, this property shall be the sum of
+	// indeterminate correctable errors across all memory without duplication, which may not be the sum of all
+	// IndeterminateCorrectableErrorCount properties over all memory.
+	IndeterminateCorrectableErrorCount int
+	// IndeterminateUncorrectableErrorCount shall contain the number of indeterminate uncorrectable errors since reset.
+	// Since the error origin is indeterminate, the same error can be duplicated across multiple MemoryMetrics
+	// resources. When this resource is subordinate to the MemorySummary object, this property shall be the sum of
+	// indeterminate uncorrectable errors across all memory without duplication, which may not be the sum of all
+	// IndeterminateUncorrectableErrorCount properties over all memory.
+	IndeterminateUncorrectableErrorCount int
+	// UncorrectableECCErrorCount shall contain the number of uncorrectable errors since reset. When this resource is
+	// subordinate to the MemorySummary object, this property shall be the sum of UncorrectableECCErrorCount over all
+	// memory.
+	UncorrectableECCErrorCount int
 }
 
 // HealthData shall contain properties which describe the HealthData metrics for
@@ -65,6 +107,26 @@ type LifeTime struct {
 	BlocksRead uint64
 	// BlocksWritten shall be number of blocks written for the lifetime of the Memory.
 	BlocksWritten uint64
+	// CorrectableECCErrorCount shall contain the number of correctable errors for the lifetime of the memory. When
+	// this resource is subordinate to the MemorySummary object, this property shall be the sum of
+	// CorrectableECCErrorCount over all memory.
+	CorrectableECCErrorCount int
+	// IndeterminateCorrectableErrorCount shall contain the number of indeterminate correctable errors for the lifetime
+	// of the memory. Since the error origin is indeterminate, the same error can be duplicated across multiple
+	// MemoryMetrics resources. When this resource is subordinate to the MemorySummary object, this property shall be
+	// the sum of indeterminate correctable errors across all memory without duplication, which may not be the sum of
+	// all IndeterminateCorrectableErrorCount properties over all memory.
+	IndeterminateCorrectableErrorCount int
+	// IndeterminateUncorrectableErrorCount shall contain the number of indeterminate uncorrectable errors for the
+	// lifetime of the memory. Since the error origin is indeterminate, the same error can be duplicated across
+	// multiple MemoryMetrics resources. When this resource is subordinate to the MemorySummary object, this property
+	// shall be the sum of indeterminate uncorrectable errors across all memory without duplication, which may not be
+	// the sum of all IndeterminateUncorrectableErrorCount properties over all memory.
+	IndeterminateUncorrectableErrorCount int
+	// UncorrectableECCErrorCount shall contain the number of uncorrectable errors for the lifetime of the memory. When
+	// this resource is subordinate to the MemorySummary object, this property shall be the sum of
+	// UncorrectableECCErrorCount over all memory.
+	UncorrectableECCErrorCount int
 }
 
 // MemoryMetrics is used to represent the Memory Metrics for a single Memory
@@ -83,11 +145,24 @@ type MemoryMetrics struct {
 	BandwidthPercent float32
 	// BlockSizeBytes shall be the block size in bytes of all structure elements.
 	BlockSizeBytes int
+	// CXL shall contain the memory metrics specific to CXL devices.
+	CXL CXLMemoryMetrics
+	// CapacityUtilizationPercent shall contain the memory capacity utilization as a percentage, typically '0' to
+	// '100'. When this resource is subordinate to the MemorySummary object, this property shall be the memory capacity
+	// utilization over all memory as a percentage.
+	CapacityUtilizationPercent float64
+	// CorrectedPersistentErrorCount shall contain the number of corrected errors in persistent memory.
+	CorrectedPersistentErrorCount int
+	// CorrectedVolatileErrorCount shall contain the number of corrected errors in volatile memory.
+	CorrectedVolatileErrorCount int
 	// CurrentPeriod shall contain properties which describe the CurrentPeriod
 	// metrics for the current resource.
 	CurrentPeriod CurrentPeriod
 	// Description provides a description of this resource.
 	Description string
+	// DirtyShutdownCount shall contain the number of shutdowns while outstanding writes have not completed to
+	// persistent memory.
+	DirtyShutdownCount int
 	// HealthData shall contain properties which describe the HealthData metrics
 	// for the current resource.
 	HealthData HealthData
@@ -96,6 +171,39 @@ type MemoryMetrics struct {
 	LifeTime LifeTime
 	// OperatingSpeedMHz is used by the memory device.
 	OperatingSpeedMHz int
+
+	clearCurrentPeriodTarget string
+}
+
+// UnmarshalJSON unmarshals a MemoryMetrics object from the raw JSON.
+func (memorymetrics *MemoryMetrics) UnmarshalJSON(b []byte) error {
+	type temp MemoryMetrics
+	type Actions struct {
+		ClearCurrentPeriod struct {
+			Target string
+		} `json:"#MemoryMetrics.ClearCurrentPeriod"`
+	}
+	var t struct {
+		temp
+		Actions Actions
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*memorymetrics = MemoryMetrics(t.temp)
+
+	// Extract the links to other entities for later
+	memorymetrics.clearCurrentPeriodTarget = t.Actions.ClearCurrentPeriod.Target
+
+	return nil
+}
+
+// ClearCurrentPeriod sets the CurrentPeriod property's values to 0.
+func (memorymetrics *MemoryMetrics) ClearCurrentPeriod() error {
+	return memorymetrics.Post(memorymetrics.clearCurrentPeriodTarget, nil)
 }
 
 // GetMemoryMetrics will get a MemoryMetrics instance from the service.
