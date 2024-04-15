@@ -322,9 +322,3 @@ func ListReferencedMetricReportDefinitions(c common.Client, link string) ([]*Met
 
 	return result, collectionError
 }
-
-// Wildcard shall contain a wildcard and its substitution values.
-type Wildcard struct {
-	// Values shall contain the list of values to substitute for the wildcard.
-	Values []string
-}
