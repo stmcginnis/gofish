@@ -34,11 +34,9 @@ var networkDeviceFunctionBody = `{
 			"MTUSize": 9000,
 			"PermanentMACAddress": "98:E7:43:00:01:0A",
 			"VLAN": {
-				"@odata.id": "/redfish/v1/VLAN/1"
-			},
-			"VLANs": [{
-				"@odata.id": "/redfish/v1/Port/1"
-			}]
+				"VLANEnable": true,
+				"VLANId": 8
+			}
 		},
 		"FibreChannel": {
 			"AllowFIPVLANDiscovery": true,
@@ -104,8 +102,8 @@ func TestNetworkDeviceFunction(t *testing.T) {
 		t.Errorf("Invalid ethernet MAC address: %s", result.Ethernet.MACAddress)
 	}
 
-	if result.FibreChannel.FCoEActiveVLANId != 500 {
-		t.Errorf("Invalid active VLAN: %d", result.FibreChannel.FCoEActiveVLANId)
+	if result.FibreChannel.FCoEActiveVLANID != 500 {
+		t.Errorf("Invalid active VLAN: %d", result.FibreChannel.FCoEActiveVLANID)
 	}
 
 	if result.FibreChannel.WWNSource != ConfiguredLocallyWWNSource {
