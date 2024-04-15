@@ -16,11 +16,16 @@ type ImplementationType string
 const (
 	// PhysicalSensorImplementationType The reading is acquired from a physical sensor.
 	PhysicalSensorImplementationType ImplementationType = "PhysicalSensor"
+	// CalculatedImplementationType The metric is implemented by applying a calculation on another metric property. The
+	// calculation is specified in the CalculationAlgorithm property.
+	CalculatedImplementationType ImplementationType = "Calculated"
 	// SynthesizedImplementationType The reading is obtained by applying a calculation on one or more properties or
 	// multiple sensors. The calculation is not provided.
 	SynthesizedImplementationType ImplementationType = "Synthesized"
 	// ReportedImplementationType The reading is obtained from software or a device.
 	ReportedImplementationType ImplementationType = "Reported"
+	// DigitalMeterImplementationType The metric is implemented as digital meter.
+	DigitalMeterImplementationType ImplementationType = "DigitalMeter"
 )
 
 // The implementation of the sensor.
