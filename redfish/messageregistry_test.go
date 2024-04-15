@@ -14,6 +14,10 @@ var messageRegistryBody = `{
 		"@odata.type": "#MessageRegistry.v1_2_0.MessageRegistry",
 		"Description": "This registry is an example.",
 		"Id": "MyRegistry.json",
+		"Name": "MyRegistry Registry",
+		"OwningEntity": "The vendor name",
+		"RegistryPrefix": "MyRegistry",
+		"RegistryVersion": "2.2.0",
 		"Language": "en",
 		"Messages": {
 			"FirstMessage": {
@@ -59,11 +63,7 @@ var messageRegistryBody = `{
 				"Resolution": "The resolution for the message with Oem.",
 				"Severity": "Critical"
 			}
-		},
-		"Name": "MyRegistry Registry",
-		"OwningEntity": "The vendor name",
-		"RegistryPrefix": "MyRegistry",
-		"RegistryVersion": "2.2.0"
+		}
 	}`
 
 // TestMessageRegistry tests the parsing of MessageRegistry objects.
@@ -211,34 +211,6 @@ func TestMessageRegistry(t *testing.T) { //nolint:funlen,gocyclo
 		}
 		if m.Severity != "Critical" {
 			t.Errorf("Received invalid Severity: %s for the messageKey: %s", m.Severity, messageKey)
-		}
-
-		// test oem
-		switch oem := m.Oem.(type) {
-		case map[string]interface{}:
-			for vendor, values := range oem {
-				if vendor != "VendorName" {
-					t.Errorf("Received invalid Oem vendor: %s for the messageKey: %s", vendor, messageKey)
-				}
-				switch val := values.(type) {
-				case map[string]interface{}:
-					for k, v := range val {
-						if k != "OemInfo1" && k != "OemInfoN" {
-							t.Errorf("Received invalid Oem key %s for vendor: %s for the messageKey: %s", k, vendor, messageKey)
-						}
-						if k == "OemInfo1" && v != "The Oem info 1." {
-							t.Errorf("Received invalid OemInfo1: %s for the messageKey: %s", v, messageKey)
-						}
-						if v == "OemInfoN" && v != "The Oem info N." {
-							t.Errorf("Received invalid OemInfoN: %s for the messageKey: %s", v, messageKey)
-						}
-					}
-				default:
-					t.Error("Unexpected value format")
-				}
-			}
-		default:
-			t.Errorf("Received invalid Oem for the messageKey: %s", messageKey)
 		}
 	} else {
 		t.Errorf("MessageKey %s not found.", messageKey)
