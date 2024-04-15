@@ -25,6 +25,8 @@ const (
 type DataDirection string
 
 const (
+	// NoneDataDirection Indicates that this limit not enforced.
+	NoneDataDirection DataDirection = "None"
 	// IngressDataDirection Indicates that this limit is enforced on packets and bytes received by the network device
 	// function.
 	IngressDataDirection DataDirection = "Ingress"
