@@ -65,6 +65,15 @@ const (
 	OtherDeviceClass DeviceClass = "Other"
 )
 
+type FunctionProtocol string
+
+const (
+	// PCIeFunctionProtocol A standard PCIe function.
+	PCIeFunctionProtocol FunctionProtocol = "PCIe"
+	// CXLFunctionProtocol A PCIe function supporting CXL extensions.
+	CXLFunctionProtocol FunctionProtocol = "CXL"
+)
+
 // FunctionType is the function type.
 type FunctionType string
 
@@ -81,6 +90,8 @@ type PCIeFunction struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
+	// ODataEtag is the odata etag.
+	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// ClassCode shall be the PCI Class Code of the PCIe device function.
@@ -91,15 +102,17 @@ type PCIeFunction struct {
 	// Storage, Network, Memory etc.
 	DeviceClass DeviceClass
 	// DeviceID shall be the PCI Device ID of the PCIe device function.
-	DeviceID string `json:"DeviceId"`
+	DeviceID string
 	// FunctionID shall the PCIe device function number within a given PCIe
 	// device.
-	FunctionID int `json:"FunctionId"`
+	FunctionID int
+	// FunctionProtocol shall contain the protocol supported by this PCIe function.
+	FunctionProtocol FunctionProtocol
 	// FunctionType shall be the function type of the PCIe device function such
 	// as Physical or Virtual.
 	FunctionType FunctionType
 	// RevisionID shall be the PCI Revision ID of the PCIe device function.
-	RevisionID string `json:"RevisionID"`
+	RevisionID string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// SubsystemID shall be the PCI Subsystem ID of the PCIe device function.
@@ -109,6 +122,8 @@ type PCIeFunction struct {
 	SubsystemVendorID string `json:"SubsystemVendorId"`
 	// VendorID shall be the PCI Vendor ID of the PCIe device function.
 	VendorID string `json:"VendorId"`
+
+	cxlLogicalDevice string
 	// Drives shall reference a resource of type Drive that represents the
 	// storage drives associated with this resource.
 	drives []string
@@ -119,6 +134,11 @@ type PCIeFunction struct {
 	ethernetInterfaces []string
 	// EthernetInterfacesCount is the number of ethernet interfaces.
 	EthernetInterfacesCount int
+	// MemoryDomains shall contain an array of links to resources of type MemoryDomain that represent the memory
+	// domains associated with this PCIe function.
+	memoryDomains []string
+	// MemoryDomainsCount is the number of memory domains associated with this PCIe function.
+	MemoryDomainsCount int
 	// NetworkDeviceFunctions shall be an array of references to resources of
 	// type NetworkDeviceFunction that represents the network device functions
 	// associated with this resource.
@@ -128,6 +148,9 @@ type PCIeFunction struct {
 	// PCIeDevice shall be a reference to the resource that this function is a
 	// part of and shall reference a resource of type PCIeDevice.
 	pcieDevice string
+	// Processor shall link to a resource of type Processor that represents the processor that is hosted on this PCIe
+	// function.
+	processor string
 	// StorageControllers shall reference a resource of type StorageController
 	// that represents the storage controllers associated with this resource.
 	storageControllers []string
@@ -140,13 +163,17 @@ func (pciefunction *PCIeFunction) UnmarshalJSON(b []byte) error {
 	type temp PCIeFunction
 
 	type links struct {
+		CXLLogicalDevice            common.Link
 		Drives                      common.Links
 		DrivesCount                 int `json:"Drives@odata.count"`
 		EthernetInterfaces          common.Links
 		EthernetInterfacesCount     int `json:"EthernetInterfaces@odata.count"`
+		MemoryDomains               common.Links
+		MemoryDomainsCount          int `json:"MemoryDomains@odata.count"`
 		NetworkDeviceFunctions      common.Links
 		NetworkDeviceFunctionsCount int `json:"NetworkDeviceFunctions@odata.count"`
 		PCIeDevice                  common.Link
+		Processor                   common.Link
 		StorageControllers          common.Links
 		StorageControllersCount     int `json:"StorageControllers@odata.count"`
 	}
@@ -164,13 +191,17 @@ func (pciefunction *PCIeFunction) UnmarshalJSON(b []byte) error {
 	*pciefunction = PCIeFunction(t.temp)
 
 	// Extract the links to other entities for later
+	pciefunction.cxlLogicalDevice = t.Links.CXLLogicalDevice.String()
 	pciefunction.drives = t.Links.Drives.ToStrings()
 	pciefunction.DrivesCount = t.Links.DrivesCount
 	pciefunction.ethernetInterfaces = t.Links.EthernetInterfaces.ToStrings()
 	pciefunction.EthernetInterfacesCount = t.Links.EthernetInterfacesCount
+	pciefunction.memoryDomains = t.Links.MemoryDomains.ToStrings()
+	pciefunction.MemoryDomainsCount = t.Links.MemoryDomainsCount
 	pciefunction.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
 	pciefunction.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
 	pciefunction.pcieDevice = t.Links.PCIeDevice.String()
+	pciefunction.processor = t.Links.Processor.String()
 	pciefunction.storageControllers = t.Links.StorageControllers.ToStrings()
 	pciefunction.StorageControllersCount = t.Links.StorageControllersCount
 
@@ -227,6 +258,14 @@ func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction,
 	return result, collectionError
 }
 
+// CXLLogicalDevice gets the CXL logical device to which this PCIe function is assigned.
+func (pciefunction *PCIeFunction) CXLLogicalDevice() (*CXLLogicalDevice, error) {
+	if pciefunction.cxlLogicalDevice == "" {
+		return nil, nil
+	}
+	return GetCXLLogicalDevice(pciefunction.GetClient(), pciefunction.cxlLogicalDevice)
+}
+
 // Drives gets the PCIe function's drives.
 func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
 	var result []*Drive
@@ -269,6 +308,27 @@ func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, er
 	return result, collectionError
 }
 
+// MemoryDomains gets the memory domains associated with this PCIe function.
+func (pciefunction *PCIeFunction) MemoryDomains() ([]*MemoryDomain, error) {
+	var result []*MemoryDomain
+
+	collectionError := common.NewCollectionError()
+	for _, netLink := range pciefunction.memoryDomains {
+		net, err := GetMemoryDomain(pciefunction.GetClient(), netLink)
+		if err != nil {
+			collectionError.Failures[netLink] = err
+		} else {
+			result = append(result, net)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
 // NetworkDeviceFunctions gets the PCIe function's ethernet interfaces.
 func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
 	var result []*NetworkDeviceFunction
@@ -296,6 +356,14 @@ func (pciefunction *PCIeFunction) PCIeDevice() (*PCIeDevice, error) {
 		return nil, nil
 	}
 	return GetPCIeDevice(pciefunction.GetClient(), pciefunction.pcieDevice)
+}
+
+// Processor gets the processor that is hosted on this PCIe function.
+func (pciefunction *PCIeFunction) Processor() (*Processor, error) {
+	if pciefunction.processor == "" {
+		return nil, nil
+	}
+	return GetProcessor(pciefunction.GetClient(), pciefunction.processor)
 }
 
 // StorageControllers gets the associated storage controllers.
