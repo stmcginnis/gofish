@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -91,6 +92,8 @@ type Controllers struct {
 	Location common.Location
 	// PCIeInterface is used to connect this PCIe-based controller to its host.
 	PCIeInterface PCIeInterface
+
+	activeSoftwareImage string
 	// NetworkDeviceFunctions shall be an array of references of type
 	// NetworkDeviceFunction that represent the Network Device Functions
 	// associated with this Network Controller.
@@ -101,24 +104,40 @@ type Controllers struct {
 	// represent the Network Ports associated with this Network Controller.
 	networkPorts []string
 	// NetworkPortsCount is the number of network ports.
+	// This property has been deprecated in favor of the Ports property.
 	NetworkPortsCount int
 	// PCIeDevices shall be an array of references of type PCIeDevice that
 	// represent the PCI-e Devices associated with this Network Controller.
 	pcieDevices []string
 	// PCIeDevicesCount is the number of PCIeDevices.
 	PCIeDevicesCount int
+	ports            []string
+	// PortsCount gets the number of ports associated with this network controller.
+	PortsCount     int
+	softwareImages []string
+	// SoftwareImagesCount gets the number of firmware images that apply to this controller.
+	SoftwareImagesCount int
 }
 
 // UnmarshalJSON unmarshals a Controllers object from the raw JSON.
 func (controllers *Controllers) UnmarshalJSON(b []byte) error {
 	type temp Controllers
 	type links struct {
-		NetworkPorts                common.Links
-		NetworkPortsCount           int `json:"EthernetInterfaces@odata.count"`
+		ActiveSoftwareImage         common.Link
 		NetworkDeviceFunctions      common.Links
 		NetworkDeviceFunctionsCount int `json:"NetworkDeviceFunctions@odata.count"`
+		NetworkPorts                common.Links
+		NetworkPortsCount           int `json:"EthernetInterfaces@odata.count"`
 		PCIeDevice                  common.Link
 		PCIeDevicesCount            int `json:"PCIeDevices@odata.count"`
+		// Ports shall contain an array of links to resources of type Port that represent the ports associated with this
+		// network controller.
+		Ports      common.Links
+		PortsCount int `json:"Ports@odata.count"`
+		// SoftwareImages shall contain an array of links to resource of type SoftwareInventory that represent the firmware
+		// images that apply to this controller.
+		SoftwareImages      common.Links
+		SoftwareImagesCount int `json:"SoftwareImages@odata.count"`
 	}
 
 	var t struct {
@@ -133,14 +152,132 @@ func (controllers *Controllers) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*controllers = Controllers(t.temp)
-	controllers.networkPorts = t.Links.NetworkPorts.ToStrings()
-	controllers.NetworkPortsCount = t.Links.NetworkPortsCount
+	controllers.activeSoftwareImage = t.Links.ActiveSoftwareImage.String()
 	controllers.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
 	controllers.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
+	controllers.networkPorts = t.Links.NetworkPorts.ToStrings()
+	controllers.NetworkPortsCount = t.Links.NetworkPortsCount
 	controllers.pcieDevices = t.Links.NetworkDeviceFunctions.ToStrings()
 	controllers.PCIeDevicesCount = t.Links.NetworkDeviceFunctionsCount
+	controllers.ports = t.Links.Ports.ToStrings()
+	controllers.PortsCount = t.Links.PortsCount
+	controllers.softwareImages = t.Links.SoftwareImages.ToStrings()
+	controllers.SoftwareImagesCount = t.Links.SoftwareImagesCount
 
 	return nil
+}
+
+// ActiveSoftwareImage gets the active firmware image for this network controller.
+func (controllers *Controllers) ActiveSoftwareImage(c common.Client) (*SoftwareInventory, error) {
+	if controllers.activeSoftwareImage == "" {
+		return nil, nil
+	}
+	return GetSoftwareInventory(c, controllers.activeSoftwareImage)
+}
+
+// NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network controller.
+func (controllers *Controllers) NetworkDeviceFunctions(c common.Client) ([]*NetworkDeviceFunction, error) {
+	var result []*NetworkDeviceFunction
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range controllers.networkDeviceFunctions {
+		unit, err := GetNetworkDeviceFunction(c, uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// NetworkPorts gets the collection of NetworkPorts for this network controller.
+func (controllers *Controllers) NetworkPorts(c common.Client) ([]*NetworkPort, error) {
+	var result []*NetworkPort
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range controllers.networkPorts {
+		unit, err := GetNetworkPort(c, uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// PCIeDevices gets the PCIe devices associated with this network controller.
+func (controllers *Controllers) PCIeDevices(c common.Client) ([]*PCIeDevice, error) {
+	var result []*PCIeDevice
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range controllers.pcieDevices {
+		unit, err := GetPCIeDevice(c, uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Ports gets the ports associated with this network controller.
+func (controllers *Controllers) Ports(c common.Client) ([]*Port, error) {
+	var result []*Port
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range controllers.ports {
+		unit, err := GetPort(c, uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// SoftwareImages gets the firmware images that apply to this controller.
+func (controllers *Controllers) SoftwareImages(c common.Client) ([]*SoftwareInventory, error) {
+	var result []*SoftwareInventory
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range controllers.softwareImages {
+		unit, err := GetSoftwareInventory(c, uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // DataCenterBridging shall describe the capability, status,
@@ -172,35 +309,64 @@ type NetworkAdapter struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
+	// ODataEtag is the odata etag.
+	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Assembly shall be a link to a resource of type Assembly.
 	assembly string
+	// Certificates shall contain a link to a resource collection of type CertificateCollection that contains
+	// certificates for device identity and attestation.
+	certificates []string
 	// Controllers shall contain the set of network controllers ASICs that make
 	// up this NetworkAdapter.
 	Controllers []Controllers
 	// Description provides a description of this resource.
 	Description string
+	// EnvironmentMetrics shall contain a link to a resource of type EnvironmentMetrics that specifies the environment
+	// metrics for this network adapter.
+	environmentMetrics string
+	// Identifiers shall contain a list of all known durable names for the network adapter.
+	Identifiers []common.Identifier
+	// LLDPEnabled shall contain the state indicating whether LLDP is globally enabled on a network adapter. If set to
+	// 'false', the LLDPEnabled value for the ports associated with this adapter shall be disregarded.
+	LLDPEnabled bool
+	// Location shall contain the location information of the network adapter.
+	Location common.Location
 	// Manufacturer shall contain a value that represents the manufacturer of
 	// the network adapter.
 	Manufacturer string
+	// Metrics are the metrics associated with this adapter.
+	Metrics NetworkAdapterMetrics
 	// Model shall contain the information about how the manufacturer references
 	// this network adapter.
 	Model string
 	// NetworkDeviceFunctions shall be a link to a collection of type
 	// NetworkDeviceFunctionCollection.
-	networkDeviceFunctions string
+	networkDeviceFunctions []string
 	// NetworkPorts shall be a link to a collection of type NetworkPortCollection.
-	networkPorts string
+	// This property has been deprecated in favor of the Ports property.
+	networkPorts []string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// PartNumber shall contain the part number for the network adapter as
 	// defined by the manufacturer.
 	PartNumber string
+	// Ports shall contain a link to a resource collection of type PortCollection.
+	ports []string
+	// Processors shall contain a link to a resource collection of type ProcessorCollection that represent the offload
+	// processors contained in this network adapter.
+	processors []string
 	// SKU shall contain the Stock Keeping Unit (SKU) for the network adapter.
 	SKU string
 	// SerialNumber shall contain the serial number for the network adapter.
 	SerialNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+
 	// resetSettingsToDefaultTarget is the URL for sending a ResetSettingsToDefault action
 	resetSettingsToDefaultTarget string
 }
@@ -216,8 +382,12 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Assembly               common.Link
-		NetworkDeviceFunctions common.Link
-		NetworkPorts           common.Link
+		Certificates           common.LinksCollection
+		EnvironmentMetrics     common.Link
+		NetworkDeviceFunctions common.LinksCollection
+		NetworkPorts           common.LinksCollection
+		Ports                  common.LinksCollection
+		Processors             common.LinksCollection
 		Actions                actions
 	}
 
@@ -229,11 +399,33 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*networkadapter = NetworkAdapter(t.temp)
 	networkadapter.assembly = t.Assembly.String()
-	networkadapter.networkDeviceFunctions = t.NetworkDeviceFunctions.String()
-	networkadapter.networkPorts = t.NetworkPorts.String()
+	networkadapter.certificates = t.Certificates.ToStrings()
+	networkadapter.environmentMetrics = t.EnvironmentMetrics.String()
+	networkadapter.networkDeviceFunctions = t.NetworkDeviceFunctions.ToStrings()
+	networkadapter.networkPorts = t.NetworkPorts.ToStrings()
+	networkadapter.ports = t.Ports.ToStrings()
+	networkadapter.processors = t.Processors.ToStrings()
+
 	networkadapter.resetSettingsToDefaultTarget = t.Actions.ResetSettingsToDefault.Target
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (networkadapter *NetworkAdapter) Update() error {
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(NetworkAdapter)
+	original.UnmarshalJSON(networkadapter.rawData)
+
+	readWriteFields := []string{
+		"LLDPEnabled",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(networkadapter).Elem()
+
+	return networkadapter.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetNetworkAdapter will get a NetworkAdapter instance from the Redfish service.
@@ -293,14 +485,117 @@ func (networkadapter *NetworkAdapter) Assembly() (*Assembly, error) {
 	return GetAssembly(networkadapter.GetClient(), networkadapter.assembly)
 }
 
+// Certificatea gets the certificates for device identity and attestation.
+func (networkadapter *NetworkAdapter) Certificates() ([]*Certificate, error) {
+	var result []*Certificate
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range networkadapter.certificates {
+		unit, err := GetCertificate(networkadapter.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// EnvironmentMetrics gets the environment metrics for this network adapter.
+func (networkadapter *NetworkAdapter) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+	if networkadapter.environmentMetrics == "" {
+		return nil, nil
+	}
+	return GetEnvironmentMetrics(networkadapter.GetClient(), networkadapter.environmentMetrics)
+}
+
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network adapter
 func (networkadapter *NetworkAdapter) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return ListReferencedNetworkDeviceFunctions(networkadapter.GetClient(), networkadapter.networkDeviceFunctions)
+	var result []*NetworkDeviceFunction
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range networkadapter.networkDeviceFunctions {
+		unit, err := GetNetworkDeviceFunction(networkadapter.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // NetworkPorts gets the collection of NetworkPorts for this network adapter
 func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
-	return ListReferencedNetworkPorts(networkadapter.GetClient(), networkadapter.networkPorts)
+	var result []*NetworkPort
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range networkadapter.networkPorts {
+		unit, err := GetNetworkPort(networkadapter.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Ports gets the ports associated with this network adapter.
+func (networkadapter *NetworkAdapter) Ports() ([]*Port, error) {
+	var result []*Port
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range networkadapter.ports {
+		unit, err := GetPort(networkadapter.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Processors gets the offload processors contained in this network adapter.
+func (networkadapter *NetworkAdapter) Processors() ([]*Processor, error) {
+	var result []*Processor
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range networkadapter.networkPorts {
+		unit, err := GetProcessor(networkadapter.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ResetSettingsToDefault shall perform a reset of all active and pending
