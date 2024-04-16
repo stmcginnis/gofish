@@ -12,6 +12,16 @@ import (
 	"github.com/stmcginnis/gofish/swordfish"
 )
 
+// DeepOperations shall contain information about deep operations that the service supports.
+type DeepOperations struct {
+	// DeepPATCH shall indicate whether this service supports the Redfish Specification-defined deep PATCH operation.
+	DeepPATCH bool
+	// DeepPOST shall indicate whether this service supports the Redfish Specification-defined deep POST operation.
+	DeepPOST bool
+	// MaxLevels shall contain the maximum levels of resources allowed in deep operations.
+	MaxLevels int
+}
+
 // Expand shall contain information about the support of the $expand query
 // parameter by the service.
 type Expand struct {
@@ -74,21 +84,28 @@ type Service struct {
 	// AccountService shall only contain a reference to a resource that complies
 	// to the AccountService schema.
 	accountService string
+	// AggregationService shall contain a link to a resource of type AggregationService.
+	aggregationService string
+	// Cables shall contain a link to a resource collection of type CableCollection.
+	cables []string
 	// CertificateService shall be a link to the CertificateService.
 	certificateService string
 	// Chassis shall only contain a reference to a collection of resources that
 	// comply to the Chassis schema.
 	chassis string
+	// ComponentIntegrity shall contain a link to a resource collection of type ComponentIntegrityCollection.
+	componentIntegrity []string
 	// CompositionService shall only contain a reference to a resource that
 	// complies to the CompositionService schema.
 	compositionService string
 	// Description provides a description of this resource.
 	Description string
-	// EventService shall only contain a reference to a resource that complies
-	// to the EventService schema.
+	// EventService shall contain a link to a resource of type EventService.
 	eventService string
 	// Fabrics shall contain references to all Fabric instances.
 	fabrics string
+	// Facilities shall contain a link to a resource collection of type FacilityCollection.
+	facilities []string
 	// JobService shall only contain a reference to a resource that conforms to
 	// the JobService schema.
 	jobService string
@@ -96,9 +113,15 @@ type Service struct {
 	// that comply to the SchemaFile schema where the files are Json-Schema
 	// files.
 	jsonSchemas string
+	// KeyService shall contain a link to a resource of type KeyService.
+	keyService string
+	// LicenseService shall contain a link to a resource of type LicenseService.
+	licenseService string
 	// Managers shall only contain a reference to a collection of resources that
 	// comply to the Managers schema.
 	managers string
+	// NVMeDomains shall contain a link to a resource collection of type NVMeDomainCollection.
+	nvmeDomains []string
 	// Oem contains all the vendor specific actions. It is vendor responsibility to parse
 	// this field accordingly
 	Oem json.RawMessage
@@ -116,13 +139,26 @@ type Service struct {
 	// majorversion.minorversion.errata in compliance with Protocol Version
 	// section of the Redfish specification.
 	RedfishVersion string
+	// RegisteredClients shall contain a link to a resource collection of type RegisteredClientCollection.
+	registeredClients []string
 	// Registries shall contain a reference to Message Registry.
 	registries string
 	// ResourceBlocks shall contain references to all Resource Block instances.
 	resourceBlocks string
+	// ServiceConditions shall contain a link to a resource of type ServiceConditions.
+	serviceConditions string
+	// ServiceIdentification shall contain a vendor-provided or user-provided value that identifies and associates a
+	// discovered Redfish service with a particular product instance. The value of the property shall contain the value
+	// of the ServiceIdentification property in the Manager resource providing the Redfish service root resource. The
+	// value of this property is used in conjunction with the Product and Vendor properties to match user credentials
+	// or other a priori product instance information necessary for initial deployment to the correct, matching Redfish
+	// service. This property shall not be present if its value is an empty string or 'null'.
+	ServiceIdentification string
 	// SessionService shall only contain a reference to a resource that complies
 	// to the SessionService schema.
 	sessionService string
+	// Storage shall contain a link to a resource collection of type StorageCollection.
+	storage []string
 	// StorageServices shall contain references to all StorageService instances.
 	storageServices string
 	// StorageSystems shall contain computer systems that act as storage
@@ -137,6 +173,8 @@ type Service struct {
 	tasks string
 	// TelemetryService shall be a link to the TelemetryService.
 	telemetryService string
+	// ThermalEquipment shall contain a link to a resource of type ThermalEquipment.
+	thermalEquipment string
 	// UUID shall be an exact match of the UUID value returned in a 200OK from
 	// an SSDP M-SEARCH request during discovery. RFC4122 describes methods that
 	// can be used to create a UUID value. The value should be considered to be
@@ -151,8 +189,12 @@ type Service struct {
 	// by this Redfish service. If this property is supported, the vendor name
 	// shall not be included in the value of the Product property.
 	Vendor string
+
 	// Sessions shall contain the link to a collection of Sessions.
 	sessions string
+	// ManagerProvidingService shall contain a link to a resource of type Manager that represents the manager providing
+	// this Redfish service.
+	managerProvidingService string
 }
 
 // UnmarshalJSON unmarshals a Service object from the raw JSON.
@@ -160,27 +202,39 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 	type temp Service
 	var t struct {
 		temp
+		AccountService     common.Link
+		AggregationService common.Link
+		Cables             common.LinksCollection
 		CertificateService common.Link
 		Chassis            common.Link
-		Managers           common.Link
-		Tasks              common.Link
-		StorageServices    common.Link
-		StorageSystems     common.Link
-		AccountService     common.Link
+		ComponentIntegrity common.LinksCollection
+		CompositionService common.Link
 		EventService       common.Link
+		Fabrics            common.Link
+		Facilities         common.LinksCollection
+		JobService         common.Link
+		JSONSchemas        common.Link
+		KeyService         common.Link
+		LicenseService     common.Link
+		Managers           common.Link
+		NVMeDomains        common.LinksCollection
 		PowerEquipment     common.Link
 		Registries         common.Link
-		Systems            common.Link
-		CompositionService common.Link
-		Fabrics            common.Link
-		JobService         common.Link
-		JSONSchemas        common.Link `json:"JsonSchemas"`
+		RegisteredClients  common.LinksCollection
 		ResourceBlocks     common.Link
+		ServiceConditions  common.Link
 		SessionService     common.Link
+		Storage            common.LinksCollection
+		StorageServices    common.Link
+		StorageSystems     common.Link
+		Systems            common.Link
+		Tasks              common.Link
 		TelemetryService   common.Link
+		ThermalEquipment   common.Link
 		UpdateService      common.Link
 		Links              struct {
-			Sessions common.Link
+			ManagerProvidingService common.Link
+			Sessions                common.Link
 		}
 	}
 
@@ -191,26 +245,39 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*serviceroot = Service(t.temp)
+	serviceroot.accountService = t.AccountService.String()
+	serviceroot.aggregationService = t.AggregationService.String()
+	serviceroot.cables = t.Cables.ToStrings()
 	serviceroot.certificateService = t.CertificateService.String()
 	serviceroot.chassis = t.Chassis.String()
-	serviceroot.managers = t.Managers.String()
-	serviceroot.tasks = t.Tasks.String()
-	serviceroot.sessions = t.Links.Sessions.String()
-	serviceroot.storageServices = t.StorageServices.String()
-	serviceroot.storageSystems = t.StorageSystems.String()
-	serviceroot.accountService = t.AccountService.String()
-	serviceroot.eventService = t.EventService.String()
-	serviceroot.powerEquipment = t.PowerEquipment.String()
-	serviceroot.registries = t.Registries.String()
-	serviceroot.systems = t.Systems.String()
+	serviceroot.componentIntegrity = t.ComponentIntegrity.ToStrings()
 	serviceroot.compositionService = t.CompositionService.String()
+	serviceroot.eventService = t.EventService.String()
 	serviceroot.fabrics = t.Fabrics.String()
+	serviceroot.facilities = t.Facilities.ToStrings()
 	serviceroot.jobService = t.JobService.String()
 	serviceroot.jsonSchemas = t.JSONSchemas.String()
+	serviceroot.keyService = t.KeyService.String()
+	serviceroot.licenseService = t.LicenseService.String()
+	serviceroot.managers = t.Managers.String()
+	serviceroot.nvmeDomains = t.NVMeDomains.ToStrings()
+	serviceroot.powerEquipment = t.PowerEquipment.String()
+	serviceroot.registeredClients = t.RegisteredClients.ToStrings()
+	serviceroot.registries = t.Registries.String()
 	serviceroot.resourceBlocks = t.ResourceBlocks.String()
+	serviceroot.serviceConditions = t.ServiceConditions.String()
 	serviceroot.sessionService = t.SessionService.String()
+	serviceroot.storage = t.Storage.ToStrings()
+	serviceroot.storageServices = t.StorageServices.String()
+	serviceroot.storageSystems = t.StorageSystems.String()
+	serviceroot.systems = t.Systems.String()
+	serviceroot.tasks = t.Tasks.String()
 	serviceroot.telemetryService = t.TelemetryService.String()
+	serviceroot.thermalEquipment = t.ThermalEquipment.String()
 	serviceroot.updateService = t.UpdateService.String()
+
+	serviceroot.sessions = t.Links.Sessions.String()
+	serviceroot.managerProvidingService = t.Links.ManagerProvidingService.String()
 
 	return nil
 }
@@ -233,9 +300,132 @@ func ServiceRoot(c common.Client) (*Service, error) {
 	return &serviceroot, nil
 }
 
+// AccountService gets the Redfish AccountService
+func (serviceroot *Service) AccountService() (*redfish.AccountService, error) {
+	return redfish.GetAccountService(serviceroot.GetClient(), serviceroot.accountService)
+}
+
+// AggregationService gets the aggregation service.
+func (serviceroot *Service) AggregationService() (*redfish.AggregationService, error) {
+	if serviceroot.aggregationService == "" {
+		return nil, nil
+	}
+	return redfish.GetAggregationService(serviceroot.GetClient(), serviceroot.aggregationService)
+}
+
+// Cables gets a collection of cables.
+func (serviceroot *Service) Cables() ([]*redfish.Cable, error) {
+	var result []*redfish.Cable
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range serviceroot.cables {
+		item, err := redfish.GetCable(serviceroot.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// CertificateService gets the certificate service.
+func (serviceroot *Service) CertificateService() (*redfish.CertificateService, error) {
+	if serviceroot.certificateService == "" {
+		return nil, nil
+	}
+	return redfish.GetCertificateService(serviceroot.GetClient(), serviceroot.certificateService)
+}
+
 // Chassis gets the chassis instances managed by this service.
 func (serviceroot *Service) Chassis() ([]*redfish.Chassis, error) {
 	return redfish.ListReferencedChassis(serviceroot.GetClient(), serviceroot.chassis)
+}
+
+// ComponentIntegrity gets a collection of cables.
+func (serviceroot *Service) ComponentIntegrity() ([]*redfish.ComponentIntegrity, error) {
+	var result []*redfish.ComponentIntegrity
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range serviceroot.componentIntegrity {
+		item, err := redfish.GetComponentIntegrity(serviceroot.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// CompositionService gets the composition service.
+func (serviceroot *Service) CompositionService() (*redfish.CompositionService, error) {
+	if serviceroot.compositionService == "" {
+		return nil, nil
+	}
+	return redfish.GetCompositionService(serviceroot.GetClient(), serviceroot.compositionService)
+}
+
+// EventService gets the Redfish EventService
+func (serviceroot *Service) EventService() (*redfish.EventService, error) {
+	return redfish.GetEventService(serviceroot.GetClient(), serviceroot.eventService)
+}
+
+// Fabrics gets a collection of fabrics.
+func (serviceroot *Service) Fabrics() ([]*redfish.Fabric, error) {
+	return redfish.ListReferencedFabrics(serviceroot.GetClient(), serviceroot.fabrics)
+}
+
+// Facilities gets a collection of facilities.
+func (serviceroot *Service) Facilities() ([]*redfish.Facility, error) {
+	var result []*redfish.Facility
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range serviceroot.facilities {
+		item, err := redfish.GetFacility(serviceroot.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// JobService gets the job service instance
+func (serviceroot *Service) JobService() (*redfish.JobService, error) {
+	return redfish.GetJobService(serviceroot.GetClient(), serviceroot.jobService)
+}
+
+// KeyService gets the key service.
+func (serviceroot *Service) KeyService() (*redfish.KeyService, error) {
+	if serviceroot.keyService == "" {
+		return nil, nil
+	}
+	return redfish.GetKeyService(serviceroot.GetClient(), serviceroot.keyService)
+}
+
+// LicenseService gets the license service.
+func (serviceroot *Service) LicenseService() (*redfish.LicenseService, error) {
+	if serviceroot.licenseService == "" {
+		return nil, nil
+	}
+	return redfish.GetLicenseService(serviceroot.GetClient(), serviceroot.licenseService)
 }
 
 // Managers gets the manager instances of this service.
@@ -243,14 +433,103 @@ func (serviceroot *Service) Managers() ([]*redfish.Manager, error) {
 	return redfish.ListReferencedManagers(serviceroot.GetClient(), serviceroot.managers)
 }
 
-// StorageSystems gets the storage system instances managed by this service.
-func (serviceroot *Service) StorageSystems() ([]*swordfish.StorageSystem, error) {
-	return swordfish.ListReferencedStorageSystems(serviceroot.GetClient(), serviceroot.storageSystems)
+// // NVMeDomains gets a collection of Swordfish NVMe domains.
+// func (serviceroot *Service) NVMeDomains() ([]*swordfish.NVMeDomain, error) {
+// 	var result []*swordfish.NVMeDomain
+
+// 	collectionError := common.NewCollectionError()
+// 	for _, uri := range serviceroot.nvmeDomains {
+// 		item, err := swordfish.GetNVMeDomain(serviceroot.GetClient(), uri)
+// 		if err != nil {
+// 			collectionError.Failures[uri] = err
+// 		} else {
+// 			result = append(result, item)
+// 		}
+// 	}
+
+// 	if collectionError.Empty() {
+// 		return result, nil
+// 	}
+
+// 	return result, collectionError
+// }
+
+// RegisteredClients gets a collection of registered clients.
+func (serviceroot *Service) RegisteredClients() ([]*redfish.RegisteredClient, error) {
+	var result []*redfish.RegisteredClient
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range serviceroot.registeredClients {
+		item, err := redfish.GetRegisteredClient(serviceroot.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Registries gets the Redfish Registries
+func (serviceroot *Service) Registries() ([]*redfish.MessageRegistryFile, error) {
+	return redfish.ListReferencedMessageRegistryFiles(serviceroot.GetClient(), serviceroot.registries)
+}
+
+// ResourceBlocks gets a collection of resource blocks.
+func (serviceroot *Service) ResourceBlocks() ([]*redfish.ResourceBlock, error) {
+	return redfish.ListReferencedResourceBlocks(serviceroot.GetClient(), serviceroot.resourceBlocks)
+}
+
+// ServiceConditions gets the service conditions.
+func (serviceroot *Service) ServiceConditions() (*redfish.ServiceConditions, error) {
+	if serviceroot.serviceConditions == "" {
+		return nil, nil
+	}
+	return redfish.GetServiceConditions(serviceroot.GetClient(), serviceroot.serviceConditions)
+}
+
+// SessionService gets the session service.
+func (serviceroot *Service) SessionService() (*redfish.SessionService, error) {
+	if serviceroot.sessionService == "" {
+		return nil, nil
+	}
+	return redfish.GetSessionService(serviceroot.GetClient(), serviceroot.sessionService)
+}
+
+// Storage gets a collection of storage objects.
+func (serviceroot *Service) Storage() ([]*redfish.Storage, error) {
+	var result []*redfish.Storage
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range serviceroot.storage {
+		item, err := redfish.GetStorage(serviceroot.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // StorageServices gets the Swordfish storage services
 func (serviceroot *Service) StorageServices() ([]*swordfish.StorageService, error) {
 	return swordfish.ListReferencedStorageServices(serviceroot.GetClient(), serviceroot.storageServices)
+}
+
+// StorageSystems gets the storage system instances managed by this service.
+func (serviceroot *Service) StorageSystems() ([]*swordfish.StorageSystem, error) {
+	return swordfish.ListReferencedStorageSystems(serviceroot.GetClient(), serviceroot.storageSystems)
 }
 
 // Tasks gets the system's tasks
@@ -273,6 +552,19 @@ func (serviceroot *Service) CreateSession(username, password string) (*redfish.A
 	return redfish.CreateSession(serviceroot.GetClient(), serviceroot.sessions, username, password)
 }
 
+// ManagerProvidingService gets the manager for this Redfish service.
+func (serviceroot *Service) ManagerProvidingService() (*redfish.Manager, error) {
+	if serviceroot.managerProvidingService == "" {
+		return nil, nil
+	}
+	return redfish.GetManager(serviceroot.GetClient(), serviceroot.managerProvidingService)
+}
+
+// PowerEquipment gets the powerEquipment instances of this service.
+func (serviceroot *Service) PowerEquipment() (*redfish.PowerEquipment, error) {
+	return redfish.GetPowerEquipment(serviceroot.GetClient(), serviceroot.powerEquipment)
+}
+
 // Sessions gets the system's active sessions
 func (serviceroot *Service) Sessions() ([]*redfish.Session, error) {
 	return redfish.ListReferencedSessions(serviceroot.GetClient(), serviceroot.sessions)
@@ -281,21 +573,6 @@ func (serviceroot *Service) Sessions() ([]*redfish.Session, error) {
 // DeleteSession logout the specified session
 func (serviceroot *Service) DeleteSession(url string) error {
 	return redfish.DeleteSession(serviceroot.GetClient(), url)
-}
-
-// AccountService gets the Redfish AccountService
-func (serviceroot *Service) AccountService() (*redfish.AccountService, error) {
-	return redfish.GetAccountService(serviceroot.GetClient(), serviceroot.accountService)
-}
-
-// EventService gets the Redfish EventService
-func (serviceroot *Service) EventService() (*redfish.EventService, error) {
-	return redfish.GetEventService(serviceroot.GetClient(), serviceroot.eventService)
-}
-
-// Registries gets the Redfish Registries
-func (serviceroot *Service) Registries() ([]*redfish.MessageRegistryFile, error) {
-	return redfish.ListReferencedMessageRegistryFiles(serviceroot.GetClient(), serviceroot.registries)
 }
 
 // MessageRegistries gets all the available message registries in all languages
@@ -342,22 +619,17 @@ func (serviceroot *Service) Systems() ([]*redfish.ComputerSystem, error) {
 	return redfish.ListReferencedComputerSystems(serviceroot.GetClient(), serviceroot.systems)
 }
 
-// CompositionService gets the composition service instance
-func (serviceroot *Service) CompositionService() (*redfish.CompositionService, error) {
-	return redfish.GetCompositionService(serviceroot.GetClient(), serviceroot.compositionService)
+// TelemetryService gets the telemetry service instance.
+func (serviceroot *Service) TelemetryService() (*redfish.TelemetryService, error) {
+	return redfish.GetTelemetryService(serviceroot.GetClient(), serviceroot.telemetryService)
+}
+
+// ThermalEquipment gets the thermal equipment instance.
+func (serviceroot *Service) ThermalEquipment() (*redfish.ThermalEquipment, error) {
+	return redfish.GetThermalEquipment(serviceroot.GetClient(), serviceroot.thermalEquipment)
 }
 
 // UpdateService gets the update service instance
 func (serviceroot *Service) UpdateService() (*redfish.UpdateService, error) {
 	return redfish.GetUpdateService(serviceroot.GetClient(), serviceroot.updateService)
-}
-
-// JobService gets the job service instance
-func (serviceroot *Service) JobService() (*redfish.JobService, error) {
-	return redfish.GetJobService(serviceroot.GetClient(), serviceroot.jobService)
-}
-
-// PowerEquipment gets the powerEquipment instances of this service.
-func (serviceroot *Service) PowerEquipment() (*redfish.PowerEquipment, error) {
-	return redfish.GetPowerEquipment(serviceroot.GetClient(), serviceroot.powerEquipment)
 }
