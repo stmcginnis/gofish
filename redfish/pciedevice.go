@@ -244,7 +244,7 @@ type PCIeDevice struct {
 	// SerialNumber is used to identify the PCIe device.
 	SerialNumber string
 	// Slot shall contain information about the PCIe slot for this PCIe device.
-	Slot Slot
+	Slot PCIeSlot
 	// SparePartNumber shall contain the spare part number of the PCIe device.
 	SparePartNumber string
 	// StagedVersion shall contain the staged firmware version for this PCIe device; this firmware is not yet active.
