@@ -71,6 +71,10 @@ type Role struct {
 	// For custom Roles, some implementations may not allow writing to this
 	// property.
 	OemPrivileges []string
+	// Restricted shall indicate whether use of the role is restricted by a service as defined by the 'Restricted roles
+	// and restricted privileges' clause of the Redfish Specification. If this property is not present, the value shall
+	// be assumed to be 'false'.
+	Restricted bool
 	// RoleID shall contain the string name of the Role.
 	// This property shall contain the same value as the Id property.
 	RoleID string `json:"RoleId"`
