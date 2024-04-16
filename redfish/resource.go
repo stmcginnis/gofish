@@ -127,6 +127,61 @@ const (
 	MiddleReference Reference = "Middle"
 )
 
+// Condition is a condition that requires attention.
+type Condition struct {
+	// LogEntry is a link to the log entry created for this condition.
+	logEntry string
+	// Message is the human-readable message for this condition.
+	Message string
+	// MessageArgs is an array of message arguments that are substituted for the arguments in
+	// the message when looked up in the message registry. It has the same semantics as the
+	// MessageArgs property in the Redfish MessageRegistry schema.
+	MessageArgs []string
+	// MessageID is an identifier for the message.
+	MessageID string
+	// OriginOfCondition is a link to the resource or object that originated the condition.
+	originOfCondition string
+	// Resolution is a suggestions on how to resolve the condition.
+	Resolution string
+	// ResolutionSteps is a list of recommended steps to resolve the condition.
+	ResolutionSteps []ResolutionStep
+	// Severity is the severity of the condition.
+	Severity common.Health
+	// Timestamp is the time the condition occurred.
+	Timestamp string
+}
+
+// UnmarshalJSON unmarshals a Condition object from the raw JSON.
+func (condition *Condition) UnmarshalJSON(b []byte) error {
+	type temp Condition
+	var t struct {
+		temp
+		LogEntry          common.Link
+		OriginOfCondition string
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*condition = Condition(t.temp)
+
+	// Extract the links to other entities for later
+	condition.logEntry = t.LogEntry.String()
+	condition.originOfCondition = t.OriginOfCondition
+
+	return nil
+}
+
+// LogEntry gets the log entry created for this condition.
+func (condition *Condition) LogEntry(c common.Client) (*LogEntry, error) {
+	if condition.logEntry == "" {
+		return nil, nil
+	}
+	return GetLogEntry(c, condition.logEntry)
+}
+
 // ResourceIdentifier shall be unique within the managed ecosystem.
 type ResourceIdentifier struct {
 	// DurableName shall contain the world-wide unique identifier for the resource. The string shall be in the
