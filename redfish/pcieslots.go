@@ -33,7 +33,8 @@ const (
 	U2 SlotTypes = "U2"
 )
 
-type Slot struct {
+// PCIeSlot shall contain the definition for a PCIe Slot for a Redfish implementation.
+type PCIeSlot struct {
 	// HotPluggable is an indication of whether this PCIe slot supports hotplug.
 	HotPluggable bool
 	// Lanes is the number of PCIe lanes supported by this slot.
@@ -46,6 +47,9 @@ type Slot struct {
 	PCIeType PCIeTypes
 	// SlotType is the PCIe slot type for this slot
 	SlotType SlotTypes
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
+
 	// PCIeDevice shall be an array of links to the PCIe devices contained in this slot.
 	pcieDevice []string
 	// PCIeDeviceCount is the number of PCIe devices contained in this slot.
@@ -62,13 +66,11 @@ type Slot struct {
 	// this object contains shall conform to the Redfish Specification
 	// described requirements.
 	Oem json.RawMessage
-	// Status shall contain any status or health properties of the resource.
-	Status common.Status
 }
 
 // UnmarshalJSON unmarshals a Slot object from the raw JSON.
-func (slot *Slot) UnmarshalJSON(b []byte) error {
-	type temp Slot
+func (slot *PCIeSlot) UnmarshalJSON(b []byte) error {
+	type temp PCIeSlot
 	type linkReference struct {
 		PCIeDevice      common.Links
 		PCIeDeviceCount int `json:"PCIeDevice@odata.count"`
@@ -86,7 +88,7 @@ func (slot *Slot) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*slot = Slot(t.temp)
+	*slot = PCIeSlot(t.temp)
 	slot.pcieDevice = t.Links.PCIeDevice.ToStrings()
 	slot.PCIeDeviceCount = t.Links.PCIeDeviceCount
 	slot.processors = t.Links.Processors.ToStrings()
@@ -96,8 +98,52 @@ func (slot *Slot) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// PCIeSlots is used to represent a PCIeSlots resource for a Redfish
-// implementation.
+// PCIeDevices gets the PCIe devices contained in this slot.
+func (slot *PCIeSlot) PCIeDevice(c common.Client) ([]*PCIeDevice, error) {
+	var result []*PCIeDevice
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range slot.pcieDevice {
+		eth, err := GetPCIeDevice(c, ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Processors gets the processors that are directly connected or directly bridged to this PCIe slot.
+func (slot *PCIeSlot) Processors(c common.Client) ([]*Processor, error) {
+	var result []*Processor
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range slot.processors {
+		eth, err := GetProcessor(c, ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// PCIeSlots is used to represent a PCIeSlots resource for a Redfish implementation.
+// This schema has been deprecated in favor of the PCIeDevice schema.
+// Empty PCIe slots should be represented by PCIeDevice resources using the `Absent`
+// value of the State property within Status.
 type PCIeSlots struct {
 	common.Entity
 	// ODataContext is the odata context.
@@ -107,7 +153,7 @@ type PCIeSlots struct {
 	// Description provides a description of this resource.
 	Description string
 	// Slots is an array of PCI Slot information.
-	Slots []Slot
+	Slots []PCIeSlot
 	// Oem shall contain the OEM extensions. All values for properties that
 	// this object contains shall conform to the Redfish Specification
 	// described requirements.
