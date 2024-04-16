@@ -30,52 +30,195 @@ type Congestion struct {
 type ConnectedDeviceMode string
 
 const (
-	// CXL 68B flit and VH.
-	CXL68BFlitAndVHDeviceMode ConnectedDeviceMode = "CXL68BFlitAndVH"
-	// CXL latency-optimized 256B flit.
-	CXLLatencyOptimized256BFlitDeviceMode ConnectedDeviceMode = "CXLLatencyOptimized256BFlit"
-	// The connection is not CXL or is disconnected.
-	DisconnectedDeviceMode ConnectedDeviceMode = "Disconnected"
-	// Port-based routing (PBR).
-	PBRDeviceMode ConnectedDeviceMode = "PBR"
-	// Restricted CXL device (RCD).
-	RCDDeviceMode ConnectedDeviceMode = "RCD"
-	// Standard 256B flit.
-	Standard256BFlitDeviceMode ConnectedDeviceMode = "Standard256BFlit"
+	// DisconnectedConnectedDeviceMode shall indicate the connection is not CXL or is disconnected.
+	DisconnectedConnectedDeviceMode ConnectedDeviceMode = "Disconnected"
+	// RCDConnectedDeviceMode shall indicate the connected device mode is restricted CXL device (RCD).
+	RCDConnectedDeviceMode ConnectedDeviceMode = "RCD"
+	// CXL68BFlitAndVHConnectedDeviceMode shall indicate the connected device mode is CXL 68B flit and VH.
+	CXL68BFlitAndVHConnectedDeviceMode ConnectedDeviceMode = "CXL68BFlitAndVH"
+	// Standard256BFlitConnectedDeviceMode shall indicate the connected device mode is standard 256B flit.
+	Standard256BFlitConnectedDeviceMode ConnectedDeviceMode = "Standard256BFlit"
+	// CXLLatencyOptimized256BFlitConnectedDeviceMode shall indicate the connected device mode is CXL latency-optimized
+	// 256B flit.
+	CXLLatencyOptimized256BFlitConnectedDeviceMode ConnectedDeviceMode = "CXLLatencyOptimized256BFlit"
+	// PBRConnectedDeviceMode shall indicate the connected device mode is port-based routing (PBR).
+	PBRConnectedDeviceMode ConnectedDeviceMode = "PBR"
 )
 
 type ConnectedDeviceType string
 
 const (
-	// No device detected.
-	NoneDeviceType ConnectedDeviceType = "None"
-	// PCIe device.
-	PCIeDeviceDeviceType ConnectedDeviceType = "PCIeDevice"
-	// CXL Type 1 device.
-	Type1DeviceType ConnectedDeviceType = "Type1"
-	// CXL Type 2 device.
-	Type2DeviceType ConnectedDeviceType = "Type2"
-	// CXL Type 3 multi-logical device (MLD).
-	Type3MLDDeviceType ConnectedDeviceType = "Type3MLD"
-	// CXL Type 3 single logical device (SLD).
-	Type3SLDDeviceType ConnectedDeviceType = "Type3SLD"
+	// NoneConnectedDeviceType shall indicate no device is detected.
+	NoneConnectedDeviceType ConnectedDeviceType = "None"
+	// PCIeDeviceConnectedDeviceType shall indicate the connected device is a PCIe device.
+	PCIeDeviceConnectedDeviceType ConnectedDeviceType = "PCIeDevice"
+	// Type1ConnectedDeviceType shall indicate the connected device is a CXL Type 1 device.
+	Type1ConnectedDeviceType ConnectedDeviceType = "Type1"
+	// Type2ConnectedDeviceType shall indicate the connected device is a CXL Type 2 device.
+	Type2ConnectedDeviceType ConnectedDeviceType = "Type2"
+	// Type3SLDConnectedDeviceType shall indicate the connected device is a CXL Type 3 single logical device (SLD).
+	Type3SLDConnectedDeviceType ConnectedDeviceType = "Type3SLD"
+	// Type3MLDConnectedDeviceType shall indicate the connected device is a CXL Type 3 multi-logical device (MLD).
+	Type3MLDConnectedDeviceType ConnectedDeviceType = "Type3MLD"
 )
 
 type CurrentPortConfigurationState string
 
 const (
-	// Bind in progress.
-	BindInProgressPortConfigurationState CurrentPortConfigurationState = "BindInProgress"
-	// Disabled.
-	DisabledPortConfigurationState CurrentPortConfigurationState = "Disabled"
-	// Downstream port (DSP).
-	DSPPortConfigurationState CurrentPortConfigurationState = "DSP"
-	// Reserved.
-	ReservedPortConfigurationState CurrentPortConfigurationState = "Reserved"
-	// Unbind in progress.
-	UnbindInProgressPortConfigurationState CurrentPortConfigurationState = "UnbindInProgress"
-	// Upstream port (USP).
-	USPPortConfigurationState CurrentPortConfigurationState = "USP"
+	// DisabledCurrentPortConfigurationState shall indicate the port is disabled.
+	DisabledCurrentPortConfigurationState CurrentPortConfigurationState = "Disabled"
+	// BindInProgressCurrentPortConfigurationState shall indicate a bind is in progress for the port.
+	BindInProgressCurrentPortConfigurationState CurrentPortConfigurationState = "BindInProgress"
+	// UnbindInProgressCurrentPortConfigurationState shall indicate an unbind is in progress for the port.
+	UnbindInProgressCurrentPortConfigurationState CurrentPortConfigurationState = "UnbindInProgress"
+	// DSPCurrentPortConfigurationState shall indicate the port is enabled as a downstream port (DSP).
+	DSPCurrentPortConfigurationState CurrentPortConfigurationState = "DSP"
+	// USPCurrentPortConfigurationState shall indicate the port is enabled as an upstream port (USP).
+	USPCurrentPortConfigurationState CurrentPortConfigurationState = "USP"
+	// ReservedCurrentPortConfigurationState shall indicate the port is in a reserved state.
+	ReservedCurrentPortConfigurationState CurrentPortConfigurationState = "Reserved"
+	// FabricLinkCurrentPortConfigurationState shall indicate the port is enabled as a fabric link to another switch.
+	FabricLinkCurrentPortConfigurationState CurrentPortConfigurationState = "FabricLink"
+)
+
+type FiberConnectionType string
+
+const (
+	// SingleModeFiberConnectionType The connection is using single mode operation.
+	SingleModeFiberConnectionType FiberConnectionType = "SingleMode"
+	// MultiModeFiberConnectionType The connection is using multi mode operation.
+	MultiModeFiberConnectionType FiberConnectionType = "MultiMode"
+)
+
+type IEEE802IDSubtype string
+
+const (
+	// ChassisCompIEEE802IDSubtype Chassis component, based on the value of entPhysicalAlias in RFC4133.
+	ChassisCompIEEE802IDSubtype IEEE802IDSubtype = "ChassisComp"
+	// IfAliasIEEE802IDSubtype Interface alias, based on the ifAlias MIB object.
+	IfAliasIEEE802IDSubtype IEEE802IDSubtype = "IfAlias"
+	// PortCompIEEE802IDSubtype Port component, based on the value of entPhysicalAlias in RFC4133.
+	PortCompIEEE802IDSubtype IEEE802IDSubtype = "PortComp"
+	// MacAddrIEEE802IDSubtype MAC address, based on an agent-detected unicast source address as defined in IEEE
+	// standard 802.
+	MacAddrIEEE802IDSubtype IEEE802IDSubtype = "MacAddr"
+	// NetworkAddrIEEE802IDSubtype Network address, based on an agent-detected network address.
+	NetworkAddrIEEE802IDSubtype IEEE802IDSubtype = "NetworkAddr"
+	// IfNameIEEE802IDSubtype Interface name, based on the ifName MIB object.
+	IfNameIEEE802IDSubtype IEEE802IDSubtype = "IfName"
+	// AgentIDIEEE802IDSubtype Agent circuit ID, based on the agent-local identifier of the circuit as defined in
+	// RFC3046.
+	AgentIDIEEE802IDSubtype IEEE802IDSubtype = "AgentId"
+	// LocalAssignIEEE802IDSubtype Locally assigned, based on an alphanumeric value locally assigned.
+	LocalAssignIEEE802IDSubtype IEEE802IDSubtype = "LocalAssign"
+	// NotTransmittedIEEE802IDSubtype No data to be sent to/received from remote partner.
+	NotTransmittedIEEE802IDSubtype IEEE802IDSubtype = "NotTransmitted"
+)
+
+type LLDPSystemCapabilities string
+
+const (
+	// NoneLLDPSystemCapabilities shall indicate the system capabilities are transmitted, but no capabilities are set.
+	NoneLLDPSystemCapabilities LLDPSystemCapabilities = "None"
+	// BridgeLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'bridge' capability.
+	BridgeLLDPSystemCapabilities LLDPSystemCapabilities = "Bridge"
+	// DOCSISCableDeviceLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'DOCSIS cable device' capability.
+	DOCSISCableDeviceLLDPSystemCapabilities LLDPSystemCapabilities = "DOCSISCableDevice"
+	// OtherLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'other' capability.
+	OtherLLDPSystemCapabilities LLDPSystemCapabilities = "Other"
+	// RepeaterLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'repeater' capability.
+	RepeaterLLDPSystemCapabilities LLDPSystemCapabilities = "Repeater"
+	// RouterLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'router' capability.
+	RouterLLDPSystemCapabilities LLDPSystemCapabilities = "Router"
+	// StationLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'station' capability.
+	StationLLDPSystemCapabilities LLDPSystemCapabilities = "Station"
+	// TelephoneLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'telephone' capability.
+	TelephoneLLDPSystemCapabilities LLDPSystemCapabilities = "Telephone"
+	// WLANAccessPointLLDPSystemCapabilities shall indicate the IEEE802.1AB-defined 'WLAN access point' capability.
+	WLANAccessPointLLDPSystemCapabilities LLDPSystemCapabilities = "WLANAccessPoint"
+)
+
+type PortLinkStatus string
+
+const (
+	// LinkUpPortLinkStatus This link on this interface is up.
+	LinkUpPortLinkStatus LinkStatus = "LinkUp"
+	// StartingPortLinkStatus This link on this interface is starting. A physical link has been established, but the port
+	// is not able to transfer data.
+	StartingPortLinkStatus LinkStatus = "Starting"
+	// TrainingPortLinkStatus This physical link on this interface is training.
+	TrainingPortLinkStatus LinkStatus = "Training"
+	// LinkDownPortLinkStatus The link on this interface is down.
+	LinkDownPortLinkStatus LinkStatus = "LinkDown"
+	// NoLinkPortLinkStatus No physical link detected on this interface.
+	NoLinkPortLinkStatus LinkStatus = "NoLink"
+)
+
+type MediumType string
+
+const (
+	// CopperMediumType The medium connected is copper.
+	CopperMediumType MediumType = "Copper"
+	// FiberOpticMediumType The medium connected is fiber optic.
+	FiberOpticMediumType MediumType = "FiberOptic"
+)
+
+type PortMedium string
+
+const (
+	// ElectricalPortMedium This port has an electrical cable connection.
+	ElectricalPortMedium PortMedium = "Electrical"
+	// OpticalPortMedium This port has an optical cable connection.
+	OpticalPortMedium PortMedium = "Optical"
+)
+
+// PortType is
+type PortType string
+
+const (
+	// UpstreamPortPortType This port connects to a host device.
+	UpstreamPortPortType PortType = "UpstreamPort"
+	// DownstreamPortPortType This port connects to a target device.
+	DownstreamPortPortType PortType = "DownstreamPort"
+	// InterswitchPortPortType This port connects to another switch.
+	InterswitchPortPortType PortType = "InterswitchPort"
+	// ManagementPortPortType This port connects to a switch manager.
+	ManagementPortPortType PortType = "ManagementPort"
+	// BidirectionalPortPortType This port connects to any type of device.
+	BidirectionalPortPortType PortType = "BidirectionalPort"
+	// UnconfiguredPortPortType This port has not yet been configured.
+	UnconfiguredPortPortType PortType = "UnconfiguredPort"
+)
+
+type SFPType string
+
+const (
+	// SFPSFPType The SFP conforms to the SFF Specification for SFP.
+	SFPSFPType SFPType = "SFP"
+	// SFPPlusSFPType The SFP conforms to the SFF Specification for SFP+.
+	SFPPlusSFPType SFPType = "SFPPlus"
+	// SFP28SFPType The SFP conforms to the SFF Specification for SFP+ and IEEE 802.3by Specification.
+	SFP28SFPType SFPType = "SFP28"
+	// CSFPSFPType The SFP conforms to the CSFP MSA Specification.
+	CSFPSFPType SFPType = "cSFP"
+	// SFPDDSFPType The SFP conforms to the SFP-DD MSA Specification.
+	SFPDDSFPType SFPType = "SFPDD"
+	// QSFPSFPType The SFP conforms to the SFF Specification for QSFP.
+	QSFPSFPType SFPType = "QSFP"
+	// QSFPPlusSFPType The SFP conforms to the SFF Specification for QSFP+.
+	QSFPPlusSFPType SFPType = "QSFPPlus"
+	// QSFP14SFPType The SFP conforms to the SFF Specification for QSFP14.
+	QSFP14SFPType SFPType = "QSFP14"
+	// QSFP28SFPType The SFP conforms to the SFF Specification for QSFP28.
+	QSFP28SFPType SFPType = "QSFP28"
+	// QSFP56SFPType The SFP conforms to the SFF Specification for QSFP56.
+	QSFP56SFPType SFPType = "QSFP56"
+	// MiniSASHDSFPType The SFP conforms to the SFF Specification SFF-8644.
+	MiniSASHDSFPType SFPType = "MiniSASHD"
+	// QSFPDDSFPType The SFP conforms to the QSFP Double Density Specification.
+	QSFPDDSFPType SFPType = "QSFPDD"
+	// OSFPSFPType The SFP conforms to the OSFP Specification.
+	OSFPSFPType SFPType = "OSFP"
 )
 
 type QoSTelemetryCapabilities struct {
@@ -85,7 +228,7 @@ type QoSTelemetryCapabilities struct {
 	TemporaryThroughputReductionSupported bool
 }
 
-type CXL struct {
+type CXLPort struct {
 	// The congestion properties for this CXL port.
 	Congestion Congestion
 	// The connected device mode.
@@ -100,6 +243,167 @@ type CXL struct {
 	QoSTelemetryCapabilities QoSTelemetryCapabilities
 	// Indicates whether temporary throughput reduction is enabled.
 	TemporaryThroughputReductionEnabled bool
+}
+
+// ConfiguredNetworkLink shall contain a set of link settings that a port is configured to use for autonegotiation.
+type ConfiguredNetworkLink struct {
+	// ConfiguredLinkSpeedGbps shall contain the network link speed per lane this port is configured to allow for
+	// autonegotiation purposes. This value includes overhead associated with the protocol.
+	ConfiguredLinkSpeedGbps float64
+	// ConfiguredWidth shall contain the network link width this port is configured to use for autonegotiation
+	// purposes.
+	ConfiguredWidth int
+}
+
+// EthernetProperties shall contain Ethernet-specific properties for a port.
+type EthernetProperties struct {
+	// AssociatedMACAddresses shall contain an array of configured MAC addresses that are associated with this network
+	// port, including the programmed address of the lowest-numbered network device function, the configured but not
+	// active address if applicable, the address for hardware port teaming, or other network addresses.
+	AssociatedMACAddresses []string
+	// EEEEnabled shall indicate whether IEEE 802.3az Energy-Efficient Ethernet (EEE) is enabled on this port.
+	EEEEnabled bool
+	// FlowControlConfiguration shall contain the locally configured 802.3x flow control setting for this port.
+	FlowControlConfiguration FlowControl
+	// FlowControlStatus shall contain the 802.3x flow control behavior negotiated with the link partner for this port.
+	FlowControlStatus FlowControl
+	// LLDPEnabled shall contain the state indicating whether to enable LLDP for a port. If LLDP is disabled at the
+	// adapter level, this property shall be ignored.
+	LLDPEnabled bool
+	// LLDPReceive shall contain the LLDP data being received on this link.
+	LLDPReceive LLDPReceive
+	// LLDPTransmit shall contain the LLDP data being transmitted on this link.
+	LLDPTransmit LLDPTransmit
+	// WakeOnLANEnabled shall indicate whether Wake on LAN (WoL) is enabled on this port.
+	WakeOnLANEnabled bool
+}
+
+// FibreChannelProperties shall contain Fibre Channel-specific properties for a port.
+type FibreChannelProperties struct {
+	// AssociatedWorldWideNames shall contain an array of configured World Wide Names (WWN) that are associated with
+	// this network port, including the programmed address of the lowest-numbered network device function, the
+	// configured but not active address if applicable, the address for hardware port teaming, or other network
+	// addresses.
+	AssociatedWorldWideNames []string
+	// FabricName shall indicate the Fibre Channel Fabric Name provided by the switch.
+	FabricName string
+	// NumberDiscoveredRemotePorts shall contain the number of ports not on this associated device that this port has
+	// discovered.
+	NumberDiscoveredRemotePorts int
+	// PortConnectionType shall contain the connection type for this port.
+	PortConnectionType PortConnectionType
+}
+
+type FunctionMaxBandwidth struct {
+	// AllocationPercent shall contain the maximum bandwidth percentage allocation, '0' to '100', for the associated
+	// network device function.
+	AllocationPercent int
+	// NetworkDeviceFunction shall contain a link to a resource of type NetworkDeviceFunction that represents the
+	// network device function associated with this bandwidth setting of this network port.
+	networkDeviceFunction common.Link //nolint:unused
+}
+
+// FunctionMinBandwidth shall describe a minimum bandwidth percentage allocation for a network device function
+// associated with a port.
+type FunctionMinBandwidth struct {
+	// AllocationPercent shall contain the minimum bandwidth percentage allocation, '0' to '100', for the associated
+	// network device function. The sum of all minimum percentages shall not exceed '100'.
+	AllocationPercent int
+	// NetworkDeviceFunction shall contain a link to a resource of type NetworkDeviceFunction that represents the
+	// network device function associated with this bandwidth setting of this network port.
+	networkDeviceFunction common.Link //nolint:unused
+}
+
+// InfiniBandProperties shall contain InfiniBand-specific properties for a port.
+type InfiniBandProperties struct {
+	// AssociatedNodeGUIDs shall contain an array of configured node GUIDs that are associated with this network port,
+	// including the programmed address of the lowest-numbered network device function, the configured but not active
+	// address if applicable, the address for hardware port teaming, or other network addresses.
+	AssociatedNodeGUIDs []string
+	// AssociatedPortGUIDs shall contain an array of configured port GUIDs that are associated with this network port,
+	// including the programmed address of the lowest-numbered network device function, the configured but not active
+	// address if applicable, the address for hardware port teaming, or other network addresses.
+	AssociatedPortGUIDs []string
+	// AssociatedSystemGUIDs shall contain an array of configured system GUIDs that are associated with this network
+	// port, including the programmed address of the lowest-numbered network device function, the configured but not
+	// active address if applicable, the address for hardware port teaming, or other network addresses.
+	AssociatedSystemGUIDs []string
+}
+
+// LLDPReceive shall contain the LLDP data from the remote partner across this link.
+type LLDPReceive struct {
+	// ChassisID shall contain the chassis ID received from the remote partner across this link. If no such chassis ID
+	// has been received, this property should not be present.
+	ChassisID string
+	// ChassisIDSubtype shall contain the IEEE 802.1AB-2009 chassis ID subtype received from the remote partner across
+	// this link. If no such chassis ID subtype has been received, this property should not be present.
+	ChassisIDSubtype IEEE802IDSubtype
+	// ManagementAddressIPv4 shall contain the IPv4 management address received from the remote partner across this
+	// link. If no such management address has been received, this property should not be present.
+	ManagementAddressIPv4 string
+	// ManagementAddressIPv6 shall contain the IPv6 management address received from the remote partner across this
+	// link. If no such management address has been received, this property should not be present.
+	ManagementAddressIPv6 string
+	// ManagementAddressMAC shall contain the management MAC address received from the remote partner across this link.
+	// If no such management address has been received, this property should not be present.
+	ManagementAddressMAC string
+	// ManagementVlanID shall contain the management VLAN ID received from the remote partner across this link. If no
+	// such management VLAN ID has been received, this property should not be present.
+	ManagementVlanID int
+	// PortID shall contain a colon-delimited string of hexadecimal octets identifying the port received from the
+	// remote partner across this link. If no such port ID has been received, this property should not be present.
+	PortID string
+	// PortIDSubtype shall contain the port ID subtype from IEEE 802.1AB-2009 Table 8-3 received from the remote
+	// partner across this link. If no such port ID subtype has been received, this property should not be present.
+	PortIDSubtype IEEE802IDSubtype
+	// SystemCapabilities shall contain the system capabilities received from the remote partner across this link. If
+	// no such system capabilities have been received, this property shall not be present. This property shall not
+	// contain the value 'None'.
+	SystemCapabilities []LLDPSystemCapabilities
+	// SystemDescription shall contain the system description received from the remote partner across this link. If no
+	// such system description has been received, this property shall not be present.
+	SystemDescription string
+	// SystemName shall contain the system name received from the remote partner across this link. If no such system
+	// name has been received, this property shall not be present.
+	SystemName string
+}
+
+// LLDPTransmit shall contain the LLDP data to be transmitted from this endpoint.
+type LLDPTransmit struct {
+	// ChassisID shall contain the chassis ID to be transmitted from this endpoint. If no such chassis ID is to be
+	// transmitted, this value shall be an empty string.
+	ChassisID string
+	// ChassisIDSubtype shall contain the IEEE 802.1AB-2009 chassis ID subtype to be transmitted from this endpoint. If
+	// no such chassis ID subtype is to be transmitted, this value shall be 'NotTransmitted'.
+	ChassisIDSubtype IEEE802IDSubtype
+	// ManagementAddressIPv4 shall contain the IPv4 management address to be transmitted from this endpoint. If no such
+	// management address is to be transmitted, this value shall be an empty string.
+	ManagementAddressIPv4 string
+	// ManagementAddressIPv6 shall contain the IPv6 management address to be transmitted from this endpoint. If no such
+	// management address is to be transmitted, this value shall be an empty string.
+	ManagementAddressIPv6 string
+	// ManagementAddressMAC shall contain the management MAC address to be transmitted from this endpoint. If no such
+	// management address is to be transmitted, this value shall be an empty string.
+	ManagementAddressMAC string
+	// ManagementVlanID shall contain the management VLAN ID to be transmitted from this endpoint. If no such port ID
+	// is to be transmitted, this value shall be '4095'.
+	ManagementVlanID int
+	// PortID shall contain a colon-delimited string of hexadecimal octets identifying the port for an LLDP endpoint.
+	// If no such port ID is to be transmitted, this value shall be an empty string.
+	PortID string
+	// PortIDSubtype shall contain the port ID subtype from IEEE 802.1AB-2009 Table 8-3 to be transmitted from this
+	// endpoint. If no such port ID subtype is to be transmitted, this value shall be 'NotTransmitted'.
+	PortIDSubtype IEEE802IDSubtype
+	// SystemCapabilities shall contain the system capabilities to be transmitted from this endpoint. If no such system
+	// capabilities are to be transmitted, this value shall be an empty array. If this property contains the value
+	// 'None', an empty set of system capabilities is transmitted from this endpoint.
+	SystemCapabilities []LLDPSystemCapabilities
+	// SystemDescription shall contain the system description to be transmitted from this endpoint. If no such system
+	// description is to be transmitted, this value shall be an empty string.
+	SystemDescription string
+	// SystemName shall contain the system name to be transmitted from this endpoint. If no such system name is to be
+	// transmitted, this value shall be an empty string.
+	SystemName string
 }
 
 type IDSubtype string
@@ -148,31 +452,6 @@ const (
 	WLANAccessPointSystemCapability SystemCapability = "WLANAccessPoint"
 )
 
-type LLDP struct {
-	// Link Layer Data Protocol (LLDP) chassis ID.
-	ChassisID string `json:"ChassisId"`
-	// The type of identifier used for the chassis ID.
-	ChassisIDSubtype IDSubtype `json:"ChassisIdSubtype"`
-	// The IPv4 management address to be transmitted from this endpoint.
-	ManagementAddressIPv4 string
-	// The IPv6 management address to be transmitted from this endpoint.
-	ManagementAddressIPv6 string
-	// The management MAC address to be transmitted from this endpoint.
-	ManagementAddressMAC string
-	// The management VLAN ID to be transmitted from this endpoint.
-	ManagementVlanID int `json:"ManagementVlanId"`
-	// A colon delimited string of hexadecimal octets identifying a port to be transmitted from this endpoint.
-	PortID string `json:"PortId"`
-	// The port ID subtype to be transmitted from this endpoint.
-	PortIDSubtype IDSubtype `json:"PortIdSubtype"`
-	// The system capabilities to be transmitted from this endpoint.
-	SystemCapabilities []SystemCapability
-	// The system description to be transmitted from this endpoint.
-	SystemDescription string
-	// The system name to be transmitted from this endpoint.
-	SystemName string
-}
-
 type PortEthernet struct {
 	// An array of configured MAC addresses that are associated with this network port.
 	AssociatedMACAddresses []string
@@ -185,9 +464,9 @@ type PortEthernet struct {
 	// Enable/disable LLDP for this port.
 	LLDPEnabled bool
 	// LLDP data being received on this link.
-	LLDPReceive LLDP
+	LLDPReceive LLDPReceive
 	// LLDP data being transmitted on this link.
-	LLDPTransmit LLDP
+	LLDPTransmit LLDPTransmit
 	// Deprecated (v1.5+): The set of Ethernet capabilities that this port supports.
 	SupportedEthernetCapabilities []SupportedEthernetCapabilities
 	// Indicates whether Wake on LAN (WoL) is enabled on this port.
@@ -212,15 +491,6 @@ type FunctionBandwidth struct {
 	networkDeviceFunction string
 }
 
-type PortGenZ struct {
-	// The Linear Packet Relay Table for the port.
-	lrpt string
-	// The Multi-subnet Packet Relay Table for the port.
-	mrpt string
-	// The Virtual Channel Action Table for the port.
-	vcat string
-}
-
 type InfiniBand struct {
 	// An array of configured node GUIDs that are associated with this network port,
 	// including the programmed address of the lowest numbered network device function,
@@ -237,13 +507,6 @@ type InfiniBand struct {
 	// the configured but not active address, if applicable,
 	// the address for hardware port teaming, or other network addresses.
 	AssociatedSystemGUIDs []string
-}
-
-type ConfiguredNetworkLink struct {
-	// The link speed per lane this port is configured to use for autonegotiation.
-	ConfiguredLinkSpeedGbps float32
-	// The link width this port is configured to use for autonegotiation in conjunction with the link speed.
-	ConfiguredWidth int
 }
 
 type LinkConfiguration struct {
@@ -264,31 +527,6 @@ const (
 	DisabledLinkState LinkState = "Disabled"
 	// The link is enabled and operational.
 	EnabledLinkState LinkState = "Enabled"
-)
-
-type PortLinkStatus string
-
-const (
-	// The link on this interface is down.
-	LinkDownPortLinkStatus PortLinkStatus = "LinkDown"
-	// The link on this interface is up.
-	LinkUpPortLinkStatus PortLinkStatus = "LinkUp"
-	// No physical link detected on this interface.
-	NoLinkPortLinkStatus PortLinkStatus = "NoLink"
-	// This link on this interface is starting. A physical link has been established,
-	// but the port is not able to transfer data.
-	StartingPortLinkStatus PortLinkStatus = "Starting"
-	// This physical link on this interface is training.
-	TrainingPortLinkStatus PortLinkStatus = "Training"
-)
-
-type PortMedium string
-
-const (
-	// This port has an electrical cable connection.
-	ElectricalPortMedium PortMedium = "Electrical"
-	// This port has an optical cable connection.
-	OpticalPortMedium PortMedium = "Optical"
 )
 
 type PortProtocol string
@@ -377,41 +615,6 @@ const (
 	VGAPortProtocol PortProtocol = "VGA"
 )
 
-type PortType string
-
-const (
-	// This port connects to any type of device.
-	BidirectionalPortType PortType = "BidirectionalPort"
-	// This port connects to a target device.
-	DownstreamPortType PortType = "DownstreamPort"
-	// This port connects to another switch.
-	InterswitchPortType PortType = "InterswitchPort"
-	// This port connects to a switch manager.
-	ManagementPortType PortType = "ManagementPort"
-	// This port has not yet been configured.
-	UnconfiguredPortType PortType = "UnconfiguredPort"
-	// This port connects to a host device.
-	UpstreamPortType PortType = "UpstreamPort"
-)
-
-type FiberConnectionType string
-
-const (
-	// The connection is using multi mode operation.
-	MultiModeFiberConnectionType FiberConnectionType = "MultiMode"
-	// The connection is using single mode operation.
-	SingleModeFiberConnectionType FiberConnectionType = "SingleMode"
-)
-
-type MediumType string
-
-const (
-	// The medium connected is copper.
-	CopperMediumType MediumType = "Copper"
-	// The medium connected is fiber optic.
-	FiberOpticMediumType MediumType = "FiberOptic"
-)
-
 type SFPDeviceType string
 
 const (
@@ -482,7 +685,7 @@ type Port struct {
 	// The current speed of this port.
 	CurrentSpeedGbps float32
 	// CXL properties for this port.
-	CXL CXL
+	CXL CXLPort
 	// Description provides a description of this resource.
 	Description string
 	// Deprecated (v1.10+): An indication of whether this port is enabled.
@@ -500,8 +703,12 @@ type Port struct {
 	// An array of minimum bandwidth allocation percentages for the functions
 	// associated with this port.
 	FunctionMinBandwidth []FunctionBandwidth
-	// Gen-Z specific properties.
-	GenZ PortGenZ
+	// The GenZ Linear Packet Relay Table for the port.
+	genZLPRT []string
+	// The Multi-subnet Packet Relay Table for the port.
+	genZMPRT []string
+	// The Virtual Channel Action Table for the port.
+	genZVCAT []string
 	// InfiniBand properties for this port.
 	InfiniBand InfiniBand
 	// An indication of whether the port is enabled.
@@ -545,8 +752,8 @@ type Port struct {
 	// The number of lanes, phys, or other physical transport links that this port contains.
 	Width int
 
-	// An array of links to the endpoints at the other end of the link.
-	associatedEndpoints      []string
+	associatedEndpoints []string
+	// AssociatedEndpointsCount gets the number of endpoints on the other end of the link.
 	AssociatedEndpointsCount int
 	// An array of links to the cables connected to this port.
 	cables      []string
@@ -583,9 +790,9 @@ func (port *Port) UnmarshalJSON(b []byte) error {
 		NetworkDeviceFunction common.Link
 	}
 	type genZ struct {
-		LRPT common.Link
-		MRPT common.Link
-		VCAT common.Link
+		LRPT common.LinksCollection
+		MRPT common.LinksCollection
+		VCAT common.LinksCollection
 	}
 	type links struct {
 		AssociatedEndpoints       common.Links
@@ -629,10 +836,11 @@ func (port *Port) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*port = Port(t.temp)
 	port.environmentMetrics = t.EnvironmentMetrics.String()
-	port.GenZ.lrpt = t.GenZ.LRPT.String()
-	port.GenZ.mrpt = t.GenZ.MRPT.String()
-	port.GenZ.vcat = t.GenZ.VCAT.String()
 	port.metrics = t.Metrics.String()
+	port.genZLPRT = t.GenZ.LRPT.ToStrings()
+	port.genZMPRT = t.GenZ.MRPT.ToStrings()
+	port.genZVCAT = t.GenZ.VCAT.ToStrings()
+
 	port.associatedEndpoints = t.Links.AssociatedEndpoints.ToStrings()
 	port.AssociatedEndpointsCount = t.Links.AssociatedEndpointsCount
 	port.cables = t.Links.Cables.ToStrings()
@@ -646,6 +854,7 @@ func (port *Port) UnmarshalJSON(b []byte) error {
 	port.ethernetInterfaces = t.Links.EthernetInterfaces.ToStrings()
 	port.EthernetInterfacesCount = t.Links.EthernetInterfacesCount
 	port.OemLinks = t.Links.Oem
+
 	port.resetTarget = t.Actions.ResetPort.Target
 	port.resetPPBTarget = t.Actions.ResetPPB.Target
 	port.OemActions = t.Actions.Oem
@@ -663,6 +872,211 @@ func (port *Port) UnmarshalJSON(b []byte) error {
 	}
 
 	return nil
+}
+
+// EnvironmentMetrics gets the environment metrics for this port or any attached small form-factor pluggable (SFP) device.
+func (port *Port) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+	if port.environmentMetrics == "" {
+		return nil, nil
+	}
+	return GetEnvironmentMetrics(port.GetClient(), port.environmentMetrics)
+}
+
+// Metrics gets the metrics for this port.
+func (port *Port) Metrics() (*PortMetrics, error) {
+	if port.metrics == "" {
+		return nil, nil
+	}
+	return GetPortMetrics(port.GetClient(), port.metrics)
+}
+
+// AssociatedEndpoints gets the endpoints at the other end of the link.
+func (port *Port) AssociatedEndpoints() ([]*Endpoint, error) {
+	var result []*Endpoint
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.associatedEndpoints {
+		eth, err := GetEndpoint(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Cables gets the cables connected to this port.
+func (port *Port) Cables() ([]*Cable, error) {
+	var result []*Cable
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.cables {
+		eth, err := GetCable(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// ConnectedPorts gets the remote device ports connected to the other end of the link.
+func (port *Port) ConnectedPorts() ([]*Port, error) {
+	var result []*Port
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.connectedPorts {
+		eth, err := GetPort(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// ConnectedSwitchPorts gets the switch ports connected to the other end of the link.
+func (port *Port) ConnectedSwitchPorts() ([]*Port, error) {
+	var result []*Port
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.connectedSwitchPorts {
+		eth, err := GetPort(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// ConnectedSwitches gets the switches connected to the other end of the link.
+func (port *Port) ConnectedSwitches() ([]*Switch, error) {
+	var result []*Switch
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.connectedSwitches {
+		eth, err := GetSwitch(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// EthernetInterfaces gets the Ethernet interfaces this port provides.
+func (port *Port) EthernetInterfaces() ([]*EthernetInterface, error) {
+	var result []*EthernetInterface
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.ethernetInterfaces {
+		eth, err := GetEthernetInterface(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// GenZLPRT gets the Gen-Z Core Specification-defined Linear Packet Relay Table for this port.
+func (port *Port) GenZLPRT() ([]*RouteEntry, error) {
+	var result []*RouteEntry
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.genZLPRT {
+		eth, err := GetRouteEntry(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// GenZMPRT gets the Gen-Z Core Specification-defined Multi-subnet Packet Relay Table for this port.
+func (port *Port) GenZMPRT() ([]*RouteEntry, error) {
+	var result []*RouteEntry
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.genZMPRT {
+		eth, err := GetRouteEntry(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// GenZVCAT gets the Gen-Z Virtual Channel Action Table for the port.
+func (port *Port) GenZVCAT() ([]*VCATEntry, error) {
+	var result []*VCATEntry
+
+	collectionError := common.NewCollectionError()
+	for _, ethLink := range port.genZVCAT {
+		eth, err := GetVCATEntry(port.GetClient(), ethLink)
+		if err != nil {
+			collectionError.Failures[ethLink] = err
+		} else {
+			result = append(result, eth)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -688,13 +1102,13 @@ func (port *Port) Update() error {
 		"FlowControlConfiguration",
 		"LLDPEnabled",
 		"ChassisId",
-		"ChassisIdSubtype",
+		"ChassisIDSubtype",
 		"ManagementAddressIPv4",
 		"ManagementAddressIPv6",
 		"ManagementAddressMAC",
 		"ManagementVlanId",
 		"PortId",
-		"PortIdSubtype",
+		"PortIDSubtype",
 		"SystemCapabilities",
 		"SystemDescription",
 		"SystemName",
@@ -765,6 +1179,7 @@ func ListReferencedPorts(c common.Client, link string) ([]*Port, error) {
 	return result, collectionError
 }
 
+// ResetPort resets this port.
 func (port *Port) ResetPort(resetType ResetType) error {
 	if port.resetTarget == "" {
 		return fmt.Errorf("ResetPort action is not supported")
@@ -778,6 +1193,7 @@ func (port *Port) ResetPort(resetType ResetType) error {
 	return port.Post(port.resetTarget, t)
 }
 
+// ResetPPB resets the PCI-to-PCI bridge (PPB) for this port.
 func (port *Port) ResetPPB() error {
 	if port.resetPPBTarget == "" {
 		return fmt.Errorf("ResetPPB action is not supported")
