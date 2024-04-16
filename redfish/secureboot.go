@@ -72,10 +72,11 @@ type SecureBoot struct {
 	// SecureBootMode shall contain the current Secure Boot mode, as defined in
 	// the UEFI Specification.
 	SecureBootMode SecureBootModeType
-	// resetKeysTarget is the URL to send ResetKeys requests.
-	resetKeysTarget string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+
+	// resetKeysTarget is the URL to send ResetKeys requests.
+	resetKeysTarget string
 }
 
 // UnmarshalJSON unmarshals a SecureBoot object from the raw JSON.
