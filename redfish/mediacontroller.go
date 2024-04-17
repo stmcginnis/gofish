@@ -65,9 +65,7 @@ type MediaController struct {
 func (mediacontroller *MediaController) UnmarshalJSON(b []byte) error {
 	type temp MediaController
 	type Actions struct {
-		Reset struct {
-			Target string
-		} `json:"#MediaController.Reset"`
+		Reset common.ActionTarget `json:"#MediaController.Reset"`
 	}
 	type Links struct {
 		// Endpoints shall contain an array of links to resources of type Endpoint with which this media controller is

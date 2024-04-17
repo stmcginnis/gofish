@@ -443,33 +443,15 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 	}
 
 	type actions struct {
-		AssignReplicaTarget struct {
-			Target string
-		} `json:"#Volume.AssignReplicaTarget"`
-		CheckConsistency struct {
-			Target string
-		} `json:"#Volume.CheckConsistency"`
-		CreateReplicaTarget struct {
-			Target string
-		} `json:"#Volume.CreateReplicaTarget"`
-		Initialize struct {
-			Target string
-		} `json:"#Volume.Initialize"`
-		RemoveReplicaRelationship struct {
-			Target string
-		} `json:"#Volume.RemoveReplicaRelationship"`
-		ResumeReplication struct {
-			Target string
-		} `json:"#Volume.ResumeReplication"`
-		ReverseReplicationRelationship struct {
-			Target string
-		} `json:"#Volume.ReverseReplicationRelationship"`
-		SplitReplication struct {
-			Target string
-		} `json:"#Volume.SplitReplication"`
-		SuspendReplication struct {
-			Target string
-		} `json:"#Volume.SuspendReplication"`
+		AssignReplicaTarget            common.ActionTarget `json:"#Volume.AssignReplicaTarget"`
+		CheckConsistency               common.ActionTarget `json:"#Volume.CheckConsistency"`
+		CreateReplicaTarget            common.ActionTarget `json:"#Volume.CreateReplicaTarget"`
+		Initialize                     common.ActionTarget `json:"#Volume.Initialize"`
+		RemoveReplicaRelationship      common.ActionTarget `json:"#Volume.RemoveReplicaRelationship"`
+		ResumeReplication              common.ActionTarget `json:"#Volume.ResumeReplication"`
+		ReverseReplicationRelationship common.ActionTarget `json:"#Volume.ReverseReplicationRelationship"`
+		SplitReplication               common.ActionTarget `json:"#Volume.SplitReplication"`
+		SuspendReplication             common.ActionTarget `json:"#Volume.SuspendReplication"`
 	}
 
 	var t struct {

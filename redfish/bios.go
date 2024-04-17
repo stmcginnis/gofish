@@ -56,12 +56,8 @@ type Bios struct {
 func (bios *Bios) UnmarshalJSON(b []byte) error {
 	type temp Bios
 	type Actions struct {
-		ChangePassword struct {
-			Target string
-		} `json:"#Bios.ChangePassword"`
-		ResetBios struct {
-			Target string
-		} `json:"#Bios.ResetBios"`
+		ChangePassword common.ActionTarget `json:"#Bios.ChangePassword"`
+		ResetBios      common.ActionTarget `json:"#Bios.ResetBios"`
 	}
 	type Links struct {
 		ActiveSoftwareImage struct {

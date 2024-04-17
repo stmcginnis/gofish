@@ -126,12 +126,8 @@ type AggregationSource struct {
 func (aggregationsource *AggregationSource) UnmarshalJSON(b []byte) error {
 	type temp AggregationSource
 	type Actions struct {
-		GenerateSSHIdentityKeyPair struct {
-			Target string
-		} `json:"#AggregationSource.GenerateSSHIdentityKeyPair"`
-		RemoveSSHIdentityKeyPair struct {
-			Target string
-		} `json:"#AggregationSource.RemoveSSHIdentityKeyPair"`
+		GenerateSSHIdentityKeyPair common.ActionTarget `json:"#AggregationSource.GenerateSSHIdentityKeyPair"`
+		RemoveSSHIdentityKeyPair   common.ActionTarget `json:"#AggregationSource.RemoveSSHIdentityKeyPair"`
 	}
 	type Links struct {
 		// ConnectionMethod shall contain an array of links to resources of type ConnectionMethod that are used to connect

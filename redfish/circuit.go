@@ -400,16 +400,10 @@ func (circuit *Circuit) UnmarshalJSON(b []byte) error {
 		SourceCircuit             common.Link
 	}
 	type actions struct {
-		BreakerControl struct {
-			Target string
-		} `json:"#Circuit.BreakerControl"`
-		PowerControl struct {
-			Target string
-		} `json:"#Circuit.PowerControl"`
-		ResetMetrics struct {
-			Target string
-		} `json:"#Circuit.ResetMetrics"`
-		Oem json.RawMessage // OEM actions will be stored here
+		BreakerControl common.ActionTarget `json:"#Circuit.BreakerControl"`
+		PowerControl   common.ActionTarget `json:"#Circuit.PowerControl"`
+		ResetMetrics   common.ActionTarget `json:"#Circuit.ResetMetrics"`
+		Oem            json.RawMessage     // OEM actions will be stored here
 	}
 	var t struct {
 		temp

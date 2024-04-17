@@ -49,9 +49,7 @@ type HeaterMetrics struct {
 func (heatermetrics *HeaterMetrics) UnmarshalJSON(b []byte) error {
 	type temp HeaterMetrics
 	type Actions struct {
-		ResetMetrics struct {
-			Target string
-		} `json:"#HeaterMetrics.ResetMetrics"`
+		ResetMetrics common.ActionTarget `json:"#HeaterMetrics.ResetMetrics"`
 	}
 	var t struct {
 		temp

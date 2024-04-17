@@ -169,10 +169,8 @@ func (powerSupplyUnit *PowerSupplyUnit) UnmarshalJSON(b []byte) error {
 		Oem                  json.RawMessage
 	}
 	type actions struct {
-		Reset struct {
-			Target string
-		} `json:"#PowerSupply.Reset"`
-		Oem json.RawMessage // OEM actions will be stored here
+		Reset common.ActionTarget `json:"#PowerSupply.Reset"`
+		Oem   json.RawMessage     // OEM actions will be stored here
 	}
 	var t struct {
 		temp

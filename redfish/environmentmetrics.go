@@ -77,12 +77,8 @@ type EnvironmentMetrics struct {
 func (environmentmetrics *EnvironmentMetrics) UnmarshalJSON(b []byte) error {
 	type temp EnvironmentMetrics
 	type Actions struct {
-		ResetMetrics struct {
-			Target string
-		} `json:"#EnvironmentMetrics.ResetMetrics"`
-		ResetToDefaults struct {
-			Target string
-		} `json:"#EnvironmentMetrics.ResetToDefaults"`
+		ResetMetrics    common.ActionTarget `json:"#EnvironmentMetrics.ResetMetrics"`
+		ResetToDefaults common.ActionTarget `json:"#EnvironmentMetrics.ResetToDefaults"`
 	}
 	var t struct {
 		temp

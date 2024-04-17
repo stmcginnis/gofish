@@ -199,9 +199,7 @@ type ProcessorMetrics struct {
 func (processormetrics *ProcessorMetrics) UnmarshalJSON(b []byte) error {
 	type temp ProcessorMetrics
 	type Actions struct {
-		ClearCurrentPeriod struct {
-			Target string
-		} `json:"#ProcessorMetrics.ClearCurrentPeriod"`
+		ClearCurrentPeriod common.ActionTarget `json:"#ProcessorMetrics.ClearCurrentPeriod"`
 	}
 	var t struct {
 		temp

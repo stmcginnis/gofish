@@ -191,12 +191,8 @@ type ComponentIntegrity struct {
 func (componentintegrity *ComponentIntegrity) UnmarshalJSON(b []byte) error {
 	type temp ComponentIntegrity
 	type Actions struct {
-		SPDMGetSignedMeasurements struct {
-			Target string
-		} `json:"#ComponentIntegrity.SPDMGetSignedMeasurements"`
-		TPMGetSignedMeasurements struct {
-			Target string
-		} `json:"#ComponentIntegrity.TPMGetSignedMeasurements"`
+		SPDMGetSignedMeasurements common.ActionTarget `json:"#ComponentIntegrity.SPDMGetSignedMeasurements"`
+		TPMGetSignedMeasurements  common.ActionTarget `json:"#ComponentIntegrity.TPMGetSignedMeasurements"`
 	}
 	type Links struct {
 		// ComponentsProtected shall contain an array of links to resources that the component identified by the

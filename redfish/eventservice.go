@@ -190,12 +190,8 @@ type EventService struct {
 func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 	type temp EventService
 	type Actions struct {
-		SubmitTestEvent struct {
-			Target string
-		} `json:"#EventService.SubmitTestEvent"`
-		TestEventSubscription struct {
-			Target string
-		} `json:"#EventService.TestEventSubscription"`
+		SubmitTestEvent       common.ActionTarget `json:"#EventService.SubmitTestEvent"`
+		TestEventSubscription common.ActionTarget `json:"#EventService.TestEventSubscription"`
 	}
 	var t struct {
 		temp

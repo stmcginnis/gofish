@@ -85,12 +85,8 @@ type OutletGroup struct {
 func (outletgroup *OutletGroup) UnmarshalJSON(b []byte) error {
 	type temp OutletGroup
 	type Actions struct {
-		PowerControl struct {
-			Target string
-		} `json:"#OutletGroup.PowerControl"`
-		ResetMetrics struct {
-			Target string
-		} `json:"#OutletGroup.ResetMetrics"`
+		PowerControl common.ActionTarget `json:"#OutletGroup.PowerControl"`
+		ResetMetrics common.ActionTarget `json:"#OutletGroup.ResetMetrics"`
 	}
 	type Links struct {
 		Outlets      common.Links

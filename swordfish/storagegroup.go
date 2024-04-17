@@ -147,12 +147,8 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 		ParentStorageGroupsCount int `json:"ParentStorageGroups@odata.count"`
 	}
 	type actions struct {
-		ExposeVolumes struct {
-			Target string
-		} `json:"#StorageGroup.ExposeVolumes"`
-		HideVolumes struct {
-			Target string
-		} `json:"#StorageGroup.HideVolumes"`
+		ExposeVolumes common.ActionTarget `json:"#StorageGroup.ExposeVolumes"`
+		HideVolumes   common.ActionTarget `json:"#StorageGroup.HideVolumes"`
 	}
 	var t struct {
 		temp

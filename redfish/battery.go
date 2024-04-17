@@ -132,15 +132,9 @@ func (battery *Battery) UnmarshalJSON(b []byte) error {
 		StorageControllersCount int `json:"StorageControllers@odata.count"`
 	}
 	type Actions struct {
-		BatteryCalibrate struct {
-			Target string
-		} `json:"#Battery.Calibrate"`
-		BatteryReset struct {
-			Target string
-		} `json:"#Battery.Reset"`
-		BatterySelfTest struct {
-			Target string
-		} `json:"#Battery.SelfTest"`
+		BatteryCalibrate common.ActionTarget `json:"#Battery.Calibrate"`
+		BatteryReset     common.ActionTarget `json:"#Battery.Reset"`
+		BatterySelfTest  common.ActionTarget `json:"#Battery.SelfTest"`
 	}
 	var t struct {
 		temp

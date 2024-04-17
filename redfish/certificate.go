@@ -168,13 +168,9 @@ func (certificate *Certificate) UnmarshalJSON(b []byte) error {
 		Oem           json.RawMessage
 	}
 	type actions struct {
-		RekeyCertificate struct {
-			Target string
-		} `json:"#Certificate.Rekey"`
-		RenewCertificate struct {
-			Target string
-		} `json:"#Certificate.Renew"`
-		Oem json.RawMessage // OEM actions will be stored here
+		RekeyCertificate common.ActionTarget `json:"#Certificate.Rekey"`
+		RenewCertificate common.ActionTarget `json:"#Certificate.Renew"`
+		Oem              json.RawMessage     // OEM actions will be stored here
 	}
 	var t struct {
 		temp

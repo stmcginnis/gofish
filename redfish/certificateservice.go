@@ -35,12 +35,8 @@ func (certificateservice *CertificateService) UnmarshalJSON(b []byte) error {
 		AssociatedControlsCount int `json:"AssociatedControls@odata.count"`
 	}
 	type actions struct {
-		GenerateCSR struct {
-			Target string
-		} `json:"#CertificateService.GenerateCSR"`
-		ReplaceCertificate struct {
-			Target string
-		} `json:"#CertificateService.ReplaceCertificate"`
+		GenerateCSR        common.ActionTarget `json:"#CertificateService.GenerateCSR"`
+		ReplaceCertificate common.ActionTarget `json:"#CertificateService.ReplaceCertificate"`
 	}
 	var t struct {
 		temp

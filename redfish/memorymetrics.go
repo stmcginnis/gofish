@@ -179,9 +179,7 @@ type MemoryMetrics struct {
 func (memorymetrics *MemoryMetrics) UnmarshalJSON(b []byte) error {
 	type temp MemoryMetrics
 	type Actions struct {
-		ClearCurrentPeriod struct {
-			Target string
-		} `json:"#MemoryMetrics.ClearCurrentPeriod"`
+		ClearCurrentPeriod common.ActionTarget `json:"#MemoryMetrics.ClearCurrentPeriod"`
 	}
 	var t struct {
 		temp

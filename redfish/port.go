@@ -810,13 +810,9 @@ func (port *Port) UnmarshalJSON(b []byte) error {
 		Oem                       json.RawMessage
 	}
 	type actions struct {
-		ResetPort struct {
-			Target string
-		} `json:"#Port.Reset"`
-		ResetPPB struct {
-			Target string
-		} `json:"#Port.ResetPPB"`
-		Oem json.RawMessage // OEM actions will be stored here
+		ResetPort common.ActionTarget `json:"#Port.Reset"`
+		ResetPPB  common.ActionTarget `json:"#Port.ResetPPB"`
+		Oem       json.RawMessage     // OEM actions will be stored here
 	}
 	var t struct {
 		temp

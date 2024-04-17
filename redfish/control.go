@@ -178,9 +178,7 @@ type Control struct {
 func (control *Control) UnmarshalJSON(b []byte) error {
 	type temp Control
 	type Actions struct {
-		ResetToDefaults struct {
-			Target string
-		} `json:"#Control.ResetToDefaults"`
+		ResetToDefaults common.ActionTarget `json:"#Control.ResetToDefaults"`
 	}
 	var t struct {
 		temp

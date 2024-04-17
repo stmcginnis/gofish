@@ -390,19 +390,13 @@ type Manager struct {
 func (manager *Manager) UnmarshalJSON(b []byte) error {
 	type temp Manager
 	type actions struct {
-		ForceFailover struct {
-			Target string
-		} `json:"#Manager.ForceFailover"`
-		ModifyRedundancySet struct {
-			Target string
-		} `json:"#Manager.ModifyRedundancySet"`
-		Reset struct {
+		ForceFailover       common.ActionTarget `json:"#Manager.ForceFailover"`
+		ModifyRedundancySet common.ActionTarget `json:"#Manager.ModifyRedundancySet"`
+		Reset               struct {
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
 			Target            string
 		} `json:"#Manager.Reset"`
-		ResetToDefaults struct {
-			Target string
-		} `json:"#Manager.ResetToDefaults"`
+		ResetToDefaults common.ActionTarget `json:"#Manager.ResetToDefaults"`
 
 		Oem json.RawMessage
 	}

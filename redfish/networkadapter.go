@@ -375,9 +375,7 @@ type NetworkAdapter struct {
 func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	type temp NetworkAdapter
 	type actions struct {
-		ResetSettingsToDefault struct {
-			Target string
-		} `json:"#NetworkAdapter.ResetSettingsToDefault"`
+		ResetSettingsToDefault common.ActionTarget `json:"#NetworkAdapter.ResetSettingsToDefault"`
 	}
 	var t struct {
 		temp

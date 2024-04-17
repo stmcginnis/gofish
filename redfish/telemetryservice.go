@@ -91,18 +91,10 @@ type TelemetryService struct {
 func (telemetryservice *TelemetryService) UnmarshalJSON(b []byte) error {
 	type temp TelemetryService
 	type Actions struct {
-		ClearMetricReports struct {
-			Target string
-		} `json:"#TelemetryService.ClearMetricReports"`
-		ResetMetricReportDefinitionsToDefaults struct {
-			Target string
-		} `json:"#TelemetryService.ResetMetricReportDefinitionsToDefaults"`
-		ResetTriggersToDefaults struct {
-			Target string
-		} `json:"#TelemetryService.ResetTriggersToDefaults"`
-		SubmitTestMetricReport struct {
-			Target string
-		} `json:"#TelemetryService.SubmitTestMetricReport"`
+		ClearMetricReports                     common.ActionTarget `json:"#TelemetryService.ClearMetricReports"`
+		ResetMetricReportDefinitionsToDefaults common.ActionTarget `json:"#TelemetryService.ResetMetricReportDefinitionsToDefaults"`
+		ResetTriggersToDefaults                common.ActionTarget `json:"#TelemetryService.ResetTriggersToDefaults"`
+		SubmitTestMetricReport                 common.ActionTarget `json:"#TelemetryService.SubmitTestMetricReport"`
 	}
 	var t struct {
 		temp

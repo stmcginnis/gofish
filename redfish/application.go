@@ -46,9 +46,7 @@ type Application struct {
 func (application *Application) UnmarshalJSON(b []byte) error {
 	type temp Application
 	type Actions struct {
-		ApplicationReset struct {
-			Target string
-		} `json:"#Application.Reset"`
+		ApplicationReset common.ActionTarget `json:"#Application.Reset"`
 	}
 	type Links struct {
 		// SoftwareImage shall contain a link to a resource of type SoftwareInventory that represents the software image

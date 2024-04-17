@@ -198,12 +198,8 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 		StorageServicesCount           int `json:"StorageServices@odata.count"`
 	}
 	type actions struct {
-		ResetToDefaults struct {
-			Target string
-		} `json:"#/definitions/ResetToDefaults"`
-		SetEncryptionKey struct {
-			Target string
-		} `json:"#Storage.SetEncryptionKey"`
+		ResetToDefaults  common.ActionTarget `json:"#/definitions/ResetToDefaults"`
+		SetEncryptionKey common.ActionTarget `json:"#Storage.SetEncryptionKey"`
 	}
 	var t struct {
 		temp
