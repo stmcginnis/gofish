@@ -60,10 +60,10 @@ func TestUpdateService(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error decoding JSON: %s", err)
 		}
-		assertMessage(t, result.FirmwareInventory, "/redfish/v1/UpdateService/FirmwareInventory")
+		assertMessage(t, result.firmwareInventory, "/redfish/v1/UpdateService/FirmwareInventory")
 		assertMessage(t, result.HTTPPushURI, "/redfish/v1/UpdateService/FirmwareInventory")
 		assertMessage(t, result.TransferProtocol[0], "HTTP")
-		assertMessage(t, result.UpdateServiceTarget, "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate")
+		assertMessage(t, result.simpleUpdateTarget, "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate")
 	})
 }
 
@@ -114,6 +114,6 @@ func TestUpdateServiceStartUpdate(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error decoding JSON: %s", err)
 		}
-		assertMessage(t, result.StartUpdateTarget, "/redfish/v1/UpdateService/Actions/UpdateService.StartUpdate")
+		assertMessage(t, result.startUpdateTarget, "/redfish/v1/UpdateService/Actions/UpdateService.StartUpdate")
 	})
 }

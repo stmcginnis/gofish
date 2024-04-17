@@ -11,6 +11,48 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+type ECDSACurveType string
+
+const (
+	// NISTB233ECDSACurveType NIST B-233.
+	NISTB233ECDSACurveType ECDSACurveType = "NISTB233"
+	// NISTB409ECDSACurveType NIST B-409.
+	NISTB409ECDSACurveType ECDSACurveType = "NISTB409"
+	// NISTK163ECDSACurveType NIST K-163.
+	NISTK163ECDSACurveType ECDSACurveType = "NISTK163"
+	// NISTK233ECDSACurveType NIST K-233.
+	NISTK233ECDSACurveType ECDSACurveType = "NISTK233"
+	// NISTK283ECDSACurveType NIST K-283.
+	NISTK283ECDSACurveType ECDSACurveType = "NISTK283"
+	// NISTK409ECDSACurveType NIST K-409.
+	NISTK409ECDSACurveType ECDSACurveType = "NISTK409"
+	// NISTP192ECDSACurveType NIST P-192.
+	NISTP192ECDSACurveType ECDSACurveType = "NISTP192"
+	// NISTP224ECDSACurveType NIST P-224.
+	NISTP224ECDSACurveType ECDSACurveType = "NISTP224"
+	// NISTP256ECDSACurveType NIST P-256.
+	NISTP256ECDSACurveType ECDSACurveType = "NISTP256"
+	// NISTP384ECDSACurveType NIST P-384.
+	NISTP384ECDSACurveType ECDSACurveType = "NISTP384"
+	// NISTP521ECDSACurveType NIST P-521.
+	NISTP521ECDSACurveType ECDSACurveType = "NISTP521"
+	// NISTT571ECDSACurveType NIST T-571.
+	NISTT571ECDSACurveType ECDSACurveType = "NISTT571"
+)
+
+type SSHAlgoKeyType string
+
+const (
+	// DSASSHKeyType is DSA.
+	DSASSHAlgoKeyType SSHAlgoKeyType = "DSA"
+	// ECDSASSHKeyType is ECDSA.
+	ECDSASSHAlgoKeyType SSHAlgoKeyType = "ECDSA"
+	// ED25519SSHKeyType is Ed25519.
+	ED25519SSHAlgoKeyType SSHAlgoKeyType = "Ed25519"
+	// RSASSHKeyType is RSA.
+	RSASSHAlgoKeyType SSHAlgoKeyType = "RSA"
+)
+
 type KeyType string
 
 const (

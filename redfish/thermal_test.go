@@ -109,7 +109,7 @@ func TestThermal(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.Fans[0].Name != "Fan One" {
+	if result.Fans[0].Name != "Charlie" {
 		t.Errorf("Invalid fan name: %s", result.Fans[0].Name)
 	}
 }
