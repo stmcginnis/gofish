@@ -451,13 +451,9 @@ func (sensor *Sensor) UnmarshalJSON(b []byte) error {
 		Oem                     json.RawMessage
 	}
 	type actions struct {
-		ResetMetrics struct {
-			Target string
-		} `json:"#Sensor.ResetMetrics"`
-		ResetToDefaults struct {
-			Target string
-		} `json:"#Sensor.ResetToDefaults"`
-		Oem json.RawMessage // OEM actions will be stored here
+		ResetMetrics    common.ActionTarget `json:"#Sensor.ResetMetrics"`
+		ResetToDefaults common.ActionTarget `json:"#Sensor.ResetToDefaults"`
+		Oem             json.RawMessage     // OEM actions will be stored here
 	}
 	var t struct {
 		temp

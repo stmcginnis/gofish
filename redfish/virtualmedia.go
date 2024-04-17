@@ -177,12 +177,8 @@ type VirtualMedia struct {
 func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	type temp VirtualMedia
 	type actions struct {
-		EjectMedia struct {
-			Target string
-		} `json:"#VirtualMedia.EjectMedia"`
-		InsertMedia struct {
-			Target string
-		} `json:"#VirtualMedia.InsertMedia"`
+		EjectMedia  common.ActionTarget `json:"#VirtualMedia.EjectMedia"`
+		InsertMedia common.ActionTarget `json:"#VirtualMedia.InsertMedia"`
 	}
 	var t struct {
 		temp

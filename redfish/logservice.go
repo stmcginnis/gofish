@@ -130,9 +130,7 @@ type LogService struct {
 func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	type temp LogService
 	type Actions struct {
-		ClearLog struct {
-			Target string
-		} `json:"#LogService.ClearLog"`
+		ClearLog common.ActionTarget `json:"#LogService.ClearLog"`
 	}
 	var t struct {
 		temp

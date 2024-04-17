@@ -103,9 +103,7 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		HostingSystem common.Link
 	}
 	type actions struct {
-		SetEncryptionKey struct {
-			Target string
-		} `json:"#StorageService.SetEncryptionKey"`
+		SetEncryptionKey common.ActionTarget `json:"#StorageService.SetEncryptionKey"`
 	}
 	var t struct {
 		temp

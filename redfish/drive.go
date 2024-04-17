@@ -365,9 +365,7 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 		VolumeCount       int `json:"Volumes@odata.count"`
 	}
 	type Actions struct {
-		SecureErase struct {
-			Target string
-		} `json:"#Drive.SecureErase"`
+		SecureErase common.ActionTarget `json:"#Drive.SecureErase"`
 	}
 	var t struct {
 		temp

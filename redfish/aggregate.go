@@ -39,18 +39,10 @@ type Aggregate struct {
 func (aggregate *Aggregate) UnmarshalJSON(b []byte) error {
 	type temp Aggregate
 	type Actions struct {
-		AddElements struct {
-			Target string
-		} `json:"#Aggregate.AddElements"`
-		RemoveElements struct {
-			Target string
-		} `json:"#Aggregate.RemoveElements"`
-		Reset struct {
-			Target string
-		} `json:"#Aggregate.Reset"`
-		SetDefaultBootOrder struct {
-			Target string
-		} `json:"#Aggregate.SetDefaultBootOrder"`
+		AddElements         common.ActionTarget `json:"#Aggregate.AddElements"`
+		RemoveElements      common.ActionTarget `json:"#Aggregate.RemoveElements"`
+		Reset               common.ActionTarget `json:"#Aggregate.Reset"`
+		SetDefaultBootOrder common.ActionTarget `json:"#Aggregate.SetDefaultBootOrder"`
 	}
 	var t struct {
 		temp

@@ -82,9 +82,7 @@ type ManagerDiagnosticData struct {
 func (managerdiagnosticdata *ManagerDiagnosticData) UnmarshalJSON(b []byte) error {
 	type temp ManagerDiagnosticData
 	type Actions struct {
-		ResetMetrics struct {
-			Target string
-		} `json:"#ManagerDiagnosticData.ResetMetrics"`
+		ResetMetrics common.ActionTarget `json:"#ManagerDiagnosticData.ResetMetrics"`
 	}
 	var t struct {
 		temp

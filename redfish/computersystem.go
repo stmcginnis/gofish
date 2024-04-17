@@ -938,22 +938,14 @@ type ComputerSystem struct {
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
 func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	type CSActions struct {
-		AddResourceBlock struct {
-			Target string
-		} `json:"#ComputerSystem.AddResourceBlock"`
-		Decommission struct {
-			Target string
-		} `json:"#ComputerSystem.Decommission"`
-		RemoveResourceBlock struct {
-			Target string
-		} `json:"#ComputerSystem.RemoveResourceBlock"`
-		Reset struct {
+		AddResourceBlock    common.ActionTarget `json:"#ComputerSystem.AddResourceBlock"`
+		Decommission        common.ActionTarget `json:"#ComputerSystem.Decommission"`
+		RemoveResourceBlock common.ActionTarget `json:"#ComputerSystem.RemoveResourceBlock"`
+		Reset               struct {
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
 			Target            string
 		} `json:"#ComputerSystem.Reset"`
-		SetDefaultBootOrder struct {
-			Target string
-		} `json:"#ComputerSystem.SetDefaultBootOrder"`
+		SetDefaultBootOrder common.ActionTarget `json:"#ComputerSystem.SetDefaultBootOrder"`
 	}
 
 	type temp ComputerSystem

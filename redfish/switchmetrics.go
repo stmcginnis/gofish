@@ -62,9 +62,7 @@ type SwitchMetrics struct {
 func (switchmetrics *SwitchMetrics) UnmarshalJSON(b []byte) error {
 	type temp SwitchMetrics
 	type Actions struct {
-		ClearCurrentPeriod struct {
-			Target string
-		} `json:"#SwitchMetrics.ClearCurrentPeriod"`
+		ClearCurrentPeriod common.ActionTarget `json:"#SwitchMetrics.ClearCurrentPeriod"`
 	}
 	var t struct {
 		temp

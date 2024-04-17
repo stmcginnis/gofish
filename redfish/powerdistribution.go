@@ -197,10 +197,8 @@ func (powerDistribution *PowerDistribution) UnmarshalJSON(b []byte) error {
 		Oem            json.RawMessage
 	}
 	type actions struct {
-		TransferControl struct {
-			Target string
-		} `json:"#PowerDistribution.TransferControl"`
-		Oem json.RawMessage // OEM actions will be stored here
+		TransferControl common.ActionTarget `json:"#PowerDistribution.TransferControl"`
+		Oem             json.RawMessage     // OEM actions will be stored here
 	}
 	var t struct {
 		temp

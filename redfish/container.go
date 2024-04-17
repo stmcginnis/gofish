@@ -45,9 +45,7 @@ type Container struct {
 func (container *Container) UnmarshalJSON(b []byte) error {
 	type temp Container
 	type Actions struct {
-		Reset struct {
-			Target string
-		} `json:"#Container.Reset"`
+		Reset common.ActionTarget `json:"#Container.Reset"`
 	}
 	type Links struct {
 		// ContainerImage shall contain a link to a resource of type ContainerImage that represents the container image for

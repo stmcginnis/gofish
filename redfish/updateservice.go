@@ -201,19 +201,13 @@ type UpdateService struct {
 func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 	type temp UpdateService
 	type actions struct {
-		GenerateSSHIdentityKeyPair struct {
-			Target string
-		} `json:"#UpdateService.GenerateSSHIdentityKeyPair"`
-		RemoveSSHIdentityKeyPair struct {
-			Target string
-		} `json:"#UpdateService.RemoveSSHIdentityKeyPair"`
-		SimpleUpdate struct {
+		GenerateSSHIdentityKeyPair common.ActionTarget `json:"#UpdateService.GenerateSSHIdentityKeyPair"`
+		RemoveSSHIdentityKeyPair   common.ActionTarget `json:"#UpdateService.RemoveSSHIdentityKeyPair"`
+		SimpleUpdate               struct {
 			AllowableValues []string `json:"TransferProtocol@Redfish.AllowableValues"`
 			Target          string
 		} `json:"#UpdateService.SimpleUpdate"`
-		StartUpdate struct {
-			Target string
-		} `json:"#UpdateService.StartUpdate"`
+		StartUpdate common.ActionTarget `json:"#UpdateService.StartUpdate"`
 
 		Oem json.RawMessage // OEM actions will be stored here
 	}

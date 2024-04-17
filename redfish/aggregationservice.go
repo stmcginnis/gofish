@@ -46,12 +46,8 @@ type AggregationService struct {
 func (aggregationservice *AggregationService) UnmarshalJSON(b []byte) error {
 	type temp AggregationService
 	type Actions struct {
-		Reset struct {
-			Target string
-		} `json:"#AggregationService.Reset"`
-		SetDefaultBootOrder struct {
-			Target string
-		} `json:"#AggregationService.SetDefaultBootOrder"`
+		Reset               common.ActionTarget `json:"#AggregationService.Reset"`
+		SetDefaultBootOrder common.ActionTarget `json:"#AggregationService.SetDefaultBootOrder"`
 	}
 	var t struct {
 		temp

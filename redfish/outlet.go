@@ -204,12 +204,8 @@ type Outlet struct {
 func (outlet *Outlet) UnmarshalJSON(b []byte) error {
 	type temp Outlet
 	type Actions struct {
-		PowerControl struct {
-			Target string
-		} `json:"#Outlet.PowerControl"`
-		ResetMetrics struct {
-			Target string
-		} `json:"#Outlet.ResetMetrics"`
+		PowerControl common.ActionTarget `json:"#Outlet.PowerControl"`
+		ResetMetrics common.ActionTarget `json:"#Outlet.ResetMetrics"`
 	}
 	type Links struct {
 		BranchCircuit             common.Link

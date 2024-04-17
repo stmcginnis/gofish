@@ -145,9 +145,7 @@ type Power struct {
 func (power *Power) UnmarshalJSON(b []byte) error {
 	type temp Power
 	type Actions struct {
-		PowerSupplyReset struct {
-			Target string
-		} `json:"#Power.PowerSupplyReset"`
+		PowerSupplyReset common.ActionTarget `json:"#Power.PowerSupplyReset"`
 	}
 	var t struct {
 		temp

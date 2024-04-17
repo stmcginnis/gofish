@@ -83,9 +83,7 @@ type SecureBoot struct {
 func (secureboot *SecureBoot) UnmarshalJSON(b []byte) error {
 	type temp SecureBoot
 	type actions struct {
-		ResetKeys struct {
-			Target string
-		} `json:"#SecureBoot.ResetKeys"`
+		ResetKeys common.ActionTarget `json:"#SecureBoot.ResetKeys"`
 	}
 	var t struct {
 		temp

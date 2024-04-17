@@ -124,9 +124,7 @@ type Switch struct {
 func (sw *Switch) UnmarshalJSON(b []byte) error {
 	type temp Switch
 	type Actions struct {
-		Reset struct {
-			Target string
-		} `json:"#Switch.Reset"`
+		Reset common.ActionTarget `json:"#Switch.Reset"`
 	}
 	type Links struct {
 		// Chassis shall contain a link to a resource of type Chassis with which this switch is associated.

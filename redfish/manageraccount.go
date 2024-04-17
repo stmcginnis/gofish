@@ -131,9 +131,7 @@ type ManagerAccount struct {
 func (manageraccount *ManagerAccount) UnmarshalJSON(b []byte) error {
 	type temp ManagerAccount
 	type Actions struct {
-		ChangePassword struct {
-			Target string
-		} `json:"#ManagerAccount.ChangePassword"`
+		ChangePassword common.ActionTarget `json:"#ManagerAccount.ChangePassword"`
 	}
 	type AccountLinks struct {
 		Role common.Link
