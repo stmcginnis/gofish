@@ -63,7 +63,7 @@ type Payload struct {
 	// HTTPOperation shall contain the HTTP operation to
 	// execute for this Task.
 	HTTPOperation string `json:"HttpOperation"`
-	// JSONBody is used for this Task.
+	// JSONBody shall contain the JSON-formatted payload used for this task.
 	JSONBody string `json:"JsonBody"`
 	// TargetURI is used as the target for an HTTP operation.
 	TargetURI string `json:"TargetUri"`
@@ -86,6 +86,12 @@ type Task struct {
 	// returned normally. If this property is not specified when the Task is
 	// created, the default value shall be False.
 	HidePayload bool
+	Links       struct {
+		// CreatedResources are an array of resource IDs created by this task.
+		CreatedResources []string
+		// CreatedResourcesCount is the number of created resources.
+		CreatedResourcesCount int `json:"CreatedResources@odata.count"`
+	}
 	// Messages shall be an array of messages associated with the task.
 	Messages []common.Message
 	// Payload shall contain information detailing the HTTP and JSON payload
@@ -98,6 +104,9 @@ type Task struct {
 	PercentComplete int
 	// StartTime shall indicate the time the task was started.
 	StartTime string
+	// SubTasks shall contain a link to a resource collection of type TaskCollection. This property shall not be
+	// present if this resource represents a sub-task for a task.
+	subTasks []string
 	// TaskMonitor shall contain a URI to Task Monitor as defined in the Redfish
 	// Specification.
 	TaskMonitor string
@@ -137,6 +146,7 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 	type temp Task
 	var t struct {
 		temp
+		SubTasks common.LinksCollection
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -146,8 +156,31 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*task = Task(t.temp)
+	task.subTasks = t.SubTasks.ToStrings()
 
 	return nil
+}
+
+// SubTasks gets the sub-tasks for this task.
+// This property shall not be present if this resource represents a sub-task for a task.
+func (task *Task) SubTasks() ([]*Task, error) {
+	var result []*Task
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range task.subTasks {
+		item, err := GetTask(task.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // GetTask will get a Task instance from the service.
