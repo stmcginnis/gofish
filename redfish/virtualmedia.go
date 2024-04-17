@@ -27,6 +27,22 @@ const (
 	OemConnectedVia ConnectedVia = "Oem"
 )
 
+type EjectPolicy string
+
+const (
+	// OnPowerOffEjectPolicy The virtual media ejection occurs during a system power or reset event.
+	OnPowerOffEjectPolicy EjectPolicy = "OnPowerOff"
+	// SessionEjectPolicy The virtual media ejection occurs when a session is terminated. The session might be outside
+	// the Redfish service.
+	SessionEjectPolicy EjectPolicy = "Session"
+	// TimedEjectPolicy The virtual media ejection occurs when a timer configured by the EjectTimeout property expires.
+	TimedEjectPolicy EjectPolicy = "Timed"
+	// AfterUseEjectPolicy The virtual media ejection occurs after the media is used.
+	AfterUseEjectPolicy EjectPolicy = "AfterUse"
+	// PersistentEjectPolicy The virtual media mount information persists indefinitely.
+	PersistentEjectPolicy EjectPolicy = "Persistent"
+)
+
 // VirtualMediaType is the type of media.
 type VirtualMediaType string
 
@@ -88,25 +104,38 @@ type VirtualMedia struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// ConnectedVia shall contain the current connection
-	// method from a client to the virtual media that this Resource
+	// Certificates shall contain a link to a resource collection of type CertificateCollection that represents the
+	// server certificates for the server referenced by the Image property. If VerifyCertificate is 'true', services
+	// shall compare the certificates in this collection with the certificate obtained during handshaking with the
+	// image server in order to verify the identity of the image server prior to completing the remote media
+	// connection. If the server cannot be verified, the service shall not complete the remote media connection. If
+	// VerifyCertificate is 'false', the service shall not perform certificate verification with certificates in this
+	// collection. Regardless of the contents of this collection, services may perform additional verification based on
+	// other factors, such as the configuration of the SecurityPolicy resource.
+	certificates []string
+	// ClientCertificates shall contain a link to a resource collection of type CertificateCollection that represents
+	// the client identity certificates that are provided to the server referenced by the Image property as part of TLS
+	// handshaking.
+	clientCertificates []string
+	// ConnectedVia shall contain the current connection method from a client to the virtual media that this Resource
 	// represents.
 	ConnectedVia ConnectedVia
 	// Description provides a description of this resource.
 	Description string
+	// EjectPolicy shall contain the ejection policy for the virtual media.
+	EjectPolicy EjectPolicy
+	// EjectTimeout shall indicate the amount of time before virtual media is automatically ejected when EjectPolicy
+	// contains 'Timed'.
+	EjectTimeout string
 	// Image shall contain an URI. A null value indicated
 	// no image connection.
 	Image string
 	// ImageName shall contain the name of the image.
 	ImageName string
-	// Inserted shall indicate whether media is present in
-	// the virtual media device.
+	// Inserted shall indicate whether media is present in the virtual media device.
 	Inserted bool
-	// MediaTypes shall be the supported media
-	// types for this connection.
+	// MediaTypes shall be the supported media types for this connection.
 	MediaTypes []VirtualMediaType
-	// Indicates which MediaTypes is used
-	MediaType VirtualMediaType
 	// Password shall represent the password to access the
 	// Image parameter-specified URI. The value shall be null in responses.
 	Password string
@@ -119,15 +148,23 @@ type VirtualMedia struct {
 	// UserName shall represent the user name to access the
 	// Image parameter-specified URI.
 	UserName string
+	// VerifyCertificate shall indicate whether the service will verify the certificate of the server referenced by the
+	// Image property prior to completing the remote media connection with the certificates found in the collection
+	// referenced by the Certificates property. If this property is not supported by the service, it shall be assumed
+	// to be 'false'. This property should default to 'false' in order to maintain compatibility with older clients.
+	// Regardless of the value of this property, services may perform additional verification based on other factors,
+	// such as the configuration of the SecurityPolicy resource.
+	VerifyCertificate bool
 	// WriteProtected shall indicate whether the remote
 	// device media prevents writing to that media.
 	WriteProtected bool
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+
 	// ejectMediaTarget is the URL to send EjectMedia requests.
 	ejectMediaTarget string
 	// insertMediaTarget is the URL to send InsertMedia requests.
 	insertMediaTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
 	// SupportsMediaEject indicates if this implementation supports ejecting
 	// virtual media or not (added in schema 1.2.0).
 	SupportsMediaEject bool
@@ -149,7 +186,9 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Actions actions
+		Actions           actions
+		Certificates      common.LinksCollection
+		ClientCertificate common.LinksCollection
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -160,6 +199,9 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	*virtualmedia = VirtualMedia(t.temp)
 
 	// Extract the links to other entities for later
+	virtualmedia.certificates = t.Certificates.ToStrings()
+	virtualmedia.clientCertificates = t.ClientCertificate.ToStrings()
+
 	virtualmedia.ejectMediaTarget = t.Actions.EjectMedia.Target
 	virtualmedia.insertMediaTarget = t.Actions.InsertMedia.Target
 
@@ -170,6 +212,58 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	virtualmedia.rawData = b
 
 	return nil
+}
+
+// Certificates gets the the server certificates for the server referenced by the
+// Image property. If VerifyCertificate is `true`, services shall compare the
+// certificates in this collection with the certificate obtained during handshaking
+// with the image server in order to verify the identity of the image server prior
+// to completing the remote media connection. If the server cannot be verified,
+// the service shall not complete the remote media connection. If VerifyCertificate
+// is `false`, the service shall not perform certificate verification with
+// certificates in this collection. Regardless of the contents of this collection,
+// services may perform additional verification based on other factors, such as the
+// configuration of the SecurityPolicy resource.
+func (virtualmedia *VirtualMedia) Certificates() ([]*Certificate, error) {
+	var result []*Certificate
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range virtualmedia.certificates {
+		item, err := GetCertificate(virtualmedia.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// ClientCertificates gets the client identity certificates that are provided to
+// the server referenced by the Image property as part of TLS handshaking.
+func (virtualmedia *VirtualMedia) ClientCertificates() ([]*Certificate, error) {
+	var result []*Certificate
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range virtualmedia.clientCertificates {
+		item, err := GetCertificate(virtualmedia.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -183,6 +277,8 @@ func (virtualmedia *VirtualMedia) Update() error {
 	}
 
 	readWriteFields := []string{
+		"EjectPolicy",
+		"EjectTimeout",
 		"Image",
 		"Inserted",
 		"MediaType",
