@@ -160,6 +160,27 @@ func (addresspool *AddressPool) Endpoints() ([]*Endpoint, error) {
 	return result, collectionError
 }
 
+// Zones gets the zones associated with this address pool.
+func (addresspool *AddressPool) Zones() ([]*Zone, error) {
+	var result []*Zone
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range addresspool.zones {
+		endpoint, err := GetZone(addresspool.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, endpoint)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
 // BFDSingleHopOnly shall contain the BFD-related properties for an Ethernet fabric that uses Bidirectional
 // Forwarding Detection (BFD) for link fault detection.
 type BFDSingleHopOnly struct {
