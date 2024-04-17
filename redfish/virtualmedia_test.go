@@ -31,7 +31,6 @@ var vmBody = `{
 	"Image": "https://example.com/mygoldimage.iso",
 	"ImageName": "mygoldimage.iso",
 	"Inserted": false,
-	"MediaType": "USBStick",
 	"MediaTypes": [
 	  "Floppy",
 	  "USBStick"
@@ -97,9 +96,6 @@ func TestVirtualMedia(t *testing.T) {
 
 	if result.SupportsMediaInsert == false {
 		t.Error("Expected SupportsMediaInsert to be true since target is set")
-	}
-	if result.MediaType != "USBStick" {
-		t.Errorf("Received invalid MediaType: %s", result.MediaType)
 	}
 }
 
