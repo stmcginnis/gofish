@@ -60,6 +60,14 @@ func (certificateservice *CertificateService) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// CertificateLocations get the certificate locations.
+func (certificateservice *CertificateService) CertificateLocations() (*CertificateLocations, error) {
+	if certificateservice.certificateLocations == "" {
+		return nil, nil
+	}
+	return GetCertificateLocations(certificateservice.GetClient(), certificateservice.certificateLocations)
+}
+
 // GetCertificateService will get a CertificateService instance from the service.
 func GetCertificateService(c common.Client, uri string) (*CertificateService, error) {
 	resp, err := c.Get(uri)
