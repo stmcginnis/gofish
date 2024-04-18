@@ -453,3 +453,35 @@ func (accountservice *AccountService) Accounts() ([]*ManagerAccount, error) {
 func (accountservice *AccountService) Roles() ([]*Role, error) {
 	return ListReferencedRoles(accountservice.GetClient(), accountservice.roles)
 }
+
+// CreateAccount creates a new Redfish user account.
+//
+// `userName` is the new username to use.
+//
+// `password` is the initial password, must conform to configured password requirements.
+//
+// `roleID` is the role to assign to the user, typically one of `Administrator`, `Operator`, or `ReadOnly`.
+//
+// Returns the created user account that can then be updated for things like setting `passwordChangeRequried`, etc.
+func (accountservice *AccountService) CreateAccount(userName, password, roleID string) (*ManagerAccount, error) {
+	t := struct {
+		UserName string
+		Enabled  bool
+		Password string
+		RoleID   string `json:"RoleId"`
+	}{
+		UserName: userName,
+		Enabled:  true,
+		Password: password,
+		RoleID:   roleID,
+	}
+	resp, err := accountservice.PostWithResponse(accountservice.accounts, t)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var result ManagerAccount
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	return &result, err
+}
