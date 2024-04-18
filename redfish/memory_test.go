@@ -50,6 +50,7 @@ var memoryBody = `{
 		},
 		"LogicalSizeMiB": 2097152,
 		"Manufacturer": "Generic",
+		"MaxTDPMilliWatts": [0],
 		"MemoryDeviceType": "DDR4",
 		"MemoryLocation": {
 			"Channel": 1,
@@ -59,9 +60,13 @@ var memoryBody = `{
 		},
 		"MemoryMedia": ["DRAM"],
 		"MemoryType": "NVDIMM_N",
+		"Metrics": {
+			"@odata.id": "/redfish/v1/Systems/1/Memory/1/MemoryMetrics"
+		},
 		"OperatingMemoryModes": [
 			"PMEM"
 		],
+		"OperatingSpeedMhz": 3200,
 		"PowerManagementPolicy": {
 			"AveragePowerBudgetMilliWatts": 42,
 			"MaxTDPMilliWatts": 12,
