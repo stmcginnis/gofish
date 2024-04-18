@@ -59,8 +59,27 @@ var computerSystemBody = `{
 				"SDCard",
 				"UefiHttp"
 			],
+			"BootOptions": {
+				"@odata.id": "/redfish/v1/Systems/1/BootOptions"
+			  },
+			"BootNext": "",
+			"BootOrder": [
+				"Boot0003",
+				"Boot0011",
+				"Boot0014",
+				"Boot0007",
+				"Boot0008",
+				"Boot0009",
+				"Boot000A",
+				"Boot000B",
+				"Boot000C",
+				"Boot000D",
+				"Boot000E",
+				"Boot000F",
+				"Boot0002"
+				],
 			"UefiTargetBootSourceOverride": "uefi device path",
-			"HttpBootURI": "http://localhost/boot.efi"
+			"HttpBootUri": "http://localhost/boot.efi"
 		},
 		"BiosVersion": "P79 v1.00 (09/20/2013)",
 		"ProcessorSummary": {
@@ -102,6 +121,18 @@ var computerSystemBody = `{
 		},
 		"SimpleStorage": {
 			"@odata.id": "/redfish/v1/Systems/System-1/SimpleStorage"
+		},
+		"Storage": {
+			"@odata.id": "/redfish/v1/Systems/1/Storage"
+		},
+		"LogServices": {
+			"@odata.id": "/redfish/v1/Systems/1/LogServices"
+		},
+		"SecureBoot": {
+			"@odata.id": "/redfish/v1/Systems/1/SecureBoot"
+		},
+		"Bios": {
+			"@odata.id": "/redfish/v1/Systems/1/Bios"
 		},
 		"Links": {
 			"Chassis": [
