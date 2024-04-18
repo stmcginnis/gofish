@@ -290,7 +290,7 @@ type Manager struct {
 	SerialConsole SerialConsole
 	// serialInterfaces shall be a link to a collection of type
 	// SerialInterfaceCollection which are for the use of this manager.
-	serialInterfaces []string
+	serialInterfaces string
 	// SerialNumber shall contain a manufacturer-allocated number that
 	// identifies the manager.
 	SerialNumber string
@@ -427,7 +427,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		NetworkProtocol       common.Link
 		ManagerDiagnosticData common.Link
 		RemoteAccountService  common.Link
-		SerialInterfaces      common.LinksCollection
+		SerialInterfaces      common.Link
 		USBPorts              common.LinksCollection
 		VirtualMedia          common.Link
 		Links                 linkReference
@@ -451,7 +451,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.OemActions = t.Actions.Oem
 	manager.Oem = t.Oem
 	manager.remoteAccountService = t.RemoteAccountService.String()
-	manager.serialInterfaces = t.SerialInterfaces.ToStrings()
+	manager.serialInterfaces = t.SerialInterfaces.String()
 	manager.usbPorts = t.USBPorts.ToStrings()
 	manager.virtualMedia = t.VirtualMedia.String()
 
@@ -667,23 +667,7 @@ func (manager *Manager) RemoteAccountService() (*AccountService, error) {
 
 // SerialInterfaces get this manager's serial interfaces.
 func (manager *Manager) SerialInterfaces() ([]*SerialInterface, error) {
-	var result []*SerialInterface
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range manager.serialInterfaces {
-		unit, err := GetSerialInterface(manager.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedSerialInterfaces(manager.GetClient(), manager.serialInterfaces)
 }
 
 // USBPorts get the USB ports of the manager.
