@@ -18,6 +18,50 @@ var networkInterfaceBody = strings.NewReader(
 		"Id": "NetworkInterface-1",
 		"Name": "NetworkInterfaceOne",
 		"Description": "NetworkInterface One",
+		"InterfaceEnabled": false,
+		"PermanentMACAddress": "BE:3A:F2:B6:05:9F",
+		"MACAddress": "00:00:00:00:00:00",
+		"SpeedMbps": 100,
+		"AutoNeg": true,
+		"FullDuplex": true,
+		"MTUSize": 0,
+		"IPv4Addresses": [
+			{
+			"Address": "169.254.3.1",
+			"SubnetMask": "255.255.255.0",
+			"AddressOrigin": "Static",
+			"Gateway": "169.254.3.254"
+			}
+		],
+		"IPv4StaticAddresses": [
+			{
+			"Address": "169.254.3.1",
+			"SubnetMask": "255.255.255.0",
+			"Gateway": "169.254.3.254"
+			}
+		],
+		"IPv6StaticAddresses": [
+			{
+			"Address": "::",
+			"PrefixLength": 64
+			},
+			{
+			"Address": "::",
+			"PrefixLength": 64
+			},
+			{
+			"Address": "::",
+			"PrefixLength": 64
+			},
+			{
+			"Address": "::",
+			"PrefixLength": 64
+			},
+			{
+			"Address": "::",
+			"PrefixLength": 64
+			}
+		],
 		"Links": {
 			"NetworkAdapter": {
 					"@odata.id": "/redfish/v1/NetworkAdapters/1"
