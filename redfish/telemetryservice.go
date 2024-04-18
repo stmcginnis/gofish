@@ -103,6 +103,8 @@ func (telemetryservice *TelemetryService) UnmarshalJSON(b []byte) error {
 		MetricDefinitions       common.Link
 		MetricReportDefinitions common.Link
 		MetricReports           common.Link
+		// Bug in Supermicro implementation
+		SupportedCollectionFuntions []CollectionFunction
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -122,6 +124,10 @@ func (telemetryservice *TelemetryService) UnmarshalJSON(b []byte) error {
 	telemetryservice.resetMetricReportDefinitionsToDefaultsTarget = t.Actions.ResetMetricReportDefinitionsToDefaults.Target
 	telemetryservice.resetTriggersToDefaultsTarget = t.Actions.ResetTriggersToDefaults.Target
 	telemetryservice.submitTestMetricReportTarget = t.Actions.SubmitTestMetricReport.Target
+
+	if len(telemetryservice.SupportedCollectionFunctions) == 0 && len(t.SupportedCollectionFuntions) > 0 {
+		telemetryservice.SupportedCollectionFunctions = t.SupportedCollectionFuntions
+	}
 
 	// This is a read/write object, so we need to save the raw object data for later
 	telemetryservice.rawData = b
