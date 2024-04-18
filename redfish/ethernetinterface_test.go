@@ -21,12 +21,49 @@ var ethernetInterfaceBody = `{
 		"FQDN": "default.local",
 		"FullDuplex": true,
 		"HostName": "default",
+		"MaxIPv6StaticAddresses": 1,
 		"IPv4Addresses": [
 			{
 				"Address": "172.16.3.39",
 				"AddressOrigin": "IPv4LinkLocal",
 				"Gateway": "0.0.0.0",
 				"SubnetMask": "255.255.0.0"
+			}
+		],
+		"IPv6AddressPolicyTable": [
+			{
+				"Prefix": "::1/128",
+				"Precedence": 50,
+				"Label": 0
+			}
+		],
+		"IPv4StaticAddresses": [
+			{
+				"Address": "169.254.3.254",
+				"SubnetMask": "255.255.255.0",
+				"Gateway": "169.254.3.254"
+			}
+		],
+		"IPv6StaticAddresses": [
+			{
+				"Address": "",
+				"PrefixLength": 0
+			},
+			{
+				"Address": "::",
+				"PrefixLength": 64
+			},
+			{
+				"Address": "::",
+				"PrefixLength": 64
+			},
+			{
+				"Address": "::",
+				"PrefixLength": 64
+			},
+			{
+				"Address": "::",
+				"PrefixLength": 64
 			}
 		],
 		"Id": "NIC-0",
