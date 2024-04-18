@@ -410,7 +410,7 @@ type PowerSupply struct {
 	// Redundancy is used to show redundancy for power supplies and other
 	// elements in this resource. The use of IDs within these arrays shall
 	// reference the members of the redundancy groups.
-	Redundancy []Redundancy
+	redundancy []string
 	// RedundancyCount is the number of objects.
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// SerialNumber shall contain the serial number as
@@ -432,7 +432,8 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	type temp PowerSupply
 	var t struct {
 		temp
-		Assembly common.Link
+		Assembly   common.Link
+		Redundancy common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -443,6 +444,7 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*powersupply = PowerSupply(t.temp)
 	powersupply.assembly = t.Assembly.String()
+	powersupply.redundancy = t.Redundancy.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	powersupply.rawData = b
@@ -456,6 +458,27 @@ func (powersupply *PowerSupply) Assembly() (*Assembly, error) {
 		return nil, nil
 	}
 	return GetAssembly(powersupply.GetClient(), powersupply.assembly)
+}
+
+// Redundancy gets the endpoints at the other end of the link.
+func (powersupply *PowerSupply) Redundancy() ([]*Redundancy, error) {
+	var result []*Redundancy
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range powersupply.redundancy {
+		item, err := GetRedundancy(powersupply.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // GetPowerSupply will get a PowerSupply instance from the Redfish service.
@@ -559,7 +582,7 @@ type Voltage struct {
 	// PhysicalContext shall be a description
 	// of the affected device or region within the chassis to which this
 	// voltage measurement applies.
-	PhysicalContext string
+	PhysicalContext PhysicalContext
 	// ReadingVolts shall be the present
 	// reading of the voltage sensor's reading.
 	ReadingVolts float32
