@@ -81,15 +81,12 @@ type TrustedComponent struct {
 	ODataType string `json:"@odata.type"`
 	// Certificates shall contain a link to a resource collection of type CertificateCollection that contains device
 	// identity certificates of the trusted component.
-	Certificates string
+	certificates string
 	// Description provides a description of this resource.
 	Description string
 	// FirmwareVersion shall contain a version number associated with the active software image on the trusted
 	// component.
 	FirmwareVersion string
-	// Links shall contain links to resources that are related to but are not contained by, or subordinate to, this
-	// resource.
-	Links string
 	// Manufacturer shall contain the name of the organization responsible for producing the trusted component. This
 	// organization may be the entity from whom the trusted component is purchased, but this is not necessarily true.
 	Manufacturer string
@@ -111,7 +108,7 @@ type TrustedComponent struct {
 	// TCG-defined TPM trusted components.
 	TPM string
 	// TrustedComponentType shall contain the type of trusted component.
-	TrustedComponentType string
+	TrustedComponentType TrustedComponentType
 	// UUID shall contain a universally unique identifier number for the trusted component.
 	UUID string
 
@@ -136,8 +133,9 @@ func (trustedcomponent *TrustedComponent) UnmarshalJSON(b []byte) error {
 	type temp TrustedComponent
 	var t struct {
 		temp
-		Links   trustedComponentLinks
-		Actions struct {
+		Certificates common.Link
+		Links        trustedComponentLinks
+		Actions      struct {
 			TPMGetEventLog struct {
 				Target string
 			} `json:"#TrustedComponent.TPMGetEventLog"`
@@ -153,18 +151,76 @@ func (trustedcomponent *TrustedComponent) UnmarshalJSON(b []byte) error {
 	*trustedcomponent = TrustedComponent(t.temp)
 	trustedcomponent.tpmGetEventLogTarget = t.Actions.TPMGetEventLog.Target
 
-	// TODO: Implement accessors for linked objects
+	trustedcomponent.certificates = t.Certificates.String()
+
 	trustedcomponent.activeSoftwareImage = t.Links.ActiveSoftwareImage.String()
 	trustedcomponent.componentIntegrity = t.Links.ComponentIntegrity.ToStrings()
 	trustedcomponent.ComponentIntegrityCount = t.Links.ComponentIntegrityCount
+	trustedcomponent.softwareImages = t.Links.SoftwareImages.ToStrings()
+	trustedcomponent.SoftwareImagesCount = t.Links.SoftwareImagesCount
+
+	// TODO: Implement accessors for linked objects
 	trustedcomponent.componentsProtected = t.Links.ComponentsProtected.ToStrings()
 	trustedcomponent.ComponentsProtectedCount = t.Links.ComponentsProtectedCount
 	trustedcomponent.integratedInto = t.Links.IntegratedInto.String()
 	trustedcomponent.owner = t.Links.Owner.String()
-	trustedcomponent.softwareImages = t.Links.SoftwareImages.ToStrings()
-	trustedcomponent.SoftwareImagesCount = t.Links.SoftwareImagesCount
 
 	return nil
+}
+
+// ActiveSoftwareImage gets the active firmware image for this trusted component.
+func (trustedcomponent *TrustedComponent) ActiveSoftwareImage() (*SoftwareInventory, error) {
+	if trustedcomponent.activeSoftwareImage == "" {
+		return nil, nil
+	}
+	return GetSoftwareInventory(trustedcomponent.GetClient(), trustedcomponent.activeSoftwareImage)
+}
+
+// ComponentIntegrity gets the resources for which the trusted component is responsible.
+func (trustedcomponent *TrustedComponent) ComponentIntegrity() ([]*ComponentIntegrity, error) {
+	var result []*ComponentIntegrity
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range trustedcomponent.componentIntegrity {
+		cs, err := GetComponentIntegrity(trustedcomponent.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, cs)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// SoftwareImages gets the firmware images that apply to this trusted component.
+func (trustedcomponent *TrustedComponent) SoftwareImages() ([]*SoftwareInventory, error) {
+	var result []*SoftwareInventory
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range trustedcomponent.softwareImages {
+		cs, err := GetSoftwareInventory(trustedcomponent.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, cs)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Certificates gets the certificates associated with this trusted component.
+func (trustedcomponent *TrustedComponent) Certificates() ([]*Certificate, error) {
+	return ListReferencedCertificates(trustedcomponent.GetClient(), trustedcomponent.certificates)
 }
 
 // TPMGetEventLog gets the event log for TPM 2.0 devices.
