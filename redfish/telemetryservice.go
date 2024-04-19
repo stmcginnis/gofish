@@ -77,7 +77,7 @@ type TelemetryService struct {
 	// SupportedCollectionFunctions shall contain the function to apply over the collection duration.
 	SupportedCollectionFunctions []CollectionFunction
 	// Triggers shall contain a link to a resource collection of type TriggersCollection.
-	Triggers string
+	triggers string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 
@@ -103,6 +103,7 @@ func (telemetryservice *TelemetryService) UnmarshalJSON(b []byte) error {
 		MetricDefinitions       common.Link
 		MetricReportDefinitions common.Link
 		MetricReports           common.Link
+		Triggers                common.Link
 		// Bug in Supermicro implementation
 		SupportedCollectionFuntions []CollectionFunction
 	}
@@ -119,6 +120,7 @@ func (telemetryservice *TelemetryService) UnmarshalJSON(b []byte) error {
 	telemetryservice.metricDefinitions = t.MetricDefinitions.String()
 	telemetryservice.metricReportDefinitions = t.MetricReportDefinitions.String()
 	telemetryservice.metricReports = t.MetricReports.String()
+	telemetryservice.triggers = t.Triggers.String()
 
 	telemetryservice.clearMetricReportTarget = t.Actions.ClearMetricReports.Target
 	telemetryservice.resetMetricReportDefinitionsToDefaultsTarget = t.Actions.ResetMetricReportDefinitionsToDefaults.Target
@@ -156,6 +158,11 @@ func (telemetryservice *TelemetryService) MetricReportDefinitions() ([]*MetricRe
 // MetricReports gets the metric reports.
 func (telemetryservice *TelemetryService) MetricReports() ([]*MetricReport, error) {
 	return ListReferencedMetricReports(telemetryservice.GetClient(), telemetryservice.metricReports)
+}
+
+// Triggers gets the triggers.
+func (telemetryservice *TelemetryService) Triggers() ([]*Triggers, error) {
+	return ListReferencedTriggerss(telemetryservice.GetClient(), telemetryservice.triggers)
 }
 
 // ClearMetricReports will clear the metric reports for this telemetry service.
