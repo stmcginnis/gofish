@@ -136,7 +136,7 @@ func GetThermalMetrics(c common.Client, uri string) (*ThermalMetrics, error) {
 
 // ListReferencedThermalMetricss gets the collection of ThermalMetrics from
 // a provided reference.
-func ListReferencedThermalMetricss(c common.Client, link string) ([]*ThermalMetrics, error) {
+func ListReferencedThermalMetrics(c common.Client, link string) ([]*ThermalMetrics, error) {
 	var result []*ThermalMetrics
 	if link == "" {
 		return result, nil

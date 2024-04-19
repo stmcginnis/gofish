@@ -96,9 +96,9 @@ func GetHeaterMetrics(c common.Client, uri string) (*HeaterMetrics, error) {
 	return &heatermetrics, nil
 }
 
-// ListReferencedHeaterMetricss gets the collection of HeaterMetrics from
+// ListReferencedHeaterMetrics gets the collection of HeaterMetrics from
 // a provided reference.
-func ListReferencedHeaterMetricss(c common.Client, link string) ([]*HeaterMetrics, error) {
+func ListReferencedHeaterMetrics(c common.Client, link string) ([]*HeaterMetrics, error) {
 	var result []*HeaterMetrics
 	if link == "" {
 		return result, nil
