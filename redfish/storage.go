@@ -140,6 +140,7 @@ type Storage struct {
 	Status common.Status
 	// StorageControllers is a collection that indicates all the storage
 	// controllers that this resource represents.
+	// This property has been deprecated in favor of Controllers to allow for storage controllers to be represented as their own resources.
 	StorageControllers []StorageController
 	// StorageControllersCount is the number of storage controllers.
 	StorageControllersCount int `json:"StorageControllers@odata.count"`
