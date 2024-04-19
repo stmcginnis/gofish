@@ -197,8 +197,8 @@ type MetricReportDefinition struct {
 
 	// Triggers shall contain a set of triggers that cause this metric report to generate a new metric report upon a
 	// trigger occurrence when the TriggerActions property contains 'RedfishMetricReport'.
-	Triggers []Triggers
-	// Triggers@odata.count
+	triggers []string
+	// TriggersCount is the number of linked triggers.
 	TriggersCount int
 }
 
@@ -211,7 +211,7 @@ func (metricreportdefinition *MetricReportDefinition) UnmarshalJSON(b []byte) er
 		OEM json.RawMessage `json:"Oem"`
 		// Triggers shall contain a set of triggers that cause this metric report to generate a new metric report upon a
 		// trigger occurrence when the TriggerActions property contains 'RedfishMetricReport'.
-		Triggers []Triggers
+		Triggers common.Links
 		// Triggers@odata.count
 		TriggersCount int `json:"Triggers@odata.count"`
 	}
@@ -228,13 +228,34 @@ func (metricreportdefinition *MetricReportDefinition) UnmarshalJSON(b []byte) er
 	*metricreportdefinition = MetricReportDefinition(t.temp)
 
 	// Extract the links to other entities for later
-	metricreportdefinition.Triggers = t.Links.Triggers
+	metricreportdefinition.triggers = t.Links.Triggers.ToStrings()
 	metricreportdefinition.TriggersCount = t.Links.TriggersCount
 
 	// This is a read/write object, so we need to save the raw object data for later
 	metricreportdefinition.rawData = b
 
 	return nil
+}
+
+// Triggers get the associated triggers.
+func (metricreportdefinition *MetricReportDefinition) Triggers() ([]*Triggers, error) {
+	var result []*Triggers
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range metricreportdefinition.triggers {
+		unit, err := GetTriggers(metricreportdefinition.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, unit)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Update commits updates to this object's properties to the running system.
