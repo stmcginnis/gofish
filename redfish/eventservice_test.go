@@ -23,58 +23,73 @@ const (
 )
 
 var eventServiceBody = `{
-		"@Redfish.Copyright": "Copyright 2014-2019 DMTF. All rights reserved.",
-		"@odata.context": "/redfish/v1/$metadata#EventService.EventService",
-		"@odata.type": "#EventService.v1_0_0.EventService",
-		"@odata.id": "/redfish/v1/EventService",
-		"Id": "EventService",
-		"Name": "Event Service",
-		"DeliveryRetryAttempts": 4,
-		"DeliveryRetryIntervalSeconds": 30,
-		"Description": "Service for events",
-		"EventFormatTypes": [
-			"Event",
-			"MetricReport"
+	"@odata.context": "/redfish/v1/$metadata#EventService.EventService",
+	"@odata.id": "/redfish/v1/EventService",
+	"@odata.type": "#EventService.v1_10_0.EventService",
+	"Actions": {
+	  "#EventService.SubmitTestEvent": {
+		"EventType@Redfish.AllowableValues": [
+		  "Alert"
 		],
-		"EventTypesForSubscription":[
-			"StatusChange",
-			"ResourceUpdated",
-			"ResourceAdded",
-			"ResourceRemoved",
-			"Alert"
-		],
-		"RegistryPrefixes": ["EVENT_"],
-		"ResourceTypes": ["Chassis"],
-		"SSEFilterPropertiesSupported": {
-			"EventFormatType": true,
-			"MessageId": true,
-			"MetricReportDefinition": false,
-			"OriginResource": true,
-			"RegistryPrefix": true,
-			"ResourceType": true
-		},
-		"ServerSentEventUri": "http://example.com/events",
-		"ServiceEnabled": true,
-		"Status": {
-			"State": "Enabled",
-			"Health": "OK"
-		},
-		"Subscriptions": {
-			"@odata.id": "/redfish/v1/EventService/Subscriptions"
-		},
-		"Actions": {
-			"#EventService.SubmitTestEvent": {
-				"target": "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent",
-				"EventType@Redfish.AllowableValues": [
-					"StatusChange",
-					"ResourceUpdated",
-					"ResourceAdded",
-					"ResourceRemoved",
-					"Alert"
-				]
-			}
+		"target": "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent"
+	  }
+	},
+	"DeliveryRetryAttempts": 3,
+	"DeliveryRetryIntervalSeconds": 5,
+	"Description": "Event Service represents the properties for the service",
+	"EventFormatTypes": [
+	  "Event",
+	  "MetricReport"
+	],
+	"EventFormatTypes@odata.count": 2,
+	"EventTypesForSubscription": [
+	  "Alert",
+	  "MetricReport",
+	  "Other"
+	],
+	"EventTypesForSubscription@odata.count": 3,
+	"Id": "EventService",
+	"Name": "Event Service",
+	"SMTP": {
+	  "Authentication": "None",
+	  "ConnectionProtocol": "StartTLS",
+	  "FromAddress": "",
+	  "Password": null,
+	  "Port": 25,
+	  "ServerAddress": "0.0.0.0",
+	  "Username": ""
+	},
+	"SSEFilterPropertiesSupported": {
+	  "EventFormatType": true,
+	  "EventType": true,
+	  "MessageId": true,
+	  "MetricReportDefinition": true,
+	  "OriginResource": true,
+	  "RegistryPrefix": true,
+	  "ResourceType": true,
+	  "SubordinateResources": false
+	},
+	"ServerSentEventUri": "/redfish/v1/SSE",
+	"ServiceEnabled": true,
+	"Status": {
+	  "Conditions": [
+		{
+		  "Message": "The Redfish EventService feature is partially enabled because the IPMILan.1.AlertEnable property is disabled in the URI /redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1.",
+		  "MessageArgs": [],
+		  "MessageArgs@odata.count": 0,
+		  "MessageId": "SYS553",
+		  "Resolution": "Enable the IPMILan.1.AlertEnable property in the following URI: /redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1.",
+		  "Severity": "Warning"
 		}
-	}`
+	  ],
+	  "Health": "Warning",
+	  "HealthRollup": "Warning",
+	  "State": "Enabled"
+	},
+	"Subscriptions": {
+	  "@odata.id": "/redfish/v1/EventService/Subscriptions"
+	}
+  }`
 
 func assertContains(t testing.TB, expected, actual string) {
 	t.Helper()
@@ -117,9 +132,9 @@ func TestEventService(t *testing.T) {
 
 	assertEquals(t, "EventService", result.ID)
 	assertEquals(t, "Event Service", result.Name)
-	assertEquals(t, "4", fmt.Sprint(result.DeliveryRetryAttempts))
-	assertEquals(t, "30", fmt.Sprint(result.DeliveryRetryIntervalSeconds))
-	assertEquals(t, "false", fmt.Sprint(result.SSEFilterPropertiesSupported.MetricReportDefinition))
+	assertEquals(t, "3", fmt.Sprint(result.DeliveryRetryAttempts))
+	assertEquals(t, "5", fmt.Sprint(result.DeliveryRetryIntervalSeconds))
+	assertEquals(t, "true", fmt.Sprint(result.SSEFilterPropertiesSupported.MetricReportDefinition))
 	assertEquals(t, "true", fmt.Sprint(result.SSEFilterPropertiesSupported.MessageID))
 	assertEquals(t, "/redfish/v1/EventService/Actions/EventService.SubmitTestEvent", result.SubmitTestEventTarget)
 

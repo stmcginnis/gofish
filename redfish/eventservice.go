@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -28,7 +27,10 @@ const (
 	MetricReportEventFormatType EventFormatType = "MetricReport"
 )
 
-// EventType is
+// EventType is the event type.
+// This property has been deprecated. Starting with Redfish Specification v1.6 (Event v1.3),
+// subscriptions are based on the RegistryPrefix and ResourceType properties and not on the
+// EventType property.
 type EventType string
 
 const (
@@ -42,14 +44,21 @@ const (
 	ResourceUpdatedEventType EventType = "ResourceUpdated"
 	// StatusChangeEventType indicates the status of this resource has changed.
 	StatusChangeEventType EventType = "StatusChange"
+	// MetricReportEventType indicates the telemetry service is sending a metric report.
+	MetricReportEventType EventType = "MetricReport"
+	// OtherEventType is used to indicate that because EventType is deprecated as of Redfish
+	// Specification v1.6, the event is based on a registry or resource but not an EventType.
+	OtherEventType EventType = "Other"
 )
 
-// IsValidEventType will check if it is a valid EventType
+// IsValidEventType will check if it is a valid EventType.
+// Should remove and leave it to the service to decide if it's valid, but since
+// this is deprecated leaving it in for now.
 func (et EventType) IsValidEventType() bool {
 	switch et {
 	case AlertEventType, ResourceAddedEventType,
 		ResourceRemovedEventType, ResourceUpdatedEventType,
-		StatusChangeEventType:
+		StatusChangeEventType, MetricReportEventType, OtherEventType:
 		return true
 	}
 	return false
@@ -292,7 +301,7 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 // GetEventSubscriptions gets all the subscriptions using the event service.
 func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
 	if strings.TrimSpace(eventservice.Subscriptions) == "" {
-		return nil, fmt.Errorf("empty subscription link in the event service")
+		return nil, errors.New("empty subscription link in the event service")
 	}
 
 	return ListReferencedEventDestinations(eventservice.GetClient(), eventservice.Subscriptions)
@@ -327,7 +336,7 @@ func (eventservice *EventService) CreateEventSubscription(
 	oem interface{},
 ) (string, error) {
 	if strings.TrimSpace(eventservice.Subscriptions) == "" {
-		return "", fmt.Errorf("empty subscription link in the event service")
+		return "", errors.New("empty subscription link in the event service")
 	}
 
 	return CreateEventDestination(
@@ -372,7 +381,7 @@ func (eventservice *EventService) CreateEventSubscriptionInstance(
 	oem interface{},
 ) (string, error) {
 	if strings.TrimSpace(eventservice.Subscriptions) == "" {
-		return "", fmt.Errorf("empty subscription link in the event service")
+		return "", errors.New("empty subscription link in the event service")
 	}
 
 	return CreateEventDestinationInstance(
