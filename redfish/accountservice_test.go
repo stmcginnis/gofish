@@ -13,24 +13,242 @@ import (
 )
 
 var accountServiceBody = `{
-		"@odata.context": "/redfish/v1/$metadata#AccountService",
-		"@odata.id": "/redfish/v1/AccountService",
-		"@odata.type": "#AccountService.0.94.0.AccountService",
-		"Id": "AccountService",
-		"Name": "Account Service",
-		"Description": "BMC User Accounts",
-		"Modified": "2036-09-11T14:17:21+00:00",
-		"AuthFailureLoggingThreshold": 3,
-		"MinPasswordLength": 8,
-		"Links": {
-			"Accounts": {
-				"@odata.id": "/redfish/v1/AccountService/Accounts"
-			},
-			"Roles": {
-				"@odata.id": "/redfish/v1/AccountService/Roles"
-			}
+	"@odata.context": "/redfish/v1/$metadata#AccountService.AccountService",
+	"@odata.type": "#AccountService.v1_13_0.AccountService",
+	"@odata.id": "/redfish/v1/AccountService",
+	"@odata.etag": "\"126793801710\"",
+	"AccountLockoutCounterResetAfter": 0,
+	"AccountLockoutDuration": 0,
+	"AccountLockoutThreshold": 0,
+	"Accounts": {
+	  "@odata.id": "/redfish/v1/AccountService/Accounts"
+	},
+	"ActiveDirectory": {
+	  "Certificates": {
+		"@odata.id": "/redfish/v1/AccountService/ActiveDirectory/Certificates"
+	  },
+	  "AccountProviderType": "ActiveDirectoryService",
+	  "Authentication": {
+		"AuthenticationType": "UsernameAndPassword",
+		"KerberosKeytab": null
+	  },
+	  "RemoteRoleMapping": [
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
 		}
-	}`
+	  ],
+	  "RemoteRoleMapping@odata.count": 15,
+	  "ServiceAddresses": [
+		"",
+		"",
+		""
+	  ],
+	  "ServiceAddresses@odata.count": 3,
+	  "ServiceEnabled": false
+	},
+	"AdditionalExternalAccountProviders": {
+	  "@odata.id": "/redfish/v1/AccountService/ExternalAccountProviders"
+	},
+	"AuthFailureLoggingThreshold": 2,
+	"Description": "BMC User Accounts",
+	"Id": "RemoteAccountService",
+	"LDAP": {
+	  "Certificates": {
+		"@odata.id": "/redfish/v1/AccountService/LDAP/Certificates"
+	  },
+	  "AccountProviderType": "LDAPService",
+	  "Authentication": {
+		"AuthenticationType": "UsernameAndPassword"
+	  },
+	  "LDAPService": {
+		"SearchSettings": {
+		  "BaseDistinguishedNames": [
+			""
+		  ],
+		  "BaseDistinguishedNames@odata.count": 1,
+		  "GroupNameAttribute": "",
+		  "UsernameAttribute": ""
+		}
+	  },
+	  "RemoteRoleMapping": [
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		},
+		{
+		  "RemoteGroup": "",
+		  "LocalRole": "None"
+		}
+	  ],
+	  "RemoteRoleMapping@odata.count": 15,
+	  "ServiceAddresses": [
+		""
+	  ],
+	  "ServiceAddresses@odata.count": 1,
+	  "ServiceEnabled": false
+	},
+	"LocalAccountAuth": "Fallback",
+	"MaxPasswordLength": 127,
+	"MinPasswordLength": 0,
+	"OAuth2": {
+	  "Certificates": {
+		"@odata.id": "/redfish/v1/AccountService/ExternalAccountProviders/1/Certificates"
+	  },
+	  "ServiceEnabled": true,
+	  "ServiceAddresses": [
+		""
+	  ],
+	  "ServiceAddresses@odata.count": 1,
+	  "OAuth2Service": {
+		"Issuer": "",
+		"OAuthServiceSigningKeys": "",
+		"Audience": [
+		  "c4:cb:e1:b4:bc:46"
+		],
+		"Mode": "Discovery"
+	  }
+	},
+	"Name": "Account Service",
+	"PasswordExpirationDays": null,
+	"PrivilegeMap": {
+	  "@odata.id": "/redfish/v1/Managers/iDRAC.Embedded.1/PrivilegeRegistry"
+	},
+	"Roles": {
+	  "@odata.id": "/redfish/v1/AccountService/Roles"
+	},
+	"ServiceEnabled": true,
+	"Status": {
+	  "Health": "OK",
+	  "State": "Enabled"
+	},
+	"SupportedAccountTypes": [
+	  "Redfish",
+	  "SNMP",
+	  "OEM",
+	  "HostConsole",
+	  "ManagerConsole",
+	  "IPMI",
+	  "KVMIP",
+	  "VirtualMedia",
+	  "WebUI"
+	],
+	"SupportedOEMAccountTypes": [
+	  "IPMI",
+	  "SOL",
+	  "WSMAN",
+	  "UI",
+	  "Racadm"
+	]
+  }`
 
 // TestAccountService tests the parsing of AccountService objects.
 func TestAccountService(t *testing.T) {
@@ -41,7 +259,7 @@ func TestAccountService(t *testing.T) {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	if result.ID != "AccountService" {
+	if result.ID != "RemoteAccountService" {
 		t.Errorf("Received invalid ID: %s", result.ID)
 	}
 
@@ -49,12 +267,12 @@ func TestAccountService(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.AuthFailureLoggingThreshold != 3 {
+	if result.AuthFailureLoggingThreshold != 2 {
 		t.Errorf("Received invalid authentication failure logging threshold: %d",
 			result.AuthFailureLoggingThreshold)
 	}
 
-	if result.MinPasswordLength != 8 {
+	if result.MinPasswordLength != 0 {
 		t.Errorf("Received invalid minimum password length: %d", result.MinPasswordLength)
 	}
 
@@ -64,6 +282,18 @@ func TestAccountService(t *testing.T) {
 
 	if result.roles != "/redfish/v1/AccountService/Roles" {
 		t.Errorf("Received invalid Roles: %s", result.roles)
+	}
+
+	if result.ActiveDirectory.certificates != "/redfish/v1/AccountService/ActiveDirectory/Certificates" {
+		t.Errorf("Received invalid ActiveDirectory certificates link: %s", result.ActiveDirectory.certificates)
+	}
+
+	if result.LDAP.AccountProviderType != LDAPServiceAccountProviderTypes {
+		t.Errorf("Received invalid LDAP account provider type: %s", result.LDAP.AccountProviderType)
+	}
+
+	if len(result.SupportedAccountTypes) != 9 {
+		t.Errorf("Received invalid number of supported account types: %#v", result.SupportedAccountTypes)
 	}
 }
 

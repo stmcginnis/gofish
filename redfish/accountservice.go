@@ -254,10 +254,10 @@ func (clientcertificate *ClientCertificate) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// func (clientcertificate *ClientCertificate) ClientCertificates() ([]*Certificate, error) {
-// 	// TODO: Finish implementing
-// 	return ListReferencedCertificates(clientcertificate.GetClient(), clientcertificate.certificates)
-// }
+// ClientCertificates gets the client certificates.
+func (clientcertificate *ClientCertificate) ClientCertificates(c common.Client) ([]*Certificate, error) {
+	return ListReferencedCertificates(c, clientcertificate.certificates)
+}
 
 // AccountService contains properties for managing user accounts. The
 // properties are common to all user accounts, such as password requirements,
@@ -310,10 +310,10 @@ type AccountService struct {
 	// Directory services as an external account provider, this entity shall
 	// be populated by default.  This entity shall not be present in the
 	// AdditionalExternalAccountProviders Resource Collection.
-	// activeDirectory string
+	ActiveDirectory ExternalAccountProvider
 	// additionalExternalAccountProviders shall contain the
 	// additional external account providers that this Account Service uses.
-	// additionalExternalAccountProviders string
+	additionalExternalAccountProviders string
 	// AuthFailureLoggingThreshold shall contain the
 	// threshold for when an authorization failure is logged.  This value
 	// represents a modulo function.  The failure shall be logged every `n`th
@@ -345,17 +345,26 @@ type AccountService struct {
 	MinPasswordLength int
 	// MultiFactorAuth shall contain the multi-factor authentication settings that this account service supports.
 	MultiFactorAuth MultiFactorAuth
+	// OAuth2 is the first OAuth 2.0 external account provider that this account service supports.
+	// If the account service supports one or more OAuth 2.0 services as an external account provider,
+	// this entity shall be populated by default. This entity shall not be present in the additional
+	// external account providers resource collection.
+	OAuth2 ExternalAccountProvider
 	// outboundConnections shall contain a link to a collection of type OutboundConnection.
 	outboundConnections string
+	// PasswordExpirationDays is the number of days before account passwords in this account service will expire.
+	PasswordExpirationDays int
+	// PrivilegeMap shall contain a link to a resource of type PrivilegeMapping that contains the privileges that are
+	// required for a user context to complete a requested operation on a URI associated with this service.
+	privilegeMap string
 	// RequireChangePasswordAction shall indicate whether clients are required to invoke the ChangePassword action to
 	// modify the password property in ManagerAccount resources. If 'true', services shall reject PATCH and PUT
 	// requests to modify the Password property in ManagerAccount resources.
 	RequireChangePasswordAction bool
-	// privilegeMap shall contain a link to a Resource of
-	// type PrivilegeMapping that contains the privileges that are required
-	// for a user context to complete a requested operation on a URI
-	// associated with this Service.
-	// privilegeMap string
+	// RestrictedOemPrivileges shall contain an array of OEM privileges that are restricted by the service.
+	RestrictedOemPrivileges []string
+	// RestrictedPrivileges shall contain an array of Redfish privileges that are restricted by the service.
+	RestrictedPrivileges []PrivilegeType
 	// roles shall contain a link to a Resource Collection
 	// of type RoleCollection.
 	roles string
@@ -370,6 +379,15 @@ type AccountService struct {
 	// Status shall contain any status or health properties
 	// of the Resource.
 	Status common.Status
+	// SupportedAccountTypes shall contain an array of the account types supported by the service.
+	SupportedAccountTypes []AccountTypes
+	// SupportedOEMAccountTypes shall contain an array of the OEM account types supported by the service.
+	SupportedOEMAccountTypes []string
+	// TACACSplus shall contain the first TACACS+ external account provider that this account service supports. If the
+	// account service supports one or more TACACS+ services as an external account provider, this entity shall be
+	// populated by default. This entity shall not be present in the additional external account providers resource
+	// collection.
+	TACACSplus ExternalAccountProvider
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -383,8 +401,10 @@ func (accountservice *AccountService) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Links               AccountLinks
-		OutboundConnections common.Link
+		Links                              AccountLinks
+		AdditionalExternalAccountProviders common.Link
+		OutboundConnections                common.Link
+		PrivilegeMap                       common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -401,12 +421,28 @@ func (accountservice *AccountService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	accountservice.accounts = t.Links.Accounts.String()
 	accountservice.roles = t.Links.Roles.String()
+
+	accountservice.additionalExternalAccountProviders = t.AdditionalExternalAccountProviders.String()
 	accountservice.outboundConnections = t.OutboundConnections.String()
+	accountservice.privilegeMap = t.PrivilegeMap.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	accountservice.rawData = b
 
 	return nil
+}
+
+// AdditionalExternalAccountProviders gets additional external account providers that this account service uses.
+func (accountservice *AccountService) AdditionalExternalAccountProviders() ([]*ExternalAccountProvider, error) {
+	return ListReferencedExternalAccountProviders(accountservice.GetClient(), accountservice.additionalExternalAccountProviders)
+}
+
+// PrivilegeMap gets the mapping of the privileges required to complete a requested operation on a URI associated with this service.
+func (accountservice *AccountService) PrivilegeMap() (*PrivilegeRegistry, error) {
+	if accountservice.privilegeMap == "" {
+		return nil, nil
+	}
+	return GetPrivilegeRegistry(accountservice.GetClient(), accountservice.privilegeMap)
 }
 
 // Update commits updates to this object's properties to the running system.
