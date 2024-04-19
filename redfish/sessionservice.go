@@ -34,7 +34,7 @@ type SessionService struct {
 	// between the Validation.Minimum and Validation.Maximum.
 	SessionTimeout int
 	// Sessions shall contain a link to a resource collection of type SessionCollection.
-	sessions []string
+	sessions string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// rawData holds the original serialized JSON so we can compare updates.
@@ -46,7 +46,7 @@ func (sessionservice *SessionService) UnmarshalJSON(b []byte) error {
 	type temp SessionService
 	var t struct {
 		temp
-		Sessions common.LinksCollection
+		Sessions common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -57,7 +57,7 @@ func (sessionservice *SessionService) UnmarshalJSON(b []byte) error {
 	*sessionservice = SessionService(t.temp)
 
 	// Extract the links to other entities for later
-	sessionservice.sessions = t.Sessions.ToStrings()
+	sessionservice.sessions = t.Sessions.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	sessionservice.rawData = b
@@ -67,23 +67,7 @@ func (sessionservice *SessionService) UnmarshalJSON(b []byte) error {
 
 // Sessions gets a collection of sessions.
 func (sessionservice *SessionService) Sessions() ([]*Session, error) {
-	var result []*Session
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range sessionservice.sessions {
-		eth, err := GetSession(sessionservice.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedSessions(sessionservice.GetClient(), sessionservice.sessions)
 }
 
 // Update commits updates to this object's properties to the running system.
