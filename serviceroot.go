@@ -87,14 +87,14 @@ type Service struct {
 	// AggregationService shall contain a link to a resource of type AggregationService.
 	aggregationService string
 	// Cables shall contain a link to a resource collection of type CableCollection.
-	cables []string
+	cables string
 	// CertificateService shall be a link to the CertificateService.
 	certificateService string
 	// Chassis shall only contain a reference to a collection of resources that
 	// comply to the Chassis schema.
 	chassis string
 	// ComponentIntegrity shall contain a link to a resource collection of type ComponentIntegrityCollection.
-	componentIntegrity []string
+	componentIntegrity string
 	// CompositionService shall only contain a reference to a resource that
 	// complies to the CompositionService schema.
 	compositionService string
@@ -105,7 +105,7 @@ type Service struct {
 	// Fabrics shall contain references to all Fabric instances.
 	fabrics string
 	// Facilities shall contain a link to a resource collection of type FacilityCollection.
-	facilities []string
+	facilities string
 	// JobService shall only contain a reference to a resource that conforms to
 	// the JobService schema.
 	jobService string
@@ -121,7 +121,7 @@ type Service struct {
 	// comply to the Managers schema.
 	managers string
 	// NVMeDomains shall contain a link to a resource collection of type NVMeDomainCollection.
-	nvmeDomains []string
+	nvmeDomains string
 	// Oem contains all the vendor specific actions. It is vendor responsibility to parse
 	// this field accordingly
 	Oem json.RawMessage
@@ -140,7 +140,7 @@ type Service struct {
 	// section of the Redfish specification.
 	RedfishVersion string
 	// RegisteredClients shall contain a link to a resource collection of type RegisteredClientCollection.
-	registeredClients []string
+	registeredClients string
 	// Registries shall contain a reference to Message Registry.
 	registries string
 	// ResourceBlocks shall contain references to all Resource Block instances.
@@ -158,7 +158,7 @@ type Service struct {
 	// to the SessionService schema.
 	sessionService string
 	// Storage shall contain a link to a resource collection of type StorageCollection.
-	storage []string
+	storage string
 	// StorageServices shall contain references to all StorageService instances.
 	storageServices string
 	// StorageSystems shall contain computer systems that act as storage
@@ -204,27 +204,27 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 		temp
 		AccountService     common.Link
 		AggregationService common.Link
-		Cables             common.LinksCollection
+		Cables             common.Link
 		CertificateService common.Link
 		Chassis            common.Link
-		ComponentIntegrity common.LinksCollection
+		ComponentIntegrity common.Link
 		CompositionService common.Link
 		EventService       common.Link
 		Fabrics            common.Link
-		Facilities         common.LinksCollection
+		Facilities         common.Link
 		JobService         common.Link
 		JSONSchemas        common.Link
 		KeyService         common.Link
 		LicenseService     common.Link
 		Managers           common.Link
-		NVMeDomains        common.LinksCollection
+		NVMeDomains        common.Link
 		PowerEquipment     common.Link
 		Registries         common.Link
-		RegisteredClients  common.LinksCollection
+		RegisteredClients  common.Link
 		ResourceBlocks     common.Link
 		ServiceConditions  common.Link
 		SessionService     common.Link
-		Storage            common.LinksCollection
+		Storage            common.Link
 		StorageServices    common.Link
 		StorageSystems     common.Link
 		Systems            common.Link
@@ -247,27 +247,27 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 	*serviceroot = Service(t.temp)
 	serviceroot.accountService = t.AccountService.String()
 	serviceroot.aggregationService = t.AggregationService.String()
-	serviceroot.cables = t.Cables.ToStrings()
+	serviceroot.cables = t.Cables.String()
 	serviceroot.certificateService = t.CertificateService.String()
 	serviceroot.chassis = t.Chassis.String()
-	serviceroot.componentIntegrity = t.ComponentIntegrity.ToStrings()
+	serviceroot.componentIntegrity = t.ComponentIntegrity.String()
 	serviceroot.compositionService = t.CompositionService.String()
 	serviceroot.eventService = t.EventService.String()
 	serviceroot.fabrics = t.Fabrics.String()
-	serviceroot.facilities = t.Facilities.ToStrings()
+	serviceroot.facilities = t.Facilities.String()
 	serviceroot.jobService = t.JobService.String()
 	serviceroot.jsonSchemas = t.JSONSchemas.String()
 	serviceroot.keyService = t.KeyService.String()
 	serviceroot.licenseService = t.LicenseService.String()
 	serviceroot.managers = t.Managers.String()
-	serviceroot.nvmeDomains = t.NVMeDomains.ToStrings()
+	serviceroot.nvmeDomains = t.NVMeDomains.String()
 	serviceroot.powerEquipment = t.PowerEquipment.String()
-	serviceroot.registeredClients = t.RegisteredClients.ToStrings()
+	serviceroot.registeredClients = t.RegisteredClients.String()
 	serviceroot.registries = t.Registries.String()
 	serviceroot.resourceBlocks = t.ResourceBlocks.String()
 	serviceroot.serviceConditions = t.ServiceConditions.String()
 	serviceroot.sessionService = t.SessionService.String()
-	serviceroot.storage = t.Storage.ToStrings()
+	serviceroot.storage = t.Storage.String()
 	serviceroot.storageServices = t.StorageServices.String()
 	serviceroot.storageSystems = t.StorageSystems.String()
 	serviceroot.systems = t.Systems.String()
@@ -315,23 +315,7 @@ func (serviceroot *Service) AggregationService() (*redfish.AggregationService, e
 
 // Cables gets a collection of cables.
 func (serviceroot *Service) Cables() ([]*redfish.Cable, error) {
-	var result []*redfish.Cable
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range serviceroot.cables {
-		item, err := redfish.GetCable(serviceroot.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return redfish.ListReferencedCables(serviceroot.GetClient(), serviceroot.cables)
 }
 
 // CertificateService gets the certificate service.
@@ -349,23 +333,7 @@ func (serviceroot *Service) Chassis() ([]*redfish.Chassis, error) {
 
 // ComponentIntegrity gets a collection of cables.
 func (serviceroot *Service) ComponentIntegrity() ([]*redfish.ComponentIntegrity, error) {
-	var result []*redfish.ComponentIntegrity
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range serviceroot.componentIntegrity {
-		item, err := redfish.GetComponentIntegrity(serviceroot.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return redfish.ListReferencedComponentIntegritys(serviceroot.GetClient(), serviceroot.componentIntegrity)
 }
 
 // CompositionService gets the composition service.
@@ -388,23 +356,7 @@ func (serviceroot *Service) Fabrics() ([]*redfish.Fabric, error) {
 
 // Facilities gets a collection of facilities.
 func (serviceroot *Service) Facilities() ([]*redfish.Facility, error) {
-	var result []*redfish.Facility
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range serviceroot.facilities {
-		item, err := redfish.GetFacility(serviceroot.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return redfish.ListReferencedFacilitys(serviceroot.GetClient(), serviceroot.facilities)
 }
 
 // JobService gets the job service instance
@@ -456,23 +408,7 @@ func (serviceroot *Service) Managers() ([]*redfish.Manager, error) {
 
 // RegisteredClients gets a collection of registered clients.
 func (serviceroot *Service) RegisteredClients() ([]*redfish.RegisteredClient, error) {
-	var result []*redfish.RegisteredClient
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range serviceroot.registeredClients {
-		item, err := redfish.GetRegisteredClient(serviceroot.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return redfish.ListReferencedRegisteredClients(serviceroot.GetClient(), serviceroot.registeredClients)
 }
 
 // Registries gets the Redfish Registries
@@ -503,23 +439,7 @@ func (serviceroot *Service) SessionService() (*redfish.SessionService, error) {
 
 // Storage gets a collection of storage objects.
 func (serviceroot *Service) Storage() ([]*redfish.Storage, error) {
-	var result []*redfish.Storage
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range serviceroot.storage {
-		item, err := redfish.GetStorage(serviceroot.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return redfish.ListReferencedStorages(serviceroot.GetClient(), serviceroot.storage)
 }
 
 // StorageServices gets the Swordfish storage services
