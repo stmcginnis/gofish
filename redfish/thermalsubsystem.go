@@ -24,27 +24,27 @@ type ThermalSubsystem struct {
 	CoolantConnectorRedundancy []RedundantGroup
 	// CoolantConnectors shall contain a link to a resource collection of type CoolantConnectorCollection that contains
 	// the coolant connectors for this equipment.
-	coolantConnectors []string
+	coolantConnectors string
 	// Description provides a description of this resource.
 	Description string
 	// FanRedundancy shall contain redundancy information for the groups of fans in this subsystem.
 	FanRedundancy []RedundantGroup
 	// Fans shall contain a link to a resource collection of type FanCollection.
-	fans []string
+	fans string
 	// Heaters shall contain a link to a resource collection of type HeaterCollection.
-	heaters []string
+	heaters string
 	// LeakDetection shall contain a link to a resource collection of type LeakDetection.
-	leakDetection []string
+	leakDetection string
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// Pumps shall contain a link to a resource collection of type PumpCollection that contains details for the pumps
 	// included in this equipment.
-	pumps []string
+	pumps string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// ThermalMetrics shall contain a link to a resource collection of type ThermalMetrics.
-	thermalMetrics []string
+	thermalMetrics string
 }
 
 // UnmarshalJSON unmarshals a ThermalSubsystem object from the raw JSON.
@@ -52,12 +52,12 @@ func (thermalsubsystem *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 	type temp ThermalSubsystem
 	var t struct {
 		temp
-		CoolantConnectors common.LinksCollection
-		Fans              common.LinksCollection
-		Heaters           common.LinksCollection
-		LeakDetection     common.LinksCollection
-		Pumps             common.LinksCollection
-		ThermalMetrics    common.LinksCollection
+		CoolantConnectors common.Link
+		Fans              common.Link
+		Heaters           common.Link
+		LeakDetection     common.Link
+		Pumps             common.Link
+		ThermalMetrics    common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -68,140 +68,47 @@ func (thermalsubsystem *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 	*thermalsubsystem = ThermalSubsystem(t.temp)
 
 	// Extract the links to other entities for later
-	thermalsubsystem.coolantConnectors = t.CoolantConnectors.ToStrings()
-	thermalsubsystem.fans = t.Fans.ToStrings()
-	thermalsubsystem.heaters = t.Heaters.ToStrings()
-	thermalsubsystem.leakDetection = t.LeakDetection.ToStrings()
-	thermalsubsystem.pumps = t.Pumps.ToStrings()
-	thermalsubsystem.thermalMetrics = t.ThermalMetrics.ToStrings()
+	thermalsubsystem.coolantConnectors = t.CoolantConnectors.String()
+	thermalsubsystem.fans = t.Fans.String()
+	thermalsubsystem.heaters = t.Heaters.String()
+	thermalsubsystem.leakDetection = t.LeakDetection.String()
+	thermalsubsystem.pumps = t.Pumps.String()
+	thermalsubsystem.thermalMetrics = t.ThermalMetrics.String()
 
 	return nil
 }
 
 // CoolantConnectors gets the coolant connectors for this equipment.
 func (thermalsubsystem *ThermalSubsystem) CoolantConnectors() ([]*CoolantConnector, error) {
-	var result []*CoolantConnector
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalsubsystem.coolantConnectors {
-		item, err := GetCoolantConnector(thermalsubsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCoolantConnectors(thermalsubsystem.GetClient(), thermalsubsystem.coolantConnectors)
 }
 
 // Fans gets the fans for this equipment.
 func (thermalsubsystem *ThermalSubsystem) Fans() ([]*Fan, error) {
-	var result []*Fan
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalsubsystem.fans {
-		item, err := GetFan(thermalsubsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedFans(thermalsubsystem.GetClient(), thermalsubsystem.fans)
 }
 
 // Heaters gets the heaters within this subsystem.
 func (thermalsubsystem *ThermalSubsystem) Heaters() ([]*Heater, error) {
-	var result []*Heater
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalsubsystem.heaters {
-		item, err := GetHeater(thermalsubsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedHeaters(thermalsubsystem.GetClient(), thermalsubsystem.heaters)
 }
 
 // LeakDetection gets the leak detection system within this chassis.
 func (thermalsubsystem *ThermalSubsystem) LeakDetection() ([]*LeakDetection, error) {
-	var result []*LeakDetection
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalsubsystem.leakDetection {
-		item, err := GetLeakDetection(thermalsubsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedLeakDetections(thermalsubsystem.GetClient(), thermalsubsystem.leakDetection)
 }
 
 // Pumps gets the pumps for this equipment.
 func (thermalsubsystem *ThermalSubsystem) Pumps() ([]*Pump, error) {
-	var result []*Pump
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalsubsystem.pumps {
-		item, err := GetPump(thermalsubsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedPumps(thermalsubsystem.GetClient(), thermalsubsystem.pumps)
 }
 
 // ThermalMetrics gets the summary of thermal metrics for this subsystem.
-func (thermalsubsystem *ThermalSubsystem) ThermalMetrics() ([]*ThermalMetrics, error) {
-	var result []*ThermalMetrics
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalsubsystem.thermalMetrics {
-		item, err := GetThermalMetrics(thermalsubsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
+func (thermalsubsystem *ThermalSubsystem) ThermalMetrics() (*ThermalMetrics, error) {
+	if thermalsubsystem.thermalMetrics == "" {
+		return nil, nil
 	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return GetThermalMetrics(thermalsubsystem.GetClient(), thermalsubsystem.thermalMetrics)
 }
 
 // GetThermalSubsystem will get a ThermalSubsystem instance from the service.
