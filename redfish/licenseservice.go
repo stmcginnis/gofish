@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -32,7 +33,7 @@ type LicenseService struct {
 	// new resource. In these cases, the service shall respond with the HTTP '200 OK' status code or HTTP '204 No
 	// Content' status code and the 'Location' header in the response shall contain the URI of the updated License
 	// resource.
-	licenses []string
+	licenses string
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
@@ -40,6 +41,8 @@ type LicenseService struct {
 	ServiceEnabled bool
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+
+	installTarget string
 }
 
 // UnmarshalJSON unmarshals a LicenseService object from the raw JSON.
@@ -47,7 +50,10 @@ func (licenseservice *LicenseService) UnmarshalJSON(b []byte) error {
 	type temp LicenseService
 	var t struct {
 		temp
-		Licenses common.LinksCollection
+		Licenses common.Link
+		Actions  struct {
+			Install common.ActionTarget `json:"#LicenseService.Install"`
+		}
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -58,7 +64,8 @@ func (licenseservice *LicenseService) UnmarshalJSON(b []byte) error {
 	*licenseservice = LicenseService(t.temp)
 
 	// Extract the links to other entities for later
-	licenseservice.licenses = t.Licenses.ToStrings()
+	licenseservice.licenses = t.Licenses.String()
+	licenseservice.installTarget = t.Actions.Install.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
 	licenseservice.rawData = b
@@ -66,25 +73,44 @@ func (licenseservice *LicenseService) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+type InstallLicenseParameters struct {
+	// AuthorizedDevices (optional) parameter shall contain an array of links to the devices to be authorized
+	// by the license. Clients can provide this parameter when installing a license to apply the license to
+	// specific devices. If not provided when installing a license, the service may determine the devices to
+	// which the license applies. This parameter shall not be present if the AuthorizationScope property
+	// contains the value `Service`.
+	AuthorizedDevices []string `json:",omitempty"`
+	// LicenseFileURI shall contain an RFC3986-defined URI that links to a file that the license service
+	// retrieves to install the license in that file. This URI should contain a scheme that describes the
+	// transfer protocol. If the TransferProtocol parameter is absent or not supported, and a transfer protocol
+	// is not specified by a scheme contained within this URI, the service shall use HTTP to get the file.
+	LicenseFileURI string
+	// Password (optional) shall represent the password to access the URI specified by the LicenseFileURI parameter.
+	Password string `json:",omitempty"`
+	// TargetServices (optional) shall contain an array of links to resources of type Manager that represent the
+	// services where the license will be installed, such as remote Redfish services. This parameter shall only
+	// be present in aggregators when the AuthorizationScope property contains `Service` or `Capacity`.
+	TargetServices []string `json:",omitempty"`
+	// TransferProtocol (optional) is the network protocol that the license service shall use to retrieve the license file
+	// located at the LicenseFileURI.  Services should ignore this parameter if the URI provided in LicenseFileURI
+	// contains a scheme.  If this parameter is not provided or supported, and if a transfer protocol is not
+	// specified by a scheme contained within this URI, the service shall use HTTP to retrieve the file.
+	TransferProtocol TransferProtocolType `json:",omitempty"`
+	// Username (optional) is the user name to access the URI specified by the LicenseFileURI parameter.
+	Username string `json:",omitempty"`
+}
+
+// Install will install one or more licenses from a remote file. The service may update an existing License resource.
+func (licenseservice *LicenseService) Install(parameters *InstallLicenseParameters) error {
+	if licenseservice.installTarget == "" {
+		return errors.New("license install not supported by this service")
+	}
+	return licenseservice.Post(licenseservice.installTarget, parameters)
+}
+
 // Licenses gets the set of installed licenses.
 func (licenseservice *LicenseService) Licenses() ([]*License, error) {
-	var result []*License
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range licenseservice.licenses {
-		unit, err := GetLicense(licenseservice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedLicenses(licenseservice.GetClient(), licenseservice.licenses)
 }
 
 // Update commits updates to this object's properties to the running system.
