@@ -204,6 +204,7 @@ type Chassis struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	assembly  string
 	// AssetTag shall contain an identifying string that
 	// tracks the chassis for inventory purposes.
 	AssetTag string
@@ -213,6 +214,7 @@ type Chassis struct {
 	// ChassisType shall indicate the physical form factor
 	// for the type of chassis.
 	ChassisType ChassisType
+	controls    string
 	// DepthMm shall represent the depth (length) of the
 	// chassis, in millimeters, as specified by the manufacturer.
 	DepthMm float64
@@ -243,10 +245,6 @@ type Chassis struct {
 	// respective environmental limits that include temperature, relative
 	// humidity, dew point, and maximum allowable elevation.
 	EnvironmentalClass EnvironmentalClass
-	// Facility shall contain a link to the resource of type Facility and shall represent the smallest facility that
-	// contains this chassis. This property shall not appear in resources that include a ContainedBy property within
-	// the Links property.
-	facility string
 	// FabricAdapters shall contain a link to a resource collection of type FabricAdapterCollection that represents
 	// fabric adapters in this chassis that provide access to fabric-related resource pools.
 	fabricAdapters string
@@ -280,6 +278,7 @@ type Chassis struct {
 	// LocationIndicatorActive in the resource that represents the functional view of this Chassis, such as a
 	// ComputerSystem resource.
 	LocationIndicatorActive bool
+	logServices             string
 	// Manufacturer shall contain the name of the
 	// organization responsible for producing the chassis. This organization
 	// might be the entity from whom the chassis is purchased, but this is
@@ -297,7 +296,8 @@ type Chassis struct {
 	MinPowerWatts float64
 	// Model shall contain the name by which the
 	// manufacturer generally refers to the chassis.
-	Model string
+	Model           string
+	networkAdapters string
 	// PartNumber shall contain a part number assigned by
 	// the organization that is responsible for producing or manufacturing
 	// the chassis.
@@ -327,7 +327,8 @@ type Chassis struct {
 	Replaceable bool
 	// SKU shall contain the stock-keeping unit number for
 	// this chassis.
-	SKU string
+	SKU     string
+	sensors string
 	// SerialNumber shall contain a manufacturer-allocated
 	// number that identifies the chassis.
 	SerialNumber string
@@ -338,6 +339,14 @@ type Chassis struct {
 	Status common.Status
 	// ThermalDirection shall indicate the general direction of the thermal management path through the chassis.
 	ThermalDirection ThermalDirection
+	// ThermalManagedByParent shall indicate whether the chassis relies on the containing chassis to provide thermal
+	// management. The value 'true' shall indicate that the chassis relies on the containing chassis to provide thermal
+	// management. The value 'false' shall indicate the chassis provides thermal management, and may provide details in
+	// a ThermalSubsystem resource, or by populating the Fans property in Links.
+	ThermalManagedByParent bool
+	// ThermalSubsystem shall contain a link to a resource of type ThermalSubsystem that represents the thermal
+	// subsystem information for this chassis.
+	thermalSubsystem string
 	// TrustedComponents shall contain a link to a resource collection of type TrustedComponentCollection.
 	trustedComponents string
 	// UUID shall contain the universal unique identifier
@@ -349,62 +358,122 @@ type Chassis struct {
 	// WidthMm shall represent the width of the chassis, in
 	// millimeters, as specified by the manufacturer.
 	WidthMm float64
-	thermal string
-	power   string
-	// pcieSlots shall be a link to the PCIe slot properties for this chassis
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+
+	// Deprecated properties
+
+	power     string
+	thermal   string
 	pcieSlots string
-	// sensors shall be a link to to the collection of sensors
-	// located in the equipment and sub-components
-	sensors         string
-	networkAdapters string
-	// logServices shall be a link to a collection of type LogServiceCollection.
-	logServices     string
-	computerSystems []string
-	resourceBlocks  []string
-	managedBy       []string
-	assembly        string
+
+	// Action links
+
 	// resetTarget is the internal URL to send reset actions to.
 	resetTarget string
 	// SupportedResetTypes, if provided, is the reset types this chassis supports.
 	SupportedResetTypes []ResetType
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData               []byte
+
+	// Links
+
+	cables []string
+	// CablesCount is the number of connected cables
+	CablesCount     int
+	computerSystems []string
+	// ComputerSystemsCount is the number of computer systems in this chassis.
+	ComputerSystemsCount  int
 	connectedCoolingLoops []string
-	// ConnectedCoolingLoopsCount is the number of CoolingLoops connected to this chassis.
-	// Added in v1.25.0.
+	// ConnectedCoolingLoopsCount is the number of cooling loops connected to this chassis.
 	ConnectedCoolingLoopsCount int
-	coolingUnits               []string
+	containedBy                string
+	contains                   []string
+	// ContainsCount is the number of chassis this chassis contains.
+	ContainsCount int
+	coolingUnits  []string
 	// CoolingUnitsCount is the number of cooling units connected to this chassis.
-	// Added in v1.25.0.
 	CoolingUnitsCount int
+	facility          string
+	fans              []string
+	// FansCount is the number of fans connected to this chassis.
+	FansCount int
+	managedBy []string
+	// ManagedByCount is the number of managers for this chassis.
+	ManagedByCount    int
+	managersInChassis []string
+	// ManagersInChassisCount is the number of managers contained in this chassis.
+	ManagersInChassisCount int
+	powerDistribution      string
+	powerOutlets           []string
+	// PowerOutletsCount is the number of power outlets in this chassis.
+	PowerOutletsCount int
+	powerSupplies     []string
+	// PowerSuppliesCount gets the number of power supplies in the chassis.
+	PowerSuppliesCount int
+	resourceBlocks     []string
+	// ResourceBlocksCount is the number of resource blocks in this chassis.
+	ResourceBlockCount int
+	storage            []string
+	// StorageCount is the number of storage instances connected to this chassis.
+	StorageCount int
+	switches     []string
+	// SwitchesCount is the number of switches in this chassis.
+	SwitchesCount int
+}
+
+type chassisLinks struct {
+	Cables                     common.Links
+	CablesCount                int `json:"Cables@odata.count"`
+	ComputerSystems            common.Links
+	ComputerSystemsCount       int `json:"ComputerSystems@odata.count"`
+	ConnectedCoolingLoops      common.Links
+	ConnectedCoolingLoopsCount int `json:"ConnectedCoolingLoops@odata.count"`
+	ContainedBy                common.Link
+	Contains                   common.Links
+	ContainsCount              int `json:"Contains@odata.count"`
+	CoolingUnits               common.Links
+	CoolingUnitsCount          int `json:"CoolingUnits@odata.count"`
+	Drives                     common.Links
+	DrivesCount                int `json:"Drives@odata.count"`
+	Facility                   common.Link
+	Fans                       common.Links
+	FansCount                  int `json:"Fans@odata.count"`
+	ManagedBy                  common.Links
+	ManagedByCount             int `json:"ManagedBy@odata.count"`
+	ManagersInChassis          common.Links
+	ManagersInChassisCount     int `json:"ManagersInChassis@odata.count"`
+	PowerDistribution          common.Link
+	PowerOutlets               common.Links
+	PowerOutletsCount          int `json:"PowerOutlets@odata.count"`
+	PowerSupplies              common.Links
+	PowerSuppliesCount         int `json:"PowerSupplies@odata.count"`
+	Processors                 common.Links
+	ProcessorsCount            int `json:"Processors@odata.count"`
+	ResourceBlocks             common.Links
+	ResourceBlocksCount        int `json:"ResourceBlocks@odata.count"`
+	Storage                    common.Links
+	StorageCount               int `json:"Storage@odata.count"`
+	Switches                   common.Links
+	SwitchesCount              int `json:"Switches@odata.count"`
+}
+
+type chassisActions struct {
+	ChassisReset struct {
+		AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
+		Target            string
+	} `json:"#Chassis.Reset"`
 }
 
 // UnmarshalJSON unmarshals a Chassis object from the raw JSON.
+//
+//nolint:funlen
 func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	type temp Chassis
-	type linkReference struct {
-		ComputerSystems             common.Links
-		ResourceBlocks              common.Links
-		ManagedBy                   common.Links
-		Drives                      common.Links
-		DrivesCount                 int `json:"Drives@odata.count"`
-		ConnectedCoolingLoops       common.Links
-		ConnectedCoolingLooopsCount int `json:"ConnectedCoolingLoops@odata.count"`
-		CoolingUnits                common.Links
-		CoolingUnitsCount           int `json:"CoolingUnits@odata.count"`
-		Facility                    common.Link
-	}
-	type Actions struct {
-		ChassisReset struct {
-			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
-			Target            string
-		} `json:"#Chassis.Reset"`
-	}
 
 	var t struct {
 		temp
 		Assembly           common.Link
 		Certificates       common.Link
+		Controls           common.Links
 		Drives             common.Link
 		EnvironmentMetrics common.Link
 		FabricAdapters     common.Link
@@ -419,9 +488,10 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		Processors         common.Link
 		Sensors            common.Link
 		Thermal            common.Link
+		ThermalSubsystem   common.Link
 		TrustedComponents  common.Link
-		Links              linkReference
-		Actions            Actions
+		Links              chassisLinks
+		Actions            chassisActions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -437,32 +507,57 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	chassis.drives = t.Drives.String()
 	chassis.environmentMetrics = t.EnvironmentMetrics.String()
 	chassis.fabricAdapters = t.FabricAdapters.String()
+	chassis.logServices = t.LogServices.String()
+	chassis.memory = t.Memory.String()
+	chassis.memoryDomains = t.MemoryDomains.String()
+	chassis.networkAdapters = t.NetworkAdapters.String()
+	chassis.pcieDevices = t.PCIeDevices.String()
+	chassis.pcieSlots = t.PCIeSlots.String()
+	chassis.power = t.Power.String()
+	chassis.powerSubsystem = t.PowerSubsystem.String()
+	chassis.processors = t.Processors.String()
+	chassis.sensors = t.Sensors.String()
+	chassis.thermal = t.Thermal.String()
+	chassis.thermalSubsystem = t.ThermalSubsystem.String()
+	chassis.trustedComponents = t.TrustedComponents.String()
+
+	chassis.resetTarget = t.Actions.ChassisReset.Target
+	chassis.SupportedResetTypes = t.Actions.ChassisReset.AllowedResetTypes
+
+	chassis.cables = t.Links.Cables.ToStrings()
+	chassis.computerSystems = t.Links.ComputerSystems.ToStrings()
+	chassis.ComputerSystemsCount = t.Links.ComputerSystemsCount
+	chassis.connectedCoolingLoops = t.Links.ConnectedCoolingLoops.ToStrings()
+	chassis.ConnectedCoolingLoopsCount = t.Links.ConnectedCoolingLoopsCount
+	chassis.containedBy = t.Links.ContainedBy.String()
+	chassis.contains = t.Links.Contains.ToStrings()
+	chassis.ContainsCount = t.Links.ContainsCount
+	chassis.coolingUnits = t.Links.CoolingUnits.ToStrings()
+	chassis.CoolingUnitsCount = t.Links.CoolingUnitsCount
 	chassis.facility = t.Links.Facility.String()
+	chassis.fans = t.Links.Fans.ToStrings()
+	chassis.FansCount = t.Links.FansCount
+	chassis.managedBy = t.Links.ManagedBy.ToStrings()
+	chassis.ManagedByCount = t.Links.ManagedByCount
+	chassis.managersInChassis = t.Links.ManagersInChassis.ToStrings()
+	chassis.ManagersInChassisCount = t.Links.ManagersInChassisCount
+	chassis.powerDistribution = t.Links.PowerDistribution.String()
+	chassis.powerOutlets = t.Links.PowerOutlets.ToStrings()
+	chassis.PowerOutletsCount = t.Links.PowerOutletsCount
+	chassis.powerSupplies = t.Links.PowerSupplies.ToStrings()
+	chassis.PowerSuppliesCount = t.Links.PowerSuppliesCount
+	// Links contain processors, but so does the chassis object. Since the chassis
+	// object includes a collection link that is a little more efficient, sticking
+	// with that until there is a need identified to grab it a different way.
+	chassis.resourceBlocks = t.Links.ResourceBlocks.ToStrings()
+	chassis.storage = t.Links.Storage.ToStrings()
+	chassis.StorageCount = t.Links.StorageCount
+	chassis.switches = t.Links.Switches.ToStrings()
+	chassis.SwitchesCount = t.Links.SwitchesCount
 	chassis.linkedDrives = t.Links.Drives.ToStrings()
 	if chassis.DrivesCount == 0 && t.Links.DrivesCount > 0 {
 		chassis.DrivesCount = t.Links.DrivesCount
 	}
-	chassis.memory = t.Memory.String()
-	chassis.memoryDomains = t.MemoryDomains.String()
-	chassis.thermal = t.Thermal.String()
-	chassis.trustedComponents = t.TrustedComponents.String()
-	chassis.power = t.Power.String()
-	chassis.powerSubsystem = t.PowerSubsystem.String()
-	chassis.pcieDevices = t.PCIeDevices.String()
-	chassis.pcieSlots = t.PCIeSlots.String()
-	chassis.sensors = t.Sensors.String()
-	chassis.networkAdapters = t.NetworkAdapters.String()
-	chassis.logServices = t.LogServices.String()
-	chassis.computerSystems = t.Links.ComputerSystems.ToStrings()
-	chassis.resourceBlocks = t.Links.ResourceBlocks.ToStrings()
-	chassis.managedBy = t.Links.ManagedBy.ToStrings()
-	chassis.resetTarget = t.Actions.ChassisReset.Target
-	chassis.SupportedResetTypes = t.Actions.ChassisReset.AllowedResetTypes
-	chassis.processors = t.Processors.String()
-	chassis.connectedCoolingLoops = t.Links.ConnectedCoolingLoops.ToStrings()
-	chassis.ConnectedCoolingLoopsCount = t.Links.ConnectedCoolingLooopsCount
-	chassis.coolingUnits = t.Links.CoolingUnits.ToStrings()
-	chassis.CoolingUnitsCount = t.Links.CoolingUnitsCount
 
 	// This is a read/write object, so we need to save the raw object data for later
 	chassis.rawData = b
@@ -549,6 +644,11 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 // Certificates returns certificates in this Chassis.
 func (chassis *Chassis) Certificates() ([]*Certificate, error) {
 	return ListReferencedCertificates(chassis.GetClient(), chassis.certificates)
+}
+
+// Controls returns controls in this Chassis.
+func (chassis *Chassis) Controls() ([]*Control, error) {
+	return ListReferencedControls(chassis.GetClient(), chassis.controls)
 }
 
 // ConnectedCoolingLoops returns a collection of CoolingLoops associated with this Chassis.
@@ -648,6 +748,14 @@ func (chassis *Chassis) Drives() ([]*Drive, error) {
 	return result, collectionError
 }
 
+// EnvironmentMetrics gets the environment metrics for the chassis
+func (chassis *Chassis) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+	if chassis.environmentMetrics == "" {
+		return nil, nil
+	}
+	return GetEnvironmentMetrics(chassis.GetClient(), chassis.environmentMetrics)
+}
+
 // Facility gets the smallest facility that contains the chassis.
 func (chassis *Chassis) Facility() (*Facility, error) {
 	if chassis.facility == "" {
@@ -668,6 +776,7 @@ func (chassis *Chassis) MemoryDomains() ([]*MemoryDomain, error) {
 }
 
 // Thermal gets the thermal temperature and cooling information for the chassis
+// This link has been deprecated in favor of the ThermalSubsystem link property.
 func (chassis *Chassis) Thermal() (*Thermal, error) {
 	if chassis.thermal == "" {
 		return nil, nil
@@ -676,12 +785,24 @@ func (chassis *Chassis) Thermal() (*Thermal, error) {
 	return GetThermal(chassis.GetClient(), chassis.thermal)
 }
 
+// ThermalSubsystem gets the thermal subsystem for this chassis.
+func (chassis *Chassis) ThermalSubsystem() (*ThermalSubsystem, error) {
+	if chassis.thermalSubsystem == "" {
+		return nil, nil
+	}
+
+	return GetThermalSubsystem(chassis.GetClient(), chassis.thermalSubsystem)
+}
+
 // PCIeDevices gets the PCIe devices in the chassis
 func (chassis *Chassis) PCIeDevices() ([]*PCIeDevice, error) {
 	return ListReferencedPCIeDevices(chassis.GetClient(), chassis.pcieDevices)
 }
 
-// PCIeSlots gets the PCIe slots properties for the chassis
+// PCIeSlots gets the PCIe slots properties for the chassis.
+// This property has been deprecated in favor of the PCIeDevices property. The PCIeSlots schema has been
+// deprecated in favor of the PCIeDevice schema. Empty PCIe slots are represented by PCIeDevice resources
+// using the `Absent` value of the State property within Status.
 func (chassis *Chassis) PCIeSlots() (*PCIeSlots, error) {
 	if chassis.pcieSlots == "" {
 		return nil, nil
@@ -691,12 +812,34 @@ func (chassis *Chassis) PCIeSlots() (*PCIeSlots, error) {
 }
 
 // Power gets the power information for the chassis
+// This link has been deprecated in favor of the PowerSubsystem link property.
 func (chassis *Chassis) Power() (*Power, error) {
 	if chassis.power == "" {
 		return nil, nil
 	}
 
 	return GetPower(chassis.GetClient(), chassis.power)
+}
+
+// Cables gets the connected cables.
+func (chassis *Chassis) Cables() ([]*Cable, error) {
+	var result []*Cable
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.cables {
+		cs, err := GetCable(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, cs)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ComputerSystems returns the collection of systems from this chassis
@@ -720,10 +863,57 @@ func (chassis *Chassis) ComputerSystems() ([]*ComputerSystem, error) {
 	return result, collectionError
 }
 
-// Processors returns the collection of systems from this chassis.
-// Added in v1.25.0.
-func (chassis *Chassis) Processors() ([]*Processor, error) {
-	return ListReferencedProcessors(chassis.GetClient(), chassis.processors)
+// ContainedBy gets the chassis that contains this chassis. The result is nil
+// if this chassis is not contained by another one.
+func (chassis *Chassis) ContainedBy() (*Chassis, error) {
+	if chassis.containedBy == "" {
+		return nil, nil
+	}
+	return GetChassis(chassis.GetClient(), chassis.containedBy)
+}
+
+// Contains gets the chassis instances that this chassis contains.
+func (chassis *Chassis) Contains() ([]*Chassis, error) {
+	var result []*Chassis
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.contains {
+		cs, err := GetChassis(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, cs)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Fans gets the the fans that provide cooling to this chassis. This property shall not be present if the
+// ThermalManagedByParent property contains `true` or if the fans are contained in the ThermalSubsystem
+// resource for this chassis.
+func (chassis *Chassis) Fans() ([]*Fan, error) {
+	var result []*Fan
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.fans {
+		cs, err := GetFan(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, cs)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // ManagedBy gets the collection of managers of this chassis
@@ -747,9 +937,151 @@ func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
 	return result, collectionError
 }
 
+// ManagersInChassis gets the managers contained in this chassis.
+func (chassis *Chassis) ManagersInChassis() ([]*Manager, error) {
+	var result []*Manager
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.managersInChassis {
+		manager, err := GetManager(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// PowerDistribution gets the power distribution functionality contained within this chassis.
+func (chassis *Chassis) PowerDistribution() (*PowerDistribution, error) {
+	if chassis.powerDistribution == "" {
+		return nil, nil
+	}
+	return GetPowerDistribution(chassis.GetClient(), chassis.powerDistribution)
+}
+
+// PowerOutlets gets the power outlets in this chassis.
+func (chassis *Chassis) PowerOutlets() ([]*Outlet, error) {
+	var result []*Outlet
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.powerOutlets {
+		manager, err := GetOutlet(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// PowerSupplies gets the power supplies that provide power to this chassis. This property shall not be
+// present if the PoweredByParent property contains 'true' or if the power supplies are contained in the
+// PowerSubsystem resource for this chassis.
+func (chassis *Chassis) PowerSupplies() ([]*PowerSupply, error) {
+	var result []*PowerSupply
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.powerSupplies {
+		manager, err := GetPowerSupply(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Processors returns the collection of systems from this chassis.
+// Added in v1.25.0.
+func (chassis *Chassis) Processors() ([]*Processor, error) {
+	return ListReferencedProcessors(chassis.GetClient(), chassis.processors)
+}
+
+// ResourceBlocks gets the resource blocks located in this chassis.
+func (chassis *Chassis) ResourceBlocks() ([]*ResourceBlock, error) {
+	var result []*ResourceBlock
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.resourceBlocks {
+		manager, err := GetResourceBlock(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Storage gets the storage subsystems connected to or inside this chassis.
+func (chassis *Chassis) Storage() ([]*Storage, error) {
+	var result []*Storage
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.storage {
+		manager, err := GetStorage(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
 // Sensors gets the collection of sensors located in the equipment and sub-components of this chassis
 func (chassis *Chassis) Sensors() ([]*Sensor, error) {
 	return ListReferencedSensors(chassis.GetClient(), chassis.sensors)
+}
+
+// Switches gets the switches in this chassis.
+func (chassis *Chassis) Switches() ([]*Switch, error) {
+	var result []*Switch
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range chassis.switches {
+		manager, err := GetSwitch(chassis.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // NetworkAdapters gets the collection of network adapters of this chassis
