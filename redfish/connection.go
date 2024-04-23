@@ -375,5 +375,5 @@ type VolumeInfo struct {
 	// InitiatorEndpointGroups properties shall be given access to this volume as described by this object. If
 	// TargetEndpoints or TargetEndpointGroups is present, the referenced initiator endpoints shall be required to
 	// access the referenced volume through one of the referenced target endpoints.
-	Volume string
+	Volume common.Link
 }
