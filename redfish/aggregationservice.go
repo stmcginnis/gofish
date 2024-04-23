@@ -21,11 +21,11 @@ type AggregationService struct {
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Aggregates shall contain a link to a resource collection of type AggregateCollection.
-	aggregates []string
+	aggregates string
 	// AggregationSources shall contain a link to a resource collection of type AggregationSourceCollection.
-	aggregationSources []string
+	aggregationSources string
 	// ConnectionMethods shall contain a link to a resource collection of type ConnectionMethodCollection.
-	connectionMethods []string
+	connectionMethods string
 	// Description provides a description of this resource.
 	Description string
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
@@ -52,9 +52,9 @@ func (aggregationservice *AggregationService) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Actions            Actions
-		Aggregates         common.LinksCollection
-		AggregationSources common.LinksCollection
-		ConnectionMethods  common.LinksCollection
+		Aggregates         common.Link
+		AggregationSources common.Link
+		ConnectionMethods  common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -68,9 +68,9 @@ func (aggregationservice *AggregationService) UnmarshalJSON(b []byte) error {
 	aggregationservice.resetTarget = t.Actions.Reset.Target
 	aggregationservice.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
-	aggregationservice.aggregates = t.Aggregates.ToStrings()
-	aggregationservice.aggregationSources = t.AggregationSources.ToStrings()
-	aggregationservice.connectionMethods = t.ConnectionMethods.ToStrings()
+	aggregationservice.aggregates = t.Aggregates.String()
+	aggregationservice.aggregationSources = t.AggregationSources.String()
+	aggregationservice.connectionMethods = t.ConnectionMethods.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	aggregationservice.rawData = b
@@ -112,65 +112,17 @@ func (aggregationservice *AggregationService) SetDefaultBootOrder(systems []stri
 
 // Aggregates gets the aggregates associated with this service.
 func (aggregationservice *AggregationService) Aggregates() ([]*Aggregate, error) {
-	var result []*Aggregate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range aggregationservice.aggregates {
-		item, err := GetAggregate(aggregationservice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedAggregates(aggregationservice.GetClient(), aggregationservice.aggregates)
 }
 
 // AggregationSources gets the aggregation sources associated with this service.
 func (aggregationservice *AggregationService) AggregationSources() ([]*AggregationSource, error) {
-	var result []*AggregationSource
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range aggregationservice.aggregationSources {
-		item, err := GetAggregationSource(aggregationservice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedAggregationSources(aggregationservice.GetClient(), aggregationservice.aggregationSources)
 }
 
 // ConnectionMethods gets the connection methods associated with this service.
 func (aggregationservice *AggregationService) ConnectionMethods() ([]*ConnectionMethod, error) {
-	var result []*ConnectionMethod
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range aggregationservice.connectionMethods {
-		item, err := GetConnectionMethod(aggregationservice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedConnectionMethods(aggregationservice.GetClient(), aggregationservice.connectionMethods)
 }
 
 // Update commits updates to this object's properties to the running system.
