@@ -72,7 +72,7 @@ type Battery struct {
 	// MaxDischargeRateAmps shall contain the maximum discharge rate of this battery in amp units.
 	MaxDischargeRateAmps float64
 	// Metrics shall contain a link to a resource of type BatteryMetrics.
-	Metrics string
+	metrics string
 	// Model shall contain the model information as defined by the manufacturer for this battery.
 	Model string
 	// PartNumber shall contain the part number as defined by the manufacturer for this battery.
@@ -92,7 +92,7 @@ type Battery struct {
 	// StateOfHealthPercent shall contain the state of health, in percent units, of this battery. The value of the
 	// DataSourceUri property, if present, shall reference a resource of type Sensor with the ReadingType property
 	// containing the value 'Percent'.
-	StateOfHealthPercent string
+	StateOfHealthPercent SensorExcerpt
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// Version shall contain the hardware version of this battery as determined by the vendor or supplier.
@@ -138,7 +138,8 @@ func (battery *Battery) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Assembly string
+		Assembly common.Link
+		Metrics  common.Link
 		Links    Links
 		Actions  Actions
 	}
@@ -151,7 +152,9 @@ func (battery *Battery) UnmarshalJSON(b []byte) error {
 	*battery = Battery(t.temp)
 
 	// Extract the links to other entities for later
-	battery.assembly = t.Assembly
+	battery.assembly = t.Assembly.String()
+	battery.metrics = t.Metrics.String()
+
 	battery.memory = t.Links.Memory
 	battery.MemoryCount = t.Links.MemoryCount
 	battery.storageControllers = t.Links.StorageControllers
@@ -245,9 +248,20 @@ func ListReferencedBatterys(c common.Client, link string) ([]*Battery, error) {
 	return result, collectionError
 }
 
-// Assembly get the containing assembly of this batter.
+// Assembly get the containing assembly of this battery.
 func (battery *Battery) Assembly() (*Assembly, error) {
+	if battery.assembly == "" {
+		return nil, nil
+	}
 	return GetAssembly(battery.GetClient(), battery.assembly)
+}
+
+// BatteryMetrics get the metrics for this battery.
+func (battery *Battery) BatteryMetrics() (*BatteryMetrics, error) {
+	if battery.metrics == "" {
+		return nil, nil
+	}
+	return GetBatteryMetrics(battery.GetClient(), battery.metrics)
 }
 
 // Memory returns a collection of Memory devices associated with this Battery.
