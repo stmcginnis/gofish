@@ -53,7 +53,7 @@ type AccelerationFunction struct {
 	// Manufacturer shall contain a string that identifies the manufacturer of the acceleration function.
 	Manufacturer string
 	// PowerWatts shall contain the total acceleration function power consumption, in watt units.
-	PowerWatts string
+	PowerWatts int
 	// Status shall contain any status or health properties of the Resource.
 	Status common.Status
 	// UUID shall contain a UUID for the acceleration function. RFC4122 describes methods that can create the value.
