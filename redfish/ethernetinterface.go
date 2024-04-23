@@ -243,13 +243,14 @@ type EthernetInterface struct {
 	// UefiDevicePath shall be the UEFI device path to the device which
 	// implements this interface (port).
 	UefiDevicePath string
-	// VLAN shall be the VLAN for this interface.  If this interface supports
-	// more than one VLAN, the VLAN property shall not be present and the VLANS
-	// collection link shall be present instead.
-	VLAN VLAN
 	// VLAN shall contain the VLAN for this interface. If this interface supports more than one VLAN, the VLAN property
-	// shall be absent and, instead, the VLAN collection link shall be present.
-	vlan string
+	// shall be absent and, instead, the VLANs call should be used instead.
+	VLAN VLAN
+	// VLANs is a collection of VLANs and is only used if the interface supports
+	// more than one VLANs, applies only if the interface supports more than one VLAN. If this property
+	// is present, the VLANEnabled and VLANId properties shall not be present.
+	// This property has been deprecated in favor of newer methods indicating multiple VLANs.
+	vlans string
 
 	affiliatedInterfaces []string
 	// AffiliatedInterfacesCount is the number of affiliated interfaces.
@@ -314,7 +315,7 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Links links
-		VLAN  common.Link
+		VLANs common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -338,7 +339,7 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 	ethernetinterface.relatedInterfaces = t.Links.RelatedInterfaces.ToStrings()
 	ethernetinterface.RelatedInterfacesCount = t.Links.RelatedInterfacesCount
 
-	ethernetinterface.vlan = t.VLAN.String()
+	ethernetinterface.vlans = t.VLANs.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	ethernetinterface.rawData = b
@@ -451,7 +452,11 @@ type StatelessAddressAutoConfiguration struct {
 	IPv6AutoConfigEnabled bool
 }
 
-// TODO: Add vlans
+// VLAN gets the VLAN for this interface. If this interface supports more than one VLAN, the VLAN call
+// will return nil and the VLANs call should be used instead.
+func (ethernetinterface *EthernetInterface) VLANs() ([]*VLanNetworkInterface, error) {
+	return ListReferencedVLanNetworkInterfaces(ethernetinterface.GetClient(), ethernetinterface.vlans)
+}
 
 // AffiliatedInterfaces gets any ethernet interfaces that are affiliated with this interface.
 func (ethernetinterface *EthernetInterface) AffiliatedInterfaces() ([]*EthernetInterface, error) {

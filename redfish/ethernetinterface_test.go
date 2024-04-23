@@ -136,6 +136,10 @@ func TestEthernetInterface(t *testing.T) {
 	if result.SpeedMbps != 10000 {
 		t.Errorf("Expected 10000 speed, got %d", result.SpeedMbps)
 	}
+
+	if result.VLAN.VLANID != 0 {
+		t.Errorf("Expected VLAN ID 0, got %d", result.VLAN.VLANID)
+	}
 }
 
 // TestEthernetInterfaceUpdate tests the Update call.
