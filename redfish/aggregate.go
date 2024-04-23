@@ -22,7 +22,7 @@ type Aggregate struct {
 	// Description provides a description of this resource.
 	Description string
 	// Elements shall contain an array of links to the elements of this aggregate.
-	Elements []Resource
+	elements []string
 	// ElementsCount shall contain the number of entries in the Elements array.
 	ElementsCount int
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
@@ -46,7 +46,8 @@ func (aggregate *Aggregate) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Actions Actions
+		Actions  Actions
+		Elements common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -62,7 +63,30 @@ func (aggregate *Aggregate) UnmarshalJSON(b []byte) error {
 	aggregate.resetTarget = t.Actions.Reset.Target
 	aggregate.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
+	aggregate.elements = t.Elements.ToStrings()
+
 	return nil
+}
+
+// Elements get the elements of this aggregate.
+func (aggregate *Aggregate) Elements() ([]*Resource, error) {
+	var result []*Resource
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range aggregate.elements {
+		endpoint, err := GetResource(aggregate.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, endpoint)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // AddElements adds one or more resources to the aggregate.
