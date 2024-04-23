@@ -116,7 +116,7 @@ type AggregationSource struct {
 	generateSSHIdentityKeyPairTarget string
 	removeSSHIdentityKeyPairTarget   string
 
-	connectionMethod  []string
+	connectionMethod  string
 	resourcesAccessed []string
 	// ResourcesAccessedCount is the number of the resources added to the service through the aggregation source.
 	ResourcesAccessedCount int
@@ -130,9 +130,9 @@ func (aggregationsource *AggregationSource) UnmarshalJSON(b []byte) error {
 		RemoveSSHIdentityKeyPair   common.ActionTarget `json:"#AggregationSource.RemoveSSHIdentityKeyPair"`
 	}
 	type Links struct {
-		// ConnectionMethod shall contain an array of links to resources of type ConnectionMethod that are used to connect
+		// ConnectionMethod shall contain a link to resources of type ConnectionMethod that are used to connect
 		// to the aggregation source.
-		ConnectionMethod common.Links
+		ConnectionMethod common.Link
 		// ResourcesAccessed shall contain an array of links to the resources added to the service through the aggregation
 		// source. It is recommended that this be the minimal number of properties needed to find the resources that would
 		// be lost when the aggregation source is deleted. For example, this could be the pointers to the members of the
@@ -156,7 +156,7 @@ func (aggregationsource *AggregationSource) UnmarshalJSON(b []byte) error {
 	aggregationsource.generateSSHIdentityKeyPairTarget = t.Actions.GenerateSSHIdentityKeyPair.Target
 	aggregationsource.removeSSHIdentityKeyPairTarget = t.Actions.RemoveSSHIdentityKeyPair.Target
 
-	aggregationsource.connectionMethod = t.Links.ConnectionMethod.ToStrings()
+	aggregationsource.connectionMethod = t.Links.ConnectionMethod.String()
 	aggregationsource.resourcesAccessed = t.Links.ResourcesAccessed.ToStrings()
 	aggregationsource.ResourcesAccessedCount = t.Links.ResourcesAccessedCount
 
