@@ -43,7 +43,7 @@ type NVMeSMARTMetrics struct {
 	// temperature has been greater than or equal to the critical composite temperature threshold.
 	CriticalCompositeTempTimeMinutes int
 	// CriticalWarnings shall contain the NVMe-defined 'Critical Warning'.
-	CriticalWarnings string
+	CriticalWarnings NVMeSMARTCriticalWarnings
 	// DataUnitsRead shall contain the NVMe-defined 'Data Units Read', which represents the number of 512 byte data
 	// units the host has read from the controller as part of processing a SMART Data Units Read Command in units of
 	// one thousand.
@@ -53,7 +53,7 @@ type NVMeSMARTMetrics struct {
 	// thousand.
 	DataUnitsWritten int
 	// EGCriticalWarningSummary shall contain the NVMe-defined 'Endurance Group Critical Warning Summary'.
-	EGCriticalWarningSummary string
+	EGCriticalWarningSummary EGCriticalWarningSummary
 	// HostReadCommands shall contain the NVMe-defined 'Host Read Commands', which represents the number of SMART Host
 	// Read Commands completed by the controller.
 	HostReadCommands int
