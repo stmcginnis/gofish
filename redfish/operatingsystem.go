@@ -130,15 +130,15 @@ type OperatingSystem struct {
 	ODataType string `json:"@odata.type"`
 	// Applications shall contain a link to a resource collection of type ApplicationCollection that represent the
 	// applications running under this operating system.
-	applications []string
+	applications string
 	// ContainerEngines shall contain the container engines running in this operating system.
 	ContainerEngines []ContainerEngine
 	// ContainerImages shall contain a link to a resource collection of type ContainerImageCollection that represent
 	// the container images available to container engines on this operating system.
-	containerImages []string
+	containerImages string
 	// Containers shall contain a link to a resource collection of type ContainerCollection that represent the
 	// containers running under this operating system.
-	containers []string
+	containers string
 	// Description provides a description of this resource.
 	Description string
 	// Kernel shall contain the kernel information for this operating system.
@@ -167,9 +167,9 @@ func (operatingsystem *OperatingSystem) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Links           Links
-		Applications    common.LinksCollection
-		ContainerImages common.LinksCollection
-		Containers      common.LinksCollection
+		Applications    common.Link
+		ContainerImages common.Link
+		Containers      common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -182,9 +182,9 @@ func (operatingsystem *OperatingSystem) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	operatingsystem.softwareImage = t.Links.SoftwareImage.String()
 
-	operatingsystem.applications = t.Applications.ToStrings()
-	operatingsystem.containerImages = t.ContainerImages.ToStrings()
-	operatingsystem.containers = t.Containers.ToStrings()
+	operatingsystem.applications = t.Applications.String()
+	operatingsystem.containerImages = t.ContainerImages.String()
+	operatingsystem.containers = t.Containers.String()
 
 	return nil
 }
@@ -199,65 +199,17 @@ func (operatingsystem *OperatingSystem) SoftwareImage() (*SoftwareInventory, err
 
 // Applications gets the applications running under this operating system.
 func (operatingsystem *OperatingSystem) Applications() ([]*Application, error) {
-	var result []*Application
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range operatingsystem.applications {
-		unit, err := GetApplication(operatingsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedApplications(operatingsystem.GetClient(), operatingsystem.applications)
 }
 
 // ContainerImages gets the container images available to container engines on this operating system.
 func (operatingsystem *OperatingSystem) ContainerImages() ([]*ContainerImage, error) {
-	var result []*ContainerImage
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range operatingsystem.containerImages {
-		unit, err := GetContainerImage(operatingsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedContainerImages(operatingsystem.GetClient(), operatingsystem.containerImages)
 }
 
 // Containers gets the containers running under this operating system.
 func (operatingsystem *OperatingSystem) Containers() ([]*Container, error) {
-	var result []*Container
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range operatingsystem.containers {
-		unit, err := GetContainer(operatingsystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedContainers(operatingsystem.GetClient(), operatingsystem.containers)
 }
 
 // GetOperatingSystem will get a OperatingSystem instance from the service.
