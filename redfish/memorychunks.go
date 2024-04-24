@@ -47,7 +47,7 @@ const (
 // InterleaveSet shall describe an interleave set of which the memory chunk is a part.
 type InterleaveSet struct {
 	// Memory shall contain the memory device to which these settings apply.
-	Memory string
+	memory string
 	// MemoryLevel shall contain the level of this interleave set for multi-level tiered memory.
 	MemoryLevel int
 	// OffsetMiB shall contain the offset within the DIMM that corresponds to the start of this memory region, with
@@ -57,6 +57,35 @@ type InterleaveSet struct {
 	RegionID string
 	// SizeMiB shall contain the size of this memory region, with units in MiB.
 	SizeMiB int
+}
+
+// UnmarshalJSON unmarshals a InterleaveSet object from the raw JSON.
+func (interleaveset *InterleaveSet) UnmarshalJSON(b []byte) error {
+	type temp InterleaveSet
+	var t struct {
+		temp
+		Memory common.Link
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*interleaveset = InterleaveSet(t.temp)
+
+	// Extract the links to other entities for later
+	interleaveset.memory = t.Memory.String()
+
+	return nil
+}
+
+// Memory gets the associated memory device.
+func (interleaveset *InterleaveSet) Memory(c common.Client) (*Memory, error) {
+	if interleaveset.memory == "" {
+		return nil, nil
+	}
+	return GetMemory(c, interleaveset.memory)
 }
 
 // MemoryChunks shall represent memory chunks and interleave sets in a Redfish implementation.
