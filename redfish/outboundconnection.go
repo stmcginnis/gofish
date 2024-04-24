@@ -66,12 +66,12 @@ type OutboundConnection struct {
 	// the connection. If the remote client cannot be verified, the service shall not complete the connection.
 	// Regardless of the contents of this collection, services may perform additional verification based on other
 	// factors, such as the configuration of the SecurityPolicy resource.
-	certificates []string
+	certificates string
 	// ClientCertificates shall contain a link to a resource collection of type CertificateCollection that represents
 	// the client identity certificates for the service. If the Authentication property contains 'MTLS', these
 	// certificates are provided to the remote client referenced by the EndpointURI property as part of TLS
 	// handshaking.
-	clientCertificates []string
+	clientCertificates string
 	// ConnectionEnabled shall indicate if the outbound connection is enabled. If 'true', the service shall attempt to
 	// establish an outbound connection to the remote client specified by the EndpointURI property. If 'false', the
 	// service shall not attempt to establish a connection to the remote client and shall close the connection if one
@@ -120,8 +120,8 @@ func (outboundconnection *OutboundConnection) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Links              Links
-		Certificates       common.LinksCollection
-		ClientCertificates common.LinksCollection
+		Certificates       common.Link
+		ClientCertificates common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -134,8 +134,8 @@ func (outboundconnection *OutboundConnection) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	outboundconnection.session = t.Links.Session.String()
 
-	outboundconnection.certificates = t.Certificates.ToStrings()
-	outboundconnection.clientCertificates = t.ClientCertificates.ToStrings()
+	outboundconnection.certificates = t.Certificates.String()
+	outboundconnection.clientCertificates = t.ClientCertificates.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	outboundconnection.rawData = b
@@ -153,44 +153,12 @@ func (outboundconnection *OutboundConnection) Session() (*Session, error) {
 
 // Certificates gets the server certificates for the remote client referenced by the EndpointURI property.
 func (outboundconnection *OutboundConnection) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range outboundconnection.certificates {
-		unit, err := GetCertificate(outboundconnection.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.certificates)
 }
 
 // ClientCertificates gets the client identity certificates for the service.
 func (outboundconnection *OutboundConnection) ClientCertificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range outboundconnection.clientCertificates {
-		unit, err := GetCertificate(outboundconnection.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.clientCertificates)
 }
 
 // Update commits updates to this object's properties to the running system.
