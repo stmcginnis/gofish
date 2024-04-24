@@ -186,8 +186,9 @@ type RedundantGroup struct {
 	// The minimum number of devices needed for this group to be redundant.
 	MinNeededInGroup int64
 	// The links to the devices included in this redundancy group.
-	redundancyGroup      []string
-	RedundancyGroupCount int
+	redundancyGroup []string
+	// RedundancyGroupCount is the number of redundancy groups in this group.
+	RedundancyGroupCount int `json:"RedundancyGroup@odata.count"`
 	// The redundancy mode of the group.
 	RedundancyType RedundancyType
 	// The status and health of the resource and its subordinate or dependent resources
@@ -197,14 +198,10 @@ type RedundantGroup struct {
 // UnmarshalJSON unmarshals a RedundancyGroup object from the raw JSON.
 func (redundantGroup *RedundantGroup) UnmarshalJSON(b []byte) error {
 	type temp RedundantGroup
-	type groupReference struct {
-		RedundancyGroup      common.Links
-		RedundancyGroupCount int `json:"RedundancyGroup@odata.count"`
-	}
 
 	var t struct {
 		temp
-		Group groupReference
+		RedundancyGroup common.Links
 	}
 
 	if err := json.Unmarshal(b, &t); err != nil {
@@ -212,8 +209,7 @@ func (redundantGroup *RedundantGroup) UnmarshalJSON(b []byte) error {
 	}
 
 	*redundantGroup = RedundantGroup(t.temp)
-	redundantGroup.redundancyGroup = t.Group.RedundancyGroup.ToStrings()
-	redundantGroup.RedundancyGroupCount = t.Group.RedundancyGroupCount
+	redundantGroup.redundancyGroup = t.RedundancyGroup.ToStrings()
 
 	return nil
 }
