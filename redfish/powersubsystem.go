@@ -31,7 +31,7 @@ type PowerSubsystem struct {
 	// Allocation shall contain the set of properties describing the allocation of power for this subsystem.
 	Allocation PowerAllocation
 	// Batteries shall contain a link to a resource collection of type BatteryCollection.
-	batteries []string
+	batteries string
 	// CapacityWatts shall represent the total power capacity that can be allocated to this subsystem.
 	CapacityWatts float64
 	// Description provides a description of this resource.
@@ -40,7 +40,7 @@ type PowerSubsystem struct {
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// PowerSupplies shall contain a link to a resource collection of type PowerSupplyCollection.
-	powerSupplies []string
+	powerSupplies string
 	// PowerSupplyRedundancy shall contain redundancy information for the set of power supplies in this subsystem. The
 	// values of the RedundancyGroup array shall reference resources of type PowerSupply.
 	PowerSupplyRedundancy []RedundantGroup
@@ -53,8 +53,8 @@ func (powersubsystem *PowerSubsystem) UnmarshalJSON(b []byte) error {
 	type temp PowerSubsystem
 	var t struct {
 		temp
-		Batteries     common.LinksCollection
-		PowerSupplies common.LinksCollection
+		Batteries     common.Link
+		PowerSupplies common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -65,52 +65,20 @@ func (powersubsystem *PowerSubsystem) UnmarshalJSON(b []byte) error {
 	*powersubsystem = PowerSubsystem(t.temp)
 
 	// Extract the links to other entities for later
-	powersubsystem.batteries = t.Batteries.ToStrings()
-	powersubsystem.powerSupplies = t.PowerSupplies.ToStrings()
+	powersubsystem.batteries = t.Batteries.String()
+	powersubsystem.powerSupplies = t.PowerSupplies.String()
 
 	return nil
 }
 
 // Batteries gets the batteries in this power subsystem.
 func (powersubsystem *PowerSubsystem) Batteries() ([]*Battery, error) {
-	var result []*Battery
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powersubsystem.batteries {
-		eth, err := GetBattery(powersubsystem.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedBatterys(powersubsystem.GetClient(), powersubsystem.batteries)
 }
 
 // PowerSupplies gets the power supplies in this power subsystem.
 func (powersubsystem *PowerSubsystem) PowerSupplies() ([]*PowerSupply, error) {
-	var result []*PowerSupply
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powersubsystem.powerSupplies {
-		eth, err := GetPowerSupply(powersubsystem.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedPowerSupplies(powersubsystem.GetClient(), powersubsystem.powerSupplies)
 }
 
 // GetPowerSubsystem will get a PowerSubsystem instance from the service.
