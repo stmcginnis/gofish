@@ -68,7 +68,7 @@ type ManagerDiagnosticData struct {
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// ProcessorStatistics shall contain the processor statistics of the manager.
-	ProcessorStatistics ProcessStatistics
+	ProcessorStatistics ProcessorStatistics
 	// ServiceRootUptimeSeconds shall contain the wall-clock time the service root hosted by this manager has been
 	// running in seconds.
 	ServiceRootUptimeSeconds float64
