@@ -19,7 +19,7 @@ type BaseSpeedPrioritySettings struct {
 	CoreCount int
 	// CoreIDs shall contain an array identifying the cores to configure with the speed specified by the BaseSpeedMHz
 	// property. The length of the array shall equal the value of the CoreCount property.
-	CoreIDs []string
+	CoreIDs []int
 }
 
 // OperatingConfig shall represent an operational configuration for a processor in the Redfish Specification.
