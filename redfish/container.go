@@ -166,7 +166,7 @@ func (container *Container) ContainerImage() (*ContainerImage, error) {
 // Limits shall contain the resource limits allocated to a container.
 type Limits struct {
 	// CPUCount shall contain the number of processors available to this container.
-	CPUCount int
+	CPUCount float32
 	// MemoryBytes shall contain the amount of memory available to this container in bytes.
 	MemoryBytes int
 }
