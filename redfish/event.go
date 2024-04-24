@@ -159,6 +159,10 @@ type EventRecord struct {
 	// EventTimestamp shall indicate the time the event occurred where the value shall be consistent with the Redfish
 	// service time that is also used for the values of the Modified property.
 	EventTimestamp string
+	// EventType is the type of event.
+	// This property has been deprecated.  Starting with Redfish Specification v1.6 (Event v1.3), subscriptions are
+	// based on the RegistryPrefix and ResourceType properties and not on the EventType property.
+	EventType EventType
 	// LogEntry shall contain a link to a resource of type LogEntry that represents the log entry created for this
 	// event.
 	logEntry string
@@ -198,6 +202,10 @@ type EventRecord struct {
 	// resolution steps once the Resolved property in the associated LogEntry resource contains 'true' or the Health
 	// property in the associated resource referenced by the OriginOfCondition property contains 'OK'.
 	ResolutionSteps []ResolutionStep
+	// Severity is the severity of the event.
+	// This property has been deprecated in favor of MessageSeverity, which ties the values to
+	// the enumerations defined for the Health property within Status.
+	Severity string
 	// SpecificEventExistsInGroup shall indicate that the event is equivalent to another event, with a more specific
 	// definition, within the same EventGroupId. For example, the 'DriveFailed' message from the Storage Device Message
 	// Registry is more specific than the 'ResourceStatusChangedCritical' message from the Resource Event Message
@@ -212,7 +220,8 @@ func (eventrecord *EventRecord) UnmarshalJSON(b []byte) error {
 	type temp EventRecord
 	var t struct {
 		temp
-		LogEntry common.Link
+		LogEntry          common.Link
+		OriginOfCondition common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -224,8 +233,17 @@ func (eventrecord *EventRecord) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	eventrecord.logEntry = t.LogEntry.String()
+	eventrecord.OriginOfCondition = t.OriginOfCondition.String()
 
 	return nil
+}
+
+// LogEntry gets the log entry for this event.
+func (eventrecord *EventRecord) LogEntry(c common.Client) (*LogEntry, error) {
+	if eventrecord.logEntry == "" {
+		return nil, nil
+	}
+	return GetLogEntry(c, eventrecord.logEntry)
 }
 
 // EventRecordActions shall contain the available actions for this resource.
