@@ -190,12 +190,12 @@ type PortMetrics struct {
 	// Description provides a description of this resource.
 	Description string
 	// FibreChannelPortMetrics shall contain Fibre Channel-specific port metrics for network ports.
-	FibreChannelPortMetrics string
+	FibreChannel FibreChannelPortMetrics
 	// GenZPortMetrics shall contain the port metrics specific to Gen-Z ports.
-	GenZPortMetrics string
+	GenZ GenZPortMetrics
 	// NetworkingPortMetrics shall contain port metrics for network ports, including Ethernet, Fibre Channel, and InfiniBand, that
 	// are not specific to one of these protocols.
-	NetworkingPortMetrics string
+	Networking NetworkingPortMetrics
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
