@@ -43,7 +43,7 @@ type MediaController struct {
 	// PartNumber shall indicate the part number as provided by the manufacturer of this media controller.
 	PartNumber string
 	// Ports shall contain a link to a resource collection of type PortCollection.
-	ports []string
+	ports string
 	// SerialNumber shall indicate the serial number as provided by the manufacturer of this media controller.
 	SerialNumber string
 	// Status shall contain any status or health properties of the resource.
@@ -83,7 +83,7 @@ func (mediacontroller *MediaController) UnmarshalJSON(b []byte) error {
 		Actions            Actions
 		Links              Links
 		EnvironmentMetrics common.Link
-		Ports              common.LinksCollection
+		Ports              common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -102,7 +102,7 @@ func (mediacontroller *MediaController) UnmarshalJSON(b []byte) error {
 	mediacontroller.MemoryDomainsCount = t.Links.MemoryDomainsCount
 
 	mediacontroller.environmentMetrics = t.EnvironmentMetrics.String()
-	mediacontroller.ports = t.Ports.ToStrings()
+	mediacontroller.ports = t.Ports.String()
 
 	return nil
 }
@@ -127,23 +127,7 @@ func (mediacontroller *MediaController) EnvironmentMetrics() (*EnvironmentMetric
 
 // Ports gets the ports associated with this media controller.
 func (mediacontroller *MediaController) Ports() ([]*Port, error) {
-	var result []*Port
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range mediacontroller.ports {
-		unit, err := GetPort(mediacontroller.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedPorts(mediacontroller.GetClient(), mediacontroller.ports)
 }
 
 // Endpoints get the Endpoints with which this media controller is associated.
