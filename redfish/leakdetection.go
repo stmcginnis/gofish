@@ -25,7 +25,7 @@ type LeakDetection struct {
 	// LeakDetectorGroups shall contain an array of leak detection groups.
 	LeakDetectorGroups []LeakDetectorGroup
 	// LeakDetectors shall contain a link to a resource collection of type LeakDetectorCollection.
-	leakDetectors []string
+	leakDetectors string
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
@@ -38,7 +38,7 @@ func (leakdetection *LeakDetection) UnmarshalJSON(b []byte) error {
 	type temp LeakDetection
 	var t struct {
 		temp
-		LeakDetectors common.LinksCollection
+		LeakDetectors common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -49,30 +49,14 @@ func (leakdetection *LeakDetection) UnmarshalJSON(b []byte) error {
 	*leakdetection = LeakDetection(t.temp)
 
 	// Extract the links to other entities for later
-	leakdetection.leakDetectors = t.LeakDetectors.ToStrings()
+	leakdetection.leakDetectors = t.LeakDetectors.String()
 
 	return nil
 }
 
 // LeakDetectors gets the leak detectors within this subsystem.
 func (leakdetection *LeakDetection) LeakDetectors() ([]*LeakDetector, error) {
-	var result []*LeakDetector
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range leakdetection.leakDetectors {
-		unit, err := GetLeakDetector(leakdetection.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedLeakDetectors(leakdetection.GetClient(), leakdetection.leakDetectors)
 }
 
 // GetLeakDetection will get a LeakDetection instance from the service.
