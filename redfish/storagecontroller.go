@@ -194,9 +194,12 @@ type StorageController struct {
 	CacheSummary CacheSummary
 	// Certificates shall contain a link to a resource collection of type CertificateCollection that contains
 	// certificates for device identity and attestation.
-	certificates []string
+	certificates string
 	// ControllerRates shall contain all the rate settings available on the controller.
 	ControllerRates Rates
+	// EnvironmentMetrics shall contain a link to a resource of type EnvironmentMetrics that specifies the environment
+	// metrics for this storage controller.
+	environmentMetrics string
 	// FirmwareVersion shall contain the firmware version as defined by the
 	// manufacturer for the associated storage controller.
 	FirmwareVersion string
@@ -211,18 +214,20 @@ type StorageController struct {
 	// from whom the storage controller is purchased, but this is not
 	// necessarily true.
 	Manufacturer string
-	// MemberID shall uniquely identify the member within the collection.
-	MemberID string
+	// Metrics shall contain a link to the metrics associated with this storage controller.
+	metrics string
 	// Model shall be the name by which the manufacturer generally refers to the
 	// storage controller.
 	Model string
+	// NVMeControllerProperties shall contain NVMe-related properties for this storage controller.
+	NVMeControllerProperties NVMeControllerProperties
 	// PCIeInterface is used to connect this PCIe-based controller to its host.
 	PCIeInterface PCIeInterface
 	// PartNumber shall be a part number assigned by the organization that is
 	// responsible for producing or manufacturing the storage controller.
 	PartNumber string
 	// Ports shall contain a link to a resource collection of type PortCollection.
-	ports []string
+	ports string
 	// SKU shall be the stock-keeping unit number for this storage storage
 	// controller.
 	SKU string
@@ -247,10 +252,22 @@ type StorageController struct {
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 
-	endpoints []string
+	attachedVolumes []string
+	// AttachedVolumesCount is the number of attached volumes.
+	AttachedVolumesCount int
+	batteries            []string
+	// BatteriesCount is the number of connected batteries.
+	BatteriesCount int
+	endpoints      []string
 	// EndpointsCount is the number of enclosures.
-	EndpointsCount int
-	pcieFunctions  []string
+	EndpointsCount           int
+	nvmeDiscoveredSubsystems []string
+	// NVMeDiscoveredSubsystemsCount is the number of discovered NVMe subsystems.
+	NVMeDiscoveredSubsystemsCount int
+	networkDeviceFunctions        []string
+	// NetworkDeviceFunctionsCount is the number of network device functions.
+	NetworkDeviceFunctionsCount int
+	pcieFunctions               []string
 	// PCIeFunctionsCount is the number of PCIeFunctions for this storage controller.
 	PCIeFunctionsCount int
 	// StorageServices shall be a reference to the resources that this
@@ -267,19 +284,29 @@ type StorageController struct {
 func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 	type temp StorageController
 	type links struct {
-		Endpoints            common.Links
-		EndpointsCount       int `json:"Endpoints@odata.count"`
-		PCIeFunctions        common.Links
-		PCIeFunctionsCount   int `json:"PCIeFunctions@odata.count"`
-		StorageServices      common.Links
-		StorageServicesCount int `json:"StorageServices@odata.count"`
+		AttachedVolumes               common.Links
+		AttachedVolumesCount          int `json:"AttachedVolumes@odata.count"`
+		Batteries                     common.Links
+		BatteriesCount                int `json:"Batteries@odata.count"`
+		Endpoints                     common.Links
+		EndpointsCount                int `json:"Endpoints@odata.count"`
+		NVMeDiscoveredSubsystems      common.Links
+		NVMeDiscoveredSubsystemsCount int `json:"NVMeDiscoveredSubsystems@odata.count"`
+		NetworkDeviceFunctions        common.Links
+		NetworkDeviceFunctionsCount   int `json:"NetworkDeviceFunctions@odata.count"`
+		PCIeFunctions                 common.Links
+		PCIeFunctionsCount            int `json:"PCIeFunctions@odata.count"`
+		StorageServices               common.Links
+		StorageServicesCount          int `json:"StorageServices@odata.count"`
 	}
 	var t struct {
 		temp
-		Assembly     common.Link
-		Certificates common.LinksCollection
-		Ports        common.LinksCollection
-		Links        links
+		Assembly           common.Link
+		Certificates       common.Link
+		EnvironmentMetrics common.Link
+		Metrics            common.Link
+		Ports              common.Link
+		Links              links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -291,11 +318,21 @@ func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	storagecontroller.assembly = t.Assembly.String()
-	storagecontroller.certificates = t.Certificates.ToStrings()
-	storagecontroller.ports = t.Ports.ToStrings()
+	storagecontroller.certificates = t.Certificates.String()
+	storagecontroller.environmentMetrics = t.EnvironmentMetrics.String()
+	storagecontroller.metrics = t.Metrics.String()
+	storagecontroller.ports = t.Ports.String()
 
-	storagecontroller.endpoints = t.Links.StorageServices.ToStrings()
+	storagecontroller.attachedVolumes = t.Links.AttachedVolumes.ToStrings()
+	storagecontroller.AttachedVolumesCount = t.Links.AttachedVolumesCount
+	storagecontroller.batteries = t.Links.Batteries.ToStrings()
+	storagecontroller.BatteriesCount = t.Links.BatteriesCount
+	storagecontroller.endpoints = t.Links.Endpoints.ToStrings()
 	storagecontroller.EndpointsCount = t.Links.EndpointsCount
+	storagecontroller.nvmeDiscoveredSubsystems = t.Links.NVMeDiscoveredSubsystems.ToStrings()
+	storagecontroller.NVMeDiscoveredSubsystemsCount = t.Links.NVMeDiscoveredSubsystemsCount
+	storagecontroller.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
+	storagecontroller.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
 	storagecontroller.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	storagecontroller.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
 	storagecontroller.storageServices = t.Links.StorageServices.ToStrings()
@@ -317,36 +354,64 @@ func (storagecontroller *StorageController) Assembly() (*Assembly, error) {
 
 // Certificates gets the storage controller's certificates.
 func (storagecontroller *StorageController) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
+	return ListReferencedCertificates(storagecontroller.GetClient(), storagecontroller.certificates)
+}
 
-	collectionError := common.NewCollectionError()
-	for _, uri := range storagecontroller.certificates {
-		item, err := GetCertificate(storagecontroller.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
+// EnvironmentMetrics gets the environment metrics for this storage controller.
+func (storagecontroller *StorageController) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+	if storagecontroller.environmentMetrics == "" {
+		return nil, nil
 	}
+	return GetEnvironmentMetrics(storagecontroller.GetClient(), storagecontroller.environmentMetrics)
+}
 
-	if collectionError.Empty() {
-		return result, nil
+// Metrics gets the metrics associated with this storage controller.
+func (storagecontroller *StorageController) Metrics() (*StorageControllerMetrics, error) {
+	if storagecontroller.metrics == "" {
+		return nil, nil
 	}
-
-	return result, collectionError
+	return GetStorageControllerMetrics(storagecontroller.GetClient(), storagecontroller.metrics)
 }
 
 // Ports gets the ports that exist on the storage controller.
 func (storagecontroller *StorageController) Ports() ([]*Port, error) {
-	var result []*Port
+	return ListReferencedPorts(storagecontroller.GetClient(), storagecontroller.ports)
+}
+
+// // AttachedVolumes gets the volumes that are attached to this instance of storage controller.
+// func (storagecontroller *StorageController) AttachedVolumes() ([]*swordfish.Volume, error) {
+// 	var result []*swordfish.Volume
+
+// 	collectionError := common.NewCollectionError()
+// 	for _, uri := range storagecontroller.attachedVolumes {
+// 		endpoint, err := swordfish.GetVolume(storagecontroller.GetClient(), uri)
+// 		if err != nil {
+// 			collectionError.Failures[uri] = err
+// 		} else {
+// 			result = append(result, endpoint)
+// 		}
+// 	}
+
+// 	if collectionError.Empty() {
+// 		return result, nil
+// 	}
+
+// 	return result, collectionError
+// }
+
+// Batteries gets the batteries that provide power to this storage controller during a power-loss event,
+// such as with battery-backed RAID controllers. This property shall not be present if the batteries
+// power the containing chassis as a whole rather than the individual storage controller.
+func (storagecontroller *StorageController) Batteries() ([]*Battery, error) {
+	var result []*Battery
 
 	collectionError := common.NewCollectionError()
-	for _, uri := range storagecontroller.ports {
-		item, err := GetPort(storagecontroller.GetClient(), uri)
+	for _, uri := range storagecontroller.batteries {
+		endpoint, err := GetBattery(storagecontroller.GetClient(), uri)
 		if err != nil {
 			collectionError.Failures[uri] = err
 		} else {
-			result = append(result, item)
+			result = append(result, endpoint)
 		}
 	}
 
@@ -368,6 +433,50 @@ func (storagecontroller *StorageController) Endpoints() ([]*Endpoint, error) {
 			collectionError.Failures[uri] = err
 		} else {
 			result = append(result, endpoint)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// NVMeDiscoveredSubsystems gets the storage that represent the NVMe subsystems discovered by
+// this discovery controller. This property shall only be present if ControllerType in
+// NVMeControllerProperties contains 'Discovery'.
+func (storagecontroller *StorageController) NVMeDiscoveredSubsystems() ([]*Storage, error) {
+	var result []*Storage
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range storagecontroller.nvmeDiscoveredSubsystems {
+		item, err := GetStorage(storagecontroller.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// NetworkDeviceFunctions the network device functions that provide connectivity to this controller.
+func (storagecontroller *StorageController) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
+	var result []*NetworkDeviceFunction
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range storagecontroller.networkDeviceFunctions {
+		item, err := GetNetworkDeviceFunction(storagecontroller.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
 		}
 	}
 
