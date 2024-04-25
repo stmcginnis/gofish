@@ -157,7 +157,7 @@ func (condition *Condition) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		LogEntry          common.Link
-		OriginOfCondition string
+		OriginOfCondition common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -169,7 +169,7 @@ func (condition *Condition) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	condition.logEntry = t.LogEntry.String()
-	condition.originOfCondition = t.OriginOfCondition
+	condition.originOfCondition = t.OriginOfCondition.String()
 
 	return nil
 }
