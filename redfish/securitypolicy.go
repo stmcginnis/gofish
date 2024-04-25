@@ -59,7 +59,7 @@ type SPDMPolicy struct {
 	// containing only CA certificates. If 'VerifyCertificate' contains the value 'true' and if an SPDM endpoint
 	// verifies successfully against a partial chain or exactly matches a leaf certificate, that SPDM endpoint shall
 	// fail authentication.
-	revokedCertificates []string
+	revokedCertificates string
 	// SecureSessionEnabled shall indicate whether SPDM secure sessions with devices as defined in DSP0274 is enabled.
 	SecureSessionEnabled bool
 	// TrustedCertificates shall contain a link to a resource collection of type CertificateCollection that represents
@@ -68,7 +68,7 @@ type SPDMPolicy struct {
 	// containing only CA certificates. If 'VerifyCertificate' contains the value 'true' and if an SPDM endpoint
 	// verifies successfully against a partial chain or exactly matches a leaf certificate, that SPDM endpoint shall be
 	// considered verified and other authentications checks are performed.
-	trustedCertificates []string
+	trustedCertificates string
 	// VerifyCertificate shall indicate whether the manager will verify the certificate of the SPDM endpoint. If
 	// 'true', the manager shall verify the device certificate with the certificates found in the collections
 	// referenced by the 'RevokedCertificates' and 'TrustedCertificates' properties. If 'false', the manager shall not
@@ -81,8 +81,8 @@ func (spdmpolicy *SPDMPolicy) UnmarshalJSON(b []byte) error {
 	type temp SPDMPolicy
 	var t struct {
 		temp
-		RevokedCertificates common.LinksCollection
-		TrustedCertificates common.LinksCollection
+		RevokedCertificates common.Link
+		TrustedCertificates common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -93,52 +93,20 @@ func (spdmpolicy *SPDMPolicy) UnmarshalJSON(b []byte) error {
 	*spdmpolicy = SPDMPolicy(t.temp)
 
 	// Extract the links to other entities for later
-	spdmpolicy.revokedCertificates = t.RevokedCertificates.ToStrings()
-	spdmpolicy.trustedCertificates = t.TrustedCertificates.ToStrings()
+	spdmpolicy.revokedCertificates = t.RevokedCertificates.String()
+	spdmpolicy.trustedCertificates = t.TrustedCertificates.String()
 
 	return nil
 }
 
 // RevokedCertificates gets the set of revoked SPDM device certificates.
 func (spdmpolicy *SPDMPolicy) RevokedCertificates(c common.Client) ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range spdmpolicy.revokedCertificates {
-		item, err := GetCertificate(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(c, spdmpolicy.revokedCertificates)
 }
 
 // TrustedCertificates gets the set of trusted SPDM device certificates.
 func (spdmpolicy *SPDMPolicy) TrustedCertificates(c common.Client) ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range spdmpolicy.trustedCertificates {
-		item, err := GetCertificate(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(c, spdmpolicy.trustedCertificates)
 }
 
 // SecurityPolicy shall represent configurable security-related policies managed by a manager. All security
@@ -328,14 +296,14 @@ type TLSPolicy struct {
 	// certificate chains, or complete certificate chains, where a partial certificate chain is a chain containing only
 	// CA certificates. If 'VerifyCertificate' contains the value 'true' and if a TLS endpoint verifies successfully
 	// against a partial chain or exactly matches a leaf certificate, that TLS endpoint shall fail authentication.
-	revokedCertificates []string
+	revokedCertificates string
 	// TrustedCertificates shall contain a link to a resource collection of type CertificateCollection that represents
 	// the set of trusted TLS certificates. Certificates in this collection may contain leaf certificates, partial
 	// certificate chains, or complete certificate chains, where a partial certificate chain is a chain containing only
 	// CA certificates. If 'VerifyCertificate' contains the value 'true' and if a TLS endpoint verifies successfully
 	// against a partial chain or exactly matches a leaf certificate, that TLS endpoint shall be considered verified
 	// and other authentications checks are performed.
-	trustedCertificates []string
+	trustedCertificates string
 	// VerifyCertificate shall indicate whether the manager will verify the certificate of the remote endpoint in a TLS
 	// connection. If 'true', the manager shall verify the remote endpoint certificate with the certificates found in
 	// the collections referenced by the 'RevokedCertificates' and 'TrustedCertificates' properties. If 'false' or not
@@ -348,8 +316,8 @@ func (tlspolicy *TLSPolicy) UnmarshalJSON(b []byte) error {
 	type temp TLSPolicy
 	var t struct {
 		temp
-		RevokedCertificates common.LinksCollection
-		TrustedCertificates common.LinksCollection
+		RevokedCertificates common.Link
+		TrustedCertificates common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -360,50 +328,18 @@ func (tlspolicy *TLSPolicy) UnmarshalJSON(b []byte) error {
 	*tlspolicy = TLSPolicy(t.temp)
 
 	// Extract the links to other entities for later
-	tlspolicy.revokedCertificates = t.RevokedCertificates.ToStrings()
-	tlspolicy.trustedCertificates = t.TrustedCertificates.ToStrings()
+	tlspolicy.revokedCertificates = t.RevokedCertificates.String()
+	tlspolicy.trustedCertificates = t.TrustedCertificates.String()
 
 	return nil
 }
 
 // RevokedCertificates gets the set of revoked TLS certificates.
 func (tlspolicy *TLSPolicy) RevokedCertificates(c common.Client) ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range tlspolicy.revokedCertificates {
-		item, err := GetCertificate(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(c, tlspolicy.revokedCertificates)
 }
 
 // TrustedCertificates gets the set of trusted TLS certificates.
 func (tlspolicy *TLSPolicy) TrustedCertificates(c common.Client) ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range tlspolicy.trustedCertificates {
-		item, err := GetCertificate(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(c, tlspolicy.trustedCertificates)
 }
