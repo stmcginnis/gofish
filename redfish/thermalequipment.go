@@ -21,21 +21,21 @@ type ThermalEquipment struct {
 	ODataType string `json:"@odata.type"`
 	// CDUs shall contain a link to a resource collection of type CoolingUnitCollection that contains a set of coolant
 	// distribution units.
-	cdus []string
+	cdus string
 	// CoolingLoopRedundancy shall contain redundancy information for the set of cooling loops attached to this
 	// equipment. The values of the RedundancyGroup array shall reference resources of type CoolingLoop.
 	CoolingLoopRedundancy []RedundantGroup
 	// CoolingLoops shall contain a link to a resource collection of type CoolingLoopCollection that contains the set
 	// of cooling loops managed by the service.
-	coolingLoops []string
+	coolingLoops string
 	// Description provides a description of this resource.
 	Description string
 	// HeatExchangers shall contain a link to a resource collection of type CoolingUnitCollection that contains a set
 	// of heat exchanger units.
-	heatExchangers []string
+	heatExchangers string
 	// ImmersionUnits shall contain a link to a resource collection of type CoolingUnitCollection that contains a set
 	// of immersion cooling units.
-	immersionUnits []string
+	immersionUnits string
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
@@ -48,10 +48,10 @@ func (thermalequipment *ThermalEquipment) UnmarshalJSON(b []byte) error {
 	type temp ThermalEquipment
 	var t struct {
 		temp
-		CDUs           common.LinksCollection
-		CoolingLoops   common.LinksCollection
-		HeatExchangers common.LinksCollection
-		ImmersionUnits common.LinksCollection
+		CDUs           common.Link
+		CoolingLoops   common.Link
+		HeatExchangers common.Link
+		ImmersionUnits common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -62,96 +62,32 @@ func (thermalequipment *ThermalEquipment) UnmarshalJSON(b []byte) error {
 	*thermalequipment = ThermalEquipment(t.temp)
 
 	// Extract the links to other entities for later
-	thermalequipment.cdus = t.CDUs.ToStrings()
-	thermalequipment.coolingLoops = t.CoolingLoops.ToStrings()
-	thermalequipment.heatExchangers = t.HeatExchangers.ToStrings()
-	thermalequipment.immersionUnits = t.ImmersionUnits.ToStrings()
+	thermalequipment.cdus = t.CDUs.String()
+	thermalequipment.coolingLoops = t.CoolingLoops.String()
+	thermalequipment.heatExchangers = t.HeatExchangers.String()
+	thermalequipment.immersionUnits = t.ImmersionUnits.String()
 
 	return nil
 }
 
 // CDUs gets a collection of coolant distribution units.
 func (thermalequipment *ThermalEquipment) CDUs() ([]*CoolingUnit, error) {
-	var result []*CoolingUnit
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalequipment.cdus {
-		item, err := GetCoolingUnit(thermalequipment.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.cdus)
 }
 
 // CoolingLoops gets a collection of cooling loops.
 func (thermalequipment *ThermalEquipment) CoolingLoops() ([]*CoolingLoop, error) {
-	var result []*CoolingLoop
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalequipment.coolingLoops {
-		item, err := GetCoolingLoop(thermalequipment.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCoolingLoops(thermalequipment.GetClient(), thermalequipment.coolingLoops)
 }
 
 // HeatExchangers gets a collection of heat exchangers.
 func (thermalequipment *ThermalEquipment) HeatExchangers() ([]*CoolingUnit, error) {
-	var result []*CoolingUnit
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalequipment.heatExchangers {
-		item, err := GetCoolingUnit(thermalequipment.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.heatExchangers)
 }
 
 // ImmersionUnits gets a collection of immersion cooling units.
 func (thermalequipment *ThermalEquipment) ImmersionUnits() ([]*CoolingUnit, error) {
-	var result []*CoolingUnit
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range thermalequipment.immersionUnits {
-		item, err := GetCoolingUnit(thermalequipment.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.immersionUnits)
 }
 
 // GetThermalEquipment will get a ThermalEquipment instance from the service.
