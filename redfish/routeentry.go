@@ -30,7 +30,7 @@ type RouteEntry struct {
 	// RawEntryHex shall contain a binary data that represents the content of route entry rows.
 	RawEntryHex string
 	// RouteSet shall contain a link to a Resource Collection of type RouteSetEntryCollection.
-	routeSet []string
+	routeSet string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
@@ -40,7 +40,7 @@ func (routeentry *RouteEntry) UnmarshalJSON(b []byte) error {
 	type temp RouteEntry
 	var t struct {
 		temp
-		RouteSet common.LinksCollection
+		RouteSet common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -51,7 +51,7 @@ func (routeentry *RouteEntry) UnmarshalJSON(b []byte) error {
 	*routeentry = RouteEntry(t.temp)
 
 	// Extract the links to other entities for later
-	routeentry.routeSet = t.RouteSet.ToStrings()
+	routeentry.routeSet = t.RouteSet.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	routeentry.rawData = b
@@ -61,23 +61,7 @@ func (routeentry *RouteEntry) UnmarshalJSON(b []byte) error {
 
 // RouteSet gets the associated route set.
 func (routeentry *RouteEntry) RouteSet() ([]*RouteSetEntry, error) {
-	var result []*RouteSetEntry
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range routeentry.routeSet {
-		eth, err := GetRouteSetEntry(routeentry.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedRouteSetEntrys(routeentry.GetClient(), routeentry.routeSet)
 }
 
 // Update commits updates to this object's properties to the running system.
