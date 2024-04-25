@@ -31,7 +31,7 @@ type SecureBootDatabase struct {
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// certificates shall be a link to a resource collection of type CertificateCollection.
-	certificates []string
+	certificates string
 	// DatabaseID shall contain the name of the UEFI Secure Boot database. This property shall contain the same value
 	// as the Id property. The value shall be one of the UEFI-defined Secure Boot databases: 'PK', 'KEK' 'db', 'dbx',
 	// 'dbr', 'dbt', 'PKDefault', 'KEKDefault', 'dbDefault', 'dbxDefault', 'dbrDefault', or 'dbtDefault'.
@@ -42,7 +42,9 @@ type SecureBootDatabase struct {
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// Signatures shall be a link to a resource collection of type SignatureCollection.
-	signatures []string
+	signatures string
+
+	resetKeysTarget string
 }
 
 // UnmarshalJSON unmarshals a SecureBootDatabase object from the raw JSON.
@@ -50,8 +52,11 @@ func (securebootdatabase *SecureBootDatabase) UnmarshalJSON(b []byte) error {
 	type temp SecureBootDatabase
 	var t struct {
 		temp
-		Certificates common.LinksCollection
-		Signatures   common.LinksCollection
+		Actions struct {
+			ResetKeys common.ActionTarget `json:"#SecureBootDatabase.ResetKeys"`
+		}
+		Certificates common.Link
+		Signatures   common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -62,52 +67,34 @@ func (securebootdatabase *SecureBootDatabase) UnmarshalJSON(b []byte) error {
 	*securebootdatabase = SecureBootDatabase(t.temp)
 
 	// Extract the links to other entities for later
-	securebootdatabase.certificates = t.Certificates.ToStrings()
-	securebootdatabase.signatures = t.Signatures.ToStrings()
+	securebootdatabase.certificates = t.Certificates.String()
+	securebootdatabase.signatures = t.Signatures.String()
+
+	securebootdatabase.resetKeysTarget = t.Actions.ResetKeys.Target
 
 	return nil
 }
 
 // Certificates get the certificates contained in this UEFI Secure Boot database.
 func (securebootdatabase *SecureBootDatabase) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range securebootdatabase.certificates {
-		item, err := GetCertificate(securebootdatabase.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(securebootdatabase.GetClient(), securebootdatabase.certificates)
 }
 
 // Signatures get the certificates contained in this UEFI Secure Boot database.
 func (securebootdatabase *SecureBootDatabase) Signatures() ([]*Signature, error) {
-	var result []*Signature
+	return ListReferencedSignatures(securebootdatabase.GetClient(), securebootdatabase.signatures)
+}
 
-	collectionError := common.NewCollectionError()
-	for _, uri := range securebootdatabase.signatures {
-		item, err := GetSignature(securebootdatabase.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
+// ResetKeys will perform a reset of this UEFI Secure Boot key database. The `ResetAllKeysToDefault`
+// value shall reset this UEFI Secure Boot key database to the default values. The `DeleteAllKeys`
+// value shall delete the contents of this UEFI Secure Boot key database.
+func (securebootdatabase *SecureBootDatabase) ResetKeys(resetType ResetKeysType) error {
+	params := struct {
+		ResetKeysType ResetKeysType
+	}{
+		ResetKeysType: resetType,
 	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return securebootdatabase.Post(securebootdatabase.resetKeysTarget, params)
 }
 
 // GetSecureBootDatabase will get a SecureBootDatabase instance from the service.
