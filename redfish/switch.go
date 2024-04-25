@@ -160,6 +160,7 @@ func (sw *Switch) UnmarshalJSON(b []byte) error {
 	sw.certificates = t.Certificates.String()
 	sw.logServices = t.LogServices.String()
 	sw.metrics = t.Metrics.String()
+	sw.ports = t.Ports.String()
 
 	sw.chassis = t.Links.Chassis.String()
 	sw.endpoints = t.Links.Endpoints.ToStrings()
