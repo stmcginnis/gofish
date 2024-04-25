@@ -32,7 +32,7 @@ type USBController struct {
 	// PartNumber shall contain the manufacturer-provided part number for the USB controller.
 	PartNumber string
 	// Ports shall contain a link to a resource collection of type PortCollection.
-	ports []string
+	ports string
 	// SKU shall contain the SKU number for this USB controller.
 	SKU string
 	// SerialNumber shall contain a manufacturer-allocated number that identifies the USB controller.
@@ -59,7 +59,7 @@ func (usbcontroller *USBController) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Links Links
-		Ports common.LinksCollection
+		Ports common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -72,7 +72,7 @@ func (usbcontroller *USBController) UnmarshalJSON(b []byte) error {
 	usbcontroller.pcieDevice = t.Links.PCIeDevice.String()
 	usbcontroller.processors = t.Links.Processors.ToStrings()
 
-	usbcontroller.ports = t.Ports.ToStrings()
+	usbcontroller.ports = t.Ports.String()
 
 	return nil
 }
@@ -108,23 +108,7 @@ func (usbcontroller *USBController) Processors() ([]*Processor, error) {
 
 // Ports gets the ports of the USB controller.
 func (usbcontroller *USBController) Ports() ([]*Port, error) {
-	var result []*Port
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range usbcontroller.ports {
-		item, err := GetPort(usbcontroller.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedPorts(usbcontroller.GetClient(), usbcontroller.ports)
 }
 
 // GetUSBController will get a USBController instance from the service.
