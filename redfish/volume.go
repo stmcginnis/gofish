@@ -12,6 +12,26 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+type InitializeMethod string
+
+const (
+	// BackgroundInitializeMethod volume will be available for use immediately, with data erasure and preparation to happen as background tasks.
+	BackgroundInitializeMethod InitializeMethod = "Background"
+	// ForegroundInitializeMethod Data erasure and preparation tasks will complete before the volume is presented as available for use.
+	ForegroundInitializeMethod InitializeMethod = "Foreground"
+	// SkipInitializeMethod volume will be available for use immediately, with no preparation.
+	SkipInitializeMethod InitializeMethod = "Skip"
+)
+
+type InitializeType string
+
+const (
+	// FastInitializeType volume is prepared for use quickly, typically by erasing just the beginning and end of the space so that partitioning can be performed.
+	FastInitializeType InitializeType = "Fast"
+	// SlowInitializeType volume is prepared for use slowly, typically by completely erasing the volume.
+	SlowInitializeType InitializeType = "Slow"
+)
+
 type LBAFormat struct {
 	// LBADataSizeBytes shall be the LBA data size reported in bytes.
 	LBADataSizeBytes int
@@ -731,13 +751,13 @@ func (volume *Volume) ForceEnable() error {
 // `initializeMethod` is the Swordfish-defined InitializeMethod to be performed.
 //
 // `initializeType` is the Swordfish-defined InitializeType to be performed.
-func (volume *Volume) Initialize(initializeMethod, initializeType string) error {
+func (volume *Volume) Initialize(initializeMethod InitializeMethod, initializeType InitializeType) error {
 	if volume.initializeTarget == "" {
 		return errors.New("initialize is not supported by this volume")
 	}
 	t := struct {
-		InitializeMethod string
-		InitializeType   string
+		InitializeMethod InitializeMethod
+		InitializeType   InitializeType
 	}{
 		InitializeMethod: initializeMethod,
 		InitializeType:   initializeType,
