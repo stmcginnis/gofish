@@ -892,7 +892,7 @@ type ComputerSystem struct {
 	SystemType SystemType
 	// USBControllers shall contain a link to a resource collection of type USBControllerCollection that contains USB
 	// controllers for this system.
-	USBControllers string
+	usbControllers string
 	// UUID shall contain the universally unique identifier number for this system. RFC4122 describes methods to create
 	// this value. The value should be considered to be opaque. Client software should only treat the overall value as
 	// a UUID and should not interpret any subfields within the UUID. If the system supports SMBIOS, the property value
@@ -968,6 +968,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		MemoryDomains       common.Link
 		PCIeDevices         common.Links
 		PCIeFunctions       common.Links
+		USBControllers      common.Link
 		VirtualMedia        common.Link
 		Links               CSLinks
 		Settings            common.Settings `json:"@Redfish.Settings"`
@@ -997,6 +998,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.secureBoot = t.SecureBoot.String()
 	computersystem.simpleStorage = t.SimpleStorage.String()
 	computersystem.storage = t.Storage.String()
+	computersystem.usbControllers = t.USBControllers.String()
 	computersystem.virtualMedia = t.VirtualMedia.String()
 
 	computersystem.addResourceBlockTarget = t.Actions.AddResourceBlock.Target
@@ -1356,6 +1358,11 @@ func (computersystem *ComputerSystem) Storage() ([]*Storage, error) {
 // VirtualMedia gets the virtual media associated with this system.
 func (computersystem *ComputerSystem) VirtualMedia() ([]*VirtualMedia, error) {
 	return ListReferencedVirtualMedias(computersystem.GetClient(), computersystem.virtualMedia)
+}
+
+// USBControllers gets the USB controllers associated with this system.
+func (computersystem *ComputerSystem) USBControllers() ([]*USBController, error) {
+	return ListReferencedUSBControllers(computersystem.GetClient(), computersystem.usbControllers)
 }
 
 // CSLinks are references to resources that are related to, but not contained

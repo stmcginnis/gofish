@@ -134,6 +134,9 @@ var computerSystemBody = `{
 		"Bios": {
 			"@odata.id": "/redfish/v1/Systems/1/Bios"
 		},
+		"USBControllers": {
+		  "@odata.id": "/redfish/v1/Systems/System_0/USBControllers"
+		},
 		"Links": {
 			"Chassis": [
 				{
