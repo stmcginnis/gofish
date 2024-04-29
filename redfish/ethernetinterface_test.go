@@ -143,6 +143,8 @@ func TestEthernetInterface(t *testing.T) {
 }
 
 // TestEthernetInterfaceUpdate tests the Update call.
+//
+//nolint:funlen
 func TestEthernetInterfaceUpdate(t *testing.T) {
 	var result EthernetInterface
 	err := json.NewDecoder(strings.NewReader(ethernetInterfaceBody)).Decode(&result)
@@ -162,6 +164,13 @@ func TestEthernetInterfaceUpdate(t *testing.T) {
 	result.MACAddress = "de:ad:de:ad:de:ad"
 	result.MTUSize = 9216
 	result.SpeedMbps = 1000
+
+	result.DHCPv4.DHCPEnabled = true
+	result.DHCPv6.UseDNSServers = true
+	result.IPv6AddressPolicyTable = append(result.IPv6AddressPolicyTable, IPv6AddressPolicyEntry{Label: 5})
+	result.StatelessAddressAutoConfig.IPv6AutoConfigEnabled = true
+	result.VLAN.VLANID = 8
+
 	err = result.Update()
 
 	if err != nil {
@@ -204,6 +213,26 @@ func TestEthernetInterfaceUpdate(t *testing.T) {
 
 	if strings.Contains(calls[0].Payload, "FullDuplex") {
 		t.Errorf("Unexpected update for FullDuplex in payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "DHCPEnabled:true") {
+		t.Errorf("Unexpected DHCPv4.DHCPEnabled update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "UseDNSServers:true") {
+		t.Errorf("Unexpected DHCPv6.UseDNSServers update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "Label:5") {
+		t.Errorf("Unexpected IPv6AddressPolicyTable Label update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "IPv6AutoConfigEnabled:true") {
+		t.Errorf("Unexpected StatelessAddressAutoConfig IPv6AutoConfigEnabled update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "VLANId:8") {
+		t.Errorf("Unexpected VLAN VLANID update payload: %s", calls[0].Payload)
 	}
 }
 
