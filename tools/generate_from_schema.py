@@ -79,6 +79,8 @@ def _get_type(name, obj):
         result = 'common.Status'
     elif name == 'Identifier':
         result = 'common.Identifier'
+    elif name == 'Location':
+        result = 'common.Location'
     elif name == 'Description':
         result = 'string'
     elif name == 'UUID':
