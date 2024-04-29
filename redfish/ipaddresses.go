@@ -61,14 +61,14 @@ type IPv4Address struct {
 	// is enabled on the interface, this property becomes read-only.
 	Address string
 	// AddressOrigin shall be the IP address origin for this network interface.
-	AddressOrigin IPv4AddressOrigin
+	AddressOrigin IPv4AddressOrigin `json:",omitempty"`
 	// Gateway shall be the IPv4 default gateway address for this interface. If
 	// DHCPv4 is enabled on the interface and is configured to set the IPv4
 	// default gateway address, this property becomes read-only.
-	Gateway string
+	Gateway string `json:",omitempty"`
 	// SubnetMask shall be the IPv4 subnet mask for this address. If DHCPv4 is
 	// enabled on the interface, this property becomes read-only.
-	SubnetMask string
+	SubnetMask string `json:",omitempty"`
 }
 
 // IPv6Address describes an IPv6 address assigned to an interface.
@@ -76,7 +76,7 @@ type IPv6Address struct {
 	// Address lists an IPv6 address that is currently assigned on this interface.
 	Address string
 	// AddressOrigin shall be the IPv6 address origin for this interface.
-	AddressOrigin IPv6AddressOrigin
+	AddressOrigin IPv6AddressOrigin `json:",omitempty"`
 	// AddressState Preferred and Deprecated states follow the definitions
 	// given RFC4862 Section 5.5.4. An address is in the Tentative state
 	// while undergoing Duplicate Address Detection (DAD) per RFC4862 Section
@@ -84,9 +84,9 @@ type IPv6Address struct {
 	// DAD. A Static address in the Failed state is not in use on the
 	// network stack, and corrective action will be needed to remedy this
 	// condition.
-	AddressState AddressState
+	AddressState AddressState `json:",omitempty"`
 	// PrefixLength shall be the IPv6 address prefix length for this interface.
-	PrefixLength uint8
+	PrefixLength uint8 `json:",omitempty"`
 }
 
 // IPv6GatewayStaticAddress shall represent a single IPv6 static address to be
