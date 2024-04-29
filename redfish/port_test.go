@@ -20,6 +20,7 @@ var portBody = `{
         "State": "Enabled",
         "Health": "OK"
     },
+    "LinkStatus": "LinkUp",
     "PortId": "1",
     "PortProtocol": "SAS",
     "PortType": "BidirectionalPort",
@@ -50,4 +51,5 @@ func TestPort(t *testing.T) {
 	assertEquals(t, "BidirectionalPort", fmt.Sprint(result.PortType))
 	assertEquals(t, "SAS", fmt.Sprint(result.PortProtocol))
 	assertEquals(t, "48", fmt.Sprint(result.CurrentSpeedGbps))
+	assertEquals(t, "LinkUp", fmt.Sprint(result.LinkStatus))
 }

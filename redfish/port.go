@@ -142,16 +142,16 @@ type PortLinkStatus string
 
 const (
 	// LinkUpPortLinkStatus This link on this interface is up.
-	LinkUpPortLinkStatus LinkStatus = "LinkUp"
+	LinkUpPortLinkStatus PortLinkStatus = "LinkUp"
 	// StartingPortLinkStatus This link on this interface is starting. A physical link has been established, but the port
 	// is not able to transfer data.
-	StartingPortLinkStatus LinkStatus = "Starting"
+	StartingPortLinkStatus PortLinkStatus = "Starting"
 	// TrainingPortLinkStatus This physical link on this interface is training.
-	TrainingPortLinkStatus LinkStatus = "Training"
+	TrainingPortLinkStatus PortLinkStatus = "Training"
 	// LinkDownPortLinkStatus The link on this interface is down.
-	LinkDownPortLinkStatus LinkStatus = "LinkDown"
+	LinkDownPortLinkStatus PortLinkStatus = "LinkDown"
 	// NoLinkPortLinkStatus No physical link detected on this interface.
-	NoLinkPortLinkStatus LinkStatus = "NoLink"
+	NoLinkPortLinkStatus PortLinkStatus = "NoLink"
 )
 
 type MediumType string
