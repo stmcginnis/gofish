@@ -473,7 +473,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		temp
 		Assembly           common.Link
 		Certificates       common.Link
-		Controls           common.Links
+		Controls           common.Link
 		Drives             common.Link
 		EnvironmentMetrics common.Link
 		FabricAdapters     common.Link
@@ -504,6 +504,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	chassis.assembly = t.Assembly.String()
 	chassis.certificates = t.Certificates.String()
+	chassis.controls = t.Controls.String()
 	chassis.drives = t.Drives.String()
 	chassis.environmentMetrics = t.EnvironmentMetrics.String()
 	chassis.fabricAdapters = t.FabricAdapters.String()
