@@ -504,6 +504,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	chassis.assembly = t.Assembly.String()
 	chassis.certificates = t.Certificates.String()
+	chassis.controls = t.Controls.String()
 	chassis.drives = t.Drives.String()
 	chassis.environmentMetrics = t.EnvironmentMetrics.String()
 	chassis.fabricAdapters = t.FabricAdapters.String()
