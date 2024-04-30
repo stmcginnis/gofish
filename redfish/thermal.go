@@ -78,7 +78,7 @@ type ThermalFan struct {
 	// RedundancyCount is the number of Redundancy items.
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// RelatedItem shall contain an array of links to resources or objects that this fan services.
-	RelatedItem []string
+	relatedItem []string
 	// RelatedItem@odataCount is the number of related items.
 	RelatedItemCount int `json:"RelatedItem@odata.count"`
 	// SensorNumber shall contain a numerical identifier for this fan speed sensor that is unique within this resource.
@@ -108,8 +108,9 @@ func (fan *ThermalFan) UnmarshalJSON(b []byte) error {
 	type temp ThermalFan
 	var t struct {
 		temp
-		Assembly   common.Link
-		Redundancy common.Links
+		Assembly    common.Link
+		Redundancy  common.Links
+		RelatedItem common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -122,6 +123,7 @@ func (fan *ThermalFan) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	fan.assembly = t.Assembly.String()
 	fan.redundancy = t.Redundancy.ToStrings()
+	fan.relatedItem = t.RelatedItem.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	fan.rawData = b
@@ -216,7 +218,7 @@ type Temperature struct {
 	ReadingCelsius float32
 	// RelatedItem shall contain an array of links to resources or objects that represent areas or devices to which
 	// this temperature applies.
-	RelatedItem []string
+	relatedItem []string
 	// RelatedItemCount is the number of related items.
 	RelatedItemCount int `json:"RelatedItem@odata.count"`
 	// SensorNumber shall be a numerical identifier for this temperature sensor
@@ -252,6 +254,7 @@ func (temperature *Temperature) UnmarshalJSON(b []byte) error {
 	type temp Temperature
 	var t struct {
 		temp
+		RelatedItem common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -262,6 +265,7 @@ func (temperature *Temperature) UnmarshalJSON(b []byte) error {
 	*temperature = Temperature(t.temp)
 
 	// Extract the links to other entities for later
+	temperature.relatedItem = t.RelatedItem.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	temperature.rawData = b
