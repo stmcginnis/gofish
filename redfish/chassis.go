@@ -473,7 +473,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		temp
 		Assembly           common.Link
 		Certificates       common.Link
-		Controls           common.Links
+		Controls           common.Link
 		Drives             common.Link
 		EnvironmentMetrics common.Link
 		FabricAdapters     common.Link
