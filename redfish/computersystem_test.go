@@ -304,11 +304,11 @@ func TestComputerSystem(t *testing.T) { //nolint
 		t.Errorf("Invalid allowable reset actions, expected 6, got %d",
 			len(result.SupportedResetTypes))
 	}
-	if len(result.ManagedBy) != 1 {
-		t.Errorf("Received invalid number of ManagedBy: %d", len(result.ManagedBy))
+	if len(result.managedBy) != 1 {
+		t.Errorf("Received invalid number of ManagedBy: %d", len(result.managedBy))
 	}
-	if result.ManagedBy[0] != "/redfish/v1/Managers/BMC-1" {
-		t.Errorf("Received invalid Managers reference: %s", result.ManagedBy[0])
+	if result.managedBy[0] != "/redfish/v1/Managers/BMC-1" {
+		t.Errorf("Received invalid Managers reference: %s", result.managedBy[0])
 	}
 }
 
