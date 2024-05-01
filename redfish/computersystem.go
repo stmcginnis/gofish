@@ -915,10 +915,7 @@ type ComputerSystem struct {
 	// settingsApplyTimes is a set of allowed settings update apply times. If none
 	// are specified, then the system does not provide that information.
 	settingsApplyTimes []common.ApplyTime
-	// ManagedBy An array of references to the Managers responsible for this system.
-	// This is temporary until a proper method can be implemented to actually
-	// retrieve those objects directly.
-	ManagedBy []string
+	managedBy          []string
 
 	// addResourceBlockTarget is the internal URL for the AddResourceBlock action.
 	addResourceBlockTarget string
@@ -1009,7 +1006,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
 	computersystem.chassis = t.Links.Chassis.ToStrings()
-	computersystem.ManagedBy = t.Links.ManagedBy.ToStrings()
+	computersystem.managedBy = t.Links.ManagedBy.ToStrings()
 	computersystem.settingsApplyTimes = t.Settings.SupportedApplyTimes
 
 	// Some implementations use a @Redfish.Settings object to direct settings updates to a
@@ -1168,6 +1165,27 @@ func (computersystem *ComputerSystem) EthernetInterfaces() ([]*EthernetInterface
 // LogServices get this system's log services.
 func (computersystem *ComputerSystem) LogServices() ([]*LogService, error) {
 	return ListReferencedLogServices(computersystem.GetClient(), computersystem.logServices)
+}
+
+// ManagedBy gets all Managers for this system.
+func (computersystem *ComputerSystem) ManagedBy() ([]*Manager, error) {
+	var result []*Manager
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range computersystem.managedBy {
+		manager, err := GetManager(computersystem.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, manager)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // Memory gets this system's memory.
