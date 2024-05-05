@@ -752,7 +752,9 @@ type Port struct {
 	// The number of lanes, phys, or other physical transport links that this port contains.
 	Width int
 
-	associatedEndpoints []string
+	// AssociatedMacAddresses gets the MAC address(es) associated with this port.
+	AssociatedMACAddresses []string
+	associatedEndpoints    []string
 	// AssociatedEndpointsCount gets the number of endpoints on the other end of the link.
 	AssociatedEndpointsCount int
 	// An array of links to the cables connected to this port.
