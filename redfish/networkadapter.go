@@ -317,7 +317,7 @@ type NetworkAdapter struct {
 	assembly string
 	// Certificates shall contain a link to a resource collection of type CertificateCollection that contains
 	// certificates for device identity and attestation.
-	certificates []string
+	certificates string
 	// Controllers shall contain the set of network controllers ASICs that make
 	// up this NetworkAdapter.
 	Controllers []Controllers
@@ -343,10 +343,10 @@ type NetworkAdapter struct {
 	Model string
 	// NetworkDeviceFunctions shall be a link to a collection of type
 	// NetworkDeviceFunctionCollection.
-	networkDeviceFunctions []string
+	networkDeviceFunctions string
 	// NetworkPorts shall be a link to a collection of type NetworkPortCollection.
 	// This property has been deprecated in favor of the Ports property.
-	networkPorts []string
+	networkPorts string
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
@@ -354,10 +354,10 @@ type NetworkAdapter struct {
 	// defined by the manufacturer.
 	PartNumber string
 	// Ports shall contain a link to a resource collection of type PortCollection.
-	ports []string
+	ports string
 	// Processors shall contain a link to a resource collection of type ProcessorCollection that represent the offload
 	// processors contained in this network adapter.
-	processors []string
+	processors string
 	// SKU shall contain the Stock Keeping Unit (SKU) for the network adapter.
 	SKU string
 	// SerialNumber shall contain the serial number for the network adapter.
@@ -380,12 +380,12 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Assembly               common.Link
-		Certificates           common.LinksCollection
+		Certificates           common.Link
 		EnvironmentMetrics     common.Link
-		NetworkDeviceFunctions common.LinksCollection
-		NetworkPorts           common.LinksCollection
-		Ports                  common.LinksCollection
-		Processors             common.LinksCollection
+		NetworkDeviceFunctions common.Link
+		NetworkPorts           common.Link
+		Ports                  common.Link
+		Processors             common.Link
 		Actions                actions
 	}
 
@@ -397,12 +397,12 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*networkadapter = NetworkAdapter(t.temp)
 	networkadapter.assembly = t.Assembly.String()
-	networkadapter.certificates = t.Certificates.ToStrings()
+	networkadapter.certificates = t.Certificates.String()
 	networkadapter.environmentMetrics = t.EnvironmentMetrics.String()
-	networkadapter.networkDeviceFunctions = t.NetworkDeviceFunctions.ToStrings()
-	networkadapter.networkPorts = t.NetworkPorts.ToStrings()
-	networkadapter.ports = t.Ports.ToStrings()
-	networkadapter.processors = t.Processors.ToStrings()
+	networkadapter.networkDeviceFunctions = t.NetworkDeviceFunctions.String()
+	networkadapter.networkPorts = t.NetworkPorts.String()
+	networkadapter.ports = t.Ports.String()
+	networkadapter.processors = t.Processors.String()
 
 	networkadapter.resetSettingsToDefaultTarget = t.Actions.ResetSettingsToDefault.Target
 
@@ -485,23 +485,7 @@ func (networkadapter *NetworkAdapter) Assembly() (*Assembly, error) {
 
 // Certificatea gets the certificates for device identity and attestation.
 func (networkadapter *NetworkAdapter) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkadapter.certificates {
-		unit, err := GetCertificate(networkadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedCertificates(networkadapter.GetClient(), networkadapter.certificates)
 }
 
 // EnvironmentMetrics gets the environment metrics for this network adapter.
@@ -514,86 +498,22 @@ func (networkadapter *NetworkAdapter) EnvironmentMetrics() (*EnvironmentMetrics,
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network adapter
 func (networkadapter *NetworkAdapter) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	var result []*NetworkDeviceFunction
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkadapter.networkDeviceFunctions {
-		unit, err := GetNetworkDeviceFunction(networkadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedNetworkDeviceFunctions(networkadapter.GetClient(), networkadapter.networkDeviceFunctions)
 }
 
 // NetworkPorts gets the collection of NetworkPorts for this network adapter
 func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
-	var result []*NetworkPort
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkadapter.networkPorts {
-		unit, err := GetNetworkPort(networkadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedNetworkPorts(networkadapter.GetClient(), networkadapter.networkPorts)
 }
 
 // Ports gets the ports associated with this network adapter.
 func (networkadapter *NetworkAdapter) Ports() ([]*Port, error) {
-	var result []*Port
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkadapter.ports {
-		unit, err := GetPort(networkadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedPorts(networkadapter.GetClient(), networkadapter.ports)
 }
 
 // Processors gets the offload processors contained in this network adapter.
 func (networkadapter *NetworkAdapter) Processors() ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkadapter.networkPorts {
-		unit, err := GetProcessor(networkadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedProcessors(networkadapter.GetClient(), networkadapter.processors)
 }
 
 // ResetSettingsToDefault shall perform a reset of all active and pending
