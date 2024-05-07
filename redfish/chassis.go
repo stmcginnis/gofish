@@ -822,6 +822,16 @@ func (chassis *Chassis) Power() (*Power, error) {
 	return GetPower(chassis.GetClient(), chassis.power)
 }
 
+// PowerSubsystem gets the power subsystem for the chassis
+// This link has been deprecated in favor of the PowerSubsystem link property.
+func (chassis *Chassis) PowerSubsystem() (*PowerSubsystem, error) {
+	if chassis.powerSubsystem == "" {
+		return nil, nil
+	}
+
+	return GetPowerSubsystem(chassis.GetClient(), chassis.powerSubsystem)
+}
+
 // Cables gets the connected cables.
 func (chassis *Chassis) Cables() ([]*Cable, error) {
 	var result []*Cable
