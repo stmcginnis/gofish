@@ -211,7 +211,7 @@ type Manager struct {
 	DaylightSavingTime DaylightSavingTime
 	// DedicatedNetworkPorts shall contain a link to a resource collection of type PortCollection that represent the
 	// dedicated network ports of the manager.
-	dedicatedNetworkPorts []string
+	dedicatedNetworkPorts string
 	// Description provides a description of this resource.
 	Description string
 	// ethernetInterfaces shall be a link to a collection of type
@@ -310,7 +310,7 @@ type Manager struct {
 	// SharedNetworkPorts shall contain a link to a resource collection of type PortCollection that represent the
 	// shared network ports of the manager. The members of this collection shall reference Port resources subordinate
 	// to NetworkAdapter resources.
-	SharedNetworkPorts string
+	sharedNetworkPorts string
 	// SparePartNumber shall contain the spare part number of the manager.
 	SparePartNumber string
 	// Status shall contain any status or health properties
@@ -324,7 +324,7 @@ type Manager struct {
 	TimeZoneName string
 	// USBPorts shall contain a link to a resource collection of type PortCollection that represent the USB ports of
 	// the manager.
-	usbPorts []string
+	usbPorts string
 	// UUID shall contain the universal unique
 	// identifier number for the manager.
 	UUID string
@@ -420,15 +420,16 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		DedicatedNetworkPorts common.LinksCollection
+		DedicatedNetworkPorts common.Link
 		EthernetInterfaces    common.Link
 		HostInterfaces        common.Link
 		LogServices           common.Link
 		NetworkProtocol       common.Link
 		ManagerDiagnosticData common.Link
 		RemoteAccountService  common.Link
+		SharedNetworkPorts    common.Link
 		SerialInterfaces      common.Link
-		USBPorts              common.LinksCollection
+		USBPorts              common.Link
 		VirtualMedia          common.Link
 		Links                 linkReference
 		Actions               actions
@@ -442,7 +443,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities
 	*manager = Manager(t.temp)
-	manager.dedicatedNetworkPorts = t.DedicatedNetworkPorts.ToStrings()
+	manager.dedicatedNetworkPorts = t.DedicatedNetworkPorts.String()
 	manager.ethernetInterfaces = t.EthernetInterfaces.String()
 	manager.hostInterfaces = t.HostInterfaces.String()
 	manager.logServices = t.LogServices.String()
@@ -451,8 +452,9 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.OemActions = t.Actions.Oem
 	manager.Oem = t.Oem
 	manager.remoteAccountService = t.RemoteAccountService.String()
+	manager.sharedNetworkPorts = t.SharedNetworkPorts.String()
 	manager.serialInterfaces = t.SerialInterfaces.String()
-	manager.usbPorts = t.USBPorts.ToStrings()
+	manager.usbPorts = t.USBPorts.String()
 	manager.virtualMedia = t.VirtualMedia.String()
 
 	manager.activeSoftwareImage = t.Links.ActiveSoftwareImage.String()
@@ -615,23 +617,7 @@ func (manager *Manager) ResetToDefaults(resetType ResetToDefaultsType) error {
 
 // DedicatedNetworkPorts gets the dedicated network ports of the manager.
 func (manager *Manager) DedicatedNetworkPorts() ([]*Port, error) {
-	var result []*Port
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range manager.dedicatedNetworkPorts {
-		unit, err := GetPort(manager.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedPorts(manager.GetClient(), manager.dedicatedNetworkPorts)
 }
 
 // EthernetInterfaces get this manager's ethernet interfaces.
@@ -665,6 +651,11 @@ func (manager *Manager) RemoteAccountService() (*AccountService, error) {
 	return GetAccountService(manager.GetClient(), manager.remoteAccountService)
 }
 
+// SharedNetworkPorts gets the shared network ports of the manager.
+func (manager *Manager) SharedNetworkPorts() ([]*Port, error) {
+	return ListReferencedPorts(manager.GetClient(), manager.sharedNetworkPorts)
+}
+
 // SerialInterfaces get this manager's serial interfaces.
 func (manager *Manager) SerialInterfaces() ([]*SerialInterface, error) {
 	return ListReferencedSerialInterfaces(manager.GetClient(), manager.serialInterfaces)
@@ -672,23 +663,7 @@ func (manager *Manager) SerialInterfaces() ([]*SerialInterface, error) {
 
 // USBPorts get the USB ports of the manager.
 func (manager *Manager) USBPorts() ([]*Port, error) {
-	var result []*Port
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range manager.usbPorts {
-		unit, err := GetPort(manager.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedPorts(manager.GetClient(), manager.usbPorts)
 }
 
 // VirtualMedia gets the virtual media associated with this manager.
