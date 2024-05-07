@@ -59,7 +59,22 @@ func (powersubsystem *PowerSubsystem) UnmarshalJSON(b []byte) error {
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		// Work around a bug in NVIDIA's implementation
+		var u struct {
+			temp
+			Batteries     common.Link
+			PowerSupplies common.Link
+			Allocation    []interface{}
+		}
+		err2 := json.Unmarshal(b, &u)
+		if err2 != nil {
+			// Still didn't work, return original error
+			return err
+		}
+
+		t.temp = u.temp
+		t.Batteries = u.Batteries
+		t.PowerSupplies = u.PowerSupplies
 	}
 
 	*powersubsystem = PowerSubsystem(t.temp)
