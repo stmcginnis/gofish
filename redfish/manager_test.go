@@ -227,6 +227,9 @@ var managerBody = `{
 				"SSH"
 			]
 		},
+		"SharedNetworkPorts": {
+		  "@odata.id": "/redfish/v1/Managers/1/SharedNetworkPorts"
+		},
 		"FirmwareVersion": "1.00",
 		"RemoteAccountService": {
 			"@odata.id": "/redfish/v1/Managers/AccountService"
