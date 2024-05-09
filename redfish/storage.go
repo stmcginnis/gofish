@@ -99,13 +99,13 @@ type Storage struct {
 	AutoVolumeCreate AutoVolumeCreate
 	// Connections shall contain a link to a resource collection of type ConnectionCollection. The members of this
 	// collection shall reference Connection resources subordinate to Fabric resources.
-	connections []string
+	connections string
 	// ConsistencyGroups shall contain a link to a resource collection of type ConsistencyGroupCollection. The property
 	// shall be used when groups of volumes are treated as a single resource by an application or set of applications.
-	consistencyGroups []string
+	consistencyGroups string
 	// Controllers shall contain a link to a resource collection of type StorageControllerCollection that contains the
 	// set of storage controllers allocated to this storage subsystem.
-	controllers []string
+	controllers string
 	// Description provides a description of this resource.
 	Description string
 	// Drives is a collection that indicates all the drives attached to the
@@ -117,10 +117,10 @@ type Storage struct {
 	EncryptionMode EncryptionMode
 	// EndpointGroups shall contain a link to a resource collection of type EndpointGroupCollection. This property
 	// shall be implemented when atomic control is needed to perform mapping, masking, and zoning operations.
-	endpointGroups []string
+	endpointGroups string
 	// FileSystems shall contain a link to a resource collection of type FileSystemCollection. This property shall be
 	// used when file systems are shared or exported by the storage subsystem.
-	fileSystems []string
+	fileSystems string
 	// HotspareActivationPolicy shall contain the policy under which all drives operating as hot spares in this storage
 	// domain will activate.
 	HotspareActivationPolicy HotspareActivationPolicy
@@ -147,7 +147,7 @@ type Storage struct {
 	// StoragePools shall contain a link to a resource collection of type StoragePoolCollection. This property shall be
 	// used when an abstraction of media, rather than references to individual media, are used as the storage data
 	// source.
-	storagePools []string
+	storagePools string
 	// Volumes is a collection that indicates all the volumes produced by the
 	// storage controllers that this resource represents.
 	volumes string
@@ -205,13 +205,13 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Links             links
-		Connections       common.Links
-		ConsistencyGroups common.Links
-		Controllers       common.Links
+		Connections       common.Link
+		ConsistencyGroups common.Link
+		Controllers       common.Link
 		Drives            common.Links
-		EndpointGroups    common.Links
-		FileSystems       common.Links
-		StoragePools      common.Links
+		EndpointGroups    common.Link
+		FileSystems       common.Link
+		StoragePools      common.Link
 		Volumes           common.Link
 		Actions           actions
 	}
@@ -224,13 +224,13 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 	*storage = Storage(t.temp)
 
 	// Extract the links to other entities for later
-	storage.connections = t.Connections.ToStrings()
-	storage.consistencyGroups = t.ConsistencyGroups.ToStrings()
-	storage.controllers = t.Controllers.ToStrings()
+	storage.connections = t.Connections.String()
+	storage.consistencyGroups = t.ConsistencyGroups.String()
+	storage.controllers = t.Controllers.String()
 	storage.drives = t.Drives.ToStrings()
-	storage.endpointGroups = t.EndpointGroups.ToStrings()
-	storage.fileSystems = t.FileSystems.ToStrings()
-	storage.storagePools = t.StoragePools.ToStrings()
+	storage.endpointGroups = t.EndpointGroups.String()
+	storage.fileSystems = t.FileSystems.String()
+	storage.storagePools = t.StoragePools.String()
 	storage.volumes = t.Volumes.String()
 
 	storage.enclosures = t.Links.Enclosures.ToStrings()
@@ -254,66 +254,18 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 
 // Connection gets the connections that this storage subsystem contains.
 func (storage *Storage) Connections() ([]*Connection, error) {
-	var result []*Connection
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range storage.connections {
-		item, err := GetConnection(storage.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedConnections(storage.GetClient(), storage.connections)
 }
 
 // ConsistencyGroups gets groups of volumes that are treated as a single resource
 // by an application or set of applications.
 // func (storage *Storage) ConsistencyGroups() ([]*swordfish.ConsistencyGroup, error) {
-// 	var result []*swordfish.ConsistencyGroup
-
-// 	collectionError := common.NewCollectionError()
-// 	for _, uri := range storage.consistencyGroups {
-// 		item, err := swordfish.GetConsistencyGroup(storage.GetClient(), uri)
-// 		if err != nil {
-// 			collectionError.Failures[uri] = err
-// 		} else {
-// 			result = append(result, item)
-// 		}
-// 	}
-
-// 	if collectionError.Empty() {
-// 		return result, nil
-// 	}
-
-// 	return result, collectionError
+//	return swordfishListReferencedConsistencyGroups(storage.GetClient(), storage.consistencyGroups)
 // }
 
 // Controllers gets the set of storage controllers allocated to this storage subsystem.
 func (storage *Storage) Controllers() ([]*StorageController, error) {
-	var result []*StorageController
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range storage.controllers {
-		item, err := GetStorageController(storage.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedStorageControllers(storage.GetClient(), storage.controllers)
 }
 
 // Drives gets the drives attached to the storage controllers that this
@@ -341,67 +293,12 @@ func (storage *Storage) Drives() ([]*Drive, error) {
 // EndpointGroups gets the set of endpoints that are used for a common purpose such as an ACL
 // or logical identification, that belong to this storage subsystem.
 func (storage *Storage) EndpointGroups() ([]*EndpointGroup, error) {
-	var result []*EndpointGroup
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range storage.endpointGroups {
-		item, err := GetEndpointGroup(storage.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return ListReferencedEndpointGroups(storage.GetClient(), storage.endpointGroups)
 }
 
 // FileSystems gets the file systems that are allocated by this storage subsystem.
 // func (storage *Storage) FileSystems() ([]*swordfish.FileSystem, error) {
-// 	var result []*swordfish.FileSystem
-
-// 	collectionError := common.NewCollectionError()
-// 	for _, uri := range storage.fileSystems {
-// 		item, err := swordfish.GetFileSystem(storage.GetClient(), uri)
-// 		if err != nil {
-// 			collectionError.Failures[uri] = err
-// 		} else {
-// 			result = append(result, item)
-// 		}
-// 	}
-
-// 	if collectionError.Empty() {
-// 		return result, nil
-// 	}
-
-// 	return result, collectionError
-// }
-
-// StoragePools gets the storage pools that are allocated by this storage subsystem.
-// A storage pool is the set of storage capacity that can be used to produce volumes
-// or other storage pools.
-// func (storage *Storage) StoragePools() ([]*swordfish.StoragePool, error) {
-// 	var result []*swordfish.StoragePool
-
-// 	collectionError := common.NewCollectionError()
-// 	for _, uri := range storage.storagePools {
-// 		item, err := swordfish.GetStoragePool(storage.GetClient(), uri)
-// 		if err != nil {
-// 			collectionError.Failures[uri] = err
-// 		} else {
-// 			result = append(result, item)
-// 		}
-// 	}
-
-// 	if collectionError.Empty() {
-// 		return result, nil
-// 	}
-
-// 	return result, collectionError
+// return swordfish.ListReferencedFileSystems(storage.GetClient(), storage.fileSystems)
 // }
 
 // Volumes gets the volumes associated with this storage subsystem.
