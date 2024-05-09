@@ -159,9 +159,9 @@ func GetStorageControllerMetrics(c common.Client, uri string) (*StorageControlle
 	return &storagecontrollermetrics, nil
 }
 
-// ListReferencedStorageControllerMetricss gets the collection of StorageControllerMetrics from
+// ListReferencedStorageControllerMetrics gets the collection of StorageControllerMetrics from
 // a provided reference.
-func ListReferencedStorageControllerMetricss(c common.Client, link string) ([]*StorageControllerMetrics, error) {
+func ListReferencedStorageControllerMetrics(c common.Client, link string) ([]*StorageControllerMetrics, error) {
 	var result []*StorageControllerMetrics
 	if link == "" {
 		return result, nil
