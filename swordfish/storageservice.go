@@ -6,6 +6,7 @@ package swordfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -62,9 +63,6 @@ type StorageService struct {
 	// fileSystems is an array of references to FileSystems managed by this
 	// storage service.
 	fileSystems string
-	// hostingSystem shall reference the ComputerSystem or
-	// StorageController that hosts this service.
-	hostingSystem string
 	// ioConnectivityLoSCapabilities shall reference the IO connectivity
 	// capabilities of this service.
 	ioConnectivityLoSCapabilities string
@@ -73,6 +71,16 @@ type StorageService struct {
 	ioPerformanceLoSCapabilities string
 	// IOStatistics shall represent IO statistics for this StorageService.
 	IOStatistics IOStatistics
+	// LinesOfService shall reference a LineOfService collection defined for this service.
+	linesOfService []string
+	// LinesOfServiceCount is the number of lines of service.
+	LinesOfServiceCount int `json:"LinesOfService@odata.count"`
+	// Metrics shall contain a link to a resource of type StorageServiceMetrics that specifies the metrics for this
+	// storage service. IO metrics are reported in the IOStatistics property.
+	metrics string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// spareResourceSets shall contain resources that may be utilized to
 	// replace the capacity provided by a failed resource having a compatible type.
 	spareResourceSets []string
@@ -90,8 +98,15 @@ type StorageService struct {
 	// Volumes is an array of references to Volumes managed by this storage
 	// service.
 	volumes string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+
 	// setEncryptionKeyTarget is the URL to send SetEncryptionKey requests.
 	setEncryptionKeyTarget string
+
+	// hostingSystem shall reference the ComputerSystem or
+	// StorageController that hosts this service.
+	hostingSystem string
 }
 
 // UnmarshalJSON unmarshals a StorageService object from the raw JSON.
@@ -119,6 +134,8 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 		IOConnectivityLoSCapabilities common.Link
 		IOPerformanceLoSCapabilities  common.Link
 		Redundancy                    common.Links
+		LinesOfService                common.Links
+		Metrics                       common.Link
 		SpareResourceSets             common.Links
 		StorageGroups                 common.Link
 		StoragePools                  common.Link
@@ -146,16 +163,52 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 	storageservice.fileSystems = t.FileSystems.String()
 	storageservice.ioConnectivityLoSCapabilities = t.IOConnectivityLoSCapabilities.String()
 	storageservice.ioPerformanceLoSCapabilities = t.IOPerformanceLoSCapabilities.String()
+	storageservice.metrics = t.Metrics.String()
 	storageservice.redundancy = t.Redundancy.ToStrings()
+	storageservice.linesOfService = t.LinesOfService.ToStrings()
 	storageservice.spareResourceSets = t.SpareResourceSets.ToStrings()
 	storageservice.storageGroups = t.StorageGroups.String()
 	storageservice.storagePools = t.StoragePools.String()
 	storageservice.storageSubsystems = t.StorageSubsystems.String()
-	storageservice.hostingSystem = t.Links.HostingSystem.String()
 	storageservice.volumes = t.Volumes.String()
+
 	storageservice.setEncryptionKeyTarget = t.Actions.SetEncryptionKey.Target
 
+	storageservice.hostingSystem = t.Links.HostingSystem.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	storageservice.rawData = b
+
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (storageservice *StorageService) Update() error {
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(StorageService)
+	original.UnmarshalJSON(storageservice.rawData)
+
+	readWriteFields := []string{
+		"ClassesOfService",
+		"ConsistencyGroups",
+		"DataProtectionLoSCapabilities",
+		"DataSecurityLoSCapabilities",
+		"DataStorageLoSCapabilities",
+		"DefaultClassOfService",
+		"EndpointGroups",
+		"FileSystems",
+		"IOConnectivityLoSCapabilities",
+		"IOPerformanceLoSCapabilities",
+		"LinesOfService",
+		"SpareResourceSets",
+		"Volumes",
+	}
+
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(storageservice).Elem()
+
+	return storageservice.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
 // GetStorageService will get a StorageService instance from the service.
@@ -305,6 +358,27 @@ func (storageservice *StorageService) Redundancy() ([]*redfish.Redundancy, error
 	return result, collectionError
 }
 
+// LinesOfService gets lines of service for this service.
+func (storageservice *StorageService) LinesOfService() ([]*LineOfService, error) {
+	var result []*LineOfService
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range storageservice.linesOfService {
+		item, err := GetLineOfService(storageservice.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
 func (storageservice *StorageService) SpareResourceSets() ([]*SpareResourceSet, error) {
@@ -360,4 +434,12 @@ func (storageservice *StorageService) SetEncryptionKey(key string) error {
 	}{EncryptionKey: key}
 
 	return storageservice.Post(storageservice.setEncryptionKeyTarget, t)
+}
+
+// Metrics gets the metrics for this storage pool.
+func (storageservice *StorageService) Metrics() (*StorageServiceMetrics, error) {
+	if storageservice.metrics == "" {
+		return nil, nil
+	}
+	return GetStorageServiceMetrics(storageservice.GetClient(), storageservice.metrics)
 }

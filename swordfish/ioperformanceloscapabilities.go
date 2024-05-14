@@ -59,6 +59,9 @@ type IOPerformanceLoSCapabilities struct {
 	// MinSupportedIoOperationLatencyMicroseconds shall be the minimum supported
 	// average IO latency in microseconds calculated over the SamplePeriod
 	MinSupportedIoOperationLatencyMicroseconds int
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// SupportedIOWorkloads shall be a collection of supported workloads.
 	SupportedIOWorkloads []IOWorkload
 	// SupportedLinesOfService shall be a collection of supported IO performance

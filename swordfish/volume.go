@@ -13,6 +13,74 @@ import (
 	"github.com/stmcginnis/gofish/redfish"
 )
 
+type ALUA struct {
+	// ANAGroupID shall contain the ANA group id for this volume.
+	ANAGroupID int64
+}
+
+type LBAFormat struct {
+	// LBADataSizeBytes shall be the LBA data size reported in bytes.
+	LBADataSizeBytes int
+	// LBAFormatType shall be the LBA format type. This property is intended for capabilities instrumentation.
+	LBAFormatType LBAFormatType
+	// LBAMetadataSizeBytes shall be the LBA metadata size reported in bytes.
+	LBAMetadataSizeBytes int
+	// RelativePerformance shall be the LBA Relative Performance type. This field indicates the relative performance of
+	// the LBA format indicated relative to other LBA formats supported by the controller. This property is intended
+	// for capabilities instrumentation.
+	RelativePerformance LBARelativePerformanceType
+}
+
+type LBAFormatType string
+
+const (
+	// LBAFormat0LBAFormatType indicates the LBA data size supported.
+	LBAFormat0LBAFormatType LBAFormatType = "LBAFormat0"
+	// LBAFormat1LBAFormatType indicates the LBA data size supported.
+	LBAFormat1LBAFormatType LBAFormatType = "LBAFormat1"
+	// LBAFormat10LBAFormatType indicates the LBA data size supported.
+	LBAFormat10LBAFormatType LBAFormatType = "LBAFormat10"
+	// LBAFormat11LBAFormatType indicates the LBA data size supported.
+	LBAFormat11LBAFormatType LBAFormatType = "LBAFormat11"
+	// LBAFormat12LBAFormatType indicates the LBA data size supported.
+	LBAFormat12LBAFormatType LBAFormatType = "LBAFormat12"
+	// LBAFormat13LBAFormatType indicates the LBA data size supported.
+	LBAFormat13LBAFormatType LBAFormatType = "LBAFormat13"
+	// LBAFormat14LBAFormatType indicates the LBA data size supported.
+	LBAFormat14LBAFormatType LBAFormatType = "LBAFormat14"
+	// LBAFormat15LBAFormatType indicates the LBA data size supported.
+	LBAFormat15LBAFormatType LBAFormatType = "LBAFormat15"
+	// LBAFormat2LBAFormatType indicates the LBA data size supported.
+	LBAFormat2LBAFormatType LBAFormatType = "LBAFormat2"
+	// LBAFormat3LBAFormatType indicates the LBA data size supported.
+	LBAFormat3LBAFormatType LBAFormatType = "LBAFormat3"
+	// LBAFormat4LBAFormatType indicates the LBA data size supported.
+	LBAFormat4LBAFormatType LBAFormatType = "LBAFormat4"
+	// LBAFormat5LBAFormatType indicates the LBA data size supported.
+	LBAFormat5LBAFormatType LBAFormatType = "LBAFormat5"
+	// LBAFormat6LBAFormatType indicates the LBA data size supported.
+	LBAFormat6LBAFormatType LBAFormatType = "LBAFormat6"
+	// LBAFormat7LBAFormatType indicates the LBA data size supported.
+	LBAFormat7LBAFormatType LBAFormatType = "LBAFormat7"
+	// LBAFormat8LBAFormatType indicates the LBA data size supported.
+	LBAFormat8LBAFormatType LBAFormatType = "LBAFormat8"
+	// LBAFormat9LBAFormatType indicates the LBA data size supported.
+	LBAFormat9LBAFormatType LBAFormatType = "LBAFormat9"
+)
+
+type LBARelativePerformanceType string
+
+const (
+	// BestLBARelativePerformanceType indicates the best performance.
+	BestLBARelativePerformanceType LBARelativePerformanceType = "Best"
+	// BetterLBARelativePerformanceType indicates the bestbetter performance.
+	BetterLBARelativePerformanceType LBARelativePerformanceType = "Better"
+	// DegradedLBARelativePerformanceType indicates degraded performance.
+	DegradedLBARelativePerformanceType LBARelativePerformanceType = "Degraded"
+	// GoodLBARelativePerformanceType indicates good performance.
+	GoodLBARelativePerformanceType LBARelativePerformanceType = "Good"
+)
+
 // InitializeType is
 type InitializeType string
 
@@ -148,6 +216,17 @@ const (
 	OffReadCachePolicyType ReadCachePolicyType = "Off"
 )
 
+type InitializeMethod string
+
+const (
+	// BackgroundInitializeMethod means the volume will be available for use immediately, with data erasure and preparation to happen as background tasks.
+	BackgroundInitializeMethod InitializeMethod = "Background"
+	// ForegroundInitializeMethod means data erasure and preparation tasks will complete before the volume is presented as available for use.
+	ForegroundInitializeMethod InitializeMethod = "Foreground"
+	// SkipInitializeMethod means the volume will be available for use immediately, with no preparation.
+	SkipInitializeMethod InitializeMethod = "Skip"
+)
+
 // VolumeUsageType is the type of volume usage.
 type VolumeUsageType string
 
@@ -234,6 +313,126 @@ const (
 	OEMWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "Oem"
 )
 
+type NamespaceType string
+
+const (
+	// BlockNamespaceType indicates the namespace is configured for use with a block storage interface.
+	BlockNamespaceType NamespaceType = "Block"
+	// ComputationalNamespaceType indicates the namespace is configured for use with a computational storage interface.
+	ComputationalNamespaceType NamespaceType = "Computational"
+	// KeyValueNamespaceType indicates the namespace is configured for use with a KeyValue interface.
+	KeyValueNamespaceType NamespaceType = "KeyValue"
+	// ZNSNamespaceType indicates the namespace is configured for use with a zoned storage interface.
+	ZNSNamespaceType NamespaceType = "ZNS"
+)
+
+// NVMeNamespaceProperties This contains properties to use when Volume is used to describe an NVMe Namespace.
+type NVMeNamespaceProperties struct {
+	// FormattedLBASize shall contain the LBA data size and metadata size combination that the namespace has been
+	// formatted with. This is a 4-bit data structure.
+	FormattedLBASize string
+	// IsShareable shall indicate whether the namespace is shareable.
+	IsShareable bool
+	// LBAFormat shall describe the current LBA format ID and corresponding detailed properties, such as the LBA data
+	// size and metadata size. Use the LBAFormats property to describe namespace capabilities in a collection
+	// capabilities annotation.
+	LBAFormat LBAFormat
+	// LBAFormats shall describe the LBA format IDs and corresponding detailed properties, such as the LBA data size
+	// and metadata size. This property is intended for use in a collection capabilities annotation. Use the LBAFormat
+	// property on an instance of a namespace.
+	LBAFormats []LBAFormat
+	// LBAFormatsSupported shall be a list of the LBA formats supported for the namespace, or potential namespaces.
+	LBAFormatsSupported []LBAFormatType
+	// MetadataTransferredAtEndOfDataLBA shall indicate whether or not the metadata is transferred at the end of the
+	// LBA creating an extended data LBA.
+	MetadataTransferredAtEndOfDataLBA bool
+	// NVMeVersion shall contain the version of the NVMe Base Specification supported.
+	NVMeVersion string
+	// NamespaceFeatures shall contain a set of Namespace Features.
+	NamespaceFeatures NamespaceFeatures
+	// NamespaceID shall contain the NVMe Namespace Identifier for this namespace. This property shall be a hex value.
+	// Namespace identifiers are not durable and do not have meaning outside the scope of the NVMe subsystem. NSID 0x0,
+	// 0xFFFFFFFF, 0xFFFFFFFE are special purpose values.
+	NamespaceID string
+	// NamespaceType shall identify the type of namespace.
+	NamespaceType NamespaceType
+	// NumberLBAFormats shall contain the number of LBA data size and metadata size combinations supported by this
+	// namespace. The value of this property is between 0 and 16. LBA formats with an index set beyond this value will
+	// not be supported.
+	NumberLBAFormats int
+	// SupportsIOPerformanceHints shall indicate whether the namespace supports IO performance hints.
+	SupportsIOPerformanceHints bool
+	// SupportsMultipleNamespaceAttachments shall indicate whether the namespace may be attached to two or more
+	// controllers.
+	SupportsMultipleNamespaceAttachments bool
+	// Type shall identify the type of namespace.
+	Type NamespaceType
+}
+
+// NamespaceFeatures
+type NamespaceFeatures struct {
+	// SupportsAtomicTransactionSize shall indicate whether or not the NVM fields for Namespace preferred write
+	// granularity (NPWG), write alignment (NPWA), deallocate granularity (NPDG), deallocate alignment (NPDA) and
+	// optimal write size (NOWS) are defined for this namespace and should be used by the host for I/O optimization.
+	SupportsAtomicTransactionSize bool
+	// SupportsDeallocatedOrUnwrittenLBError shall indicate that the controller supports deallocated or unwritten
+	// logical block error for this namespace.
+	SupportsDeallocatedOrUnwrittenLBError bool
+	// SupportsIOPerformanceHints shall indicate that the Namespace Atomic Write Unit Normal (NAWUN), Namespace Atomic
+	// Write Unit Power Fail (NAWUPF), and Namespace Atomic Compare and Write Unit (NACWU) fields are defined for this
+	// namespace and should be used by the host for this namespace instead of the controller-level properties AWUN,
+	// AWUPF, and ACWU.
+	SupportsIOPerformanceHints bool
+	// SupportsNGUIDReuse shall indicate that the namespace supports the use of an NGUID (namespace globally unique
+	// identifier) value.
+	SupportsNGUIDReuse bool
+	// SupportsThinProvisioning shall indicate whether or not the NVMe Namespace supports thin provisioning.
+	// Specifically, the namespace capacity reported may be less than the namespace size.
+	SupportsThinProvisioning bool
+}
+
+type Operation struct {
+	// AssociatedFeaturesRegistry A reference to the task associated with the operation if any.
+	AssociatedFeaturesRegistry string
+	// Operation shall contain the type of the operation.
+	Operation OperationType
+	// PercentageComplete The percentage of the operation that has been completed.
+	PercentageComplete int
+}
+
+type OperationType string
+
+const (
+	// ChangeRAIDTypeOperationType indicates a ChangeRAIDType operation is being performed.
+	ChangeRAIDTypeOperationType OperationType = "ChangeRAIDType"
+	// ChangeStripSizeOperationType indicates a ChangeStripSize operation is being performed.
+	ChangeStripSizeOperationType OperationType = "ChangeStripSize"
+	// CheckConsistencyOperationType indicates a CheckConsistency operation is being performed.
+	CheckConsistencyOperationType OperationType = "CheckConsistency"
+	// CompressOperationType indicates a Compress operation is being performed.
+	CompressOperationType OperationType = "Compress"
+	// DecryptOperationType indicates a Decrypt operation is being performed.
+	DecryptOperationType OperationType = "Decrypt"
+	// DeduplicateOperationType indicates a Deduplicate operation is being performed.
+	DeduplicateOperationType OperationType = "Deduplicate"
+	// DeleteOperationType indicates a Delete operation is being performed.
+	DeleteOperationType OperationType = "Delete"
+	// EncryptOperationType indicates a Encrypt operation is being performed.
+	EncryptOperationType OperationType = "Encrypt"
+	// FormatOperationType indicates an Format operation is being performed.
+	FormatOperationType OperationType = "Format"
+	// InitializeOperationType indicates a Initialize operation is being performed.
+	InitializeOperationType OperationType = "Initialize"
+	// RebuildOperationType indicates a Rebuild operation is being performed.
+	RebuildOperationType OperationType = "Rebuild"
+	// ReplicateOperationType indicates a Replicate operation is being performed.
+	ReplicateOperationType OperationType = "Replicate"
+	// ResizeOperationType indicates a Resize operation is being performed.
+	ResizeOperationType OperationType = "Resize"
+	// ChangeRAIDTypeOperationType indicates a Sanitize operation is being performed.
+	SanitizeOperationType OperationType = "Sanitize"
+)
+
 // Volume is used to represent a volume, virtual disk, logical disk, LUN,
 // or other logical storage for a Redfish implementation.
 type Volume struct {
@@ -243,8 +442,13 @@ type Volume struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	// ALUA shall identify the ALUA properties for this volume.
+	ALUA ALUA
 	// AccessCapabilities shall specify a current storage access capability.
 	AccessCapabilities []StorageAccessCapability
+	// allocatedPools shall contain references to all storage pools allocated
+	// from this volume.
+	allocatedPools []string
 	// BlockSizeBytes shall contain size of the smallest
 	// addressable unit of the associated volume.
 	BlockSizeBytes int
@@ -253,35 +457,46 @@ type Volume struct {
 	Capacity Capacity
 	// CapacityBytes shall contain the size in bytes of the
 	// associated volume.
-	CapacityBytes int
-	// CapacitySources is Fully or partially consumed storage from a source
+	CapacityBytes int64
+	// CapacitySources is fully or partially consumed storage from a source
 	// resource. Each entry provides capacity allocation information from a
 	// named source resource.
-	CapacitySources []CapacitySource
-	// CapacitySources@odata.count is
+	capacitySources []string
+	// CapacitySourcesCount is the number of capacity sources.
 	CapacitySourcesCount int `json:"CapacitySources@odata.count"`
 	// Compressed shall contain a boolean indicator if the Volume is currently
 	// utilizing compression or not.
 	Compressed bool
+	// Connections shall contain references to all Connections that include this volume.
+	connections []string
+	// ConnectionsCount is the number of connections.
+	ConnectionsCount int `json:"Connections@odata.count"`
 	// Deduplicated shall contain a boolean indicator if the Volume is currently
 	// utilizing deduplication or not.
 	Deduplicated bool
 	// Description provides a description of this resource.
 	Description string
+	// DisplayName shall contain a user-configurable string to name the volume.
+	DisplayName string
 	// Encrypted shall contain a boolean indicator if the
 	// Volume is currently utilizing encryption or not.
 	Encrypted bool
-	// EncryptionTypes is used by this Volume.
+	// EncryptionTypes is the type of encryption used by this Volume.
 	EncryptionTypes []redfish.EncryptionTypes
-	// IOStatistics shall represent IO statistics for this volume.
-	// IOStatistics IOStatistics
+	// IOPerfModeEnabled shall indicate whether IO performance mode is enabled for the volume.
+	IOPerfModeEnabled bool
 	// Identifiers shall contain a list of all known durable
 	// names for the associated volume.
 	Identifiers []common.Identifier
-	// Links is The Links property, as described by the Redfish
-	// Specification, shall contain references to resources that are related
-	// to, but not contained by (subordinate to), this resource.
-	Links string
+	// InitializeMethod shall indicate the initialization method used for this volume. If InitializeMethod is not
+	// specified, the InitializeMethod should be Foreground. This value reflects the most recently used Initialization
+	// Method, and may be changed using the Initialize Action.
+	InitializeMethod InitializeMethod
+	// IsBootCapable shall indicate whether or not the Volume contains a boot image and is capable of booting. This
+	// property may be settable by an admin or client with visibility into the contents of the volume. This property
+	// should only be set to true when VolumeUsage is either not specified, or when VolumeUsage is set to Data or
+	// SystemData.
+	IsBootCapable bool
 	// LogicalUnitNumber shall contain host-visible LogicalUnitNumber assigned
 	// to this Volume. This property shall only be used when in a single connect
 	// configuration and no StorageGroup configuration is used.
@@ -301,10 +516,18 @@ type Volume struct {
 	// MediaSpanCount shall indicate the number of media elements used per span
 	// in the secondary RAID for a hierarchical RAID type.
 	MediaSpanCount int
+	// Metrics shall contain a link to a resource of type VolumeMetrics that specifies the metrics for this volume. IO
+	// metrics are reported in the IOStatistics property.
+	metrics string
 	// Model is The value is assigned by the manufacturer and shall
 	// represents a specific storage volume implementation.
 	Model string
-	// Operations shall contain a list of all currently
+	// NVMeNamespaceProperties shall contain properties to use when Volume is used to describe an NVMe Namespace.
+	NVMeNamespaceProperties NVMeNamespaceProperties
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// Operations shall contain a list of all operations currently
 	// running on the Volume.
 	Operations []common.Operations
 	// OptimumIOSizeBytes shall contain the optimum IO size
@@ -328,15 +551,20 @@ type Volume struct {
 	// {[(SUM(AllocatedBytes) - SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100
 	// represented as an integer value.
 	RemainingCapacityPercent int
-	// ReplicaInfo shall describe the replica relationship
-	// between this storage volume and a corresponding source volume.
-	// ReplicaInfo redfish.ReplicaInfo
-	// ReplicaTargets shall reference the target replicas that
-	// are sourced by this replica.
-	ReplicaTargets []string
-	// ReplicaTargets@odata.count is
+	// RemoteReplicaTargets shall reference the URIs to the remote target replicas that are sourced by this replica.
+	// Remote indicates that the replica is managed by a separate Swordfish service instance.
+	RemoteReplicaTargets []string
+	// ReplicaInfo shall describe the replica relationship between this storage volume and a corresponding source
+	// volume.
+	ReplicaInfo ReplicaInfo
+	// ReplicaTargets shall reference the target replicas that are sourced by this replica.
+	replicaTargets []string
+	// ReplicaTargetsCount is the number of replica targets.
 	ReplicaTargetsCount int `json:"ReplicaTargets@odata.count"`
-	// Status is
+	// ReplicationEnabled shall indicate whether or not replication is enabled on the volume. This property shall be
+	// consistent with the state reflected at the storage pool level.
+	ReplicationEnabled bool
+	// Status shall contain the status of the Volume.
 	Status common.Status
 	// StripSizeBytes is the number of consecutively addressed virtual disk
 	// blocks (bytes) mapped to consecutively addressed blocks on a single
@@ -355,38 +583,45 @@ type Volume struct {
 	// the write hole issue on the RAID volume. If no policy is enabled at the
 	// moment, this property shall be set to 'Off'.
 	WriteHoleProtectionPolicy WriteHoleProtectionPolicyType
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+
+	cacheDataVolumes []string
+	// CacheDatavolumesCount is the number of cache data volumes.
+	CacheDataVolumesCount int
+	cacheVolumeSource     string
 	// classOfService shall contain a reference to the
 	// ClassOfService that this storage volume conforms to.
-	classOfService string
+	classOfService  string
+	clientEndpoints []string
+	// ClientEndpointsCount is the number of client endpoints.
+	ClientEndpointsCount int
+	consistencyGroups    []string
+	// ConsistencyGroupsCount is the number of consistency groups associated with this volume.
+	ConsistencyGroupsCount int
+	controllers            []string
+	// ControllersCount is the number of storage controllers associated with this volume.
+	ControllersCount     int
+	dedicatedSpareDrives []string
 	// DedicatedSpareDrivesCount is the number of dedicates spare drives
 	DedicatedSpareDrivesCount int
+	drives                    []string
 	// DrivesCount is the number of associated drives.
-	DrivesCount int
+	DrivesCount           int
+	journalingMedia       string
+	owningStorageResource string
+	owningStorageService  string
+	providingStoragePool  string
+	serverEndpoints       []string
+	// ServerEndpointsCount is the number of server endpoints this volume is associated with.
+	ServerEndpointsCount int
+	spareResourceSets    []string
 	// SpareResourceSetsCount is the number of spare resources sets.
 	SpareResourceSetsCount int
-	// dedicatedSpareDrives shall be a reference to the resources that this
-	// volume is associated with and shall reference resources of type Drive.
-	// This property shall only contain references to Drive entities which are
-	// currently assigned as a dedicated spare and are able to support this Volume.
-	dedicatedSpareDrives []string
-	// DisplayName shall contain a user-configurable string to name the volume.
-	DisplayName string
-	// drives shall be a reference to the resources that this volume is
-	// associated with and shall reference resources of type Drive. This
-	// property shall only contain references to Drive entities which are
-	// currently members of the Volume, not hot spare Drives which are not
-	// currently a member of the volume.
-	drives []string
-	// SpareResourceSets referenced SpareResourceSet shall contain
-	// resources that may be utilized to replace the capacity provided by a
-	// failed resource having a compatible type.
-	spareResourceSets []string
-	// allocatedPools shall contain references to all storage pools allocated
-	// from this volume.
-	allocatedPools []string
-	// storageGroups shall contain references to all storage groups that include
-	// this volume.
-	storageGroups []string
+	storageGroups          []string
+	// StorageGroupsCount is the number of storage groups associated with this volume.
+	StorageGroupsCount int
+
 	// assignReplicaTargetTarget is the URL to send AssignReplicaTarget requests.
 	assignReplicaTargetTarget string
 	// checkConsistencyTarget is the URL to send CheckConsistency requests.
@@ -406,60 +641,61 @@ type Volume struct {
 	splitReplicationTarget string
 	// suspendReplicationTarget is the URL to send SuspendReplication requests.
 	suspendReplicationTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+}
+
+type volumeLinks struct {
+	CacheDataVolumes          common.Links
+	CacheDataVolumesCount     int `json:"CacheDataVolumes@odata.count"`
+	CacheVolumeSource         common.Link
+	ClassOfService            common.Link
+	ClientEndpoints           common.Links
+	ClientEndpointsCount      int `json:"ClientEndpoints@odata.count"`
+	ConsistencyGroups         common.Links
+	ConsistencyGroupsCount    int `json:"ConsistencyGroups@odata.count"`
+	Controllers               common.Links
+	ControllersCount          int `json:"Controllers@odata.count"`
+	DedicatedSpareDrives      common.Links
+	DedicatedSpareDrivesCount int `json:"DedicatedSpareDrives@odata.count"`
+	Drives                    common.Links
+	DrivesCount               int `json:"Drives@odata.count"`
+	JournalingMedia           common.Link
+	OwningStorageResource     common.Link
+	OwningStorageService      common.Link
+	ProvidingStoragePool      common.Link
+	ServerEndpoints           common.Links
+	ServerEndpointsCount      int `json:"ServerEndpoints@odata.count"`
+	SpareResourceSets         common.Links
+	SpareResourceSetsCount    int `json:"SpareResourceSets@odata.count"`
+	StorageGroups             common.Links
+	StorageGroupsCount        int `json:"StorageGroups@odata.count"`
+}
+
+type volumeActions struct {
+	AssignReplicaTarget            common.ActionTarget `json:"#Volume.AssignReplicaTarget"`
+	CheckConsistency               common.ActionTarget `json:"#Volume.CheckConsistency"`
+	CreateReplicaTarget            common.ActionTarget `json:"#Volume.CreateReplicaTarget"`
+	Initialize                     common.ActionTarget `json:"#Volume.Initialize"`
+	RemoveReplicaRelationship      common.ActionTarget `json:"#Volume.RemoveReplicaRelationship"`
+	ResumeReplication              common.ActionTarget `json:"#Volume.ResumeReplication"`
+	ReverseReplicationRelationship common.ActionTarget `json:"#Volume.ReverseReplicationRelationship"`
+	SplitReplication               common.ActionTarget `json:"#Volume.SplitReplication"`
+	SuspendReplication             common.ActionTarget `json:"#Volume.SuspendReplication"`
 }
 
 // UnmarshalJSON unmarshals a Volume object from the raw JSON.
 func (volume *Volume) UnmarshalJSON(b []byte) error {
 	type temp Volume
 
-	type links struct {
-		// ClassOfService shall contain a reference to the
-		// ClassOfService that this storage volume conforms to.
-		ClassOfService common.Link
-		// DedicatedSpareDrives shall be a
-		// reference to the resources that this volume is associated with and
-		// shall reference resources of type Drive. This property shall only
-		// contain references to Drive entities which are currently assigned as a
-		// dedicated spare and are able to support this Volume.
-		DedicatedSpareDrives common.Links
-		// DedicatedSpareDrives@odata.count is
-		DedicatedSpareDrivesCount int `json:"DedicatedSpareDrives@odata.count"`
-		// Drives shall be a reference to the
-		// resources that this volume is associated with and shall reference
-		// resources of type Drive. This property shall only contain references
-		// to Drive entities which are currently members of the Volume, not hot
-		// spare Drives which are not currently a member of the volume.
-		Drives common.Links
-		// Drives@odata.count is
-		DrivesCount int `json:"Drives@odata.count"`
-		// SpareResourceSets is Each referenced SpareResourceSet shall contain
-		// resources that may be utilized to replace the capacity provided by a
-		// failed resource having a compatible type.
-		SpareResourceSets common.Links
-		// SpareResourceSets@odata.count is
-		SpareResourceSetsCount int `json:"SpareResourceSets@odata.count"`
-	}
-
-	type actions struct {
-		AssignReplicaTarget            common.ActionTarget `json:"#Volume.AssignReplicaTarget"`
-		CheckConsistency               common.ActionTarget `json:"#Volume.CheckConsistency"`
-		CreateReplicaTarget            common.ActionTarget `json:"#Volume.CreateReplicaTarget"`
-		Initialize                     common.ActionTarget `json:"#Volume.Initialize"`
-		RemoveReplicaRelationship      common.ActionTarget `json:"#Volume.RemoveReplicaRelationship"`
-		ResumeReplication              common.ActionTarget `json:"#Volume.ResumeReplication"`
-		ReverseReplicationRelationship common.ActionTarget `json:"#Volume.ReverseReplicationRelationship"`
-		SplitReplication               common.ActionTarget `json:"#Volume.SplitReplication"`
-		SuspendReplication             common.ActionTarget `json:"#Volume.SuspendReplication"`
-	}
-
 	var t struct {
 		temp
-		AllocatedPools common.Links
-		StorageGroups  common.Links
-		Links          links
-		Actions        actions
+		AllocatedPools  common.Links
+		CapacitySources common.Links
+		Connections     common.Links
+		Metrics         common.Link
+		ReplicaTargets  common.Links
+		StorageGroups   common.Links
+		Links           volumeLinks
+		Actions         volumeActions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -470,14 +706,40 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*volume = Volume(t.temp)
 	volume.allocatedPools = t.AllocatedPools.ToStrings()
+	volume.capacitySources = t.CapacitySources.ToStrings()
+	volume.connections = t.Connections.ToStrings()
+	volume.metrics = t.Metrics.String()
+	volume.replicaTargets = t.ReplicaTargets.ToStrings()
 	volume.storageGroups = t.StorageGroups.ToStrings()
+
+	volume.cacheDataVolumes = t.Links.CacheDataVolumes.ToStrings()
+	volume.CacheDataVolumesCount = t.Links.CacheDataVolumesCount
+	volume.cacheVolumeSource = t.Links.CacheVolumeSource.String()
 	volume.classOfService = t.Links.ClassOfService.String()
+	volume.clientEndpoints = t.Links.ClientEndpoints.ToStrings()
+	volume.ClientEndpointsCount = t.Links.ClientEndpointsCount
+	volume.consistencyGroups = t.Links.ConsistencyGroups.ToStrings()
+	volume.ConsistencyGroupsCount = t.Links.ConsistencyGroupsCount
+	volume.controllers = t.Links.Controllers.ToStrings()
+	volume.ControllersCount = t.Links.ControllersCount
 	volume.dedicatedSpareDrives = t.Links.DedicatedSpareDrives.ToStrings()
-	volume.drives = t.Links.Drives.ToStrings()
-	volume.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
 	volume.DedicatedSpareDrivesCount = t.Links.DedicatedSpareDrivesCount
+	volume.drives = t.Links.Drives.ToStrings()
 	volume.DrivesCount = t.Links.DrivesCount
+	volume.journalingMedia = t.Links.JournalingMedia.String()
+	volume.owningStorageResource = t.Links.OwningStorageResource.String()
+	volume.owningStorageService = t.Links.OwningStorageService.String()
+	volume.providingStoragePool = t.Links.ProvidingStoragePool.String()
+	volume.serverEndpoints = t.Links.ServerEndpoints.ToStrings()
+	volume.ServerEndpointsCount = t.Links.ServerEndpointsCount
+	volume.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
 	volume.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
+
+	if len(volume.storageGroups) == 0 {
+		volume.storageGroups = t.Links.StorageGroups.ToStrings()
+		volume.StorageGroupsCount = t.Links.StorageGroupsCount
+	}
+
 	volume.assignReplicaTargetTarget = t.Actions.AssignReplicaTarget.Target
 	volume.checkConsistencyTarget = t.Actions.CheckConsistency.Target
 	volume.createReplicaTargetTarget = t.Actions.CreateReplicaTarget.Target
@@ -513,10 +775,13 @@ func (volume *Volume) Update() error {
 		"DisplayName",
 		"Encrypted",
 		"EncryptionTypes",
+		"IOPerfModeEnabled",
+		"IsBootCapable",
 		"LowSpaceWarningThresholdPercents",
 		"ProvisioningPolicy",
 		"ReadCachePolicy",
 		"RecoverableCapacitySourceCount",
+		"ReplicationEnabled",
 		"StripSizeBytes",
 		"WriteCachePolicy",
 		"WriteHoleProtectionPolicy",
@@ -577,6 +842,36 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 	return result, collectionError
 }
 
+// CacheDataVolumes gets the data volumes this volume serves as a cache volume.
+func (volume *Volume) CacheDataVolumes() ([]*Volume, error) {
+	var result []*Volume
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range volume.cacheDataVolumes {
+		item, err := GetVolume(volume.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// CacheVolumeSources gets the cache volume source for this volume.
+func (volume *Volume) CacheVolumeSource() (*Volume, error) {
+	if volume.cacheVolumeSource == "" {
+		return nil, nil
+	}
+
+	return GetVolume(volume.GetClient(), volume.cacheVolumeSource)
+}
+
 // ClassOfService gets the class of service that this storage volume conforms to.
 func (volume *Volume) ClassOfService() (*ClassOfService, error) {
 	if volume.classOfService == "" {
@@ -586,15 +881,80 @@ func (volume *Volume) ClassOfService() (*ClassOfService, error) {
 	return GetClassOfService(volume.GetClient(), volume.classOfService)
 }
 
+// ClientEndpoints gets the client Endpoints associated with this volume.
+func (volume *Volume) ClientEndpoints() ([]*redfish.Endpoint, error) {
+	var result []*redfish.Endpoint
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range volume.clientEndpoints {
+		item, err := redfish.GetEndpoint(volume.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// ConsistencyGroups gets the ConsistencyGroups associated with this volume.
+func (volume *Volume) ConsistencyGroups() ([]*ConsistencyGroup, error) {
+	var result []*ConsistencyGroup
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range volume.consistencyGroups {
+		item, err := GetConsistencyGroup(volume.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Controllers gets the controllers (of type StorageController) associated with
+// this volume. When the volume is of type NVMe, these may be both the physical
+// and logical controller representations.
+func (volume *Volume) Controllers() ([]*redfish.StorageController, error) {
+	var result []*redfish.StorageController
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range volume.controllers {
+		item, err := redfish.GetStorageController(volume.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
 // getDrives gets a set of referenced drives.
 func (volume *Volume) getDrives(links []string) ([]*redfish.Drive, error) {
 	var result []*redfish.Drive
 
 	collectionError := common.NewCollectionError()
-	for _, driveLink := range links {
-		drive, err := redfish.GetDrive(volume.GetClient(), driveLink)
+	for _, uri := range links {
+		drive, err := redfish.GetDrive(volume.GetClient(), uri)
 		if err != nil {
-			collectionError.Failures[driveLink] = err
+			collectionError.Failures[uri] = err
 		} else {
 			result = append(result, drive)
 		}
@@ -616,6 +976,54 @@ func (volume *Volume) DedicatedSpareDrives() ([]*redfish.Drive, error) {
 // Drives references the Drives that are associated with this volume.
 func (volume *Volume) Drives() ([]*redfish.Drive, error) {
 	return volume.getDrives(volume.drives)
+}
+
+// OwningStorageResource gets the Storage resource that owns or contains this volume.
+func (volume *Volume) OwningStorageResource() (*redfish.Storage, error) {
+	if volume.owningStorageResource == "" {
+		return nil, nil
+	}
+
+	return redfish.GetStorage(volume.GetClient(), volume.owningStorageResource)
+}
+
+// OwningStorageService gets the StorageService that owns or contains this volume.
+func (volume *Volume) OwningStorageService() (*StorageService, error) {
+	if volume.owningStorageService == "" {
+		return nil, nil
+	}
+
+	return GetStorageService(volume.GetClient(), volume.owningStorageService)
+}
+
+// ProvidingStoragePool gets the StoragePool resource that provides this volume resource.
+func (volume *Volume) ProvidingStoragePool() (*StoragePool, error) {
+	if volume.providingStoragePool == "" {
+		return nil, nil
+	}
+
+	return GetStoragePool(volume.GetClient(), volume.providingStoragePool)
+}
+
+// ServerEndpoints gets the server Endpoints associated with this volume.
+func (volume *Volume) ServerEndpoints() ([]*redfish.Endpoint, error) {
+	var result []*redfish.Endpoint
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range volume.serverEndpoints {
+		item, err := redfish.GetEndpoint(volume.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
 }
 
 // SpareResourceSets gets the spare resources that can be used for this volume.
@@ -640,16 +1048,17 @@ func (volume *Volume) SpareResourceSets() ([]*SpareResourceSet, error) {
 }
 
 // StorageGroups gets the storage groups that associated with this volume.
+// This property is deprecated in favor of the Connections property.
 func (volume *Volume) StorageGroups() ([]*StorageGroup, error) {
 	var result []*StorageGroup
 
 	collectionError := common.NewCollectionError()
-	for _, sgLink := range volume.storageGroups {
-		sg, err := GetStorageGroup(volume.GetClient(), sgLink)
+	for _, uri := range volume.storageGroups {
+		item, err := GetStorageGroup(volume.GetClient(), uri)
 		if err != nil {
-			collectionError.Failures[sgLink] = err
+			collectionError.Failures[uri] = err
 		} else {
-			result = append(result, sg)
+			result = append(result, item)
 		}
 	}
 
@@ -660,17 +1069,17 @@ func (volume *Volume) StorageGroups() ([]*StorageGroup, error) {
 	return result, collectionError
 }
 
-// StoragePools gets the storage pools that associated with this volume.
-func (volume *Volume) StoragePools() ([]*StoragePool, error) {
+// AllocatedPools gets the storage pools that associated with this volume.
+func (volume *Volume) AllocatedPools() ([]*StoragePool, error) {
 	var result []*StoragePool
 
 	collectionError := common.NewCollectionError()
-	for _, sgLink := range volume.allocatedPools {
-		sg, err := GetStoragePool(volume.GetClient(), sgLink)
+	for _, uri := range volume.allocatedPools {
+		item, err := GetStoragePool(volume.GetClient(), uri)
 		if err != nil {
-			collectionError.Failures[sgLink] = err
+			collectionError.Failures[uri] = err
 		} else {
-			result = append(result, sg)
+			result = append(result, item)
 		}
 	}
 
@@ -679,6 +1088,57 @@ func (volume *Volume) StoragePools() ([]*StoragePool, error) {
 	}
 
 	return result, collectionError
+}
+
+// CapacitySources gets the space allocations to this volume.
+func (volume *Volume) CapacitySources() ([]*CapacitySource, error) {
+	var result []*CapacitySource
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range volume.capacitySources {
+		item, err := GetCapacitySource(volume.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Connections gets the connections that include this volume.
+func (volume *Volume) Connections() ([]*redfish.Connection, error) {
+	var result []*redfish.Connection
+
+	collectionError := common.NewCollectionError()
+	for _, uri := range volume.connections {
+		item, err := redfish.GetConnection(volume.GetClient(), uri)
+		if err != nil {
+			collectionError.Failures[uri] = err
+		} else {
+			result = append(result, item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}
+
+// Metrics gets the metrics for this volume. IO metrics are reported in the IOStatistics property.
+func (volume *Volume) Metrics() (*VolumeMetrics, error) {
+	if volume.metrics == "" {
+		return nil, nil
+	}
+
+	return GetVolumeMetrics(volume.GetClient(), volume.metrics)
 }
 
 // AssignReplicaTarget is used to establish a replication relationship by

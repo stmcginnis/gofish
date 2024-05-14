@@ -85,6 +85,10 @@ type FileShare struct {
 	// {[(SUM(AllocatedBytes) - SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100
 	// represented as an integer value.
 	RemainingCapacityPercent int
+	// ReplicationEnabled shall indicate whether or not replication is enabled
+	// on the file share. This property shall be consistent with the state
+	// reflected at the storage pool level.
+	ReplicationEnabled bool
 	// RootAccess shall indicate whether Root
 	// access is allowed by the file share. The default value for this
 	// property is false.
@@ -148,6 +152,7 @@ func (fileshare *FileShare) Update() error {
 		"FileShareQuotaType",
 		"FileShareTotalQuotaBytes",
 		"LowSpaceWarningThresholdPercents",
+		"ReplicationEnabled",
 	}
 
 	originalElement := reflect.ValueOf(original).Elem()

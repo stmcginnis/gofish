@@ -51,6 +51,15 @@ const (
 	SequentiallyConsistentConsistencyType ConsistencyType = "SequentiallyConsistent"
 )
 
+type ReplicaFaultDomain string
+
+const (
+	// LocalReplicaFaultDomain indicates that the source and target replicas are contained within a single fault domain.
+	LocalReplicaFaultDomain ReplicaFaultDomain = "Local"
+	// RemoteReplicaFaultDomain indicates that the source and target replicas are in separate fault domains.
+	RemoteReplicaFaultDomain ReplicaFaultDomain = "Remote"
+)
+
 // ReplicaPriority is used to specify the priority of background copy
 // engine I/O relative to host I/O operations during a sequential
 // background copy operation.
@@ -335,8 +344,12 @@ type ReplicaInfo struct {
 	// PercentSynced shall be an average of the PercentSynced across all
 	// members of the group.
 	PercentSynced int
+	// RemoteSourceReplica shall describe the fault domain (local or remote) of the replica relationship.
+	RemoteSourceReplica string
 	// Replica shall reference the resource that is the source of this replica.
 	replica string
+	// ReplicaFaultDomain shall describe the fault domain (local or remote) of the replica relationship.
+	ReplicaFaultDomain ReplicaFaultDomain
 	// ReplicaPriority shall specify the priority
 	// of background copy engine I/O to be managed relative to host I/O
 	// operations during a sequential background copy operation.
@@ -370,6 +383,9 @@ type ReplicaInfo struct {
 	// represented by ReplicaState. When RequestedState reaches the requested
 	// state, this property shall be null.
 	RequestedReplicaState ReplicaState
+	// SourceReplica shall contain the URI to the source replica when located on a different Swordfish service
+	// instance.
+	SourceReplica string
 	// SyncMaintained is If true, Synchronization shall be maintained. The
 	// default value for this property is false.
 	SyncMaintained bool
@@ -441,6 +457,9 @@ type StorageReplicaInfo struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 }
 
 // GetStorageReplicaInfo will get a StorageReplicaInfo instance from the service.
