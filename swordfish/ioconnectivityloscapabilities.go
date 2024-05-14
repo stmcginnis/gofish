@@ -29,6 +29,9 @@ type IOConnectivityLoSCapabilities struct {
 	MaxSupportedBytesPerSecond int64
 	// MaxSupportedIOPS shall be the maximum IOPS that a connection can support.
 	MaxSupportedIOPS int
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// SupportedAccessProtocols is Access protocols supported by this service
 	// option. NOTE: SMB+NFS* requires that SMB and at least one of NFSv3 or
 	// NFXv4 are also selected, (i.e. {'SMB', 'NFSv4', 'SMB+NFS*'}).

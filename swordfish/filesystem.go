@@ -150,6 +150,7 @@ type FileSystem struct {
 	// MaxFileNameLengthBytes shall specify the maximum length of a file name
 	// within the file system.
 	MaxFileNameLengthBytes int64
+	metrics                string
 	// RecoverableCapacitySourceCount is the number of available capacity source
 	// resources currently available in the event that an equivalent capacity
 	// source resource fails.
@@ -205,6 +206,7 @@ func (filesystem *FileSystem) UnmarshalJSON(b []byte) error {
 		ExportedShares common.Link
 		ReplicaTargets common.Links
 		Links          links
+		Metrics        common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -228,6 +230,15 @@ func (filesystem *FileSystem) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// Metrics gets the filesystem metrics.
+func (filesystem *FileSystem) Metrics() (*FileSystemMetrics, error) {
+	if filesystem.metrics == "" {
+		return nil, nil
+	}
+
+	return GetFileSystemMetrics(filesystem.GetClient(), filesystem.metrics)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (filesystem *FileSystem) Update() error {
 	// Get a representation of the object's original state so we can find what
@@ -249,6 +260,7 @@ func (filesystem *FileSystem) Update() error {
 		"LowSpaceWarningThresholdPercents",
 		"MaxFileNameLengthBytes",
 		"RecoverableCapacitySourceCount",
+		"ReplicationEnabled",
 	}
 
 	originalElement := reflect.ValueOf(original).Elem()

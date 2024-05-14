@@ -32,21 +32,31 @@ const (
 
 // CHAPInformation is used for CHAP auth.
 type CHAPInformation struct {
-	// InitiatorCHAPPassword shall be the
-	// shared secret for CHAP authentication.
+	// CHAPPassword shall be the password when CHAP authentication is specified.
+	CHAPPassword string
+	// CHAPUser shall be the username when CHAP authentication is specified.
+	CHAPUser string
+	// InitiatorCHAPPassword shall be the shared secret for Mutual (2-way) CHAP
+	// authentication.
 	InitiatorCHAPPassword string
-	// InitiatorCHAPUser is If present, this property is the initiator CHAP
-	// username for authentication. For example, with an iSCSI scenario, use
-	// the initiator iQN.
+	// InitiatorCHAPUser If present, this property is the initiator CHAP username
+	// for Mutual (2-way) authentication. For example, with an iSCSI scenario,
+	// use the initiator iQN.
 	InitiatorCHAPUser string
-	// TargetCHAPUser shall be the CHAP
-	// Username for 2-way CHAP authentication. For example, with an iSCSI
-	// scenario, use the target iQN. In a FC with DHCHAP, this value will be
-	// a FC WWN.
+	// TargetCHAPPassword shall be the CHAP Secret for 2-way CHAP authentication.
+	TargetCHAPPassword string
+	// TargetCHAPUser shall be the Target CHAP Username for Mutual (2-way) CHAP
+	// authentication. For example, with an iSCSI scenario, use the target iQN.
 	TargetCHAPUser string
-	// TargetPassword shall be the CHAP Secret
-	// for 2-way CHAP authentication.
-	TargetPassword string
+}
+
+// DHCHAPInformation User name and password values for target and initiator
+// endpoints when CHAP authentication is used.
+type DHCHAPInformation struct {
+	// LocalDHCHAPAuthSecret shall be the local DHCHAP auth secret for DHCHAP authentication.
+	LocalDHCHAPAuthSecret string
+	// PeerDHCHAPAuthSecret shall be the peer DHCHAP auth secret for DHCHAP authentication.
+	PeerDHCHAPAuthSecret string
 }
 
 // StorageGroup is a set of related storage entities (volumes, file systems...)
@@ -90,6 +100,7 @@ type StorageGroup struct {
 	MappedVolumes []MappedVolume
 	// MembersAreConsistent shall be set to true if all members are in a
 	// consistent state. The default value for this property is false.
+	// Deprecated in favor of using the ConsistencyGroup for Consistency set management.
 	MembersAreConsistent bool
 	// ReplicaInfo shall describe the replication relationship between this
 	// storage group and a corresponding source storage group.
@@ -110,11 +121,15 @@ type StorageGroup struct {
 	// Status is the status of this group.
 	Status common.Status
 	// VolumesCount is the number of volumes.
+	// These references are replaced by the MappedVolumes array in StorageGroup.
 	VolumesCount int `json:"Volumes@odata.count"`
 	// VolumesAreExposed shall be set to true if storage volumes are exposed to
 	// the paths defined by the client and server endpoints. The default value
 	// for this property is false.
 	VolumesAreExposed bool
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+
 	// ChildStorageGroups is an array of references to StorageGroups are
 	// incorporated into this StorageGroup
 	childStorageGroups []string
@@ -128,12 +143,11 @@ type StorageGroup struct {
 	parentStorageGroups []string
 	// ParentStorageGroupsCount is the number of parent storage groups.
 	ParentStorageGroupsCount int
+
 	// exposeVolumesTarget is the URL to for the ExposeVolumes action.
 	exposeVolumesTarget string
 	// hideVolumesTarget is the URL to for the HideVolumes action.
 	hideVolumesTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a StorageGroup object from the raw JSON.
@@ -169,6 +183,7 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 	storagegroup.classOfService = t.Links.ClassOfService.String()
 	storagegroup.parentStorageGroups = t.Links.ParentStorageGroups.ToStrings()
 	storagegroup.ParentStorageGroupsCount = t.Links.ParentStorageGroupsCount
+
 	storagegroup.exposeVolumesTarget = t.Actions.ExposeVolumes.Target
 	storagegroup.hideVolumesTarget = t.Actions.HideVolumes.Target
 
