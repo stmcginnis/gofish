@@ -229,6 +229,10 @@ type PCIeDevice struct {
 	// Model shall be the name by which the manufacturer generally refers to the
 	// PCIe device.
 	Model string
+	// Oem shall contain the OEM extensions. All values for properties that
+	// this object contains shall conform to the Redfish Specification
+	// described requirements.
+	Oem json.RawMessage
 	// PCIeInterface is used to connect this PCIe Device to its host or
 	// upstream switch.
 	PCIeInterface PCIeInterface

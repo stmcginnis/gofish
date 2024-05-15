@@ -111,6 +111,10 @@ type PCIeFunction struct {
 	// FunctionType shall be the function type of the PCIe device function such
 	// as Physical or Virtual.
 	FunctionType FunctionType
+	// Oem shall contain the OEM extensions. All values for properties that
+	// this object contains shall conform to the Redfish Specification
+	// described requirements.
+	Oem json.RawMessage
 	// RevisionID shall be the PCI Revision ID of the PCIe device function.
 	RevisionID string
 	// Status shall contain any status or health properties of the resource.
