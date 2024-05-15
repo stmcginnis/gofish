@@ -5,8 +5,26 @@
 package redfish
 
 import (
+	"encoding/json"
+
 	"github.com/stmcginnis/gofish/common"
 )
+
+// The additional versions of this software.
+type AdditionalVersions struct {
+	// The bootloader version contained in this software, such as U-Boot or UEFI.
+	Bootloader string
+	// This property shall contain the kernel version contained in this software.
+	// For strict POSIX software, the value shall contain the output of uname -srm.
+	// For Microsoft Windows, the value shall contain the output of ver.
+	Kernel string
+	// The microcode version contained in this software, such as processor microcode.
+	Microcode string
+	// The operating system name of this software.
+	OSDistribution string
+	// Oem property shall contain the Oem extensions.
+	Oem json.RawMessage
+}
 
 // SoftwareInventory is This Resource contains a single software
 // component that this Redfish Service manages.
@@ -21,6 +39,8 @@ type SoftwareInventory struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
+	// The additional versions of this software.
+	AdditionalVersions AdditionalVersions
 	// LowestSupportedVersion is used for the Version property.
 	LowestSupportedVersion string
 	// Manufacturer is This property shall represent the name of the
