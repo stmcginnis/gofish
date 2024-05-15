@@ -159,6 +159,8 @@ type Drive struct {
 	// IndicatorLED shall contain the indicator light state for the indicator
 	// light associated with this drive.
 	IndicatorLED common.IndicatorLED
+	// AMI-specific
+	IsRaidMember *int
 	// Location shall contain location information of the associated drive.
 	Location []common.Location
 	// Manufacturer shall be the name of the organization responsible for
