@@ -144,7 +144,7 @@ func (license *License) UnmarshalJSON(b []byte) error {
 		// provide this property when installing a license to apply the license to specific devices. If not provided when
 		// installing a license, the service may determine the devices to which the license applies. This property shall
 		// not be present if the AuthorizationScope property contains the value 'Service'.
-		AuthorizedDevices []string
+		AuthorizedDevices common.Links
 		// AuthorizedDevices@odata.count
 		AuthorizedDevicesCount int `json:"AuthorizedDevices@odata.count"`
 		// TargetServices shall contain an array of links to resources of type Manager that represent the services where
@@ -167,7 +167,7 @@ func (license *License) UnmarshalJSON(b []byte) error {
 	*license = License(t.temp)
 
 	// Extract the links to other entities for later
-	license.AuthorizedDevices = t.Links.AuthorizedDevices
+	license.AuthorizedDevices = t.Links.AuthorizedDevices.ToStrings()
 	license.AuthorizedDevicesCount = t.Links.AuthorizedDevicesCount
 	license.targetServices = t.Links.TargetServices.ToStrings()
 	license.TargetServicesCount = t.Links.TargetServicesCount
