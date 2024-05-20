@@ -178,7 +178,7 @@ func TestOutletPowerControl(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.PowerControl(OffPowerState)
+	err = result.PowerControl(OffActionPowerState)
 	if err != nil {
 		t.Errorf("Error making PowerControl call: %s", err)
 	}
