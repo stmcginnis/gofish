@@ -248,9 +248,9 @@ func (outlet *Outlet) UnmarshalJSON(b []byte) error {
 }
 
 // PowerControl controls the power state of the outlet.
-func (outlet *Outlet) PowerControl(powerState PowerState) error {
+func (outlet *Outlet) PowerControl(powerState ActionPowerState) error {
 	params := struct {
-		PowerState PowerState
+		PowerState ActionPowerState
 	}{
 		PowerState: powerState,
 	}
