@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"math/big"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -86,7 +87,7 @@ type Attribute struct {
 	// The UEFI namespace ID for the attribute.
 	UefiNamespaceID string `json:"UefiNamespaceId"`
 	// The upper limit for an integer attribute.
-	UpperBound int64
+	UpperBound big.Int
 	// 	An array of the possible values for enumerated attribute values.
 	Value []AttributeValue
 	// A valid regular expression, according to the Perl regular expression dialect,
