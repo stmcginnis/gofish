@@ -183,7 +183,7 @@ type ComponentIntegrity struct {
 	spdmGetSignedMeasurementsTarget string
 	tpmGetSignedMeasurementsTarget  string
 	componentsProtected             []string
-	// ComponentsProtectedCount is the number of resources protected by the compoent identified by TargetComponentURI.
+	// ComponentsProtectedCount is the number of resources protected by the component identified by TargetComponentURI.
 	ComponentsProtectedCount int
 }
 

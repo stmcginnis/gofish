@@ -17,7 +17,7 @@ var metricDefinitonBody = `{
 	"@odata.id": "/redfish/v1/TelemetryService/MetricDefinitions/VoltageStatus",
 	"Id": "VoltageStatus",
 	"Name": "Voltage status Metric Definition",
-	"Description": "Status of the Voltage of Small Form Factor pluggable(SFP) Tranceiver",
+	"Description": "Status of the Voltage of Small Form Factor pluggable(SFP) Transceiver",
 	"MetricType": "Discrete",
 	"MetricDataType": "Enumeration",
 	"Accuracy": 0,
@@ -41,7 +41,7 @@ func TestMetricDefinition(t *testing.T) {
 
 	assertEquals(t, "VoltageStatus", result.ID)
 	assertEquals(t, "Voltage status Metric Definition", result.Name)
-	assertEquals(t, "Status of the Voltage of Small Form Factor pluggable(SFP) Tranceiver", result.Description)
+	assertEquals(t, "Status of the Voltage of Small Form Factor pluggable(SFP) Transceiver", result.Description)
 	assertEquals(t, "0", fmt.Sprintf("%.0f", result.Accuracy))
 	assertEquals(t, "PT60.0S", result.SensingInterval)
 	assertEquals(t, "4", fmt.Sprintf("%d", len(result.DiscreteValues)))

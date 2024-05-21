@@ -62,7 +62,7 @@ type AccelerationFunction struct {
 	UUID string
 	// Version shall describe the acceleration function version.
 	Version string
-	// endpoints is a colleection of URIs for connected endpoints.
+	// endpoints is a collection of URIs for connected endpoints.
 	endpoints []string
 	// EndpointsCount is the number of connected endpoints.
 	EndpointsCount int

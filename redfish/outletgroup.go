@@ -133,7 +133,7 @@ func (outletgroup *OutletGroup) ResetMetrics() error {
 	return outletgroup.Post(outletgroup.resetMetricsTarget, nil)
 }
 
-// Outlets get the outlets that are in this outlet gruop.
+// Outlets get the outlets that are in this outlet group.
 func (outletgroup *OutletGroup) Outlets() ([]*Outlet, error) {
 	var result []*Outlet
 

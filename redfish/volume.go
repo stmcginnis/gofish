@@ -768,7 +768,7 @@ func (volume *Volume) Initialize(initializeMethod InitializeMethod, initializeTy
 // RemoveReplicaRelationship is used to disable data synchronization between a source and
 // target volume, remove the replication relationship, and optionally delete the target volume.
 //
-// `deleteTargetVolume` indicates whether to delte the target volume as part of the operation.
+// `deleteTargetVolume` indicates whether to delete the target volume as part of the operation.
 //
 // `targetVolumeURI` is the URI to the existing target volume.
 func (volume *Volume) RemoveReplicaRelationship(deleteTargetVolume bool, targetVolumeURI string) error {

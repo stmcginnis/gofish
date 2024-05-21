@@ -35,7 +35,7 @@ type AddressPool struct {
 	GenZ APGenZ
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// endpoints is a colleection of URIs for connected endpoints.
+	// endpoints is a collection of URIs for connected endpoints.
 	endpoints []string
 	// EndpointsCount is the number of connected endpoints.
 	EndpointsCount int

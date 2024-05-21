@@ -417,7 +417,7 @@ const (
 	IfAliasIDSubtype IDSubtype = "IfAlias"
 	// Interface name, based on the ifName MIB object.
 	IfNameIDSubtype IDSubtype = "IfName"
-	// Locally assigned, based on a alpha-numeric value locally assigned.
+	// Locally assigned, based on an alphanumeric value locally assigned.
 	LocalAssignIDSubtype IDSubtype = "LocalAssign"
 	// MAC address, based on an agent detected unicast source address as defined in IEEE standard 802.
 	MacAddrIDSubtype IDSubtype = "MacAddr"
