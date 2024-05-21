@@ -299,17 +299,17 @@ const (
 	// activities to close the RAID write hole.
 	OffWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "Off"
 	// JournalingWriteHoleProtectionPolicyType The policy that uses separate
-	// block device for write-ahead logging to adddress write hole issue. All
+	// block device for write-ahead logging to address write hole issue. All
 	// write operations on the RAID volume are first logged on dedicated
 	// journaling device that is not part of the volume.
 	JournalingWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "Journaling"
 	// DistributedLogWriteHoleProtectionPolicyType The policy that
-	// distributes additional log (e.q. cheksum of the parity) among the
+	// distributes additional log (e.q. checksum of the parity) among the
 	// volume's capacity sources to address write hole issue. Additional data
 	// is used to detect data corruption on the volume.
 	DistributedLogWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "DistributedLog"
 	// OEMWriteHoleProtectionPolicyType The policy that is Oem specific. The
-	// mechanism details are unknown unless provided separatly by the Oem.
+	// mechanism details are unknown unless provided separately by the Oem.
 	OEMWriteHoleProtectionPolicyType WriteHoleProtectionPolicyType = "Oem"
 )
 

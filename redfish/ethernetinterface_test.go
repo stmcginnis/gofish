@@ -305,6 +305,6 @@ func TestEthernetInterfaceIPv6(t *testing.T) {
 	}
 
 	if result.IPv6Addresses[1].PrefixLength != 128 {
-		t.Errorf("The 3nd IPv6 address's prefix length should be 128, got: %d", result.IPv6Addresses[1].PrefixLength)
+		t.Errorf("The 3rd IPv6 address's prefix length should be 128, got: %d", result.IPv6Addresses[1].PrefixLength)
 	}
 }

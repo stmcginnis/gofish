@@ -139,7 +139,7 @@ func (ba SettingsAttributes) Float64(name string) float64 {
 
 // Int gets the value as an integer or 0 if that is not possible.
 func (ba SettingsAttributes) Int(name string) int {
-	// Integer values may be interpeted as float64, so get it as that first,
+	// Integer values may be interpreted as float64, so get it as that first,
 	// then coerce down to int.
 	floatVal := int(ba.Float64(name))
 	return (floatVal)
