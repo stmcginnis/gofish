@@ -379,6 +379,8 @@ type Manager struct {
 	modifyRedundancySetTarget string
 	// resetTarget is the internal URL to send reset targets to.
 	resetTarget string
+	// resetInfo contains URI for an ActionInfo Resource that describes this action.
+	actionInfo string
 	// SupportedResetTypes, if provided, is the reset types this system supports.
 	SupportedResetTypes   []ResetType
 	resetToDefaultsTarget string
@@ -393,6 +395,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 		ForceFailover       common.ActionTarget `json:"#Manager.ForceFailover"`
 		ModifyRedundancySet common.ActionTarget `json:"#Manager.ModifyRedundancySet"`
 		Reset               struct {
+			ActionInfo        string      `json:"@Redfish.ActionInfo"`
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
 			Target            string
 		} `json:"#Manager.Reset"`
@@ -479,6 +482,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
 	manager.resetTarget = t.Actions.Reset.Target
 	manager.resetToDefaultsTarget = t.Actions.ResetToDefaults.Target
+	manager.actionInfo = t.Actions.Reset.ActionInfo
 
 	// This is a read/write object, so we need to save the raw object data for later
 	manager.rawData = b
