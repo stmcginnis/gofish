@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -241,6 +242,29 @@ func (logservice *LogService) FilteredEntries(options ...common.FilterOption) ([
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
 func (logservice *LogService) ClearLog() error {
+	err := logservice.Post(logservice.clearLogTarget, struct{}{})
+	if err == nil {
+		return nil
+	}
+
+	// As of LogService 1.3.0, need to pass the LogEntryCollection etag. If our first attempt failed, try that.
+	entryCollection := &struct {
+		ETag string `json:"@odata.etag"`
+	}{}
+
+	retryErr := logservice.Get(logservice.GetClient(), logservice.entries, entryCollection)
+	if retryErr == nil {
+		payload := struct {
+			LogEntriesETag string
+		}{LogEntriesETag: strings.Trim(entryCollection.ETag, "\"")}
+
+		retryErr = logservice.Post(logservice.clearLogTarget, payload)
+		if retryErr == nil {
+			return nil
+		}
+	}
+
+	// Fall back to broken implementation to workaround vendor bug
 	t := struct {
 		Action string
 	}{
