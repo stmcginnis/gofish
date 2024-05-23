@@ -588,6 +588,14 @@ func (manager *Manager) ModifyRedundancySet(addManagers, removeManagers []*Manag
 // Reset shall perform a reset of the manager.
 func (manager *Manager) Reset(resetType ResetType) error {
 	if len(manager.SupportedResetTypes) == 0 {
+		if len(manager.actionInfo) > 0 {
+			// reset without confirming the type is supported by the manager.
+			// done to minimize overhead though technically not as correct as first checking the supported reset types
+			t := struct {
+				ResetType ResetType
+			}{ResetType: resetType}
+			return manager.Post(manager.resetTarget, t)
+		}
 		// reset directly without reset type. HPE server has the behavior
 		return manager.Post(manager.resetTarget, struct{}{})
 	}
