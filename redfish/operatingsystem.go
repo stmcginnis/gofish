@@ -232,10 +232,9 @@ func GetOperatingSystem(c common.Client, uri string) (*OperatingSystem, error) {
 
 // ListReferencedOperatingSystems gets the collection of OperatingSystem from
 // a provided reference.
-func ListReferencedOperatingSystems(c common.Client, link string) ([]*OperatingSystem, error) {
-	var result []*OperatingSystem
+func ListReferencedOperatingSystems(c common.Client, link string) ([]*OperatingSystem, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -251,27 +250,36 @@ func ListReferencedOperatingSystems(c common.Client, link string) ([]*OperatingS
 		ch <- GetResult{Item: operatingsystem, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-OperatingSystem helper map.
+	unorderedResults := map[string]*OperatingSystem{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*OperatingSystem, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // VirtualMachineEngine shall contain a virtual machine engine running in an operating system.

@@ -303,10 +303,9 @@ func GetSwitch(c common.Client, uri string) (*Switch, error) {
 
 // ListReferencedSwitches gets the collection of Switch from
 // a provided reference.
-func ListReferencedSwitches(c common.Client, link string) ([]*Switch, error) {
-	var result []*Switch
+func ListReferencedSwitches(c common.Client, link string) ([]*Switch, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -322,27 +321,36 @@ func ListReferencedSwitches(c common.Client, link string) ([]*Switch, error) {
 		ch <- GetResult{Item: sw, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Switch helper map.
+	unorderedResults := map[string]*Switch{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Switch, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // VCSSwitch shall contain Virtual CXL Switch (VCS) properties for a switch.

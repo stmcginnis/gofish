@@ -183,10 +183,9 @@ func GetDataProtectionLoSCapabilities(c common.Client, uri string) (*DataProtect
 
 // ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from
 // a provided reference.
-func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) ([]*DataProtectionLoSCapabilities, error) {
-	var result []*DataProtectionLoSCapabilities
+func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) ([]*DataProtectionLoSCapabilities, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -202,27 +201,36 @@ func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) (
 		ch <- GetResult{Item: dataprotectionloscapabilities, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-DataProtectionLoSCapabilities helper map.
+	unorderedResults := map[string]*DataProtectionLoSCapabilities{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*DataProtectionLoSCapabilities, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.

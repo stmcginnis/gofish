@@ -515,10 +515,9 @@ func (circuit *Circuit) ResetMetrics() error {
 
 // ListReferencedCircuits gets the collection of Circuits from
 // a provided reference.
-func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) {
-	var result []*Circuit
+func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -534,27 +533,36 @@ func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) {
 		ch <- GetResult{Item: circuit, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Circuit helper map.
+	unorderedResults := map[string]*Circuit{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Circuit, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // BranchCircuit gets a resource that represents the branch circuit associated with this circuit.

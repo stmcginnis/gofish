@@ -47,10 +47,9 @@ func GetLineOfService(c common.Client, uri string) (*LineOfService, error) {
 
 // ListReferencedLineOfServices gets the collection of LineOfService from
 // a provided reference.
-func ListReferencedLineOfServices(c common.Client, link string) ([]*LineOfService, error) {
-	var result []*LineOfService
+func ListReferencedLineOfServices(c common.Client, link string) ([]*LineOfService, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -66,25 +65,34 @@ func ListReferencedLineOfServices(c common.Client, link string) ([]*LineOfServic
 		ch <- GetResult{Item: lineofservice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-LineOfService helper map.
+	unorderedResults := map[string]*LineOfService{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*LineOfService, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

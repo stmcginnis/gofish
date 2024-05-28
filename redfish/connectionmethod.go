@@ -110,10 +110,9 @@ func GetConnectionMethod(c common.Client, uri string) (*ConnectionMethod, error)
 
 // ListReferencedConnectionMethods gets the collection of ConnectionMethod from
 // a provided reference.
-func ListReferencedConnectionMethods(c common.Client, link string) ([]*ConnectionMethod, error) {
-	var result []*ConnectionMethod
+func ListReferencedConnectionMethods(c common.Client, link string) ([]*ConnectionMethod, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -129,27 +128,36 @@ func ListReferencedConnectionMethods(c common.Client, link string) ([]*Connectio
 		ch <- GetResult{Item: connectionmethod, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-ConnectionMethod helper map.
+	unorderedResults := map[string]*ConnectionMethod{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*ConnectionMethod, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // AggregationSources gets the access points using this connection method.

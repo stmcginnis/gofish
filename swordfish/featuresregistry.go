@@ -59,10 +59,9 @@ func GetFeaturesRegistry(c common.Client, uri string) (*FeaturesRegistry, error)
 
 // ListReferencedFeaturesRegistrys gets the collection of FeaturesRegistry from
 // a provided reference.
-func ListReferencedFeaturesRegistrys(c common.Client, link string) ([]*FeaturesRegistry, error) {
-	var result []*FeaturesRegistry
+func ListReferencedFeaturesRegistrys(c common.Client, link string) ([]*FeaturesRegistry, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -78,27 +77,36 @@ func ListReferencedFeaturesRegistrys(c common.Client, link string) ([]*FeaturesR
 		ch <- GetResult{Item: featuresregistry, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-FeaturesRegistry helper map.
+	unorderedResults := map[string]*FeaturesRegistry{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*FeaturesRegistry, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // FeaturesRegistryProperty shall represent the suffix to be used in the Feature and shall be unique within this

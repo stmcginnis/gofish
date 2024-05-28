@@ -169,10 +169,9 @@ func GetFileShare(c common.Client, uri string) (*FileShare, error) {
 
 // ListReferencedFileShares gets the collection of FileShare from a provided
 // reference.
-func ListReferencedFileShares(c common.Client, link string) ([]*FileShare, error) {
-	var result []*FileShare
+func ListReferencedFileShares(c common.Client, link string) ([]*FileShare, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -188,27 +187,36 @@ func ListReferencedFileShares(c common.Client, link string) ([]*FileShare, error
 		ch <- GetResult{Item: fileshare, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-FileShare helper map.
+	unorderedResults := map[string]*FileShare{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*FileShare, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ClassOfService gets the file share's class of service.

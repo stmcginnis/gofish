@@ -244,10 +244,9 @@ func GetProcessorMetrics(c common.Client, uri string) (*ProcessorMetrics, error)
 
 // ListReferencedProcessorMetricss gets the collection of ProcessorMetrics from
 // a provided reference.
-func ListReferencedProcessorMetricss(c common.Client, link string) ([]*ProcessorMetrics, error) {
-	var result []*ProcessorMetrics
+func ListReferencedProcessorMetricss(c common.Client, link string) ([]*ProcessorMetrics, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -263,25 +262,34 @@ func ListReferencedProcessorMetricss(c common.Client, link string) ([]*Processor
 		ch <- GetResult{Item: processormetrics, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-ProcessorMetrics helper map.
+	unorderedResults := map[string]*ProcessorMetrics{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*ProcessorMetrics, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

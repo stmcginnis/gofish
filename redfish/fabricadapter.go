@@ -269,10 +269,9 @@ func GetFabricAdapter(c common.Client, uri string) (*FabricAdapter, error) {
 
 // ListReferencedFabricAdapters gets the collection of FabricAdapter from
 // a provided reference.
-func ListReferencedFabricAdapters(c common.Client, link string) ([]*FabricAdapter, error) {
-	var result []*FabricAdapter
+func ListReferencedFabricAdapters(c common.Client, link string) ([]*FabricAdapter, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -288,27 +287,36 @@ func ListReferencedFabricAdapters(c common.Client, link string) ([]*FabricAdapte
 		ch <- GetResult{Item: fabricadapter, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-FabricAdapter helper map.
+	unorderedResults := map[string]*FabricAdapter{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*FabricAdapter, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // FabricAdapterGenZ shall contain Gen-Z related properties for a fabric adapter.

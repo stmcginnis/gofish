@@ -102,10 +102,9 @@ func GetIOPerformanceLineOfService(c common.Client, uri string) (*IOPerformanceL
 
 // ListReferencedIOPerformanceLineOfServices gets the collection of IOPerformanceLineOfService from
 // a provided reference.
-func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]*IOPerformanceLineOfService, error) {
-	var result []*IOPerformanceLineOfService
+func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]*IOPerformanceLineOfService, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -121,25 +120,34 @@ func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]
 		ch <- GetResult{Item: ioperformancelineofservice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-IOPerformanceLineOfService helper map.
+	unorderedResults := map[string]*IOPerformanceLineOfService{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*IOPerformanceLineOfService, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

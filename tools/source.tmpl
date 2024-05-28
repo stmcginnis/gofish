@@ -107,9 +107,8 @@ func Get{{ class.name }}(c common.Client, uri string) (*{{ class.name }}, error)
 // ListReferenced{{ class.name }}s gets the collection of {{ class.name }} from
 // a provided reference.
 func ListReferenced{{ class.name }}s(c common.Client, link string) ([]*{{ class.name }}, error) {
-    var result []*{{ class.name }}
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -125,27 +124,36 @@ func ListReferenced{{ class.name }}s(c common.Client, link string) ([]*{{ class.
 		ch <- GetResult{Item: {{ class.name|lower }}, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-{{ class.name }} helper map.
+	unorderedResults := map[string]*{{ class.name }}{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*{{ class.name }}, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 {% endif %}

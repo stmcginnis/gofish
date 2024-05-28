@@ -116,10 +116,9 @@ func GetPowerSubsystem(c common.Client, uri string) (*PowerSubsystem, error) {
 
 // ListReferencedPowerSubsystems gets the collection of PowerSubsystem from
 // a provided reference.
-func ListReferencedPowerSubsystems(c common.Client, link string) ([]*PowerSubsystem, error) {
-	var result []*PowerSubsystem
+func ListReferencedPowerSubsystems(c common.Client, link string) ([]*PowerSubsystem, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -135,25 +134,34 @@ func ListReferencedPowerSubsystems(c common.Client, link string) ([]*PowerSubsys
 		ch <- GetResult{Item: powersubsystem, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-PowerSubsystem helper map.
+	unorderedResults := map[string]*PowerSubsystem{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*PowerSubsystem, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

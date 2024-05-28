@@ -237,10 +237,9 @@ func GetPowerSupplyUnit(c common.Client, uri string) (*PowerSupplyUnit, error) {
 
 // ListReferencedPowerSupplyUnits gets the collection of PowerSupplies from
 // a provided reference.
-func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSupplyUnit, error) {
-	var result []*PowerSupplyUnit
+func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSupplyUnit, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -252,31 +251,40 @@ func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSuppl
 	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
 	get := func(link string) {
-		powerSupplyUnit, err := GetPowerSupplyUnit(c, link)
-		ch <- GetResult{Item: powerSupplyUnit, Link: link, Error: err}
+		powersupplyunit, err := GetPowerSupplyUnit(c, link)
+		ch <- GetResult{Item: powersupplyunit, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-PowerSupplyUnit helper map.
+	unorderedResults := map[string]*PowerSupplyUnit{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*PowerSupplyUnit, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // This action shall reset a power supply. A GracefulRestart ResetType shall reset the power supply

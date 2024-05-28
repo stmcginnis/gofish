@@ -173,10 +173,9 @@ func GetExternalAccountProvider(c common.Client, uri string) (*ExternalAccountPr
 
 // ListReferencedExternalAccountProviders gets the collection of ExternalAccountProvider from
 // a provided reference.
-func ListReferencedExternalAccountProviders(c common.Client, link string) ([]*ExternalAccountProvider, error) {
-	var result []*ExternalAccountProvider
+func ListReferencedExternalAccountProviders(c common.Client, link string) ([]*ExternalAccountProvider, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -192,27 +191,36 @@ func ListReferencedExternalAccountProviders(c common.Client, link string) ([]*Ex
 		ch <- GetResult{Item: externalaccountprovider, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-ExternalAccountProvider helper map.
+	unorderedResults := map[string]*ExternalAccountProvider{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*ExternalAccountProvider, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // LDAPSearchSettings shall contain all required settings to search a generic LDAP service.

@@ -174,10 +174,9 @@ func GetConnection(c common.Client, uri string) (*Connection, error) {
 
 // ListReferencedConnections gets the collection of Connection from
 // a provided reference.
-func ListReferencedConnections(c common.Client, link string) ([]*Connection, error) {
-	var result []*Connection
+func ListReferencedConnections(c common.Client, link string) ([]*Connection, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -193,27 +192,36 @@ func ListReferencedConnections(c common.Client, link string) ([]*Connection, err
 		ch <- GetResult{Item: connection, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Connection helper map.
+	unorderedResults := map[string]*Connection{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Connection, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // InitiatorEndpointGroups get the initiator endpoint groups associated with this connection.

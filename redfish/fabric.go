@@ -146,10 +146,9 @@ func GetFabric(c common.Client, uri string) (*Fabric, error) {
 
 // ListReferencedFabrics gets the collection of Fabric from
 // a provided reference.
-func ListReferencedFabrics(c common.Client, link string) ([]*Fabric, error) {
-	var result []*Fabric
+func ListReferencedFabrics(c common.Client, link string) ([]*Fabric, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -165,25 +164,34 @@ func ListReferencedFabrics(c common.Client, link string) ([]*Fabric, error) {
 		ch <- GetResult{Item: fabric, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Fabric helper map.
+	unorderedResults := map[string]*Fabric{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Fabric, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

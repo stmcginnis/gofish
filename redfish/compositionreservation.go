@@ -80,10 +80,9 @@ func GetCompositionReservation(c common.Client, uri string) (*CompositionReserva
 
 // ListReferencedCompositionReservations gets the collection of CompositionReservation from
 // a provided reference.
-func ListReferencedCompositionReservations(c common.Client, link string) ([]*CompositionReservation, error) {
-	var result []*CompositionReservation
+func ListReferencedCompositionReservations(c common.Client, link string) ([]*CompositionReservation, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -99,27 +98,36 @@ func ListReferencedCompositionReservations(c common.Client, link string) ([]*Com
 		ch <- GetResult{Item: compositionreservation, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-CompositionReservation helper map.
+	unorderedResults := map[string]*CompositionReservation{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*CompositionReservation, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ReservedResourceBlocks gets reserved resource blocks for this reservation.

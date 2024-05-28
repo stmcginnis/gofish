@@ -264,10 +264,9 @@ func GetComponentIntegrity(c common.Client, uri string) (*ComponentIntegrity, er
 
 // ListReferencedComponentIntegritys gets the collection of ComponentIntegrity from
 // a provided reference.
-func ListReferencedComponentIntegritys(c common.Client, link string) ([]*ComponentIntegrity, error) {
-	var result []*ComponentIntegrity
+func ListReferencedComponentIntegritys(c common.Client, link string) ([]*ComponentIntegrity, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -283,27 +282,36 @@ func ListReferencedComponentIntegritys(c common.Client, link string) ([]*Compone
 		ch <- GetResult{Item: componentintegrity, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-ComponentIntegrity helper map.
+	unorderedResults := map[string]*ComponentIntegrity{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*ComponentIntegrity, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // SPDMGetSignedMeasurementsRequest contains the parameters for the SPDMGetSignedMeasurements action.

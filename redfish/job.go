@@ -177,10 +177,9 @@ func GetJob(c common.Client, uri string) (*Job, error) {
 
 // ListReferencedJobs gets the collection of Job from
 // a provided reference.
-func ListReferencedJobs(c common.Client, link string) ([]*Job, error) {
-	var result []*Job
+func ListReferencedJobs(c common.Client, link string) ([]*Job, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -196,25 +195,34 @@ func ListReferencedJobs(c common.Client, link string) ([]*Job, error) {
 		ch <- GetResult{Item: job, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Job helper map.
+	unorderedResults := map[string]*Job{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Job, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

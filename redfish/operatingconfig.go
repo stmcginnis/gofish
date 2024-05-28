@@ -73,10 +73,9 @@ func GetOperatingConfig(c common.Client, uri string) (*OperatingConfig, error) {
 
 // ListReferencedOperatingConfigs gets the collection of OperatingConfig from
 // a provided reference.
-func ListReferencedOperatingConfigs(c common.Client, link string) ([]*OperatingConfig, error) {
-	var result []*OperatingConfig
+func ListReferencedOperatingConfigs(c common.Client, link string) ([]*OperatingConfig, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -92,27 +91,36 @@ func ListReferencedOperatingConfigs(c common.Client, link string) ([]*OperatingC
 		ch <- GetResult{Item: operatingconfig, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-OperatingConfig helper map.
+	unorderedResults := map[string]*OperatingConfig{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*OperatingConfig, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // TurboProfileDatapoint shall specify the turbo profile for a set of active cores.

@@ -161,10 +161,9 @@ func GetStorageControllerMetrics(c common.Client, uri string) (*StorageControlle
 
 // ListReferencedStorageControllerMetrics gets the collection of StorageControllerMetrics from
 // a provided reference.
-func ListReferencedStorageControllerMetrics(c common.Client, link string) ([]*StorageControllerMetrics, error) {
-	var result []*StorageControllerMetrics
+func ListReferencedStorageControllerMetrics(c common.Client, link string) ([]*StorageControllerMetrics, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -180,25 +179,34 @@ func ListReferencedStorageControllerMetrics(c common.Client, link string) ([]*St
 		ch <- GetResult{Item: storagecontrollermetrics, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-StorageControllerMetrics helper map.
+	unorderedResults := map[string]*StorageControllerMetrics{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*StorageControllerMetrics, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

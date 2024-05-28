@@ -219,10 +219,9 @@ func GetStorageService(c common.Client, uri string) (*StorageService, error) {
 
 // ListReferencedStorageServices gets the collection of StorageService from
 // a provided reference.
-func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) {
-	var result []*StorageService
+func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -238,27 +237,36 @@ func ListReferencedStorageServices(c common.Client, link string) ([]*StorageServ
 		ch <- GetResult{Item: storageservice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-StorageService helper map.
+	unorderedResults := map[string]*StorageService{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*StorageService, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ClassesOfService gets the storage service's classes of service.

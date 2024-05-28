@@ -86,10 +86,9 @@ func GetLeakDetector(c common.Client, uri string) (*LeakDetector, error) {
 
 // ListReferencedLeakDetectors gets the collection of LeakDetector from
 // a provided reference.
-func ListReferencedLeakDetectors(c common.Client, link string) ([]*LeakDetector, error) {
-	var result []*LeakDetector
+func ListReferencedLeakDetectors(c common.Client, link string) ([]*LeakDetector, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -105,27 +104,36 @@ func ListReferencedLeakDetectors(c common.Client, link string) ([]*LeakDetector,
 		ch <- GetResult{Item: leakdetector, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-LeakDetector helper map.
+	unorderedResults := map[string]*LeakDetector{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*LeakDetector, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // LeakDetectorArrayExcerpt shall represent a state-based or digital-value leak detector for a Redfish

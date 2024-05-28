@@ -600,10 +600,9 @@ func GetChassis(c common.Client, uri string) (*Chassis, error) {
 }
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
-func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
-	var result []*Chassis
+func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -619,27 +618,36 @@ func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
 		ch <- GetResult{Item: chassis, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Chassis helper map.
+	unorderedResults := map[string]*Chassis{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Chassis, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Certificates returns certificates in this Chassis.

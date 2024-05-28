@@ -102,20 +102,27 @@ func (cr *CollectionError) Error() string {
 }
 
 // CollectList will retrieve a collection of entities from the Redfish service.
-func CollectList(get func(string), c Client, link string) error {
+// Returned slice links contains the original list of links from that collection, in the
+// same order that was returned by the Redfish api from the collection's link.
+func CollectList(get func(string), c Client, link string) ([]string, error) {
 	collection, err := GetCollection(c, link)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	var links []string
+	links = append(links, collection.ItemLinks...)
 
 	CollectCollection(get, collection.ItemLinks)
 	if collection.MembersNextLink != "" {
-		err := CollectList(get, c, collection.MembersNextLink)
+		nextLinks, err := CollectList(get, c, collection.MembersNextLink)
 		if err != nil {
-			return err
+			return nil, err
 		}
+
+		links = append(links, nextLinks...)
 	}
-	return nil
+	return links, nil
 }
 
 // CollectCollection will retrieve a collection of entitied from the Redfish service

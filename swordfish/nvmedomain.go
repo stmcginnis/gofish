@@ -187,10 +187,9 @@ func GetNVMeDomain(c common.Client, uri string) (*NVMeDomain, error) {
 
 // ListReferencedNVMeDomains gets the collection of NVMeDomain from
 // a provided reference.
-func ListReferencedNVMeDomains(c common.Client, link string) ([]*NVMeDomain, error) {
-	var result []*NVMeDomain
+func ListReferencedNVMeDomains(c common.Client, link string) ([]*NVMeDomain, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -206,25 +205,34 @@ func ListReferencedNVMeDomains(c common.Client, link string) ([]*NVMeDomain, err
 		ch <- GetResult{Item: nvmedomain, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-NVMeDomain helper map.
+	unorderedResults := map[string]*NVMeDomain{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*NVMeDomain, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

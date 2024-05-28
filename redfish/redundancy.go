@@ -121,10 +121,9 @@ func GetRedundancy(c common.Client, uri string) (*Redundancy, error) {
 
 // ListReferencedRedundancies gets the collection of Redundancy from
 // a provided reference.
-func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, error) {
-	var result []*Redundancy
+func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -140,27 +139,36 @@ func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, er
 		ch <- GetResult{Item: redundancy, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Redundancy helper map.
+	unorderedResults := map[string]*Redundancy{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Redundancy, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // The redundancy mode of the group.

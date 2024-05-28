@@ -183,10 +183,9 @@ func GetCoolantConnector(c common.Client, uri string) (*CoolantConnector, error)
 
 // ListReferencedCoolantConnectors gets the collection of CoolantConnector from
 // a provided reference.
-func ListReferencedCoolantConnectors(c common.Client, link string) ([]*CoolantConnector, error) {
-	var result []*CoolantConnector
+func ListReferencedCoolantConnectors(c common.Client, link string) ([]*CoolantConnector, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -202,27 +201,36 @@ func ListReferencedCoolantConnectors(c common.Client, link string) ([]*CoolantCo
 		ch <- GetResult{Item: coolantconnector, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-CoolantConnector helper map.
+	unorderedResults := map[string]*CoolantConnector{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*CoolantConnector, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ConnectedChassis retrieves a collection of the Chassis at the other end of the connection.

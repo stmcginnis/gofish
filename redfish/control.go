@@ -247,10 +247,9 @@ func GetControl(c common.Client, uri string) (*Control, error) {
 
 // ListReferencedControls gets the collection of Control from
 // a provided reference.
-func ListReferencedControls(c common.Client, link string) ([]*Control, error) {
-	var result []*Control
+func ListReferencedControls(c common.Client, link string) ([]*Control, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -266,27 +265,36 @@ func ListReferencedControls(c common.Client, link string) ([]*Control, error) {
 		ch <- GetResult{Item: control, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Control helper map.
+	unorderedResults := map[string]*Control{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Control, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ResetToDefault resets the values of writable properties to factory defaults.

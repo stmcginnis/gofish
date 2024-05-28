@@ -180,10 +180,9 @@ func GetKeyPolicy(c common.Client, uri string) (*KeyPolicy, error) {
 
 // ListReferencedKeyPolicys gets the collection of KeyPolicy from
 // a provided reference.
-func ListReferencedKeyPolicys(c common.Client, link string) ([]*KeyPolicy, error) {
-	var result []*KeyPolicy
+func ListReferencedKeyPolicys(c common.Client, link string) ([]*KeyPolicy, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -199,27 +198,36 @@ func ListReferencedKeyPolicys(c common.Client, link string) ([]*KeyPolicy, error
 		ch <- GetResult{Item: keypolicy, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-KeyPolicy helper map.
+	unorderedResults := map[string]*KeyPolicy{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*KeyPolicy, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // NVMeoF shall contain NVMe-oF specific properties for a key policy.

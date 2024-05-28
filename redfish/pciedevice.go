@@ -362,10 +362,9 @@ func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
 
 // ListReferencedPCIeDevices gets the collection of PCIeDevice from
 // a provided reference.
-func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, error) {
-	var result []*PCIeDevice
+func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -381,27 +380,36 @@ func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, err
 		ch <- GetResult{Item: pciedevice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-PCIeDevice helper map.
+	unorderedResults := map[string]*PCIeDevice{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*PCIeDevice, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // PCIeInterface properties shall be the definition for a PCIe Interface for a

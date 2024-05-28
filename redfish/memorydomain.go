@@ -205,10 +205,9 @@ func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
 
 // ListReferencedMemoryDomains gets the collection of MemoryDomain from
 // a provided reference.
-func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) {
-	var result []*MemoryDomain
+func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -224,27 +223,36 @@ func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain,
 		ch <- GetResult{Item: memorydomain, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-MemoryDomain helper map.
+	unorderedResults := map[string]*MemoryDomain{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*MemoryDomain, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // MemorySet shall represent the interleave sets for a memory chunk.

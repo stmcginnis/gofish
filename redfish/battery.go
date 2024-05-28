@@ -206,10 +206,9 @@ func GetBattery(c common.Client, uri string) (*Battery, error) {
 
 // ListReferencedBatterys gets the collection of Battery from
 // a provided reference.
-func ListReferencedBatterys(c common.Client, link string) ([]*Battery, error) {
-	var result []*Battery
+func ListReferencedBatterys(c common.Client, link string) ([]*Battery, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -225,27 +224,36 @@ func ListReferencedBatterys(c common.Client, link string) ([]*Battery, error) {
 		ch <- GetResult{Item: battery, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Battery helper map.
+	unorderedResults := map[string]*Battery{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Battery, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Assembly get the containing assembly of this battery.

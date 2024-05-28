@@ -272,10 +272,9 @@ func GetPowerDomain(c common.Client, uri string) (*PowerDomain, error) {
 
 // ListReferencedPowerDomains gets the collection of PowerDomain from
 // a provided reference.
-func ListReferencedPowerDomains(c common.Client, link string) ([]*PowerDomain, error) {
-	var result []*PowerDomain
+func ListReferencedPowerDomains(c common.Client, link string) ([]*PowerDomain, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -291,25 +290,34 @@ func ListReferencedPowerDomains(c common.Client, link string) ([]*PowerDomain, e
 		ch <- GetResult{Item: powerdomain, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-PowerDomain helper map.
+	unorderedResults := map[string]*PowerDomain{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*PowerDomain, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

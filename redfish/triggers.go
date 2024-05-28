@@ -283,10 +283,9 @@ func GetTriggers(c common.Client, uri string) (*Triggers, error) {
 
 // ListReferencedTriggerss gets the collection of Triggers from
 // a provided reference.
-func ListReferencedTriggerss(c common.Client, link string) ([]*Triggers, error) {
-	var result []*Triggers
+func ListReferencedTriggerss(c common.Client, link string) ([]*Triggers, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -302,25 +301,34 @@ func ListReferencedTriggerss(c common.Client, link string) ([]*Triggers, error) 
 		ch <- GetResult{Item: triggers, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Triggers helper map.
+	unorderedResults := map[string]*Triggers{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Triggers, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

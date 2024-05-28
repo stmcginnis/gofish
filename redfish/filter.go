@@ -147,10 +147,9 @@ func GetFilter(c common.Client, uri string) (*Filter, error) {
 
 // ListReferencedFilters gets the collection of Filter from
 // a provided reference.
-func ListReferencedFilters(c common.Client, link string) ([]*Filter, error) {
-	var result []*Filter
+func ListReferencedFilters(c common.Client, link string) ([]*Filter, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -166,25 +165,34 @@ func ListReferencedFilters(c common.Client, link string) ([]*Filter, error) {
 		ch <- GetResult{Item: filter, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Filter helper map.
+	unorderedResults := map[string]*Filter{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Filter, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

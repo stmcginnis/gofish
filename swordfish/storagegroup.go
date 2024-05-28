@@ -225,10 +225,9 @@ func GetStorageGroup(c common.Client, uri string) (*StorageGroup, error) {
 
 // ListReferencedStorageGroups gets the collection of StorageGroup from
 // a provided reference.
-func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup, error) {
-	var result []*StorageGroup
+func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -244,27 +243,36 @@ func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup,
 		ch <- GetResult{Item: storagegroup, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-StorageGroup helper map.
+	unorderedResults := map[string]*StorageGroup{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*StorageGroup, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ChildStorageGroups gets child groups of this group.

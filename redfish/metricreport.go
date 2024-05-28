@@ -87,10 +87,9 @@ func GetMetricReport(c common.Client, uri string) (*MetricReport, error) {
 
 // ListReferencedMetricReports gets the collection of MetricReport from
 // a provided reference.
-func ListReferencedMetricReports(c common.Client, link string) ([]*MetricReport, error) {
-	var result []*MetricReport
+func ListReferencedMetricReports(c common.Client, link string) ([]*MetricReport, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -106,27 +105,36 @@ func ListReferencedMetricReports(c common.Client, link string) ([]*MetricReport,
 		ch <- GetResult{Item: metricreport, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-MetricReport helper map.
+	unorderedResults := map[string]*MetricReport{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*MetricReport, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // MetricValue shall contain properties that capture a metric value and other associated information.

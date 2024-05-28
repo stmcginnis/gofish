@@ -94,10 +94,9 @@ func GetVCATEntry(c common.Client, uri string) (*VCATEntry, error) {
 
 // ListReferencedVCATEntrys gets the collection of VCATEntry from
 // a provided reference.
-func ListReferencedVCATEntrys(c common.Client, link string) ([]*VCATEntry, error) {
-	var result []*VCATEntry
+func ListReferencedVCATEntrys(c common.Client, link string) ([]*VCATEntry, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -113,27 +112,36 @@ func ListReferencedVCATEntrys(c common.Client, link string) ([]*VCATEntry, error
 		ch <- GetResult{Item: vcatentry, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-VCATEntry helper map.
+	unorderedResults := map[string]*VCATEntry{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*VCATEntry, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // VCATableEntry shall contain a Virtual Channel entry definition that describes a specific Virtual Channel.

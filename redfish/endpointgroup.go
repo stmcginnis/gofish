@@ -142,10 +142,9 @@ func GetEndpointGroup(c common.Client, uri string) (*EndpointGroup, error) {
 
 // ListReferencedEndpointGroups gets the collection of EndpointGroup from
 // a provided reference.
-func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) {
-	var result []*EndpointGroup
+func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -161,27 +160,36 @@ func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGrou
 		ch <- GetResult{Item: endpointgroup, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-EndpointGroup helper map.
+	unorderedResults := map[string]*EndpointGroup{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*EndpointGroup, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Endpoints get the endpoints associated with this endpoint group.

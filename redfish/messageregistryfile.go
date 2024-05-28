@@ -66,10 +66,9 @@ func GetMessageRegistryFile(c common.Client, uri string) (*MessageRegistryFile, 
 }
 
 // ListReferencedMessageRegistryFiles gets the collection of MessageRegistryFile.
-func ListReferencedMessageRegistryFiles(c common.Client, link string) ([]*MessageRegistryFile, error) {
-	var result []*MessageRegistryFile
+func ListReferencedMessageRegistryFiles(c common.Client, link string) ([]*MessageRegistryFile, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -85,25 +84,34 @@ func ListReferencedMessageRegistryFiles(c common.Client, link string) ([]*Messag
 		ch <- GetResult{Item: messageregistryfile, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-MessageRegistryFile helper map.
+	unorderedResults := map[string]*MessageRegistryFile{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*MessageRegistryFile, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

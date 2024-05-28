@@ -220,10 +220,9 @@ func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
 
 // ListReferencedPCIeFunctions gets the collection of PCIeFunction from
 // a provided reference.
-func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) {
-	var result []*PCIeFunction
+func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -239,27 +238,36 @@ func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction,
 		ch <- GetResult{Item: pciefunction, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-PCIeFunction helper map.
+	unorderedResults := map[string]*PCIeFunction{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*PCIeFunction, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // CXLLogicalDevice gets the CXL logical device to which this PCIe function is assigned.

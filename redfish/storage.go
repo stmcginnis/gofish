@@ -457,10 +457,9 @@ func GetStorage(c common.Client, uri string) (*Storage, error) {
 
 // ListReferencedStorages gets the collection of Storage from a provided
 // reference.
-func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
-	var result []*Storage
+func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -476,27 +475,36 @@ func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
 		ch <- GetResult{Item: storage, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Storage helper map.
+	unorderedResults := map[string]*Storage{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Storage, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage

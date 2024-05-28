@@ -151,10 +151,9 @@ func GetLicenseService(c common.Client, uri string) (*LicenseService, error) {
 
 // ListReferencedLicenseServices gets the collection of LicenseService from
 // a provided reference.
-func ListReferencedLicenseServices(c common.Client, link string) ([]*LicenseService, error) {
-	var result []*LicenseService
+func ListReferencedLicenseServices(c common.Client, link string) ([]*LicenseService, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -170,25 +169,34 @@ func ListReferencedLicenseServices(c common.Client, link string) ([]*LicenseServ
 		ch <- GetResult{Item: licenseservice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-LicenseService helper map.
+	unorderedResults := map[string]*LicenseService{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*LicenseService, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

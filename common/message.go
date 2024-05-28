@@ -56,9 +56,8 @@ func GetMessage(c Client, uri string) (*Message, error) {
 // ListReferencedMessages gets the collection of Message from
 // a provided reference.
 func ListReferencedMessages(c Client, link string) ([]*Message, error) {
-	var result []*Message
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -74,25 +73,34 @@ func ListReferencedMessages(c Client, link string) ([]*Message, error) {
 		ch <- GetResult{Item: message, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := CollectList(get, c, link)
+		links, err = CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Message helper map.
+	unorderedResults := map[string]*Message{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Message, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

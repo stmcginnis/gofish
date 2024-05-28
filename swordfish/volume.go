@@ -800,10 +800,9 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 }
 
 // ListReferencedVolumes gets the collection of Volume from a provided reference.
-func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
-	var result []*Volume
+func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -819,27 +818,36 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 		ch <- GetResult{Item: volume, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Volume helper map.
+	unorderedResults := map[string]*Volume{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Volume, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // CacheDataVolumes gets the data volumes this volume serves as a cache volume.

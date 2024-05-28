@@ -182,10 +182,9 @@ func GetReservoir(c common.Client, uri string) (*Reservoir, error) {
 
 // ListReferencedReservoirs gets the collection of Reservoir from
 // a provided reference.
-func ListReferencedReservoirs(c common.Client, link string) ([]*Reservoir, error) {
-	var result []*Reservoir
+func ListReferencedReservoirs(c common.Client, link string) ([]*Reservoir, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -201,25 +200,34 @@ func ListReferencedReservoirs(c common.Client, link string) ([]*Reservoir, error
 		ch <- GetResult{Item: reservoir, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Reservoir helper map.
+	unorderedResults := map[string]*Reservoir{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Reservoir, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

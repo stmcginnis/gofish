@@ -98,10 +98,9 @@ func GetHeaterMetrics(c common.Client, uri string) (*HeaterMetrics, error) {
 
 // ListReferencedHeaterMetrics gets the collection of HeaterMetrics from
 // a provided reference.
-func ListReferencedHeaterMetrics(c common.Client, link string) ([]*HeaterMetrics, error) {
-	var result []*HeaterMetrics
+func ListReferencedHeaterMetrics(c common.Client, link string) ([]*HeaterMetrics, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -117,25 +116,34 @@ func ListReferencedHeaterMetrics(c common.Client, link string) ([]*HeaterMetrics
 		ch <- GetResult{Item: heatermetrics, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-HeaterMetrics helper map.
+	unorderedResults := map[string]*HeaterMetrics{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*HeaterMetrics, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

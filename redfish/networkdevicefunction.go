@@ -565,10 +565,9 @@ func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFuncti
 
 // ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
 // a provided reference.
-func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*NetworkDeviceFunction, error) {
-	var result []*NetworkDeviceFunction
+func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*NetworkDeviceFunction, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -584,27 +583,36 @@ func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*Netw
 		ch <- GetResult{Item: networkdevicefunction, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-NetworkDeviceFunction helper map.
+	unorderedResults := map[string]*NetworkDeviceFunction{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*NetworkDeviceFunction, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ISCSIBoot shall describe the iSCSI boot capabilities, status, and

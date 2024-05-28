@@ -189,10 +189,9 @@ func GetCoolingLoop(c common.Client, uri string) (*CoolingLoop, error) {
 
 // ListReferencedCoolingLoops gets the collection of CoolingLoop from
 // a provided reference.
-func ListReferencedCoolingLoops(c common.Client, link string) ([]*CoolingLoop, error) {
-	var result []*CoolingLoop
+func ListReferencedCoolingLoops(c common.Client, link string) ([]*CoolingLoop, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -208,27 +207,36 @@ func ListReferencedCoolingLoops(c common.Client, link string) ([]*CoolingLoop, e
 		ch <- GetResult{Item: coolingloop, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-CoolingLoop helper map.
+	unorderedResults := map[string]*CoolingLoop{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*CoolingLoop, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // SecondaryCoolantConnectors gets the secondary coolant connectors for this equipment.

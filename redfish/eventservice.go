@@ -256,10 +256,9 @@ func GetEventService(c common.Client, uri string) (*EventService, error) {
 
 // ListReferencedEventServices gets the collection of EventService from
 // a provided reference.
-func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) {
-	var result []*EventService
+func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -275,27 +274,36 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 		ch <- GetResult{Item: eventservice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-EventService helper map.
+	unorderedResults := map[string]*EventService{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*EventService, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.

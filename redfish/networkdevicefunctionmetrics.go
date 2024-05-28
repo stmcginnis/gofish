@@ -129,10 +129,9 @@ func GetNetworkDeviceFunctionMetrics(c common.Client, uri string) (*NetworkDevic
 
 // ListReferencedNetworkDeviceFunctionMetricss gets the collection of NetworkDeviceFunctionMetrics from
 // a provided reference.
-func ListReferencedNetworkDeviceFunctionMetricss(c common.Client, link string) ([]*NetworkDeviceFunctionMetrics, error) {
-	var result []*NetworkDeviceFunctionMetrics
+func ListReferencedNetworkDeviceFunctionMetricss(c common.Client, link string) ([]*NetworkDeviceFunctionMetrics, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -148,25 +147,34 @@ func ListReferencedNetworkDeviceFunctionMetricss(c common.Client, link string) (
 		ch <- GetResult{Item: networkdevicefunctionmetrics, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-NetworkDeviceFunctionMetrics helper map.
+	unorderedResults := map[string]*NetworkDeviceFunctionMetrics{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*NetworkDeviceFunctionMetrics, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

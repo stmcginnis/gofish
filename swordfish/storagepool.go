@@ -349,10 +349,9 @@ func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
 
 // ListReferencedStoragePools gets the collection of StoragePool from
 // a provided reference.
-func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) {
-	var result []*StoragePool
+func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -368,27 +367,36 @@ func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, e
 		ch <- GetResult{Item: storagepool, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-StoragePool helper map.
+	unorderedResults := map[string]*StoragePool{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*StoragePool, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // DedicatedSpareDrives gets the Drive entities which are currently assigned as

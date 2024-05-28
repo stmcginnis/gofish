@@ -121,10 +121,9 @@ func GetAccelerationFunction(c common.Client, uri string) (*AccelerationFunction
 
 // ListReferencedAccelerationFunctions gets the collection of AccelerationFunction from
 // a provided reference.
-func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*AccelerationFunction, error) {
-	var result []*AccelerationFunction
+func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*AccelerationFunction, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -140,27 +139,36 @@ func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*Accel
 		ch <- GetResult{Item: accelerationfunction, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-AccelerationFunction helper map.
+	unorderedResults := map[string]*AccelerationFunction{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*AccelerationFunction, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Endpoints gets the endpoints connected to this accelerator.

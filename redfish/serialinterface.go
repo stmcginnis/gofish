@@ -221,10 +221,9 @@ func GetSerialInterface(c common.Client, uri string) (*SerialInterface, error) {
 
 // ListReferencedSerialInterfaces gets the collection of SerialInterface from
 // a provided reference.
-func ListReferencedSerialInterfaces(c common.Client, link string) ([]*SerialInterface, error) {
-	var result []*SerialInterface
+func ListReferencedSerialInterfaces(c common.Client, link string) ([]*SerialInterface, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -236,29 +235,38 @@ func ListReferencedSerialInterfaces(c common.Client, link string) ([]*SerialInte
 	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
 	get := func(link string) {
-		serialInterface, err := GetSerialInterface(c, link)
-		ch <- GetResult{Item: serialInterface, Link: link, Error: err}
+		serialinterface, err := GetSerialInterface(c, link)
+		ch <- GetResult{Item: serialinterface, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-SerialInterface helper map.
+	unorderedResults := map[string]*SerialInterface{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*SerialInterface, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

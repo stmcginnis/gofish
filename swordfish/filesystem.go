@@ -277,10 +277,9 @@ func GetFileSystem(c common.Client, uri string) (*FileSystem, error) {
 
 // ListReferencedFileSystems gets the collection of FileSystem from
 // a provided reference.
-func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, error) {
-	var result []*FileSystem
+func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -296,27 +295,36 @@ func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, err
 		ch <- GetResult{Item: filesystem, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-FileSystem helper map.
+	unorderedResults := map[string]*FileSystem{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*FileSystem, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ExportedShares gets the exported file shares for this file system.

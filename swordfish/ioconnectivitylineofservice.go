@@ -90,10 +90,9 @@ func GetIOConnectivityLineOfService(c common.Client, uri string) (*IOConnectivit
 
 // ListReferencedIOConnectivityLineOfServices gets the collection of IOConnectivityLineOfService from
 // a provided reference.
-func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([]*IOConnectivityLineOfService, error) {
-	var result []*IOConnectivityLineOfService
+func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([]*IOConnectivityLineOfService, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -109,25 +108,34 @@ func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([
 		ch <- GetResult{Item: ioconnectivitylineofservice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-IOConnectivityLineOfService helper map.
+	unorderedResults := map[string]*IOConnectivityLineOfService{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*IOConnectivityLineOfService, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

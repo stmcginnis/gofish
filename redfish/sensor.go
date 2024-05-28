@@ -488,10 +488,9 @@ func GetSensor(c common.Client, uri string) (*Sensor, error) {
 }
 
 // ListReferencedSensor gets the Sensor collection.
-func ListReferencedSensors(c common.Client, link string) ([]*Sensor, error) {
-	var result []*Sensor
+func ListReferencedSensors(c common.Client, link string) ([]*Sensor, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -507,27 +506,36 @@ func ListReferencedSensors(c common.Client, link string) ([]*Sensor, error) {
 		ch <- GetResult{Item: sensor, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Sensor helper map.
+	unorderedResults := map[string]*Sensor{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Sensor, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 func (sensor *Sensor) ResetMetrics() error {

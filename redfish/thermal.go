@@ -374,10 +374,9 @@ func GetThermal(c common.Client, uri string) (*Thermal, error) {
 }
 
 // ListReferencedThermals gets the collection of Thermal from a provided reference.
-func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) {
-	var result []*Thermal
+func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -393,25 +392,34 @@ func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) {
 		ch <- GetResult{Item: thermal, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Thermal helper map.
+	unorderedResults := map[string]*Thermal{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Thermal, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

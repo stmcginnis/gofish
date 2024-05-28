@@ -379,10 +379,9 @@ func GetOutlet(c common.Client, uri string) (*Outlet, error) {
 
 // ListReferencedOutlets gets the collection of Outlet from
 // a provided reference.
-func ListReferencedOutlets(c common.Client, link string) ([]*Outlet, error) {
-	var result []*Outlet
+func ListReferencedOutlets(c common.Client, link string) ([]*Outlet, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -398,27 +397,36 @@ func ListReferencedOutlets(c common.Client, link string) ([]*Outlet, error) {
 		ch <- GetResult{Item: outlet, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Outlet helper map.
+	unorderedResults := map[string]*Outlet{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Outlet, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // VoltageSensors shall contain properties that describe voltage sensor readings for an outlet.

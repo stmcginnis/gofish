@@ -100,10 +100,9 @@ func GetDataStorageLineOfService(c common.Client, uri string) (*DataStorageLineO
 
 // ListReferencedDataStorageLineOfServices gets the collection of DataStorageLineOfService from
 // a provided reference.
-func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*DataStorageLineOfService, error) {
-	var result []*DataStorageLineOfService
+func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*DataStorageLineOfService, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -119,25 +118,34 @@ func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*D
 		ch <- GetResult{Item: datastoragelineofservice, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-DataStorageLineOfService helper map.
+	unorderedResults := map[string]*DataStorageLineOfService{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*DataStorageLineOfService, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

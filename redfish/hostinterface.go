@@ -215,10 +215,9 @@ func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
 
 // ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
-func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) {
-	var result []*HostInterface
+func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -234,27 +233,36 @@ func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterfac
 		ch <- GetResult{Item: hostinterface, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-HostInterface helper map.
+	unorderedResults := map[string]*HostInterface{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*HostInterface, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.

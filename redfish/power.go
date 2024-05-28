@@ -187,10 +187,9 @@ func GetPower(c common.Client, uri string) (*Power, error) {
 
 // ListReferencedPowers gets the collection of Power from
 // a provided reference.
-func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
-	var result []*Power
+func ListReferencedPowers(c common.Client, link string) ([]*Power, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -206,27 +205,36 @@ func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
 		ch <- GetResult{Item: power, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Power helper map.
+	unorderedResults := map[string]*Power{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Power, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 type PowerControl struct {
@@ -487,10 +495,9 @@ func GetPowerSupply(c common.Client, uri string) (*PowerSupply, error) {
 	return &powerSupply, powerSupply.Get(c, uri, &powerSupply)
 }
 
-func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) {
-	var result []*PowerSupply
+func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -502,31 +509,40 @@ func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, 
 	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
 	get := func(link string) {
-		powerSupply, err := GetPowerSupply(c, link)
-		ch <- GetResult{Item: powerSupply, Link: link, Error: err}
+		powersupply, err := GetPowerSupply(c, link)
+		ch <- GetResult{Item: powersupply, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-PowerSupply helper map.
+	unorderedResults := map[string]*PowerSupply{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*PowerSupply, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Update commits updates to this object's properties to the running system.

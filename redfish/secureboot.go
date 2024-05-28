@@ -133,10 +133,9 @@ func GetSecureBoot(c common.Client, uri string) (*SecureBoot, error) {
 
 // ListReferencedSecureBoots gets the collection of SecureBoot from
 // a provided reference.
-func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, error) {
-	var result []*SecureBoot
+func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -152,27 +151,36 @@ func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, err
 		ch <- GetResult{Item: secureboot, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-SecureBoot helper map.
+	unorderedResults := map[string]*SecureBoot{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*SecureBoot, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ResetKeys shall perform a reset of the Secure Boot key databases. The

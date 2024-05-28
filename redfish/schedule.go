@@ -157,10 +157,9 @@ func GetSchedule(c common.Client, uri string) (*Schedule, error) {
 
 // ListReferencedSchedules gets the collection of Schedule from
 // a provided reference.
-func ListReferencedSchedules(c common.Client, link string) ([]*Schedule, error) {
-	var result []*Schedule
+func ListReferencedSchedules(c common.Client, link string) ([]*Schedule, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -176,25 +175,34 @@ func ListReferencedSchedules(c common.Client, link string) ([]*Schedule, error) 
 		ch <- GetResult{Item: schedule, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Schedule helper map.
+	unorderedResults := map[string]*Schedule{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Schedule, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

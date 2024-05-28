@@ -192,10 +192,9 @@ func GetMediaController(c common.Client, uri string) (*MediaController, error) {
 
 // ListReferencedMediaControllers gets the collection of MediaController from
 // a provided reference.
-func ListReferencedMediaControllers(c common.Client, link string) ([]*MediaController, error) {
-	var result []*MediaController
+func ListReferencedMediaControllers(c common.Client, link string) ([]*MediaController, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -211,25 +210,34 @@ func ListReferencedMediaControllers(c common.Client, link string) ([]*MediaContr
 		ch <- GetResult{Item: mediacontroller, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-MediaController helper map.
+	unorderedResults := map[string]*MediaController{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*MediaController, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

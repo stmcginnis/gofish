@@ -53,10 +53,9 @@ func GetServiceConditions(c common.Client, uri string) (*ServiceConditions, erro
 
 // ListReferencedServiceConditionss gets the collection of ServiceConditions from
 // a provided reference.
-func ListReferencedServiceConditionss(c common.Client, link string) ([]*ServiceConditions, error) {
-	var result []*ServiceConditions
+func ListReferencedServiceConditionss(c common.Client, link string) ([]*ServiceConditions, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -72,25 +71,34 @@ func ListReferencedServiceConditionss(c common.Client, link string) ([]*ServiceC
 		ch <- GetResult{Item: serviceconditions, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-ServiceConditions helper map.
+	unorderedResults := map[string]*ServiceConditions{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*ServiceConditions, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

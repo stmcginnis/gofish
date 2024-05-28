@@ -169,10 +169,9 @@ func GetGraphicsController(c common.Client, uri string) (*GraphicsController, er
 
 // ListReferencedGraphicsControllers gets the collection of GraphicsController from
 // a provided reference.
-func ListReferencedGraphicsControllers(c common.Client, link string) ([]*GraphicsController, error) {
-	var result []*GraphicsController
+func ListReferencedGraphicsControllers(c common.Client, link string) ([]*GraphicsController, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -188,25 +187,34 @@ func ListReferencedGraphicsControllers(c common.Client, link string) ([]*Graphic
 		ch <- GetResult{Item: graphicscontroller, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-GraphicsController helper map.
+	unorderedResults := map[string]*GraphicsController{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*GraphicsController, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

@@ -1058,10 +1058,9 @@ func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
 // a provided reference.
-func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) {
-	var result []*ComputerSystem
+func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -1077,27 +1076,36 @@ func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSys
 		ch <- GetResult{Item: computersystem, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-ComputerSystem helper map.
+	unorderedResults := map[string]*ComputerSystem{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*ComputerSystem, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Bios gets the Bios information for this ComputerSystem.
@@ -1111,9 +1119,10 @@ func (computersystem *ComputerSystem) Bios() (*Bios, error) {
 
 // BootOptions gets all BootOption items for this system.
 func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
-	var result []*BootOption
-	if computersystem.Boot.bootOptions == "" {
-		return result, nil
+	link := computersystem.Boot.bootOptions
+
+	if link == "" {
+		return nil, nil
 	}
 	c := computersystem.GetClient()
 
@@ -1130,27 +1139,36 @@ func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
 		ch <- GetResult{Item: bootoption, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, computersystem.Boot.bootOptions)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
-			collectionError.Failures[computersystem.Boot.bootOptions] = err
+			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-ComputerSystem helper map.
+	unorderedResults := map[string]*BootOption{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*BootOption, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 func (computersystem *ComputerSystem) BootCertificates() ([]*Certificate, error) {

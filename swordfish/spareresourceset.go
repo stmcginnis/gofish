@@ -114,10 +114,9 @@ func GetSpareResourceSet(c common.Client, uri string) (*SpareResourceSet, error)
 
 // ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
 // a provided reference.
-func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareResourceSet, error) {
-	var result []*SpareResourceSet
+func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareResourceSet, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -133,27 +132,36 @@ func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareReso
 		ch <- GetResult{Item: spareresourceset, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-SpareResourceSet helper map.
+	unorderedResults := map[string]*SpareResourceSet{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*SpareResourceSet, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // ReplacementSpareSets gets other spare sets that can be utilized to replenish

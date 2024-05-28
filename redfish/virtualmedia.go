@@ -348,10 +348,9 @@ func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
 
 // ListReferencedVirtualMedias gets the collection of VirtualMedia from
 // a provided reference.
-func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) {
-	var result []*VirtualMedia
+func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -367,25 +366,34 @@ func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia,
 		ch <- GetResult{Item: virtualmedia, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-VirtualMedia helper map.
+	unorderedResults := map[string]*VirtualMedia{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*VirtualMedia, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

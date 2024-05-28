@@ -91,10 +91,9 @@ func GetManifest(c common.Client, uri string) (*Manifest, error) {
 
 // ListReferencedManifests gets the collection of Manifest from
 // a provided reference.
-func ListReferencedManifests(c common.Client, link string) ([]*Manifest, error) {
-	var result []*Manifest
+func ListReferencedManifests(c common.Client, link string) ([]*Manifest, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -110,27 +109,36 @@ func ListReferencedManifests(c common.Client, link string) ([]*Manifest, error) 
 		ch <- GetResult{Item: manifest, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Manifest helper map.
+	unorderedResults := map[string]*Manifest{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Manifest, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Stanza shall contain properties that describe a request to be fulfilled within a manifest.

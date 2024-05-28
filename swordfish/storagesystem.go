@@ -21,10 +21,9 @@ func GetStorageSystem(c common.Client, uri string) (*StorageSystem, error) {
 }
 
 // ListReferencedStorageSystems gets the collection of StorageSystems.
-func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSystem, error) {
-	var result []*StorageSystem
+func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSystem, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -40,25 +39,34 @@ func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSyste
 		ch <- GetResult{Item: storagesystem, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-StorageSystem helper map.
+	unorderedResults := map[string]*StorageSystem{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*StorageSystem, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

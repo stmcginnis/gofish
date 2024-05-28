@@ -199,10 +199,9 @@ func GetSecurityPolicy(c common.Client, uri string) (*SecurityPolicy, error) {
 
 // ListReferencedSecurityPolicys gets the collection of SecurityPolicy from
 // a provided reference.
-func ListReferencedSecurityPolicys(c common.Client, link string) ([]*SecurityPolicy, error) {
-	var result []*SecurityPolicy
+func ListReferencedSecurityPolicys(c common.Client, link string) ([]*SecurityPolicy, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -218,27 +217,36 @@ func ListReferencedSecurityPolicys(c common.Client, link string) ([]*SecurityPol
 		ch <- GetResult{Item: securitypolicy, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-SecurityPolicy helper map.
+	unorderedResults := map[string]*SecurityPolicy{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*SecurityPolicy, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // TLSAlgorithmSet shall contain TLS algorithm settings.

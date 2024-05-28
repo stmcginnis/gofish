@@ -620,10 +620,9 @@ func DeleteEventDestination(c common.Client, uri string) error {
 
 // ListReferencedEventDestinations gets the collection of EventDestination from
 // a provided reference.
-func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) {
-	var result []*EventDestination
+func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -634,33 +633,41 @@ func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDest
 
 	ch := make(chan GetResult)
 	collectionError := common.NewCollectionError()
-
 	get := func(link string) {
 		eventdestination, err := GetEventDestination(c, link)
 		ch <- GetResult{Item: eventdestination, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-EventDestination helper map.
+	unorderedResults := map[string]*EventDestination{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*EventDestination, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included

@@ -191,10 +191,9 @@ func GetTask(c common.Client, uri string) (*Task, error) {
 
 // ListReferencedTasks gets the collection of Task from
 // a provided reference.
-func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
-	var result []*Task
+func ListReferencedTasks(c common.Client, link string) ([]*Task, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -210,25 +209,34 @@ func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
 		ch <- GetResult{Item: task, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Task helper map.
+	unorderedResults := map[string]*Task{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Task, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }

@@ -595,10 +595,9 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
-func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
-	var result []*Memory
+func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) { //nolint:dupl
 	if link == "" {
-		return result, nil
+		return nil, nil
 	}
 
 	type GetResult struct {
@@ -614,27 +613,36 @@ func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
 		ch <- GetResult{Item: memory, Link: link, Error: err}
 	}
 
+	var links []string
+	var err error
 	go func() {
-		err := common.CollectList(get, c, link)
+		links, err = common.CollectList(get, c, link)
 		if err != nil {
 			collectionError.Failures[link] = err
 		}
 		close(ch)
 	}()
 
+	// Save unordered results into link-to-Memory helper map.
+	unorderedResults := map[string]*Memory{}
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
 		} else {
-			result = append(result, r.Item)
+			unorderedResults[r.Link] = r.Item
 		}
 	}
 
-	if collectionError.Empty() {
-		return result, nil
+	if !collectionError.Empty() {
+		return nil, collectionError
+	}
+	// Build the final ordered slice based on the original order from the links list.
+	results := make([]*Memory, len(links))
+	for i, link := range links {
+		results[i] = unorderedResults[link]
 	}
 
-	return result, collectionError
+	return results, nil
 }
 
 // Assembly gets this memory's assembly.
