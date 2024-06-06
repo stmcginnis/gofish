@@ -180,6 +180,8 @@ type Drive struct {
 	// NegotiatedSpeedGbs shall contain current bus speed of the associated
 	// drive.
 	NegotiatedSpeedGbs float32
+	// Oem contains all the vendor specific information.
+	Oem json.RawMessage
 	// Operations shall contain a list of all operations currently running on
 	// the Drive.
 	Operations []common.Operations
