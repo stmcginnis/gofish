@@ -825,6 +825,9 @@ type ComputerSystem struct {
 	// networkInterfaces shall be a link to a collection of type
 	// NetworkInterfaceCollection.
 	networkInterfaces string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// OperatingSystem shall contain a link to a resource of type OperatingSystem that contains operating system
 	// information for this system.
 	OperatingSystem string
