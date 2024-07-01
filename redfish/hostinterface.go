@@ -70,7 +70,7 @@ type HostInterface struct {
 	// CredentialBootstrapping shall contain settings for the Redfish Host Interface Specification-defined 'credential
 	// bootstrapping via IPMI commands' feature for this interface. This property shall be absent if credential
 	// bootstrapping is not supported by the service.
-	CredentialBootstrapping string
+	CredentialBootstrapping CredentialBootstrapping
 	// Description provides a description of this resource.
 	Description string
 	// ExternallyAccessible is used by external clients, and this property
