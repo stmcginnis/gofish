@@ -52,6 +52,9 @@ type APIClient struct {
 
 	// dumpWriter will receive HTTP dumps if non-nil.
 	dumpWriter io.Writer
+
+	// keepAlive is a flag to indicate if we should try to keep idle connections open
+	keepAlive bool
 }
 
 // Session holds the session ID and auth token needed to identify an
@@ -94,6 +97,10 @@ type ClientConfig struct {
 
 	// The maximum number of concurrent HTTP requests that will be made (default: 1)
 	MaxConcurrentRequests int64
+
+	// ReuseConnections can be useful if executing a lot of requests. Setting to `true` allows
+	// the TCP sessions to remain open and reused betweeen subsequent calls.
+	ReuseConnections bool
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -131,6 +138,13 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 				InsecureSkipVerify: config.Insecure,
 			},
 		}
+
+		if config.ReuseConnections {
+			client.keepAlive = true
+			transport.DisableKeepAlives = false
+			transport.IdleConnTimeout = 1 * time.Minute
+		}
+
 		client.HTTPClient = &http.Client{Transport: transport}
 	} else {
 		client.HTTPClient = config.HTTPClient
@@ -500,7 +514,12 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 			req.Header.Set("Authorization", fmt.Sprintf("Basic %v", encodedAuth))
 		}
 	}
+
 	req.Close = true
+	if c.keepAlive {
+		req.Close = false
+		req.Header.Add("Connection", "keep-alive")
+	}
 
 	// Dump request if needed.
 	if c.dumpWriter != nil {
@@ -575,6 +594,7 @@ func (c *APIClient) dumpResponse(resp *http.Response) error {
 func (c *APIClient) Logout() {
 	if c != nil && c.Service != nil && c.auth != nil {
 		_ = c.Service.DeleteSession(c.auth.Session)
+		c.HTTPClient.CloseIdleConnections()
 	}
 }
 
