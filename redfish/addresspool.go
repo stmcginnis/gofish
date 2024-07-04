@@ -98,45 +98,7 @@ func GetAddressPool(c common.Client, uri string) (*AddressPool, error) {
 // ListReferencedAddressPools gets the collection of AddressPool from
 // a provided reference.
 func ListReferencedAddressPools(c common.Client, link string) ([]*AddressPool, error) {
-	var result []*AddressPool
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *AddressPool
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		addresspool, err := GetAddressPool(c, link)
-		ch <- GetResult{Item: addresspool, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetAddressPool)
 }
 
 // Endpoints gets the endpoints connected to this address pool.

@@ -458,45 +458,7 @@ func GetStorage(c common.Client, uri string) (*Storage, error) {
 // ListReferencedStorages gets the collection of Storage from a provided
 // reference.
 func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
-	var result []*Storage
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Storage
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		storage, err := GetStorage(c, link)
-		ch <- GetResult{Item: storage, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetStorage)
 }
 
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage

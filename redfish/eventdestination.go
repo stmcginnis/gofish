@@ -621,46 +621,7 @@ func DeleteEventDestination(c common.Client, uri string) error {
 // ListReferencedEventDestinations gets the collection of EventDestination from
 // a provided reference.
 func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) {
-	var result []*EventDestination
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *EventDestination
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-
-	get := func(link string) {
-		eventdestination, err := GetEventDestination(c, link)
-		ch <- GetResult{Item: eventdestination, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetEventDestination)
 }
 
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included

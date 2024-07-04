@@ -146,43 +146,5 @@ func GetAllowDeny(c common.Client, uri string) (*AllowDeny, error) {
 // ListReferencedAllowDenys gets the collection of AllowDeny from
 // a provided reference.
 func ListReferencedAllowDenys(c common.Client, link string) ([]*AllowDeny, error) {
-	var result []*AllowDeny
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *AllowDeny
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		allowdeny, err := GetAllowDeny(c, link)
-		ch <- GetResult{Item: allowdeny, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetAllowDeny)
 }

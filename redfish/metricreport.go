@@ -88,45 +88,7 @@ func GetMetricReport(c common.Client, uri string) (*MetricReport, error) {
 // ListReferencedMetricReports gets the collection of MetricReport from
 // a provided reference.
 func ListReferencedMetricReports(c common.Client, link string) ([]*MetricReport, error) {
-	var result []*MetricReport
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *MetricReport
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		metricreport, err := GetMetricReport(c, link)
-		ch <- GetResult{Item: metricreport, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetMetricReport)
 }
 
 // MetricValue shall contain properties that capture a metric value and other associated information.

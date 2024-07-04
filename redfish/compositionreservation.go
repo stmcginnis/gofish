@@ -81,45 +81,7 @@ func GetCompositionReservation(c common.Client, uri string) (*CompositionReserva
 // ListReferencedCompositionReservations gets the collection of CompositionReservation from
 // a provided reference.
 func ListReferencedCompositionReservations(c common.Client, link string) ([]*CompositionReservation, error) {
-	var result []*CompositionReservation
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *CompositionReservation
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		compositionreservation, err := GetCompositionReservation(c, link)
-		ch <- GetResult{Item: compositionreservation, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetCompositionReservation)
 }
 
 // ReservedResourceBlocks gets reserved resource blocks for this reservation.

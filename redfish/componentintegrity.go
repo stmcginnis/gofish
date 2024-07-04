@@ -265,45 +265,7 @@ func GetComponentIntegrity(c common.Client, uri string) (*ComponentIntegrity, er
 // ListReferencedComponentIntegritys gets the collection of ComponentIntegrity from
 // a provided reference.
 func ListReferencedComponentIntegritys(c common.Client, link string) ([]*ComponentIntegrity, error) {
-	var result []*ComponentIntegrity
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *ComponentIntegrity
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		componentintegrity, err := GetComponentIntegrity(c, link)
-		ch <- GetResult{Item: componentintegrity, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetComponentIntegrity)
 }
 
 // SPDMGetSignedMeasurementsRequest contains the parameters for the SPDMGetSignedMeasurements action.

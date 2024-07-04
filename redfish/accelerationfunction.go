@@ -122,45 +122,7 @@ func GetAccelerationFunction(c common.Client, uri string) (*AccelerationFunction
 // ListReferencedAccelerationFunctions gets the collection of AccelerationFunction from
 // a provided reference.
 func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*AccelerationFunction, error) {
-	var result []*AccelerationFunction
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *AccelerationFunction
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		accelerationfunction, err := GetAccelerationFunction(c, link)
-		ch <- GetResult{Item: accelerationfunction, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetAccelerationFunction)
 }
 
 // Endpoints gets the endpoints connected to this accelerator.

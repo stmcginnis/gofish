@@ -148,43 +148,5 @@ func GetFilter(c common.Client, uri string) (*Filter, error) {
 // ListReferencedFilters gets the collection of Filter from
 // a provided reference.
 func ListReferencedFilters(c common.Client, link string) ([]*Filter, error) {
-	var result []*Filter
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Filter
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		filter, err := GetFilter(c, link)
-		ch <- GetResult{Item: filter, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetFilter)
 }

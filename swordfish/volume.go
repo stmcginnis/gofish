@@ -801,45 +801,7 @@ func GetVolume(c common.Client, uri string) (*Volume, error) {
 
 // ListReferencedVolumes gets the collection of Volume from a provided reference.
 func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
-	var result []*Volume
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Volume
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		volume, err := GetVolume(c, link)
-		ch <- GetResult{Item: volume, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetVolume)
 }
 
 // CacheDataVolumes gets the data volumes this volume serves as a cache volume.

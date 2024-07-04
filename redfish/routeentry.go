@@ -103,43 +103,5 @@ func GetRouteEntry(c common.Client, uri string) (*RouteEntry, error) {
 // ListReferencedRouteEntrys gets the collection of RouteEntry from
 // a provided reference.
 func ListReferencedRouteEntrys(c common.Client, link string) ([]*RouteEntry, error) {
-	var result []*RouteEntry
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *RouteEntry
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		routeentry, err := GetRouteEntry(c, link)
-		ch <- GetResult{Item: routeentry, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetRouteEntry)
 }

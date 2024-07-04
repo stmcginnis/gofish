@@ -186,45 +186,7 @@ func GetLogService(c common.Client, uri string) (*LogService, error) {
 
 // ListReferencedLogServices gets the collection of LogService from a provided reference.
 func ListReferencedLogServices(c common.Client, link string) ([]*LogService, error) {
-	var result []*LogService
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *LogService
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		logservice, err := GetLogService(c, link)
-		ch <- GetResult{Item: logservice, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetLogService)
 }
 
 // Entries gets the log entries of this service.

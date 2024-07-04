@@ -92,48 +92,10 @@ func GetVCATEntry(c common.Client, uri string) (*VCATEntry, error) {
 	return &vcatentry, nil
 }
 
-// ListReferencedVCATEntrys gets the collection of VCATEntry from
+// ListReferencedVCATEntries gets the collection of VCATEntry from
 // a provided reference.
-func ListReferencedVCATEntrys(c common.Client, link string) ([]*VCATEntry, error) {
-	var result []*VCATEntry
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *VCATEntry
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		vcatentry, err := GetVCATEntry(c, link)
-		ch <- GetResult{Item: vcatentry, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+func ListReferencedVCATEntries(c common.Client, link string) ([]*VCATEntry, error) {
+	return common.GetCollectionObjects(c, link, GetVCATEntry)
 }
 
 // VCATableEntry shall contain a Virtual Channel entry definition that describes a specific Virtual Channel.

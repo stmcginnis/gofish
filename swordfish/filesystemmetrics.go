@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-//nolint:dupl
 package swordfish
 
 import (
@@ -50,43 +49,5 @@ func GetFileSystemMetrics(c common.Client, uri string) (*FileSystemMetrics, erro
 // ListReferencedFileSystemMetricss gets the collection of FileSystemMetrics from
 // a provided reference.
 func ListReferencedFileSystemMetricss(c common.Client, link string) ([]*FileSystemMetrics, error) {
-	var result []*FileSystemMetrics
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *FileSystemMetrics
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		filesystemmetrics, err := GetFileSystemMetrics(c, link)
-		ch <- GetResult{Item: filesystemmetrics, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetFileSystemMetrics)
 }

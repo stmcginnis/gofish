@@ -105,45 +105,7 @@ func GetContainerImage(c common.Client, uri string) (*ContainerImage, error) {
 // ListReferencedContainerImages gets the collection of ContainerImage from
 // a provided reference.
 func ListReferencedContainerImages(c common.Client, link string) ([]*ContainerImage, error) {
-	var result []*ContainerImage
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *ContainerImage
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		containerimage, err := GetContainerImage(c, link)
-		ch <- GetResult{Item: containerimage, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetContainerImage)
 }
 
 // Containers get the container instances using this container image.

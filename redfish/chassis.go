@@ -601,45 +601,7 @@ func GetChassis(c common.Client, uri string) (*Chassis, error) {
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
 func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
-	var result []*Chassis
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Chassis
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		chassis, err := GetChassis(c, link)
-		ch <- GetResult{Item: chassis, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetChassis)
 }
 
 // Certificates returns certificates in this Chassis.

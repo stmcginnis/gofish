@@ -134,45 +134,7 @@ func GetSecureBoot(c common.Client, uri string) (*SecureBoot, error) {
 // ListReferencedSecureBoots gets the collection of SecureBoot from
 // a provided reference.
 func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, error) {
-	var result []*SecureBoot
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *SecureBoot
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		secureboot, err := GetSecureBoot(c, link)
-		ch <- GetResult{Item: secureboot, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetSecureBoot)
 }
 
 // ResetKeys shall perform a reset of the Secure Boot key databases. The

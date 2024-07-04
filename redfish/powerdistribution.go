@@ -305,45 +305,7 @@ func (powerDistribution *PowerDistribution) TransferControl() error {
 // ListReferencedPowerDistribution gets the collection of PowerDistribution from
 // a provided reference.
 func ListReferencedPowerDistributionUnits(c common.Client, link string) ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *PowerDistribution
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		powerDistribution, err := GetPowerDistribution(c, link)
-		ch <- GetResult{Item: powerDistribution, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetPowerDistribution)
 }
 
 // Deprecated: (v1.3) in favor of the Sensors link in the Chassis resource.

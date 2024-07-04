@@ -278,45 +278,7 @@ func GetFileSystem(c common.Client, uri string) (*FileSystem, error) {
 // ListReferencedFileSystems gets the collection of FileSystem from
 // a provided reference.
 func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, error) {
-	var result []*FileSystem
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *FileSystem
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		filesystem, err := GetFileSystem(c, link)
-		ch <- GetResult{Item: filesystem, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetFileSystem)
 }
 
 // ExportedShares gets the exported file shares for this file system.

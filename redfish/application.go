@@ -94,45 +94,7 @@ func GetApplication(c common.Client, uri string) (*Application, error) {
 // ListReferencedApplications gets the collection of Application from
 // a provided reference.
 func ListReferencedApplications(c common.Client, link string) ([]*Application, error) {
-	var result []*Application
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Application
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		application, err := GetApplication(c, link)
-		ch <- GetResult{Item: application, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetApplication)
 }
 
 // SoftwareImage returns a `SoftwareInventory“ that represents the software image from which this application runs.

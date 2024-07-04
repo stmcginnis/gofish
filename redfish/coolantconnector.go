@@ -184,45 +184,7 @@ func GetCoolantConnector(c common.Client, uri string) (*CoolantConnector, error)
 // ListReferencedCoolantConnectors gets the collection of CoolantConnector from
 // a provided reference.
 func ListReferencedCoolantConnectors(c common.Client, link string) ([]*CoolantConnector, error) {
-	var result []*CoolantConnector
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *CoolantConnector
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		coolantconnector, err := GetCoolantConnector(c, link)
-		ch <- GetResult{Item: coolantconnector, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetCoolantConnector)
 }
 
 // ConnectedChassis retrieves a collection of the Chassis at the other end of the connection.

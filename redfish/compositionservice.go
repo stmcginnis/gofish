@@ -178,45 +178,7 @@ func GetCompositionService(c common.Client, uri string) (*CompositionService, er
 // ListReferencedCompositionServices gets the collection of CompositionService from
 // a provided reference.
 func ListReferencedCompositionServices(c common.Client, link string) ([]*CompositionService, error) {
-	var result []*CompositionService
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *CompositionService
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		compositionservice, err := GetCompositionService(c, link)
-		ch <- GetResult{Item: compositionservice, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetCompositionService)
 }
 
 // Compose performs a set of operations specified by a manifest.

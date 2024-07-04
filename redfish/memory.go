@@ -596,45 +596,7 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
 func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
-	var result []*Memory
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Memory
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		memory, err := GetMemory(c, link)
-		ch <- GetResult{Item: memory, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetMemory)
 }
 
 // Assembly gets this memory's assembly.

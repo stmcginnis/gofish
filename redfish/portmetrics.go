@@ -240,45 +240,7 @@ func GetPortMetrics(c common.Client, uri string) (*PortMetrics, error) {
 // ListReferencedPortMetricss gets the collection of PortMetrics from
 // a provided reference.
 func ListReferencedPortMetricss(c common.Client, link string) ([]*PortMetrics, error) {
-	var result []*PortMetrics
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *PortMetrics
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		portmetrics, err := GetPortMetrics(c, link)
-		ch <- GetResult{Item: portmetrics, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetPortMetrics)
 }
 
 // SASPortMetrics shall describe physical (phy) related metrics for Serial Attached SCSI (SAS).

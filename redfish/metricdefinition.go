@@ -232,45 +232,7 @@ func GetMetricDefinition(c common.Client, uri string) (*MetricDefinition, error)
 // ListReferencedMetricDefinitions gets the collection of MetricDefinition from
 // a provided reference.
 func ListReferencedMetricDefinitions(c common.Client, link string) ([]*MetricDefinition, error) {
-	var result []*MetricDefinition
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *MetricDefinition
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		metricdefinition, err := GetMetricDefinition(c, link)
-		ch <- GetResult{Item: metricdefinition, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetMetricDefinition)
 }
 
 // Wildcard shall contain a wildcard and its substitution values.

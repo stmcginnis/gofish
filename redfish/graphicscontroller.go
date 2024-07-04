@@ -170,43 +170,5 @@ func GetGraphicsController(c common.Client, uri string) (*GraphicsController, er
 // ListReferencedGraphicsControllers gets the collection of GraphicsController from
 // a provided reference.
 func ListReferencedGraphicsControllers(c common.Client, link string) ([]*GraphicsController, error) {
-	var result []*GraphicsController
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *GraphicsController
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		graphicscontroller, err := GetGraphicsController(c, link)
-		ch <- GetResult{Item: graphicscontroller, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetGraphicsController)
 }

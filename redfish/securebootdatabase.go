@@ -118,43 +118,5 @@ func GetSecureBootDatabase(c common.Client, uri string) (*SecureBootDatabase, er
 // ListReferencedSecureBootDatabases gets the collection of SecureBootDatabase from
 // a provided reference.
 func ListReferencedSecureBootDatabases(c common.Client, link string) ([]*SecureBootDatabase, error) {
-	var result []*SecureBootDatabase
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *SecureBootDatabase
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		securebootdatabase, err := GetSecureBootDatabase(c, link)
-		ch <- GetResult{Item: securebootdatabase, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetSecureBootDatabase)
 }

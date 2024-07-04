@@ -181,45 +181,7 @@ func GetKeyPolicy(c common.Client, uri string) (*KeyPolicy, error) {
 // ListReferencedKeyPolicys gets the collection of KeyPolicy from
 // a provided reference.
 func ListReferencedKeyPolicys(c common.Client, link string) ([]*KeyPolicy, error) {
-	var result []*KeyPolicy
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *KeyPolicy
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		keypolicy, err := GetKeyPolicy(c, link)
-		ch <- GetResult{Item: keypolicy, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetKeyPolicy)
 }
 
 // NVMeoF shall contain NVMe-oF specific properties for a key policy.

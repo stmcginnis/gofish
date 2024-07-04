@@ -186,43 +186,5 @@ func GetMemoryRegion(c common.Client, uri string) (*MemoryRegion, error) {
 // ListReferencedMemoryRegions gets the collection of MemoryRegion from
 // a provided reference.
 func ListReferencedMemoryRegions(c common.Client, link string) ([]*MemoryRegion, error) {
-	var result []*MemoryRegion
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *MemoryRegion
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		memoryregion, err := GetMemoryRegion(c, link)
-		ch <- GetResult{Item: memoryregion, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetMemoryRegion)
 }

@@ -95,45 +95,7 @@ func GetContainer(c common.Client, uri string) (*Container, error) {
 // ListReferencedContainers gets the collection of Container from
 // a provided reference.
 func ListReferencedContainers(c common.Client, link string) ([]*Container, error) {
-	var result []*Container
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Container
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		container, err := GetContainer(c, link)
-		ch <- GetResult{Item: container, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetContainer)
 }
 
 // Reset resets the container.

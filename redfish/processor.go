@@ -1025,45 +1025,7 @@ func GetProcessor(c common.Client, uri string) (*Processor, error) {
 
 // ListReferencedProcessors gets the collection of Processor from a provided reference.
 func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error) {
-	var result []*Processor
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Processor
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		processor, err := GetProcessor(c, link)
-		ch <- GetResult{Item: processor, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetProcessor)
 }
 
 // ProcessorID shall contain identification information for a processor.

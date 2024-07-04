@@ -221,45 +221,7 @@ func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
 // ListReferencedPCIeFunctions gets the collection of PCIeFunction from
 // a provided reference.
 func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) {
-	var result []*PCIeFunction
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *PCIeFunction
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		pciefunction, err := GetPCIeFunction(c, link)
-		ch <- GetResult{Item: pciefunction, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetPCIeFunction)
 }
 
 // CXLLogicalDevice gets the CXL logical device to which this PCIe function is assigned.

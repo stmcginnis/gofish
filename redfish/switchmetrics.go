@@ -111,43 +111,5 @@ func GetSwitchMetrics(c common.Client, uri string) (*SwitchMetrics, error) {
 // ListReferencedSwitchMetricss gets the collection of SwitchMetrics from
 // a provided reference.
 func ListReferencedSwitchMetricss(c common.Client, link string) ([]*SwitchMetrics, error) {
-	var result []*SwitchMetrics
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *SwitchMetrics
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		switchmetrics, err := GetSwitchMetrics(c, link)
-		ch <- GetResult{Item: switchmetrics, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetSwitchMetrics)
 }

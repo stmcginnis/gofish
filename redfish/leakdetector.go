@@ -87,45 +87,7 @@ func GetLeakDetector(c common.Client, uri string) (*LeakDetector, error) {
 // ListReferencedLeakDetectors gets the collection of LeakDetector from
 // a provided reference.
 func ListReferencedLeakDetectors(c common.Client, link string) ([]*LeakDetector, error) {
-	var result []*LeakDetector
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *LeakDetector
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		leakdetector, err := GetLeakDetector(c, link)
-		ch <- GetResult{Item: leakdetector, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetLeakDetector)
 }
 
 // LeakDetectorArrayExcerpt shall represent a state-based or digital-value leak detector for a Redfish

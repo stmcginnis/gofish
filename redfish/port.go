@@ -1134,45 +1134,7 @@ func GetPort(c common.Client, uri string) (*Port, error) {
 // ListReferencedPorts gets the collection of Port from
 // a provided reference.
 func ListReferencedPorts(c common.Client, link string) ([]*Port, error) {
-	var result []*Port
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Port
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		port, err := GetPort(c, link)
-		ch <- GetResult{Item: port, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetPort)
 }
 
 // ResetPort resets this port.

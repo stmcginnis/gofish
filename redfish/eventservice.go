@@ -257,45 +257,7 @@ func GetEventService(c common.Client, uri string) (*EventService, error) {
 // ListReferencedEventServices gets the collection of EventService from
 // a provided reference.
 func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) {
-	var result []*EventService
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *EventService
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		eventservice, err := GetEventService(c, link)
-		ch <- GetResult{Item: eventservice, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetEventService)
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.
