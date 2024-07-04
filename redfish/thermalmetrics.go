@@ -137,43 +137,5 @@ func GetThermalMetrics(c common.Client, uri string) (*ThermalMetrics, error) {
 // ListReferencedThermalMetricss gets the collection of ThermalMetrics from
 // a provided reference.
 func ListReferencedThermalMetrics(c common.Client, link string) ([]*ThermalMetrics, error) {
-	var result []*ThermalMetrics
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *ThermalMetrics
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		thermalmetrics, err := GetThermalMetrics(c, link)
-		ch <- GetResult{Item: thermalmetrics, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetThermalMetrics)
 }

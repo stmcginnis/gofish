@@ -67,43 +67,5 @@ func GetSignature(c common.Client, uri string) (*Signature, error) {
 // ListReferencedSignatures gets the collection of Signature from
 // a provided reference.
 func ListReferencedSignatures(c common.Client, link string) ([]*Signature, error) {
-	var result []*Signature
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Signature
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		signature, err := GetSignature(c, link)
-		ch <- GetResult{Item: signature, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetSignature)
 }

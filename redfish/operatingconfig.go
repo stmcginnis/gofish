@@ -74,45 +74,7 @@ func GetOperatingConfig(c common.Client, uri string) (*OperatingConfig, error) {
 // ListReferencedOperatingConfigs gets the collection of OperatingConfig from
 // a provided reference.
 func ListReferencedOperatingConfigs(c common.Client, link string) ([]*OperatingConfig, error) {
-	var result []*OperatingConfig
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *OperatingConfig
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		operatingconfig, err := GetOperatingConfig(c, link)
-		ch <- GetResult{Item: operatingconfig, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetOperatingConfig)
 }
 
 // TurboProfileDatapoint shall specify the turbo profile for a set of active cores.

@@ -232,43 +232,5 @@ func GetTelemetryService(c common.Client, uri string) (*TelemetryService, error)
 // ListReferencedTelemetryServices gets the collection of TelemetryService from
 // a provided reference.
 func ListReferencedTelemetryServices(c common.Client, link string) ([]*TelemetryService, error) {
-	var result []*TelemetryService
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *TelemetryService
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		telemetryservice, err := GetTelemetryService(c, link)
-		ch <- GetResult{Item: telemetryservice, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetTelemetryService)
 }

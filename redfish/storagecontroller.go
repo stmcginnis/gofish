@@ -537,43 +537,5 @@ func GetStorageController(c common.Client, uri string) (*StorageController, erro
 // ListReferencedStorageControllers gets the collection of StorageControllers
 // from a provided reference.
 func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageController, error) {
-	var result []*StorageController
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *StorageController
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		storagecontroller, err := GetStorageController(c, link)
-		ch <- GetResult{Item: storagecontroller, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetStorageController)
 }

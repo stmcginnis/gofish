@@ -231,45 +231,7 @@ func GetCXLLogicalDevice(c common.Client, uri string) (*CXLLogicalDevice, error)
 // ListReferencedCXLLogicalDevices gets the collection of CXLLogicalDevice from
 // a provided reference.
 func ListReferencedCXLLogicalDevices(c common.Client, link string) ([]*CXLLogicalDevice, error) {
-	var result []*CXLLogicalDevice
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *CXLLogicalDevice
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		cxllogicaldevice, err := GetCXLLogicalDevice(c, link)
-		ch <- GetResult{Item: cxllogicaldevice, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetCXLLogicalDevice)
 }
 
 // QoS shall contain the quality of service properties of this CXL logical device.

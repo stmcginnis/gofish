@@ -94,45 +94,7 @@ func GetClassOfService(c common.Client, uri string) (*ClassOfService, error) {
 // ListReferencedClassOfServices gets the collection of ClassOfService from
 // a provided reference.
 func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfService, error) {
-	var result []*ClassOfService
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *ClassOfService
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		classofservice, err := GetClassOfService(c, link)
-		ch <- GetResult{Item: classofservice, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetClassOfService)
 }
 
 // DataProtectionLinesOfServices gets the DataProtectionLinesOfService that are

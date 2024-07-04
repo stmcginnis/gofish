@@ -516,45 +516,7 @@ func (circuit *Circuit) ResetMetrics() error {
 // ListReferencedCircuits gets the collection of Circuits from
 // a provided reference.
 func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) {
-	var result []*Circuit
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Circuit
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		circuit, err := GetCircuit(c, link)
-		ch <- GetResult{Item: circuit, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetCircuit)
 }
 
 // BranchCircuit gets a resource that represents the branch circuit associated with this circuit.

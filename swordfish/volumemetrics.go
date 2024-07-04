@@ -69,43 +69,5 @@ func GetVolumeMetrics(c common.Client, uri string) (*VolumeMetrics, error) {
 // ListReferencedVolumeMetricss gets the collection of VolumeMetrics from
 // a provided reference.
 func ListReferencedVolumeMetricss(c common.Client, link string) ([]*VolumeMetrics, error) {
-	var result []*VolumeMetrics
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *VolumeMetrics
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		volumemetrics, err := GetVolumeMetrics(c, link)
-		ch <- GetResult{Item: volumemetrics, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetVolumeMetrics)
 }

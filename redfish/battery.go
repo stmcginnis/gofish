@@ -207,45 +207,7 @@ func GetBattery(c common.Client, uri string) (*Battery, error) {
 // ListReferencedBatterys gets the collection of Battery from
 // a provided reference.
 func ListReferencedBatterys(c common.Client, link string) ([]*Battery, error) {
-	var result []*Battery
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Battery
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		battery, err := GetBattery(c, link)
-		ch <- GetResult{Item: battery, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetBattery)
 }
 
 // Assembly get the containing assembly of this battery.

@@ -407,45 +407,7 @@ func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, erro
 // ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
 // a provided reference.
 func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*EthernetInterface, error) {
-	var result []*EthernetInterface
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *EthernetInterface
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		ethernetinterface, err := GetEthernetInterface(c, link)
-		ch <- GetResult{Item: ethernetinterface, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetEthernetInterface)
 }
 
 // IPv6AddressPolicyEntry describes and entry in the Address Selection Policy

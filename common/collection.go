@@ -138,3 +138,47 @@ func CollectCollection(get func(string), links []string) {
 
 	wg.Wait()
 }
+
+func GetCollectionObjects[E any](c Client, link string, getFn func(Client, string) (*E, error)) ([]*E, error) {
+	var result []*E
+	if link == "" {
+		return result, nil
+	}
+
+	type GetResult struct {
+		Item  *E
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
+	collectionError := NewCollectionError()
+	get := func(link string) {
+		entity, err := getFn(c, link)
+		ch <- GetResult{Item: entity, Link: link, Error: err}
+	}
+
+	go func() {
+		err := CollectList(get, c, link)
+		if err != nil {
+			collectionError.Failures[link] = err
+		}
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
+		} else {
+			result = append(result, r.Item)
+		}
+	}
+
+	fmt.Printf("Got here, %d objects in collection\n", len(result))
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}

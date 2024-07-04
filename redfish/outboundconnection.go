@@ -200,45 +200,7 @@ func GetOutboundConnection(c common.Client, uri string) (*OutboundConnection, er
 // ListReferencedOutboundConnections gets the collection of OutboundConnection from
 // a provided reference.
 func ListReferencedOutboundConnections(c common.Client, link string) ([]*OutboundConnection, error) {
-	var result []*OutboundConnection
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *OutboundConnection
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		outboundconnection, err := GetOutboundConnection(c, link)
-		ch <- GetResult{Item: outboundconnection, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetOutboundConnection)
 }
 
 // RetryPolicyType shall contain the retry policy for an outbound connection.

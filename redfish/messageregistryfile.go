@@ -67,43 +67,5 @@ func GetMessageRegistryFile(c common.Client, uri string) (*MessageRegistryFile, 
 
 // ListReferencedMessageRegistryFiles gets the collection of MessageRegistryFile.
 func ListReferencedMessageRegistryFiles(c common.Client, link string) ([]*MessageRegistryFile, error) {
-	var result []*MessageRegistryFile
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *MessageRegistryFile
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		messageregistryfile, err := GetMessageRegistryFile(c, link)
-		ch <- GetResult{Item: messageregistryfile, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetMessageRegistryFile)
 }

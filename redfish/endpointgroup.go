@@ -143,45 +143,7 @@ func GetEndpointGroup(c common.Client, uri string) (*EndpointGroup, error) {
 // ListReferencedEndpointGroups gets the collection of EndpointGroup from
 // a provided reference.
 func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) {
-	var result []*EndpointGroup
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *EndpointGroup
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		endpointgroup, err := GetEndpointGroup(c, link)
-		ch <- GetResult{Item: endpointgroup, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetEndpointGroup)
 }
 
 // Endpoints get the endpoints associated with this endpoint group.

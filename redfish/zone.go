@@ -389,43 +389,5 @@ func GetZone(c common.Client, uri string) (*Zone, error) {
 // ListReferencedZones gets the collection of Zone from
 // a provided reference.
 func ListReferencedZones(c common.Client, link string) ([]*Zone, error) {
-	var result []*Zone
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Zone
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		zone, err := GetZone(c, link)
-		ch <- GetResult{Item: zone, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetZone)
 }

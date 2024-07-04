@@ -128,45 +128,7 @@ func GetIOPerformanceLoSCapabilities(c common.Client, uri string) (*IOPerformanc
 // ListReferencedIOPerformanceLoSCapabilitiess gets the collection of IOPerformanceLoSCapabilities from
 // a provided reference.
 func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string) ([]*IOPerformanceLoSCapabilities, error) {
-	var result []*IOPerformanceLoSCapabilities
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *IOPerformanceLoSCapabilities
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		ioperformanceloscapabilities, err := GetIOPerformanceLoSCapabilities(c, link)
-		ch <- GetResult{Item: ioperformanceloscapabilities, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetIOPerformanceLoSCapabilities)
 }
 
 // IOWorkload is used to describe an IO Workload.

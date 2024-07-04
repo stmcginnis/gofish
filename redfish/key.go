@@ -154,45 +154,7 @@ func GetKey(c common.Client, uri string) (*Key, error) {
 // ListReferencedKeys gets the collection of Key from
 // a provided reference.
 func ListReferencedKeys(c common.Client, link string) ([]*Key, error) {
-	var result []*Key
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Key
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		key, err := GetKey(c, link)
-		ch <- GetResult{Item: key, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetKey)
 }
 
 // KeyNVMeoF shall contain NVMe-oF specific properties for a key.

@@ -523,45 +523,7 @@ func GetManager(c common.Client, uri string) (*Manager, error) {
 
 // ListReferencedManagers gets the collection of Managers
 func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
-	var result []*Manager
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Manager
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		manager, err := GetManager(c, link)
-		ch <- GetResult{Item: manager, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetManager)
 }
 
 // ForceFailover forces a failover to the specified manager.

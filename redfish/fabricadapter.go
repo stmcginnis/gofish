@@ -270,45 +270,7 @@ func GetFabricAdapter(c common.Client, uri string) (*FabricAdapter, error) {
 // ListReferencedFabricAdapters gets the collection of FabricAdapter from
 // a provided reference.
 func ListReferencedFabricAdapters(c common.Client, link string) ([]*FabricAdapter, error) {
-	var result []*FabricAdapter
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *FabricAdapter
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		fabricadapter, err := GetFabricAdapter(c, link)
-		ch <- GetResult{Item: fabricadapter, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetFabricAdapter)
 }
 
 // FabricAdapterGenZ shall contain Gen-Z related properties for a fabric adapter.

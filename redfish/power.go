@@ -188,45 +188,7 @@ func GetPower(c common.Client, uri string) (*Power, error) {
 // ListReferencedPowers gets the collection of Power from
 // a provided reference.
 func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
-	var result []*Power
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Power
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		power, err := GetPower(c, link)
-		ch <- GetResult{Item: power, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetPower)
 }
 
 type PowerControl struct {

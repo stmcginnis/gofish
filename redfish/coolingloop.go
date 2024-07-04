@@ -190,45 +190,7 @@ func GetCoolingLoop(c common.Client, uri string) (*CoolingLoop, error) {
 // ListReferencedCoolingLoops gets the collection of CoolingLoop from
 // a provided reference.
 func ListReferencedCoolingLoops(c common.Client, link string) ([]*CoolingLoop, error) {
-	var result []*CoolingLoop
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *CoolingLoop
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		coolingloop, err := GetCoolingLoop(c, link)
-		ch <- GetResult{Item: coolingloop, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetCoolingLoop)
 }
 
 // SecondaryCoolantConnectors gets the secondary coolant connectors for this equipment.

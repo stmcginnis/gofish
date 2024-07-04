@@ -146,43 +146,5 @@ func GetRegisteredClient(c common.Client, uri string) (*RegisteredClient, error)
 // ListReferencedRegisteredClients gets the collection of RegisteredClient from
 // a provided reference.
 func ListReferencedRegisteredClients(c common.Client, link string) ([]*RegisteredClient, error) {
-	var result []*RegisteredClient
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *RegisteredClient
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		registeredclient, err := GetRegisteredClient(c, link)
-		ch <- GetResult{Item: registeredclient, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetRegisteredClient)
 }

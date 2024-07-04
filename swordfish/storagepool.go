@@ -350,45 +350,7 @@ func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
 // ListReferencedStoragePools gets the collection of StoragePool from
 // a provided reference.
 func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) {
-	var result []*StoragePool
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *StoragePool
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		storagepool, err := GetStoragePool(c, link)
-		ch <- GetResult{Item: storagepool, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetStoragePool)
 }
 
 // DedicatedSpareDrives gets the Drive entities which are currently assigned as

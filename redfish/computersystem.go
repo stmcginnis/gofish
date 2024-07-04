@@ -1062,45 +1062,7 @@ func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
 // a provided reference.
 func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) {
-	var result []*ComputerSystem
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *ComputerSystem
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		computersystem, err := GetComputerSystem(c, link)
-		ch <- GetResult{Item: computersystem, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetComputerSystem)
 }
 
 // Bios gets the Bios information for this ComputerSystem.

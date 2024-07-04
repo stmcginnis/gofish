@@ -206,43 +206,5 @@ func GetDataSecurityLoSCapabilities(c common.Client, uri string) (*DataSecurityL
 // ListReferencedDataSecurityLoSCapabilities gets the collection of DataSecurityLoSCapabilities from
 // a provided reference.
 func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string) ([]*DataSecurityLoSCapabilities, error) {
-	var result []*DataSecurityLoSCapabilities
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *DataSecurityLoSCapabilities
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		datasecurityloscapabilities, err := GetDataSecurityLoSCapabilities(c, link)
-		ch <- GetResult{Item: datasecurityloscapabilities, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetDataSecurityLoSCapabilities)
 }

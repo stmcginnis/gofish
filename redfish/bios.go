@@ -105,45 +105,7 @@ func GetBios(c common.Client, uri string) (*Bios, error) {
 
 // ListReferencedBioss gets the collection of Bios from a provided reference.
 func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
-	var result []*Bios
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Bios
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		bios, err := GetBios(c, link)
-		ch <- GetResult{Item: bios, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetBios)
 }
 
 // ChangePassword shall change the selected BIOS password.

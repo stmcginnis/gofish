@@ -216,45 +216,7 @@ func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
 // ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
 func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) {
-	var result []*HostInterface
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *HostInterface
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		hostinterface, err := GetHostInterface(c, link)
-		ch <- GetResult{Item: hostinterface, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetHostInterface)
 }
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.

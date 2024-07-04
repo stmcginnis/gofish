@@ -147,43 +147,5 @@ func GetFabric(c common.Client, uri string) (*Fabric, error) {
 // ListReferencedFabrics gets the collection of Fabric from
 // a provided reference.
 func ListReferencedFabrics(c common.Client, link string) ([]*Fabric, error) {
-	var result []*Fabric
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *Fabric
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		fabric, err := GetFabric(c, link)
-		ch <- GetResult{Item: fabric, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetFabric)
 }

@@ -206,45 +206,7 @@ func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
 // ListReferencedMemoryDomains gets the collection of MemoryDomain from
 // a provided reference.
 func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) {
-	var result []*MemoryDomain
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *MemoryDomain
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		memorydomain, err := GetMemoryDomain(c, link)
-		ch <- GetResult{Item: memorydomain, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetMemoryDomain)
 }
 
 // MemorySet shall represent the interleave sets for a memory chunk.

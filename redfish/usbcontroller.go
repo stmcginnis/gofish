@@ -132,43 +132,5 @@ func GetUSBController(c common.Client, uri string) (*USBController, error) {
 // ListReferencedUSBControllers gets the collection of USBController from
 // a provided reference.
 func ListReferencedUSBControllers(c common.Client, link string) ([]*USBController, error) {
-	var result []*USBController
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *USBController
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		usbcontroller, err := GetUSBController(c, link)
-		ch <- GetResult{Item: usbcontroller, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetUSBController)
 }

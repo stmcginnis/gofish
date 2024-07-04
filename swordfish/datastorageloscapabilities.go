@@ -137,43 +137,5 @@ func GetDataStorageLoSCapabilities(c common.Client, uri string) (*DataStorageLoS
 // ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
 // a provided reference.
 func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) {
-	var result []*DataStorageLoSCapabilities
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *DataStorageLoSCapabilities
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		datastorageloscapabilities, err := GetDataStorageLoSCapabilities(c, link)
-		ch <- GetResult{Item: datastorageloscapabilities, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects(c, link, GetDataStorageLoSCapabilities)
 }
