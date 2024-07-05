@@ -169,24 +169,11 @@ func (nvmedomain *NVMeDomain) Update() error {
 
 // GetNVMeDomain will get a NVMeDomain instance from the service.
 func GetNVMeDomain(c common.Client, uri string) (*NVMeDomain, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var nvmedomain NVMeDomain
-	err = json.NewDecoder(resp.Body).Decode(&nvmedomain)
-	if err != nil {
-		return nil, err
-	}
-
-	nvmedomain.SetClient(c)
-	return &nvmedomain, nil
+	return common.GetObject[NVMeDomain](c, uri)
 }
 
 // ListReferencedNVMeDomains gets the collection of NVMeDomain from
 // a provided reference.
 func ListReferencedNVMeDomains(c common.Client, link string) ([]*NVMeDomain, error) {
-	return common.GetCollectionObjects(c, link, GetNVMeDomain)
+	return common.GetCollectionObjects[NVMeDomain](c, link)
 }

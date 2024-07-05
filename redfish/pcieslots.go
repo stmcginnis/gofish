@@ -185,6 +185,5 @@ func (pcieSlots *PCIeSlots) UnmarshalJSON(b []byte) error {
 
 // GetPCIeSlots will get a PCIeSlots instance from the chassis.
 func GetPCIeSlots(c common.Client, uri string) (*PCIeSlots, error) {
-	var pcieSlots PCIeSlots
-	return &pcieSlots, pcieSlots.Get(c, uri, &pcieSlots)
+	return common.GetObject[PCIeSlots](c, uri)
 }

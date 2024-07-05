@@ -180,13 +180,12 @@ func (logservice *LogService) Update() error {
 
 // GetLogService will get a LogService instance from the service.
 func GetLogService(c common.Client, uri string) (*LogService, error) {
-	var logService LogService
-	return &logService, logService.Get(c, uri, &logService)
+	return common.GetObject[LogService](c, uri)
 }
 
 // ListReferencedLogServices gets the collection of LogService from a provided reference.
 func ListReferencedLogServices(c common.Client, link string) ([]*LogService, error) {
-	return common.GetCollectionObjects(c, link, GetLogService)
+	return common.GetCollectionObjects[LogService](c, link)
 }
 
 // Entries gets the log entries of this service.

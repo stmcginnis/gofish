@@ -356,7 +356,7 @@ func (serviceroot *Service) Fabrics() ([]*redfish.Fabric, error) {
 
 // Facilities gets a collection of facilities.
 func (serviceroot *Service) Facilities() ([]*redfish.Facility, error) {
-	return redfish.ListReferencedFacilitys(serviceroot.GetClient(), serviceroot.facilities)
+	return redfish.ListReferencedFacilities(serviceroot.GetClient(), serviceroot.facilities)
 }
 
 // JobService gets the job service instance

@@ -214,26 +214,13 @@ func (operatingsystem *OperatingSystem) Containers() ([]*Container, error) {
 
 // GetOperatingSystem will get a OperatingSystem instance from the service.
 func GetOperatingSystem(c common.Client, uri string) (*OperatingSystem, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var operatingsystem OperatingSystem
-	err = json.NewDecoder(resp.Body).Decode(&operatingsystem)
-	if err != nil {
-		return nil, err
-	}
-
-	operatingsystem.SetClient(c)
-	return &operatingsystem, nil
+	return common.GetObject[OperatingSystem](c, uri)
 }
 
 // ListReferencedOperatingSystems gets the collection of OperatingSystem from
 // a provided reference.
 func ListReferencedOperatingSystems(c common.Client, link string) ([]*OperatingSystem, error) {
-	return common.GetCollectionObjects(c, link, GetOperatingSystem)
+	return common.GetCollectionObjects[OperatingSystem](c, link)
 }
 
 // VirtualMachineEngine shall contain a virtual machine engine running in an operating system.

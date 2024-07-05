@@ -84,14 +84,13 @@ func (simplestorage *SimpleStorage) UnmarshalJSON(b []byte) error {
 
 // GetSimpleStorage will get a SimpleStorage instance from the service.
 func GetSimpleStorage(c common.Client, uri string) (*SimpleStorage, error) {
-	var simpleStorage SimpleStorage
-	return &simpleStorage, simpleStorage.Get(c, uri, &simpleStorage)
+	return common.GetObject[SimpleStorage](c, uri)
 }
 
 // ListReferencedSimpleStorages gets the collection of SimpleStorage from
 // a provided reference.
 func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorage, error) {
-	return common.GetCollectionObjects(c, link, GetSimpleStorage)
+	return common.GetCollectionObjects[SimpleStorage](c, link)
 }
 
 // Chassis gets the chassis containing this storage service.

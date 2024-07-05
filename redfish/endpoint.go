@@ -227,14 +227,13 @@ func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
 
 // GetEndpoint will get a Endpoint instance from the service.
 func GetEndpoint(c common.Client, uri string) (*Endpoint, error) {
-	var endpoint Endpoint
-	return &endpoint, endpoint.Get(c, uri, &endpoint)
+	return common.GetObject[Endpoint](c, uri)
 }
 
 // ListReferencedEndpoints gets the collection of Endpoint from
 // a provided reference.
 func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) {
-	return common.GetCollectionObjects(c, link, GetEndpoint)
+	return common.GetCollectionObjects[Endpoint](c, link)
 }
 
 // GCID shall contain the Gen-Z Core Specification-defined Global

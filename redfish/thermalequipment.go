@@ -92,24 +92,11 @@ func (thermalequipment *ThermalEquipment) ImmersionUnits() ([]*CoolingUnit, erro
 
 // GetThermalEquipment will get a ThermalEquipment instance from the service.
 func GetThermalEquipment(c common.Client, uri string) (*ThermalEquipment, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var thermalequipment ThermalEquipment
-	err = json.NewDecoder(resp.Body).Decode(&thermalequipment)
-	if err != nil {
-		return nil, err
-	}
-
-	thermalequipment.SetClient(c)
-	return &thermalequipment, nil
+	return common.GetObject[ThermalEquipment](c, uri)
 }
 
 // ListReferencedThermalEquipments gets the collection of ThermalEquipment from
 // a provided reference.
 func ListReferencedThermalEquipments(c common.Client, link string) ([]*ThermalEquipment, error) {
-	return common.GetCollectionObjects(c, link, GetThermalEquipment)
+	return common.GetCollectionObjects[ThermalEquipment](c, link)
 }

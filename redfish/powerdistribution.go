@@ -251,8 +251,7 @@ func (powerDistribution *PowerDistribution) UnmarshalJSON(b []byte) error {
 
 // GetPowerDistribution will get a PowerDistribution instance from the Redfish service.
 func GetPowerDistribution(c common.Client, uri string) (*PowerDistribution, error) {
-	var powerDistribution PowerDistribution
-	return &powerDistribution, powerDistribution.Get(c, uri, &powerDistribution)
+	return common.GetObject[PowerDistribution](c, uri)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -305,7 +304,7 @@ func (powerDistribution *PowerDistribution) TransferControl() error {
 // ListReferencedPowerDistribution gets the collection of PowerDistribution from
 // a provided reference.
 func ListReferencedPowerDistributionUnits(c common.Client, link string) ([]*PowerDistribution, error) {
-	return common.GetCollectionObjects(c, link, GetPowerDistribution)
+	return common.GetCollectionObjects[PowerDistribution](c, link)
 }
 
 // Deprecated: (v1.3) in favor of the Sensors link in the Chassis resource.

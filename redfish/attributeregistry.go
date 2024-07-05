@@ -306,6 +306,5 @@ type AttributeRegistry struct {
 // GetAttributeRegistry will get an AttributeRegistry instance from the Redfish service,
 // e.g. BiosAttributeRegistry
 func GetAttributeRegistry(c common.Client, uri string) (*AttributeRegistry, error) {
-	var attributeRegistry AttributeRegistry
-	return &attributeRegistry, attributeRegistry.Get(c, uri, &attributeRegistry)
+	return common.GetObject[AttributeRegistry](c, uri)
 }

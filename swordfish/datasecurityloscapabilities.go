@@ -199,12 +199,11 @@ type DataSecurityLoSCapabilities struct {
 
 // GetDataSecurityLoSCapabilities will get a DataSecurityLoSCapabilities instance from the service.
 func GetDataSecurityLoSCapabilities(c common.Client, uri string) (*DataSecurityLoSCapabilities, error) {
-	var dataSecurityLoSCapabilities DataSecurityLoSCapabilities
-	return &dataSecurityLoSCapabilities, dataSecurityLoSCapabilities.Get(c, uri, &dataSecurityLoSCapabilities)
+	return common.GetObject[DataSecurityLoSCapabilities](c, uri)
 }
 
 // ListReferencedDataSecurityLoSCapabilities gets the collection of DataSecurityLoSCapabilities from
 // a provided reference.
 func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string) ([]*DataSecurityLoSCapabilities, error) {
-	return common.GetCollectionObjects(c, link, GetDataSecurityLoSCapabilities)
+	return common.GetCollectionObjects[DataSecurityLoSCapabilities](c, link)
 }

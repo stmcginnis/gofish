@@ -50,24 +50,11 @@ type VolumeMetrics struct {
 
 // GetVolumeMetrics will get a VolumeMetrics instance from the service.
 func GetVolumeMetrics(c common.Client, uri string) (*VolumeMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var volumemetrics VolumeMetrics
-	err = json.NewDecoder(resp.Body).Decode(&volumemetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	volumemetrics.SetClient(c)
-	return &volumemetrics, nil
+	return common.GetObject[VolumeMetrics](c, uri)
 }
 
 // ListReferencedVolumeMetricss gets the collection of VolumeMetrics from
 // a provided reference.
 func ListReferencedVolumeMetricss(c common.Client, link string) ([]*VolumeMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetVolumeMetrics)
+	return common.GetCollectionObjects[VolumeMetrics](c, link)
 }

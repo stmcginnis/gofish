@@ -130,12 +130,11 @@ func (datastorageloscapabilities *DataStorageLoSCapabilities) Update() error {
 
 // GetDataStorageLoSCapabilities will get a DataStorageLoSCapabilities instance from the service.
 func GetDataStorageLoSCapabilities(c common.Client, uri string) (*DataStorageLoSCapabilities, error) {
-	var dataStorageLoSCapabilities DataStorageLoSCapabilities
-	return &dataStorageLoSCapabilities, dataStorageLoSCapabilities.Get(c, uri, &dataStorageLoSCapabilities)
+	return common.GetObject[DataStorageLoSCapabilities](c, uri)
 }
 
 // ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
 // a provided reference.
 func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) {
-	return common.GetCollectionObjects(c, link, GetDataStorageLoSCapabilities)
+	return common.GetCollectionObjects[DataStorageLoSCapabilities](c, link)
 }

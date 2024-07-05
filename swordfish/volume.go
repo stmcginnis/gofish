@@ -795,13 +795,12 @@ func (volume *Volume) Update() error {
 
 // GetVolume will get a Volume instance from the service.
 func GetVolume(c common.Client, uri string) (*Volume, error) {
-	var volume Volume
-	return &volume, volume.Get(c, uri, &volume)
+	return common.GetObject[Volume](c, uri)
 }
 
 // ListReferencedVolumes gets the collection of Volume from a provided reference.
 func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
-	return common.GetCollectionObjects(c, link, GetVolume)
+	return common.GetCollectionObjects[Volume](c, link)
 }
 
 // CacheDataVolumes gets the data volumes this volume serves as a cache volume.

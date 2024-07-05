@@ -5,8 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -50,24 +48,11 @@ type DriveMetrics struct {
 
 // GetDriveMetrics will get a DriveMetrics instance from the service.
 func GetDriveMetrics(c common.Client, uri string) (*DriveMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var drivemetrics DriveMetrics
-	err = json.NewDecoder(resp.Body).Decode(&drivemetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	drivemetrics.SetClient(c)
-	return &drivemetrics, nil
+	return common.GetObject[DriveMetrics](c, uri)
 }
 
 // ListReferencedDriveMetricss gets the collection of DriveMetrics from
 // a provided reference.
 func ListReferencedDriveMetricss(c common.Client, link string) ([]*DriveMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetDriveMetrics)
+	return common.GetCollectionObjects[DriveMetrics](c, link)
 }

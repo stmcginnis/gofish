@@ -162,26 +162,13 @@ func (keypolicy *KeyPolicy) Update() error {
 
 // GetKeyPolicy will get a KeyPolicy instance from the service.
 func GetKeyPolicy(c common.Client, uri string) (*KeyPolicy, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var keypolicy KeyPolicy
-	err = json.NewDecoder(resp.Body).Decode(&keypolicy)
-	if err != nil {
-		return nil, err
-	}
-
-	keypolicy.SetClient(c)
-	return &keypolicy, nil
+	return common.GetObject[KeyPolicy](c, uri)
 }
 
 // ListReferencedKeyPolicys gets the collection of KeyPolicy from
 // a provided reference.
 func ListReferencedKeyPolicys(c common.Client, link string) ([]*KeyPolicy, error) {
-	return common.GetCollectionObjects(c, link, GetKeyPolicy)
+	return common.GetCollectionObjects[KeyPolicy](c, link)
 }
 
 // NVMeoF shall contain NVMe-oF specific properties for a key policy.

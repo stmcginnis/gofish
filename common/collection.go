@@ -139,14 +139,17 @@ func CollectCollection(get func(string), links []string) {
 	wg.Wait()
 }
 
-func GetCollectionObjects[E any](c Client, link string, getFn func(Client, string) (*E, error)) ([]*E, error) {
-	var result []*E
-	if link == "" {
+func GetCollectionObjects[T any, PT interface {
+	*T
+	SchemaObject
+}](c Client, uri string) ([]*T, error) {
+	var result []*T
+	if uri == "" {
 		return result, nil
 	}
 
 	type GetResult struct {
-		Item  *E
+		Item  *T
 		Link  string
 		Error error
 	}
@@ -154,14 +157,14 @@ func GetCollectionObjects[E any](c Client, link string, getFn func(Client, strin
 	ch := make(chan GetResult)
 	collectionError := NewCollectionError()
 	get := func(link string) {
-		entity, err := getFn(c, link)
+		entity, err := GetObject[T, PT](c, link)
 		ch <- GetResult{Item: entity, Link: link, Error: err}
 	}
 
 	go func() {
-		err := CollectList(get, c, link)
+		err := CollectList(get, c, uri)
 		if err != nil {
-			collectionError.Failures[link] = err
+			collectionError.Failures[uri] = err
 		}
 		close(ch)
 	}()
@@ -173,8 +176,6 @@ func GetCollectionObjects[E any](c Client, link string, getFn func(Client, strin
 			result = append(result, r.Item)
 		}
 	}
-
-	fmt.Printf("Got here, %d objects in collection\n", len(result))
 
 	if collectionError.Empty() {
 		return result, nil

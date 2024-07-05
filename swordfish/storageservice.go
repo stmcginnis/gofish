@@ -213,14 +213,13 @@ func (storageservice *StorageService) Update() error {
 
 // GetStorageService will get a StorageService instance from the service.
 func GetStorageService(c common.Client, uri string) (*StorageService, error) {
-	var storageService StorageService
-	return &storageService, storageService.Get(c, uri, &storageService)
+	return common.GetObject[StorageService](c, uri)
 }
 
 // ListReferencedStorageServices gets the collection of StorageService from
 // a provided reference.
 func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) {
-	return common.GetCollectionObjects(c, link, GetStorageService)
+	return common.GetCollectionObjects[StorageService](c, link)
 }
 
 // ClassesOfService gets the storage service's classes of service.

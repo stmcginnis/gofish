@@ -464,12 +464,11 @@ type StorageReplicaInfo struct {
 
 // GetStorageReplicaInfo will get a StorageReplicaInfo instance from the service.
 func GetStorageReplicaInfo(c common.Client, uri string) (*StorageReplicaInfo, error) {
-	var storageReplicaInfo StorageReplicaInfo
-	return &storageReplicaInfo, storageReplicaInfo.Get(c, uri, &storageReplicaInfo)
+	return common.GetObject[StorageReplicaInfo](c, uri)
 }
 
 // ListReferencedStorageReplicaInfos gets the collection of StorageReplicaInfo from
 // a provided reference.
 func ListReferencedStorageReplicaInfos(c common.Client, link string) ([]*StorageReplicaInfo, error) {
-	return common.GetCollectionObjects(c, link, GetStorageReplicaInfo)
+	return common.GetCollectionObjects[StorageReplicaInfo](c, link)
 }

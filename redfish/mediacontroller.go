@@ -174,24 +174,11 @@ func (mediacontroller *MediaController) MemoryDomains() ([]*MemoryDomain, error)
 
 // GetMediaController will get a MediaController instance from the service.
 func GetMediaController(c common.Client, uri string) (*MediaController, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var mediacontroller MediaController
-	err = json.NewDecoder(resp.Body).Decode(&mediacontroller)
-	if err != nil {
-		return nil, err
-	}
-
-	mediacontroller.SetClient(c)
-	return &mediacontroller, nil
+	return common.GetObject[MediaController](c, uri)
 }
 
 // ListReferencedMediaControllers gets the collection of MediaController from
 // a provided reference.
 func ListReferencedMediaControllers(c common.Client, link string) ([]*MediaController, error) {
-	return common.GetCollectionObjects(c, link, GetMediaController)
+	return common.GetCollectionObjects[MediaController](c, link)
 }

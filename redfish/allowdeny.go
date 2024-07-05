@@ -127,24 +127,11 @@ func (allowdeny *AllowDeny) Update() error {
 
 // GetAllowDeny will get a AllowDeny instance from the service.
 func GetAllowDeny(c common.Client, uri string) (*AllowDeny, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var allowdeny AllowDeny
-	err = json.NewDecoder(resp.Body).Decode(&allowdeny)
-	if err != nil {
-		return nil, err
-	}
-
-	allowdeny.SetClient(c)
-	return &allowdeny, nil
+	return common.GetObject[AllowDeny](c, uri)
 }
 
 // ListReferencedAllowDenys gets the collection of AllowDeny from
 // a provided reference.
 func ListReferencedAllowDenys(c common.Client, link string) ([]*AllowDeny, error) {
-	return common.GetCollectionObjects(c, link, GetAllowDeny)
+	return common.GetCollectionObjects[AllowDeny](c, link)
 }

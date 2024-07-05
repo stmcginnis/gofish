@@ -361,26 +361,13 @@ func (outlet *Outlet) Update() error {
 
 // GetOutlet will get a Outlet instance from the service.
 func GetOutlet(c common.Client, uri string) (*Outlet, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var outlet Outlet
-	err = json.NewDecoder(resp.Body).Decode(&outlet)
-	if err != nil {
-		return nil, err
-	}
-
-	outlet.SetClient(c)
-	return &outlet, nil
+	return common.GetObject[Outlet](c, uri)
 }
 
 // ListReferencedOutlets gets the collection of Outlet from
 // a provided reference.
 func ListReferencedOutlets(c common.Client, link string) ([]*Outlet, error) {
-	return common.GetCollectionObjects(c, link, GetOutlet)
+	return common.GetCollectionObjects[Outlet](c, link)
 }
 
 // VoltageSensors shall contain properties that describe voltage sensor readings for an outlet.

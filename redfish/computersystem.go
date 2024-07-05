@@ -1055,14 +1055,13 @@ func (computersystem *ComputerSystem) Update() error {
 
 // GetComputerSystem will get a ComputerSystem instance from the service.
 func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
-	var computersystem ComputerSystem
-	return &computersystem, computersystem.Get(c, uri, &computersystem)
+	return common.GetObject[ComputerSystem](c, uri)
 }
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
 // a provided reference.
 func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) {
-	return common.GetCollectionObjects(c, link, GetComputerSystem)
+	return common.GetCollectionObjects[ComputerSystem](c, link)
 }
 
 // Bios gets the Bios information for this ComputerSystem.

@@ -441,8 +441,7 @@ func (circuit *Circuit) UnmarshalJSON(b []byte) error {
 
 // GetCircuit will get a Circuit instance from the Redfish service.
 func GetCircuit(c common.Client, uri string) (*Circuit, error) {
-	var circuit Circuit
-	return &circuit, circuit.Get(c, uri, &circuit)
+	return common.GetObject[Circuit](c, uri)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -516,7 +515,7 @@ func (circuit *Circuit) ResetMetrics() error {
 // ListReferencedCircuits gets the collection of Circuits from
 // a provided reference.
 func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) {
-	return common.GetCollectionObjects(c, link, GetCircuit)
+	return common.GetCollectionObjects[Circuit](c, link)
 }
 
 // BranchCircuit gets a resource that represents the branch circuit associated with this circuit.

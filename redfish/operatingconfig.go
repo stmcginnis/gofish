@@ -55,26 +55,13 @@ type OperatingConfig struct {
 
 // GetOperatingConfig will get a OperatingConfig instance from the service.
 func GetOperatingConfig(c common.Client, uri string) (*OperatingConfig, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var operatingconfig OperatingConfig
-	err = json.NewDecoder(resp.Body).Decode(&operatingconfig)
-	if err != nil {
-		return nil, err
-	}
-
-	operatingconfig.SetClient(c)
-	return &operatingconfig, nil
+	return common.GetObject[OperatingConfig](c, uri)
 }
 
 // ListReferencedOperatingConfigs gets the collection of OperatingConfig from
 // a provided reference.
 func ListReferencedOperatingConfigs(c common.Client, link string) ([]*OperatingConfig, error) {
-	return common.GetCollectionObjects(c, link, GetOperatingConfig)
+	return common.GetCollectionObjects[OperatingConfig](c, link)
 }
 
 // TurboProfileDatapoint shall specify the turbo profile for a set of active cores.

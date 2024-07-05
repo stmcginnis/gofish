@@ -171,14 +171,13 @@ func (compositionservice *CompositionService) Update() error {
 
 // GetCompositionService will get a CompositionService instance from the service.
 func GetCompositionService(c common.Client, uri string) (*CompositionService, error) {
-	var compositionservice CompositionService
-	return &compositionservice, compositionservice.Get(c, uri, &compositionservice)
+	return common.GetObject[CompositionService](c, uri)
 }
 
 // ListReferencedCompositionServices gets the collection of CompositionService from
 // a provided reference.
 func ListReferencedCompositionServices(c common.Client, link string) ([]*CompositionService, error) {
-	return common.GetCollectionObjects(c, link, GetCompositionService)
+	return common.GetCollectionObjects[CompositionService](c, link)
 }
 
 // Compose performs a set of operations specified by a manifest.

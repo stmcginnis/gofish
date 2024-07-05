@@ -16,11 +16,10 @@ type StorageSystem struct {
 
 // GetStorageSystem will get a StorageSystem instance from the Swordfish service.
 func GetStorageSystem(c common.Client, uri string) (*StorageSystem, error) {
-	var storageSystem StorageSystem
-	return &storageSystem, storageSystem.Get(c, uri, &storageSystem)
+	return common.GetObject[StorageSystem](c, uri)
 }
 
 // ListReferencedStorageSystems gets the collection of StorageSystems.
 func ListReferencedStorageSystems(c common.Client, link string) ([]*StorageSystem, error) {
-	return common.GetCollectionObjects(c, link, GetStorageSystem)
+	return common.GetCollectionObjects[StorageSystem](c, link)
 }

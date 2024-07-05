@@ -214,14 +214,13 @@ func (pciefunction *PCIeFunction) UnmarshalJSON(b []byte) error {
 
 // GetPCIeFunction will get a PCIeFunction instance from the service.
 func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
-	var pcieFunction PCIeFunction
-	return &pcieFunction, pcieFunction.Get(c, uri, &pcieFunction)
+	return common.GetObject[PCIeFunction](c, uri)
 }
 
 // ListReferencedPCIeFunctions gets the collection of PCIeFunction from
 // a provided reference.
 func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) {
-	return common.GetCollectionObjects(c, link, GetPCIeFunction)
+	return common.GetCollectionObjects[PCIeFunction](c, link)
 }
 
 // CXLLogicalDevice gets the CXL logical device to which this PCIe function is assigned.

@@ -77,8 +77,7 @@ func (jobservice *JobService) UnmarshalJSON(b []byte) error {
 
 // GetJobService will get a JobService instance from the service.
 func GetJobService(c common.Client, uri string) (*JobService, error) {
-	var jobService JobService
-	return &jobService, jobService.Get(c, uri, &jobService)
+	return common.GetObject[JobService](c, uri)
 }
 
 // Jobs gets the collection of jobs of this job service

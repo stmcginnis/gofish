@@ -61,26 +61,13 @@ func (leakdetection *LeakDetection) LeakDetectors() ([]*LeakDetector, error) {
 
 // GetLeakDetection will get a LeakDetection instance from the service.
 func GetLeakDetection(c common.Client, uri string) (*LeakDetection, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var leakdetection LeakDetection
-	err = json.NewDecoder(resp.Body).Decode(&leakdetection)
-	if err != nil {
-		return nil, err
-	}
-
-	leakdetection.SetClient(c)
-	return &leakdetection, nil
+	return common.GetObject[LeakDetection](c, uri)
 }
 
 // ListReferencedLeakDetections gets the collection of LeakDetection from
 // a provided reference.
 func ListReferencedLeakDetections(c common.Client, link string) ([]*LeakDetection, error) {
-	return common.GetCollectionObjects(c, link, GetLeakDetection)
+	return common.GetCollectionObjects[LeakDetection](c, link)
 }
 
 // LeakDetectorGroup shall contain a group of leak detection equipment that reports a unified status.

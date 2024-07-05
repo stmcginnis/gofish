@@ -99,13 +99,12 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 
 // GetBios will get a Bios instance from the service.
 func GetBios(c common.Client, uri string) (*Bios, error) {
-	var bios Bios
-	return &bios, bios.Get(c, uri, &bios)
+	return common.GetObject[Bios](c, uri)
 }
 
 // ListReferencedBioss gets the collection of Bios from a provided reference.
 func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
-	return common.GetCollectionObjects(c, link, GetBios)
+	return common.GetCollectionObjects[Bios](c, link)
 }
 
 // ChangePassword shall change the selected BIOS password.

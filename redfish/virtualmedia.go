@@ -342,12 +342,11 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) e
 
 // GetVirtualMedia will get a VirtualMedia instance from the service.
 func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
-	var virtualMedia VirtualMedia
-	return &virtualMedia, virtualMedia.Get(c, uri, &virtualMedia)
+	return common.GetObject[VirtualMedia](c, uri)
 }
 
 // ListReferencedVirtualMedias gets the collection of VirtualMedia from
 // a provided reference.
 func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) {
-	return common.GetCollectionObjects(c, link, GetVirtualMedia)
+	return common.GetCollectionObjects[VirtualMedia](c, link)
 }

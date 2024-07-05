@@ -76,26 +76,13 @@ func (container *Container) UnmarshalJSON(b []byte) error {
 
 // GetContainer will get a Container instance from the service.
 func GetContainer(c common.Client, uri string) (*Container, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var container Container
-	err = json.NewDecoder(resp.Body).Decode(&container)
-	if err != nil {
-		return nil, err
-	}
-
-	container.SetClient(c)
-	return &container, nil
+	return common.GetObject[Container](c, uri)
 }
 
 // ListReferencedContainers gets the collection of Container from
 // a provided reference.
 func ListReferencedContainers(c common.Client, link string) ([]*Container, error) {
-	return common.GetCollectionObjects(c, link, GetContainer)
+	return common.GetCollectionObjects[Container](c, link)
 }
 
 // Reset resets the container.

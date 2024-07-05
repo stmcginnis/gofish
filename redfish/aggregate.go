@@ -134,24 +134,11 @@ func (aggregate *Aggregate) SetDefaultBootOrder() error {
 
 // GetAggregate will get a Aggregate instance from the service.
 func GetAggregate(c common.Client, uri string) (*Aggregate, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var aggregate Aggregate
-	err = json.NewDecoder(resp.Body).Decode(&aggregate)
-	if err != nil {
-		return nil, err
-	}
-
-	aggregate.SetClient(c)
-	return &aggregate, nil
+	return common.GetObject[Aggregate](c, uri)
 }
 
 // ListReferencedAggregates gets the collection of Aggregate from
 // a provided reference.
 func ListReferencedAggregates(c common.Client, link string) ([]*Aggregate, error) {
-	return common.GetCollectionObjects(c, link, GetAggregate)
+	return common.GetCollectionObjects[Aggregate](c, link)
 }

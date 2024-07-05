@@ -129,24 +129,11 @@ func (filter *Filter) Update() error {
 
 // GetFilter will get a Filter instance from the service.
 func GetFilter(c common.Client, uri string) (*Filter, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var filter Filter
-	err = json.NewDecoder(resp.Body).Decode(&filter)
-	if err != nil {
-		return nil, err
-	}
-
-	filter.SetClient(c)
-	return &filter, nil
+	return common.GetObject[Filter](c, uri)
 }
 
 // ListReferencedFilters gets the collection of Filter from
 // a provided reference.
 func ListReferencedFilters(c common.Client, link string) ([]*Filter, error) {
-	return common.GetCollectionObjects(c, link, GetFilter)
+	return common.GetCollectionObjects[Filter](c, link)
 }

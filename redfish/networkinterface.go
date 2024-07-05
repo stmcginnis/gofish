@@ -81,14 +81,13 @@ func (networkinterface *NetworkInterface) UnmarshalJSON(b []byte) error {
 
 // GetNetworkInterface will get a NetworkInterface instance from the service.
 func GetNetworkInterface(c common.Client, uri string) (*NetworkInterface, error) {
-	var networkInterface NetworkInterface
-	return &networkInterface, networkInterface.Get(c, uri, &networkInterface)
+	return common.GetObject[NetworkInterface](c, uri)
 }
 
 // ListReferencedNetworkInterfaces gets the collection of NetworkInterface from
 // a provided reference.
 func ListReferencedNetworkInterfaces(c common.Client, link string) ([]*NetworkInterface, error) {
-	return common.GetCollectionObjects(c, link, GetNetworkInterface)
+	return common.GetCollectionObjects[NetworkInterface](c, link)
 }
 
 // NetworkAdapter gets the NetworkAdapter for this interface.

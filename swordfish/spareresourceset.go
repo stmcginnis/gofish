@@ -108,14 +108,13 @@ func (spareresourceset *SpareResourceSet) Update() error {
 
 // GetSpareResourceSet will get a SpareResourceSet instance from the service.
 func GetSpareResourceSet(c common.Client, uri string) (*SpareResourceSet, error) {
-	var spareResourceSet SpareResourceSet
-	return &spareResourceSet, spareResourceSet.Get(c, uri, &spareResourceSet)
+	return common.GetObject[SpareResourceSet](c, uri)
 }
 
 // ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
 // a provided reference.
 func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareResourceSet, error) {
-	return common.GetCollectionObjects(c, link, GetSpareResourceSet)
+	return common.GetCollectionObjects[SpareResourceSet](c, link)
 }
 
 // ReplacementSpareSets gets other spare sets that can be utilized to replenish

@@ -139,24 +139,11 @@ func (schedule *Schedule) Update() error {
 
 // GetSchedule will get a Schedule instance from the service.
 func GetSchedule(c common.Client, uri string) (*Schedule, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var schedule Schedule
-	err = json.NewDecoder(resp.Body).Decode(&schedule)
-	if err != nil {
-		return nil, err
-	}
-
-	schedule.SetClient(c)
-	return &schedule, nil
+	return common.GetObject[Schedule](c, uri)
 }
 
 // ListReferencedSchedules gets the collection of Schedule from
 // a provided reference.
 func ListReferencedSchedules(c common.Client, link string) ([]*Schedule, error) {
-	return common.GetCollectionObjects(c, link, GetSchedule)
+	return common.GetCollectionObjects[Schedule](c, link)
 }

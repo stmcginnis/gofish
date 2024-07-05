@@ -171,26 +171,13 @@ func (coolingloop *CoolingLoop) Update() error {
 
 // GetCoolingLoop will get a CoolingLoop instance from the service.
 func GetCoolingLoop(c common.Client, uri string) (*CoolingLoop, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var coolingloop CoolingLoop
-	err = json.NewDecoder(resp.Body).Decode(&coolingloop)
-	if err != nil {
-		return nil, err
-	}
-
-	coolingloop.SetClient(c)
-	return &coolingloop, nil
+	return common.GetObject[CoolingLoop](c, uri)
 }
 
 // ListReferencedCoolingLoops gets the collection of CoolingLoop from
 // a provided reference.
 func ListReferencedCoolingLoops(c common.Client, link string) ([]*CoolingLoop, error) {
-	return common.GetCollectionObjects(c, link, GetCoolingLoop)
+	return common.GetCollectionObjects[CoolingLoop](c, link)
 }
 
 // SecondaryCoolantConnectors gets the secondary coolant connectors for this equipment.

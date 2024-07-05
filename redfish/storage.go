@@ -451,14 +451,13 @@ func (storage *Storage) Update() error {
 
 // GetStorage will get a Storage instance from the service.
 func GetStorage(c common.Client, uri string) (*Storage, error) {
-	var storage Storage
-	return &storage, storage.Get(c, uri, &storage)
+	return common.GetObject[Storage](c, uri)
 }
 
 // ListReferencedStorages gets the collection of Storage from a provided
 // reference.
 func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
-	return common.GetCollectionObjects(c, link, GetStorage)
+	return common.GetCollectionObjects[Storage](c, link)
 }
 
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage

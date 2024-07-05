@@ -212,26 +212,13 @@ func (cxllogicaldevice *CXLLogicalDevice) PCIeFunctions() ([]*PCIeDevice, error)
 
 // GetCXLLogicalDevice will get a CXLLogicalDevice instance from the service.
 func GetCXLLogicalDevice(c common.Client, uri string) (*CXLLogicalDevice, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var cxllogicaldevice CXLLogicalDevice
-	err = json.NewDecoder(resp.Body).Decode(&cxllogicaldevice)
-	if err != nil {
-		return nil, err
-	}
-
-	cxllogicaldevice.SetClient(c)
-	return &cxllogicaldevice, nil
+	return common.GetObject[CXLLogicalDevice](c, uri)
 }
 
 // ListReferencedCXLLogicalDevices gets the collection of CXLLogicalDevice from
 // a provided reference.
 func ListReferencedCXLLogicalDevices(c common.Client, link string) ([]*CXLLogicalDevice, error) {
-	return common.GetCollectionObjects(c, link, GetCXLLogicalDevice)
+	return common.GetCollectionObjects[CXLLogicalDevice](c, link)
 }
 
 // QoS shall contain the quality of service properties of this CXL logical device.

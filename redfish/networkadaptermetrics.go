@@ -63,24 +63,11 @@ type NetworkAdapterMetrics struct {
 
 // GetNetworkAdapterMetrics will get a NetworkAdapterMetrics instance from the service.
 func GetNetworkAdapterMetrics(c common.Client, uri string) (*NetworkAdapterMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var networkadaptermetrics NetworkAdapterMetrics
-	err = json.NewDecoder(resp.Body).Decode(&networkadaptermetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	networkadaptermetrics.SetClient(c)
-	return &networkadaptermetrics, nil
+	return common.GetObject[NetworkAdapterMetrics](c, uri)
 }
 
 // ListReferencedNetworkAdapterMetrics gets the collection of NetworkAdapterMetrics from
 // a provided reference.
 func ListReferencedNetworkAdapterMetrics(c common.Client, link string) ([]*NetworkAdapterMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetNetworkAdapterMetrics)
+	return common.GetCollectionObjects[NetworkAdapterMetrics](c, link)
 }

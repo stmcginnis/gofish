@@ -125,12 +125,11 @@ func (role *Role) Update() error {
 
 // GetRole will get a Role instance from the service.
 func GetRole(c common.Client, uri string) (*Role, error) {
-	var role Role
-	return &role, role.Get(c, uri, &role)
+	return common.GetObject[Role](c, uri)
 }
 
 // ListReferencedRoles gets the collection of Role from
 // a provided reference.
 func ListReferencedRoles(c common.Client, link string) ([]*Role, error) {
-	return common.GetCollectionObjects(c, link, GetRole)
+	return common.GetCollectionObjects[Role](c, link)
 }

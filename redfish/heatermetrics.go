@@ -80,24 +80,11 @@ func (heatermetrics *HeaterMetrics) ResetMetrics() error {
 
 // GetHeaterMetrics will get a HeaterMetrics instance from the service.
 func GetHeaterMetrics(c common.Client, uri string) (*HeaterMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var heatermetrics HeaterMetrics
-	err = json.NewDecoder(resp.Body).Decode(&heatermetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	heatermetrics.SetClient(c)
-	return &heatermetrics, nil
+	return common.GetObject[HeaterMetrics](c, uri)
 }
 
 // ListReferencedHeaterMetrics gets the collection of HeaterMetrics from
 // a provided reference.
 func ListReferencedHeaterMetrics(c common.Client, link string) ([]*HeaterMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetHeaterMetrics)
+	return common.GetCollectionObjects[HeaterMetrics](c, link)
 }

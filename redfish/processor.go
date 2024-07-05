@@ -1019,13 +1019,12 @@ func (processor *Processor) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // GetProcessor will get a Processor instance from the system
 func GetProcessor(c common.Client, uri string) (*Processor, error) {
-	var processor Processor
-	return &processor, processor.Get(c, uri, &processor)
+	return common.GetObject[Processor](c, uri)
 }
 
 // ListReferencedProcessors gets the collection of Processor from a provided reference.
 func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error) {
-	return common.GetCollectionObjects(c, link, GetProcessor)
+	return common.GetCollectionObjects[Processor](c, link)
 }
 
 // ProcessorID shall contain identification information for a processor.

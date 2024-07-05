@@ -458,26 +458,13 @@ type Resource struct {
 
 // GetResource will get a Resource instance from the service.
 func GetResource(c common.Client, uri string) (*Resource, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var resource Resource
-	err = json.NewDecoder(resp.Body).Decode(&resource)
-	if err != nil {
-		return nil, err
-	}
-
-	resource.SetClient(c)
-	return &resource, nil
+	return common.GetObject[Resource](c, uri)
 }
 
 // ListReferencedResources gets the collection of Resource from
 // a provided reference.
 func ListReferencedResources(c common.Client, link string) ([]*Resource, error) {
-	return common.GetCollectionObjects(c, link, GetResource)
+	return common.GetCollectionObjects[Resource](c, link)
 }
 
 // ResourceCollection

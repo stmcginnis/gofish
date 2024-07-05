@@ -438,13 +438,12 @@ func (drive *Drive) Update() error {
 
 // GetDrive will get a Drive instance from the service.
 func GetDrive(c common.Client, uri string) (*Drive, error) {
-	var drive Drive
-	return &drive, drive.Get(c, uri, &drive)
+	return common.GetObject[Drive](c, uri)
 }
 
 // ListReferencedDrives gets the collection of Drives from a provided reference.
 func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
-	return common.GetCollectionObjects(c, link, GetDrive)
+	return common.GetCollectionObjects[Drive](c, link)
 }
 
 // Assembly gets the Assembly for this drive.

@@ -273,24 +273,11 @@ func (heater *Heater) Update() error {
 
 // GetHeater will get a Heater instance from the service.
 func GetHeater(c common.Client, uri string) (*Heater, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var heater Heater
-	err = json.NewDecoder(resp.Body).Decode(&heater)
-	if err != nil {
-		return nil, err
-	}
-
-	heater.SetClient(c)
-	return &heater, nil
+	return common.GetObject[Heater](c, uri)
 }
 
 // ListReferencedHeaters gets the collection of Heater from
 // a provided reference.
 func ListReferencedHeaters(c common.Client, link string) ([]*Heater, error) {
-	return common.GetCollectionObjects(c, link, GetHeater)
+	return common.GetCollectionObjects[Heater](c, link)
 }

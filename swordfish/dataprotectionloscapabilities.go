@@ -177,14 +177,13 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) Update() err
 
 // GetDataProtectionLoSCapabilities will get a DataProtectionLoSCapabilities instance from the service.
 func GetDataProtectionLoSCapabilities(c common.Client, uri string) (*DataProtectionLoSCapabilities, error) {
-	var dataProtectionLoSCapabilities DataProtectionLoSCapabilities
-	return &dataProtectionLoSCapabilities, dataProtectionLoSCapabilities.Get(c, uri, &dataProtectionLoSCapabilities)
+	return common.GetObject[DataProtectionLoSCapabilities](c, uri)
 }
 
 // ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from
 // a provided reference.
 func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) ([]*DataProtectionLoSCapabilities, error) {
-	return common.GetCollectionObjects(c, link, GetDataProtectionLoSCapabilities)
+	return common.GetCollectionObjects[DataProtectionLoSCapabilities](c, link)
 }
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.

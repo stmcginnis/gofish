@@ -134,8 +134,7 @@ type MessageRegistry struct {
 
 // GetMessageRegistry will get a MessageRegistry instance from the Redfish service.
 func GetMessageRegistry(c common.Client, uri string) (*MessageRegistry, error) {
-	var messageRegistry MessageRegistry
-	return &messageRegistry, messageRegistry.Get(c, uri, &messageRegistry)
+	return common.GetObject[MessageRegistry](c, uri)
 }
 
 // ListReferencedMessageRegistries gets the collection of MessageRegistry.

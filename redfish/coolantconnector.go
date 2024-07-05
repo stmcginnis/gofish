@@ -165,26 +165,13 @@ func (coolantconnector *CoolantConnector) Update() error {
 
 // GetCoolantConnector will get a CoolantConnector instance from the service.
 func GetCoolantConnector(c common.Client, uri string) (*CoolantConnector, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var coolantconnector CoolantConnector
-	err = json.NewDecoder(resp.Body).Decode(&coolantconnector)
-	if err != nil {
-		return nil, err
-	}
-
-	coolantconnector.SetClient(c)
-	return &coolantconnector, nil
+	return common.GetObject[CoolantConnector](c, uri)
 }
 
 // ListReferencedCoolantConnectors gets the collection of CoolantConnector from
 // a provided reference.
 func ListReferencedCoolantConnectors(c common.Client, link string) ([]*CoolantConnector, error) {
-	return common.GetCollectionObjects(c, link, GetCoolantConnector)
+	return common.GetCollectionObjects[CoolantConnector](c, link)
 }
 
 // ConnectedChassis retrieves a collection of the Chassis at the other end of the connection.

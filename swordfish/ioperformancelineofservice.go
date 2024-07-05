@@ -96,12 +96,11 @@ func (ioperformancelineofservice *IOPerformanceLineOfService) Update() error {
 
 // GetIOPerformanceLineOfService will get a IOPerformanceLineOfService instance from the service.
 func GetIOPerformanceLineOfService(c common.Client, uri string) (*IOPerformanceLineOfService, error) {
-	var ioPerformanceLineOfService IOPerformanceLineOfService
-	return &ioPerformanceLineOfService, ioPerformanceLineOfService.Get(c, uri, &ioPerformanceLineOfService)
+	return common.GetObject[IOPerformanceLineOfService](c, uri)
 }
 
 // ListReferencedIOPerformanceLineOfServices gets the collection of IOPerformanceLineOfService from
 // a provided reference.
 func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]*IOPerformanceLineOfService, error) {
-	return common.GetCollectionObjects(c, link, GetIOPerformanceLineOfService)
+	return common.GetCollectionObjects[IOPerformanceLineOfService](c, link)
 }

@@ -250,14 +250,13 @@ func (eventservice *EventService) Update() error {
 
 // GetEventService will get a EventService instance from the service.
 func GetEventService(c common.Client, uri string) (*EventService, error) {
-	var eventService EventService
-	return &eventService, eventService.Get(c, uri, &eventService)
+	return common.GetObject[EventService](c, uri)
 }
 
 // ListReferencedEventServices gets the collection of EventService from
 // a provided reference.
 func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) {
-	return common.GetCollectionObjects(c, link, GetEventService)
+	return common.GetCollectionObjects[EventService](c, link)
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.
@@ -271,6 +270,9 @@ func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, 
 
 // GetEventSubscription gets a specific subscription using the event service.
 func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
+	if uri == "" {
+		return nil, errors.New("uri should not be empty")
+	}
 	return GetEventDestination(eventservice.GetClient(), uri)
 }
 

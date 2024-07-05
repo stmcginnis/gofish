@@ -370,24 +370,11 @@ func (zone *Zone) Update() error {
 
 // GetZone will get a Zone instance from the service.
 func GetZone(c common.Client, uri string) (*Zone, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var zone Zone
-	err = json.NewDecoder(resp.Body).Decode(&zone)
-	if err != nil {
-		return nil, err
-	}
-
-	zone.SetClient(c)
-	return &zone, nil
+	return common.GetObject[Zone](c, uri)
 }
 
 // ListReferencedZones gets the collection of Zone from
 // a provided reference.
 func ListReferencedZones(c common.Client, link string) ([]*Zone, error) {
-	return common.GetCollectionObjects(c, link, GetZone)
+	return common.GetCollectionObjects[Zone](c, link)
 }

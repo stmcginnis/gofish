@@ -89,12 +89,11 @@ func (vlannetworkinterface *VLanNetworkInterface) Update() error {
 
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.
 func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface, error) {
-	var vLanNetworkInterface VLanNetworkInterface
-	return &vLanNetworkInterface, vLanNetworkInterface.Get(c, uri, &vLanNetworkInterface)
+	return common.GetObject[VLanNetworkInterface](c, uri)
 }
 
 // ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from
 // a provided reference.
 func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanNetworkInterface, error) {
-	return common.GetCollectionObjects(c, link, GetVLanNetworkInterface)
+	return common.GetCollectionObjects[VLanNetworkInterface](c, link)
 }

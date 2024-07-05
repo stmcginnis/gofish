@@ -118,14 +118,13 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 
 // GetCapacitySource will get a CapacitySource instance from the service.
 func GetCapacitySource(c common.Client, uri string) (*CapacitySource, error) {
-	var capacitySource CapacitySource
-	return &capacitySource, capacitySource.Get(c, uri, &capacitySource)
+	return common.GetObject[CapacitySource](c, uri)
 }
 
 // ListReferencedCapacitySources gets the collection of CapacitySources from
 // a provided reference.
 func ListReferencedCapacitySources(c common.Client, link string) ([]*CapacitySource, error) {
-	return common.GetCollectionObjects(c, link, GetCapacitySource)
+	return common.GetCollectionObjects[CapacitySource](c, link)
 }
 
 // ProvidedClassOfService gets the ClassOfService from the ProvidingDrives,

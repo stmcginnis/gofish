@@ -347,24 +347,11 @@ func (cable *Cable) Update() error {
 
 // GetCable will get a Cable instance from the service.
 func GetCable(c common.Client, uri string) (*Cable, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var cable Cable
-	err = json.NewDecoder(resp.Body).Decode(&cable)
-	if err != nil {
-		return nil, err
-	}
-
-	cable.SetClient(c)
-	return &cable, nil
+	return common.GetObject[Cable](c, uri)
 }
 
 // ListReferencedCables gets the collection of Cable from
 // a provided reference.
 func ListReferencedCables(c common.Client, link string) ([]*Cable, error) {
-	return common.GetCollectionObjects(c, link, GetCable)
+	return common.GetCollectionObjects[Cable](c, link)
 }

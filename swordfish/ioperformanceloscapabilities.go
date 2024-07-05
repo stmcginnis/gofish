@@ -121,14 +121,13 @@ func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) Update() error
 
 // GetIOPerformanceLoSCapabilities will get a IOPerformanceLoSCapabilities instance from the service.
 func GetIOPerformanceLoSCapabilities(c common.Client, uri string) (*IOPerformanceLoSCapabilities, error) {
-	var ioPerformanceLoSCapabilities IOPerformanceLoSCapabilities
-	return &ioPerformanceLoSCapabilities, ioPerformanceLoSCapabilities.Get(c, uri, &ioPerformanceLoSCapabilities)
+	return common.GetObject[IOPerformanceLoSCapabilities](c, uri)
 }
 
 // ListReferencedIOPerformanceLoSCapabilitiess gets the collection of IOPerformanceLoSCapabilities from
 // a provided reference.
 func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string) ([]*IOPerformanceLoSCapabilities, error) {
-	return common.GetCollectionObjects(c, link, GetIOPerformanceLoSCapabilities)
+	return common.GetCollectionObjects[IOPerformanceLoSCapabilities](c, link)
 }
 
 // IOWorkload is used to describe an IO Workload.

@@ -113,24 +113,11 @@ func (usbcontroller *USBController) Ports() ([]*Port, error) {
 
 // GetUSBController will get a USBController instance from the service.
 func GetUSBController(c common.Client, uri string) (*USBController, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var usbcontroller USBController
-	err = json.NewDecoder(resp.Body).Decode(&usbcontroller)
-	if err != nil {
-		return nil, err
-	}
-
-	usbcontroller.SetClient(c)
-	return &usbcontroller, nil
+	return common.GetObject[USBController](c, uri)
 }
 
 // ListReferencedUSBControllers gets the collection of USBController from
 // a provided reference.
 func ListReferencedUSBControllers(c common.Client, link string) ([]*USBController, error) {
-	return common.GetCollectionObjects(c, link, GetUSBController)
+	return common.GetCollectionObjects[USBController](c, link)
 }

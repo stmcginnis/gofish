@@ -287,6 +287,5 @@ func (networkProtocol *NetworkProtocolSettings) Update() error {
 }
 
 func GetNetworkProtocol(c common.Client, uri string) (*NetworkProtocolSettings, error) {
-	var networkProtocolSettings NetworkProtocolSettings
-	return &networkProtocolSettings, networkProtocolSettings.Get(c, uri, &networkProtocolSettings)
+	return common.GetObject[NetworkProtocolSettings](c, uri)
 }

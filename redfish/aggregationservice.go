@@ -144,24 +144,11 @@ func (aggregationservice *AggregationService) Update() error {
 
 // GetAggregationService will get a AggregationService instance from the service.
 func GetAggregationService(c common.Client, uri string) (*AggregationService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var aggregationservice AggregationService
-	err = json.NewDecoder(resp.Body).Decode(&aggregationservice)
-	if err != nil {
-		return nil, err
-	}
-
-	aggregationservice.SetClient(c)
-	return &aggregationservice, nil
+	return common.GetObject[AggregationService](c, uri)
 }
 
 // ListReferencedAggregationServices gets the collection of AggregationService from
 // a provided reference.
 func ListReferencedAggregationServices(c common.Client, link string) ([]*AggregationService, error) {
-	return common.GetCollectionObjects(c, link, GetAggregationService)
+	return common.GetCollectionObjects[AggregationService](c, link)
 }

@@ -229,26 +229,13 @@ func (control *Control) Update() error {
 
 // GetControl will get a Control instance from the service.
 func GetControl(c common.Client, uri string) (*Control, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var control Control
-	err = json.NewDecoder(resp.Body).Decode(&control)
-	if err != nil {
-		return nil, err
-	}
-
-	control.SetClient(c)
-	return &control, nil
+	return common.GetObject[Control](c, uri)
 }
 
 // ListReferencedControls gets the collection of Control from
 // a provided reference.
 func ListReferencedControls(c common.Client, link string) ([]*Control, error) {
-	return common.GetCollectionObjects(c, link, GetControl)
+	return common.GetCollectionObjects[Control](c, link)
 }
 
 // ResetToDefault resets the values of writable properties to factory defaults.

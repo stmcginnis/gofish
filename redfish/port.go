@@ -1127,14 +1127,13 @@ func (port *Port) Update() error {
 
 // GetPort will get a Port instance from the service.
 func GetPort(c common.Client, uri string) (*Port, error) {
-	var port Port
-	return &port, port.Get(c, uri, &port)
+	return common.GetObject[Port](c, uri)
 }
 
 // ListReferencedPorts gets the collection of Port from
 // a provided reference.
 func ListReferencedPorts(c common.Client, link string) ([]*Port, error) {
-	return common.GetCollectionObjects(c, link, GetPort)
+	return common.GetCollectionObjects[Port](c, link)
 }
 
 // ResetPort resets this port.

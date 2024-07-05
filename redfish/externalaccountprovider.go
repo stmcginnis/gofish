@@ -155,26 +155,13 @@ func (externalaccountprovider *ExternalAccountProvider) Update() error {
 
 // GetExternalAccountProvider will get a ExternalAccountProvider instance from the service.
 func GetExternalAccountProvider(c common.Client, uri string) (*ExternalAccountProvider, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var externalaccountprovider ExternalAccountProvider
-	err = json.NewDecoder(resp.Body).Decode(&externalaccountprovider)
-	if err != nil {
-		return nil, err
-	}
-
-	externalaccountprovider.SetClient(c)
-	return &externalaccountprovider, nil
+	return common.GetObject[ExternalAccountProvider](c, uri)
 }
 
 // ListReferencedExternalAccountProviders gets the collection of ExternalAccountProvider from
 // a provided reference.
 func ListReferencedExternalAccountProviders(c common.Client, link string) ([]*ExternalAccountProvider, error) {
-	return common.GetCollectionObjects(c, link, GetExternalAccountProvider)
+	return common.GetCollectionObjects[ExternalAccountProvider](c, link)
 }
 
 // LDAPSearchSettings shall contain all required settings to search a generic LDAP service.

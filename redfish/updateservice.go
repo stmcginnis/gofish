@@ -392,6 +392,5 @@ func (updateService *UpdateService) SoftwareInventories() ([]*SoftwareInventory,
 
 // GetUpdateService will get a UpdateService instance from the service.
 func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
-	var updateService UpdateService
-	return &updateService, updateService.Get(c, uri, &updateService)
+	return common.GetObject[UpdateService](c, uri)
 }

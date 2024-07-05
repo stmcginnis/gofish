@@ -139,24 +139,11 @@ func (environmentmetrics *EnvironmentMetrics) Update() error {
 
 // GetEnvironmentMetrics will get a EnvironmentMetrics instance from the service.
 func GetEnvironmentMetrics(c common.Client, uri string) (*EnvironmentMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var environmentmetrics EnvironmentMetrics
-	err = json.NewDecoder(resp.Body).Decode(&environmentmetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	environmentmetrics.SetClient(c)
-	return &environmentmetrics, nil
+	return common.GetObject[EnvironmentMetrics](c, uri)
 }
 
 // ListReferencedEnvironmentMetricss gets the collection of EnvironmentMetrics from
 // a provided reference.
 func ListReferencedEnvironmentMetricss(c common.Client, link string) ([]*EnvironmentMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetEnvironmentMetrics)
+	return common.GetCollectionObjects[EnvironmentMetrics](c, link)
 }

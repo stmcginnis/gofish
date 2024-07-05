@@ -304,24 +304,11 @@ func (consistencygroup *ConsistencyGroup) Update() error {
 
 // GetConsistencyGroup will get a ConsistencyGroup instance from the service.
 func GetConsistencyGroup(c common.Client, uri string) (*ConsistencyGroup, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var consistencygroup ConsistencyGroup
-	err = json.NewDecoder(resp.Body).Decode(&consistencygroup)
-	if err != nil {
-		return nil, err
-	}
-
-	consistencygroup.SetClient(c)
-	return &consistencygroup, nil
+	return common.GetObject[ConsistencyGroup](c, uri)
 }
 
 // ListReferencedConsistencyGroups gets the collection of ConsistencyGroup from
 // a provided reference.
 func ListReferencedConsistencyGroups(c common.Client, link string) ([]*ConsistencyGroup, error) {
-	return common.GetCollectionObjects(c, link, GetConsistencyGroup)
+	return common.GetCollectionObjects[ConsistencyGroup](c, link)
 }

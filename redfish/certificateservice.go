@@ -70,26 +70,13 @@ func (certificateservice *CertificateService) CertificateLocations() (*Certifica
 
 // GetCertificateService will get a CertificateService instance from the service.
 func GetCertificateService(c common.Client, uri string) (*CertificateService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var certificateservice CertificateService
-	err = json.NewDecoder(resp.Body).Decode(&certificateservice)
-	if err != nil {
-		return nil, err
-	}
-
-	certificateservice.SetClient(c)
-	return &certificateservice, nil
+	return common.GetObject[CertificateService](c, uri)
 }
 
 // ListReferencedCertificateServices gets the collection of CertificateService from
 // a provided reference.
 func ListReferencedCertificateServices(c common.Client, link string) ([]*CertificateService, error) {
-	return common.GetCollectionObjects(c, link, GetCertificateService)
+	return common.GetCollectionObjects[CertificateService](c, link)
 }
 
 // GenerateCSRResponse shall contain the properties found in the response body for the GenerateCSR action.

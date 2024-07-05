@@ -530,12 +530,11 @@ func (storagecontroller *StorageController) Update() error {
 
 // GetStorageController will get a Storage controller instance from the service.
 func GetStorageController(c common.Client, uri string) (*StorageController, error) {
-	var storageController StorageController
-	return &storageController, storageController.Get(c, uri, &storageController)
+	return common.GetObject[StorageController](c, uri)
 }
 
 // ListReferencedStorageControllers gets the collection of StorageControllers
 // from a provided reference.
 func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageController, error) {
-	return common.GetCollectionObjects(c, link, GetStorageController)
+	return common.GetCollectionObjects[StorageController](c, link)
 }

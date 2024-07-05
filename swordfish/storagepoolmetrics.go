@@ -49,24 +49,11 @@ type StoragePoolMetrics struct {
 
 // GetStoragePoolMetrics will get a StoragePoolMetrics instance from the service.
 func GetStoragePoolMetrics(c common.Client, uri string) (*StoragePoolMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var storagepoolmetrics StoragePoolMetrics
-	err = json.NewDecoder(resp.Body).Decode(&storagepoolmetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	storagepoolmetrics.SetClient(c)
-	return &storagepoolmetrics, nil
+	return common.GetObject[StoragePoolMetrics](c, uri)
 }
 
 // ListReferencedStoragePoolMetricss gets the collection of StoragePoolMetrics from
 // a provided reference.
 func ListReferencedStoragePoolMetricss(c common.Client, link string) ([]*StoragePoolMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetStoragePoolMetrics)
+	return common.GetCollectionObjects[StoragePoolMetrics](c, link)
 }

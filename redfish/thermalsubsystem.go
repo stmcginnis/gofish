@@ -113,24 +113,11 @@ func (thermalsubsystem *ThermalSubsystem) ThermalMetrics() (*ThermalMetrics, err
 
 // GetThermalSubsystem will get a ThermalSubsystem instance from the service.
 func GetThermalSubsystem(c common.Client, uri string) (*ThermalSubsystem, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var thermalsubsystem ThermalSubsystem
-	err = json.NewDecoder(resp.Body).Decode(&thermalsubsystem)
-	if err != nil {
-		return nil, err
-	}
-
-	thermalsubsystem.SetClient(c)
-	return &thermalsubsystem, nil
+	return common.GetObject[ThermalSubsystem](c, uri)
 }
 
 // ListReferencedThermalSubsystems gets the collection of ThermalSubsystem from
 // a provided reference.
 func ListReferencedThermalSubsystems(c common.Client, link string) ([]*ThermalSubsystem, error) {
-	return common.GetCollectionObjects(c, link, GetThermalSubsystem)
+	return common.GetCollectionObjects[ThermalSubsystem](c, link)
 }

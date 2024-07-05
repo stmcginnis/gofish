@@ -285,26 +285,13 @@ func (sw *Switch) Update() error {
 
 // GetSwitch will get a Switch instance from the service.
 func GetSwitch(c common.Client, uri string) (*Switch, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var sw Switch
-	err = json.NewDecoder(resp.Body).Decode(&sw)
-	if err != nil {
-		return nil, err
-	}
-
-	sw.SetClient(c)
-	return &sw, nil
+	return common.GetObject[Switch](c, uri)
 }
 
 // ListReferencedSwitches gets the collection of Switch from
 // a provided reference.
 func ListReferencedSwitches(c common.Client, link string) ([]*Switch, error) {
-	return common.GetCollectionObjects(c, link, GetSwitch)
+	return common.GetCollectionObjects[Switch](c, link)
 }
 
 // VCSSwitch shall contain Virtual CXL Switch (VCS) properties for a switch.

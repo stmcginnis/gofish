@@ -254,24 +254,11 @@ func (powerdomain *PowerDomain) TransferSwitches() ([]*PowerDistribution, error)
 
 // GetPowerDomain will get a PowerDomain instance from the service.
 func GetPowerDomain(c common.Client, uri string) (*PowerDomain, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var powerdomain PowerDomain
-	err = json.NewDecoder(resp.Body).Decode(&powerdomain)
-	if err != nil {
-		return nil, err
-	}
-
-	powerdomain.SetClient(c)
-	return &powerdomain, nil
+	return common.GetObject[PowerDomain](c, uri)
 }
 
 // ListReferencedPowerDomains gets the collection of PowerDomain from
 // a provided reference.
 func ListReferencedPowerDomains(c common.Client, link string) ([]*PowerDomain, error) {
-	return common.GetCollectionObjects(c, link, GetPowerDomain)
+	return common.GetCollectionObjects[PowerDomain](c, link)
 }

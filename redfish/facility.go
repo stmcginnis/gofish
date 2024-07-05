@@ -495,24 +495,11 @@ func (facility *Facility) TransferSwitches() ([]*PowerDistribution, error) {
 
 // GetFacility will get a Facility instance from the service.
 func GetFacility(c common.Client, uri string) (*Facility, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var facility Facility
-	err = json.NewDecoder(resp.Body).Decode(&facility)
-	if err != nil {
-		return nil, err
-	}
-
-	facility.SetClient(c)
-	return &facility, nil
+	return common.GetObject[Facility](c, uri)
 }
 
-// ListReferencedFacilitys gets the collection of Facility from
+// ListReferencedFacilities gets the collection of Facility from
 // a provided reference.
-func ListReferencedFacilitys(c common.Client, link string) ([]*Facility, error) {
-	return common.GetCollectionObjects(c, link, GetFacility)
+func ListReferencedFacilities(c common.Client, link string) ([]*Facility, error) {
+	return common.GetCollectionObjects[Facility](c, link)
 }

@@ -69,24 +69,11 @@ func (keyservice *KeyService) NVMeoFSecrets() ([]*Key, error) {
 
 // GetKeyService will get a KeyService instance from the service.
 func GetKeyService(c common.Client, uri string) (*KeyService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var keyservice KeyService
-	err = json.NewDecoder(resp.Body).Decode(&keyservice)
-	if err != nil {
-		return nil, err
-	}
-
-	keyservice.SetClient(c)
-	return &keyservice, nil
+	return common.GetObject[KeyService](c, uri)
 }
 
 // ListReferencedKeyServices gets the collection of KeyService from
 // a provided reference.
 func ListReferencedKeyServices(c common.Client, link string) ([]*KeyService, error) {
-	return common.GetCollectionObjects(c, link, GetKeyService)
+	return common.GetCollectionObjects[KeyService](c, link)
 }

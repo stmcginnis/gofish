@@ -68,26 +68,13 @@ type Event struct {
 
 // GetEvent will get a Event instance from the service.
 func GetEvent(c common.Client, uri string) (*Event, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var event Event
-	err = json.NewDecoder(resp.Body).Decode(&event)
-	if err != nil {
-		return nil, err
-	}
-
-	event.SetClient(c)
-	return &event, nil
+	return common.GetObject[Event](c, uri)
 }
 
 // ListReferencedEvents gets the collection of Event from
 // a provided reference.
 func ListReferencedEvents(c common.Client, link string) ([]*Event, error) {
-	return common.GetCollectionObjects(c, link, GetEvent)
+	return common.GetCollectionObjects[Event](c, link)
 }
 
 // EventRecord

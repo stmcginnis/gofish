@@ -369,11 +369,10 @@ func (thermal *Thermal) Update() error {
 
 // GetThermal will get a Thermal instance from the service.
 func GetThermal(c common.Client, uri string) (*Thermal, error) {
-	var thermal Thermal
-	return &thermal, thermal.Get(c, uri, &thermal)
+	return common.GetObject[Thermal](c, uri)
 }
 
 // ListReferencedThermals gets the collection of Thermal from a provided reference.
 func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) {
-	return common.GetCollectionObjects(c, link, GetThermal)
+	return common.GetCollectionObjects[Thermal](c, link)
 }

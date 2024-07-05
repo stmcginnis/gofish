@@ -199,14 +199,13 @@ func (memorydomain *MemoryDomain) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // GetMemoryDomain will get a MemoryDomain instance from the service.
 func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
-	var memoryDomain MemoryDomain
-	return &memoryDomain, memoryDomain.Get(c, uri, &memoryDomain)
+	return common.GetObject[MemoryDomain](c, uri)
 }
 
 // ListReferencedMemoryDomains gets the collection of MemoryDomain from
 // a provided reference.
 func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) {
-	return common.GetCollectionObjects(c, link, GetMemoryDomain)
+	return common.GetCollectionObjects[MemoryDomain](c, link)
 }
 
 // MemorySet shall represent the interleave sets for a memory chunk.

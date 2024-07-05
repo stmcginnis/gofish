@@ -45,12 +45,11 @@ type DataSecurityLineOfService struct {
 
 // GetDataSecurityLineOfService will get a DataSecurityLineOfService instance from the service.
 func GetDataSecurityLineOfService(c common.Client, uri string) (*DataSecurityLineOfService, error) {
-	var dataSecurityLineOfService DataSecurityLineOfService
-	return &dataSecurityLineOfService, dataSecurityLineOfService.Get(c, uri, &dataSecurityLineOfService)
+	return common.GetObject[DataSecurityLineOfService](c, uri)
 }
 
 // ListReferencedDataSecurityLineOfServices gets the collection of DataSecurityLineOfService from
 // a provided reference.
 func ListReferencedDataSecurityLineOfServices(c common.Client, link string) ([]*DataSecurityLineOfService, error) {
-	return common.GetCollectionObjects(c, link, GetDataSecurityLineOfService)
+	return common.GetCollectionObjects[DataSecurityLineOfService](c, link)
 }

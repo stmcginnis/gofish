@@ -181,14 +181,13 @@ func (power *Power) PowerSupplyReset(memberID string, resetType ResetType) error
 
 // GetPower will get a Power instance from the service.
 func GetPower(c common.Client, uri string) (*Power, error) {
-	var power Power
-	return &power, power.Get(c, uri, &power)
+	return common.GetObject[Power](c, uri)
 }
 
 // ListReferencedPowers gets the collection of Power from
 // a provided reference.
 func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
-	return common.GetCollectionObjects(c, link, GetPower)
+	return common.GetCollectionObjects[Power](c, link)
 }
 
 type PowerControl struct {

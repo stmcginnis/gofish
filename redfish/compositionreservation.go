@@ -62,26 +62,13 @@ func (compositionreservation *CompositionReservation) UnmarshalJSON(b []byte) er
 
 // GetCompositionReservation will get a CompositionReservation instance from the service.
 func GetCompositionReservation(c common.Client, uri string) (*CompositionReservation, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var compositionreservation CompositionReservation
-	err = json.NewDecoder(resp.Body).Decode(&compositionreservation)
-	if err != nil {
-		return nil, err
-	}
-
-	compositionreservation.SetClient(c)
-	return &compositionreservation, nil
+	return common.GetObject[CompositionReservation](c, uri)
 }
 
 // ListReferencedCompositionReservations gets the collection of CompositionReservation from
 // a provided reference.
 func ListReferencedCompositionReservations(c common.Client, link string) ([]*CompositionReservation, error) {
-	return common.GetCollectionObjects(c, link, GetCompositionReservation)
+	return common.GetCollectionObjects[CompositionReservation](c, link)
 }
 
 // ReservedResourceBlocks gets reserved resource blocks for this reservation.

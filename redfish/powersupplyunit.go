@@ -231,14 +231,13 @@ func (powerSupplyUnit *PowerSupplyUnit) Update() error {
 
 // GetPowerSupplyUnit will get a PowerSupplyUnit instance from the Redfish service.
 func GetPowerSupplyUnit(c common.Client, uri string) (*PowerSupplyUnit, error) {
-	var powerSupplyUnit PowerSupplyUnit
-	return &powerSupplyUnit, powerSupplyUnit.Get(c, uri, &powerSupplyUnit)
+	return common.GetObject[PowerSupplyUnit](c, uri)
 }
 
 // ListReferencedPowerSupplyUnits gets the collection of PowerSupplies from
 // a provided reference.
 func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSupplyUnit, error) {
-	return common.GetCollectionObjects(c, link, GetPowerSupplyUnit)
+	return common.GetCollectionObjects[PowerSupplyUnit](c, link)
 }
 
 // This action shall reset a power supply. A GracefulRestart ResetType shall reset the power supply

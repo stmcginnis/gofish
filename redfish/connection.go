@@ -156,26 +156,13 @@ func (connection *Connection) UnmarshalJSON(b []byte) error {
 
 // GetConnection will get a Connection instance from the service.
 func GetConnection(c common.Client, uri string) (*Connection, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var connection Connection
-	err = json.NewDecoder(resp.Body).Decode(&connection)
-	if err != nil {
-		return nil, err
-	}
-
-	connection.SetClient(c)
-	return &connection, nil
+	return common.GetObject[Connection](c, uri)
 }
 
 // ListReferencedConnections gets the collection of Connection from
 // a provided reference.
 func ListReferencedConnections(c common.Client, link string) ([]*Connection, error) {
-	return common.GetCollectionObjects(c, link, GetConnection)
+	return common.GetCollectionObjects[Connection](c, link)
 }
 
 // InitiatorEndpointGroups get the initiator endpoint groups associated with this connection.

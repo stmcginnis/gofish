@@ -84,24 +84,11 @@ func (routeentry *RouteEntry) Update() error {
 
 // GetRouteEntry will get a RouteEntry instance from the service.
 func GetRouteEntry(c common.Client, uri string) (*RouteEntry, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var routeentry RouteEntry
-	err = json.NewDecoder(resp.Body).Decode(&routeentry)
-	if err != nil {
-		return nil, err
-	}
-
-	routeentry.SetClient(c)
-	return &routeentry, nil
+	return common.GetObject[RouteEntry](c, uri)
 }
 
 // ListReferencedRouteEntrys gets the collection of RouteEntry from
 // a provided reference.
 func ListReferencedRouteEntrys(c common.Client, link string) ([]*RouteEntry, error) {
-	return common.GetCollectionObjects(c, link, GetRouteEntry)
+	return common.GetCollectionObjects[RouteEntry](c, link)
 }

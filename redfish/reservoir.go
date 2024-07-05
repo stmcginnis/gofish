@@ -164,24 +164,11 @@ func (reservoir *Reservoir) Update() error {
 
 // GetReservoir will get a Reservoir instance from the service.
 func GetReservoir(c common.Client, uri string) (*Reservoir, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var reservoir Reservoir
-	err = json.NewDecoder(resp.Body).Decode(&reservoir)
-	if err != nil {
-		return nil, err
-	}
-
-	reservoir.SetClient(c)
-	return &reservoir, nil
+	return common.GetObject[Reservoir](c, uri)
 }
 
 // ListReferencedReservoirs gets the collection of Reservoir from
 // a provided reference.
 func ListReferencedReservoirs(c common.Client, link string) ([]*Reservoir, error) {
-	return common.GetCollectionObjects(c, link, GetReservoir)
+	return common.GetCollectionObjects[Reservoir](c, link)
 }

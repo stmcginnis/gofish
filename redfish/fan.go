@@ -170,24 +170,11 @@ func (fan *Fan) Update() error {
 
 // GetFan will get a Fan instance from the service.
 func GetFan(c common.Client, uri string) (*Fan, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var fan Fan
-	err = json.NewDecoder(resp.Body).Decode(&fan)
-	if err != nil {
-		return nil, err
-	}
-
-	fan.SetClient(c)
-	return &fan, nil
+	return common.GetObject[Fan](c, uri)
 }
 
 // ListReferencedFans gets the collection of Fan from
 // a provided reference.
 func ListReferencedFans(c common.Client, link string) ([]*Fan, error) {
-	return common.GetCollectionObjects(c, link, GetFan)
+	return common.GetCollectionObjects[Fan](c, link)
 }

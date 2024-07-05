@@ -92,24 +92,11 @@ func (switchmetrics *SwitchMetrics) ClearCurrentPeriod() error {
 
 // GetSwitchMetrics will get a SwitchMetrics instance from the service.
 func GetSwitchMetrics(c common.Client, uri string) (*SwitchMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var switchmetrics SwitchMetrics
-	err = json.NewDecoder(resp.Body).Decode(&switchmetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	switchmetrics.SetClient(c)
-	return &switchmetrics, nil
+	return common.GetObject[SwitchMetrics](c, uri)
 }
 
 // ListReferencedSwitchMetricss gets the collection of SwitchMetrics from
 // a provided reference.
 func ListReferencedSwitchMetricss(c common.Client, link string) ([]*SwitchMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetSwitchMetrics)
+	return common.GetCollectionObjects[SwitchMetrics](c, link)
 }

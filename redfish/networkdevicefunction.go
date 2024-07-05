@@ -559,14 +559,13 @@ func (networkdevicefunction *NetworkDeviceFunction) Update() error {
 
 // GetNetworkDeviceFunction will get a NetworkDeviceFunction instance from the service.
 func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFunction, error) {
-	var networkDeviceFunction NetworkDeviceFunction
-	return &networkDeviceFunction, networkDeviceFunction.Get(c, uri, &networkDeviceFunction)
+	return common.GetObject[NetworkDeviceFunction](c, uri)
 }
 
 // ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
 // a provided reference.
 func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*NetworkDeviceFunction, error) {
-	return common.GetCollectionObjects(c, link, GetNetworkDeviceFunction)
+	return common.GetCollectionObjects[NetworkDeviceFunction](c, link)
 }
 
 // ISCSIBoot shall describe the iSCSI boot capabilities, status, and
