@@ -9,7 +9,7 @@ GOLANGCI_VERSION := "v1.57"
 all: lint build test
 
 test:
-	go test -v $(PKGS)
+	go test -v $(PKGS) -cover -race
 
 build:
 	go build
