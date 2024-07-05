@@ -78,8 +78,7 @@ func (metrics *PowerDistributionMetrics) UnmarshalJSON(b []byte) error {
 
 // GetPowerDistributionMetrics will get a PowerDistributionMetrics instance from the Redfish service.
 func GetPowerDistributionMetrics(c common.Client, uri string) (*PowerDistributionMetrics, error) {
-	var metrics PowerDistributionMetrics
-	return &metrics, metrics.Get(c, uri, &metrics)
+	return common.GetObject[PowerDistributionMetrics](c, uri)
 }
 
 // This action shall reset any time intervals or counted values for this equipment.

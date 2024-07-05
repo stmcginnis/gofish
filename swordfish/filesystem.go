@@ -271,14 +271,13 @@ func (filesystem *FileSystem) Update() error {
 
 // GetFileSystem will get a FileSystem instance from the service.
 func GetFileSystem(c common.Client, uri string) (*FileSystem, error) {
-	var fileSystem FileSystem
-	return &fileSystem, fileSystem.Get(c, uri, &fileSystem)
+	return common.GetObject[FileSystem](c, uri)
 }
 
 // ListReferencedFileSystems gets the collection of FileSystem from
 // a provided reference.
 func ListReferencedFileSystems(c common.Client, link string) ([]*FileSystem, error) {
-	return common.GetCollectionObjects(c, link, GetFileSystem)
+	return common.GetCollectionObjects[FileSystem](c, link)
 }
 
 // ExportedShares gets the exported file shares for this file system.

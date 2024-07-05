@@ -221,26 +221,13 @@ type PortMetrics struct {
 
 // GetPortMetrics will get a PortMetrics instance from the service.
 func GetPortMetrics(c common.Client, uri string) (*PortMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var portmetrics PortMetrics
-	err = json.NewDecoder(resp.Body).Decode(&portmetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	portmetrics.SetClient(c)
-	return &portmetrics, nil
+	return common.GetObject[PortMetrics](c, uri)
 }
 
 // ListReferencedPortMetricss gets the collection of PortMetrics from
 // a provided reference.
 func ListReferencedPortMetricss(c common.Client, link string) ([]*PortMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetPortMetrics)
+	return common.GetCollectionObjects[PortMetrics](c, link)
 }
 
 // SASPortMetrics shall describe physical (phy) related metrics for Serial Attached SCSI (SAS).

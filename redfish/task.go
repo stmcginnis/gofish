@@ -185,12 +185,11 @@ func (task *Task) SubTasks() ([]*Task, error) {
 
 // GetTask will get a Task instance from the service.
 func GetTask(c common.Client, uri string) (*Task, error) {
-	var task Task
-	return &task, task.Get(c, uri, &task)
+	return common.GetObject[Task](c, uri)
 }
 
 // ListReferencedTasks gets the collection of Task from
 // a provided reference.
 func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
-	return common.GetCollectionObjects(c, link, GetTask)
+	return common.GetCollectionObjects[Task](c, link)
 }

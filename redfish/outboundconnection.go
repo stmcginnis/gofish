@@ -181,26 +181,13 @@ func (outboundconnection *OutboundConnection) Update() error {
 
 // GetOutboundConnection will get a OutboundConnection instance from the service.
 func GetOutboundConnection(c common.Client, uri string) (*OutboundConnection, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var outboundconnection OutboundConnection
-	err = json.NewDecoder(resp.Body).Decode(&outboundconnection)
-	if err != nil {
-		return nil, err
-	}
-
-	outboundconnection.SetClient(c)
-	return &outboundconnection, nil
+	return common.GetObject[OutboundConnection](c, uri)
 }
 
 // ListReferencedOutboundConnections gets the collection of OutboundConnection from
 // a provided reference.
 func ListReferencedOutboundConnections(c common.Client, link string) ([]*OutboundConnection, error) {
-	return common.GetCollectionObjects(c, link, GetOutboundConnection)
+	return common.GetCollectionObjects[OutboundConnection](c, link)
 }
 
 // RetryPolicyType shall contain the retry policy for an outbound connection.

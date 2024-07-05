@@ -86,26 +86,13 @@ func (containerimage *ContainerImage) UnmarshalJSON(b []byte) error {
 
 // GetContainerImage will get a ContainerImage instance from the service.
 func GetContainerImage(c common.Client, uri string) (*ContainerImage, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var containerimage ContainerImage
-	err = json.NewDecoder(resp.Body).Decode(&containerimage)
-	if err != nil {
-		return nil, err
-	}
-
-	containerimage.SetClient(c)
-	return &containerimage, nil
+	return common.GetObject[ContainerImage](c, uri)
 }
 
 // ListReferencedContainerImages gets the collection of ContainerImage from
 // a provided reference.
 func ListReferencedContainerImages(c common.Client, link string) ([]*ContainerImage, error) {
-	return common.GetCollectionObjects(c, link, GetContainerImage)
+	return common.GetCollectionObjects[ContainerImage](c, link)
 }
 
 // Containers get the container instances using this container image.

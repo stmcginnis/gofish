@@ -151,24 +151,11 @@ func (graphicscontroller *GraphicsController) Update() error {
 
 // GetGraphicsController will get a GraphicsController instance from the service.
 func GetGraphicsController(c common.Client, uri string) (*GraphicsController, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var graphicscontroller GraphicsController
-	err = json.NewDecoder(resp.Body).Decode(&graphicscontroller)
-	if err != nil {
-		return nil, err
-	}
-
-	graphicscontroller.SetClient(c)
-	return &graphicscontroller, nil
+	return common.GetObject[GraphicsController](c, uri)
 }
 
 // ListReferencedGraphicsControllers gets the collection of GraphicsController from
 // a provided reference.
 func ListReferencedGraphicsControllers(c common.Client, link string) ([]*GraphicsController, error) {
-	return common.GetCollectionObjects(c, link, GetGraphicsController)
+	return common.GetCollectionObjects[GraphicsController](c, link)
 }

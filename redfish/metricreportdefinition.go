@@ -284,24 +284,11 @@ func (metricreportdefinition *MetricReportDefinition) Update() error {
 
 // GetMetricReportDefinition will get a MetricReportDefinition instance from the service.
 func GetMetricReportDefinition(c common.Client, uri string) (*MetricReportDefinition, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var metricreportdefinition MetricReportDefinition
-	err = json.NewDecoder(resp.Body).Decode(&metricreportdefinition)
-	if err != nil {
-		return nil, err
-	}
-
-	metricreportdefinition.SetClient(c)
-	return &metricreportdefinition, nil
+	return common.GetObject[MetricReportDefinition](c, uri)
 }
 
 // ListReferencedMetricReportDefinitions gets the collection of MetricReportDefinition from
 // a provided reference.
 func ListReferencedMetricReportDefinitions(c common.Client, link string) ([]*MetricReportDefinition, error) {
-	return common.GetCollectionObjects(c, link, GetMetricReportDefinition)
+	return common.GetCollectionObjects[MetricReportDefinition](c, link)
 }

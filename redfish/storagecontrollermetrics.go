@@ -5,8 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -143,24 +141,11 @@ type StorageControllerMetrics struct {
 
 // GetStorageControllerMetrics will get a StorageControllerMetrics instance from the service.
 func GetStorageControllerMetrics(c common.Client, uri string) (*StorageControllerMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var storagecontrollermetrics StorageControllerMetrics
-	err = json.NewDecoder(resp.Body).Decode(&storagecontrollermetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	storagecontrollermetrics.SetClient(c)
-	return &storagecontrollermetrics, nil
+	return common.GetObject[StorageControllerMetrics](c, uri)
 }
 
 // ListReferencedStorageControllerMetrics gets the collection of StorageControllerMetrics from
 // a provided reference.
 func ListReferencedStorageControllerMetrics(c common.Client, link string) ([]*StorageControllerMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetStorageControllerMetrics)
+	return common.GetCollectionObjects[StorageControllerMetrics](c, link)
 }

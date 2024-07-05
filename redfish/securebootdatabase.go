@@ -99,24 +99,11 @@ func (securebootdatabase *SecureBootDatabase) ResetKeys(resetType ResetKeysType)
 
 // GetSecureBootDatabase will get a SecureBootDatabase instance from the service.
 func GetSecureBootDatabase(c common.Client, uri string) (*SecureBootDatabase, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var securebootdatabase SecureBootDatabase
-	err = json.NewDecoder(resp.Body).Decode(&securebootdatabase)
-	if err != nil {
-		return nil, err
-	}
-
-	securebootdatabase.SetClient(c)
-	return &securebootdatabase, nil
+	return common.GetObject[SecureBootDatabase](c, uri)
 }
 
 // ListReferencedSecureBootDatabases gets the collection of SecureBootDatabase from
 // a provided reference.
 func ListReferencedSecureBootDatabases(c common.Client, link string) ([]*SecureBootDatabase, error) {
-	return common.GetCollectionObjects(c, link, GetSecureBootDatabase)
+	return common.GetCollectionObjects[SecureBootDatabase](c, link)
 }

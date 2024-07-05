@@ -87,14 +87,13 @@ func (classofservice *ClassOfService) UnmarshalJSON(b []byte) error {
 
 // GetClassOfService will get a ClassOfService instance from the service.
 func GetClassOfService(c common.Client, uri string) (*ClassOfService, error) {
-	var classOfService ClassOfService
-	return &classOfService, classOfService.Get(c, uri, &classOfService)
+	return common.GetObject[ClassOfService](c, uri)
 }
 
 // ListReferencedClassOfServices gets the collection of ClassOfService from
 // a provided reference.
 func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfService, error) {
-	return common.GetCollectionObjects(c, link, GetClassOfService)
+	return common.GetCollectionObjects[ClassOfService](c, link)
 }
 
 // DataProtectionLinesOfServices gets the DataProtectionLinesOfService that are

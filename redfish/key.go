@@ -135,26 +135,13 @@ func (key *Key) Update() error {
 
 // GetKey will get a Key instance from the service.
 func GetKey(c common.Client, uri string) (*Key, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var key Key
-	err = json.NewDecoder(resp.Body).Decode(&key)
-	if err != nil {
-		return nil, err
-	}
-
-	key.SetClient(c)
-	return &key, nil
+	return common.GetObject[Key](c, uri)
 }
 
 // ListReferencedKeys gets the collection of Key from
 // a provided reference.
 func ListReferencedKeys(c common.Client, link string) ([]*Key, error) {
-	return common.GetCollectionObjects(c, link, GetKey)
+	return common.GetCollectionObjects[Key](c, link)
 }
 
 // KeyNVMeoF shall contain NVMe-oF specific properties for a key.

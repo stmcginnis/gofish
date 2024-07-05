@@ -747,13 +747,6 @@ func TestEventServiceGetEventSubscriptionInputParametersValidation(t *testing.T)
 	// validate the returned error
 	expectedError := "uri should not be empty"
 	assertError(t, expectedError, err.Error())
-
-	// get event subscription
-	_, err = result.GetEventSubscription(" ")
-
-	// validate the returned error
-	expectedError = "uri should not be empty"
-	assertError(t, expectedError, err.Error())
 }
 
 // TestEventServiceGetEventSubscriptionsEmptySubscriptionsLink

@@ -30,24 +30,11 @@ type FileSystemMetrics struct {
 
 // GetFileSystemMetrics will get a FileSystemMetrics instance from the service.
 func GetFileSystemMetrics(c common.Client, uri string) (*FileSystemMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var filesystemmetrics FileSystemMetrics
-	err = json.NewDecoder(resp.Body).Decode(&filesystemmetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	filesystemmetrics.SetClient(c)
-	return &filesystemmetrics, nil
+	return common.GetObject[FileSystemMetrics](c, uri)
 }
 
-// ListReferencedFileSystemMetricss gets the collection of FileSystemMetrics from
+// ListReferencedFileSystemMetricses gets the collection of FileSystemMetrics from
 // a provided reference.
-func ListReferencedFileSystemMetricss(c common.Client, link string) ([]*FileSystemMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetFileSystemMetrics)
+func ListReferencedFileSystemMetricses(c common.Client, link string) ([]*FileSystemMetrics, error) {
+	return common.GetCollectionObjects[FileSystemMetrics](c, link)
 }

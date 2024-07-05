@@ -76,26 +76,13 @@ func (vcatentry *VCATEntry) Update() error {
 
 // GetVCATEntry will get a VCATEntry instance from the service.
 func GetVCATEntry(c common.Client, uri string) (*VCATEntry, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var vcatentry VCATEntry
-	err = json.NewDecoder(resp.Body).Decode(&vcatentry)
-	if err != nil {
-		return nil, err
-	}
-
-	vcatentry.SetClient(c)
-	return &vcatentry, nil
+	return common.GetObject[VCATEntry](c, uri)
 }
 
 // ListReferencedVCATEntries gets the collection of VCATEntry from
 // a provided reference.
 func ListReferencedVCATEntries(c common.Client, link string) ([]*VCATEntry, error) {
-	return common.GetCollectionObjects(c, link, GetVCATEntry)
+	return common.GetCollectionObjects[VCATEntry](c, link)
 }
 
 // VCATableEntry shall contain a Virtual Channel entry definition that describes a specific Virtual Channel.

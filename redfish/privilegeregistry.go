@@ -70,26 +70,13 @@ type PrivilegeRegistry struct {
 
 // GetPrivilegeRegistry will get a PrivilegeRegistry instance from the service.
 func GetPrivilegeRegistry(c common.Client, uri string) (*PrivilegeRegistry, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var privilegeregistry PrivilegeRegistry
-	err = json.NewDecoder(resp.Body).Decode(&privilegeregistry)
-	if err != nil {
-		return nil, err
-	}
-
-	privilegeregistry.SetClient(c)
-	return &privilegeregistry, nil
+	return common.GetObject[PrivilegeRegistry](c, uri)
 }
 
 // ListReferencedPrivilegeRegistrys gets the collection of PrivilegeRegistry from
 // a provided reference.
 func ListReferencedPrivilegeRegistrys(c common.Client, link string) ([]*PrivilegeRegistry, error) {
-	return common.GetCollectionObjects(c, link, GetPrivilegeRegistry)
+	return common.GetCollectionObjects[PrivilegeRegistry](c, link)
 }
 
 // TargetPrivilegeMap shall describe a mapping between one or more targets and the HTTP operations associated with

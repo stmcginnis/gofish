@@ -88,26 +88,13 @@ func ({{ class.name|lower }} *{{ class.name }}) Update() error {
 {% if class.name == object_name %}
 // Get{{ class.name }} will get a {{ class.name }} instance from the service.
 func Get{{ class.name }}(c common.Client, uri string) (*{{ class.name }}, error) {
-    resp, err := c.Get(uri)
-    if err != nil {
-        return nil, err
-    }
-    defer resp.Body.Close()
-
-    var {{ class.name|lower }} {{ class.name }}
-    err = json.NewDecoder(resp.Body).Decode(&{{ class.name|lower }})
-    if err != nil {
-        return nil, err
-    }
-
-    {{ class.name|lower }}.SetClient(c)
-    return &{{ class.name|lower }}, nil
+	common.GetObject[{{ class.name }}](c, uri)
 }
 
 // ListReferenced{{ class.name }}s gets the collection of {{ class.name }} from
 // a provided reference.
 func ListReferenced{{ class.name }}s(c common.Client, link string) ([]*{{ class.name }}, error) {
-	return common.GetCollectionObjects(c, link, Get{{ class.name }})
+	return common.GetCollectionObjects[{{ class.name }}](c, link)
 }
 
 {% endif %}

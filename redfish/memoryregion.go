@@ -167,24 +167,11 @@ func (memoryregion *MemoryRegion) Update() error {
 
 // GetMemoryRegion will get a MemoryRegion instance from the service.
 func GetMemoryRegion(c common.Client, uri string) (*MemoryRegion, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var memoryregion MemoryRegion
-	err = json.NewDecoder(resp.Body).Decode(&memoryregion)
-	if err != nil {
-		return nil, err
-	}
-
-	memoryregion.SetClient(c)
-	return &memoryregion, nil
+	return common.GetObject[MemoryRegion](c, uri)
 }
 
 // ListReferencedMemoryRegions gets the collection of MemoryRegion from
 // a provided reference.
 func ListReferencedMemoryRegions(c common.Client, link string) ([]*MemoryRegion, error) {
-	return common.GetCollectionObjects(c, link, GetMemoryRegion)
+	return common.GetCollectionObjects[MemoryRegion](c, link)
 }

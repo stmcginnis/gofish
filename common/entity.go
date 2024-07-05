@@ -42,6 +42,11 @@ func (e *Entity) SetClient(c Client) {
 	e.client = c
 }
 
+// SetETag sets the etag value of this API object.
+func (e *Entity) SetETag(tag string) {
+	e.etag = tag
+}
+
 // GetClient get the API client connection to use for accessing this
 // entity.
 func (e *Entity) GetClient() Client {
@@ -241,4 +246,33 @@ func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (pay
 		}
 	}
 	return payload
+}
+
+type SchemaObject interface {
+	SetClient(Client)
+	SetETag(string)
+}
+
+// GetObject retrieves an API object from the service.
+func GetObject[T any, PT interface {
+	*T
+	SchemaObject
+}](c Client, uri string) (*T, error) {
+	resp, err := c.Get(uri)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	entity := PT(new(T))
+	err = json.NewDecoder(resp.Body).Decode(&entity)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Header["Etag"] != nil {
+		entity.SetETag(resp.Header["Etag"][0])
+	}
+	entity.SetClient(c)
+	return entity, nil
 }

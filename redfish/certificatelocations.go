@@ -58,26 +58,13 @@ func (certificatelocations *CertificateLocations) UnmarshalJSON(b []byte) error 
 
 // GetCertificateLocations will get a CertificateLocations instance from the service.
 func GetCertificateLocations(c common.Client, uri string) (*CertificateLocations, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var certificatelocations CertificateLocations
-	err = json.NewDecoder(resp.Body).Decode(&certificatelocations)
-	if err != nil {
-		return nil, err
-	}
-
-	certificatelocations.SetClient(c)
-	return &certificatelocations, nil
+	return common.GetObject[CertificateLocations](c, uri)
 }
 
 // ListReferencedCertificateLocationss gets the collection of CertificateLocations from
 // a provided reference.
 func ListReferencedCertificateLocations(c common.Client, link string) ([]*CertificateLocations, error) {
-	return common.GetCollectionObjects(c, link, GetCertificateLocations)
+	return common.GetCollectionObjects[CertificateLocations](c, link)
 }
 
 // Certificates retrieves a collection of the Certificates installed on the system.

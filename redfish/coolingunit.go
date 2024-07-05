@@ -187,26 +187,13 @@ func (coolingunit *CoolingUnit) Update() error {
 
 // GetCoolingUnit will get a CoolingUnit instance from the service.
 func GetCoolingUnit(c common.Client, uri string) (*CoolingUnit, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var coolingunit CoolingUnit
-	err = json.NewDecoder(resp.Body).Decode(&coolingunit)
-	if err != nil {
-		return nil, err
-	}
-
-	coolingunit.SetClient(c)
-	return &coolingunit, nil
+	return common.GetObject[CoolingUnit](c, uri)
 }
 
 // ListReferencedCoolingUnits gets the collection of CoolingUnit from
 // a provided reference.
 func ListReferencedCoolingUnits(c common.Client, link string) ([]*CoolingUnit, error) {
-	return common.GetCollectionObjects(c, link, GetCoolingUnit)
+	return common.GetCollectionObjects[CoolingUnit](c, link)
 }
 
 // TODO: Add functions to get linked objects

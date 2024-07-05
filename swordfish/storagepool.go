@@ -343,14 +343,13 @@ func (storagepool *StoragePool) Update() error {
 
 // GetStoragePool will get a StoragePool instance from the service.
 func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
-	var storagePool StoragePool
-	return &storagePool, storagePool.Get(c, uri, &storagePool)
+	return common.GetObject[StoragePool](c, uri)
 }
 
 // ListReferencedStoragePools gets the collection of StoragePool from
 // a provided reference.
 func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) {
-	return common.GetCollectionObjects(c, link, GetStoragePool)
+	return common.GetCollectionObjects[StoragePool](c, link)
 }
 
 // DedicatedSpareDrives gets the Drive entities which are currently assigned as

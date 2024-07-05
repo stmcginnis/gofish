@@ -197,24 +197,11 @@ func (memorychunks *MemoryChunks) Update() error {
 
 // GetMemoryChunks will get a MemoryChunks instance from the service.
 func GetMemoryChunks(c common.Client, uri string) (*MemoryChunks, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var memorychunks MemoryChunks
-	err = json.NewDecoder(resp.Body).Decode(&memorychunks)
-	if err != nil {
-		return nil, err
-	}
-
-	memorychunks.SetClient(c)
-	return &memorychunks, nil
+	return common.GetObject[MemoryChunks](c, uri)
 }
 
 // ListReferencedMemoryChunks gets the collection of MemoryChunks from
 // a provided reference.
 func ListReferencedMemoryChunks(c common.Client, link string) ([]*MemoryChunks, error) {
-	return common.GetCollectionObjects(c, link, GetMemoryChunks)
+	return common.GetCollectionObjects[MemoryChunks](c, link)
 }

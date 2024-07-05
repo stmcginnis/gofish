@@ -285,26 +285,13 @@ func (resourceblock *ResourceBlock) Update() error {
 
 // GetResourceBlock will get a ResourceBlock instance from the service.
 func GetResourceBlock(c common.Client, uri string) (*ResourceBlock, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var resourceblock ResourceBlock
-	err = json.NewDecoder(resp.Body).Decode(&resourceblock)
-	if err != nil {
-		return nil, err
-	}
-
-	resourceblock.SetClient(c)
-	return &resourceblock, nil
+	return common.GetObject[ResourceBlock](c, uri)
 }
 
 // ListReferencedResourceBlocks gets the collection of ResourceBlock from
 // a provided reference.
 func ListReferencedResourceBlocks(c common.Client, link string) ([]*ResourceBlock, error) {
-	return common.GetCollectionObjects(c, link, GetResourceBlock)
+	return common.GetCollectionObjects[ResourceBlock](c, link)
 }
 
 // ResourceBlockLimits shall specify the allowable quantities of types of resource blocks for a given composition

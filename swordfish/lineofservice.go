@@ -29,24 +29,11 @@ type LineOfService struct {
 
 // GetLineOfService will get a LineOfService instance from the service.
 func GetLineOfService(c common.Client, uri string) (*LineOfService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var lineofservice LineOfService
-	err = json.NewDecoder(resp.Body).Decode(&lineofservice)
-	if err != nil {
-		return nil, err
-	}
-
-	lineofservice.SetClient(c)
-	return &lineofservice, nil
+	return common.GetObject[LineOfService](c, uri)
 }
 
 // ListReferencedLineOfServices gets the collection of LineOfService from
 // a provided reference.
 func ListReferencedLineOfServices(c common.Client, link string) ([]*LineOfService, error) {
-	return common.GetCollectionObjects(c, link, GetLineOfService)
+	return common.GetCollectionObjects[LineOfService](c, link)
 }

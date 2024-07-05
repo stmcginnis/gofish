@@ -265,24 +265,11 @@ func (triggers *Triggers) Update() error {
 
 // GetTriggers will get a Triggers instance from the service.
 func GetTriggers(c common.Client, uri string) (*Triggers, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var triggers Triggers
-	err = json.NewDecoder(resp.Body).Decode(&triggers)
-	if err != nil {
-		return nil, err
-	}
-
-	triggers.SetClient(c)
-	return &triggers, nil
+	return common.GetObject[Triggers](c, uri)
 }
 
 // ListReferencedTriggerss gets the collection of Triggers from
 // a provided reference.
 func ListReferencedTriggerss(c common.Client, link string) ([]*Triggers, error) {
-	return common.GetCollectionObjects(c, link, GetTriggers)
+	return common.GetCollectionObjects[Triggers](c, link)
 }

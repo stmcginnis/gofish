@@ -98,24 +98,11 @@ func (powersubsystem *PowerSubsystem) PowerSupplies() ([]*PowerSupply, error) {
 
 // GetPowerSubsystem will get a PowerSubsystem instance from the service.
 func GetPowerSubsystem(c common.Client, uri string) (*PowerSubsystem, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var powersubsystem PowerSubsystem
-	err = json.NewDecoder(resp.Body).Decode(&powersubsystem)
-	if err != nil {
-		return nil, err
-	}
-
-	powersubsystem.SetClient(c)
-	return &powersubsystem, nil
+	return common.GetObject[PowerSubsystem](c, uri)
 }
 
 // ListReferencedPowerSubsystems gets the collection of PowerSubsystem from
 // a provided reference.
 func ListReferencedPowerSubsystems(c common.Client, link string) ([]*PowerSubsystem, error) {
-	return common.GetCollectionObjects(c, link, GetPowerSubsystem)
+	return common.GetCollectionObjects[PowerSubsystem](c, link)
 }

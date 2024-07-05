@@ -171,12 +171,11 @@ func (softwareinventory *SoftwareInventory) Update() error {
 
 // GetSoftwareInventory will get a SoftwareInventory instance from the service.
 func GetSoftwareInventory(c common.Client, uri string) (*SoftwareInventory, error) {
-	var softwareInventory SoftwareInventory
-	return &softwareInventory, softwareInventory.Get(c, uri, &softwareInventory)
+	return common.GetObject[SoftwareInventory](c, uri)
 }
 
 // ListReferencedSoftwareInventories gets the collection of SoftwareInventory from
 // a provided reference.
 func ListReferencedSoftwareInventories(c common.Client, link string) ([]*SoftwareInventory, error) {
-	return common.GetCollectionObjects(c, link, GetSoftwareInventory)
+	return common.GetCollectionObjects[SoftwareInventory](c, link)
 }

@@ -92,26 +92,13 @@ func (connectionmethod *ConnectionMethod) UnmarshalJSON(b []byte) error {
 
 // GetConnectionMethod will get a ConnectionMethod instance from the service.
 func GetConnectionMethod(c common.Client, uri string) (*ConnectionMethod, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var connectionmethod ConnectionMethod
-	err = json.NewDecoder(resp.Body).Decode(&connectionmethod)
-	if err != nil {
-		return nil, err
-	}
-
-	connectionmethod.SetClient(c)
-	return &connectionmethod, nil
+	return common.GetObject[ConnectionMethod](c, uri)
 }
 
 // ListReferencedConnectionMethods gets the collection of ConnectionMethod from
 // a provided reference.
 func ListReferencedConnectionMethods(c common.Client, link string) ([]*ConnectionMethod, error) {
-	return common.GetCollectionObjects(c, link, GetConnectionMethod)
+	return common.GetCollectionObjects[ConnectionMethod](c, link)
 }
 
 // AggregationSources gets the access points using this connection method.

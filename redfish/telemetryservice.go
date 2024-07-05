@@ -213,24 +213,11 @@ func (telemetryservice *TelemetryService) Update() error {
 
 // GetTelemetryService will get a TelemetryService instance from the service.
 func GetTelemetryService(c common.Client, uri string) (*TelemetryService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var telemetryservice TelemetryService
-	err = json.NewDecoder(resp.Body).Decode(&telemetryservice)
-	if err != nil {
-		return nil, err
-	}
-
-	telemetryservice.SetClient(c)
-	return &telemetryservice, nil
+	return common.GetObject[TelemetryService](c, uri)
 }
 
 // ListReferencedTelemetryServices gets the collection of TelemetryService from
 // a provided reference.
 func ListReferencedTelemetryServices(c common.Client, link string) ([]*TelemetryService, error) {
-	return common.GetCollectionObjects(c, link, GetTelemetryService)
+	return common.GetCollectionObjects[TelemetryService](c, link)
 }

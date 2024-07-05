@@ -62,6 +62,8 @@ const (
 
 // Manifest shall describe a manifest containing a set of requests to be fulfilled.
 type Manifest struct {
+	// The schema doesn't define this as a full Entity object, but it shouldn't hurt.
+	common.Entity
 	// Description provides a description of this resource.
 	Description string
 	// Expand shall contain the expansion control for references in manifest responses.
@@ -74,25 +76,13 @@ type Manifest struct {
 
 // GetManifest will get a Manifest instance from the service.
 func GetManifest(c common.Client, uri string) (*Manifest, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var manifest Manifest
-	err = json.NewDecoder(resp.Body).Decode(&manifest)
-	if err != nil {
-		return nil, err
-	}
-
-	return &manifest, nil
+	return common.GetObject[Manifest](c, uri)
 }
 
 // ListReferencedManifests gets the collection of Manifest from
 // a provided reference.
 func ListReferencedManifests(c common.Client, link string) ([]*Manifest, error) {
-	return common.GetCollectionObjects(c, link, GetManifest)
+	return common.GetCollectionObjects[Manifest](c, link)
 }
 
 // Stanza shall contain properties that describe a request to be fulfilled within a manifest.

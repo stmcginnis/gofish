@@ -115,14 +115,13 @@ func (redundancy *Redundancy) Update() error {
 
 // GetRedundancy will get a Redundancy instance from the service.
 func GetRedundancy(c common.Client, uri string) (*Redundancy, error) {
-	var redundancy Redundancy
-	return &redundancy, redundancy.Get(c, uri, &redundancy)
+	return common.GetObject[Redundancy](c, uri)
 }
 
 // ListReferencedRedundancies gets the collection of Redundancy from
 // a provided reference.
 func ListReferencedRedundancies(c common.Client, link string) ([]*Redundancy, error) {
-	return common.GetCollectionObjects(c, link, GetRedundancy)
+	return common.GetCollectionObjects[Redundancy](c, link)
 }
 
 // The redundancy mode of the group.

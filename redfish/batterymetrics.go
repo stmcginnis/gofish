@@ -5,8 +5,6 @@
 package redfish
 
 import (
-	"encoding/json"
-
 	"github.com/stmcginnis/gofish/common"
 )
 
@@ -72,24 +70,11 @@ type BatteryMetrics struct {
 
 // GetBatteryMetrics will get a BatteryMetrics instance from the service.
 func GetBatteryMetrics(c common.Client, uri string) (*BatteryMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var batterymetrics BatteryMetrics
-	err = json.NewDecoder(resp.Body).Decode(&batterymetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	batterymetrics.SetClient(c)
-	return &batterymetrics, nil
+	return common.GetObject[BatteryMetrics](c, uri)
 }
 
 // ListReferencedBatteryMetricss gets the collection of BatteryMetrics from
 // a provided reference.
 func ListReferencedBatteryMetricss(c common.Client, link string) ([]*BatteryMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetBatteryMetrics)
+	return common.GetCollectionObjects[BatteryMetrics](c, link)
 }

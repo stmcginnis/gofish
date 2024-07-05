@@ -180,24 +180,11 @@ func (outletgroup *OutletGroup) Update() error {
 
 // GetOutletGroup will get a OutletGroup instance from the service.
 func GetOutletGroup(c common.Client, uri string) (*OutletGroup, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var outletgroup OutletGroup
-	err = json.NewDecoder(resp.Body).Decode(&outletgroup)
-	if err != nil {
-		return nil, err
-	}
-
-	outletgroup.SetClient(c)
-	return &outletgroup, nil
+	return common.GetObject[OutletGroup](c, uri)
 }
 
 // ListReferencedOutletGroups gets the collection of OutletGroup from
 // a provided reference.
 func ListReferencedOutletGroups(c common.Client, link string) ([]*OutletGroup, error) {
-	return common.GetCollectionObjects(c, link, GetOutletGroup)
+	return common.GetCollectionObjects[OutletGroup](c, link)
 }

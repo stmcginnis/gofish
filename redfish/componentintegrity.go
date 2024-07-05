@@ -246,26 +246,13 @@ func (componentintegrity *ComponentIntegrity) Update() error {
 
 // GetComponentIntegrity will get a ComponentIntegrity instance from the service.
 func GetComponentIntegrity(c common.Client, uri string) (*ComponentIntegrity, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var componentintegrity ComponentIntegrity
-	err = json.NewDecoder(resp.Body).Decode(&componentintegrity)
-	if err != nil {
-		return nil, err
-	}
-
-	componentintegrity.SetClient(c)
-	return &componentintegrity, nil
+	return common.GetObject[ComponentIntegrity](c, uri)
 }
 
 // ListReferencedComponentIntegritys gets the collection of ComponentIntegrity from
 // a provided reference.
 func ListReferencedComponentIntegritys(c common.Client, link string) ([]*ComponentIntegrity, error) {
-	return common.GetCollectionObjects(c, link, GetComponentIntegrity)
+	return common.GetCollectionObjects[ComponentIntegrity](c, link)
 }
 
 // SPDMGetSignedMeasurementsRequest contains the parameters for the SPDMGetSignedMeasurements action.

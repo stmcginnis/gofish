@@ -215,12 +215,11 @@ func (serialInterface *SerialInterface) Update() error {
 
 // GetSerialInterface will get a SerialInterface instance from the service.
 func GetSerialInterface(c common.Client, uri string) (*SerialInterface, error) {
-	var serialInterface SerialInterface
-	return &serialInterface, serialInterface.Get(c, uri, &serialInterface)
+	return common.GetObject[SerialInterface](c, uri)
 }
 
 // ListReferencedSerialInterfaces gets the collection of SerialInterface from
 // a provided reference.
 func ListReferencedSerialInterfaces(c common.Client, link string) ([]*SerialInterface, error) {
-	return common.GetCollectionObjects(c, link, GetSerialInterface)
+	return common.GetCollectionObjects[SerialInterface](c, link)
 }

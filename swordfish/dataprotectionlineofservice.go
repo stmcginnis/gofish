@@ -59,14 +59,13 @@ type DataProtectionLineOfService struct {
 
 // GetDataProtectionLineOfService will get a DataProtectionLineOfService instance from the service.
 func GetDataProtectionLineOfService(c common.Client, uri string) (*DataProtectionLineOfService, error) {
-	var dataProtectionLineOfService DataProtectionLineOfService
-	return &dataProtectionLineOfService, dataProtectionLineOfService.Get(c, uri, &dataProtectionLineOfService)
+	return common.GetObject[DataProtectionLineOfService](c, uri)
 }
 
 // ListReferencedDataProtectionLineOfServices gets the collection of DataProtectionLineOfService from
 // a provided reference.
 func ListReferencedDataProtectionLineOfServices(c common.Client, link string) ([]*DataProtectionLineOfService, error) {
-	return common.GetCollectionObjects(c, link, GetDataProtectionLineOfService)
+	return common.GetCollectionObjects[DataProtectionLineOfService](c, link)
 }
 
 // ReplicaRequest is a request for a replica.

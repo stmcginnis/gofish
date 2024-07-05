@@ -111,24 +111,11 @@ type NetworkDeviceFunctionMetrics struct {
 
 // GetNetworkDeviceFunctionMetrics will get a NetworkDeviceFunctionMetrics instance from the service.
 func GetNetworkDeviceFunctionMetrics(c common.Client, uri string) (*NetworkDeviceFunctionMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var networkdevicefunctionmetrics NetworkDeviceFunctionMetrics
-	err = json.NewDecoder(resp.Body).Decode(&networkdevicefunctionmetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	networkdevicefunctionmetrics.SetClient(c)
-	return &networkdevicefunctionmetrics, nil
+	return common.GetObject[NetworkDeviceFunctionMetrics](c, uri)
 }
 
 // ListReferencedNetworkDeviceFunctionMetricss gets the collection of NetworkDeviceFunctionMetrics from
 // a provided reference.
 func ListReferencedNetworkDeviceFunctionMetricss(c common.Client, link string) ([]*NetworkDeviceFunctionMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetNetworkDeviceFunctionMetrics)
+	return common.GetCollectionObjects[NetworkDeviceFunctionMetrics](c, link)
 }

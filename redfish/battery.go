@@ -188,26 +188,13 @@ func (battery *Battery) Update() error {
 
 // GetBattery will get a Battery instance from the service.
 func GetBattery(c common.Client, uri string) (*Battery, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var battery Battery
-	err = json.NewDecoder(resp.Body).Decode(&battery)
-	if err != nil {
-		return nil, err
-	}
-
-	battery.SetClient(c)
-	return &battery, nil
+	return common.GetObject[Battery](c, uri)
 }
 
 // ListReferencedBatterys gets the collection of Battery from
 // a provided reference.
 func ListReferencedBatterys(c common.Client, link string) ([]*Battery, error) {
-	return common.GetCollectionObjects(c, link, GetBattery)
+	return common.GetCollectionObjects[Battery](c, link)
 }
 
 // Assembly get the containing assembly of this battery.

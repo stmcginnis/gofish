@@ -595,13 +595,12 @@ func (chassis *Chassis) Update() error {
 
 // GetChassis will get a Chassis instance from the Redfish service.
 func GetChassis(c common.Client, uri string) (*Chassis, error) {
-	var chassis Chassis
-	return &chassis, chassis.Get(c, uri, &chassis)
+	return common.GetObject[Chassis](c, uri)
 }
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
 func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
-	return common.GetCollectionObjects(c, link, GetChassis)
+	return common.GetCollectionObjects[Chassis](c, link)
 }
 
 // Certificates returns certificates in this Chassis.

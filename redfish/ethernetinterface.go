@@ -400,14 +400,13 @@ func (ethernetinterface *EthernetInterface) Update() error {
 
 // GetEthernetInterface will get a EthernetInterface instance from the service.
 func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, error) {
-	var ethernetInterface EthernetInterface
-	return &ethernetInterface, ethernetInterface.Get(c, uri, &ethernetInterface)
+	return common.GetObject[EthernetInterface](c, uri)
 }
 
 // ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
 // a provided reference.
 func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*EthernetInterface, error) {
-	return common.GetCollectionObjects(c, link, GetEthernetInterface)
+	return common.GetCollectionObjects[EthernetInterface](c, link)
 }
 
 // IPv6AddressPolicyEntry describes and entry in the Address Selection Policy

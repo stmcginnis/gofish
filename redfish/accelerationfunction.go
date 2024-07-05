@@ -103,26 +103,13 @@ func (accelerationfunction *AccelerationFunction) UnmarshalJSON(b []byte) error 
 
 // GetAccelerationFunction will get a AccelerationFunction instance from the service.
 func GetAccelerationFunction(c common.Client, uri string) (*AccelerationFunction, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var accelerationfunction AccelerationFunction
-	err = json.NewDecoder(resp.Body).Decode(&accelerationfunction)
-	if err != nil {
-		return nil, err
-	}
-
-	accelerationfunction.SetClient(c)
-	return &accelerationfunction, nil
+	return common.GetObject[AccelerationFunction](c, uri)
 }
 
 // ListReferencedAccelerationFunctions gets the collection of AccelerationFunction from
 // a provided reference.
 func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*AccelerationFunction, error) {
-	return common.GetCollectionObjects(c, link, GetAccelerationFunction)
+	return common.GetCollectionObjects[AccelerationFunction](c, link)
 }
 
 // Endpoints gets the endpoints connected to this accelerator.

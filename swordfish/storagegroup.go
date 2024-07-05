@@ -219,14 +219,13 @@ func (storagegroup *StorageGroup) Update() error {
 
 // GetStorageGroup will get a StorageGroup instance from the service.
 func GetStorageGroup(c common.Client, uri string) (*StorageGroup, error) {
-	var storageGroup StorageGroup
-	return &storageGroup, storageGroup.Get(c, uri, &storageGroup)
+	return common.GetObject[StorageGroup](c, uri)
 }
 
 // ListReferencedStorageGroups gets the collection of StorageGroup from
 // a provided reference.
 func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup, error) {
-	return common.GetCollectionObjects(c, link, GetStorageGroup)
+	return common.GetCollectionObjects[StorageGroup](c, link)
 }
 
 // ChildStorageGroups gets child groups of this group.

@@ -213,26 +213,13 @@ func (metricdefinition *MetricDefinition) Update() error {
 
 // GetMetricDefinition will get a MetricDefinition instance from the service.
 func GetMetricDefinition(c common.Client, uri string) (*MetricDefinition, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var metricdefinition MetricDefinition
-	err = json.NewDecoder(resp.Body).Decode(&metricdefinition)
-	if err != nil {
-		return nil, err
-	}
-
-	metricdefinition.SetClient(c)
-	return &metricdefinition, nil
+	return common.GetObject[MetricDefinition](c, uri)
 }
 
 // ListReferencedMetricDefinitions gets the collection of MetricDefinition from
 // a provided reference.
 func ListReferencedMetricDefinitions(c common.Client, link string) ([]*MetricDefinition, error) {
-	return common.GetCollectionObjects(c, link, GetMetricDefinition)
+	return common.GetCollectionObjects[MetricDefinition](c, link)
 }
 
 // Wildcard shall contain a wildcard and its substitution values.

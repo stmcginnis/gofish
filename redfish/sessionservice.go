@@ -90,24 +90,11 @@ func (sessionservice *SessionService) Update() error {
 
 // GetSessionService will get a SessionService instance from the service.
 func GetSessionService(c common.Client, uri string) (*SessionService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var sessionservice SessionService
-	err = json.NewDecoder(resp.Body).Decode(&sessionservice)
-	if err != nil {
-		return nil, err
-	}
-
-	sessionservice.SetClient(c)
-	return &sessionservice, nil
+	return common.GetObject[SessionService](c, uri)
 }
 
 // ListReferencedSessionServices gets the collection of SessionService from
 // a provided reference.
 func ListReferencedSessionServices(c common.Client, link string) ([]*SessionService, error) {
-	return common.GetCollectionObjects(c, link, GetSessionService)
+	return common.GetCollectionObjects[SessionService](c, link)
 }

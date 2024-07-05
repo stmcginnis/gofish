@@ -79,26 +79,13 @@ func (addresspool *AddressPool) UnmarshalJSON(b []byte) error {
 
 // GetAddressPool will get a AddressPool instance from the service.
 func GetAddressPool(c common.Client, uri string) (*AddressPool, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var addresspool AddressPool
-	err = json.NewDecoder(resp.Body).Decode(&addresspool)
-	if err != nil {
-		return nil, err
-	}
-
-	addresspool.SetClient(c)
-	return &addresspool, nil
+	return common.GetObject[AddressPool](c, uri)
 }
 
 // ListReferencedAddressPools gets the collection of AddressPool from
 // a provided reference.
 func ListReferencedAddressPools(c common.Client, link string) ([]*AddressPool, error) {
-	return common.GetCollectionObjects(c, link, GetAddressPool)
+	return common.GetCollectionObjects[AddressPool](c, link)
 }
 
 // Endpoints gets the endpoints connected to this address pool.

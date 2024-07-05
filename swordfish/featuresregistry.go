@@ -41,26 +41,13 @@ type FeaturesRegistry struct {
 
 // GetFeaturesRegistry will get a FeaturesRegistry instance from the service.
 func GetFeaturesRegistry(c common.Client, uri string) (*FeaturesRegistry, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var featuresregistry FeaturesRegistry
-	err = json.NewDecoder(resp.Body).Decode(&featuresregistry)
-	if err != nil {
-		return nil, err
-	}
-
-	featuresregistry.SetClient(c)
-	return &featuresregistry, nil
+	return common.GetObject[FeaturesRegistry](c, uri)
 }
 
 // ListReferencedFeaturesRegistrys gets the collection of FeaturesRegistry from
 // a provided reference.
 func ListReferencedFeaturesRegistrys(c common.Client, link string) ([]*FeaturesRegistry, error) {
-	return common.GetCollectionObjects(c, link, GetFeaturesRegistry)
+	return common.GetCollectionObjects[FeaturesRegistry](c, link)
 }
 
 // FeaturesRegistryProperty shall represent the suffix to be used in the Feature and shall be unique within this

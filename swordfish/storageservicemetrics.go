@@ -31,24 +31,11 @@ type StorageServiceMetrics struct {
 
 // GetStorageServiceMetrics will get a StorageServiceMetrics instance from the service.
 func GetStorageServiceMetrics(c common.Client, uri string) (*StorageServiceMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var storageservicemetrics StorageServiceMetrics
-	err = json.NewDecoder(resp.Body).Decode(&storageservicemetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	storageservicemetrics.SetClient(c)
-	return &storageservicemetrics, nil
+	return common.GetObject[StorageServiceMetrics](c, uri)
 }
 
 // ListReferencedStorageServiceMetricss gets the collection of StorageServiceMetrics from
 // a provided reference.
 func ListReferencedStorageServiceMetricss(c common.Client, link string) ([]*StorageServiceMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetStorageServiceMetrics)
+	return common.GetCollectionObjects[StorageServiceMetrics](c, link)
 }

@@ -124,26 +124,13 @@ func (endpointgroup *EndpointGroup) Update() error {
 
 // GetEndpointGroup will get a EndpointGroup instance from the service.
 func GetEndpointGroup(c common.Client, uri string) (*EndpointGroup, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var endpointgroup EndpointGroup
-	err = json.NewDecoder(resp.Body).Decode(&endpointgroup)
-	if err != nil {
-		return nil, err
-	}
-
-	endpointgroup.SetClient(c)
-	return &endpointgroup, nil
+	return common.GetObject[EndpointGroup](c, uri)
 }
 
 // ListReferencedEndpointGroups gets the collection of EndpointGroup from
 // a provided reference.
 func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) {
-	return common.GetCollectionObjects(c, link, GetEndpointGroup)
+	return common.GetCollectionObjects[EndpointGroup](c, link)
 }
 
 // Endpoints get the endpoints associated with this endpoint group.

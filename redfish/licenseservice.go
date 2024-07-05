@@ -133,24 +133,11 @@ func (licenseservice *LicenseService) Update() error {
 
 // GetLicenseService will get a LicenseService instance from the service.
 func GetLicenseService(c common.Client, uri string) (*LicenseService, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var licenseservice LicenseService
-	err = json.NewDecoder(resp.Body).Decode(&licenseservice)
-	if err != nil {
-		return nil, err
-	}
-
-	licenseservice.SetClient(c)
-	return &licenseservice, nil
+	return common.GetObject[LicenseService](c, uri)
 }
 
 // ListReferencedLicenseServices gets the collection of LicenseService from
 // a provided reference.
 func ListReferencedLicenseServices(c common.Client, link string) ([]*LicenseService, error) {
-	return common.GetCollectionObjects(c, link, GetLicenseService)
+	return common.GetCollectionObjects[LicenseService](c, link)
 }

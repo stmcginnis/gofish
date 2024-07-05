@@ -428,13 +428,12 @@ func (networkadapter *NetworkAdapter) Update() error {
 
 // GetNetworkAdapter will get a NetworkAdapter instance from the Redfish service.
 func GetNetworkAdapter(c common.Client, uri string) (*NetworkAdapter, error) {
-	var networkAdapter NetworkAdapter
-	return &networkAdapter, networkAdapter.Get(c, uri, &networkAdapter)
+	return common.GetObject[NetworkAdapter](c, uri)
 }
 
 // ListReferencedNetworkAdapter gets the collection of Chassis from a provided reference.
 func ListReferencedNetworkAdapter(c common.Client, link string) ([]*NetworkAdapter, error) {
-	return common.GetCollectionObjects(c, link, GetNetworkAdapter)
+	return common.GetCollectionObjects[NetworkAdapter](c, link)
 }
 
 // Assembly gets this adapter's assembly.

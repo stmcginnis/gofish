@@ -68,26 +68,13 @@ type LeakDetector struct {
 
 // GetLeakDetector will get a LeakDetector instance from the service.
 func GetLeakDetector(c common.Client, uri string) (*LeakDetector, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var leakdetector LeakDetector
-	err = json.NewDecoder(resp.Body).Decode(&leakdetector)
-	if err != nil {
-		return nil, err
-	}
-
-	leakdetector.SetClient(c)
-	return &leakdetector, nil
+	return common.GetObject[LeakDetector](c, uri)
 }
 
 // ListReferencedLeakDetectors gets the collection of LeakDetector from
 // a provided reference.
 func ListReferencedLeakDetectors(c common.Client, link string) ([]*LeakDetector, error) {
-	return common.GetCollectionObjects(c, link, GetLeakDetector)
+	return common.GetCollectionObjects[LeakDetector](c, link)
 }
 
 // LeakDetectorArrayExcerpt shall represent a state-based or digital-value leak detector for a Redfish

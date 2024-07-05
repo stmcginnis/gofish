@@ -127,14 +127,13 @@ func (secureboot *SecureBoot) Update() error {
 
 // GetSecureBoot will get a SecureBoot instance from the service.
 func GetSecureBoot(c common.Client, uri string) (*SecureBoot, error) {
-	var secureBoot SecureBoot
-	return &secureBoot, secureBoot.Get(c, uri, &secureBoot)
+	return common.GetObject[SecureBoot](c, uri)
 }
 
 // ListReferencedSecureBoots gets the collection of SecureBoot from
 // a provided reference.
 func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, error) {
-	return common.GetCollectionObjects(c, link, GetSecureBoot)
+	return common.GetCollectionObjects[SecureBoot](c, link)
 }
 
 // ResetKeys shall perform a reset of the Secure Boot key databases. The

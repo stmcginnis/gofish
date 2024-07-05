@@ -171,12 +171,11 @@ func (job *Job) Steps() ([]*Job, error) {
 
 // GetJob will get a Job instance from the service.
 func GetJob(c common.Client, uri string) (*Job, error) {
-	var job Job
-	return &job, job.Get(c, uri, &job)
+	return common.GetObject[Job](c, uri)
 }
 
 // ListReferencedJobs gets the collection of Job from
 // a provided reference.
 func ListReferencedJobs(c common.Client, link string) ([]*Job, error) {
-	return common.GetCollectionObjects(c, link, GetJob)
+	return common.GetCollectionObjects[Job](c, link)
 }

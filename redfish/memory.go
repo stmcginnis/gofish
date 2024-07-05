@@ -589,14 +589,13 @@ func (memory *Memory) Update() error {
 
 // GetMemory will get a Memory instance from the service.
 func GetMemory(c common.Client, uri string) (*Memory, error) {
-	var memory Memory
-	return &memory, memory.Get(c, uri, &memory)
+	return common.GetObject[Memory](c, uri)
 }
 
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
 func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
-	return common.GetCollectionObjects(c, link, GetMemory)
+	return common.GetCollectionObjects[Memory](c, link)
 }
 
 // Assembly gets this memory's assembly.

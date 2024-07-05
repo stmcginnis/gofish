@@ -48,24 +48,11 @@ type Signature struct {
 
 // GetSignature will get a Signature instance from the service.
 func GetSignature(c common.Client, uri string) (*Signature, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var signature Signature
-	err = json.NewDecoder(resp.Body).Decode(&signature)
-	if err != nil {
-		return nil, err
-	}
-
-	signature.SetClient(c)
-	return &signature, nil
+	return common.GetObject[Signature](c, uri)
 }
 
 // ListReferencedSignatures gets the collection of Signature from
 // a provided reference.
 func ListReferencedSignatures(c common.Client, link string) ([]*Signature, error) {
-	return common.GetCollectionObjects(c, link, GetSignature)
+	return common.GetCollectionObjects[Signature](c, link)
 }

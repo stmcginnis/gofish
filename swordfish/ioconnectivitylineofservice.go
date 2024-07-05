@@ -84,12 +84,11 @@ func (ioconnectivitylineofservice *IOConnectivityLineOfService) Update() error {
 
 // GetIOConnectivityLineOfService will get a IOConnectivityLineOfService instance from the service.
 func GetIOConnectivityLineOfService(c common.Client, uri string) (*IOConnectivityLineOfService, error) {
-	var ioConnectivityLineOfService IOConnectivityLineOfService
-	return &ioConnectivityLineOfService, ioConnectivityLineOfService.Get(c, uri, &ioConnectivityLineOfService)
+	return common.GetObject[IOConnectivityLineOfService](c, uri)
 }
 
 // ListReferencedIOConnectivityLineOfServices gets the collection of IOConnectivityLineOfService from
 // a provided reference.
 func ListReferencedIOConnectivityLineOfServices(c common.Client, link string) ([]*IOConnectivityLineOfService, error) {
-	return common.GetCollectionObjects(c, link, GetIOConnectivityLineOfService)
+	return common.GetCollectionObjects[IOConnectivityLineOfService](c, link)
 }

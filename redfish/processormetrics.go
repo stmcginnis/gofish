@@ -226,24 +226,11 @@ func (processormetrics *ProcessorMetrics) ClearCurrentPeriod() error {
 
 // GetProcessorMetrics will get a ProcessorMetrics instance from the service.
 func GetProcessorMetrics(c common.Client, uri string) (*ProcessorMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var processormetrics ProcessorMetrics
-	err = json.NewDecoder(resp.Body).Decode(&processormetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	processormetrics.SetClient(c)
-	return &processormetrics, nil
+	return common.GetObject[ProcessorMetrics](c, uri)
 }
 
 // ListReferencedProcessorMetricss gets the collection of ProcessorMetrics from
 // a provided reference.
 func ListReferencedProcessorMetricss(c common.Client, link string) ([]*ProcessorMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetProcessorMetrics)
+	return common.GetCollectionObjects[ProcessorMetrics](c, link)
 }

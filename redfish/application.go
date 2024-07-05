@@ -75,26 +75,13 @@ func (application *Application) UnmarshalJSON(b []byte) error {
 
 // GetApplication will get a Application instance from the service.
 func GetApplication(c common.Client, uri string) (*Application, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var application Application
-	err = json.NewDecoder(resp.Body).Decode(&application)
-	if err != nil {
-		return nil, err
-	}
-
-	application.SetClient(c)
-	return &application, nil
+	return common.GetObject[Application](c, uri)
 }
 
 // ListReferencedApplications gets the collection of Application from
 // a provided reference.
 func ListReferencedApplications(c common.Client, link string) ([]*Application, error) {
-	return common.GetCollectionObjects(c, link, GetApplication)
+	return common.GetCollectionObjects[Application](c, link)
 }
 
 // SoftwareImage returns a `SoftwareInventory“ that represents the software image from which this application runs.

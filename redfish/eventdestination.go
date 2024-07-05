@@ -391,13 +391,7 @@ func (eventdestination *EventDestination) Update() error {
 
 // GetEventDestination will get a EventDestination instance from the service.
 func GetEventDestination(c common.Client, uri string) (*EventDestination, error) {
-	// validate uri
-	if strings.TrimSpace(uri) == "" {
-		return nil, fmt.Errorf("uri should not be empty")
-	}
-
-	var eventdestination EventDestination
-	return &eventdestination, eventdestination.Get(c, uri, &eventdestination)
+	return common.GetObject[EventDestination](c, uri)
 }
 
 // subscriptionPayload is the payload to create the event subscription
@@ -621,7 +615,7 @@ func DeleteEventDestination(c common.Client, uri string) error {
 // ListReferencedEventDestinations gets the collection of EventDestination from
 // a provided reference.
 func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) {
-	return common.GetCollectionObjects(c, link, GetEventDestination)
+	return common.GetCollectionObjects[EventDestination](c, link)
 }
 
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included

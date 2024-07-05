@@ -190,26 +190,13 @@ func (aggregationsource *AggregationSource) Update() error {
 
 // GetAggregationSource will get a AggregationSource instance from the service.
 func GetAggregationSource(c common.Client, uri string) (*AggregationSource, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var aggregationsource AggregationSource
-	err = json.NewDecoder(resp.Body).Decode(&aggregationsource)
-	if err != nil {
-		return nil, err
-	}
-
-	aggregationsource.SetClient(c)
-	return &aggregationsource, nil
+	return common.GetObject[AggregationSource](c, uri)
 }
 
 // ListReferencedAggregationSources gets the collection of AggregationSource from
 // a provided reference.
 func ListReferencedAggregationSources(c common.Client, link string) ([]*AggregationSource, error) {
-	return common.GetCollectionObjects(c, link, GetAggregationSource)
+	return common.GetCollectionObjects[AggregationSource](c, link)
 }
 
 // SNMPSettings shall contain the settings for an SNMP aggregation source.

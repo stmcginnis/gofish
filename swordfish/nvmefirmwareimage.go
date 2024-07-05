@@ -49,24 +49,11 @@ type NVMeFirmwareImage struct {
 
 // GetNVMeFirmwareImage will get a NVMeFirmwareImage instance from the service.
 func GetNVMeFirmwareImage(c common.Client, uri string) (*NVMeFirmwareImage, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var nvmefirmwareimage NVMeFirmwareImage
-	err = json.NewDecoder(resp.Body).Decode(&nvmefirmwareimage)
-	if err != nil {
-		return nil, err
-	}
-
-	nvmefirmwareimage.SetClient(c)
-	return &nvmefirmwareimage, nil
+	return common.GetObject[NVMeFirmwareImage](c, uri)
 }
 
 // ListReferencedNVMeFirmwareImages gets the collection of NVMeFirmwareImage from
 // a provided reference.
 func ListReferencedNVMeFirmwareImages(c common.Client, link string) ([]*NVMeFirmwareImage, error) {
-	return common.GetCollectionObjects(c, link, GetNVMeFirmwareImage)
+	return common.GetCollectionObjects[NVMeFirmwareImage](c, link)
 }

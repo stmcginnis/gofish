@@ -356,14 +356,13 @@ func (pciedevice *PCIeDevice) Update() error {
 
 // GetPCIeDevice will get a PCIeDevice instance from the service.
 func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
-	var pcieDevice PCIeDevice
-	return &pcieDevice, pcieDevice.Get(c, uri, &pcieDevice)
+	return common.GetObject[PCIeDevice](c, uri)
 }
 
 // ListReferencedPCIeDevices gets the collection of PCIeDevice from
 // a provided reference.
 func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, error) {
-	return common.GetCollectionObjects(c, link, GetPCIeDevice)
+	return common.GetCollectionObjects[PCIeDevice](c, link)
 }
 
 // PCIeInterface properties shall be the definition for a PCIe Interface for a

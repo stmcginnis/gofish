@@ -242,24 +242,11 @@ func (trustedcomponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogRespo
 
 // GetTrustedComponent will get a TrustedComponent instance from the service.
 func GetTrustedComponent(c common.Client, uri string) (*TrustedComponent, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var trustedcomponent TrustedComponent
-	err = json.NewDecoder(resp.Body).Decode(&trustedcomponent)
-	if err != nil {
-		return nil, err
-	}
-
-	trustedcomponent.SetClient(c)
-	return &trustedcomponent, nil
+	return common.GetObject[TrustedComponent](c, uri)
 }
 
 // ListReferencedTrustedComponents gets the collection of TrustedComponent from
 // a provided reference.
 func ListReferencedTrustedComponents(c common.Client, link string) ([]*TrustedComponent, error) {
-	return common.GetCollectionObjects(c, link, GetTrustedComponent)
+	return common.GetCollectionObjects[TrustedComponent](c, link)
 }

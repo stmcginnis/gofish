@@ -251,26 +251,13 @@ func (fabricadapter *FabricAdapter) Update() error {
 
 // GetFabricAdapter will get a FabricAdapter instance from the service.
 func GetFabricAdapter(c common.Client, uri string) (*FabricAdapter, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var fabricadapter FabricAdapter
-	err = json.NewDecoder(resp.Body).Decode(&fabricadapter)
-	if err != nil {
-		return nil, err
-	}
-
-	fabricadapter.SetClient(c)
-	return &fabricadapter, nil
+	return common.GetObject[FabricAdapter](c, uri)
 }
 
 // ListReferencedFabricAdapters gets the collection of FabricAdapter from
 // a provided reference.
 func ListReferencedFabricAdapters(c common.Client, link string) ([]*FabricAdapter, error) {
-	return common.GetCollectionObjects(c, link, GetFabricAdapter)
+	return common.GetCollectionObjects[FabricAdapter](c, link)
 }
 
 // FabricAdapterGenZ shall contain Gen-Z related properties for a fabric adapter.

@@ -101,6 +101,5 @@ func (taskService *TaskService) Update() error {
 
 // GetTaskService will get a TaskService instance from the service.
 func GetTaskService(c common.Client, uri string) (*TaskService, error) {
-	var taskService TaskService
-	return &taskService, taskService.Get(c, uri, &taskService)
+	return common.GetObject[TaskService](c, uri)
 }

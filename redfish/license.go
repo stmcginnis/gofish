@@ -199,24 +199,11 @@ func (license *License) TargetServices() ([]*Manager, error) {
 
 // GetLicense will get a License instance from the service.
 func GetLicense(c common.Client, uri string) (*License, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var license License
-	err = json.NewDecoder(resp.Body).Decode(&license)
-	if err != nil {
-		return nil, err
-	}
-
-	license.SetClient(c)
-	return &license, nil
+	return common.GetObject[License](c, uri)
 }
 
 // ListReferencedLicenses gets the collection of License from
 // a provided reference.
 func ListReferencedLicenses(c common.Client, link string) ([]*License, error) {
-	return common.GetCollectionObjects(c, link, GetLicense)
+	return common.GetCollectionObjects[License](c, link)
 }

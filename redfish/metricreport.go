@@ -69,26 +69,13 @@ func (metricreport *MetricReport) MetricReportDefinition() (*MetricReportDefinit
 
 // GetMetricReport will get a MetricReport instance from the service.
 func GetMetricReport(c common.Client, uri string) (*MetricReport, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var metricreport MetricReport
-	err = json.NewDecoder(resp.Body).Decode(&metricreport)
-	if err != nil {
-		return nil, err
-	}
-
-	metricreport.SetClient(c)
-	return &metricreport, nil
+	return common.GetObject[MetricReport](c, uri)
 }
 
 // ListReferencedMetricReports gets the collection of MetricReport from
 // a provided reference.
 func ListReferencedMetricReports(c common.Client, link string) ([]*MetricReport, error) {
-	return common.GetCollectionObjects(c, link, GetMetricReport)
+	return common.GetCollectionObjects[MetricReport](c, link)
 }
 
 // MetricValue shall contain properties that capture a metric value and other associated information.

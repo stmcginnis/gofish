@@ -603,12 +603,11 @@ func (logentry *LogEntry) Update() error {
 
 // GetLogEntry will get a LogEntry instance from the service.
 func GetLogEntry(c common.Client, uri string) (*LogEntry, error) {
-	var logEntry LogEntry
-	return &logEntry, logEntry.Get(c, uri, &logEntry)
+	return common.GetObject[LogEntry](c, uri)
 }
 
 // ListReferencedLogEntrys gets the collection of LogEntry from
 // a provided reference.
 func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) {
-	return common.GetCollectionObjects(c, link, GetLogEntry)
+	return common.GetCollectionObjects[LogEntry](c, link)
 }

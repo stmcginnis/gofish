@@ -269,14 +269,13 @@ func (manageraccount *ManagerAccount) Update() error {
 
 // GetManagerAccount will get a ManagerAccount instance from the service.
 func GetManagerAccount(c common.Client, uri string) (*ManagerAccount, error) {
-	var managerAccount ManagerAccount
-	return &managerAccount, managerAccount.Get(c, uri, &managerAccount)
+	return common.GetObject[ManagerAccount](c, uri)
 }
 
 // ListReferencedManagerAccounts gets the collection of ManagerAccount from
 // a provided reference.
 func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAccount, error) {
-	return common.GetCollectionObjects(c, link, GetManagerAccount)
+	return common.GetCollectionObjects[ManagerAccount](c, link)
 }
 
 // SNMPUserInfo is shall contain the SNMP settings for an account.

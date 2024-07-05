@@ -127,24 +127,11 @@ func (registeredclient *RegisteredClient) Update() error {
 
 // GetRegisteredClient will get a RegisteredClient instance from the service.
 func GetRegisteredClient(c common.Client, uri string) (*RegisteredClient, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var registeredclient RegisteredClient
-	err = json.NewDecoder(resp.Body).Decode(&registeredclient)
-	if err != nil {
-		return nil, err
-	}
-
-	registeredclient.SetClient(c)
-	return &registeredclient, nil
+	return common.GetObject[RegisteredClient](c, uri)
 }
 
 // ListReferencedRegisteredClients gets the collection of RegisteredClient from
 // a provided reference.
 func ListReferencedRegisteredClients(c common.Client, link string) ([]*RegisteredClient, error) {
-	return common.GetCollectionObjects(c, link, GetRegisteredClient)
+	return common.GetCollectionObjects[RegisteredClient](c, link)
 }

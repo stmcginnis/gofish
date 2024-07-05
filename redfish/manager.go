@@ -517,13 +517,12 @@ func (manager *Manager) Update() error {
 
 // GetManager will get a Manager instance from the Swordfish service.
 func GetManager(c common.Client, uri string) (*Manager, error) {
-	var manager Manager
-	return &manager, manager.Get(c, uri, &manager)
+	return common.GetObject[Manager](c, uri)
 }
 
 // ListReferencedManagers gets the collection of Managers
 func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
-	return common.GetCollectionObjects(c, link, GetManager)
+	return common.GetCollectionObjects[Manager](c, link)
 }
 
 // ForceFailover forces a failover to the specified manager.

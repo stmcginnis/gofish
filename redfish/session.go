@@ -170,11 +170,10 @@ func DeleteSession(c common.Client, sessionURL string) (err error) {
 
 // GetSession will get a Session instance from the Redfish service.
 func GetSession(c common.Client, uri string) (*Session, error) {
-	var session Session
-	return &session, session.Get(c, uri, &session)
+	return common.GetObject[Session](c, uri)
 }
 
 // ListReferencedSessions gets the collection of Sessions
 func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
-	return common.GetCollectionObjects(c, link, GetSession)
+	return common.GetCollectionObjects[Session](c, link)
 }

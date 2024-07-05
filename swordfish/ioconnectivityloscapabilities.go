@@ -93,12 +93,11 @@ func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) Update() err
 // GetIOConnectivityLoSCapabilities will get a IOConnectivityLoSCapabilities
 // instance from the service.
 func GetIOConnectivityLoSCapabilities(c common.Client, uri string) (*IOConnectivityLoSCapabilities, error) {
-	var ioConnectivityLoSCapabilities IOConnectivityLoSCapabilities
-	return &ioConnectivityLoSCapabilities, ioConnectivityLoSCapabilities.Get(c, uri, &ioConnectivityLoSCapabilities)
+	return common.GetObject[IOConnectivityLoSCapabilities](c, uri)
 }
 
 // ListReferencedIOConnectivityLoSCapabilitiess gets the collection of
 // IOConnectivityLoSCapabilities from a provided reference.
 func ListReferencedIOConnectivityLoSCapabilitiess(c common.Client, link string) ([]*IOConnectivityLoSCapabilities, error) {
-	return common.GetCollectionObjects(c, link, GetIOConnectivityLoSCapabilities)
+	return common.GetCollectionObjects[IOConnectivityLoSCapabilities](c, link)
 }

@@ -209,14 +209,13 @@ func (hostinterface *HostInterface) Update() error {
 
 // GetHostInterface will get a HostInterface instance from the service.
 func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
-	var hostInterface HostInterface
-	return &hostInterface, hostInterface.Get(c, uri, &hostInterface)
+	return common.GetObject[HostInterface](c, uri)
 }
 
 // ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
 func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) {
-	return common.GetCollectionObjects(c, link, GetHostInterface)
+	return common.GetCollectionObjects[HostInterface](c, link)
 }
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.

@@ -97,8 +97,7 @@ func (powerEquipment *PowerEquipment) UnmarshalJSON(b []byte) error {
 
 // GetPowerEquipment will get a PowerEquipment instance from the Redfish service.
 func GetPowerEquipment(c common.Client, uri string) (*PowerEquipment, error) {
-	var powerEquipment PowerEquipment
-	return &powerEquipment, powerEquipment.Get(c, uri, &powerEquipment)
+	return common.GetObject[PowerEquipment](c, uri)
 }
 
 // ManagedBy gets the collection of managers of this PowerEquipment

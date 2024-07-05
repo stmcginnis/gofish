@@ -118,24 +118,11 @@ func (thermalmetrics *ThermalMetrics) ResetMetrics() error {
 
 // GetThermalMetrics will get a ThermalMetrics instance from the service.
 func GetThermalMetrics(c common.Client, uri string) (*ThermalMetrics, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var thermalmetrics ThermalMetrics
-	err = json.NewDecoder(resp.Body).Decode(&thermalmetrics)
-	if err != nil {
-		return nil, err
-	}
-
-	thermalmetrics.SetClient(c)
-	return &thermalmetrics, nil
+	return common.GetObject[ThermalMetrics](c, uri)
 }
 
 // ListReferencedThermalMetricss gets the collection of ThermalMetrics from
 // a provided reference.
 func ListReferencedThermalMetrics(c common.Client, link string) ([]*ThermalMetrics, error) {
-	return common.GetCollectionObjects(c, link, GetThermalMetrics)
+	return common.GetCollectionObjects[ThermalMetrics](c, link)
 }

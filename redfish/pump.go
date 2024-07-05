@@ -162,24 +162,11 @@ func (pump *Pump) Update() error {
 
 // GetPump will get a Pump instance from the service.
 func GetPump(c common.Client, uri string) (*Pump, error) {
-	resp, err := c.Get(uri)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var pump Pump
-	err = json.NewDecoder(resp.Body).Decode(&pump)
-	if err != nil {
-		return nil, err
-	}
-
-	pump.SetClient(c)
-	return &pump, nil
+	return common.GetObject[Pump](c, uri)
 }
 
 // ListReferencedPumps gets the collection of Pump from
 // a provided reference.
 func ListReferencedPumps(c common.Client, link string) ([]*Pump, error) {
-	return common.GetCollectionObjects(c, link, GetPump)
+	return common.GetCollectionObjects[Pump](c, link)
 }
