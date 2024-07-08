@@ -125,23 +125,7 @@ func (reservoir *Reservoir) Assembly() (*Assembly, error) {
 
 // Filters gets a collection of filters.
 func (reservoir *Reservoir) Filters() ([]*Filter, error) {
-	var result []*Filter
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range reservoir.filters {
-		item, err := GetFilter(reservoir.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Filter](reservoir.GetClient(), reservoir.filters)
 }
 
 // Update commits updates to this object's properties to the running system.

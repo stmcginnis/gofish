@@ -132,44 +132,12 @@ func (mediacontroller *MediaController) Ports() ([]*Port, error) {
 
 // Endpoints get the Endpoints with which this media controller is associated.
 func (mediacontroller *MediaController) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range mediacontroller.endpoints {
-		unit, err := GetEndpoint(mediacontroller.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](mediacontroller.GetClient(), mediacontroller.endpoints)
 }
 
 // MemoryDomains get the memory domains associated with this memory controller.
 func (mediacontroller *MediaController) MemoryDomains() ([]*MemoryDomain, error) {
-	var result []*MemoryDomain
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range mediacontroller.memoryDomains {
-		unit, err := GetMemoryDomain(mediacontroller.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MemoryDomain](mediacontroller.GetClient(), mediacontroller.memoryDomains)
 }
 
 // GetMediaController will get a MediaController instance from the service.

@@ -230,44 +230,12 @@ func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup,
 
 // ChildStorageGroups gets child groups of this group.
 func (storagegroup *StorageGroup) ChildStorageGroups() ([]*StorageGroup, error) {
-	var result []*StorageGroup
-
-	collectionError := common.NewCollectionError()
-	for _, sgLink := range storagegroup.childStorageGroups {
-		sg, err := GetStorageGroup(storagegroup.GetClient(), sgLink)
-		if err != nil {
-			collectionError.Failures[sgLink] = err
-		} else {
-			result = append(result, sg)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.childStorageGroups)
 }
 
 // ParentStorageGroups gets parent groups of this group.
 func (storagegroup *StorageGroup) ParentStorageGroups() ([]*StorageGroup, error) {
-	var result []*StorageGroup
-
-	collectionError := common.NewCollectionError()
-	for _, sgLink := range storagegroup.parentStorageGroups {
-		sg, err := GetStorageGroup(storagegroup.GetClient(), sgLink)
-		if err != nil {
-			collectionError.Failures[sgLink] = err
-		} else {
-			result = append(result, sg)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.parentStorageGroups)
 }
 
 // ClassOfService gets the ClassOfService that all storage in this StorageGroup

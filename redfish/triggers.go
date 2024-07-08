@@ -220,26 +220,7 @@ func (triggers *Triggers) UnmarshalJSON(b []byte) error {
 // MetricReportDefinitions gets the metric report definitions that generate new metric
 // reports when a trigger condition is met and when the TriggerActions property contains 'RedfishMetricReport'.
 func (triggers *Triggers) MetricReportDefinitions() ([]*MetricReportDefinition, error) {
-	var result []*MetricReportDefinition
-	if len(triggers.metricReportDefinitions) == 0 {
-		return result, nil
-	}
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range triggers.metricReportDefinitions {
-		rb, err := GetMetricReportDefinition(triggers.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MetricReportDefinition](triggers.GetClient(), triggers.metricReportDefinitions)
 }
 
 // Update commits updates to this object's properties to the running system.

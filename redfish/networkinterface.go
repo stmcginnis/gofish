@@ -101,64 +101,16 @@ func (networkinterface *NetworkInterface) NetworkAdapter() (*NetworkAdapter, err
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network interface
 func (networkinterface *NetworkInterface) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	var result []*NetworkDeviceFunction
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkinterface.networkDeviceFunctions {
-		unit, err := GetNetworkDeviceFunction(networkinterface.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[NetworkDeviceFunction](networkinterface.GetClient(), networkinterface.networkDeviceFunctions)
 }
 
 // NetworkPorts gets the collection of NetworkPorts of this network interface
 // This property has been deprecated in favor of the Ports property.
 func (networkinterface *NetworkInterface) NetworkPorts() ([]*NetworkPort, error) {
-	var result []*NetworkPort
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkinterface.networkPorts {
-		unit, err := GetNetworkPort(networkinterface.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[NetworkPort](networkinterface.GetClient(), networkinterface.networkPorts)
 }
 
 // Ports gets the ports associated with this network interface.
 func (networkinterface *NetworkInterface) Ports() ([]*Port, error) {
-	var result []*Port
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkinterface.ports {
-		unit, err := GetPort(networkinterface.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Port](networkinterface.GetClient(), networkinterface.ports)
 }

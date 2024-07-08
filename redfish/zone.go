@@ -225,128 +225,32 @@ func (zone *Zone) RemoveEndpoint(endpointURI, endpointETag, zoneETag string) err
 
 // AddressPools gets the address pools associated with this zone.
 func (zone *Zone) AddressPools() ([]*AddressPool, error) {
-	var result []*AddressPool
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range zone.addressPools {
-		item, err := GetAddressPool(zone.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[AddressPool](zone.GetClient(), zone.addressPools)
 }
 
 // ContainedByZones gets the zone that contain this zone.
 func (zone *Zone) ContainedByZones() ([]*Zone, error) {
-	var result []*Zone
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range zone.containedByZones {
-		item, err := GetZone(zone.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Zone](zone.GetClient(), zone.containedByZones)
 }
 
 // ContainsZones gets the zones that are contained by this zone.
 func (zone *Zone) ContainsZones() ([]*Zone, error) {
-	var result []*Zone
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range zone.containsZones {
-		item, err := GetZone(zone.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Zone](zone.GetClient(), zone.containsZones)
 }
 
 // Endpoints gets the endpoints that this zone contains.
 func (zone *Zone) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range zone.endpoints {
-		item, err := GetEndpoint(zone.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](zone.GetClient(), zone.endpoints)
 }
 
 // InvolvedSwitches gets the switches in this zone.
 func (zone *Zone) InvolvedSwitches() ([]*Switch, error) {
-	var result []*Switch
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range zone.involvedSwitches {
-		item, err := GetSwitch(zone.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Switch](zone.GetClient(), zone.involvedSwitches)
 }
 
 // ResourceBlocks gets the resource blocks with which this zone is associated.
 func (zone *Zone) ResourceBlocks() ([]*ResourceBlock, error) {
-	var result []*ResourceBlock
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range zone.resourceBlocks {
-		item, err := GetResourceBlock(zone.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[ResourceBlock](zone.GetClient(), zone.resourceBlocks)
 }
 
 // Update commits updates to this object's properties to the running system.

@@ -608,23 +608,7 @@ func (memory *Memory) Assembly() (*Assembly, error) {
 
 // Certificates gets certificates for device identity and attestation.
 func (memory *Memory) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range memory.certificates {
-		unit, err := GetCertificate(memory.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Certificate](memory.GetClient(), memory.certificates)
 }
 
 // EnvironmentMetrics gets the environment metrics for this memory.
@@ -654,23 +638,7 @@ func (memory *Memory) Metrics() (*MemoryMetrics, error) {
 // Batteries gets the batteries that provide power to this memory device during
 // a power-loss event, such as with battery-backed NVDIMMs.
 func (memory *Memory) Batteries() ([]*Battery, error) {
-	var result []*Battery
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range memory.batteries {
-		unit, err := GetBattery(memory.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Battery](memory.GetClient(), memory.batteries)
 }
 
 // Chassis gets the containing chassis of this memory.
@@ -683,86 +651,22 @@ func (memory *Memory) Chassis() (*Chassis, error) {
 
 // Endpoints gets the endpoints associated with this memory.
 func (memory *Memory) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range memory.endpoints {
-		unit, err := GetEndpoint(memory.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](memory.GetClient(), memory.endpoints)
 }
 
 // MemoryMediaSources gets the memory chunks providing media for this memory.
 func (memory *Memory) MemoryMediaSources() ([]*MemoryChunks, error) {
-	var result []*MemoryChunks
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range memory.memoryMediaSources {
-		unit, err := GetMemoryChunks(memory.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MemoryChunks](memory.GetClient(), memory.memoryMediaSources)
 }
 
 // MemoryRegionMediaSources gets the memory regions providing media for this memory.
 func (memory *Memory) MemoryRegionMediaSources() ([]*MemoryRegion, error) {
-	var result []*MemoryRegion
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range memory.memoryRegionMediaSources {
-		unit, err := GetMemoryRegion(memory.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MemoryRegion](memory.GetClient(), memory.memoryRegionMediaSources)
 }
 
 // Processors gets the processors associated with this memory device.
 func (memory *Memory) Processors() ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range memory.processors {
-		unit, err := GetProcessor(memory.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Processor](memory.GetClient(), memory.processors)
 }
 
 // DisalbeMasterPassphrase will disable the master passphrase on the supplied

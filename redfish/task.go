@@ -164,23 +164,7 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 // SubTasks gets the sub-tasks for this task.
 // This property shall not be present if this resource represents a sub-task for a task.
 func (task *Task) SubTasks() ([]*Task, error) {
-	var result []*Task
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range task.subTasks {
-		item, err := GetTask(task.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Task](task.GetClient(), task.subTasks)
 }
 
 // GetTask will get a Task instance from the service.

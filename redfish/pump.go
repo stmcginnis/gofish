@@ -121,23 +121,7 @@ func (pump *Pump) Assembly() (*Assembly, error) {
 
 // Filters gets a collection of filters.
 func (pump *Pump) Filters() ([]*Filter, error) {
-	var result []*Filter
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range pump.filters {
-		item, err := GetFilter(pump.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Filter](pump.GetClient(), pump.filters)
 }
 
 // Update commits updates to this object's properties to the running system.

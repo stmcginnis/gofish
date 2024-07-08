@@ -107,149 +107,37 @@ func (powerdomain *PowerDomain) UnmarshalJSON(b []byte) error {
 
 // ElectricalBuses gets the electrical buses in this power domain.
 func (powerdomain *PowerDomain) ElectricalBuses() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powerdomain.electricalBuses {
-		eth, err := GetPowerDistribution(powerdomain.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.electricalBuses)
 }
 
 // FloorPDUs gets the floor power distribution units in this power domain.
 func (powerdomain *PowerDomain) FloorPDUs() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powerdomain.floorPDUs {
-		eth, err := GetPowerDistribution(powerdomain.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.floorPDUs)
 }
 
 // ManagedBy gets the managers that manage this power domain.
 func (powerdomain *PowerDomain) ManagedBy() ([]*Manager, error) {
-	var result []*Manager
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powerdomain.managedBy {
-		eth, err := GetManager(powerdomain.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Manager](powerdomain.GetClient(), powerdomain.managedBy)
 }
 
 // PowerShelves gets the power shelves in this power domain.
 func (powerdomain *PowerDomain) PowerShelves() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powerdomain.powerShelves {
-		eth, err := GetPowerDistribution(powerdomain.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.powerShelves)
 }
 
 // RackPDUs gets the rack-level power distribution units in this power domain.
 func (powerdomain *PowerDomain) RackPDUs() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powerdomain.rackPDUs {
-		eth, err := GetPowerDistribution(powerdomain.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.rackPDUs)
 }
 
 // Switchgear gets the switchgear in this power domain.
 func (powerdomain *PowerDomain) Switchgear() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powerdomain.switchgear {
-		eth, err := GetPowerDistribution(powerdomain.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.switchgear)
 }
 
 // TransferSwitches gets the transfer switches in this power domain.
 func (powerdomain *PowerDomain) TransferSwitches() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range powerdomain.transferSwitches {
-		eth, err := GetPowerDistribution(powerdomain.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.transferSwitches)
 }
 
 // GetPowerDomain will get a PowerDomain instance from the service.

@@ -177,107 +177,27 @@ func (controllers *Controllers) ActiveSoftwareImage(c common.Client) (*SoftwareI
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network controller.
 func (controllers *Controllers) NetworkDeviceFunctions(c common.Client) ([]*NetworkDeviceFunction, error) {
-	var result []*NetworkDeviceFunction
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range controllers.networkDeviceFunctions {
-		unit, err := GetNetworkDeviceFunction(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[NetworkDeviceFunction](c, controllers.networkDeviceFunctions)
 }
 
 // NetworkPorts gets the collection of NetworkPorts for this network controller.
 func (controllers *Controllers) NetworkPorts(c common.Client) ([]*NetworkPort, error) {
-	var result []*NetworkPort
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range controllers.networkPorts {
-		unit, err := GetNetworkPort(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[NetworkPort](c, controllers.networkPorts)
 }
 
 // PCIeDevices gets the PCIe devices associated with this network controller.
 func (controllers *Controllers) PCIeDevices(c common.Client) ([]*PCIeDevice, error) {
-	var result []*PCIeDevice
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range controllers.pcieDevices {
-		unit, err := GetPCIeDevice(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PCIeDevice](c, controllers.pcieDevices)
 }
 
 // Ports gets the ports associated with this network controller.
 func (controllers *Controllers) Ports(c common.Client) ([]*Port, error) {
-	var result []*Port
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range controllers.ports {
-		unit, err := GetPort(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Port](c, controllers.ports)
 }
 
 // SoftwareImages gets the firmware images that apply to this controller.
 func (controllers *Controllers) SoftwareImages(c common.Client) ([]*SoftwareInventory, error) {
-	var result []*SoftwareInventory
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range controllers.softwareImages {
-		unit, err := GetSoftwareInventory(c, uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[SoftwareInventory](c, controllers.softwareImages)
 }
 
 // DataCenterBridging shall describe the capability, status,

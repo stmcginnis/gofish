@@ -113,23 +113,7 @@ func (graphicscontroller *GraphicsController) PCIeDevice() (*PCIeDevice, error) 
 
 // Processors gets this graphics controllers processors.
 func (graphicscontroller *GraphicsController) Processors() ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range graphicscontroller.processors {
-		unit, err := GetProcessor(graphicscontroller.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Processor](graphicscontroller.GetClient(), graphicscontroller.processors)
 }
 
 // Update commits updates to this object's properties to the running system.

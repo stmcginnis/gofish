@@ -235,23 +235,7 @@ func (facility *Facility) UnmarshalJSON(b []byte) error {
 
 // CDUs get the cooling distribution units associated with this facility.
 func (facility *Facility) CDUs() ([]*CoolingUnit, error) {
-	var result []*CoolingUnit
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.cdus {
-		unit, err := GetCoolingUnit(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.cdus)
 }
 
 // ContainedByFacility get facility that contains this facility.
@@ -264,233 +248,57 @@ func (facility *Facility) ContainedByFacility() (*Facility, error) {
 
 // ContainsChassis get the chassis within this facility.
 func (facility *Facility) ContainsChassis() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.containsChassis {
-		unit, err := GetChassis(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](facility.GetClient(), facility.containsChassis)
 }
 
 // ContainsFacilities get facilities within this facility.
 func (facility *Facility) ContainsFacilities() ([]*Facility, error) {
-	var result []*Facility
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.containsFacilities {
-		unit, err := GetFacility(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Facility](facility.GetClient(), facility.containsFacilities)
 }
 
 // CoolingLoops get cooling loops within this facility.
 func (facility *Facility) CoolingLoops() ([]*CoolingLoop, error) {
-	var result []*CoolingLoop
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.coolingLoops {
-		unit, err := GetCoolingLoop(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[CoolingLoop](facility.GetClient(), facility.coolingLoops)
 }
 
 // ElectricalBuses get electrical buses within this facility.
 func (facility *Facility) ElectricalBuses() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.electricalBuses {
-		unit, err := GetPowerDistribution(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.electricalBuses)
 }
 
 // FloorPDUs get floor power distribution units within this facility.
 func (facility *Facility) FloorPDUs() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.floorPDUs {
-		unit, err := GetPowerDistribution(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.floorPDUs)
 }
 
 // ImmersionUnits get immersion cooling units within this facility.
 func (facility *Facility) ImmersionUnits() ([]*CoolingUnit, error) {
-	var result []*CoolingUnit
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.immersionUnits {
-		unit, err := GetCoolingUnit(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.immersionUnits)
 }
 
 // ManagedBy gets the managers of this facility.
 func (facility *Facility) ManagedBy() ([]*Manager, error) {
-	var result []*Manager
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.managedBy {
-		cl, err := GetManager(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, cl)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Manager](facility.GetClient(), facility.managedBy)
 }
 
 // PowerShelves get power shelves within this facility.
 func (facility *Facility) PowerShelves() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.powerShelves {
-		unit, err := GetPowerDistribution(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.powerShelves)
 }
 
 // RackPDUs get rack power distribution units within this facility.
 func (facility *Facility) RackPDUs() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.rackPDUs {
-		unit, err := GetPowerDistribution(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.rackPDUs)
 }
 
 // Switchgear get switchgear power distribution units within this facility.
 func (facility *Facility) Switchgear() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.switchgear {
-		unit, err := GetPowerDistribution(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.switchgear)
 }
 
 // TransferSwitches get transfer switches within this facility.
 func (facility *Facility) TransferSwitches() ([]*PowerDistribution, error) {
-	var result []*PowerDistribution
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range facility.transferSwitches {
-		unit, err := GetPowerDistribution(facility.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.transferSwitches)
 }
 
 // GetFacility will get a Facility instance from the service.

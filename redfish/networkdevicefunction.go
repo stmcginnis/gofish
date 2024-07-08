@@ -435,67 +435,19 @@ func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) erro
 
 // Endpoints gets the endpoints that are associated with this network device function.
 func (networkdevicefunction *NetworkDeviceFunction) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkdevicefunction.endpoints {
-		unit, err := GetEndpoint(networkdevicefunction.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](networkdevicefunction.GetClient(), networkdevicefunction.endpoints)
 }
 
 // EthernetInterfaces gets the virtual interfaces that were created when one of the network device function VLANs is
 // represented as a virtual NIC for the purpose of showing the IP address associated with that VLAN.
 func (networkdevicefunction *NetworkDeviceFunction) EthernetInterfaces() ([]*EthernetInterface, error) {
-	var result []*EthernetInterface
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkdevicefunction.ethernetInterfaces {
-		unit, err := GetEthernetInterface(networkdevicefunction.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[EthernetInterface](networkdevicefunction.GetClient(), networkdevicefunction.ethernetInterfaces)
 }
 
 // OffloadProcessors gets the processors that performs offload computation for this network function, such as
 // with a SmartNIC. This property shall not be present if OffloadSystem is present.
 func (networkdevicefunction *NetworkDeviceFunction) OffloadProcessors() ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range networkdevicefunction.offloadProcessors {
-		unit, err := GetProcessor(networkdevicefunction.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Processor](networkdevicefunction.GetClient(), networkdevicefunction.offloadProcessors)
 }
 
 // OffloadSystem shall contain a link to a resource of type ComputerSystem that represents the system that performs

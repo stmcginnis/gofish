@@ -87,23 +87,7 @@ func (usbcontroller *USBController) PCIeDevice() (*PCIeDevice, error) {
 
 // Processors gets the processors that can utilize this USB controller.
 func (usbcontroller *USBController) Processors() ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range usbcontroller.processors {
-		item, err := GetProcessor(usbcontroller.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Processor](usbcontroller.GetClient(), usbcontroller.processors)
 }
 
 // Ports gets the ports of the USB controller.

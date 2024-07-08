@@ -97,21 +97,5 @@ func ListReferencedContainerImages(c common.Client, link string) ([]*ContainerIm
 
 // Containers get the container instances using this container image.
 func (containerimage *ContainerImage) Containers() ([]*Container, error) {
-	var result []*Container
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range containerimage.containers {
-		rb, err := GetContainer(containerimage.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Container](containerimage.GetClient(), containerimage.containers)
 }

@@ -132,23 +132,7 @@ func (fan *Fan) Assembly() (*Assembly, error) {
 
 // CoolingChassis get the cooling chassis related to this fan.
 func (fan *Fan) CoolingChassis() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range fan.coolingChassis {
-		unit, err := GetChassis(fan.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](fan.GetClient(), fan.coolingChassis)
 }
 
 // Update commits updates to this object's properties to the running system.

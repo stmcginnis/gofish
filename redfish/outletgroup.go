@@ -135,23 +135,7 @@ func (outletgroup *OutletGroup) ResetMetrics() error {
 
 // Outlets get the outlets that are in this outlet group.
 func (outletgroup *OutletGroup) Outlets() ([]*Outlet, error) {
-	var result []*Outlet
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range outletgroup.outlets {
-		unit, err := GetOutlet(outletgroup.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Outlet](outletgroup.GetClient(), outletgroup.outlets)
 }
 
 // Update commits updates to this object's properties to the running system.

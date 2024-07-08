@@ -69,21 +69,5 @@ func ListReferencedCertificateLocations(c common.Client, link string) ([]*Certif
 
 // Certificates retrieves a collection of the Certificates installed on the system.
 func (certificatelocations *CertificateLocations) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range certificatelocations.certificates {
-		cert, err := GetCertificate(certificatelocations.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, cert)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Certificate](certificatelocations.GetClient(), certificatelocations.certificates)
 }

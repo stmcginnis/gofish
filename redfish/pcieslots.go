@@ -100,44 +100,12 @@ func (slot *PCIeSlot) UnmarshalJSON(b []byte) error {
 
 // PCIeDevices gets the PCIe devices contained in this slot.
 func (slot *PCIeSlot) PCIeDevice(c common.Client) ([]*PCIeDevice, error) {
-	var result []*PCIeDevice
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range slot.pcieDevice {
-		eth, err := GetPCIeDevice(c, ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PCIeDevice](c, slot.pcieDevice)
 }
 
 // Processors gets the processors that are directly connected or directly bridged to this PCIe slot.
 func (slot *PCIeSlot) Processors(c common.Client) ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range slot.processors {
-		eth, err := GetProcessor(c, ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Processor](c, slot.processors)
 }
 
 // PCIeSlots is used to represent a PCIeSlots resource for a Redfish implementation.

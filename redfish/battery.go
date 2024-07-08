@@ -215,44 +215,12 @@ func (battery *Battery) BatteryMetrics() (*BatteryMetrics, error) {
 
 // Memory returns a collection of Memory devices associated with this Battery.
 func (battery *Battery) Memory() ([]*Memory, error) {
-	var result []*Memory
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range battery.memory {
-		memory, err := GetMemory(battery.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, memory)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Memory](battery.GetClient(), battery.memory)
 }
 
 // StorageControllers returns a collection of StorageControllers associated with this Battery.
 func (battery *Battery) StorageControllers() ([]*StorageController, error) {
-	var result []*StorageController
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range battery.storageControllers {
-		sc, err := GetStorageController(battery.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, sc)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[StorageController](battery.GetClient(), battery.storageControllers)
 }
 
 // Calibrate performs a self-calibration, or learn cycle, of the battery.

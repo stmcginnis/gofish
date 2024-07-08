@@ -149,86 +149,22 @@ func (fabricadapter *FabricAdapter) Ports() ([]*Port, error) {
 
 // Endpoints gets the endpoints connected to this interface.
 func (fabricadapter *FabricAdapter) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range fabricadapter.endpoints {
-		endpoint, err := GetEndpoint(fabricadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](fabricadapter.GetClient(), fabricadapter.endpoints)
 }
 
 // MemoryDomains gets the MemoryDomains associated to this interface.
 func (fabricadapter *FabricAdapter) MemoryDomains() ([]*MemoryDomain, error) {
-	var result []*MemoryDomain
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range fabricadapter.memoryDomains {
-		endpoint, err := GetMemoryDomain(fabricadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MemoryDomain](fabricadapter.GetClient(), fabricadapter.memoryDomains)
 }
 
 // PCIeDevices gets the PCIe devices associated to this interface.
 func (fabricadapter *FabricAdapter) PCIeDevices() ([]*PCIeDevice, error) {
-	var result []*PCIeDevice
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range fabricadapter.pcieDevices {
-		endpoint, err := GetPCIeDevice(fabricadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PCIeDevice](fabricadapter.GetClient(), fabricadapter.pcieDevices)
 }
 
 // Processors gets the processors associated to this interface.
 func (fabricadapter *FabricAdapter) Processors() ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range fabricadapter.processors {
-		endpoint, err := GetProcessor(fabricadapter.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Processor](fabricadapter.GetClient(), fabricadapter.processors)
 }
 
 // Update commits updates to this object's properties to the running system.

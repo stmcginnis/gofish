@@ -114,42 +114,10 @@ func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*Accel
 
 // Endpoints gets the endpoints connected to this accelerator.
 func (accelerationfunction *AccelerationFunction) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range accelerationfunction.endpoints {
-		endpoint, err := GetEndpoint(accelerationfunction.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](accelerationfunction.GetClient(), accelerationfunction.endpoints)
 }
 
 // PCIeFunctions gets the PCIe functions associated with this accelerator.
 func (accelerationfunction *AccelerationFunction) PCIeFunctions() ([]*PCIeFunction, error) {
-	var result []*PCIeFunction
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range accelerationfunction.pcieFunctions {
-		function, err := GetPCIeFunction(accelerationfunction.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, function)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PCIeFunction](accelerationfunction.GetClient(), accelerationfunction.pcieFunctions)
 }

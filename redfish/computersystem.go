@@ -1075,46 +1075,9 @@ func (computersystem *ComputerSystem) Bios() (*Bios, error) {
 
 // BootOptions gets all BootOption items for this system.
 func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
-	var result []*BootOption
-	if computersystem.Boot.bootOptions == "" {
-		return result, nil
-	}
-	c := computersystem.GetClient()
-
-	type GetResult struct {
-		Item  *BootOption
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		bootoption, err := GetBootOption(c, link)
-		ch <- GetResult{Item: bootoption, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, computersystem.Boot.bootOptions)
-		if err != nil {
-			collectionError.Failures[computersystem.Boot.bootOptions] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects[BootOption](
+		computersystem.GetClient(),
+		computersystem.Boot.bootOptions)
 }
 
 func (computersystem *ComputerSystem) BootCertificates() ([]*Certificate, error) {
@@ -1133,23 +1096,7 @@ func (computersystem *ComputerSystem) LogServices() ([]*LogService, error) {
 
 // ManagedBy gets all Managers for this system.
 func (computersystem *ComputerSystem) ManagedBy() ([]*Manager, error) {
-	var result []*Manager
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range computersystem.managedBy {
-		manager, err := GetManager(computersystem.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, manager)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Manager](computersystem.GetClient(), computersystem.managedBy)
 }
 
 // Memory gets this system's memory.
@@ -1169,44 +1116,12 @@ func (computersystem *ComputerSystem) NetworkInterfaces() ([]*NetworkInterface, 
 
 // PCIeDevices gets all PCIeDevices for this system.
 func (computersystem *ComputerSystem) PCIeDevices() ([]*PCIeDevice, error) {
-	var result []*PCIeDevice
-
-	collectionError := common.NewCollectionError()
-	for _, pciedeviceLink := range computersystem.pcieDevices {
-		pciedevice, err := GetPCIeDevice(computersystem.GetClient(), pciedeviceLink)
-		if err != nil {
-			collectionError.Failures[pciedeviceLink] = err
-		} else {
-			result = append(result, pciedevice)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PCIeDevice](computersystem.GetClient(), computersystem.pcieDevices)
 }
 
 // PCIeFunctions gets all PCIeFunctions for this system.
 func (computersystem *ComputerSystem) PCIeFunctions() ([]*PCIeFunction, error) {
-	var result []*PCIeFunction
-
-	collectionError := common.NewCollectionError()
-	for _, pciefunctionLink := range computersystem.pcieFunctions {
-		pciefunction, err := GetPCIeFunction(computersystem.GetClient(), pciefunctionLink)
-		if err != nil {
-			collectionError.Failures[pciefunctionLink] = err
-		} else {
-			result = append(result, pciefunction)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PCIeFunction](computersystem.GetClient(), computersystem.pcieFunctions)
 }
 
 // Processors returns a collection of processors from this system

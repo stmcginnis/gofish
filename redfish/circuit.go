@@ -530,23 +530,7 @@ func (circuit *Circuit) SourceCircuit() (*Circuit, error) {
 
 // DistributionCircuits gets the collection that contains the circuits powered by this circuit.
 func (circuit *Circuit) DistributionCircuits() ([]*Circuit, error) {
-	var result []*Circuit
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range circuit.distributionCircuits {
-		ct, err := GetCircuit(circuit.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, ct)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Circuit](circuit.GetClient(), circuit.distributionCircuits)
 }
 
 // TODO: outlets, power outlet

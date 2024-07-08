@@ -188,42 +188,14 @@ func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) (
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptions() ([]*ClassOfService, error) {
-	var result []*ClassOfService
-
-	collectionError := common.NewCollectionError()
-	for _, link := range dataprotectionloscapabilities.supportedReplicaOptions {
-		classOfService, err := GetClassOfService(dataprotectionloscapabilities.GetClient(), link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		} else {
-			result = append(result, classOfService)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[ClassOfService](
+		dataprotectionloscapabilities.GetClient(),
+		dataprotectionloscapabilities.supportedReplicaOptions)
 }
 
 // SupportedLinesOfService gets the supported lines of service.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLinesOfService() ([]*DataProtectionLineOfService, error) {
-	var result []*DataProtectionLineOfService
-
-	collectionError := common.NewCollectionError()
-	for _, link := range dataprotectionloscapabilities.supportedLinesOfService {
-		lineOfService, err := GetDataProtectionLineOfService(dataprotectionloscapabilities.GetClient(), link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		} else {
-			result = append(result, lineOfService)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[DataProtectionLineOfService](
+		dataprotectionloscapabilities.GetClient(),
+		dataprotectionloscapabilities.supportedLinesOfService)
 }
