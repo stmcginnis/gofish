@@ -14,7 +14,7 @@ import (
 type Syslog struct {
 	common.Entity
 
-	OdataType        string `json:"@odata.type"`
+	ODataType        string `json:"@odata.type"`
 	EnableSyslog     bool   `json:"EnableSyslog"`
 	SyslogServer     string `json:"SyslogServer"`
 	SyslogPortNumber int    `json:"SyslogPortNumber"`

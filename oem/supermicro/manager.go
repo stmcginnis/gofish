@@ -19,7 +19,7 @@ type Manager struct {
 
 type ManagerOem struct {
 	Supermicro struct {
-		OdataType string `json:"@odata.type"`
+		ODataType string `json:"@odata.type"`
 		NTP       common.Link
 		Syslog    common.Link
 		IKVM      common.Link

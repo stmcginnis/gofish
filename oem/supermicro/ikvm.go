@@ -21,7 +21,7 @@ const (
 type IKVM struct {
 	common.Entity
 
-	OdataType        string        `json:"@odata.type"`
+	ODataType        string        `json:"@odata.type"`
 	CurrentInterface IKVMInterface `json:"Current interface"`
 	URI              string        `json:"URI"`
 

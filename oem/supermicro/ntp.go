@@ -14,7 +14,7 @@ import (
 type NTP struct {
 	common.Entity
 
-	OdataType          string `json:"@odata.type"`
+	ODataType          string `json:"@odata.type"`
 	NTPEnable          bool   `json:"NTPEnable"`
 	PrimaryNTPServer   string `json:"PrimaryNTPServer"`
 	SecondaryNTPServer string `json:"SecondaryNTPServer"`

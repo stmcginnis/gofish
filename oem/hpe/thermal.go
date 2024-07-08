@@ -17,8 +17,8 @@ type Fan struct {
 
 type FanOem struct {
 	Hpe struct {
-		OdataContext string `json:"@odata.context"`
-		OdataType    string `json:"@odata.type"`
+		ODataContext string `json:"@odata.context"`
+		ODataType    string `json:"@odata.type"`
 		Location     string `json:"Location"`
 		Redundant    bool   `json:"Redundant"`
 		HotPluggable bool   `json:"HotPluggable"`
@@ -33,8 +33,8 @@ type Thermal struct {
 
 type ThermalOem struct {
 	Hpe struct {
-		OdataContext         string `json:"@odata.context"`
-		OdataType            string `json:"@odata.type"`
+		ODataContext         string `json:"@odata.context"`
+		ODataType            string `json:"@odata.type"`
 		ThermalConfiguration string `json:"ThermalConfiguration"`
 		FanPercentMinimum    int    `json:"FanPercentMinimum"`
 	} `json:"Hpe"`
