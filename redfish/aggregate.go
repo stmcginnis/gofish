@@ -70,23 +70,7 @@ func (aggregate *Aggregate) UnmarshalJSON(b []byte) error {
 
 // Elements get the elements of this aggregate.
 func (aggregate *Aggregate) Elements() ([]*Resource, error) {
-	var result []*Resource
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range aggregate.elements {
-		endpoint, err := GetResource(aggregate.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Resource](aggregate.GetClient(), aggregate.elements)
 }
 
 // AddElements adds one or more resources to the aggregate.

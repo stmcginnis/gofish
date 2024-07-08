@@ -103,21 +103,5 @@ func ListReferencedConnectionMethods(c common.Client, link string) ([]*Connectio
 
 // AggregationSources gets the access points using this connection method.
 func (connectionmethod *ConnectionMethod) AggregationSources() ([]*AggregationSource, error) {
-	var result []*AggregationSource
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range connectionmethod.aggregationSources {
-		rb, err := GetAggregationSource(connectionmethod.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[AggregationSource](connectionmethod.GetClient(), connectionmethod.aggregationSources)
 }

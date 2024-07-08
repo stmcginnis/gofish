@@ -128,86 +128,22 @@ func (cxllogicaldevice *CXLLogicalDevice) Log() (*LogService, error) {
 
 // Endpoints get the endpoints associated with this CXL logical device.
 func (cxllogicaldevice *CXLLogicalDevice) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range cxllogicaldevice.endpoints {
-		rb, err := GetEndpoint(cxllogicaldevice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](cxllogicaldevice.GetClient(), cxllogicaldevice.endpoints)
 }
 
 // MemoryChunks get the memory chunks associated with this CXL logical device.
 func (cxllogicaldevice *CXLLogicalDevice) MemoryChunks() ([]*MemoryChunks, error) {
-	var result []*MemoryChunks
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range cxllogicaldevice.memoryChunks {
-		rb, err := GetMemoryChunks(cxllogicaldevice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MemoryChunks](cxllogicaldevice.GetClient(), cxllogicaldevice.memoryChunks)
 }
 
 // MemoryDomains get the memory domains associated with this CXL logical device.
 func (cxllogicaldevice *CXLLogicalDevice) MemoryDomains() ([]*MemoryDomain, error) {
-	var result []*MemoryDomain
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range cxllogicaldevice.memoryDomains {
-		rb, err := GetMemoryDomain(cxllogicaldevice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MemoryDomain](cxllogicaldevice.GetClient(), cxllogicaldevice.memoryDomains)
 }
 
-// PCIeFunctions get the PCIe devices associated with this CXL logical device.
-func (cxllogicaldevice *CXLLogicalDevice) PCIeFunctions() ([]*PCIeDevice, error) {
-	var result []*PCIeDevice
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range cxllogicaldevice.pcieFunctions {
-		rb, err := GetPCIeDevice(cxllogicaldevice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+// PCIeFunctions get the PCIe functions associated with this CXL logical device.
+func (cxllogicaldevice *CXLLogicalDevice) PCIeFunctions() ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](cxllogicaldevice.GetClient(), cxllogicaldevice.pcieFunctions)
 }
 
 // GetCXLLogicalDevice will get a CXLLogicalDevice instance from the service.

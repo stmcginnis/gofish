@@ -233,86 +233,22 @@ func (pciefunction *PCIeFunction) CXLLogicalDevice() (*CXLLogicalDevice, error) 
 
 // Drives gets the PCIe function's drives.
 func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
-	var result []*Drive
-
-	collectionError := common.NewCollectionError()
-	for _, driveLink := range pciefunction.drives {
-		drive, err := GetDrive(pciefunction.GetClient(), driveLink)
-		if err != nil {
-			collectionError.Failures[driveLink] = err
-		} else {
-			result = append(result, drive)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Drive](pciefunction.GetClient(), pciefunction.drives)
 }
 
 // EthernetInterfaces gets the PCIe function's ethernet interfaces.
 func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, error) {
-	var result []*EthernetInterface
-
-	collectionError := common.NewCollectionError()
-	for _, ethLink := range pciefunction.ethernetInterfaces {
-		eth, err := GetEthernetInterface(pciefunction.GetClient(), ethLink)
-		if err != nil {
-			collectionError.Failures[ethLink] = err
-		} else {
-			result = append(result, eth)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[EthernetInterface](pciefunction.GetClient(), pciefunction.ethernetInterfaces)
 }
 
 // MemoryDomains gets the memory domains associated with this PCIe function.
 func (pciefunction *PCIeFunction) MemoryDomains() ([]*MemoryDomain, error) {
-	var result []*MemoryDomain
-
-	collectionError := common.NewCollectionError()
-	for _, netLink := range pciefunction.memoryDomains {
-		net, err := GetMemoryDomain(pciefunction.GetClient(), netLink)
-		if err != nil {
-			collectionError.Failures[netLink] = err
-		} else {
-			result = append(result, net)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[MemoryDomain](pciefunction.GetClient(), pciefunction.memoryDomains)
 }
 
 // NetworkDeviceFunctions gets the PCIe function's ethernet interfaces.
 func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	var result []*NetworkDeviceFunction
-
-	collectionError := common.NewCollectionError()
-	for _, netLink := range pciefunction.networkDeviceFunctions {
-		net, err := GetNetworkDeviceFunction(pciefunction.GetClient(), netLink)
-		if err != nil {
-			collectionError.Failures[netLink] = err
-		} else {
-			result = append(result, net)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[NetworkDeviceFunction](pciefunction.GetClient(), pciefunction.networkDeviceFunctions)
 }
 
 // PCIeDevice gets the associated PCIe device for this function.
@@ -333,21 +269,5 @@ func (pciefunction *PCIeFunction) Processor() (*Processor, error) {
 
 // StorageControllers gets the associated storage controllers.
 func (pciefunction *PCIeFunction) StorageControllers() ([]*StorageController, error) {
-	var result []*StorageController
-
-	collectionError := common.NewCollectionError()
-	for _, scLink := range pciefunction.storageControllers {
-		sc, err := GetStorageController(pciefunction.GetClient(), scLink)
-		if err != nil {
-			collectionError.Failures[scLink] = err
-		} else {
-			result = append(result, sc)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[StorageController](pciefunction.GetClient(), pciefunction.storageControllers)
 }

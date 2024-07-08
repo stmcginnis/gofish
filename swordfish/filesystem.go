@@ -296,21 +296,5 @@ func (filesystem *FileSystem) ClassOfService() (*ClassOfService, error) {
 
 // SpareResourceSets gets the spare resource sets used for this filesystem.
 func (filesystem *FileSystem) SpareResourceSets() ([]*SpareResourceSet, error) {
-	var result []*SpareResourceSet
-
-	collectionError := common.NewCollectionError()
-	for _, rsLink := range filesystem.spareResourceSets {
-		rs, err := GetSpareResourceSet(filesystem.GetClient(), rsLink)
-		if err != nil {
-			collectionError.Failures[rsLink] = err
-		} else {
-			result = append(result, rs)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[SpareResourceSet](filesystem.GetClient(), filesystem.spareResourceSets)
 }

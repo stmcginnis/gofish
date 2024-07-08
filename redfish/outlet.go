@@ -272,65 +272,17 @@ func (outlet *Outlet) BranchCircuit() (*Circuit, error) {
 
 // Chassis gets the chassis connected to this outlet.
 func (outlet *Outlet) Chassis() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range outlet.chassis {
-		unit, err := GetChassis(outlet.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](outlet.GetClient(), outlet.chassis)
 }
 
 // DistributionCircuits gets the circuits powered by this outlet.
 func (outlet *Outlet) DistributionCircuits() ([]*Circuit, error) {
-	var result []*Circuit
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range outlet.distributionCircuits {
-		unit, err := GetCircuit(outlet.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Circuit](outlet.GetClient(), outlet.distributionCircuits)
 }
 
 // PowerSupplies gets the power supplies connected to this outlet.
 func (outlet *Outlet) PowerSupplies() ([]*PowerSupply, error) {
-	var result []*PowerSupply
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range outlet.powerSupplies {
-		unit, err := GetPowerSupply(outlet.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PowerSupply](outlet.GetClient(), outlet.powerSupplies)
 }
 
 // Update commits updates to this object's properties to the running system.

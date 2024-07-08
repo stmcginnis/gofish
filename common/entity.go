@@ -276,3 +276,46 @@ func GetObject[T any, PT interface {
 	entity.SetClient(c)
 	return entity, nil
 }
+
+// GetObject retrieves an API object from the service.
+func GetObjects[T any, PT interface {
+	*T
+	SchemaObject
+}](c Client, uris []string) ([]*T, error) {
+	var result []*T
+	if len(uris) == 0 {
+		return result, nil
+	}
+
+	type GetResult struct {
+		Item  *T
+		Link  string
+		Error error
+	}
+
+	ch := make(chan GetResult)
+	collectionError := NewCollectionError()
+	get := func(link string) {
+		entity, err := GetObject[T, PT](c, link)
+		ch <- GetResult{Item: entity, Link: link, Error: err}
+	}
+
+	go func() {
+		CollectCollection(get, uris)
+		close(ch)
+	}()
+
+	for r := range ch {
+		if r.Error != nil {
+			collectionError.Failures[r.Link] = r.Error
+		} else {
+			result = append(result, r.Item)
+		}
+	}
+
+	if collectionError.Empty() {
+		return result, nil
+	}
+
+	return result, collectionError
+}

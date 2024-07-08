@@ -271,23 +271,7 @@ func (storage *Storage) Controllers() ([]*StorageController, error) {
 // Drives gets the drives attached to the storage controllers that this
 // resource represents.
 func (storage *Storage) Drives() ([]*Drive, error) {
-	var result []*Drive
-
-	collectionError := common.NewCollectionError()
-	for _, driveLink := range storage.drives {
-		drive, err := GetDrive(storage.GetClient(), driveLink)
-		if err != nil {
-			collectionError.Failures[driveLink] = err
-		} else {
-			result = append(result, drive)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Drive](storage.GetClient(), storage.drives)
 }
 
 // EndpointGroups gets the set of endpoints that are used for a common purpose such as an ACL
@@ -308,65 +292,17 @@ func (storage *Storage) Volumes() ([]*Volume, error) {
 
 // Enclosures gets the physical containers attached to this resource.
 func (storage *Storage) Enclosures() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range storage.enclosures {
-		item, err := GetChassis(storage.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](storage.GetClient(), storage.enclosures)
 }
 
 // HostingStorageSystems gets the storage systems that host this storage subsystem.
 func (storage *Storage) HostingStorageSystems() ([]*ComputerSystem, error) {
-	var result []*ComputerSystem
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range storage.hostingStorageSystems {
-		item, err := GetComputerSystem(storage.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[ComputerSystem](storage.GetClient(), storage.hostingStorageSystems)
 }
 
 // NVMeoFDiscoverySubsystems gets the discovery subsystems that discovered this subsystem in an NVMe-oF environment.
 func (storage *Storage) NVMeoFDiscoverySubsystems() ([]*Storage, error) {
-	var result []*Storage
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range storage.hostingStorageSystems {
-		item, err := GetStorage(storage.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Storage](storage.GetClient(), storage.nvmeoFDiscoverySubsystems)
 }
 
 // SimpleStorage gets the simple storage instance that corresponds to this storage.
@@ -379,23 +315,7 @@ func (storage *Storage) SimpleStorage() (*SimpleStorage, error) {
 
 // // StorageServices gets the storage services that connect to this storage subsystem.
 // func (storage *Storage) StorageServices() ([]*swordfish.StorageService, error) {
-// 	var result []*swordfish.StorageService
-
-// 	collectionError := common.NewCollectionError()
-// 	for _, uri := range storage.storageServices {
-// 		item, err := swordfish.GetStorageService(storage.GetClient(), uri)
-// 		if err != nil {
-// 			collectionError.Failures[uri] = err
-// 		} else {
-// 			result = append(result, item)
-// 		}
-// 	}
-
-// 	if collectionError.Empty() {
-// 		return result, nil
-// 	}
-
-// 	return result, collectionError
+//  	return common.GetObjects[StorageService](storage.GetClient(), storage.storageServices)
 // }
 
 // ResetToDefaults resets the storage device to factory defaults. This can cause the loss of data.

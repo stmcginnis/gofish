@@ -300,87 +300,23 @@ func (storageservice *StorageService) IOPerformanceLoSCapabilities() (*IOPerform
 
 // Redundancy gets the redundancy information for the storage subsystem.
 func (storageservice *StorageService) Redundancy() ([]*redfish.Redundancy, error) {
-	var result []*redfish.Redundancy
-
-	collectionError := common.NewCollectionError()
-	for _, redundancyLink := range storageservice.redundancy {
-		redundancy, err := redfish.GetRedundancy(storageservice.GetClient(), redundancyLink)
-		if err != nil {
-			collectionError.Failures[redundancyLink] = err
-		} else {
-			result = append(result, redundancy)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[redfish.Redundancy](storageservice.GetClient(), storageservice.redundancy)
 }
 
 // LinesOfService gets lines of service for this service.
 func (storageservice *StorageService) LinesOfService() ([]*LineOfService, error) {
-	var result []*LineOfService
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range storageservice.linesOfService {
-		item, err := GetLineOfService(storageservice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[LineOfService](storageservice.GetClient(), storageservice.linesOfService)
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
 func (storageservice *StorageService) SpareResourceSets() ([]*SpareResourceSet, error) {
-	var result []*SpareResourceSet
-
-	collectionError := common.NewCollectionError()
-	for _, srsLink := range storageservice.spareResourceSets {
-		srs, err := GetSpareResourceSet(storageservice.GetClient(), srsLink)
-		if err != nil {
-			collectionError.Failures[srsLink] = err
-		} else {
-			result = append(result, srs)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[SpareResourceSet](storageservice.GetClient(), storageservice.spareResourceSets)
 }
 
 // StorageGroups gets the storage groups that are a part of this storage service.
 func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
-	var result []*StorageGroup
-
-	collectionError := common.NewCollectionError()
-	for _, sgLink := range storageservice.spareResourceSets {
-		sg, err := GetStorageGroup(storageservice.GetClient(), sgLink)
-		if err != nil {
-			collectionError.Failures[sgLink] = err
-		} else {
-			result = append(result, sg)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects[StorageGroup](storageservice.GetClient(), storageservice.storageGroups)
 }
 
 // Volumes gets the volumes that are a part of this storage service.

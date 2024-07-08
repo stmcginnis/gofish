@@ -565,23 +565,7 @@ func (logentry *LogEntry) UnmarshalJSON(b []byte) error {
 
 // RelatedLogEntries gets the set of LogEntry in this or other log services that are related to this log entry.
 func (logentry *LogEntry) RelatedLogEntries() ([]*LogEntry, error) {
-	var result []*LogEntry
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range logentry.relatedLogEntries {
-		unit, err := GetLogEntry(logentry.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[LogEntry](logentry.GetClient(), logentry.relatedLogEntries)
 }
 
 // Update commits updates to this object's properties to the running system.

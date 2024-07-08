@@ -319,44 +319,12 @@ func (powerDistribution *PowerDistribution) PowerSupplies() ([]*PowerSupplyUnit,
 
 // ManagedBy gets the collection of managers for this equipment.
 func (powerDistribution *PowerDistribution) ManagedBy() ([]*Manager, error) {
-	var result []*Manager
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range powerDistribution.managedBy {
-		manager, err := GetManager(powerDistribution.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, manager)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Manager](powerDistribution.GetClient(), powerDistribution.managedBy)
 }
 
 // Chassis gets the collection of chassis for this equipment.
 func (powerDistribution *PowerDistribution) Chassis() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range powerDistribution.chassis {
-		chassis, err := GetChassis(powerDistribution.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, chassis)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](powerDistribution.GetClient(), powerDistribution.chassis)
 }
 
 // Branches gets the collection that contains the branch circuits for this equipment.

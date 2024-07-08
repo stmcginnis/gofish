@@ -239,23 +239,7 @@ func (metricreportdefinition *MetricReportDefinition) UnmarshalJSON(b []byte) er
 
 // Triggers get the associated triggers.
 func (metricreportdefinition *MetricReportDefinition) Triggers() ([]*Triggers, error) {
-	var result []*Triggers
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range metricreportdefinition.triggers {
-		unit, err := GetTriggers(metricreportdefinition.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Triggers](metricreportdefinition.GetClient(), metricreportdefinition.triggers)
 }
 
 // Update commits updates to this object's properties to the running system.

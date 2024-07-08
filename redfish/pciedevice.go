@@ -397,44 +397,13 @@ func (pciedevice *PCIeDevice) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
 
 // Chassis gets the chassis in which the PCIe device is contained.
 func (pciedevice *PCIeDevice) Chassis() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, chassisLink := range pciedevice.chassis {
-		chassis, err := GetChassis(pciedevice.GetClient(), chassisLink)
-		if err != nil {
-			collectionError.Failures[chassisLink] = err
-		} else {
-			result = append(result, chassis)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](pciedevice.GetClient(), pciedevice.chassis)
 }
 
 // PCIeFunctions get the PCIe functions that this device exposes.
 func (pciedevice *PCIeDevice) PCIeFunctions() ([]*PCIeFunction, error) {
 	if len(pciedevice.pcieFunctionsArray) > 0 {
-		var result []*PCIeFunction
-
-		collectionError := common.NewCollectionError()
-		for _, funcLink := range pciedevice.pcieFunctionsArray {
-			pciefunction, err := GetPCIeFunction(pciedevice.GetClient(), funcLink)
-			if err != nil {
-				collectionError.Failures[funcLink] = err
-			} else {
-				result = append(result, pciefunction)
-			}
-		}
-		if collectionError.Empty() {
-			return result, nil
-		}
-
-		return result, collectionError
+		return common.GetObjects[PCIeFunction](pciedevice.GetClient(), pciedevice.pcieFunctionsArray)
 	}
 	return ListReferencedPCIeFunctions(pciedevice.GetClient(), pciedevice.pcieFunctions)
 }
@@ -449,21 +418,5 @@ func (pciedevice *PCIeDevice) Switch() (*Switch, error) {
 
 // Processors gets the processors that are directly connected or directly bridged to this PCIe device.
 func (pciedevice *PCIeDevice) Processors() ([]*Processor, error) {
-	var result []*Processor
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range pciedevice.processors {
-		processor, err := GetProcessor(pciedevice.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, processor)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Processor](pciedevice.GetClient(), pciedevice.processors)
 }

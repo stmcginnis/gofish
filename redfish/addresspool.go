@@ -90,44 +90,12 @@ func ListReferencedAddressPools(c common.Client, link string) ([]*AddressPool, e
 
 // Endpoints gets the endpoints connected to this address pool.
 func (addresspool *AddressPool) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range addresspool.endpoints {
-		endpoint, err := GetEndpoint(addresspool.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](addresspool.GetClient(), addresspool.endpoints)
 }
 
 // Zones gets the zones associated with this address pool.
 func (addresspool *AddressPool) Zones() ([]*Zone, error) {
-	var result []*Zone
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range addresspool.zones {
-		endpoint, err := GetZone(addresspool.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Zone](addresspool.GetClient(), addresspool.zones)
 }
 
 // BFDSingleHopOnly shall contain the BFD-related properties for an Ethernet fabric that uses Bidirectional

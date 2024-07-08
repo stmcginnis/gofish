@@ -178,23 +178,7 @@ func (license *License) UnmarshalJSON(b []byte) error {
 // TargetServices gets a set of Manager objects that represent the services where
 // the license is installed, such as remote Redfish services.
 func (license *License) TargetServices() ([]*Manager, error) {
-	var result []*Manager
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range license.targetServices {
-		unit, err := GetManager(license.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Manager](license.GetClient(), license.targetServices)
 }
 
 // GetLicense will get a License instance from the service.

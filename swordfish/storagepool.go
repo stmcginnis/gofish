@@ -355,45 +355,13 @@ func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, e
 // DedicatedSpareDrives gets the Drive entities which are currently assigned as
 // a dedicated spare and are able to support this StoragePool.
 func (storagepool *StoragePool) DedicatedSpareDrives() ([]*redfish.Drive, error) {
-	var result []*redfish.Drive
-
-	collectionError := common.NewCollectionError()
-	for _, driveLink := range storagepool.dedicatedSpareDrives {
-		drive, err := redfish.GetDrive(storagepool.GetClient(), driveLink)
-		if err != nil {
-			collectionError.Failures[driveLink] = err
-		} else {
-			result = append(result, drive)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[redfish.Drive](storagepool.GetClient(), storagepool.dedicatedSpareDrives)
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
 func (storagepool *StoragePool) SpareResourceSets() ([]*SpareResourceSet, error) {
-	var result []*SpareResourceSet
-
-	collectionError := common.NewCollectionError()
-	for _, srsLink := range storagepool.spareResourceSets {
-		srs, err := GetSpareResourceSet(storagepool.GetClient(), srsLink)
-		if err != nil {
-			collectionError.Failures[srsLink] = err
-		} else {
-			result = append(result, srs)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[SpareResourceSet](storagepool.GetClient(), storagepool.spareResourceSets)
 }
 
 // AllocatedPools gets the storage pools allocated from this storage pool.
@@ -408,23 +376,7 @@ func (storagepool *StoragePool) AllocatedVolumes() ([]*Volume, error) {
 
 // CapacitySources gets space allocations to this pool.
 func (storagepool *StoragePool) CapacitySources() ([]*CapacitySource, error) {
-	var result []*CapacitySource
-
-	collectionError := common.NewCollectionError()
-	for _, capLink := range storagepool.capacitySources {
-		capacity, err := GetCapacitySource(storagepool.GetClient(), capLink)
-		if err != nil {
-			collectionError.Failures[capLink] = err
-		} else {
-			result = append(result, capacity)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[CapacitySource](storagepool.GetClient(), storagepool.capacitySources)
 }
 
 // ClassesOfService gets references to all classes of service supported by this

@@ -339,23 +339,7 @@ func (updateService *UpdateService) PublicIdentitySSHKey() (*Key, error) {
 // the contents of this collection, services may perform additional verification based on
 // other factors, such as the configuration of the SecurityPolicy resource.
 func (updateService *UpdateService) RemoteServerCertificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range updateService.remoteServerCertificates {
-		item, err := GetCertificate(updateService.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Certificate](updateService.GetClient(), updateService.remoteServerCertificates)
 }
 
 // RemoteServerSSHKeys gets the server SSH keys for the server referenced by the ImageURI
@@ -366,23 +350,7 @@ func (updateService *UpdateService) RemoteServerCertificates() ([]*Certificate, 
 // If VerifyRemoteServerSSHKey is `false`, the service shall not perform key verification
 // with keys in this collection.
 func (updateService *UpdateService) RemoteServerSSHKeys() ([]*Key, error) {
-	var result []*Key
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range updateService.remoteServerSSHKeys {
-		item, err := GetKey(updateService.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Key](updateService.GetClient(), updateService.remoteServerSSHKeys)
 }
 
 // SoftwareInventories gets the collection of software inventories of this update service

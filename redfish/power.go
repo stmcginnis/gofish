@@ -423,23 +423,7 @@ func (powersupply *PowerSupply) Assembly() (*Assembly, error) {
 
 // Redundancy gets the endpoints at the other end of the link.
 func (powersupply *PowerSupply) Redundancy() ([]*Redundancy, error) {
-	var result []*Redundancy
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range powersupply.redundancy {
-		item, err := GetRedundancy(powersupply.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Redundancy](powersupply.GetClient(), powersupply.redundancy)
 }
 
 // GetPowerSupply will get a PowerSupply instance from the Redfish service.
@@ -449,45 +433,7 @@ func GetPowerSupply(c common.Client, uri string) (*PowerSupply, error) {
 }
 
 func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) {
-	var result []*PowerSupply
-	if link == "" {
-		return result, nil
-	}
-
-	type GetResult struct {
-		Item  *PowerSupply
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
-	collectionError := common.NewCollectionError()
-	get := func(link string) {
-		powerSupply, err := GetPowerSupply(c, link)
-		ch <- GetResult{Item: powerSupply, Link: link, Error: err}
-	}
-
-	go func() {
-		err := common.CollectList(get, c, link)
-		if err != nil {
-			collectionError.Failures[link] = err
-		}
-		close(ch)
-	}()
-
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetCollectionObjects[PowerSupply](c, link)
 }
 
 // Update commits updates to this object's properties to the running system.

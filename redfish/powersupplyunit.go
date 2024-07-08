@@ -281,42 +281,10 @@ func (powerSupplyUnit *PowerSupplyUnit) Outlet() (*Outlet, error) {
 
 // PowerOutlets gets the outlets that supply power to this power supply.
 func (powerSupplyUnit *PowerSupplyUnit) PowerOutlets() ([]*Outlet, error) {
-	var result []*Outlet
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range powerSupplyUnit.powerOutlets {
-		chassis, err := GetOutlet(powerSupplyUnit.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, chassis)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Outlet](powerSupplyUnit.GetClient(), powerSupplyUnit.powerOutlets)
 }
 
 // PoweringChassis gets the collection of the chassis directly powered by this power supply.
 func (powerSupplyUnit *PowerSupplyUnit) PoweringChassis() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range powerSupplyUnit.poweringChassis {
-		chassis, err := GetChassis(powerSupplyUnit.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, chassis)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](powerSupplyUnit.GetClient(), powerSupplyUnit.poweringChassis)
 }

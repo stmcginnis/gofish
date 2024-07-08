@@ -131,23 +131,7 @@ func (nvmedomain *NVMeDomain) UnmarshalJSON(b []byte) error {
 
 // AssociatedDomains gets the NVMeDomains associated with this domain.
 func (nvmedomain *NVMeDomain) AssociatedDomains() ([]*NVMeDomain, error) {
-	var result []*NVMeDomain
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range nvmedomain.associatedDomains {
-		sc, err := GetNVMeDomain(nvmedomain.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, sc)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[NVMeDomain](nvmedomain.GetClient(), nvmedomain.associatedDomains)
 }
 
 // Update commits updates to this object's properties to the running system.

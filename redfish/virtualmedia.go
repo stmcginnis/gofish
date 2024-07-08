@@ -221,45 +221,13 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 // services may perform additional verification based on other factors, such as the
 // configuration of the SecurityPolicy resource.
 func (virtualmedia *VirtualMedia) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range virtualmedia.certificates {
-		item, err := GetCertificate(virtualmedia.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.certificates)
 }
 
 // ClientCertificates gets the client identity certificates that are provided to
 // the server referenced by the Image property as part of TLS handshaking.
 func (virtualmedia *VirtualMedia) ClientCertificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range virtualmedia.clientCertificates {
-		item, err := GetCertificate(virtualmedia.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, item)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.clientCertificates)
 }
 
 // Update commits updates to this object's properties to the running system.

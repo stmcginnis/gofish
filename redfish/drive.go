@@ -466,80 +466,22 @@ func (drive *Drive) Chassis() (*Chassis, error) {
 
 // Endpoints references the Endpoints that this drive is associated with.
 func (drive *Drive) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, endpointLink := range drive.endpoints {
-		endpoint, err := GetEndpoint(drive.GetClient(), endpointLink)
-		if err != nil {
-			collectionError.Failures[endpointLink] = err
-		} else {
-			result = append(result, endpoint)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](drive.GetClient(), drive.endpoints)
 }
 
 // Volumes references the Volumes that this drive is associated with.
 func (drive *Drive) Volumes() ([]*Volume, error) {
-	var result []*Volume
-
-	collectionError := common.NewCollectionError()
-	for _, volumeLink := range drive.volumes {
-		volume, err := GetVolume(drive.GetClient(), volumeLink)
-		if err != nil {
-			collectionError.Failures[volumeLink] = err
-		} else {
-			result = append(result, volume)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Volume](drive.GetClient(), drive.volumes)
 }
 
 // PCIeFunctions references the PCIeFunctions that this drive is associated with.
 func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
-	var result []*PCIeFunction
-
-	collectionError := common.NewCollectionError()
-	for _, pcieFunctionLink := range drive.pcieFunctions {
-		pcieFunction, err := GetPCIeFunction(drive.GetClient(), pcieFunctionLink)
-		if err != nil {
-			collectionError.Failures[pcieFunctionLink] = err
-		} else {
-			result = append(result, pcieFunction)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[PCIeFunction](drive.GetClient(), drive.pcieFunctions)
 }
 
 // // StoragePools references the StoragePools that this drive is associated with.
 // func (drive *Drive) StoragePools() ([]*StoragePools, error) {
-// 	var result []*StoragePools
-
-// 	for _, storagePoolLink := range drive.storagePools {
-// 		storagePool, err := GetStoragePools(drive.Client, storagePoolLink)
-// 		if err != nil {
-// 			return result, err
-// 		}
-// 		result = append(result, storagePool)
-// 	}
-
-// 	return result, nil
+//	return common.GetObjects[StoragePools](drive.GetClient(), drive.storagePools)
 // }
 
 // SecureErase shall perform a secure erase of the drive.

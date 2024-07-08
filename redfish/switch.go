@@ -204,44 +204,12 @@ func (sw *Switch) Chassis() (*Chassis, error) {
 
 // Endpoints gets any endpoints associated with this fabric.
 func (sw *Switch) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range sw.endpoints {
-		cl, err := GetEndpoint(sw.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, cl)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](sw.GetClient(), sw.endpoints)
 }
 
 // ManagedBy gets the managers of this fabric.
 func (sw *Switch) ManagedBy() ([]*Manager, error) {
-	var result []*Manager
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range sw.managedBy {
-		cl, err := GetManager(sw.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, cl)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Manager](sw.GetClient(), sw.managedBy)
 }
 
 // PCIeDevice gets the PCIe device providing this switch.

@@ -173,44 +173,12 @@ func (manageraccount *ManagerAccount) Role() (*Role, error) {
 
 // Certificates gets the user identity certificates for this account.
 func (manageraccount *ManagerAccount) Certificates() ([]*Certificate, error) {
-	var result []*Certificate
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range manageraccount.certificates {
-		unit, err := GetCertificate(manageraccount.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Certificate](manageraccount.GetClient(), manageraccount.certificates)
 }
 
 // Keys gets the keys that can be used to authenticate this account.
 func (manageraccount *ManagerAccount) Keys() ([]*Key, error) {
-	var result []*Key
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range manageraccount.keys {
-		unit, err := GetKey(manageraccount.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, unit)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Key](manageraccount.GetClient(), manageraccount.keys)
 }
 
 // ChangePassword changes the account password while requiring password for the current session.

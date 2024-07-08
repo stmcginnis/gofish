@@ -75,21 +75,7 @@ func ListReferencedCompositionReservations(c common.Client, link string) ([]*Com
 // Upon deletion of the reservation or when the reservation is applied, the
 // Reserved property in the referenced resource blocks shall change to 'false'.
 func (compositionreservation *CompositionReservation) ReservedResourceBlocks() ([]*ResourceBlock, error) {
-	var result []*ResourceBlock
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range compositionreservation.reservedResourceBlocks {
-		rb, err := GetResourceBlock(compositionreservation.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[ResourceBlock](
+		compositionreservation.GetClient(),
+		compositionreservation.reservedResourceBlocks)
 }

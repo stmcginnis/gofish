@@ -176,23 +176,7 @@ func ListReferencedCoolantConnectors(c common.Client, link string) ([]*CoolantCo
 
 // ConnectedChassis retrieves a collection of the Chassis at the other end of the connection.
 func (coolantconnector *CoolantConnector) ConnectedChassis() ([]*Chassis, error) {
-	var result []*Chassis
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range coolantconnector.connectedChassis {
-		c, err := GetChassis(coolantconnector.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, c)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Chassis](coolantconnector.GetClient(), coolantconnector.connectedChassis)
 }
 
 // ConnectedCoolingLoop gets the cooling loop at the other end of the connection.

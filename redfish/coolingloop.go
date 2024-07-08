@@ -197,21 +197,5 @@ func (coolingloop *CoolingLoop) Facility() (*Facility, error) {
 
 // ManagedBy gets the collection of managers of this equipment.
 func (coolingloop *CoolingLoop) ManagedBy() ([]*Manager, error) {
-	var result []*Manager
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range coolingloop.managedBy {
-		manager, err := GetManager(coolingloop.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, manager)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Manager](coolingloop.GetClient(), coolingloop.managedBy)
 }

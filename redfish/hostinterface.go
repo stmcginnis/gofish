@@ -220,23 +220,7 @@ func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterfac
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.
 func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error) {
-	var result []*ComputerSystem
-
-	collectionError := common.NewCollectionError()
-	for _, computerSystemLink := range hostinterface.computerSystems {
-		computerSystem, err := GetComputerSystem(hostinterface.GetClient(), computerSystemLink)
-		if err != nil {
-			collectionError.Failures[computerSystemLink] = err
-		} else {
-			result = append(result, computerSystem)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[ComputerSystem](hostinterface.GetClient(), hostinterface.computerSystems)
 }
 
 // HostEthernetInterfaces gets the network interface controllers or cards (NICs)

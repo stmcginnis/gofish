@@ -135,42 +135,10 @@ func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGrou
 
 // Endpoints get the endpoints associated with this endpoint group.
 func (endpointgroup *EndpointGroup) Endpoints() ([]*Endpoint, error) {
-	var result []*Endpoint
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range endpointgroup.endpoints {
-		rb, err := GetEndpoint(endpointgroup.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Endpoint](endpointgroup.GetClient(), endpointgroup.endpoints)
 }
 
 // Connections get the connections associated with this endpoint group.
 func (endpointgroup *EndpointGroup) Connections() ([]*Connection, error) {
-	var result []*Connection
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range endpointgroup.connections {
-		rb, err := GetConnection(endpointgroup.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, rb)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Connection](endpointgroup.GetClient(), endpointgroup.connections)
 }

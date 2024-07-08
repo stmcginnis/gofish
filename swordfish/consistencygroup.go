@@ -264,23 +264,7 @@ func (consistencygroup *ConsistencyGroup) SuspendReplication(targetGroupURI stri
 
 // Volumes gets the volumes in this consistency group.
 func (consistencygroup *ConsistencyGroup) Volumes() ([]*Volume, error) {
-	var result []*Volume
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range consistencygroup.volumes {
-		sc, err := GetVolume(consistencygroup.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, sc)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[Volume](consistencygroup.GetClient(), consistencygroup.volumes)
 }
 
 // Update commits updates to this object's properties to the running system.

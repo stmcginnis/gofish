@@ -178,44 +178,12 @@ func (trustedcomponent *TrustedComponent) ActiveSoftwareImage() (*SoftwareInvent
 
 // ComponentIntegrity gets the resources for which the trusted component is responsible.
 func (trustedcomponent *TrustedComponent) ComponentIntegrity() ([]*ComponentIntegrity, error) {
-	var result []*ComponentIntegrity
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range trustedcomponent.componentIntegrity {
-		cs, err := GetComponentIntegrity(trustedcomponent.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, cs)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[ComponentIntegrity](trustedcomponent.GetClient(), trustedcomponent.componentIntegrity)
 }
 
 // SoftwareImages gets the firmware images that apply to this trusted component.
 func (trustedcomponent *TrustedComponent) SoftwareImages() ([]*SoftwareInventory, error) {
-	var result []*SoftwareInventory
-
-	collectionError := common.NewCollectionError()
-	for _, uri := range trustedcomponent.softwareImages {
-		cs, err := GetSoftwareInventory(trustedcomponent.GetClient(), uri)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		} else {
-			result = append(result, cs)
-		}
-	}
-
-	if collectionError.Empty() {
-		return result, nil
-	}
-
-	return result, collectionError
+	return common.GetObjects[SoftwareInventory](trustedcomponent.GetClient(), trustedcomponent.softwareImages)
 }
 
 // Certificates gets the certificates associated with this trusted component.
