@@ -179,6 +179,24 @@ func (power *Power) PowerSupplyReset(memberID string, resetType ResetType) error
 	return power.Post(power.powerSupplyResetTarget, t)
 }
 
+// RedundancySet returns the []PowerSupply in the target redundancy group based on the
+// memberID. The memberID is the ID for the redundancy group from the list of .Redundancy
+// from /redfish/v1/Chassis/{id}/Power
+func (power *Power) RedundancySet(memberID int) []PowerSupply {
+	var powerSupplies []PowerSupply
+	if len(power.Redundancy) >= memberID+1 {
+		for _, psLink := range power.Redundancy[memberID].redundancySet {
+			for i := range power.PowerSupplies {
+				if power.PowerSupplies[i].ODataID == psLink {
+					powerSupplies = append(powerSupplies, power.PowerSupplies[i])
+				}
+			}
+		}
+	}
+
+	return powerSupplies
+}
+
 // GetPower will get a Power instance from the service.
 func GetPower(c common.Client, uri string) (*Power, error) {
 	return common.GetObject[Power](c, uri)
