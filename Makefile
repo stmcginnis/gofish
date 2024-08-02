@@ -4,7 +4,7 @@
 
 PKGS := $(shell go list ./... | grep -v example | grep -v tools)
 ROOT_DIR := $(shell git rev-parse --show-toplevel)
-GOLANGCI_VERSION := "v1.57"
+GOLANGCI_VERSION := "v1.59.1"
 
 all: lint build test
 
