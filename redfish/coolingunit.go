@@ -196,4 +196,42 @@ func ListReferencedCoolingUnits(c common.Client, link string) ([]*CoolingUnit, e
 	return common.GetCollectionObjects[CoolingUnit](c, link)
 }
 
-// TODO: Add functions to get linked objects
+// Assembly gets a collection of assemblies.
+func (coolingunit *CoolingUnit) Assembly() ([]*Assembly, error) {
+	return ListReferencedAssemblys(coolingunit.GetClient(), coolingunit.assembly)
+}
+
+// EnvironmentMetrics gets a collection of environment metrics.
+func (coolingunit *CoolingUnit) EnvironmentMetrics() ([]*EnvironmentMetrics, error) {
+	return ListReferencedEnvironmentMetricss(coolingunit.GetClient(), coolingunit.environmentMetrics)
+}
+
+// Filters gets a collection of filters.
+func (coolingunit *CoolingUnit) Filters() ([]*Filter, error) {
+	return ListReferencedFilters(coolingunit.GetClient(), coolingunit.filters)
+}
+
+// LeakDetection gets a collection of leak detections.
+func (coolingunit *CoolingUnit) LeakDetection() ([]*LeakDetection, error) {
+	return ListReferencedLeakDetections(coolingunit.GetClient(), coolingunit.leakDetection)
+}
+
+// PrimaryCoolantConnectors gets a collection of primary coolant connectors.
+func (coolingunit *CoolingUnit) PrimaryCoolantConnectors() ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.primaryCoolantConnectors)
+}
+
+// Pumps gets a collection of pumps.
+func (coolingunit *CoolingUnit) Pumps() ([]*Pump, error) {
+	return ListReferencedPumps(coolingunit.GetClient(), coolingunit.pumps)
+}
+
+// Reservoirs gets a collection of reservoirs.
+func (coolingunit *CoolingUnit) Reservoirs() ([]*Reservoir, error) {
+	return ListReferencedReservoirs(coolingunit.GetClient(), coolingunit.reservoirs)
+}
+
+// SecondaryCoolantConnectors gets a collection of secondary coolant connectors.
+func (coolingunit *CoolingUnit) SecondaryCoolantConnectors() ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.secondaryCoolantConnectors)
+}
