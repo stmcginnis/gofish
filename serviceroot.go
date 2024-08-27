@@ -5,7 +5,6 @@
 package gofish
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/stmcginnis/gofish/common"
@@ -216,8 +215,8 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// ServiceRootContext is same as ServiceRoot but with context
-func ServiceRootContext(ctx context.Context, c common.Client) (*Service, error) {
+// ServiceRoot will get a Service instance from the service.
+func ServiceRoot(c common.Client) (*Service, error) {
 	resp, err := c.Get(common.DefaultServiceRoot)
 	if err != nil {
 		return nil, err
@@ -232,11 +231,6 @@ func ServiceRootContext(ctx context.Context, c common.Client) (*Service, error) 
 
 	serviceroot.SetClient(c)
 	return &serviceroot, nil
-}
-
-// ServiceRoot will get a Service instance from the service.
-func ServiceRoot(c common.Client) (*Service, error) {
-	return ServiceRootContext(context.Background(), c)
 }
 
 // Chassis gets the chassis instances managed by this service.
