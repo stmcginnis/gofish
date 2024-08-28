@@ -217,12 +217,6 @@ func ConnectContext(ctx context.Context, config ClientConfig) (c *APIClient, err
 	return client, err
 }
 
-// TryConnectContext is to check connection with redfish device. Has to be used with manageable context
-func TryConnectContext(ctx context.Context, config ClientConfig) (err error) { //nolint:gocritic
-	_, err = setupClientWithConfig(ctx, &config)
-	return
-}
-
 // ConnectDefault creates an unauthenticated connection to a Redfish service.
 func ConnectDefault(endpoint string) (c *APIClient, err error) {
 	return ConnectDefaultContext(context.Background(), endpoint)
