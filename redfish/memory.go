@@ -333,7 +333,7 @@ type Memory struct {
 	// product ID of this memory module as defined by the manufacturer.
 	ModuleProductID string
 	// NonVolatileSizeLimitMiB shall contain the total non-volatile memory capacity in mebibytes (MiB).
-	NonVolatileSizeLimitMiB string
+	NonVolatileSizeLimitMiB int
 	// NonVolatileSizeMiB shall contain the total size of the non-volatile portion memory in MiB.
 	NonVolatileSizeMiB int
 	// OperatingMemoryModes shall be the memory
