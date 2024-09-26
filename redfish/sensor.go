@@ -396,7 +396,7 @@ type Sensor struct {
 	// The basis for the reading of this sensor.
 	ReadingBasis ReadingBasisType
 	// The maximum possible value for this sensor.
-	ReadingRangeMax float32
+	ReadingRangeMax float64
 	// The minimum possible value for this sensor.
 	ReadingRangeMin float32
 	// The date and time that the reading was acquired from the sensor.

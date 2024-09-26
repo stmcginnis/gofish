@@ -25,7 +25,7 @@ var sensorBody = strings.NewReader(
 		"Reading": 31.6,
 		"ReadingUnits": "C",
 		"ReadingRangeMin": 0,
-		"ReadingRangeMax": 70,
+		"ReadingRangeMax": 1.7976931348623157e+308,
 		"Accuracy": 0.25,
 		"Precision": 1,
 		"SensingInterval": "PT3S",
