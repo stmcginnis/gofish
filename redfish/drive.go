@@ -299,6 +299,10 @@ type Drive struct {
 	// WriteCacheEnabled shall indicate whether the drive
 	// write cache is enabled.
 	WriteCacheEnabled bool
+	// Actions are all the listed actions under the drive
+	Actions DriveActions
+	// Oem is all the available OEM information for the drive
+	Oem json.RawMessage
 
 	// ActiveSoftwareImage shall contain a link a resource of type SoftwareInventory that represents the active drive
 	// firmware image.
@@ -329,10 +333,14 @@ type Drive struct {
 	storagePools        []string
 	// storagePools      []string
 	StoragePoolsCount int
-	// secureEraseTarget is the URL for SecureErase actions.
-	secureEraseTarget string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+}
+
+// DriveActions are a set of actions available under a drive
+type DriveActions struct {
+	SecureErase common.ActionTarget `json:"#Drive.SecureErase"`
+	Oem         json.RawMessage
 }
 
 // UnmarshalJSON unmarshals a Drive object from the raw JSON.
@@ -364,13 +372,9 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 		Volumes           common.Links
 		VolumeCount       int `json:"Volumes@odata.count"`
 	}
-	type Actions struct {
-		SecureErase common.ActionTarget `json:"#Drive.SecureErase"`
-	}
 	var t struct {
 		temp
 		Links              links
-		Actions            Actions
 		Assembly           common.Link
 		EnvironmentMetrics common.Link
 	}
@@ -391,6 +395,7 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 	drive.EndpointsCount = t.Links.EndpointCount
 	drive.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
 	drive.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
+	drive.Oem = t.Oem
 	drive.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
 	drive.PCIeFunctionCount = t.Links.PCIeFunctionsCount
 	drive.softwareImages = t.Links.SoftwareImages.ToStrings()
@@ -400,8 +405,6 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 	drive.StoragePoolsCount = t.Links.StoragePoolsCount
 	drive.volumes = t.Links.Volumes.ToStrings()
 	drive.VolumesCount = t.Links.VolumeCount
-
-	drive.secureEraseTarget = t.Actions.SecureErase.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
 	drive.rawData = b
@@ -486,5 +489,5 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // SecureErase shall perform a secure erase of the drive.
 func (drive *Drive) SecureErase() error {
-	return drive.Post(drive.secureEraseTarget, nil)
+	return drive.Post(drive.Actions.SecureErase.Target, nil)
 }
