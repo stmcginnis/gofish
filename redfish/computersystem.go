@@ -931,8 +931,8 @@ type ComputerSystem struct {
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
 	settingsTarget            string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
@@ -1020,7 +1020,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	}
 
 	// This is a read/write object, so we need to save the raw object data for later
-	computersystem.rawData = b
+	computersystem.RawData = b
 
 	return nil
 }
@@ -1030,7 +1030,7 @@ func (computersystem *ComputerSystem) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	cs := new(ComputerSystem)
-	err := cs.UnmarshalJSON(computersystem.rawData)
+	err := cs.UnmarshalJSON(computersystem.RawData)
 	if err != nil {
 		return err
 	}
@@ -1186,7 +1186,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Bios)
-	err := original.UnmarshalJSON(computersystem.rawData)
+	err := original.UnmarshalJSON(computersystem.RawData)
 	if err != nil {
 		return err
 	}
