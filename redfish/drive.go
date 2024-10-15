@@ -299,8 +299,6 @@ type Drive struct {
 	// WriteCacheEnabled shall indicate whether the drive
 	// write cache is enabled.
 	WriteCacheEnabled bool
-	// Actions are all the listed actions under the drive
-	Actions DriveActions
 	// Oem is all the available OEM information for the drive
 	Oem json.RawMessage
 
@@ -333,14 +331,11 @@ type Drive struct {
 	storagePools        []string
 	// storagePools      []string
 	StoragePoolsCount int
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
-}
-
-// DriveActions are a set of actions available under a drive
-type DriveActions struct {
-	SecureErase common.ActionTarget `json:"#Drive.SecureErase"`
-	Oem         json.RawMessage
+	// secureEraseTarget is the URL for SecureErase actions.
+	secureEraseTarget string
+	// RawData holds the original serialized JSON so we can compare updates
+	// as well as access Oem values in the oem package.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a Drive object from the raw JSON.
@@ -372,9 +367,13 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 		Volumes           common.Links
 		VolumeCount       int `json:"Volumes@odata.count"`
 	}
+	type Actions struct {
+		SecureErase common.ActionTarget `json:"#Drive.SecureErase"`
+	}
 	var t struct {
 		temp
 		Links              links
+		Actions            Actions
 		Assembly           common.Link
 		EnvironmentMetrics common.Link
 	}
@@ -406,8 +405,10 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 	drive.volumes = t.Links.Volumes.ToStrings()
 	drive.VolumesCount = t.Links.VolumeCount
 
+	drive.secureEraseTarget = t.Actions.SecureErase.Target
+
 	// This is a read/write object, so we need to save the raw object data for later
-	drive.rawData = b
+	drive.RawData = b
 
 	return nil
 }
@@ -417,7 +418,7 @@ func (drive *Drive) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Drive)
-	err := original.UnmarshalJSON(drive.rawData)
+	err := original.UnmarshalJSON(drive.RawData)
 	if err != nil {
 		return err
 	}
@@ -489,5 +490,5 @@ func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // SecureErase shall perform a secure erase of the drive.
 func (drive *Drive) SecureErase() error {
-	return drive.Post(drive.Actions.SecureErase.Target, nil)
+	return drive.Post(drive.secureEraseTarget, nil)
 }

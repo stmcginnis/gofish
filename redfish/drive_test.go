@@ -138,8 +138,8 @@ func TestDrive(t *testing.T) {
 		t.Errorf("Invalid chassis link: %s", result.chassis)
 	}
 
-	if result.Actions.SecureErase.Target != "/redfish/v1/Chassis/NVMeChassis/Disk.Bay.0/Actions/Drive.SecureErase" {
-		t.Errorf("Invalid SecureErase target: %s", result.Actions.SecureErase.Target)
+	if result.secureEraseTarget != "/redfish/v1/Chassis/NVMeChassis/Disk.Bay.0/Actions/Drive.SecureErase" {
+		t.Errorf("Invalid SecureErase target: %s", result.secureEraseTarget)
 	}
 }
 
