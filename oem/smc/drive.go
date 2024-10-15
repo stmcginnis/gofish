@@ -2,38 +2,28 @@ package smc
 
 import (
 	"encoding/json"
+	"errors"
 
+	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
 )
+
+// ErrActionNotSupported is returned when the requested OEM-specific action
+// does not appear to be supported. This might happen when a device is new
+// or upgraded to a new firmware that follows the DMTF standards.
+var ErrActionNotSupported = errors.New("oem-specific action unsupported")
 
 // Drive extends a redfish.Drive for additional OEM fields
 type Drive struct {
 	redfish.Drive
-	smc struct {
-		Oem     driveOem     `json:"Oem"`
-		Actions driveActions `json:"Actions"`
-	}
-}
 
-type driveOem struct {
-	Supermicro struct {
-		Temperature             int
-		PercentageDriveLifeUsed int
-		DriveFunctional         bool
-	} `json:"Supermicro"`
-}
+	// Fields from the SMC OEM section
+	temperature             int
+	percentageDriveLifeUsed int
+	driveFunctional         bool
 
-type driveTarget struct {
-	Target     string `json:"target"`
-	ActionInfo string `json:"@Redfish.ActionInfo"`
-}
-
-type driveActions struct {
-	redfish.DriveActions
-	Oem struct {
-		DriveIndicate    driveTarget `json:"#Drive.Indicate"`
-		SmcDriveIndicate driveTarget `json:"#SmcDrive.Indicate"`
-	} `json:"Oem"`
+	// indicateTarget is the uri to hit to change the light state
+	indicateTarget string
 }
 
 // FromDrive returns an OEM-extended redfish drive
@@ -41,14 +31,38 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 	smcDrive := Drive{
 		Drive: *drive,
 	}
-	smcDrive.smc.Actions.DriveActions = drive.Actions
 
-	if err := json.Unmarshal(drive.Oem, &smcDrive.smc.Oem); err != nil {
+	var t struct {
+		Oem struct {
+			Supermicro struct {
+				Temperature             int
+				PercentageDriveLifeUsed int
+				DriveFunctional         bool
+			} `json:"Supermicro"`
+		} `json:"Oem"`
+		Actions struct {
+			Oem struct {
+				DriveIndicate    common.ActionTarget `json:"#Drive.Indicate"`
+				SmcDriveIndicate common.ActionTarget `json:"#SmcDrive.Indicate"`
+			} `json:"Oem"`
+		} `json:"Actions"`
+	}
+
+	// Populate the Oem data
+	if err := json.Unmarshal(drive.RawData, &t); err != nil {
 		return smcDrive, err
 	}
 
-	if err := json.Unmarshal(drive.Actions.Oem, &smcDrive.smc.Actions.Oem); err != nil {
-		return smcDrive, err
+	smcDrive.temperature = t.Oem.Supermicro.Temperature
+	smcDrive.percentageDriveLifeUsed = t.Oem.Supermicro.PercentageDriveLifeUsed
+	smcDrive.driveFunctional = t.Oem.Supermicro.DriveFunctional
+
+	// We check both the SmcDriveIndicate and the DriveIndicate targets
+	// in the Oem sections - certain models and bmc firmwares will mix
+	// these up, so we check both
+	smcDrive.indicateTarget = t.Actions.Oem.DriveIndicate.Target
+	if len(t.Actions.Oem.SmcDriveIndicate.Target) > 0 {
+		smcDrive.indicateTarget = t.Actions.Oem.SmcDriveIndicate.Target
 	}
 
 	return smcDrive, nil
@@ -56,33 +70,25 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 
 // Temperature returns the OEM provided temperature for the drive
 func (d Drive) Temperature() int {
-	return d.smc.Oem.Supermicro.Temperature
+	return d.temperature
 }
 
 // PercentageDriveLifeUsed returns the OEM provided drive life estimate as a percentage used
 func (d Drive) PercentageDriveLifeUsed() int {
-	return d.smc.Oem.Supermicro.PercentageDriveLifeUsed
+	return d.percentageDriveLifeUsed
 }
 
 // Functional returns the OEM provided flag that suggests whether a drive is functional or not
 func (d Drive) Functional() bool {
-	return d.smc.Oem.Supermicro.DriveFunctional
-}
-
-// indicateTarget figures out what uri to follow for indicator light actions.
-// This is a separate function for testing.
-func (d Drive) indicateTarget() string {
-	// We check both the SmcDriveIndicate and the DriveIndicate targets
-	// in the Oem sections - certain models and bmc firmwares will mix
-	// these up, so we check both
-	if len(d.smc.Actions.Oem.SmcDriveIndicate.Target) > 0 {
-		return d.smc.Actions.Oem.SmcDriveIndicate.Target
-	}
-
-	return d.smc.Actions.Oem.DriveIndicate.Target
+	return d.driveFunctional
 }
 
 // Indicate will set the indicator light activity, true for on, false for off
 func (d Drive) Indicate(active bool) error {
-	return d.Post(d.indicateTarget(), map[string]interface{}{"Active": active})
+	// Return a common error to let the user try falling back on the normal gofish path
+	if d.indicateTarget == "" {
+		return ErrActionNotSupported
+	}
+
+	return d.Post(d.indicateTarget, map[string]interface{}{"Active": active})
 }

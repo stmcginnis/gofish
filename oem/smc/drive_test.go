@@ -61,7 +61,7 @@ func TestSmcDriveOem(t *testing.T) {
 		t.Errorf("unexpected oem drive temerature: %d", smcDrive.Temperature())
 	}
 
-	if smcDrive.indicateTarget() != "/redfish/v1/Chassis/NVMeSSD.0.Group.0.StorageBackplane/Drives/Disk.Bay.22/Actions/Oem/Drive.Indicate" {
-		t.Errorf("unexpected oem drive indicator target: %s", smcDrive.indicateTarget())
+	if smcDrive.indicateTarget != "/redfish/v1/Chassis/NVMeSSD.0.Group.0.StorageBackplane/Drives/Disk.Bay.22/Actions/Oem/Drive.Indicate" {
+		t.Errorf("unexpected oem drive indicator target: %s", smcDrive.indicateTarget)
 	}
 }
