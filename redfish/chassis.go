@@ -359,7 +359,7 @@ type Chassis struct {
 	// millimeters, as specified by the manufacturer.
 	WidthMm float64
 	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	RawData []byte
 
 	// Deprecated properties
 
@@ -561,7 +561,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	}
 
 	// This is a read/write object, so we need to save the raw object data for later
-	chassis.rawData = b
+	chassis.RawData = b
 
 	return nil
 }
@@ -571,7 +571,7 @@ func (chassis *Chassis) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Chassis)
-	err := original.UnmarshalJSON(chassis.rawData)
+	err := original.UnmarshalJSON(chassis.RawData)
 	if err != nil {
 		return err
 	}
