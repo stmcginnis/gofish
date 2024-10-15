@@ -57,8 +57,8 @@ func TestSmcDriveOem(t *testing.T) {
 		t.Fatalf("error getting oem info from drive: %v", err)
 	}
 
-	if smcDrive.Temperature() != 33 {
-		t.Errorf("unexpected oem drive temerature: %d", smcDrive.Temperature())
+	if smcDrive.Temperature != 33 {
+		t.Errorf("unexpected oem drive temerature: %d", smcDrive.Temperature)
 	}
 
 	if smcDrive.indicateTarget != "/redfish/v1/Chassis/NVMeSSD.0.Group.0.StorageBackplane/Drives/Disk.Bay.22/Actions/Oem/Drive.Indicate" {

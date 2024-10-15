@@ -18,9 +18,9 @@ type Drive struct {
 	redfish.Drive
 
 	// Fields from the SMC OEM section
-	temperature             int
-	percentageDriveLifeUsed int
-	driveFunctional         bool
+	Temperature             int
+	PercentageDriveLifeUsed int
+	DriveFunctional         bool
 
 	// indicateTarget is the uri to hit to change the light state
 	indicateTarget string
@@ -53,9 +53,9 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 		return smcDrive, err
 	}
 
-	smcDrive.temperature = t.Oem.Supermicro.Temperature
-	smcDrive.percentageDriveLifeUsed = t.Oem.Supermicro.PercentageDriveLifeUsed
-	smcDrive.driveFunctional = t.Oem.Supermicro.DriveFunctional
+	smcDrive.Temperature = t.Oem.Supermicro.Temperature
+	smcDrive.PercentageDriveLifeUsed = t.Oem.Supermicro.PercentageDriveLifeUsed
+	smcDrive.DriveFunctional = t.Oem.Supermicro.DriveFunctional
 
 	// We check both the SmcDriveIndicate and the DriveIndicate targets
 	// in the Oem sections - certain models and bmc firmwares will mix
@@ -66,21 +66,6 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 	}
 
 	return smcDrive, nil
-}
-
-// Temperature returns the OEM provided temperature for the drive
-func (d Drive) Temperature() int {
-	return d.temperature
-}
-
-// PercentageDriveLifeUsed returns the OEM provided drive life estimate as a percentage used
-func (d Drive) PercentageDriveLifeUsed() int {
-	return d.percentageDriveLifeUsed
-}
-
-// Functional returns the OEM provided flag that suggests whether a drive is functional or not
-func (d Drive) Functional() bool {
-	return d.driveFunctional
 }
 
 // Indicate will set the indicator light activity, true for on, false for off
