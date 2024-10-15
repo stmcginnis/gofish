@@ -384,8 +384,8 @@ type Manager struct {
 	// SupportedResetTypes, if provided, is the reset types this system supports.
 	SupportedResetTypes   []ResetType
 	resetToDefaultsTarget string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a Manager object from the raw JSON.
@@ -485,7 +485,7 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 	manager.actionInfo = t.Actions.Reset.ActionInfo
 
 	// This is a read/write object, so we need to save the raw object data for later
-	manager.rawData = b
+	manager.RawData = b
 
 	return nil
 }
@@ -495,7 +495,7 @@ func (manager *Manager) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Manager)
-	err := original.UnmarshalJSON(manager.rawData)
+	err := original.UnmarshalJSON(manager.RawData)
 	if err != nil {
 		return err
 	}
