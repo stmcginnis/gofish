@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 package smc
 
 import (
@@ -61,7 +65,7 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 	// in the Oem sections - certain models and bmc firmwares will mix
 	// these up, so we check both
 	smcDrive.indicateTarget = t.Actions.Oem.DriveIndicate.Target
-	if len(t.Actions.Oem.SmcDriveIndicate.Target) > 0 {
+	if t.Actions.Oem.SmcDriveIndicate.Target != "" {
 		smcDrive.indicateTarget = t.Actions.Oem.SmcDriveIndicate.Target
 	}
 
@@ -69,7 +73,7 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 }
 
 // Indicate will set the indicator light activity, true for on, false for off
-func (d Drive) Indicate(active bool) error {
+func (d *Drive) Indicate(active bool) error {
 	// Return a common error to let the user try falling back on the normal gofish path
 	if d.indicateTarget == "" {
 		return ErrActionNotSupported

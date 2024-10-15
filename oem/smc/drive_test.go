@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 package smc
 
 import (
@@ -58,7 +62,7 @@ func TestSmcDriveOem(t *testing.T) {
 	}
 
 	if smcDrive.Temperature != 33 {
-		t.Errorf("unexpected oem drive temerature: %d", smcDrive.Temperature)
+		t.Errorf("unexpected oem drive temperature: %d", smcDrive.Temperature)
 	}
 
 	if smcDrive.indicateTarget != "/redfish/v1/Chassis/NVMeSSD.0.Group.0.StorageBackplane/Drives/Disk.Bay.22/Actions/Oem/Drive.Indicate" {
