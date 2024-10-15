@@ -6,12 +6,16 @@ import (
 	"github.com/stmcginnis/gofish/redfish"
 )
 
+// Drive extends a redfish.Drive for additional OEM fields
 type Drive struct {
 	redfish.Drive
-	Oem DriveOem `json:"Oem"`
+	smc struct {
+		Oem     driveOem     `json:"Oem"`
+		Actions driveActions `json:"Actions"`
+	}
 }
 
-type DriveOem struct {
+type driveOem struct {
 	Supermicro struct {
 		Temperature             int
 		PercentageDriveLifeUsed int
@@ -19,44 +23,66 @@ type DriveOem struct {
 	} `json:"Supermicro"`
 }
 
-type DriveTarget struct {
+type driveTarget struct {
 	Target     string `json:"target"`
 	ActionInfo string `json:"@Redfish.ActionInfo"`
 }
 
-type DriveActions struct {
+type driveActions struct {
 	redfish.DriveActions
 	Oem struct {
-		DriveIndicate    DriveTarget `json:"#Drive.Indicate"`
-		SmcDriveIndicate DriveTarget `json:"#SmcDrive.Indicate"`
+		DriveIndicate    driveTarget `json:"#Drive.Indicate"`
+		SmcDriveIndicate driveTarget `json:"#SmcDrive.Indicate"`
 	} `json:"Oem"`
 }
 
+// FromDrive returns an OEM-extended redfish drive
 func FromDrive(drive *redfish.Drive) (Drive, error) {
-	var oem DriveOem
-	err := json.Unmarshal(drive.Oem, &oem)
-
-	return Drive{
+	smcDrive := Drive{
 		Drive: *drive,
-		Oem:   oem,
-	}, err
-}
+	}
+	smcDrive.smc.Actions.DriveActions = drive.Actions
 
-func FromDriveActions(da *redfish.DriveActions) (DriveActions, error) {
-	oemActions := DriveActions{
-		DriveActions: *da,
+	if err := json.Unmarshal(drive.Oem, &smcDrive.smc.Oem); err != nil {
+		return smcDrive, err
 	}
 
-	err := json.Unmarshal(da.Oem, &oemActions.Oem)
-	return oemActions, err
-}
-
-// DriveIndicateTarget checks both the SmcDriveIndicate and DriveIndicateTarget
-// Oem entries and returns the first populated target, due to key inconsistencies
-func (da DriveActions) DriveIndicateTarget() string {
-	if len(da.Oem.SmcDriveIndicate.Target) > 0 {
-		return da.Oem.SmcDriveIndicate.Target
+	if err := json.Unmarshal(drive.Actions.Oem, &smcDrive.smc.Actions.Oem); err != nil {
+		return smcDrive, err
 	}
 
-	return da.Oem.DriveIndicate.Target
+	return smcDrive, nil
+}
+
+// Temperature returns the OEM provided temperature for the drive
+func (d Drive) Temperature() int {
+	return d.smc.Oem.Supermicro.Temperature
+}
+
+// PercentageDriveLifeUsed returns the OEM provided drive life estimate as a percentage used
+func (d Drive) PercentageDriveLifeUsed() int {
+	return d.smc.Oem.Supermicro.PercentageDriveLifeUsed
+}
+
+// Functional returns the OEM provided flag that suggests whether a drive is functional or not
+func (d Drive) Functional() bool {
+	return d.smc.Oem.Supermicro.DriveFunctional
+}
+
+// indicateTarget figures out what uri to follow for indicator light actions.
+// This is a separate function for testing.
+func (d Drive) indicateTarget() string {
+	// We check both the SmcDriveIndicate and the DriveIndicate targets
+	// in the Oem sections - certain models and bmc firmwares will mix
+	// these up, so we check both
+	if len(d.smc.Actions.Oem.SmcDriveIndicate.Target) > 0 {
+		return d.smc.Actions.Oem.SmcDriveIndicate.Target
+	}
+
+	return d.smc.Actions.Oem.DriveIndicate.Target
+}
+
+// Indicate will set the indicator light activity, true for on, false for off
+func (d Drive) Indicate(active bool) error {
+	return d.Post(d.indicateTarget(), map[string]interface{}{"Active": active})
 }

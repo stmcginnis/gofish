@@ -57,24 +57,11 @@ func TestSmcDriveOem(t *testing.T) {
 		t.Fatalf("error getting oem info from drive: %v", err)
 	}
 
-	if smcDrive.Oem.Supermicro.Temperature != 33 {
-		t.Errorf("unexpected oem drive temerature: %d", smcDrive.Oem.Supermicro.Temperature)
-	}
-}
-
-// TestSmcDriveActionOem tests the parsing of the Drive Actions field
-func TestSmcDriveActionOem(t *testing.T) {
-	drive := &redfish.Drive{}
-	if err := json.Unmarshal([]byte(smcDriveBody), drive); err != nil {
-		t.Fatalf("error decoding json: %v", err)
+	if smcDrive.Temperature() != 33 {
+		t.Errorf("unexpected oem drive temerature: %d", smcDrive.Temperature())
 	}
 
-	smcDriveActions, err := FromDriveActions(&drive.Actions)
-	if err != nil {
-		t.Fatalf("error getting oem info from drive: %v", err)
-	}
-
-	if smcDriveActions.DriveIndicateTarget() != "/redfish/v1/Chassis/NVMeSSD.0.Group.0.StorageBackplane/Drives/Disk.Bay.22/Actions/Oem/Drive.Indicate" {
-		t.Errorf("unexpected oem drive indicator target: %s", smcDriveActions.DriveIndicateTarget())
+	if smcDrive.indicateTarget() != "/redfish/v1/Chassis/NVMeSSD.0.Group.0.StorageBackplane/Drives/Disk.Bay.22/Actions/Oem/Drive.Indicate" {
+		t.Errorf("unexpected oem drive indicator target: %s", smcDrive.indicateTarget())
 	}
 }
