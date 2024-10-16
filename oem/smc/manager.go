@@ -103,7 +103,75 @@ func FromManager(manager *redfish.Manager) (*Manager, error) {
 	return &m, nil
 }
 
-// TODO: Add linked objects
+// RADIUS gets the RADIUS instance associated with this manager.
+func (m *Manager) RADIUS() (*RADIUS, error) {
+	return GetRADIUS(m.GetClient(), m.radius)
+}
+
+// MouseMode gets the MouseMode instance associated with this manager.
+func (m *Manager) MouseMode() (*MouseMode, error) {
+	return GetMouseMode(m.GetClient(), m.mouseMode)
+}
+
+// NTP gets the NTP instance associated with this manager.
+func (m *Manager) NTP() (*NTP, error) {
+	return GetNTP(m.GetClient(), m.ntp)
+}
+
+// SMCRAKP gets the SMCRAKP instance associated with this manager.
+func (m *Manager) SMCRAKP() (*SMCRAKP, error) {
+	return GetSMCRAKP(m.GetClient(), m.smcRAKP)
+}
+
+// Syslog gets the Syslog instance associated with this manager.
+func (m *Manager) Syslog() (*Syslog, error) {
+	return GetSyslog(m.GetClient(), m.syslog)
+}
+
+// SysLockdown gets the SysLockdown instance associated with this manager.
+func (m *Manager) SysLockdown() (*SysLockdown, error) {
+	return GetSysLockdown(m.GetClient(), m.sysLockdown)
+}
+
+// MemoryPFA gets the MemoryPFA instance associated with this manager.
+func (m *Manager) MemoryPFA() (*MemoryPFA, error) {
+	return GetMemoryPFA(m.GetClient(), m.memoryPFA)
+}
+
+// MemoryHealthComp gets the MemoryHealthComp instance associated with this manager.
+func (m *Manager) MemoryHealthComp() (*MemoryHealthComp, error) {
+	return GetMemoryHealthComp(m.GetClient(), m.memoryHealthComp)
+}
+
+// Snooping gets the Snooping instance associated with this manager.
+func (m *Manager) Snooping() (*Snooping, error) {
+	return GetSnooping(m.GetClient(), m.snooping)
+}
+
+// FanMode gets the FanMode instance associated with this manager.
+func (m *Manager) FanMode() (*FanMode, error) {
+	return GetFanMode(m.GetClient(), m.fanMode)
+}
+
+// IKVM gets the IKVM instance associated with this manager.
+func (m *Manager) IKVM() (*IKVM, error) {
+	return GetIKVM(m.GetClient(), m.iKVM)
+}
+
+// KCSInterface gets the KCSInterface instance associated with this manager.
+func (m *Manager) KCSInterface() (*KCSInterface, error) {
+	return GetKCSInterface(m.GetClient(), m.kcsInterface)
+}
+
+// LLDP gets the LLDP instance associated with this manager.
+func (m *Manager) LLDP() (*LLDP, error) {
+	return GetLLDP(m.GetClient(), m.lldp)
+}
+
+// LicenseManager gets the LicenseManager instance associated with this manager.
+func (m *Manager) LicenseManager() (*LicenseManager, error) {
+	return GetLicenseManager(m.GetClient(), m.licenseManager)
+}
 
 // ManagerConfigReset resets the BMC to factory defaults.
 func (m *Manager) ManagerConfigReset(option ManagerConfigResetOption) error {

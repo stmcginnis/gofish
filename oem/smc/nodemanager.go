@@ -6,7 +6,7 @@ package smc
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -99,7 +99,7 @@ func GetNodeManager(c common.Client, uri string) (*NodeManager, error) {
 // ClearAllPolicies clears the configured policies of the NodeManager.
 func (nm *NodeManager) ClearAllPolicies() error {
 	if nm.clearAllPoliciesTarget == "" {
-		return fmt.Errorf("ClearAllPolicies is not supported by this system")
+		return errors.New("ClearAllPolicies is not supported by this system")
 	}
 
 	return nm.Post(nm.clearAllPoliciesTarget, nil)
