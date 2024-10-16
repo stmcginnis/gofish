@@ -388,8 +388,8 @@ type AccountService struct {
 	// populated by default. This entity shall not be present in the additional external account providers resource
 	// collection.
 	TACACSplus ExternalAccountProvider
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals an AccountService object from the raw JSON.
@@ -427,7 +427,7 @@ func (accountservice *AccountService) UnmarshalJSON(b []byte) error {
 	accountservice.privilegeMap = t.PrivilegeMap.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	accountservice.rawData = b
+	accountservice.RawData = b
 
 	return nil
 }
@@ -450,7 +450,7 @@ func (accountservice *AccountService) Update() error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(AccountService)
-	err := original.UnmarshalJSON(accountservice.rawData)
+	err := original.UnmarshalJSON(accountservice.RawData)
 	if err != nil {
 		return err
 	}
