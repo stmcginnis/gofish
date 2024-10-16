@@ -473,6 +473,17 @@ func (drive *Drive) Endpoints() ([]*Endpoint, error) {
 	return common.GetObjects[Endpoint](drive.GetClient(), drive.endpoints)
 }
 
+// EnvironmentMetrics gets the environment metrics for this drive.
+// If no metrics are available the EnvironmentMetrics reference will be nil but
+// no error will be returned unless it was due to a problem fetching the data.
+func (drive *Drive) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+	if drive.environmentMetrics == "" {
+		return nil, nil
+	}
+
+	return GetEnvironmentMetrics(drive.GetClient(), drive.environmentMetrics)
+}
+
 // Volumes references the Volumes that this drive is associated with.
 func (drive *Drive) Volumes() ([]*Volume, error) {
 	return common.GetObjects[Volume](drive.GetClient(), drive.volumes)
