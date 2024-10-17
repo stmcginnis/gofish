@@ -193,8 +193,8 @@ type UpdateService struct {
 	// this object contains shall conform to the Redfish Specification
 	// described requirements.
 	Oem json.RawMessage
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a UpdateService object from the raw JSON.
@@ -243,7 +243,7 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 	updateService.TransferProtocol = t.Actions.SimpleUpdate.AllowableValues
 	updateService.OemActions = t.Actions.Oem
 
-	updateService.rawData = b
+	updateService.RawData = b
 
 	return nil
 }
