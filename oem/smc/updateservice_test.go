@@ -56,8 +56,8 @@ var updateServiceBody = `{
   "@odata.etag": "\"e9b94401dae9992fef2e71ef30cbcfdc\""
 }`
 
-// TestSmcUpdateServiceOem tests the parsing of the UpdateService oem field
-func TestSmcUpdateServiceOem(t *testing.T) {
+// TestSmcUpdateService tests the parsing of the UpdateService oem field
+func TestSmcUpdateService(t *testing.T) {
 	us := &redfish.UpdateService{}
 	if err := json.Unmarshal([]byte(updateServiceBody), us); err != nil {
 		t.Fatalf("error decoding json: %v", err)
