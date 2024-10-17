@@ -168,10 +168,10 @@ func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
 	return common.GetObject[UpdateService](c, uri)
 }
 
-// ActivateLicense performs the ActivateLicense action of the UpdateService.
+// Install performs an install of an update.
 func (us *UpdateService) Install(targets, installOptions []string) error {
 	if us.installTarget == "" {
-		return errors.New("Install is not supported by this system")
+		return errors.New("install is not supported by this system")
 	}
 
 	return us.Post(us.installTarget, map[string]any{
