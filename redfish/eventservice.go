@@ -439,7 +439,6 @@ type SSEFilterPropertiesSupported struct {
 
 // SMTP is shall contain settings for SMTP event delivery.
 type SMTP struct {
-
 	// Authentication shall contain the authentication
 	// method for the SMTP server.
 	Authentication SMTPAuthenticationMethods

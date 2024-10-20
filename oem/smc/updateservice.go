@@ -120,7 +120,7 @@ func (ipmi *IPMIConfig) Download() error {
 	return ipmi.Post(ipmi.downloadTarget, nil)
 }
 
-// UpdateService is the license manager instance associated with the system.
+// UpdateService is the update service instance associated with the system.
 type UpdateService struct {
 	redfish.UpdateService
 
