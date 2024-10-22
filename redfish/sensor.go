@@ -195,7 +195,7 @@ type SensorExcerpt struct {
 	// The link to the resource that provides the data for this sensor.
 	DataSourceURI string `json:"DataSourceUri"`
 	// The sensor value.
-	Reading float32
+	Reading float64
 }
 
 // SensorFanArrayExcerpt shall represent a sensor for a Redfish implementation.
