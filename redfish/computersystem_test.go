@@ -125,6 +125,9 @@ var computerSystemBody = `{
 		"Storage": {
 			"@odata.id": "/redfish/v1/Systems/1/Storage"
 		},
+    	"OperatingSystem": {
+        	"@odata.id": "/redfish/v1/Systems/1/OperatingSystem"
+    	},
 		"LogServices": {
 			"@odata.id": "/redfish/v1/Systems/1/LogServices"
 		},
@@ -309,6 +312,10 @@ func TestComputerSystem(t *testing.T) { //nolint
 	}
 	if result.managedBy[0] != "/redfish/v1/Managers/BMC-1" {
 		t.Errorf("Received invalid Managers reference: %s", result.managedBy[0])
+	}
+
+	if result.operatingSystem != "/redfish/v1/Systems/1/OperatingSystem" {
+		t.Errorf("Received invalid OperatingSystem reference: %s", result.operatingSystem)
 	}
 }
 
