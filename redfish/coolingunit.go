@@ -133,7 +133,7 @@ func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
 		LeakDetection              common.Link
 		PrimaryCoolantConnectors   common.Link
 		Pumps                      common.Link
-		Resevoirs                  common.Link
+		Reservoirs                 common.Link
 		SecondaryCoolantConnectors common.Link
 		Links                      Links
 	}
@@ -153,7 +153,7 @@ func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
 	coolingunit.leakDetection = t.LeakDetection.String()
 	coolingunit.primaryCoolantConnectors = t.PrimaryCoolantConnectors.String()
 	coolingunit.pumps = t.Pumps.String()
-	coolingunit.reservoirs = t.Resevoirs.String()
+	coolingunit.reservoirs = t.Reservoirs.String()
 	coolingunit.secondaryCoolantConnectors = t.SecondaryCoolantConnectors.String()
 	coolingunit.chassis = t.Links.Chassis.ToStrings()
 	coolingunit.ChassisCount = t.Links.ChassisCount
@@ -201,9 +201,12 @@ func (coolingunit *CoolingUnit) Assembly() ([]*Assembly, error) {
 	return ListReferencedAssemblys(coolingunit.GetClient(), coolingunit.assembly)
 }
 
-// EnvironmentMetrics gets a collection of environment metrics.
-func (coolingunit *CoolingUnit) EnvironmentMetrics() ([]*EnvironmentMetrics, error) {
-	return ListReferencedEnvironmentMetricss(coolingunit.GetClient(), coolingunit.environmentMetrics)
+// EnvironmentMetrics gets the environment metrics for this cooling unit.
+func (coolingunit *CoolingUnit) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+	if coolingunit.environmentMetrics == "" {
+		return nil, nil
+	}
+	return GetEnvironmentMetrics(coolingunit.GetClient(), coolingunit.environmentMetrics)
 }
 
 // Filters gets a collection of filters.
@@ -211,9 +214,12 @@ func (coolingunit *CoolingUnit) Filters() ([]*Filter, error) {
 	return ListReferencedFilters(coolingunit.GetClient(), coolingunit.filters)
 }
 
-// LeakDetection gets a collection of leak detections.
-func (coolingunit *CoolingUnit) LeakDetection() ([]*LeakDetection, error) {
-	return ListReferencedLeakDetections(coolingunit.GetClient(), coolingunit.leakDetection)
+// LeakDetection gets the of leak detection of this cooling unit.
+func (coolingunit *CoolingUnit) LeakDetection() (*LeakDetection, error) {
+	if coolingunit.leakDetection == "" {
+		return nil, nil
+	}
+	return GetLeakDetection(coolingunit.GetClient(), coolingunit.leakDetection)
 }
 
 // PrimaryCoolantConnectors gets a collection of primary coolant connectors.

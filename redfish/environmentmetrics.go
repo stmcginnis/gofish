@@ -142,8 +142,8 @@ func GetEnvironmentMetrics(c common.Client, uri string) (*EnvironmentMetrics, er
 	return common.GetObject[EnvironmentMetrics](c, uri)
 }
 
-// ListReferencedEnvironmentMetricss gets the collection of EnvironmentMetrics from
+// ListReferencedEnvironmentMetrics gets the collection of EnvironmentMetrics from
 // a provided reference.
-func ListReferencedEnvironmentMetricss(c common.Client, link string) ([]*EnvironmentMetrics, error) {
+func ListReferencedEnvironmentMetrics(c common.Client, link string) ([]*EnvironmentMetrics, error) {
 	return common.GetCollectionObjects[EnvironmentMetrics](c, link)
 }
