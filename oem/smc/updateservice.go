@@ -7,6 +7,7 @@ package smc
 import (
 	"encoding/json"
 	"errors"
+	"io"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -15,13 +16,16 @@ import (
 type SSLCert struct {
 	common.Entity
 
-	ValidFrom   string
+	// GoodThrough is the certificate expiration date.
 	GoodThrough string `json:"GoodTHRU"`
+	// ValidFrom is the certificate start date. It's misspelled as VaildFrom in the schema.
+	ValidFrom string `json:"VaildFrom"`
 
+	// uploadTarget is the URL to upload certificates to.
 	uploadTarget string
 }
 
-// UnmarshalJSON unmarshals a UpdateService object from the raw JSON.
+// UnmarshalJSON unmarshals a SSLCert object from the raw JSON.
 func (cert *SSLCert) UnmarshalJSON(b []byte) error {
 	type temp SSLCert
 	var t struct {
@@ -48,16 +52,22 @@ func GetSSLCert(c common.Client, uri string) (*SSLCert, error) {
 	return common.GetObject[SSLCert](c, uri)
 }
 
-// Upload installs an SSL cert.
-// NOTE: This is probably not correct. The jsonschema reported by SMC does not
-// include any parameters for this action. That seems very unlikely, so expect
-// this to fail.
-func (cert *SSLCert) Upload() error {
+// Upload will update the SSL certificate on the BMC with the provided certificate and key.
+func (cert *SSLCert) Upload(certFile, keyFile io.Reader) error {
 	if cert.uploadTarget == "" {
 		return errors.New("upload is not supported by this system")
 	}
 
-	return cert.Post(cert.uploadTarget, nil)
+	payload := make(map[string]io.Reader)
+	payload["cert_file"] = certFile
+	payload["key_file"] = keyFile
+
+	resp, err := cert.GetClient().PostMultipart(cert.uploadTarget, payload)
+	if err != nil {
+		return err
+	}
+
+	return resp.Body.Close()
 }
 
 type IPMIConfig struct {
@@ -168,7 +178,7 @@ func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
 	return common.GetObject[UpdateService](c, uri)
 }
 
-// Install performs an install of an update.
+// Install performs the installation of an update.
 func (us *UpdateService) Install(targets, installOptions []string) error {
 	if us.installTarget == "" {
 		return errors.New("install is not supported by this system")
