@@ -830,7 +830,7 @@ type ComputerSystem struct {
 	OEM json.RawMessage `json:"Oem"`
 	// OperatingSystem shall contain a link to a resource of type OperatingSystem that contains operating system
 	// information for this system.
-	OperatingSystem string
+	operatingSystem string
 	// PCIeDevices shall be an array of references of type PCIeDevice.
 	pcieDevices []string
 	// PCIeDevicesCount is the number of PCIeDevices.
@@ -960,6 +960,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		Processors          common.Link
 		Redundancy          common.Link
 		Memory              common.Link
+		OperatingSystem     common.Link
 		SimpleStorage       common.Link
 		SecureBoot          common.Link
 		Storage             common.Link
@@ -994,6 +995,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.memory = t.Memory.String()
 	computersystem.memoryDomains = t.MemoryDomains.String()
 	computersystem.networkInterfaces = t.NetworkInterfaces.String()
+	computersystem.operatingSystem = t.OperatingSystem.String()
 	computersystem.redundancy = t.Redundancy.String()
 	computersystem.secureBoot = t.SecureBoot.String()
 	computersystem.simpleStorage = t.SimpleStorage.String()
@@ -1112,6 +1114,11 @@ func (computersystem *ComputerSystem) MemoryDomains() ([]*MemoryDomain, error) {
 // NetworkInterfaces returns a collection of network interfaces in this system.
 func (computersystem *ComputerSystem) NetworkInterfaces() ([]*NetworkInterface, error) {
 	return ListReferencedNetworkInterfaces(computersystem.GetClient(), computersystem.networkInterfaces)
+}
+
+// OperatingSystem gets this system's operating system.
+func (computersystem *ComputerSystem) OperatingSystem() (*OperatingSystem, error) {
+	return GetOperatingSystem(computersystem.GetClient(), computersystem.operatingSystem)
 }
 
 // PCIeDevices gets all PCIeDevices for this system.
