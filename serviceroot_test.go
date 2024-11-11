@@ -46,6 +46,9 @@ var serviceRootBody = strings.NewReader(
 			"@odata.id": "/redfish/v1/JsonSchemas"
 		},
 		"Links": {
+			"ManagerProvidingService": {
+				"@odata.id": "/redfish/v1/Managers/1"
+			},
 			"Sessions": {
 				"@odata.id": "/redfish/v1/Sessions"
 			}
@@ -194,6 +197,10 @@ func TestServiceRoot(t *testing.T) {
 
 	if result.updateService != "/redfish/v1/UpdateService" {
 		t.Errorf("Invalid UpdateService link: %s", result.updateService)
+	}
+
+	if result.ManagerProvidingServiceLink != "/redfish/v1/Managers/1" {
+		t.Errorf("Invalid ManagerProvidingService link: %s", result.ManagerProvidingServiceLink)
 	}
 }
 

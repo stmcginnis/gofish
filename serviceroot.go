@@ -192,9 +192,9 @@ type Service struct {
 
 	// Sessions shall contain the link to a collection of Sessions.
 	sessions string
-	// ManagerProvidingService shall contain a link to a resource of type Manager that represents the manager providing
+	// ManagerProvidingServiceLink shall contain a link to a resource of type Manager that represents the manager providing
 	// this Redfish service.
-	managerProvidingService string
+	ManagerProvidingServiceLink string
 }
 
 // UnmarshalJSON unmarshals a Service object from the raw JSON.
@@ -277,7 +277,7 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 	serviceroot.updateService = t.UpdateService.String()
 
 	serviceroot.sessions = t.Links.Sessions.String()
-	serviceroot.managerProvidingService = t.Links.ManagerProvidingService.String()
+	serviceroot.ManagerProvidingServiceLink = t.Links.ManagerProvidingService.String()
 
 	return nil
 }
@@ -474,10 +474,10 @@ func (serviceroot *Service) CreateSession(username, password string) (*redfish.A
 
 // ManagerProvidingService gets the manager for this Redfish service.
 func (serviceroot *Service) ManagerProvidingService() (*redfish.Manager, error) {
-	if serviceroot.managerProvidingService == "" {
+	if serviceroot.ManagerProvidingServiceLink == "" {
 		return nil, nil
 	}
-	return redfish.GetManager(serviceroot.GetClient(), serviceroot.managerProvidingService)
+	return redfish.GetManager(serviceroot.GetClient(), serviceroot.ManagerProvidingServiceLink)
 }
 
 // PowerEquipment gets the powerEquipment instances of this service.
