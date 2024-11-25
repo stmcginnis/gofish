@@ -94,8 +94,12 @@ func (thermalsubsystem *ThermalSubsystem) Heaters() ([]*Heater, error) {
 }
 
 // LeakDetection gets the leak detection system within this chassis.
-func (thermalsubsystem *ThermalSubsystem) LeakDetection() ([]*LeakDetection, error) {
-	return ListReferencedLeakDetections(thermalsubsystem.GetClient(), thermalsubsystem.leakDetection)
+func (thermalsubsystem *ThermalSubsystem) LeakDetection() (*LeakDetection, error) {
+	if thermalsubsystem.leakDetection == "" {
+		return nil, nil
+	}
+
+	return GetLeakDetection(thermalsubsystem.GetClient(), thermalsubsystem.leakDetection)
 }
 
 // Pumps gets the pumps for this equipment.
