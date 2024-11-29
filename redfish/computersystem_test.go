@@ -88,7 +88,10 @@ var computerSystemBody = `{
 				"State": "Enabled"
 			},
 			"Count": 2,
-			"Model": "Multi-Core Intel(R) Xeon(R) processor 7500 Series"
+			"Model": "Multi-Core Intel(R) Xeon(R) processor 7500 Series",
+			"Metrics": {
+				"@odata.id": "/redfish/v1/Systems/System-1/ProcessorSummary/ProcessorMetrics"
+			}
 		},
 		"MemorySummary": {
 			"Status": {
@@ -273,6 +276,11 @@ func TestComputerSystem(t *testing.T) { //nolint
 	if result.TrustedModules[0].InterfaceTypeSelection != NoneInterfaceTypeSelection {
 		t.Errorf("Received invalid trusted module interface type selection: %s",
 			result.TrustedModules[0].InterfaceTypeSelection)
+	}
+
+	if result.ProcessorSummary.metrics != "/redfish/v1/Systems/System-1/ProcessorSummary/ProcessorMetrics" {
+		t.Errorf("Received invalid processor summary metrics: %s",
+			result.ProcessorSummary.metrics)
 	}
 
 	if result.processors != "/redfish/v1/Systems/System-1/Processors" {

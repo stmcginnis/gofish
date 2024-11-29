@@ -1341,12 +1341,44 @@ type ProcessorSummary struct {
 	Count int
 	// LogicalProcessorCount is the number of logical central processors in the system.
 	LogicalProcessorCount int
+	// Metrics shall be a reference to the Metrics
+	// associated with this ProcessorSummary.
+	metrics string
 	// Model is the processor model for the central processors in the system,
 	// per the description in the Processor Information - Processor Family
 	// section of the SMBIOS Specification DSP0134 2.8 or later.
 	Model string
 	// Status is any status or health properties of the resource.
 	Status common.Status
+}
+
+// UnmarshalJSON unmarshals a ProcessorSummary object from the raw JSON.
+func (processorSummary *ProcessorSummary) UnmarshalJSON(b []byte) error {
+	type temp ProcessorSummary
+	type t1 struct {
+		temp
+		Metrics common.Link
+	}
+	var t t1
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*processorSummary = ProcessorSummary(t.temp)
+
+	processorSummary.metrics = t.Metrics.String()
+
+	return nil
+}
+
+// Metrics gets the processor summary metrics
+func (processorSummary *ProcessorSummary) Metrics(c common.Client) (*ProcessorMetrics, error) {
+	if processorSummary.metrics == "" {
+		return nil, nil
+	}
+	return GetProcessorMetrics(c, processorSummary.metrics)
 }
 
 // TrustedModules is This type shall describe a trusted module for a system.
