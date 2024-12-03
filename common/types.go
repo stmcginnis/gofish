@@ -183,11 +183,40 @@ const (
 	UpdatingState State = "Updating"
 )
 
+type Severity string
+
+const (
+	// OKSeverity indicates normal operation.
+	OKSeverity Severity = "OK"
+	// WarningSeverity indicates the condition requires attention.
+	WarningSeverity Severity = "Warning"
+	// CriticalSeverity indicates the condition requires immediate attention
+	CriticalSeverity Severity = "Critical"
+)
+
+type Condition struct {
+	// LogEntry contains a link to the log entry created for this condition.
+	LogEntry Link
+	// Message contains the human-readable message for this condition.
+	Message string
+	// Severity contains the severity of this condition.
+	Severity Severity
+	// MessageId contains the identifier for the message
+	MessageID string
+	// OriginOfCondition contains a link to the resource or object that originated the condition
+	OriginOfCondition Link
+	// Resolution contains the recommended actions to resolve this condition
+	Resolution string
+	// Timestamp contains the time the condition was last changed
+	Timestamp string
+}
+
 // Status describes the status and health of a resource and its children.
 type Status struct {
-	Health       Health `json:"Health"`
-	HealthRollup Health `json:"HealthRollup"`
-	State        State  `json:"State"`
+	Health       Health      `json:"Health"`
+	HealthRollup Health      `json:"HealthRollup"`
+	State        State       `json:"State"`
+	Conditions   []Condition `json:"Conditions"`
 }
 
 // LocationType shall name the type of location in use.
