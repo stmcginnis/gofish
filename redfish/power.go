@@ -367,6 +367,8 @@ type PowerSupply struct {
 	// member within the collection. For services supporting Redfish v1.6 or
 	// higher, this value shall be the zero-based array index.
 	MemberID string `json:"MemberId"`
+	// The link to the power supply metrics resource associated with this power supply.
+	metrics string
 	// Model shall contain the model information as defined
 	// by the manufacturer for the associated power supply.
 	Model string
@@ -412,6 +414,7 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Assembly   common.Link
+		Metrics    common.Link
 		Redundancy common.Links
 	}
 
@@ -423,6 +426,7 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*powersupply = PowerSupply(t.temp)
 	powersupply.assembly = t.Assembly.String()
+	powersupply.metrics = t.Metrics.String()
 	powersupply.redundancy = t.Redundancy.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
@@ -437,6 +441,14 @@ func (powersupply *PowerSupply) Assembly() (*Assembly, error) {
 		return nil, nil
 	}
 	return GetAssembly(powersupply.GetClient(), powersupply.assembly)
+}
+
+// Metrics gets the metrics associated with this power supply.
+func (powersupply *PowerSupply) Metrics() (*PowerSupplyUnitMetrics, error) {
+	if powersupply.metrics == "" {
+		return nil, nil
+	}
+	return GetPowerSupplyUnitMetrics(powersupply.GetClient(), powersupply.metrics)
 }
 
 // Redundancy gets the endpoints at the other end of the link.
