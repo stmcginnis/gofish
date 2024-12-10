@@ -780,6 +780,10 @@ type Port struct {
 
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 }
 
 // UnmarshalJSON unmarshals a Port object from the raw JSON.
