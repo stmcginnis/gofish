@@ -471,7 +471,7 @@ type Processor struct {
 	// Ports shall contain a link to a resource collection of type PortCollection. It shall contain the interconnect
 	// and fabric ports of this processor. It shall not contain ports for GraphicsController resources, USBController
 	// resources, or other local adapter-related types of resources.
-	ports []string
+	ports string
 	// PowerState shall contain the power state of the processor. If the PowerState property in the associated Chassis
 	// resource contains the value 'Off', this property shall contain 'Off'.
 	PowerState PowerState
@@ -611,7 +611,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 		EnvironmentMetrics     common.Link
 		Metrics                common.Link
 		OperatingConfigs       common.LinksCollection
-		Ports                  common.LinksCollection
+		Ports                  common.Link
 		SubProcessors          common.LinksCollection
 		ProcessorMemory        common.Links
 		Links                  processorLinks
@@ -662,7 +662,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	processor.environmentMetrics = t.EnvironmentMetrics.String()
 	processor.metrics = t.Metrics.String()
 	processor.operatingConfigs = t.OperatingConfigs.ToStrings()
-	processor.ports = t.Ports.ToStrings()
+	processor.ports = t.Ports.String()
 	processor.subProcessors = t.SubProcessors.ToStrings()
 
 	processor.chassis = t.Links.Chassis.String()
@@ -778,7 +778,7 @@ func (processor *Processor) OperatingConfigs() ([]*OperatingConfig, error) {
 // contain ports for GraphicsController resources, USBController resources, or
 // other local adapter-related types of resources.
 func (processor *Processor) Ports() ([]*Port, error) {
-	return common.GetObjects[Port](processor.GetClient(), processor.ports)
+	return ListReferencedPorts(processor.GetClient(), processor.ports)
 }
 
 // SubProcessors gets the sub-processors associated with this processor, such as
