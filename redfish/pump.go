@@ -42,6 +42,8 @@ type Pump struct {
 	// FirmwareVersion shall contain a string describing the firmware version of this equipment as provided by the
 	// manufacturer.
 	FirmwareVersion string
+	// InletPressurekPa shall contain the current pressure in kilopascals entering the pump
+	InletPressurekPa SensorPumpExcerpt
 	// Location shall contain the location information of this pump.
 	Location common.Location
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
@@ -72,8 +74,12 @@ type Pump struct {
 	SerialNumber string
 	// ServiceHours shall contain the number of hours of service that the pump has been in operation.
 	ServiceHours float64
+	// setMode shall contain the action target for setting the mode of this pump.
+	setMode string
 	// SparePartNumber shall contain the spare or replacement part number as defined by the manufacturer for this pump.
 	SparePartNumber string
+	// SpeedControlPercent shall contain the desired speed, in percent units, of this pump.
+	SpeedControlPercent ControlSingleExcerpt
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// UserLabel shall contain a user-assigned label used to identify this resource. If a value has not been assigned
@@ -85,11 +91,24 @@ type Pump struct {
 	rawData []byte
 }
 
+type PumpMode string
+
+const (
+	EnabledPumpMode  PumpMode = "Enabled"
+	DisabledPumpMode PumpMode = "Disabled"
+)
+
 // UnmarshalJSON unmarshals a Pump object from the raw JSON.
 func (pump *Pump) UnmarshalJSON(b []byte) error {
 	type temp Pump
+
+	type PumpActions struct {
+		SetMode common.ActionTarget `json:"#Pump.SetMode"`
+	}
+
 	var t struct {
 		temp
+		Actions  PumpActions
 		Assembly common.Link
 		Filters  common.LinksCollection
 	}
@@ -104,11 +123,22 @@ func (pump *Pump) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	pump.assembly = t.Assembly.String()
 	pump.filters = t.Filters.ToStrings()
+	pump.setMode = t.Actions.SetMode.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
 	pump.rawData = b
 
 	return nil
+}
+
+// SetMode sets the mode of the pump.
+func (pump *Pump) SetMode(mode PumpMode) error {
+	// TODO check if mode is valid
+	properties := map[string]interface{}{
+		"Mode": mode,
+	}
+
+	return pump.Post(pump.setMode, properties)
 }
 
 // Assembly gets the containing assembly for this pump.
@@ -135,6 +165,7 @@ func (pump *Pump) Update() error {
 		"AssetTag",
 		"LocationIndicatorActive",
 		"ServiceHours",
+		"SpeedControlPercent",
 		"UserLabel",
 	}
 
