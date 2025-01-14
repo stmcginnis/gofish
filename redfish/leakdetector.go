@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -32,6 +33,8 @@ type LeakDetector struct {
 	Description string
 	// DetectorState shall contain the state of the leak detector.
 	DetectorState common.Health
+	// Enabled shall indicate whether the leak detector is enabled.
+	Enabled bool
 	// LeakDetectorType shall contain the reading type of the leak detection sensor.
 	LeakDetectorType LeakDetectorType
 	// Location shall indicate the location information for this leak detector.
@@ -64,6 +67,8 @@ type LeakDetector struct {
 	SparePartNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// RawData holds the original serialized JSON so we can compare updates
+	RawData []byte
 }
 
 // GetLeakDetector will get a LeakDetector instance from the service.
@@ -101,4 +106,20 @@ type LeakDetectorExcerpt struct {
 	DataSourceURI string
 	// DetectorState shall contain the state of the leak detector.
 	DetectorState common.Health
+}
+
+func (leakdetector *LeakDetector) Update() error {
+	ld := new(LeakDetector)
+	err := ld.OEM.UnmarshalJSON(leakdetector.RawData)
+	if err != nil {
+		return err
+	}
+
+	readWriteFields := []string{
+		"Enabled",
+	}
+
+	originalElement := reflect.ValueOf(ld).Elem()
+	currentElement := reflect.ValueOf(leakdetector).Elem()
+	return leakdetector.Entity.Update(originalElement, currentElement, readWriteFields)
 }
