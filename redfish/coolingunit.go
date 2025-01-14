@@ -188,13 +188,13 @@ func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (coolinunit *CoolingUnit) SetMode(mode CoolingUnitMode) error {
+func (coolingunit *CoolingUnit) SetMode(mode CoolingUnitMode) error {
 	// TODO: check if mode is in Allowable values
 	properties := map[string]interface{}{
 		"Mode": mode,
 	}
 
-	return coolinunit.Post(coolinunit.setMode, properties)
+	return coolingunit.Post(coolingunit.setMode, properties)
 }
 
 // Update commits updates to this object's properties to the running system.

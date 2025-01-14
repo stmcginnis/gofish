@@ -51,17 +51,26 @@ type CoolantConnector struct {
 	// present, shall reference a resource of type Sensor with the ReadingType property containing the value
 	// 'PressurekPa'.
 	DeltaPressurekPa SensorExcerpt
+	// DeltaPressureControlkPa contain the control for the desired pressure difference, in kilopascal units, for this
+	// coolant connector. This control shall only be present for the secondary coolant connector.
+	DeltaPressureControlkPa ControlSingleExcerpt
 	// DeltaTemperatureCelsius shall contain the change in temperature, in degree Celsius units, between the supply
 	// connection and the outflow or return connection to the cooling loop. The value of the DataSourceUri property, if
 	// present, shall reference a resource of type Sensor with the ReadingType property containing the value
 	// 'Temperature'.
 	DeltaTemperatureCelsius SensorExcerpt
+	// DeltaTemperatureControlCelsius contain the control for the desired temperature difference, in degree Celsius
+	// for this coolant connector. This control shall only be present for the secondary coolant connector.
+	DeltaTemperatureControlCelsius ControlSingleExcerpt
 	// Description provides a description of this resource.
 	Description string
 	// FlowLitersPerMinute shall contain the liquid flow rate, in liters per minute units, for this coolant connector.
 	// The value of the DataSourceUri property, if present, shall reference a resource of type Sensor with the
 	// ReadingType property containing the value 'LiquidFlowLPM'.
 	FlowLitersPerMinute SensorExcerpt
+	// FlowControlLiterPerMinute shall contain the control for the liquid flow rate, in liters per minute units,
+	// for this coolant connector. This control shall only be present for the secondary coolant connector.
+	FlowControlLitersPerMinute ControlSingleExcerpt
 	// HeatRemovedkW shall contain the amount of heat removed, in kilowatt units, by the coolant flow through this
 	// connector. The value of the DataSourceUri property, if present, shall reference a resource of type Sensor with
 	// the ReadingType property containing the value 'Heat'.
@@ -85,6 +94,9 @@ type CoolantConnector struct {
 	// connection to the cooling loop. The value of the DataSourceUri property, if present, shall reference a resource
 	// of type Sensor with the ReadingType property containing the value 'Temperature'.
 	ReturnTemperatureCelsius SensorExcerpt
+	// ReturnTemperatureControlCelsius contain the control for the desired return temperature, in degree Celsius units
+	// for this coolant connector. This control shall only be present for the secondary coolant connector.
+	ReturnTemperatureControlCelsius ControlSingleExcerpt
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// SupplyPressurekPa shall contain the pressure, in kilopascal units, for the intake or supply connection to the
@@ -95,6 +107,9 @@ type CoolantConnector struct {
 	// connection to the cooling loop. The value of the DataSourceUri property, if present, shall reference a resource
 	// of type Sensor with the ReadingType property containing the value 'Temperature'.
 	SupplyTemperatureCelsius SensorExcerpt
+	// SupplyTemperatureControlCelsius contain the control for the desired supply temperature, in degree Celsius units
+	// of this coolant connector. This control shall only be present for the secondary coolant connector.
+	SupplyTemperatureControlCelsius ControlSingleExcerpt
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData          []byte
 	connectedChassis []string
@@ -154,7 +169,12 @@ func (coolantconnector *CoolantConnector) Update() error {
 	readWriteFields := []string{
 		"CoolingLoopName",
 		"CoolingManagerURI",
+		"DeltaPressureControlkPa",
+		"DeltaTemperatureControlCelsius",
+		"FlowControlLitersPerMinute",
 		"LocationIndicatorActive",
+		"ReturnTemperatureControlCelsius",
+		"SupplyTemperatureControlCelsius",
 	}
 
 	originalElement := reflect.ValueOf(original).Elem()
