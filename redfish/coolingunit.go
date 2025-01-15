@@ -31,6 +31,8 @@ type CoolingUnit struct {
 	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	// AllowedCoolingUnitModes shall contain the allowed values for setting the mode of this cooling unit.
+	AllowedCoolingUnitModes []CoolingUnitMode
 	// Assembly shall contain a link to a resource of type Assembly.
 	assembly string
 	// AssetTag shall contain the user-assigned asset tag, which is an identifying string that tracks the equipment for
@@ -88,6 +90,8 @@ type CoolingUnit struct {
 	secondaryCoolantConnectors string
 	// SerialNumber shall contain a manufacturer-allocated number that identifies the equipment.
 	SerialNumber string
+	// setMode shall contain the action target for setting the mode of this cooling unit.
+	setMode string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// UserLabel shall contain a user-assigned label used to identify this resource. If a value has not been assigned
@@ -105,6 +109,13 @@ type CoolingUnit struct {
 	// ManagedByCount is the number of managers that manage this equipment.
 	ManagedByCount int
 }
+
+type CoolingUnitMode string
+
+const (
+	EnabledCoolingUnitMode  CoolingUnitMode = "Enabled"
+	DisabledCoolingUnitMode CoolingUnitMode = "Disabled"
+)
 
 // UnmarshalJSON unmarshals a CoolingUnit object from the raw JSON.
 func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
@@ -124,8 +135,16 @@ func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
 		// ManagedBy@odata.count
 		ManagedByCount int `json:"ManagedBy@odata.count"`
 	}
+	type CoolingUnitActions struct {
+		SetMode struct {
+			AllowedCoolingUnitModes []CoolingUnitMode `json:"Mode@Redfish.AllowableValues"`
+			Target                  string
+		} `json:"#CoolingUnit.SetMode"`
+	}
+
 	var t struct {
 		temp
+		Actions                    CoolingUnitActions
 		Assembly                   common.Link
 		CoolantConnectorRedundancy common.Links
 		EnvironmentMetrics         common.Link
@@ -160,11 +179,22 @@ func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
 	coolingunit.facility = t.Links.Facility.String()
 	coolingunit.managedBy = t.Links.ManagedBy.ToStrings()
 	coolingunit.ManagedByCount = t.Links.ManagedByCount
+	coolingunit.AllowedCoolingUnitModes = t.Actions.SetMode.AllowedCoolingUnitModes
+	coolingunit.setMode = t.Actions.SetMode.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
 	coolingunit.rawData = b
 
 	return nil
+}
+
+func (coolingunit *CoolingUnit) SetMode(mode CoolingUnitMode) error {
+	// TODO: check if mode is in Allowable values
+	properties := map[string]interface{}{
+		"Mode": mode,
+	}
+
+	return coolingunit.Post(coolingunit.setMode, properties)
 }
 
 // Update commits updates to this object's properties to the running system.
