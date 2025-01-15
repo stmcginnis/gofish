@@ -269,6 +269,8 @@ type Chassis struct {
 	// for the indicator light associated with this system.
 	// Deprecated v1.14+ in favor of LocationIndicatorActive property
 	IndicatorLED common.IndicatorLED
+	// leakdetectors shall contain a link to a the LeakDetectors in this chassis
+	leakdetectors string
 	// Location shall contain location information of the
 	// associated chassis.
 	Location common.Location
@@ -490,6 +492,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		Thermal            common.Link
 		ThermalSubsystem   common.Link
 		TrustedComponents  common.Link
+		LeakDetectors      common.Link
 		Links              chassisLinks
 		Actions            chassisActions
 	}
@@ -555,6 +558,7 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	chassis.StorageCount = t.Links.StorageCount
 	chassis.switches = t.Links.Switches.ToStrings()
 	chassis.SwitchesCount = t.Links.SwitchesCount
+	chassis.leakdetectors = t.LeakDetectors.String()
 	chassis.linkedDrives = t.Links.Drives.ToStrings()
 	if chassis.DrivesCount == 0 && t.Links.DrivesCount > 0 {
 		chassis.DrivesCount = t.Links.DrivesCount
@@ -853,4 +857,13 @@ func (chassis *Chassis) Reset(resetType ResetType) error {
 		ResetType ResetType
 	}{ResetType: resetType}
 	return chassis.Post(chassis.resetTarget, t)
+}
+
+// LeakDetectors gets the leak detectors for this chassis.
+func (chassis *Chassis) LeakDetectors() (*LeakDetector, error) {
+	if chassis.leakdetectors == "" {
+		return nil, nil
+	}
+
+	return GetLeakDetector(chassis.GetClient(), chassis.leakdetectors)
 }
