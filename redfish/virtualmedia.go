@@ -134,6 +134,8 @@ type VirtualMedia struct {
 	ImageName string
 	// Inserted shall indicate whether media is present in the virtual media device.
 	Inserted bool
+	//Сonnection MediaType used
+	MediaType VirtualMediaType
 	// MediaTypes shall be the supported media types for this connection.
 	MediaTypes []VirtualMediaType
 	// Password shall represent the password to access the
