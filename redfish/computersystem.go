@@ -623,7 +623,7 @@ const (
 	// ForceRestartResetType shall be used to restart the machine without wait the OS to shutdown
 	ForceRestartResetType ResetType = "ForceRestart"
 	// FullPowerCycleResetType shall be used to perform an AC power cycle
-	FullPowerCycleResetType
+	FullPowerCycleResetType ResetType = "FullPowerCycle"
 	// GracefulRestartResetType shall be used to restart the machine waiting the OS shutdown gracefully
 	GracefulRestartResetType ResetType = "GracefulRestart"
 	// GracefulShutdownResetType shall be used to restart the machine waiting the OS shutdown gracefully
