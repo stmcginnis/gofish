@@ -205,6 +205,8 @@ type NetworkProtocolSettings struct {
 	HostName string
 	// The settings for this manager's IPMI-over-LAN protocol support
 	IPMI NetworkProtocol
+	// The settings for this manager's IPMISOL protocol support
+	IPMISOL NetworkProtocol
 	// The settings for this manager's KVM-IP protocol support that
 	// apply to all system instances controlled by this manager
 	KVMIP NetworkProtocol
@@ -219,6 +221,8 @@ type NetworkProtocolSettings struct {
 	RFB NetworkProtocol
 	// The settings for this manager's SNMP support
 	SNMP SNMP
+	// The settings for this manager's SOL support
+	SOL NetworkProtocol
 	// The settings for this manager's SSDP support
 	SSDP SSDP
 	// The settings for this manager's Secure Shell (SSH) protocol
