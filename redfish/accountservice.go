@@ -518,5 +518,7 @@ func (accountservice *AccountService) CreateAccount(userName, password, roleID s
 
 	var result ManagerAccount
 	err = json.NewDecoder(resp.Body).Decode(&result)
+	result.SetClient(accountservice.GetClient())
+
 	return &result, err
 }
