@@ -859,11 +859,11 @@ func (chassis *Chassis) Reset(resetType ResetType) error {
 	return chassis.Post(chassis.resetTarget, t)
 }
 
-// LeakDetectors gets the leak detectors for this chassis.
-func (chassis *Chassis) LeakDetectors() (*LeakDetector, error) {
+// LeakDetectors gets the collection of leak detectors for this chassis.
+func (chassis *Chassis) LeakDetectors() ([]*LeakDetector, error) {
 	if chassis.leakdetectors == "" {
 		return nil, nil
 	}
 
-	return GetLeakDetector(chassis.GetClient(), chassis.leakdetectors)
+	return ListReferencedLeakDetectors(chassis.GetClient(), chassis.leakdetectors)
 }
