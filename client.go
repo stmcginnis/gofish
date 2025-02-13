@@ -147,6 +147,9 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 
 		client.HTTPClient = &http.Client{Transport: transport}
 	} else {
+		if config.ReuseConnections {
+			client.keepAlive = true
+		}
 		client.HTTPClient = config.HTTPClient
 	}
 
