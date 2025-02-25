@@ -596,6 +596,12 @@ func (c *APIClient) dumpResponse(resp *http.Response) error {
 // a new connection.
 func (c *APIClient) Logout() {
 	if c != nil && c.Service != nil && c.auth != nil {
+		// if APIClient is created with ConnectContext (f.e. with http request ctx)
+		// and passed context is cancelled (f.e. downstream request is aborted),
+		// we need to create a new context to clean up Redfish API session
+		if c.ctx.Err() != nil {
+			c.ctx = context.Background()
+		}
 		if err := c.Service.DeleteSession(c.auth.Session); err == nil {
 			// Clean up invalid session token and ID upon successful Logout
 			c.auth.Session = ""
