@@ -169,6 +169,9 @@ type MemoryMetrics struct {
 	// LifeTime shall contain properties which describe the LifeTime metrics for
 	// the current resource.
 	LifeTime LifeTime
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// OperatingSpeedMHz is used by the memory device.
 	OperatingSpeedMHz int
 
