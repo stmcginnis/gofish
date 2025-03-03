@@ -102,13 +102,13 @@ func (cr *CollectionError) Error() string {
 }
 
 // CollectList will retrieve a collection of entities from the Redfish service.
-func CollectList(get func(string), c Client, link string) error {
+func CollectList(get func(string), c Client, link string, queryOpts ...QueryOption) error {
 	collection, err := GetCollection(c, link)
 	if err != nil {
 		return err
 	}
 
-	CollectCollection(get, collection.ItemLinks)
+	CollectCollection(get, collection.ItemLinks, queryOpts...)
 	if collection.MembersNextLink != "" {
 		err := CollectList(get, c, collection.MembersNextLink)
 		if err != nil {
@@ -120,7 +120,7 @@ func CollectList(get func(string), c Client, link string) error {
 
 // CollectCollection will retrieve a collection of entitied from the Redfish service
 // when you already have the set of individual links in the collection.
-func CollectCollection(get func(string), links []string) {
+func CollectCollection(get func(string), links []string, queryOpts ...QueryOption) {
 	// Only allow three concurrent requests to avoid overwhelming the service
 	limiter := make(chan struct{}, 3)
 	var wg sync.WaitGroup
@@ -133,7 +133,7 @@ func CollectCollection(get func(string), links []string) {
 			defer wg.Done()
 			get(itemLink)
 			<-limiter
-		}(itemLink)
+		}(BuildQuery(itemLink, queryOpts...))
 	}
 
 	wg.Wait()
@@ -142,7 +142,7 @@ func CollectCollection(get func(string), links []string) {
 func GetCollectionObjects[T any, PT interface {
 	*T
 	SchemaObject
-}](c Client, uri string) ([]*T, error) {
+}](c Client, uri string, queryOpts ...QueryOption) ([]*T, error) {
 	var result []*T
 	if uri == "" {
 		return result, nil
@@ -162,7 +162,7 @@ func GetCollectionObjects[T any, PT interface {
 	}
 
 	go func() {
-		err := CollectList(get, c, uri)
+		err := CollectList(get, c, uri, queryOpts...)
 		if err != nil {
 			collectionError.Failures[uri] = err
 		}
