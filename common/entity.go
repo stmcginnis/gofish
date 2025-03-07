@@ -53,6 +53,18 @@ func (e *Entity) GetClient() Client {
 	return e.client
 }
 
+func (e *Entity) GetID() string {
+	return e.ID
+}
+
+func (e *Entity) GetODataID() string {
+	return e.ODataID
+}
+
+func (e *Entity) SetODataID(id string) {
+	e.ODataID = id
+}
+
 // Set stripEtagQuotes to enable/disable strupping etag quotes
 func (e *Entity) StripEtagQuotes(b bool) {
 	e.stripEtagQuotes = b
@@ -251,6 +263,9 @@ func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (pay
 type SchemaObject interface {
 	SetClient(Client)
 	SetETag(string)
+	GetID() string
+	GetODataID() string
+	SetODataID(string)
 }
 
 // GetObject retrieves an API object from the service.
@@ -295,13 +310,20 @@ func GetObjects[T any, PT interface {
 
 	ch := make(chan GetResult)
 	collectionError := NewCollectionError()
-	get := func(link string) {
-		entity, err := GetObject[T, PT](c, link)
-		ch <- GetResult{Item: entity, Link: link, Error: err}
+	get := func(item PT, queryOpts ...QueryOption) {
+		entity, err := GetObject[T, PT](c, item.GetODataID())
+		ch <- GetResult{Item: entity, Link: item.GetODataID(), Error: err}
+	}
+
+	entities := make([]PT, len(uris))
+	for i, u := range uris {
+		pt := PT(new(T))
+		pt.SetODataID(u)
+		entities[i] = pt
 	}
 
 	go func() {
-		CollectCollection(get, uris)
+		CollectCollection(get, entities, nil)
 		close(ch)
 	}()
 

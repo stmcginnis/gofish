@@ -14,6 +14,7 @@ import (
 type Collection struct {
 	Name            string `json:"Name"`
 	ItemLinks       []string
+	Items           json.RawMessage
 	MembersNextLink string `json:"Members@odata.nextLink,omitempty"`
 }
 
@@ -22,8 +23,11 @@ func (c *Collection) UnmarshalJSON(b []byte) error {
 	type temp Collection
 	var t struct {
 		temp
-		LinksCollection
-		Links LinksCollection `json:"Links"`
+		ODataCount   int `json:"@odata.count"`
+		Count        int `json:"Members@odata.count"`
+		MembersLinks Links
+		MembersRaw   json.RawMessage `json:"Members"`
+		Links        LinksCollection `json:"Links"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -35,11 +39,19 @@ func (c *Collection) UnmarshalJSON(b []byte) error {
 
 	// Redfish objects store collection items under Links
 	c.ItemLinks = t.Links.ToStrings()
+	c.Items = t.MembersRaw
+
+	if t.MembersRaw != nil {
+		err = json.Unmarshal(t.MembersRaw, &t.MembersLinks)
+		if err != nil {
+			return err
+		}
+	}
 
 	// Swordfish has them at the root
 	if len(c.ItemLinks) == 0 &&
-		(t.Count > 0 || t.ODataCount > 0 || len(t.Members) > 0) {
-		c.ItemLinks = t.Members.ToStrings()
+		(t.Count > 0 || t.ODataCount > 0 || len(t.MembersLinks) > 0) {
+		c.ItemLinks = t.MembersLinks.ToStrings()
 	}
 
 	return nil
@@ -102,13 +114,24 @@ func (cr *CollectionError) Error() string {
 }
 
 // CollectList will retrieve a collection of entities from the Redfish service.
-func CollectList(get func(string), c Client, link string, queryOpts ...QueryOption) error {
-	collection, err := GetCollection(c, link)
+func CollectList[T any, PT interface {
+	*T
+	SchemaObject
+}](get func(PT, ...QueryOption), c Client, link string, queryOpts ...QueryOption) error {
+	collection, err := GetCollection(c, BuildQueryForCollection(link, queryOpts...))
 	if err != nil {
 		return err
 	}
 
-	CollectCollection(get, collection.ItemLinks, queryOpts...)
+	var items []PT
+	if collection.Items != nil {
+		err = json.Unmarshal(collection.Items, &items)
+		if err != nil {
+			return err
+		}
+	}
+
+	CollectCollection(get, items, queryOpts...)
 	if collection.MembersNextLink != "" {
 		err := CollectList(get, c, collection.MembersNextLink)
 		if err != nil {
@@ -120,20 +143,24 @@ func CollectList(get func(string), c Client, link string, queryOpts ...QueryOpti
 
 // CollectCollection will retrieve a collection of entitied from the Redfish service
 // when you already have the set of individual links in the collection.
-func CollectCollection(get func(string), links []string, queryOpts ...QueryOption) {
+func CollectCollection[T any, PT interface {
+	*T
+	SchemaObject
+}](get func(PT, ...QueryOption), items []PT, queryOpts ...QueryOption) {
 	// Only allow three concurrent requests to avoid overwhelming the service
 	limiter := make(chan struct{}, 3)
 	var wg sync.WaitGroup
 
-	for _, itemLink := range links {
+	for _, item := range items {
+
 		wg.Add(1)
 		limiter <- struct{}{}
 
-		go func(itemLink string) {
+		go func(item PT) {
 			defer wg.Done()
-			get(itemLink)
+			get(item, queryOpts...)
 			<-limiter
-		}(BuildQuery(itemLink, queryOpts...))
+		}(item)
 	}
 
 	wg.Wait()
@@ -156,9 +183,14 @@ func GetCollectionObjects[T any, PT interface {
 
 	ch := make(chan GetResult)
 	collectionError := NewCollectionError()
-	get := func(link string) {
-		entity, err := GetObject[T, PT](c, link)
-		ch <- GetResult{Item: entity, Link: link, Error: err}
+	get := func(item PT, queryOpts ...QueryOption) {
+		if item.GetID() != "" {
+			item.SetClient(c)
+			ch <- GetResult{Item: item, Link: item.GetODataID(), Error: nil}
+			return
+		}
+		entity, err := GetObject[T, PT](c, BuildQuery(item.GetODataID(), queryOpts...))
+		ch <- GetResult{Item: entity, Link: item.GetODataID(), Error: err}
 	}
 
 	go func() {
