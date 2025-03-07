@@ -213,10 +213,11 @@ type Condition struct {
 
 // Status describes the status and health of a resource and its children.
 type Status struct {
-	Health       Health      `json:"Health"`
-	HealthRollup Health      `json:"HealthRollup"`
-	State        State       `json:"State"`
-	Conditions   []Condition `json:"Conditions"`
+	Health       Health          `json:"Health"`
+	HealthRollup Health          `json:"HealthRollup"`
+	State        State           `json:"State"`
+	Conditions   []Condition     `json:"Conditions"`
+	OEM          json.RawMessage `json:"Oem"`
 }
 
 // LocationType shall name the type of location in use.
