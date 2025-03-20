@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/stmcginnis/gofish/common"
@@ -115,11 +116,6 @@ type Power struct {
 	Description *string `json:"Description"`
 	// Oem contains OEM-specific extensions.
 	OEM json.RawMessage `json:"Oem"`
-	// Actions contains the available actions for this resource.
-	Actions struct {
-		PowerSupplyReset common.ActionTarget `json:"#Power.PowerSupplyReset"`
-		OEM              json.RawMessage     `json:"Oem"`
-	} `json:"Actions"`
 	// PowerControl contains the set of power control readings and settings.
 	PowerControl []PowerControl `json:"PowerControl"`
 	// PowerControlCount is the number of power control items.
@@ -142,9 +138,14 @@ type Power struct {
 
 // UnmarshalJSON unmarshals a Power object from the raw JSON.
 func (power *Power) UnmarshalJSON(b []byte) error {
-	type pwr Power
+	type temp Power
+	type Actions struct {
+		PowerSupplyReset common.ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
 	var t struct {
-		pwr
+		temp
+		Actions      Actions
+		PowerControl json.RawMessage
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -152,8 +153,28 @@ func (power *Power) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*power = Power(t.pwr)
+	*power = Power(t.temp)
+
+	powerControls := []PowerControl{}
+	err = json.Unmarshal(t.PowerControl, &powerControls)
+	if err != nil {
+		// Some Cisco implementations return a singular object instead of the
+		// expected array.
+		powerControl := PowerControl{}
+		err2 := json.Unmarshal(t.PowerControl, &powerControl)
+		if err2 != nil {
+			// Return the original error
+			return err
+		}
+
+		powerControls = append(powerControls, powerControl)
+	}
+
+	power.PowerControl = powerControls
+
+	// Extract the links to other entities for later
 	power.powerSupplyResetTarget = t.Actions.PowerSupplyReset.Target
+
 	return nil
 }
 
@@ -225,34 +246,29 @@ type PowerControl struct {
 	RelatedItem []common.Link `json:"RelatedItem,omitempty"`
 	// Status contains status and health properties of this resource.
 	Status common.Status `json:"Status,omitempty"`
-	// Actions contains the available actions for this resource.
-	Actions struct {
-		Oem json.RawMessage `json:"Oem,omitempty"`
-	} `json:"Actions,omitempty"`
 	// Oem contains OEM-specific extensions.
 	OEM json.RawMessage `json:"Oem,omitempty"`
 }
 
 // UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
 func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
-	if powercontrol == nil {
-		return fmt.Errorf("nil PowerControl receiver")
-	}
-	if len(b) == 0 {
-		return fmt.Errorf("empty input data")
-	}
-
-	type pc PowerControl
+	type temp PowerControl
 	type t1 struct {
-		pc
+		temp
+
+		// Need to work around some non-standard data types in Dell and Cisco
+		// systems.
+		MemberID            any `json:"MemberId"`
+		PowerAllocatedWatts any
+		PowerAvailableWatts any
+		PowerCapacityWatts  any
+		PowerConsumedWatts  any
 	}
 	var t t1
 
-	// First try normal unmarshaling where MemberID is a string
 	err := json.Unmarshal(b, &t)
-	if err == nil {
-		*powercontrol = PowerControl(t.pc)
-		return nil
+	if err != nil {
+		return err
 	}
 
 	// If first attempt failed, try to handle MemberID as any type
@@ -261,32 +277,16 @@ func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal PowerControl: %v", err)
 	}
 
-	// Create a new pc struct and copy all fields except MemberId
-	var result pc
-	for k, v := range raw {
-		if k != "MemberId" {
-			// This is simplified - you might need more sophisticated field copying
-			// depending on your actual struct fields
-			continue
-		}
+	// Extract the links to other entities for later
+	*powercontrol = PowerControl(t.temp)
 
-		// Handle MemberId conversion
-		switch v := v.(type) {
-		case string:
-			result.MemberID = v
-		case float64: // JSON numbers are float64
-			result.MemberID = strconv.Itoa(int(v))
-		case int:
-			result.MemberID = strconv.Itoa(v)
-		case bool:
-			result.MemberID = strconv.FormatBool(v)
-		default:
-			// For any other type, convert to string via fmt.Sprint
-			result.MemberID = fmt.Sprint(v)
-		}
-	}
+	// Standardize the property types
+	powercontrol.MemberID = parseMemberID(t.MemberID)
+	powercontrol.PowerAllocatedWatts = toFloat32(t.PowerAllocatedWatts)
+	powercontrol.PowerAvailableWatts = toFloat32(t.PowerAvailableWatts)
+	powercontrol.PowerCapacityWatts = toFloat32(t.PowerCapacityWatts)
+	powercontrol.PowerConsumedWatts = toFloat32(t.PowerConsumedWatts)
 
-	*powercontrol = PowerControl(result)
 	return nil
 }
 
@@ -312,12 +312,38 @@ type PowerMetric struct {
 	MinConsumedWatts *float32 `json:"MinConsumedWatts,omitempty"`
 }
 
+func (pm *PowerMetric) UnmarshalJSON(b []byte) error {
+	type temp PowerMetric
+	type t1 struct {
+		temp
+		IntervalInMin    any
+		MaxConsumedWatts any
+		MinConsumedWatts any
+	}
+	var t t1
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	// Extract the links to other entities for later
+	*pm = PowerMetric(t.temp)
+
+	if t.IntervalInMin != nil {
+		val := int(math.Round(float64(*toFloat32(t.IntervalInMin))))
+		pm.IntervalInMin = &val
+	}
+	pm.MaxConsumedWatts = toFloat32(t.MaxConsumedWatts)
+	pm.MinConsumedWatts = toFloat32(t.MinConsumedWatts)
+
+	return nil
+}
+
 // PowerSupply represents a power supply associated with a system or device.
 type PowerSupply struct {
 	common.Entity
 
-	// Assembly is a link to the associated Assembly resource.
-	Assembly string `json:"Assembly,omitempty"`
 	// EfficiencyPercent is the measured power efficiency percentage.
 	EfficiencyPercent *float32 `json:"EfficiencyPercent,omitempty"`
 	// FirmwareVersion is the firmware version of this power supply.
@@ -340,8 +366,6 @@ type PowerSupply struct {
 	Manufacturer string `json:"Manufacturer,omitempty"`
 	// MemberID uniquely identifies this member within the collection.
 	MemberID string `json:"MemberId"`
-	// Metrics is a link to the power supply metrics resource.
-	Metrics string `json:"Metrics,omitempty"`
 	// Model is the model information for this power supply.
 	Model string `json:"Model,omitempty"`
 	// Name is the name of this power supply.
@@ -358,8 +382,6 @@ type PowerSupply struct {
 	PowerOutputWatts *float32 `json:"PowerOutputWatts,omitempty"`
 	// PowerSupplyType is the input power type (AC or DC).
 	PowerSupplyType PowerSupplyType `json:"PowerSupplyType,omitempty"`
-	// Redundancy contains redundancy information for this power supply.
-	Redundancy []common.Link `json:"Redundancy,omitempty"`
 	// RedundancyCount is the number of redundancy items.
 	RedundancyCount int `json:"Redundancy@odata.count,omitempty"`
 	// RelatedItem contains links to resources associated with this power supply.
@@ -372,12 +394,10 @@ type PowerSupply struct {
 	SparePartNumber string `json:"SparePartNumber,omitempty"`
 	// Status contains status and health properties of this resource.
 	Status common.Status `json:"Status,omitempty"`
-	// Actions contains the available actions for this resource.
-	Actions struct {
-		OEM json.RawMessage `json:"Oem,omitempty"`
-	} `json:"Actions,omitempty"`
 
 	rawData          []byte
+	assembly         string
+	metrics          string
 	redundancyLinks  []string
 	relateditemLinks []string
 
@@ -386,33 +406,67 @@ type PowerSupply struct {
 
 // UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.
 func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
-	type ps PowerSupply
+	type temp PowerSupply
 	type actions struct {
 		Reset common.ActionTarget `json:"#PowerSupply.Reset"`
 	}
-	var t struct {
-		ps
-		Assembly    common.Link  `json:"Assembly"`
-		Metrics     common.Link  `json:"Metrics"`
-		Redundancy  common.Links `json:"Redundancy"`
-		RelatedItem common.Links `json:"RelatedItem"`
-		Actions     actions
+	type t1 struct {
+		temp
+		Assembly             common.Link
+		Metrics              common.Link
+		Redundancy           common.Links
+		RelatedItem          common.Links
+		Actions              actions
+		MemberID             any `json:"MemberId"`
+		LineInputVoltage     any
+		LastPowerOutputWatts any
+		PowerInputWatts      any
+		PowerOutputWatts     any
 	}
+	var t t1
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
 		return err
 	}
 
-	*powersupply = PowerSupply(t.ps)
-	powersupply.Assembly = t.Assembly.String()
-	powersupply.Metrics = t.Metrics.String()
+	// Extract the links to other entities for later
+	*powersupply = PowerSupply(t.temp)
 	powersupply.redundancyLinks = t.Redundancy.ToStrings()
 	powersupply.relateditemLinks = t.RelatedItem.ToStrings()
+
+	powersupply.MemberID = parseMemberID(t.MemberID)
+	powersupply.LineInputVoltage = toFloat32(t.LineInputVoltage)
+	powersupply.LastPowerOutputWatts = toFloat32(t.LastPowerOutputWatts)
+	powersupply.PowerInputWatts = toFloat32(t.PowerInputWatts)
+	powersupply.PowerOutputWatts = toFloat32(t.PowerOutputWatts)
+
+	// This is a read/write object, so we need to save the raw object data for later
 	powersupply.rawData = b
 	powersupply.resetTarget = t.Actions.Reset.Target
 
 	return nil
+}
+
+// Assembly gets the containing assembly.
+func (powersupply *PowerSupply) Assembly() (*Assembly, error) {
+	if powersupply.assembly == "" {
+		return nil, nil
+	}
+	return GetAssembly(powersupply.GetClient(), powersupply.assembly)
+}
+
+// Metrics gets the metrics associated with this power supply.
+func (powersupply *PowerSupply) Metrics() (*PowerSupplyUnitMetrics, error) {
+	if powersupply.metrics == "" {
+		return nil, nil
+	}
+	return GetPowerSupplyUnitMetrics(powersupply.GetClient(), powersupply.metrics)
+}
+
+// Redundancy gets the endpoints at the other end of the link.
+func (powersupply *PowerSupply) Redundancy() ([]*Redundancy, error) {
+	return common.GetObjects[Redundancy](powersupply.GetClient(), powersupply.redundancyLinks)
 }
 
 // GetPowerSupply retrieves a PowerSupply instance from the service.
@@ -448,33 +502,10 @@ func (powersupply *PowerSupply) Update() error {
 	return powersupply.UpdateFromRawData(powersupply, powersupply.rawData, readWriteFields)
 }
 
-// GetAssembly retrieves the containing Assembly.
-func (powersupply *PowerSupply) GetAssembly() (*Assembly, error) {
-	if powersupply.Assembly == "" {
-		return nil, nil
-	}
-	return GetAssembly(powersupply.GetClient(), powersupply.Assembly)
-}
-
-// GetMetrics retrieves the metrics associated with this power supply.
-func (powersupply *PowerSupply) GetMetrics() (*PowerSupplyUnitMetrics, error) {
-	if powersupply.Metrics == "" {
-		return nil, nil
-	}
-	return GetPowerSupplyUnitMetrics(powersupply.GetClient(), powersupply.Metrics)
-}
-
-// GetRedundancy retrieves the redundancy groups this power supply belongs to.
-func (powersupply *PowerSupply) GetRedundancy() ([]*Redundancy, error) {
-	return common.GetObjects[Redundancy](powersupply.GetClient(), powersupply.redundancyLinks)
-}
-
 // Voltage represents a voltage sensor for a chassis.
 type Voltage struct {
 	common.Entity
 
-	// Actions contains the available actions for this resource.
-	Actions *VoltageActions `json:"Actions,omitempty"`
 	// LowerThresholdCritical indicates the reading is below normal range but not yet fatal.
 	LowerThresholdCritical *float32 `json:"LowerThresholdCritical,omitempty"`
 	// LowerThresholdFatal indicates the reading is below normal range and fatal.
@@ -509,42 +540,94 @@ type Voltage struct {
 	UpperThresholdNonCritical *float32 `json:"UpperThresholdNonCritical,omitempty"`
 }
 
-// VoltageActions contains the available actions for a Voltage resource.
-type VoltageActions struct {
-	// Oem contains OEM-specific actions.
-	OEM json.RawMessage `json:"Oem,omitempty"`
-}
-
 // UnmarshalJSON unmarshals a Voltage object from the raw JSON.
 func (voltage *Voltage) UnmarshalJSON(b []byte) error {
-	type vlg Voltage
-	var t struct {
-		vlg
+	type temp Voltage
+	type t1 struct {
+		temp
 		RelatedItemCount int `json:"RelatedItem@odata.count"`
+
+		// Need to work around some non-standard data types in Dell and Cisco
+		// systems.
+		MemberID                  any `json:"MemberId"`
+		UpperThresholdCritical    any
+		UpperThresholdFatal       any
+		UpperThresholdNonCritical any
+		LowerThresholdCritical    any
+		LowerThresholdFatal       any
+		LowerThresholdNonCritical any
+		ReadingVolts              any
 	}
+	var t t1
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		var t2 struct {
-			vlg
-			RelatedItemCount int `json:"RelatedItem@odata.count"`
-			MemberID         int `json:"MemberId"`
-		}
-		err2 := json.Unmarshal(b, &t2)
-		if err2 != nil {
-			return err
-		}
-
-		t = struct {
-			vlg
-			RelatedItemCount int `json:"RelatedItem@odata.count"`
-		}{
-			vlg:              t2.vlg,
-			RelatedItemCount: t2.RelatedItemCount,
-		}
-		t.MemberID = strconv.Itoa(t2.MemberID)
+		return err
 	}
 
-	*voltage = Voltage(t.vlg)
+	// Extract the links to other entities for later
+	*voltage = Voltage(t.temp)
+
+	// Standardize the property types
+	voltage.MemberID = parseMemberID(t.MemberID)
+	voltage.UpperThresholdCritical = toFloat32(t.UpperThresholdCritical)
+	voltage.UpperThresholdFatal = toFloat32(t.UpperThresholdFatal)
+	voltage.UpperThresholdNonCritical = toFloat32(t.UpperThresholdNonCritical)
+	voltage.LowerThresholdCritical = toFloat32(t.LowerThresholdCritical)
+	voltage.LowerThresholdFatal = toFloat32(t.LowerThresholdFatal)
+	voltage.LowerThresholdNonCritical = toFloat32(t.LowerThresholdNonCritical)
+	voltage.ReadingVolts = toFloat32(t.ReadingVolts)
+
 	return nil
+}
+
+func parseMemberID(val any) string {
+	switch id := val.(type) {
+	case string:
+		return id
+	case json.Number:
+		return id.String()
+	case int:
+		return strconv.Itoa(id)
+	case float32:
+		return strconv.Itoa(int(id))
+	case float64:
+		return strconv.Itoa(int(id))
+	}
+
+	return ""
+}
+
+func toFloat32(val any) *float32 {
+	if val == nil {
+		return nil
+	}
+
+	var ret float32 = 0.0
+	switch valu := val.(type) {
+	case string:
+		fl, err := strconv.ParseFloat(valu, 32)
+		if err == nil {
+			ret = float32(fl)
+		}
+	case int:
+		ret = float32(valu)
+	case float32:
+		ret = float32(valu)
+	case float64:
+		conv := float32(valu)
+		if math.IsInf(float64(conv), 1) {
+			// Too big, return float32 max as a fallback
+			ret = math.MaxFloat32
+		}
+
+		if math.IsInf(float64(conv), 0) {
+			// Too large negative
+			ret = -math.MaxFloat32
+		}
+
+		ret = conv
+	}
+
+	return &ret
 }
