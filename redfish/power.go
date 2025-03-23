@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"math"
 	"reflect"
 	"strconv"
 
@@ -149,7 +150,8 @@ func (power *Power) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
-		Actions Actions
+		Actions      Actions
+		PowerControl json.RawMessage
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -158,6 +160,23 @@ func (power *Power) UnmarshalJSON(b []byte) error {
 	}
 
 	*power = Power(t.temp)
+
+	powerControls := []PowerControl{}
+	err = json.Unmarshal(t.PowerControl, &powerControls)
+	if err != nil {
+		// Some Cisco implementations return a singular object instead of the
+		// expected array.
+		powerControl := PowerControl{}
+		err2 := json.Unmarshal(t.PowerControl, &powerControl)
+		if err2 != nil {
+			// Return the original error
+			return err
+		}
+
+		powerControls = append(powerControls, powerControl)
+	}
+
+	power.PowerControl = powerControls
 
 	// Extract the links to other entities for later
 	power.powerSupplyResetTarget = t.Actions.PowerSupplyReset.Target
@@ -251,32 +270,32 @@ func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
 	type temp PowerControl
 	type t1 struct {
 		temp
+
+		// Need to work around some non-standard data types in Dell and Cisco
+		// systems.
+		MemberID            any
+		PowerAllocatedWatts any
+		PowerAvailableWatts any
+		PowerCapacityWatts  any
+		PowerConsumedWatts  any
 	}
 	var t t1
 
-	// Some vendor implementations had a bug where the member ID was an numeric value.
-	// To avoid a marshaling error for these systems we try to handle both ways.
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		// See if we need to handle converting MemberID
-		var t2 struct {
-			t1
-			MemberID int `json:"MemberId"`
-		}
-		err2 := json.Unmarshal(b, &t2)
-
-		if err2 != nil {
-			// Return the original error
-			return err
-		}
-
-		// Convert the numeric member ID to a string
-		t = t2.t1
-		t.temp.MemberID = strconv.Itoa(t2.MemberID)
+		return err
 	}
 
 	// Extract the links to other entities for later
 	*powercontrol = PowerControl(t.temp)
+
+	// Standardize the property types
+	powercontrol.MemberID = parseMemberID(t.MemberID)
+
+	powercontrol.PowerAllocatedWatts = toFloat32(t.PowerAllocatedWatts)
+	powercontrol.PowerAvailableWatts = toFloat32(t.PowerAvailableWatts)
+	powercontrol.PowerCapacityWatts = toFloat32(t.PowerCapacityWatts)
+	powercontrol.PowerConsumedWatts = toFloat32(t.PowerConsumedWatts)
 
 	return nil
 }
@@ -411,12 +430,18 @@ type PowerSupply struct {
 // UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.
 func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	type temp PowerSupply
-	var t struct {
+	type t1 struct {
 		temp
-		Assembly   common.Link
-		Metrics    common.Link
-		Redundancy common.Links
+		Assembly             common.Link
+		Metrics              common.Link
+		Redundancy           common.Links
+		MemberID             any
+		LineInputVoltage     any
+		LastPowerOutputWatts any
+		PowerInputWatts      any
+		PowerOutputWatts     any
 	}
+	var t t1
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
@@ -428,6 +453,13 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	powersupply.assembly = t.Assembly.String()
 	powersupply.metrics = t.Metrics.String()
 	powersupply.redundancy = t.Redundancy.ToStrings()
+
+	powersupply.MemberID = parseMemberID(t.MemberID)
+
+	powersupply.LineInputVoltage = toFloat32(t.LineInputVoltage)
+	powersupply.LastPowerOutputWatts = toFloat32(t.LastPowerOutputWatts)
+	powersupply.PowerInputWatts = toFloat32(t.PowerInputWatts)
+	powersupply.PowerOutputWatts = toFloat32(t.PowerOutputWatts)
 
 	// This is a read/write object, so we need to save the raw object data for later
 	powersupply.rawData = b
@@ -549,30 +581,82 @@ func (voltage *Voltage) UnmarshalJSON(b []byte) error {
 	type temp Voltage
 	type t1 struct {
 		temp
+
+		// Need to work around some non-standard data types in Dell and Cisco
+		// systems.
+		MemberID                  any
+		UpperThresholdCritical    any
+		UpperThresholdFatal       any
+		UpperThresholdNonCritical any
+		LowerThresholdCritical    any
+		LowerThresholdFatal       any
+		LowerThresholdNonCritical any
+		ReadingVolts              any
 	}
 	var t t1
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		// See if we need to handle converting MemberID
-		var t2 struct {
-			t1
-			MemberID int `json:"MemberId"`
-		}
-		err2 := json.Unmarshal(b, &t2)
-
-		if err2 != nil {
-			// Return the original error
-			return err
-		}
-
-		// Convert the numeric member ID to a string
-		t = t2.t1
-		t.temp.MemberID = strconv.Itoa(t2.MemberID)
+		return err
 	}
 
 	// Extract the links to other entities for later
 	*voltage = Voltage(t.temp)
 
+	// Standardize the property types
+	voltage.MemberID = parseMemberID(t.MemberID)
+	voltage.UpperThresholdCritical = toFloat32(t.UpperThresholdCritical)
+	voltage.UpperThresholdFatal = toFloat32(t.UpperThresholdFatal)
+	voltage.UpperThresholdNonCritical = toFloat32(t.UpperThresholdNonCritical)
+	voltage.LowerThresholdCritical = toFloat32(t.LowerThresholdCritical)
+	voltage.LowerThresholdFatal = toFloat32(t.LowerThresholdFatal)
+	voltage.LowerThresholdNonCritical = toFloat32(t.LowerThresholdNonCritical)
+
 	return nil
+}
+
+func parseMemberID(val any) string {
+	switch id := val.(type) {
+	case string:
+		return id
+	case json.Number:
+		return id.String()
+	case int:
+		return strconv.Itoa(id)
+	case float32:
+		return strconv.Itoa(int(id))
+	case float64:
+		return strconv.Itoa(int(id))
+	}
+
+	return ""
+}
+
+func toFloat32(val any) float32 {
+	switch valu := val.(type) {
+	case string:
+		fl, err := strconv.ParseFloat(valu, 32)
+		if err == nil {
+			return float32(fl)
+		}
+	case int:
+		return float32(valu)
+	case float32:
+		return float32(valu)
+	case float64:
+		conv := float32(valu)
+		if math.IsInf(float64(conv), 1) {
+			// Too big, return float32 max as a fallback
+			return math.MaxFloat32
+		}
+
+		if math.IsInf(float64(conv), 0) {
+			// Too large negative
+			return -math.MaxFloat32
+		}
+
+		return conv
+	}
+
+	return 0.0
 }
