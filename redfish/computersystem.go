@@ -1326,6 +1326,9 @@ type CSLinks struct {
 type MemorySummary struct {
 	// MemoryMirroring is the ability and type of memory mirroring supported by this system.
 	MemoryMirroring MemoryMirroring
+	// Metrics shall be a reference to the Metrics
+	// associated with this MemorySummary.
+	metrics string
 	// Status is the status or health properties of the resource.
 	Status common.Status
 	// TotalSystemMemoryGiB is the amount of configured system general purpose
@@ -1334,6 +1337,34 @@ type MemorySummary struct {
 	// TotalSystemPersistentMemoryGiB is the total amount of configured
 	// persistent memory available to the system as measured in gibibytes.
 	TotalSystemPersistentMemoryGiB float32
+}
+
+func (memorySummary *MemorySummary) UnmarshalJSON(b []byte) error {
+	type temp MemorySummary
+	type t1 struct {
+		temp
+		Metrics common.Link
+	}
+	var t t1
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*memorySummary = MemorySummary(t.temp)
+
+	memorySummary.metrics = t.Metrics.String()
+
+	return nil
+}
+
+// Metrics gets the memory summary metrics
+func (memorySummary *MemorySummary) Metrics(c common.Client) (*MemoryMetrics, error) {
+	if memorySummary.metrics == "" {
+		return nil, nil
+	}
+	return GetMemoryMetrics(c, memorySummary.metrics)
 }
 
 // ProcessorSummary is This type shall contain properties which describe
