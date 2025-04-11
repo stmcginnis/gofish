@@ -453,6 +453,9 @@ type Processor struct {
 	// Model shall indicate the model information as
 	// provided by the manufacturer of this processor.
 	Model string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// (v1.9+) The link to the collection operating configurations
 	// that can be applied to this processor.
 	operatingConfigs []string
