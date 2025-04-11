@@ -407,6 +407,7 @@ type Processor struct {
 	// (v1.9+) The state of the base frequency settings of
 	// the operation configuration applied to this processor.
 	BaseSpeedPriorityState BaseSpeedPriorityState
+	cacheMemory            string
 	certificates           []string
 	// Description provides a description of this resource.
 	Description string
@@ -611,6 +612,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 		AppliedOperatingConfig common.Link
 		Assembly               common.Link
 		Certificates           common.LinksCollection
+		CacheMemory            common.Link
 		EnvironmentMetrics     common.Link
 		Metrics                common.Link
 		OperatingConfigs       common.LinksCollection
@@ -661,6 +663,7 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 	processor.accelerationFunctions = t.AccelerationFunctions.ToStrings()
 	processor.appliedOperatingConfig = t.AppliedOperatingConfig.String()
 	processor.assembly = t.Assembly.String()
+	processor.cacheMemory = t.CacheMemory.String()
 	processor.certificates = t.Certificates.ToStrings()
 	processor.environmentMetrics = t.EnvironmentMetrics.String()
 	processor.metrics = t.Metrics.String()
@@ -749,6 +752,13 @@ func (processor *Processor) Assembly() (*Assembly, error) {
 		return nil, nil
 	}
 	return GetAssembly(processor.GetClient(), processor.assembly)
+}
+
+func (processor *Processor) CacheMemory() ([]*Memory, error) {
+	if processor.cacheMemory == "" {
+		return nil, nil
+	}
+	return ListReferencedMemorys(processor.GetClient(), processor.cacheMemory)
 }
 
 // Certificates gets the certificates for device identity and attestation.
