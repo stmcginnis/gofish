@@ -288,3 +288,7 @@ func (powerSupplyUnit *PowerSupplyUnit) PowerOutlets() ([]*Outlet, error) {
 func (powerSupplyUnit *PowerSupplyUnit) PoweringChassis() ([]*Chassis, error) {
 	return common.GetObjects[Chassis](powerSupplyUnit.GetClient(), powerSupplyUnit.poweringChassis)
 }
+
+func (powerSupplyUnit *PowerSupplyUnit) RawData() []byte {
+	return powerSupplyUnit.rawData
+}
