@@ -70,9 +70,38 @@ func (l Links) ToStrings() []string {
 
 // LinksCollection contains links to other entities
 type LinksCollection struct {
-	ODataCount int   `json:"@odata.count"`
-	Count      int   `json:"Members@odata.count"`
-	Members    Links `json:"Members"`
+	ODataCount int `json:"@odata.count"`
+	Count      int `json:"Members@odata.count"`
+	Members    Links
+	MembersRaw json.RawMessage `json:"Members"`
+}
+
+func (cl *LinksCollection) UnmarshalJSON(b []byte) error {
+	type temp LinksCollection
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*cl = LinksCollection(t.temp)
+
+	if t.MembersRaw == nil {
+		return nil
+	}
+
+	var l Links
+
+	err = json.Unmarshal(t.MembersRaw, &l)
+	if err != nil {
+		return err
+	}
+	cl.Members = l
+
+	return nil
 }
 
 // ToStrings will extract the URI for all linked entities.
