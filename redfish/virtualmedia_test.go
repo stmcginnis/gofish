@@ -166,7 +166,7 @@ func TestVirtualMediaInsert(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.InsertMedia("https://example.com/image", false, true)
+	_, err = result.InsertMedia("https://example.com/image", false, true)
 
 	if err != nil {
 		t.Errorf("Error making InsertMedia call: %s", err)
@@ -207,7 +207,7 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 		WriteProtected: true,
 	}
 
-	err = result.InsertMediaConfig(virtualMediaConfig)
+	_, err = result.InsertMediaConfig(virtualMediaConfig)
 	if err != nil {
 		t.Errorf("Error making InsertMediaConfig call: %s", err)
 	}
