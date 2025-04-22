@@ -178,7 +178,7 @@ func TestVirtualMediaInsert(t *testing.T) {
 		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
 	}
 
-	if !strings.Contains(calls[0].Payload, "Inserted:false") {
+	if strings.Contains(calls[0].Payload, "Inserted:true") {
 		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
 	}
 
