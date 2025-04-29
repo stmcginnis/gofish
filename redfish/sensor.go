@@ -398,7 +398,7 @@ type Sensor struct {
 	// The maximum possible value for this sensor.
 	ReadingRangeMax float64
 	// The minimum possible value for this sensor.
-	ReadingRangeMin float32
+	ReadingRangeMin float64
 	// The date and time that the reading was acquired from the sensor.
 	ReadingTime string
 	// The type of sensor.
