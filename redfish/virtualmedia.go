@@ -7,6 +7,7 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -269,22 +270,12 @@ func (virtualmedia *VirtualMedia) EjectMedia() error {
 }
 
 // InsertMedia sends a request to insert virtual media.
-func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProtected bool) error {
-	if !virtualmedia.SupportsMediaInsert {
-		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
-	}
-
-	t := struct {
-		Image          string
-		Inserted       bool
-		WriteProtected bool
-	}{
+func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProtected bool) (*Task, error) {
+	return virtualmedia.InsertMediaConfig(VirtualMediaConfig{
 		Image:          image,
 		Inserted:       inserted,
 		WriteProtected: writeProtected,
-	}
-
-	return virtualmedia.Post(virtualmedia.insertMediaTarget, t)
+	})
 }
 
 // VirtualMediaConfig is an struct used to pass config data to build the HTTP body when inserting media
@@ -300,12 +291,29 @@ type VirtualMediaConfig struct {
 }
 
 // InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct
-func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) error { //nolint
+func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (*Task, error) { //nolint
 	if !virtualmedia.SupportsMediaInsert {
-		return errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
+		return nil, errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
 
-	return virtualmedia.Post(virtualmedia.insertMediaTarget, config)
+	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMediaTarget, config)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// TODO: maybe also check StatusOK/200
+	if resp.StatusCode != http.StatusAccepted {
+		return nil, nil
+	}
+
+	if location := resp.Header["Location"]; len(location) > 0 {
+		return GetTask(virtualmedia.GetClient(), location[0])
+	}
+
+	// TODO: check if there's a task link in the body
+
+	return nil, nil
 }
 
 // GetVirtualMedia will get a VirtualMedia instance from the service.

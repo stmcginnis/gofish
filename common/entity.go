@@ -113,16 +113,7 @@ func (e *Entity) Get(c Client, uri string, payload interface{}) error {
 
 // Patch performs a Patch request against the Redfish service with etag
 func (e *Entity) Patch(uri string, payload interface{}) error {
-	header := make(map[string]string)
-	if e.etag != "" && !e.disableEtagMatch {
-		if e.stripEtagQuotes {
-			e.etag = strings.Trim(e.etag, "\"")
-		}
-
-		header["If-Match"] = e.etag
-	}
-
-	resp, err := e.client.PatchWithHeaders(uri, payload, header)
+	resp, err := e.client.PatchWithHeaders(uri, payload, e.headers())
 	if err == nil {
 		return resp.Body.Close()
 	}
@@ -131,19 +122,11 @@ func (e *Entity) Patch(uri string, payload interface{}) error {
 
 // Post performs a Post request against the Redfish service with etag
 func (e *Entity) Post(uri string, payload interface{}) error {
-	header := make(map[string]string)
-	if e.etag != "" && !e.disableEtagMatch {
-		if e.stripEtagQuotes {
-			e.etag = strings.Trim(e.etag, "\"")
-		}
-
-		header["If-Match"] = e.etag
-	}
-
-	resp, err := e.client.PostWithHeaders(uri, payload, header)
+	resp, err := e.PostWithResponse(uri, payload)
 	if err == nil {
 		return resp.Body.Close()
 	}
+
 	return err
 }
 
@@ -151,6 +134,10 @@ func (e *Entity) Post(uri string, payload interface{}) error {
 // returning the response from the service.
 // Callers should make sure to call `resp.Body.Close()` when done with the response.
 func (e *Entity) PostWithResponse(uri string, payload interface{}) (*http.Response, error) {
+	return e.client.PostWithHeaders(uri, payload, e.headers())
+}
+
+func (e *Entity) headers() map[string]string {
 	header := make(map[string]string)
 	if e.etag != "" && !e.disableEtagMatch {
 		if e.stripEtagQuotes {
@@ -159,8 +146,7 @@ func (e *Entity) PostWithResponse(uri string, payload interface{}) (*http.Respon
 
 		header["If-Match"] = e.etag
 	}
-
-	return e.client.PostWithHeaders(uri, payload, header)
+	return header
 }
 
 type Filter string
