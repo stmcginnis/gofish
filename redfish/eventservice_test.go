@@ -591,7 +591,7 @@ func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing
 
 // TestEventServiceCreateEventSubscriptionInputParametersValidation
 // tests the validation of input parameters for CreateEventSubscription.
-func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing.T) { //nolint
+func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing.T) {
 	var result EventService
 	err := json.NewDecoder(strings.NewReader(eventServiceBody)).Decode(&result)
 	if err != nil {

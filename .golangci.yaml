@@ -1,61 +1,6 @@
-linters-settings:
-  depguard:
-      rules:
-        prevent_unmaintained_packages:
-          list-mode: lax # allow unless explicitly denied
-          files:
-            - $all
-            - "!$test"
-          allow:
-            - $gostd
-          deny:
-            - pkg: io/ioutil
-              desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
-  dupl:
-    threshold: 200
-  funlen:
-    lines: 100
-    statements: 50
-  goheader:
-    values:
-      const:
-        LICENSE: BSD-3-Clause
-    template: |-
-      SPDX-License-Identifier: {{ LICENSE }}
-  goconst:
-    min-len: 2
-    min-occurrences: 5
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - deprecatedComment
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-  gocyclo:
-    min-complexity: 30
-  goimports:
-    local-prefixes: github.com/stmcginnis
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment
-  misspell:
-    locale: US
-  nolintlint:
-    allow-unused: false # report any unused nolint directives
-    require-explanation: false # don't require an explanation for nolint directives
-    require-specific: false # don't require nolint directives to be specific about which linter is being skipped
-
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - depguard
@@ -67,10 +12,8 @@ linters:
     - gocritic
     - gocyclo
     - goheader
-    - goimports
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - misspell
@@ -80,38 +23,99 @@ linters:
     - revive
     - rowserrcheck
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
     - whitespace
-
-  # don't enable:
-  # - asciicheck
-  # - exhaustive
-  # - gochecknoinits
-  # - gochecknoglobals
-  # - gocognit
-  # - godot
-  # - godox
-  # - goerr113
-  # - interfacer
-  # - lll
-  # - nestif
-  # - prealloc
-  # - testpackage
-  # - revive
-  # - scopelint
-  # - wsl
-
-issues:
-  exclude:
-    - 'declaration of "(err|ctx)" shadows declaration at'
-    - "G402: TLS InsecureSkipVerify may be true"
-    - "`(F|f)ibre` is a misspelling"
-    - "`(C|c)ancell.*` is a misspelling"
-    - "Error return value of `original.UnmarshalJSON` is not checked"
-  exclude-dirs:
-    - examples
-    - tools
+  settings:
+    depguard:
+      rules:
+        prevent_unmaintained_packages:
+          list-mode: lax
+          files:
+            - $all
+            - '!$test'
+          allow:
+            - $gostd
+          deny:
+            - pkg: io/ioutil
+              desc: 'replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil'
+    dupl:
+      threshold: 200
+    funlen:
+      lines: 100
+      statements: 50
+    goconst:
+      min-len: 2
+      min-occurrences: 5
+    gocritic:
+      disabled-checks:
+        - deprecatedComment
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+        - wrapperFunc
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 30
+    goheader:
+      values:
+        const:
+          LICENSE: BSD-3-Clause
+      template: 'SPDX-License-Identifier: {{ LICENSE }}'
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+    misspell:
+      locale: US
+    nolintlint:
+      require-explanation: false
+      require-specific: false
+      allow-unused: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: (.+)\.go$
+        text: declaration of "(err|ctx)" shadows declaration at
+      - path: (.+)\.go$
+        text: 'G402: TLS InsecureSkipVerify may be true'
+      - path: (.+)\.go$
+        text: '`(F|f)ibre` is a misspelling'
+      - path: (.+)\.go$
+        text: '`(C|c)ancell.*` is a misspelling'
+      - path: (.+)\.go$
+        text: Error return value of `original.UnmarshalJSON` is not checked
+    paths:
+      - examples
+      - tools
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/stmcginnis
+  exclusions:
+    generated: lax
+    paths:
+      - examples
+      - tools
+      - third_party$
+      - builtin$
+      - examples$

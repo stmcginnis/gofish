@@ -272,7 +272,7 @@ func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
 
 		// Convert the numeric member ID to a string
 		t = t2.t1
-		t.temp.MemberID = strconv.Itoa(t2.MemberID)
+		t.MemberID = strconv.Itoa(t2.MemberID)
 	}
 
 	// Extract the links to other entities for later
@@ -568,7 +568,7 @@ func (voltage *Voltage) UnmarshalJSON(b []byte) error {
 
 		// Convert the numeric member ID to a string
 		t = t2.t1
-		t.temp.MemberID = strconv.Itoa(t2.MemberID)
+		t.MemberID = strconv.Itoa(t2.MemberID)
 	}
 
 	// Extract the links to other entities for later
