@@ -723,8 +723,3 @@ type ErrExtendedInfo struct {
 	// An optional string describing recommended action(s) to take to resolve the error.
 	Resolution string
 }
-
-// ActionTarget is contains the target endpoint for object Actions.
-type ActionTarget struct {
-	Target string
-}
