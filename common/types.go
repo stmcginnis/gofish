@@ -535,19 +535,18 @@ type Resource struct {
 
 // ResourceCollection is
 type ResourceCollection struct {
+	Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
+	// ODataEtag is the odata etag.
+	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
-	// Name is the name of this resource
-	Name string
 	// Oem is The value of this string shall be of the format for the
 	// reserved word *Oem*.
-	OEM string `json:"Oem"`
+	OEM json.RawMessage `json:"Oem"`
 }
 
 // Operations shall describe a currently running operation on the resource.
