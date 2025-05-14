@@ -70,12 +70,12 @@ func TestVirtualMedia(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.ejectMediaTarget != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.EjectMedia" {
-		t.Errorf("Received invalid EjectMedia Action target: %s", result.ejectMediaTarget)
+	if result.ejectMedia.Target != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.EjectMedia" {
+		t.Errorf("Received invalid EjectMedia Action target: %s", result.ejectMedia.Target)
 	}
 
-	if result.insertMediaTarget != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia" {
-		t.Errorf("Received invalid InsertMedaiaAction target: %s", result.insertMediaTarget)
+	if result.insertMedia.Target != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia" {
+		t.Errorf("Received invalid InsertMedaiaAction target: %s", result.insertMedia.Target)
 	}
 
 	if result.Inserted == true {
