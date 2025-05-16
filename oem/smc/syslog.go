@@ -55,8 +55,11 @@ func (i *Syslog) Update() error {
 
 	readWriteFields := []string{
 		"Enabled",
+		"EnableSyslog",
 		"Port",
+		"SyslogPortNumber",
 		"Server",
+		"SyslogServer",
 	}
 
 	originalElement := reflect.ValueOf(orig).Elem()

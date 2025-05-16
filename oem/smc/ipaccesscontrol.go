@@ -71,6 +71,7 @@ func (i *IPAccessControl) Update() error {
 
 	readWriteFields := []string{
 		"Enabled",
+		"ServiceEnabled",
 	}
 
 	originalElement := reflect.ValueOf(orig).Elem()

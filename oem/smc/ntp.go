@@ -56,8 +56,11 @@ func (r *NTP) Update() error {
 
 	readWriteFields := []string{
 		"Enabled",
+		"NTPEnable",
 		"PrimaryServer",
+		"PrimaryNTPServer",
 		"SecondaryServer",
+		"SecondaryNTPServer",
 		"DaylightSavingTime",
 	}
 

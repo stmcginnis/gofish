@@ -53,6 +53,7 @@ func (i *SysLockdown) Update() error {
 
 	readWriteFields := []string{
 		"Enabled",
+		"SysLockdownEnabled",
 	}
 
 	originalElement := reflect.ValueOf(orig).Elem()
