@@ -54,6 +54,7 @@ func (i *IKVM) Update() error {
 
 	readWriteFields := []string{
 		"CurrentInterface",
+		"Current Interface",
 	}
 
 	originalElement := reflect.ValueOf(orig).Elem()

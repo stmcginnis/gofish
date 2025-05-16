@@ -58,6 +58,7 @@ func (i *MemoryPFA) Update() error {
 
 	readWriteFields := []string{
 		"Next",
+		"MemoryPfaNext",
 		"AlertID",
 	}
 

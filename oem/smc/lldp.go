@@ -60,6 +60,7 @@ func (i *LLDP) Update() error {
 
 	readWriteFields := []string{
 		"Enabled",
+		"LLDPEnabled",
 	}
 
 	originalElement := reflect.ValueOf(orig).Elem()

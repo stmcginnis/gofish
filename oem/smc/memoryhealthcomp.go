@@ -56,6 +56,7 @@ func (i *MemoryHealthComp) Update() error {
 
 	readWriteFields := []string{
 		"Next",
+		"MemoryHealthCompNext",
 	}
 
 	originalElement := reflect.ValueOf(orig).Elem()

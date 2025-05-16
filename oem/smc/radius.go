@@ -56,9 +56,13 @@ func (r *RADIUS) Update() error {
 
 	readWriteFields := []string{
 		"Enabled",
+		"RadiusEnabled",
 		"ServerIP",
+		"RadiusServerIP",
 		"PortNumber",
+		"RadiusPortNumber",
 		"Secret",
+		"RadiusSecret",
 	}
 
 	originalElement := reflect.ValueOf(rad).Elem()
