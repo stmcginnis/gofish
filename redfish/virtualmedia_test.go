@@ -5,7 +5,11 @@
 package redfish
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
+	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -20,10 +24,12 @@ var vmBody = `{
 	"Id": "1",
 	"Actions": {
 	  "#VirtualMedia.EjectMedia": {
-		"target": "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.EjectMedia"
+		"target": "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.EjectMedia",
+		"@Redfish.ActionInfo": "/redfish/v1/Managers/1/VirtualMedia/1/EjectMediaActionInfo"
 	  },
 	  "#VirtualMedia.InsertMedia": {
-		"target": "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia"
+		"target": "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia",
+		"@Redfish.ActionInfo": "/redfish/v1/Managers/1/VirtualMedia/1/InsertMediaActionInfo"
 	  }
 	},
 	"ConnectedVia": "NotConnected",
@@ -70,12 +76,20 @@ func TestVirtualMedia(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.ejectMediaTarget != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.EjectMedia" {
-		t.Errorf("Received invalid EjectMedia Action target: %s", result.ejectMediaTarget)
+	if result.ejectMedia.Target != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.EjectMedia" {
+		t.Errorf("Received invalid EjectMedia Action target: %s", result.ejectMedia.Target)
 	}
 
-	if result.insertMediaTarget != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia" {
-		t.Errorf("Received invalid InsertMedaiaAction target: %s", result.insertMediaTarget)
+	if result.ejectMedia.Info != "/redfish/v1/Managers/1/VirtualMedia/1/EjectMediaActionInfo" {
+		t.Errorf("Received invalid EjectMediaActionInfo target: %s", result.ejectMedia.Info)
+	}
+
+	if result.insertMedia.Target != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia" {
+		t.Errorf("Received invalid InsertMediaAction target: %s", result.insertMedia.Target)
+	}
+
+	if result.insertMedia.Info != "/redfish/v1/Managers/1/VirtualMedia/1/InsertMediaActionInfo" {
+		t.Errorf("Received invalid InsertMediaActionInfo target: %s", result.insertMedia.Info)
 	}
 
 	if result.Inserted == true {
@@ -231,5 +245,65 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 	}
 	if !strings.Contains(calls[0].Payload, "WriteProtected:true") {
 		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
+	}
+}
+
+// TestVirtualMediaActionInfo tests the ActionInfo call.
+func TestVirtualMediaActionInfo(t *testing.T) {
+	var result VirtualMedia
+	err := json.NewDecoder(strings.NewReader(vmBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	want := map[string]interface{}{
+		"Id":   "InsertMedia",
+		"Name": "InsertMedia",
+		"Parameters": []common.Parameter{
+			{Name: "Image", DataType: "String", Required: true},
+			{Name: "Inserted", DataType: "Boolean"},
+			{Name: "WriteProtected", DataType: "Boolean"},
+			{Name: "TransferProtocolType", DataType: "String", Required: true, AllowableValues: []string{"NFS", "CIFS"}},
+			{Name: "TransferMethod", DataType: "String", AllowableValues: []string{"Stream"}},
+			{Name: "UserName", DataType: "String"},
+			{Name: "Password", DataType: "String"},
+		},
+	}
+	b, err := json.Marshal(want)
+	if err != nil {
+		t.Fatalf("Failed to marshal json: %s", err)
+	}
+
+	testClient := &common.TestClient{
+		CustomReturnForActions: map[string][]interface{}{
+			http.MethodGet: {
+				&http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(bytes.NewBuffer(b)),
+				},
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	got, err := result.InsertMediaActionInfo()
+	if err != nil {
+		t.Errorf("Error making InsertMediaActionInfo call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if calls[0].Payload != "" {
+		t.Errorf("Unexpected InsertMediaActionInfo payload: %s", calls[0].Payload)
+	}
+
+	if got.ID != want["Id"].(string) {
+		t.Errorf("Unexpected ID, want: %v, got: %v", want["Id"], got.ID)
+	}
+	if got.Name != want["Name"].(string) {
+		t.Errorf("Unexpected Name, want: %v, got: %v", want["Name"], got.Name)
+	}
+	if !reflect.DeepEqual(got.Parameters, want["Parameters"].([]common.Parameter)) {
+		t.Errorf("Parameters don't match, \nwant: %v\n got: %v", want["Parameters"], got.Parameters)
 	}
 }
