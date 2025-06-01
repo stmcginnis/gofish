@@ -8,8 +8,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -221,4 +224,155 @@ func TestAuthTokenAccessors(t *testing.T) {
 	if c.GetAuthToken() != nil {
 		t.Error("Should return nil")
 	}
+}
+
+const brokenHuaweiServiceRoot = `{
+  "@odata.context": "/redfish/v1/$metadata#ServiceRoot",
+  "@odata.id": "/redfish/v1/",
+  "@odata.type": "#ServiceRoot.v1_1_0.ServiceRoot",
+  "Id": "RootService",
+  "Name": "Root Service",
+  "RedfishVersion": "1.0.2",
+  "UUID": "2D0B7460-48DC-BB02-EB11-592730502FEC",
+  "Systems": {
+    "@odata.id": "/redfish/v1/Systems"
+  },
+  "Chassis": {
+    "@odata.id": "/redfish/v1/Chassis"
+  },
+  "Managers": {
+    "@odata.id": "/redfish/v1/Managers"
+  },
+  "Tasks": {
+    "@odata.id": "/redfish/v1/TaskService"
+  },
+  "SessionService": {
+    "@odata.id": "/redfish/v1/SessionService"
+  },
+  "AccountService": {
+    "@odata.id": "/redfish/v1/AccountService"
+  },
+  "EventService": {
+    "@odata.id": "/redfish/v1/EventService"
+  },
+  "UpdateService": {
+    "@odata.id": "/redfish/v1/UpdateService"
+  },
+  "Registries": {
+    "@odata.id": "/redfish/v1/Registries"
+  },
+  "JsonSchemas": {
+    "@odata.id": "/redfish/v1/JSONSchemas"
+  },
+  "Oem": {
+    "Huawei": {
+      "SmsUpdateService": null,
+      "ProductName": "2288H V5",
+      "HostName": "2102311XBxxxxxxxxxxx",
+      "LanguageSet": "en,zh,ja,fr",
+      "Copyright": "Huawei Technologies Co., Ltd. 2004-2020. All rights reserved.",
+      "DomainName": null,
+      "AccountLockoutDuration": 300
+    }
+  }
+}`
+
+func huaweiPatch(s *Service) error {
+	// check if this is a Huawei BMC
+	if s.Vendor != "Huawei" && s.Vendor != "" {
+		return nil
+	}
+	var result map[string]any
+	err := json.Unmarshal(s.Oem, &result)
+	if err != nil {
+		return err
+	}
+	var isHuawei = false
+	_, isHuawei = result["Huawei"]
+	if !isHuawei {
+		return nil
+	}
+
+	// This code would be called from an external package
+	// => can only use public API!
+	if s.sessions == "" {
+		s.sessions = "/redfish/v1/SessionService/Sessions"
+	}
+
+	return nil
+}
+
+func TestSetupClientWithConfig(t *testing.T) {
+	const xAuthToken = "f38d4148774822d02e4fe8e5bd85ad41"
+	const sessionID = "d8899013a6beb9e6"
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/redfish/v1/" && r.Method == "GET" {
+			w.Header().Set("Content-Type", "application/json;charset=utf-8")
+			w.WriteHeader(200)
+			io.WriteString(w, brokenHuaweiServiceRoot)
+		} else if r.URL.Path == "/redfish/v1/SessionService/Sessions" && r.Method == "POST" {
+			w.Header().Set("Content-Type", "application/json;charset=utf-8")
+			w.Header().Set("X-Auth-Token", xAuthToken)
+			w.Header().Set("Location", fmt.Sprintf("%s/%s", r.URL.Path, sessionID))
+			w.WriteHeader(201)
+			io.WriteString(w, fmt.Sprintf(
+				`{
+  "@odata.context": "/redfish/v1/$metadata#Session.Session",
+  "@odata.id": "/redfish/v1/SessionService/Sessions/%s",
+  "@odata.type": "#Session.v1_0_2.Session",
+  "Id": %s,
+  "Name": "User Session",
+}`, sessionID, sessionID))
+		} else {
+			w.WriteHeader(404)
+		}
+	}))
+	defer ts.Close()
+
+	ctx := context.Background()
+	config := ClientConfig{
+		Endpoint:   ts.URL,
+		HTTPClient: ts.Client(),
+		Username:   "foo",
+		Password:   "bar",
+		BasicAuth:  false,
+	}
+
+	// First test the failing case
+	// see https://github.com/stmcginnis/gofish/issues/162, and
+	//     https://github.com/stmcginnis/gofish/issues/425
+	_, err := ConnectContext(ctx, config)
+	if err != nil {
+		if err.Error() != "unable to execute request, no target provided" {
+			t.Errorf("Unexpected error: %v", err)
+		}
+	} else {
+		t.Errorf("Should fail with 'unable to execute request, no target provided'")
+	}
+
+	// Now test the lower level API that allows for a client-side vendor patch
+	c, err := SetupClientWithConfig(ctx, &config)
+	if err != nil {
+		t.Errorf("Should succeed, got: %s", err)
+	}
+	err = huaweiPatch(c.GetService())
+	if err != nil {
+		t.Errorf("Should succeed, got: %s", err)
+	}
+	token, err := c.GetService().CreateSession(config.Username, config.Password)
+	if err != nil {
+		t.Errorf("Should create session, instead: %v", err)
+	}
+	c.SetAuthToken(token)
+	session, err := c.GetSession()
+	if err != nil {
+		t.Errorf("Should succeed, got: %s", err)
+	}
+	if session.Token != xAuthToken {
+		t.Errorf("Expected X-Auth-Token to be %s, got %s", xAuthToken, session.Token)
+	}
+	if !strings.HasSuffix(session.ID, sessionID) {
+		t.Errorf("Expected session ID suffix %s, got %s", sessionID, session.ID)
+	}
+	// c.Logout()
 }

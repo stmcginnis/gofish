@@ -103,8 +103,13 @@ type ClientConfig struct {
 	ReuseConnections bool
 }
 
-// setupClientWithConfig setups the client using the client config
-func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APIClient, err error) {
+// SetupClientWithConfig setups the client using the client config. Prefer the
+// `Connect*`-family of functions to create a configured client.
+//
+// This function does not handle the authentication setup! It is meant to be
+// used in rare cases to be able to vendor patch the ServiceRoot. (E.g. to
+// workaround a broken SessionService protocol in older Huawei/XFusion BMCs).
+func SetupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APIClient, err error) {
 	if !strings.HasPrefix(config.Endpoint, "http") {
 		return c, fmt.Errorf("endpoint must starts with http or https")
 	}
@@ -220,7 +225,7 @@ func Connect(config ClientConfig) (c *APIClient, err error) { //nolint:gocritic
 
 // ConnectContext is the same as Connect, but sets the ctx.
 func ConnectContext(ctx context.Context, config ClientConfig) (c *APIClient, err error) { //nolint:gocritic
-	client, err := setupClientWithConfig(ctx, &config)
+	client, err := SetupClientWithConfig(ctx, &config)
 	if err != nil {
 		return c, err
 	}
