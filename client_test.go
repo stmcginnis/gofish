@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/redfish"
 )
 
 const (
@@ -198,5 +199,26 @@ func TestClientRunRawRequestNoURL(t *testing.T) {
 
 	if err.Error() != "unable to execute request, no target provided" {
 		t.Errorf("Unexpected error response: %s", err.Error())
+	}
+}
+
+func TestAuthTokenAccessors(t *testing.T) {
+	c := APIClient{}
+
+	if c.GetAuthToken() != nil {
+		t.Error("Empty client should return a nil auth token")
+	}
+
+	token := &redfish.AuthToken{}
+	c.SetAuthToken(token)
+
+	if c.GetAuthToken() != token {
+		t.Error("Client should return current auth token")
+	}
+
+	c.SetAuthToken(nil)
+
+	if c.GetAuthToken() != nil {
+		t.Error("Should return nil")
 	}
 }

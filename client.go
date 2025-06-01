@@ -616,3 +616,13 @@ func (c *APIClient) Logout() {
 func (c *APIClient) SetDumpWriter(writer io.Writer) {
 	c.dumpWriter = writer
 }
+
+// SetAuthToken sets the client auth token
+func (c *APIClient) SetAuthToken(token *redfish.AuthToken) {
+	c.auth = token
+}
+
+// GetAuthToken gets the client auth token
+func (c *APIClient) GetAuthToken() *redfish.AuthToken {
+	return c.auth
+}
