@@ -13,8 +13,9 @@ type nestedStruct struct {
 	X bool `json:"x"`
 	Y []string
 }
+
 type F struct {
-	Field string
+	Field string `json:",omitempty"`
 }
 
 type testStruct struct {

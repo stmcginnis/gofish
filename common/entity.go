@@ -194,6 +194,8 @@ func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (pay
 		}
 		fieldName := field.Name
 		jsonName := field.Tag.Get("json")
+		// Strip out marshaling directives
+		jsonName = strings.ReplaceAll(jsonName, ",omitempty", "")
 		if jsonName == "-" {
 			continue
 		}
