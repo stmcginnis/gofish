@@ -6,13 +6,16 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-var logServiceBody = `{
+var logServiceBodyTmpl = `{
 		"@odata.context": "/redfish/v1/$metadata#LogService.LogService",
 		"@odata.type": "#LogService.v1_0_0.LogService",
 		"@odata.id": "/redfish/v1/LogService",
@@ -34,9 +37,16 @@ var logServiceBody = `{
 		"Actions": {
 			"#LogService.ClearLog": {
 				"target": "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog"
-			}
+			}%s
 		}
 	}`
+
+var logServiceBody = fmt.Sprintf(logServiceBodyTmpl, `
+	, "#LogService.CollectDiagnosticData": {
+		"target": "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.CollectDiagnosticData"
+	}
+`)
+var logServiceBodyNoDiag = fmt.Sprintf(logServiceBodyTmpl, "")
 
 // TestLogService tests the parsing of LogService objects.
 func TestLogService(t *testing.T) {
@@ -78,12 +88,15 @@ func TestLogService(t *testing.T) {
 	if result.clearLogTarget != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog" {
 		t.Errorf("Invalid ClearLog target: %s", result.clearLogTarget)
 	}
+
+	if result.collectDiagnosticDataTarget != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.CollectDiagnosticData" {
+		t.Errorf("Invalid CollectDiagnosticData target: %s", result.collectDiagnosticDataTarget)
+	}
 }
 
-// TestLogServiceUpdate tests the Update call.
-func TestLogServiceUpdate(t *testing.T) {
+func initLogServiceClient(t *testing.T, template string) (*LogService, *common.TestClient) {
 	var result LogService
-	err := json.NewDecoder(strings.NewReader(logServiceBody)).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(template)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
@@ -91,9 +104,15 @@ func TestLogServiceUpdate(t *testing.T) {
 
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
+	return &result, testClient
+}
+
+// TestLogServiceUpdate tests the Update call.
+func TestLogServiceUpdate(t *testing.T) {
+	result, testClient := initLogServiceClient(t, logServiceBody)
 
 	result.ServiceEnabled = false
-	err = result.Update()
+	err := result.Update()
 
 	if err != nil {
 		t.Errorf("Error making Update call: %s", err)
@@ -103,5 +122,61 @@ func TestLogServiceUpdate(t *testing.T) {
 
 	if !strings.Contains(calls[0].Payload, "ServiceEnabled:false") {
 		t.Errorf("Unexpected ServiceEnabled update payload: %s", calls[0].Payload)
+	}
+}
+
+// TestLogServiceCollectDiagnosticsDataSuccess
+func TestLogServiceCollectDiagnosticsDataSuccess(t *testing.T) {
+	logSvc, testClient := initLogServiceClient(t, logServiceBody)
+
+	if !logSvc.SupportsCollectDiagnosticData() {
+		t.Errorf("Log service doesn't support diagnostic data")
+	}
+
+	diagnosticLocation := "/redfish/v1/Managers/BMC/LogServices/Log/Entries/10"
+
+	testClient.CustomReturnForActions = map[string][]interface{}{
+		http.MethodPost: []interface{}{
+			&http.Response{
+				StatusCode: http.StatusCreated,
+				Header: http.Header{
+					"Location": []string{diagnosticLocation},
+				},
+				Body: io.NopCloser(strings.NewReader(`
+				{
+					"error": {
+						"code": "Base.1.12.Success",
+						"message": "Successfully Completed Request",
+						"@Message.ExtendedInfo": [
+							{
+								"MessageId": "Base.1.12.Success",
+								"Message": "Successfully Completed Request",
+								"MessageSeverity": "OK",
+								"Resolution": "None",
+								"@odata.type": "#Message.v1_1_2.Message"
+							}
+						]
+					}
+				}
+			`)),
+			},
+		}}
+
+	location, err := logSvc.CollectDiagnosticData(&CollectDiagnosticDataParameters{
+		DiagnosticDataType: ManagerDiagnosticDataTypes,
+	})
+	if err != nil {
+		t.Errorf("Error triggering diagnostic data: %s", err)
+	}
+
+	assertEquals(t, diagnosticLocation, location)
+}
+
+// TestLogServiceCollectDiagnosticsDataUnsupported
+func TestLogServiceCollectionDiagnosticsDataUnsupported(t *testing.T) {
+	logSvc, _ := initLogServiceClient(t, logServiceBodyNoDiag)
+
+	if logSvc.SupportsCollectDiagnosticData() {
+		t.Errorf("log service unexpectedly supports diagnostic data")
 	}
 }
