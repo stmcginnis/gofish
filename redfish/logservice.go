@@ -143,6 +143,8 @@ type LogService struct {
 
 	// collectDiagnosticDataTarget is the URL to send CollectDiagnosticData actions to. (v1.2+)
 	collectDiagnosticDataTarget string
+	// collectDiagnosticInfoTarget is the URL to get ActionInfo about the CollectDiagnosticData action.
+	collectDiagnosticInfoTarget string
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
@@ -168,6 +170,7 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	logservice.entries = t.Entries.String()
 	logservice.clearLogTarget = t.Actions.ClearLog.Target
 	logservice.collectDiagnosticDataTarget = t.Actions.CollectDiagnosticData.Target
+	logservice.collectDiagnosticInfoTarget = t.Actions.CollectDiagnosticData.ActionInfoTarget
 
 	// This is a read/write object, so we need to save the raw object data for later
 	logservice.rawData = b
@@ -298,4 +301,14 @@ func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosti
 	}
 
 	return "", nil
+}
+
+// For Redfish v1.2+
+// CollectDiagnosticDataActionInfo, if supported, provides the ActionInfo for a CollectDiagnosticData action.
+func (logservice *LogService) CollectDiagnosticDataActionInfo() (*ActionInfo, error) {
+	if logservice.collectDiagnosticInfoTarget == "" {
+		return nil, errors.New("CollectDiagnosticData ActionInfo not supported by this service")
+	}
+
+	return common.GetObject[ActionInfo](logservice.GetClient(), logservice.collectDiagnosticInfoTarget)
 }
