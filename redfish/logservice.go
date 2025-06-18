@@ -68,7 +68,7 @@ const (
 // DiagnosticDataDetail is the detailed information for a supported CollectDiagnosticData action.
 type DiagnosticDataDetail struct {
 	// DiagnosticDataType indicates the type of diagnostic data to collect.
-	DiagnosticDataType DiagnosticDataTypes
+	DiagnosticDataType LogDiagnosticDataTypes
 	// EstimatedDuration represents the estimated total time required to generate the data.
 	EstimatedDuration string
 	// EstimatedSizeBytes represents the estimated size of the data to be collected.
@@ -260,7 +260,7 @@ func (logservice *LogService) ClearLog() error {
 
 type CollectDiagnosticDataParameters struct {
 	// DiagnosticDataType (required) shall contain the type of diagnostic data to collect.
-	DiagnosticDataType DiagnosticDataTypes `json:",omitempty"`
+	DiagnosticDataType LogDiagnosticDataTypes `json:",omitempty"`
 	// OEMDiagnosticDataType (optional) shall contain the OEM-defined type of diagnostic data if the
 	// DiagnosticDataType is set to `OEMDiagnosticDataTypes`
 	OEMDiagnosticDataType string `json:",omitempty"`

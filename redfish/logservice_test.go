@@ -168,7 +168,7 @@ func TestLogServiceCollectDiagnosticsDataSuccess(t *testing.T) {
 		}}
 
 	location, err := logSvc.CollectDiagnosticData(&CollectDiagnosticDataParameters{
-		DiagnosticDataType: ManagerDiagnosticDataTypes,
+		DiagnosticDataType: ManagerLogDiagnosticDataTypes,
 	})
 	if err != nil {
 		t.Errorf("Error triggering diagnostic data: %s", err)
