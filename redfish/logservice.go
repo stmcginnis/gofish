@@ -223,6 +223,11 @@ func (logservice *LogService) FilteredEntries(options ...common.FilterOption) ([
 	return ListReferencedLogEntrys(logservice.GetClient(), fmt.Sprintf("%s%s", logservice.entries, filter))
 }
 
+// SupportsClearLog indicates if the ClearLog action is supported.
+func (logservice *LogService) SupportsClearLog() bool {
+	return logservice.clearLogTarget != ""
+}
+
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
 func (logservice *LogService) ClearLog() error {
