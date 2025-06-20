@@ -7,7 +7,6 @@ package gofish
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -121,10 +120,6 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		client.sem = make(chan bool, config.MaxConcurrentRequests)
 	}
 
-	if config.TLSHandshakeTimeout == 0 {
-		config.TLSHandshakeTimeout = 10
-	}
-
 	if config.HTTPClient == nil {
 		defaultTransport := http.DefaultTransport.(*http.Transport)
 		transport := &http.Transport{
@@ -133,10 +128,20 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 			MaxIdleConns:          defaultTransport.MaxIdleConns,
 			IdleConnTimeout:       defaultTransport.IdleConnTimeout,
 			ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+			TLSClientConfig:       defaultTransport.TLSClientConfig,
 			TLSHandshakeTimeout:   time.Duration(config.TLSHandshakeTimeout) * time.Second,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: config.Insecure,
-			},
+		}
+
+		config.HTTPClient = &http.Client{Transport: transport}
+	}
+
+	client.HTTPClient = config.HTTPClient
+
+	// if the provided HTTPClient uses a standard Transport, we want to
+	// amend its configuration to match what was provided to us
+	if transport, ok := client.HTTPClient.Transport.(*http.Transport); ok {
+		if config.Insecure {
+			transport.TLSClientConfig.InsecureSkipVerify = config.Insecure
 		}
 
 		if config.ReuseConnections {
@@ -145,12 +150,9 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 			transport.IdleConnTimeout = 1 * time.Minute
 		}
 
-		client.HTTPClient = &http.Client{Transport: transport}
-	} else {
-		if config.ReuseConnections {
-			client.keepAlive = true
+		if config.TLSHandshakeTimeout != 0 {
+			transport.TLSHandshakeTimeout = time.Duration(config.TLSHandshakeTimeout) * time.Second
 		}
-		client.HTTPClient = config.HTTPClient
 	}
 
 	// Fetch the service root
