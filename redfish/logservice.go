@@ -68,7 +68,7 @@ const (
 // DiagnosticDataDetail is the detailed information for a supported CollectDiagnosticData action.
 type DiagnosticDataDetail struct {
 	// DiagnosticDataType indicates the type of diagnostic data to collect.
-	DiagnosticDataType DiagnosticDataTypes
+	DiagnosticDataType LogDiagnosticDataTypes
 	// EstimatedDuration represents the estimated total time required to generate the data.
 	EstimatedDuration string
 	// EstimatedSizeBytes represents the estimated size of the data to be collected.
@@ -143,6 +143,8 @@ type LogService struct {
 
 	// collectDiagnosticDataTarget is the URL to send CollectDiagnosticData actions to. (v1.2+)
 	collectDiagnosticDataTarget string
+	// collectDiagnosticInfoTarget is the URL to get ActionInfo about the CollectDiagnosticData action.
+	collectDiagnosticInfoTarget string
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
@@ -168,6 +170,7 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	logservice.entries = t.Entries.String()
 	logservice.clearLogTarget = t.Actions.ClearLog.Target
 	logservice.collectDiagnosticDataTarget = t.Actions.CollectDiagnosticData.Target
+	logservice.collectDiagnosticInfoTarget = t.Actions.CollectDiagnosticData.ActionInfoTarget
 
 	// This is a read/write object, so we need to save the raw object data for later
 	logservice.rawData = b
@@ -220,6 +223,11 @@ func (logservice *LogService) FilteredEntries(options ...common.FilterOption) ([
 	return ListReferencedLogEntrys(logservice.GetClient(), fmt.Sprintf("%s%s", logservice.entries, filter))
 }
 
+// SupportsClearLog indicates if the ClearLog action is supported.
+func (logservice *LogService) SupportsClearLog() bool {
+	return logservice.clearLogTarget != ""
+}
+
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
 func (logservice *LogService) ClearLog() error {
@@ -257,7 +265,7 @@ func (logservice *LogService) ClearLog() error {
 
 type CollectDiagnosticDataParameters struct {
 	// DiagnosticDataType (required) shall contain the type of diagnostic data to collect.
-	DiagnosticDataType DiagnosticDataTypes `json:",omitempty"`
+	DiagnosticDataType LogDiagnosticDataTypes `json:",omitempty"`
 	// OEMDiagnosticDataType (optional) shall contain the OEM-defined type of diagnostic data if the
 	// DiagnosticDataType is set to `OEMDiagnosticDataTypes`
 	OEMDiagnosticDataType string `json:",omitempty"`
@@ -298,4 +306,14 @@ func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosti
 	}
 
 	return "", nil
+}
+
+// For Redfish v1.2+
+// CollectDiagnosticDataActionInfo, if supported, provides the ActionInfo for a CollectDiagnosticData action.
+func (logservice *LogService) CollectDiagnosticDataActionInfo() (*ActionInfo, error) {
+	if logservice.collectDiagnosticInfoTarget == "" {
+		return nil, errors.New("CollectDiagnosticData ActionInfo not supported by this service")
+	}
+
+	return common.GetObject[ActionInfo](logservice.GetClient(), logservice.collectDiagnosticInfoTarget)
 }
