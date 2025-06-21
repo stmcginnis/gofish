@@ -106,7 +106,7 @@ type TrustedComponent struct {
 	Status common.Status
 	// TPM shall contain TPM-specific information for this trusted component. This property shall only be present for
 	// TCG-defined TPM trusted components.
-	TPM string
+	TPM TPM
 	// TrustedComponentType shall contain the type of trusted component.
 	TrustedComponentType TrustedComponentType
 	// UUID shall contain a universally unique identifier number for the trusted component.
