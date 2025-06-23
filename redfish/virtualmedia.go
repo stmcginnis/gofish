@@ -162,10 +162,10 @@ type VirtualMedia struct {
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 
-	// ejectMediaTarget is the URL to send EjectMedia requests.
-	ejectMediaTarget string
-	// insertMediaTarget is the URL to send InsertMedia requests.
-	insertMediaTarget string
+	// ejectMedia is the URL to send EjectMedia requests.
+	ejectMedia common.Action
+	// insertMedia is the URL to send InsertMedia requests.
+	insertMedia common.Action
 	// SupportsMediaEject indicates if this implementation supports ejecting
 	// virtual media or not (added in schema 1.2.0).
 	SupportsMediaEject bool
@@ -177,13 +177,12 @@ type VirtualMedia struct {
 // UnmarshalJSON unmarshals a VirtualMedia object from the raw JSON.
 func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	type temp VirtualMedia
-	type actions struct {
-		EjectMedia  common.ActionTarget `json:"#VirtualMedia.EjectMedia"`
-		InsertMedia common.ActionTarget `json:"#VirtualMedia.InsertMedia"`
-	}
 	var t struct {
 		temp
-		Actions           actions
+		Actions struct {
+			EjectMedia  common.Action `json:"#VirtualMedia.EjectMedia"`
+			InsertMedia common.Action `json:"#VirtualMedia.InsertMedia"`
+		}
 		Certificates      common.LinksCollection
 		ClientCertificate common.LinksCollection
 	}
@@ -199,11 +198,11 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	virtualmedia.certificates = t.Certificates.ToStrings()
 	virtualmedia.clientCertificates = t.ClientCertificate.ToStrings()
 
-	virtualmedia.ejectMediaTarget = t.Actions.EjectMedia.Target
-	virtualmedia.insertMediaTarget = t.Actions.InsertMedia.Target
+	virtualmedia.ejectMedia = t.Actions.EjectMedia
+	virtualmedia.insertMedia = t.Actions.InsertMedia
 
-	virtualmedia.SupportsMediaEject = (virtualmedia.ejectMediaTarget != "")
-	virtualmedia.SupportsMediaInsert = (virtualmedia.insertMediaTarget != "")
+	virtualmedia.SupportsMediaEject = (virtualmedia.ejectMedia.Target != "")
+	virtualmedia.SupportsMediaInsert = (virtualmedia.insertMedia.Target != "")
 
 	// This is a read/write object, so we need to save the raw object data for later
 	virtualmedia.rawData = b
@@ -260,13 +259,31 @@ func (virtualmedia *VirtualMedia) Update() error {
 	return virtualmedia.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
+// EjectMediaActionInfo sends a request to gather information of the virtual media insert endpoint.
+func (virtualmedia *VirtualMedia) EjectMediaActionInfo() (*common.ActionInfo, error) {
+	info, err := common.GetObject[common.ActionInfo](virtualmedia.GetClient(), virtualmedia.ejectMedia.Info)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+}
+
 // EjectMedia sends a request to eject the media.
 func (virtualmedia *VirtualMedia) EjectMedia() error {
 	if !virtualmedia.SupportsMediaEject {
 		return errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
 	}
 
-	return virtualmedia.Post(virtualmedia.ejectMediaTarget, struct{}{})
+	return virtualmedia.Post(virtualmedia.ejectMedia.Target, struct{}{})
+}
+
+// InsertMediaActionInfo sends a request to gather information of the virtual media insert endpoint.
+func (virtualmedia *VirtualMedia) InsertMediaActionInfo() (*common.ActionInfo, error) {
+	info, err := common.GetObject[common.ActionInfo](virtualmedia.GetClient(), virtualmedia.insertMedia.Info)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
 }
 
 // InsertMedia sends a request to insert virtual media.
@@ -296,7 +313,7 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (
 		return nil, errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
 
-	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMediaTarget, config)
+	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMedia.Target, config)
 	if err != nil {
 		return nil, err
 	}
