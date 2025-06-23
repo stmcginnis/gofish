@@ -727,4 +727,7 @@ type ErrExtendedInfo struct {
 // ActionTarget is contains the target endpoint for object Actions.
 type ActionTarget struct {
 	Target string
+	// ActionInfoTarget is an optional resource that provides information about parameters
+	// that are supported by the associated Target.
+	ActionInfoTarget string `json:"@Redfish.ActionInfo"`
 }

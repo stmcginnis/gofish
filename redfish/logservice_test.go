@@ -43,7 +43,8 @@ var logServiceBodyTmpl = `{
 
 var logServiceBody = fmt.Sprintf(logServiceBodyTmpl, `
 	, "#LogService.CollectDiagnosticData": {
-		"target": "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.CollectDiagnosticData"
+		"target": "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.CollectDiagnosticData",
+		"@Redfish.ActionInfo": "/redfish/v1/Managers/BMC/LogServices/Log/CollectDiagnosticDataActionInfo"
 	}
 `)
 var logServiceBodyNoDiag = fmt.Sprintf(logServiceBodyTmpl, "")
@@ -91,6 +92,10 @@ func TestLogService(t *testing.T) {
 
 	if result.collectDiagnosticDataTarget != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.CollectDiagnosticData" {
 		t.Errorf("Invalid CollectDiagnosticData target: %s", result.collectDiagnosticDataTarget)
+	}
+
+	if result.collectDiagnosticInfoTarget != "/redfish/v1/Managers/BMC/LogServices/Log/CollectDiagnosticDataActionInfo" {
+		t.Errorf("Invalid CollectDiagnosticData ActionInfo target: %s", result.collectDiagnosticInfoTarget)
 	}
 }
 
@@ -163,7 +168,7 @@ func TestLogServiceCollectDiagnosticsDataSuccess(t *testing.T) {
 		}}
 
 	location, err := logSvc.CollectDiagnosticData(&CollectDiagnosticDataParameters{
-		DiagnosticDataType: ManagerDiagnosticDataTypes,
+		DiagnosticDataType: ManagerLogDiagnosticDataTypes,
 	})
 	if err != nil {
 		t.Errorf("Error triggering diagnostic data: %s", err)
@@ -179,4 +184,28 @@ func TestLogServiceCollectionDiagnosticsDataUnsupported(t *testing.T) {
 	if logSvc.SupportsCollectDiagnosticData() {
 		t.Errorf("log service unexpectedly supports diagnostic data")
 	}
+}
+
+func TestLogServiceCollectDiagnosticsActionInfo(t *testing.T) {
+	logSvc, testClient := initLogServiceClient(t, logServiceBody)
+
+	testClient.CustomReturnForActions = map[string][]interface{}{
+		http.MethodGet: {
+			&http.Response{
+				StatusCode: http.StatusOK,
+				// just the example ActionInfo from DSP0268 6.3.4
+				Body: io.NopCloser(strings.NewReader(actionInfoBody)),
+			},
+		}}
+
+	actionInfo, err := logSvc.CollectDiagnosticDataActionInfo()
+	if err != nil {
+		t.Errorf("Error getting diagnostic action info: %s", err)
+	}
+
+	if actionInfo.ODataType != "#ActionInfo.v1_4_2.ActionInfo" {
+		t.Errorf("Invalid action info type: %s", actionInfo.ODataType)
+	}
+
+	// not thoroughly testing the ActionInfo parsing - that will be handled in its own unit test
 }
