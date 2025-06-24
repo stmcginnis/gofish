@@ -816,6 +816,9 @@ func (chassis *Chassis) Switches() ([]*Switch, error) {
 
 // NetworkAdapters gets the collection of network adapters of this chassis
 func (chassis *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
+	if chassis.networkAdapters == "" {
+		return nil, nil
+	}
 	return ListReferencedNetworkAdapter(chassis.GetClient(), chassis.networkAdapters)
 }
 
