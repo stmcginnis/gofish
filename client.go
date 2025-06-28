@@ -7,6 +7,7 @@ package gofish
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -141,6 +142,13 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 	// amend its configuration to match what was provided to us
 	if transport, ok := client.HTTPClient.Transport.(*http.Transport); ok {
 		if config.Insecure {
+			// If we're using the default transport, need to make sure there
+			// is a TLSClientConfig set in order to set the SkipVerify flag.
+			if transport.TLSClientConfig == nil {
+				transport.TLSClientConfig = &tls.Config{
+					MinVersion: tls.VersionTLS12,
+				}
+			}
 			transport.TLSClientConfig.InsecureSkipVerify = config.Insecure
 		}
 
