@@ -63,6 +63,11 @@ func (e *Entity) DisableEtagMatch(b bool) {
 	e.disableEtagMatch = b
 }
 
+// IsEtagMatchDisabled indicates if etag matching is enabled on this entity
+func (e *Entity) IsEtagMatchDisabled() bool {
+	return e.disableEtagMatch
+}
+
 // Update commits changes to an entity.
 func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpdates []string) error {
 	payload := getPatchPayloadFromUpdate(originalEntity, updatedEntity)
