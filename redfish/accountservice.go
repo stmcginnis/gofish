@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
@@ -510,7 +511,22 @@ func (accountservice *AccountService) CreateAccount(userName, password, roleID s
 		Password: password,
 		RoleID:   roleID,
 	}
-	resp, err := accountservice.PostWithResponse(accountservice.accounts, t)
+
+	baseEntity := &accountservice.Entity
+
+	// The proper ETag for creating an account is found at `/AccountService/Accounts`
+	// If ETag matching is disabled, we don't care and don't need to waste a request,
+	// but otherwise, we need to load /Accounts to get the ETag then issue the request against that Entity
+	if !accountservice.IsEtagMatchDisabled() {
+		accountsEntity, err := common.GetObject[common.Entity](accountservice.GetClient(), accountservice.accounts)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get accounts entity: %w", err)
+		}
+
+		baseEntity = accountsEntity
+	}
+
+	resp, err := baseEntity.PostWithResponse(accountservice.accounts, t)
 	if err != nil {
 		return nil, err
 	}
