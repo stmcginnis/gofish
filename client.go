@@ -166,7 +166,7 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 	if config.ReuseConnections {
 		client.keepAlive = true
 	}
-	
+
 	// Fetch the service root
 	client.Service, err = ServiceRoot(client)
 	if err != nil {
