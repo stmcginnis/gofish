@@ -15,91 +15,75 @@ import (
 type ReadingUnits string
 
 const (
-
-	// RPMReadingUnits Indicates that the fan reading and thresholds are
-	// measured in rotations per minute.
+	// RPMReadingUnits indicates that the fan reading and thresholds are measured in rotations per minute.
 	RPMReadingUnits ReadingUnits = "RPM"
-	// PercentReadingUnits Indicates that the fan reading and thresholds are
-	// measured in percentage.
+	// PercentReadingUnits indicates that the fan reading and thresholds are measured in percentage.
 	PercentReadingUnits ReadingUnits = "Percent"
 )
 
+// ThermalFan represents a fan in a Redfish system.
 type ThermalFan struct {
 	common.Entity
-	// Assembly shall contain a link to a resource of type Assembly.
-	assembly string
-	// HotPluggable shall indicate whether the device can be inserted or removed while the underlying equipment
-	// otherwise remains in its current operational state. Hot-pluggable devices can become operable without altering
-	// the operational state of the underlying equipment. Devices that cannot be inserted or removed from equipment in
-	// operation, or devices that cannot become operable without affecting the operational state of that equipment,
-	// shall not be hot-pluggable.
-	HotPluggable bool
-	// IndicatorLED shall contain the state of the indicator light associated with this fan.
-	IndicatorLED common.IndicatorLED
-	// Location shall contain the location information of the associated fan.
-	Location common.Location
-	// LowerThresholdCritical shall contain the value at which the Reading property is below the normal range but is
-	// not yet fatal. The value of the property shall use the same units as the Reading property.
-	LowerThresholdCritical int
-	// LowerThresholdFatal shall contain the value at which the Reading property is below the normal range and is
-	// fatal. The value of the property shall use the same units as the Reading property.
-	LowerThresholdFatal int
-	// LowerThresholdNonCritical shall contain the value at which the Reading property is below normal range. The value
-	// of the property shall use the same units as the Reading property.
-	LowerThresholdNonCritical int
-	// Manufacturer shall contain the name of the organization responsible for producing the fan. This organization may
-	// be the entity from whom the fan is purchased, but this is not necessarily true.
-	Manufacturer string
-	// MaxReadingRange shall indicate the highest possible value for the Reading property. The value of the property
-	// shall use the same units as the Reading property.
-	MaxReadingRange int
-	// MemberId shall contain the unique identifier for this member within an array. For services supporting Redfish
-	// v1.6 or higher, this value shall contain the zero-based array index.
-	MemberID string
-	// MinReadingRange shall indicate the lowest possible value for the Reading property. The value of the property
-	// shall use the same units as the Reading property.
-	MinReadingRange int
-	// Model shall contain the model information as defined by the manufacturer for the associated fan.
-	Model string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
-	OEM json.RawMessage `json:"Oem"`
-	// PartNumber shall contain the part number as defined by the manufacturer for the associated fan.
-	PartNumber string
-	// PhysicalContext shall contain a description of the affected device or region within the chassis with which this
-	// fan is associated.
-	PhysicalContext PhysicalContext
-	// Reading shall contain the fan sensor reading.
-	Reading int
-	// ReadingUnits shall contain the units in which the fan reading and thresholds are measured.
-	ReadingUnits ReadingUnits
-	// Redundancy shall contain an array of links to the redundancy groups to which this fan belongs.
-	redundancy []string
-	// RedundancyCount is the number of Redundancy items.
-	RedundancyCount int `json:"Redundancy@odata.count"`
-	// RelatedItem shall contain an array of links to resources or objects that this fan services.
+	// HotPluggable indicates if the device can be inserted/removed while equipment is operating.
+	HotPluggable *bool `json:"HotPluggable,omitempty"`
+	// IndicatorLED contains the state of the indicator light associated with this fan.
+	IndicatorLED *common.IndicatorLED `json:"IndicatorLED,omitempty"`
+	// Location contains information about the fan's physical location.
+	Location *common.Location `json:"Location,omitempty"`
+	// LowerThresholdCritical contains the value below which reading is outside normal range but not yet fatal.
+	LowerThresholdCritical *int `json:"LowerThresholdCritical,omitempty"`
+	// LowerThresholdFatal contains the value below which reading is outside normal range and is fatal.
+	LowerThresholdFatal *int `json:"LowerThresholdFatal,omitempty"`
+	// LowerThresholdNonCritical contains the value below which reading is outside normal range.
+	LowerThresholdNonCritical *int `json:"LowerThresholdNonCritical,omitempty"`
+	// Manufacturer contains the name of the organization that produced the fan.
+	Manufacturer string `json:"Manufacturer,omitempty"`
+	// MaxReadingRange indicates the highest possible value for the Reading property.
+	MaxReadingRange *int `json:"MaxReadingRange,omitempty"`
+	// MemberID contains the unique identifier for this member within an array.
+	MemberID string `json:"MemberId"`
+	// MinReadingRange indicates the lowest possible value for the Reading property.
+	MinReadingRange *int `json:"MinReadingRange,omitempty"`
+	// Model contains the manufacturer-defined model information for the fan.
+	Model string `json:"Model,omitempty"`
+	// Name contains the name of the fan.
+	Name string `json:"Name,omitempty"`
+	// OEM contains OEM extensions (vendor-specific properties).
+	OEM json.RawMessage `json:"Oem,omitempty"`
+	// PartNumber contains the manufacturer-defined part number for the fan.
+	PartNumber string `json:"PartNumber,omitempty"`
+	// PhysicalContext describes the device or region within the chassis associated with this fan.
+	PhysicalContext *PhysicalContext `json:"PhysicalContext,omitempty"`
+	// Reading contains the current fan sensor reading.
+	Reading *int `json:"Reading,omitempty"`
+	// ReadingUnits contains the units in which fan readings and thresholds are measured.
+	ReadingUnits ReadingUnits `json:"ReadingUnits,omitempty"`
+	// SensorNumber contains a numerical identifier for this fan speed sensor.
+	SensorNumber *int `json:"SensorNumber,omitempty"`
+	// SerialNumber contains the manufacturer-defined serial number for the fan.
+	SerialNumber string `json:"SerialNumber,omitempty"`
+	// SparePartNumber contains the manufacturer-defined spare/replacement part number.
+	SparePartNumber string `json:"SparePartNumber,omitempty"`
+	// Status contains status and health properties of the resource.
+	Status *common.Status `json:"Status,omitempty"`
+	// UpperThresholdCritical contains the value above which reading is outside normal range but not yet fatal.
+	UpperThresholdCritical *int `json:"UpperThresholdCritical,omitempty"`
+	// UpperThresholdFatal contains the value above which reading is outside normal range and is fatal.
+	UpperThresholdFatal *int `json:"UpperThresholdFatal,omitempty"`
+	// UpperThresholdNonCritical contains the value above which reading is outside normal range.
+	UpperThresholdNonCritical *int `json:"UpperThresholdNonCritical,omitempty"`
+
+	// Links to related objects (unmarshaled separately)
+	// Assembly contains a link to a resource of type Assembly.
+	assembly    string
+	redundancy  []string
 	relatedItem []string
-	// RelatedItem@odataCount is the number of related items.
-	RelatedItemCount int `json:"RelatedItem@odata.count"`
-	// SensorNumber shall contain a numerical identifier for this fan speed sensor that is unique within this resource.
-	SensorNumber int
-	// SerialNumber shall contain the serial number as defined by the manufacturer for the associated fan.
-	SerialNumber string
-	// SparePartNumber shall contain the spare or replacement part number as defined by the manufacturer for the
-	// associated fan.
-	SparePartNumber string
-	// Status shall contain any status or health properties of the resource.
-	Status common.Status
-	// UpperThresholdCritical shall contain the value at which the Reading property is above the normal range but is
-	// not yet fatal. The value of the property shall use the same units as the Reading property.
-	UpperThresholdCritical int
-	// UpperThresholdFatal shall contain the value at which the Reading property is above the normal range and is
-	// fatal. The value of the property shall use the same units as the Reading property.
-	UpperThresholdFatal int
-	// UpperThresholdNonCritical shall contain the value at which the Reading property is above the normal range. The
-	// value of the property shall use the same units as the Reading property.
-	UpperThresholdNonCritical int
-	// rawData holds the original serialized JSON so we can compare updates.
+
+	// Counters for related objects
+	RedundancyCount  int `json:"Redundancy@odata.count,omitempty"`
+	RelatedItemCount int `json:"RelatedItem@odata.count,omitempty"`
+
+	// rawData holds original JSON for comparison during updates.
 	rawData []byte
 }
 
@@ -133,8 +117,7 @@ func (fan *ThermalFan) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (fan *ThermalFan) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
+	// Get a representation of the object's original state so we can find what to update.
 	original := new(ThermalFan)
 	original.UnmarshalJSON(fan.rawData)
 
@@ -148,104 +131,63 @@ func (fan *ThermalFan) Update() error {
 	return fan.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
+// Temperature represents a temperature sensor in a Redfish system.
 type Temperature struct {
 	common.Entity
-	// AdjustedMaxAllowableOperatingValue shall
-	// indicate the adjusted maximum allowable operating temperature for the
-	// equipment monitored by this temperature sensor, as specified by a
-	// standards body, manufacturer, or a combination, and adjusted based on
-	// environmental conditions present. For example, liquid inlet
-	// temperature may be adjusted based on the available liquid pressure.
-	AdjustedMaxAllowableOperatingValue float32
-	// AdjustedMinAllowableOperatingValue shall
-	// indicate the adjusted minimum allowable operating temperature for the
-	// equipment monitored by this temperature sensor, as specified by a
-	// standards body, manufacturer, or a combination, and adjusted based on
-	// environmental conditions present. For example, liquid inlet
-	// temperature may be adjusted based on the available liquid pressure.
-	AdjustedMinAllowableOperatingValue float32
-	// DeltaPhysicalContext shall be a description of the affected device or
-	// region within the chassis to which the DeltaReadingCelsius temperature
-	// measurement applies, relative to PhysicalContext.
-	DeltaPhysicalContext PhysicalContext
-	// DeltaReadingCelsius shall be the delta of the values of the temperature
-	// readings across this sensor and the sensor at DeltaPhysicalContext.
-	DeltaReadingCelsius float32
-	// LowerThresholdCritical shall indicate
-	// the ReadingCelsius is below the normal range but is not yet fatal. The
-	// units shall be the same units as the related ReadingCelsius property.
-	LowerThresholdCritical float32
-	// LowerThresholdFatal shall indicate the
-	// ReadingCelsius is below the normal range and is fatal. The units shall
-	// be the same units as the related ReadingCelsius property.
-	LowerThresholdFatal float32
-	// LowerThresholdNonCritical shall indicate
-	// the ReadingCelsius is below the normal range but is not critical. The
-	// units shall be the same units as the related ReadingCelsius property.
-	LowerThresholdNonCritical float32
-	// LowerThresholdUser shall contain the value at which
-	// the ReadingCelsius property is below the user-defined range. The
-	// value of the property shall use the same units as the ReadingCelsius
-	// property. The value shall be equal to the value of
-	// LowerThresholdNonCritical, LowerThresholdCritical, or
-	// LowerThresholdFatal, unless set by a user.
-	LowerThresholdUser float32
-	// MaxAllowableOperatingValue shall
-	// indicate the maximum allowable operating temperature for the equipment
-	// monitored by this temperature sensor, as specified by a standards
-	// body, manufacturer, or a combination.
-	MaxAllowableOperatingValue float32
-	// MaxReadingRangeTemp shall indicate the
-	// highest possible value for ReadingCelsius. The units shall be the same
-	// units as the related ReadingCelsius property.
-	MaxReadingRangeTemp float32
-	// MemberID shall uniquely identify the member within the collection. For
-	// services supporting Redfish v1.6 or higher, this value shall be the
-	// zero-based array index.
-	MemberID string
-	// MinAllowableOperatingValue shall indicate the minimum allowable operating
-	// temperature for the equipment monitored by this temperature sensor, as
-	// specified by a standards body, manufacturer, or a combination.
-	MinAllowableOperatingValue float32
-	// MinReadingRangeTemp shall indicate the lowest possible value for
-	// ReadingCelsius. The units shall be the same units as the related
-	// ReadingCelsius property.
-	MinReadingRangeTemp float32
-	// PhysicalContext shall be a description of the affected device or region
-	// within the chassis to which this temperature measurement applies.
-	PhysicalContext PhysicalContext
-	// ReadingCelsius shall be the current value of the temperature sensor's reading.
-	ReadingCelsius float32
-	// RelatedItem shall contain an array of links to resources or objects that represent areas or devices to which
-	// this temperature applies.
+	// AdjustedMaxAllowableOperatingValue indicates the adjusted maximum allowable operating temperature.
+	AdjustedMaxAllowableOperatingValue *float32 `json:"AdjustedMaxAllowableOperatingValue,omitempty"`
+	// AdjustedMinAllowableOperatingValue indicates the adjusted minimum allowable operating temperature.
+	AdjustedMinAllowableOperatingValue *float32 `json:"AdjustedMinAllowableOperatingValue,omitempty"`
+	// DeltaPhysicalContext describes the device/region to which DeltaReadingCelsius measurement applies.
+	DeltaPhysicalContext *PhysicalContext `json:"DeltaPhysicalContext,omitempty"`
+	// DeltaReadingCelsius contains the temperature difference between this sensor and DeltaPhysicalContext.
+	DeltaReadingCelsius *float32 `json:"DeltaReadingCelsius,omitempty"`
+	// LowerThresholdCritical indicates when reading is below normal range but not yet fatal.
+	LowerThresholdCritical *float32 `json:"LowerThresholdCritical,omitempty"`
+	// LowerThresholdFatal indicates when reading is below normal range and is fatal.
+	LowerThresholdFatal *float32 `json:"LowerThresholdFatal,omitempty"`
+	// LowerThresholdNonCritical indicates when reading is below normal range.
+	LowerThresholdNonCritical *float32 `json:"LowerThresholdNonCritical,omitempty"`
+	// LowerThresholdUser contains user-defined lower threshold value.
+	LowerThresholdUser *float32 `json:"LowerThresholdUser,omitempty"`
+	// MaxAllowableOperatingValue indicates the maximum allowable operating temperature.
+	MaxAllowableOperatingValue *float32 `json:"MaxAllowableOperatingValue,omitempty"`
+	// MaxReadingRangeTemp indicates the highest possible temperature reading.
+	MaxReadingRangeTemp *float32 `json:"MaxReadingRangeTemp,omitempty"`
+	// MemberID uniquely identifies this member within the collection.
+	MemberID string `json:"MemberId"`
+	// MinAllowableOperatingValue indicates the minimum allowable operating temperature.
+	MinAllowableOperatingValue *float32 `json:"MinAllowableOperatingValue,omitempty"`
+	// MinReadingRangeTemp indicates the lowest possible temperature reading.
+	MinReadingRangeTemp *float32 `json:"MinReadingRangeTemp,omitempty"`
+	// Name contains the name of the temperature sensor.
+	Name string `json:"Name,omitempty"`
+	// OEM contains OEM extensions (vendor-specific properties).
+	OEM json.RawMessage `json:"Oem,omitempty"`
+	// PhysicalContext describes the device or region to which this temperature applies.
+	PhysicalContext *PhysicalContext `json:"PhysicalContext,omitempty"`
+	// ReadingCelsius contains the current temperature reading in Celsius.
+	ReadingCelsius *float32 `json:"ReadingCelsius,omitempty"`
+	// SensorNumber contains a numerical identifier for this temperature sensor.
+	SensorNumber *int `json:"SensorNumber,omitempty"`
+	// Status contains status and health properties of the resource.
+	Status *common.Status `json:"Status,omitempty"`
+	// UpperThresholdCritical indicates when reading is above normal range but not yet fatal.
+	UpperThresholdCritical *float32 `json:"UpperThresholdCritical,omitempty"`
+	// UpperThresholdFatal indicates when reading is above normal range and is fatal.
+	UpperThresholdFatal *float32 `json:"UpperThresholdFatal,omitempty"`
+	// UpperThresholdNonCritical indicates when reading is above normal range.
+	UpperThresholdNonCritical *float32 `json:"UpperThresholdNonCritical,omitempty"`
+	// UpperThresholdUser contains user-defined upper threshold value.
+	UpperThresholdUser *float32 `json:"UpperThresholdUser,omitempty"`
+
+	// Links to related items (unmarshaled separately)
 	relatedItem []string
-	// RelatedItemCount is the number of related items.
-	RelatedItemCount int `json:"RelatedItem@odata.count"`
-	// SensorNumber shall be a numerical identifier for this temperature sensor
-	// that is unique within this resource.
-	SensorNumber int
-	// Status shall contain any status or health properties of the resource.
-	Status common.Status
-	// UpperThresholdCritical shall indicate
-	// the ReadingCelsius is above the normal range but is not yet fatal. The
-	// units shall be the same units as the related ReadingCelsius property.
-	UpperThresholdCritical float32
-	// UpperThresholdFatal shall indicate the
-	// ReadingCelsius is above the normal range and is fatal. The units shall
-	// be the same units as the related ReadingCelsius property.
-	UpperThresholdFatal float32
-	// UpperThresholdNonCritical shall indicate
-	// the ReadingCelsius is above the normal range but is not critical. The
-	// units shall be the same units as the related ReadingCelsius property.
-	UpperThresholdNonCritical float32
-	// UpperThresholdUser shall contain the value at which
-	// the ReadingCelsius property is above the user-defined range. The
-	// value of the property shall use the same units as the ReadingCelsius
-	// property. The value shall be equal to the value of
-	// UpperThresholdNonCritical, UpperThresholdCritical, or
-	// UpperThresholdFatal, unless set by a user.
-	UpperThresholdUser float32
-	// rawData holds the original serialized JSON so we can compare updates.
+
+	// Counter for related items
+	RelatedItemCount int `json:"RelatedItem@odata.count,omitempty"`
+
+	// rawData holds original JSON for comparison during updates.
 	rawData []byte
 }
 
@@ -275,8 +217,7 @@ func (temperature *Temperature) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (temperature *Temperature) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
+	// Get a representation of the object's original state so we can find what to update.
 	original := new(Temperature)
 	original.UnmarshalJSON(temperature.rawData)
 
@@ -291,39 +232,31 @@ func (temperature *Temperature) Update() error {
 	return temperature.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
-// Thermal is used to represent a thermal metrics resource for a Redfish
-// implementation.
+// Thermal represents thermal management data in a Redfish system.
 type Thermal struct {
 	common.Entity
-
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
+	// ODataContext contains the OData context.
+	ODataContext string `json:"@odata.context,omitempty"`
+	// ODataType contains the OData type.
+	ODataType string `json:"@odata.type,omitempty"`
 	// Description provides a description of this resource.
-	Description string
-	// Fans shall be the definition for fans for a Redfish implementation.
-	Fans []ThermalFan
-	// FansCount is the number of ThermalFans.
-	FansCount int `json:"Fans@odata.count"`
-	// Redundancy is used to show redundancy for fans and other elements in
-	// this resource. The use of IDs within these arrays shall reference the
-	// members of the redundancy groups.
+	Description string `json:"Description,omitempty"`
+	// Fans contains the set of fans in this chassis.
+	Fans []ThermalFan `json:"Fans,omitempty"`
+	// OEM contains OEM extensions (vendor-specific properties).
+	OEM json.RawMessage `json:"Oem,omitempty"`
+	// Temperatures contains the set of temperature sensors in this chassis.
+	Temperatures []Temperature `json:"Temperatures,omitempty"`
+
+	// Redundancy contains redundancy information for fans and other elements.
 	redundancy []string
-	// RedundancyCount is the number of Redundancy objects.
-	RedundancyCount int `json:"Redundancy@odata.count"`
-	// Status shall contain any status or health properties of the resource.
-	Status common.Status
-	// Temperatures shall be the definition for temperature sensors for a
-	// Redfish implementation.
-	Temperatures []Temperature
-	// TemperaturesCount is the number of Temperature objects
-	TemperaturesCount int `json:"Temperatures@odata.count"`
-	// Oem shall contain the OEM extensions. All values for properties that
-	// this object contains shall conform to the Redfish Specification
-	// described requirements.
-	Oem json.RawMessage
-	// rawData holds the original serialized JSON so we can compare updates.
+
+	// Counters for collections
+	FansCount         int `json:"Fans@odata.count,omitempty"`
+	TemperaturesCount int `json:"Temperatures@odata.count,omitempty"`
+	RedundancyCount   int `json:"Redundancy@odata.count,omitempty"`
+
+	// rawData holds original JSON for comparison during updates.
 	rawData []byte
 }
 
@@ -351,8 +284,7 @@ func (thermal *Thermal) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (thermal *Thermal) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
+	// Get a representation of the object's original state so we can find what to update.
 	original := new(Thermal)
 	original.UnmarshalJSON(thermal.rawData)
 

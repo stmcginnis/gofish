@@ -43,7 +43,7 @@ type ThermalOem struct {
 func FromThermal(thermal *redfish.Thermal) (Thermal, error) {
 	oem := ThermalOem{}
 
-	_ = json.Unmarshal(thermal.Oem, &oem)
+	_ = json.Unmarshal(thermal.OEM, &oem)
 
 	fans := make([]Fan, 0, len(thermal.Fans))
 
