@@ -153,7 +153,6 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		}
 
 		if config.ReuseConnections {
-			client.keepAlive = true
 			transport.DisableKeepAlives = false
 			transport.IdleConnTimeout = 1 * time.Minute
 		}
@@ -163,6 +162,11 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		}
 	}
 
+	// Allow provided HTTPClients that don't use the standard Transport to reuse connections.
+	if config.ReuseConnections {
+		client.keepAlive = true
+	}
+	
 	// Fetch the service root
 	client.Service, err = ServiceRoot(client)
 	if err != nil {
