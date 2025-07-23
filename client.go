@@ -153,7 +153,6 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		}
 
 		if config.ReuseConnections {
-			client.keepAlive = true
 			transport.DisableKeepAlives = false
 			transport.IdleConnTimeout = 1 * time.Minute
 		}
@@ -161,6 +160,11 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		if config.TLSHandshakeTimeout != 0 {
 			transport.TLSHandshakeTimeout = time.Duration(config.TLSHandshakeTimeout) * time.Second
 		}
+	}
+
+	// Allow provided HTTPClients that don't use the standard Transport to reuse connections.
+	if config.ReuseConnections {
+		client.keepAlive = true
 	}
 
 	// Fetch the service root
