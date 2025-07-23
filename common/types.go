@@ -369,7 +369,7 @@ type Placement struct {
 	Rack string
 	// RackOffset is the vertical location of the item in the rack. Rack offset
 	// units shall be measured from bottom to top starting with 0.
-	RackOffset int
+	RackOffset any
 	// RackOffsetUnits shall be a RackUnit enumeration literal indicating the
 	// type of rack units in use.
 	RackOffsetUnits RackUnits
