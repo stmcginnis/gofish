@@ -867,6 +867,15 @@ func (chassis *Chassis) LeakDetectors() ([]*LeakDetector, error) {
 	if chassis.leakdetectors == "" {
 		return nil, nil
 	}
-
 	return ListReferencedLeakDetectors(chassis.GetClient(), chassis.leakdetectors)
+}
+
+// GetNetworkAdapters returns the networkAdapters field value.
+func (chassis *Chassis) GetNetworkAdapters() string {
+	return chassis.networkAdapters
+}
+
+// SetNetworkAdapters sets the networkAdapters field value.
+func (chassis *Chassis) SetNetworkAdapters(networkAdapters string) {
+	chassis.networkAdapters = networkAdapters
 }
