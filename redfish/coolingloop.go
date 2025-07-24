@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -150,11 +149,6 @@ func (coolingloop *CoolingLoop) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (coolingloop *CoolingLoop) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(CoolingLoop)
-	original.UnmarshalJSON(coolingloop.rawData)
-
 	readWriteFields := []string{
 		"ConsumingEquipmentNames",
 		"CoolingManagerURI",
@@ -163,10 +157,7 @@ func (coolingloop *CoolingLoop) Update() error {
 		"UserLabel",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(coolingloop).Elem()
-
-	return coolingloop.Entity.Update(originalElement, currentElement, readWriteFields)
+	return coolingloop.UpdateFromRawData(coolingloop, coolingloop.rawData, readWriteFields)
 }
 
 // GetCoolingLoop will get a CoolingLoop instance from the service.

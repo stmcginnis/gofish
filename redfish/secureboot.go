@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -107,22 +106,11 @@ func (secureboot *SecureBoot) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (secureboot *SecureBoot) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(SecureBoot)
-	err := original.UnmarshalJSON(secureboot.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"SecureBootEnable",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(secureboot).Elem()
-
-	return secureboot.Entity.Update(originalElement, currentElement, readWriteFields)
+	return secureboot.UpdateFromRawData(secureboot, secureboot.rawData, readWriteFields)
 }
 
 // GetSecureBoot will get a SecureBoot instance from the service.

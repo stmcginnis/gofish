@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -111,19 +110,11 @@ func (fabric *Fabric) Switches() ([]*Switch, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (fabric *Fabric) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Fabric)
-	original.UnmarshalJSON(fabric.rawData)
-
 	readWriteFields := []string{
 		"UUID",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(fabric).Elem()
-
-	return fabric.Entity.Update(originalElement, currentElement, readWriteFields)
+	return fabric.UpdateFromRawData(fabric, fabric.rawData, readWriteFields)
 }
 
 // GetFabric will get a Fabric instance from the service.

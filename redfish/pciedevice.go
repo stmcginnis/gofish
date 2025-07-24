@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -334,24 +333,13 @@ func (pciedevice *PCIeDevice) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (pciedevice *PCIeDevice) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(PCIeDevice)
-	err := original.UnmarshalJSON(pciedevice.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AssetTag",
 		"LocationIndicatorActive",
 		"ReadyToRemove",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(pciedevice).Elem()
-
-	return pciedevice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return pciedevice.UpdateFromRawData(pciedevice, pciedevice.rawData, readWriteFields)
 }
 
 // GetPCIeDevice will get a PCIeDevice instance from the service.

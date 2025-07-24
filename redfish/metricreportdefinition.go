@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -244,11 +243,6 @@ func (metricreportdefinition *MetricReportDefinition) Triggers() ([]*Triggers, e
 
 // Update commits updates to this object's properties to the running system.
 func (metricreportdefinition *MetricReportDefinition) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(MetricReportDefinition)
-	original.UnmarshalJSON(metricreportdefinition.rawData)
-
 	readWriteFields := []string{
 		"MetricProperties",
 		"MetricReportDefinitionEnabled",
@@ -260,10 +254,7 @@ func (metricreportdefinition *MetricReportDefinition) Update() error {
 		"SuppressRepeatedMetricValue",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(metricreportdefinition).Elem()
-
-	return metricreportdefinition.Entity.Update(originalElement, currentElement, readWriteFields)
+	return metricreportdefinition.UpdateFromRawData(metricreportdefinition, metricreportdefinition.rawData, readWriteFields)
 }
 
 // GetMetricReportDefinition will get a MetricReportDefinition instance from the service.

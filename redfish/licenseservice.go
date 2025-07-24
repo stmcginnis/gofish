@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -115,20 +114,12 @@ func (licenseservice *LicenseService) Licenses() ([]*License, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (licenseservice *LicenseService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(LicenseService)
-	original.UnmarshalJSON(licenseservice.rawData)
-
 	readWriteFields := []string{
 		"LicenseExpirationWarningDays",
 		"ServiceEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(licenseservice).Elem()
-
-	return licenseservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return licenseservice.UpdateFromRawData(licenseservice, licenseservice.rawData, readWriteFields)
 }
 
 // GetLicenseService will get a LicenseService instance from the service.

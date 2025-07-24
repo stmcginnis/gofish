@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -163,20 +162,12 @@ func (outboundconnection *OutboundConnection) ClientCertificates() ([]*Certifica
 
 // Update commits updates to this object's properties to the running system.
 func (outboundconnection *OutboundConnection) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(OutboundConnection)
-	original.UnmarshalJSON(outboundconnection.rawData)
-
 	readWriteFields := []string{
 		"ConnectionEnabled",
 		"WebSocketPingIntervalMinutes",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(outboundconnection).Elem()
-
-	return outboundconnection.Entity.Update(originalElement, currentElement, readWriteFields)
+	return outboundconnection.UpdateFromRawData(outboundconnection, outboundconnection.rawData, readWriteFields)
 }
 
 // GetOutboundConnection will get a OutboundConnection instance from the service.

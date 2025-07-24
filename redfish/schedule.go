@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -115,26 +114,16 @@ func (schedule *Schedule) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (schedule *Schedule) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Schedule)
-	original.UnmarshalJSON(schedule.rawData)
-
-	readWriteFields := []string{
-		"EnabledDaysOfMonth",
+	readWriteFields := []string{"EnabledDaysOfMonth",
 		"EnabledDaysOfWeek",
 		"EnabledIntervals",
 		"EnabledMonthsOfYear",
 		"InitialStartTime",
 		"Lifetime",
 		"MaxOccurrences",
-		"RecurrenceInterval",
-	}
+		"RecurrenceInterval"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(schedule).Elem()
-
-	return schedule.Entity.Update(originalElement, currentElement, readWriteFields)
+	return schedule.UpdateFromRawData(schedule, schedule.rawData, readWriteFields)
 }
 
 // GetSchedule will get a Schedule instance from the service.

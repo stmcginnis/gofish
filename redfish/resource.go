@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -385,13 +384,7 @@ func (postaladdress *PostalAddress) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (postaladdress *PostalAddress) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(PostalAddress)
-	original.UnmarshalJSON(postaladdress.rawData)
-
-	readWriteFields := []string{
-		"AdditionalCode",
+	readWriteFields := []string{"AdditionalCode",
 		"AdditionalInfo",
 		"Building",
 		"City",
@@ -420,13 +413,9 @@ func (postaladdress *PostalAddress) Update() error {
 		"StreetSuffix",
 		"Territory",
 		"TrailingStreetSuffix",
-		"Unit",
-	}
+		"Unit"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(postaladdress).Elem()
-
-	return postaladdress.Entity.Update(originalElement, currentElement, readWriteFields)
+	return postaladdress.UpdateFromRawData(postaladdress, postaladdress.rawData, readWriteFields)
 }
 
 // ReferenceableMember shall contain the location of this element within an item.

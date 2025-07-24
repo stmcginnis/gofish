@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -125,19 +124,11 @@ func (environmentmetrics *EnvironmentMetrics) ResetToDefaults() error {
 
 // Update commits updates to this object's properties to the running system.
 func (environmentmetrics *EnvironmentMetrics) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(EnvironmentMetrics)
-	original.UnmarshalJSON(environmentmetrics.rawData)
-
 	readWriteFields := []string{
 		"PowerLimitWatts",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(environmentmetrics).Elem()
-
-	return environmentmetrics.Entity.Update(originalElement, currentElement, readWriteFields)
+	return environmentmetrics.UpdateFromRawData(environmentmetrics, environmentmetrics.rawData, readWriteFields)
 }
 
 // GetEnvironmentMetrics will get a EnvironmentMetrics instance from the service.

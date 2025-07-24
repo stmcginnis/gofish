@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -250,14 +249,6 @@ func (networkport *NetworkPort) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (networkport *NetworkPort) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(NetworkPort)
-	err := original.UnmarshalJSON(networkport.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"ActiveLinkTechnology",
 		"CurrentLinkSpeedMbps",
@@ -266,10 +257,7 @@ func (networkport *NetworkPort) Update() error {
 		"WakeOnLANEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(networkport).Elem()
-
-	return networkport.Entity.Update(originalElement, currentElement, readWriteFields)
+	return networkport.UpdateFromRawData(networkport, networkport.rawData, readWriteFields)
 }
 
 // GetNetworkPort will get a NetworkPort instance from the service.

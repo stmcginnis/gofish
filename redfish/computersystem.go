@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/stmcginnis/gofish/common"
@@ -1031,14 +1030,6 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (computersystem *ComputerSystem) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	cs := new(ComputerSystem)
-	err := cs.UnmarshalJSON(computersystem.RawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AssetTag",
 		"HostName",
@@ -1051,10 +1042,7 @@ func (computersystem *ComputerSystem) Update() error {
 		"IndicatorLED",
 	}
 
-	originalElement := reflect.ValueOf(cs).Elem()
-	currentElement := reflect.ValueOf(computersystem).Elem()
-
-	return computersystem.Entity.Update(originalElement, currentElement, readWriteFields)
+	return computersystem.UpdateFromRawData(computersystem, computersystem.RawData, readWriteFields)
 }
 
 // GetComputerSystem will get a ComputerSystem instance from the service.

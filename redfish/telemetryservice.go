@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -196,19 +195,9 @@ func (telemetryservice *TelemetryService) SubmitTestMetricReport(reportValues []
 
 // Update commits updates to this object's properties to the running system.
 func (telemetryservice *TelemetryService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(TelemetryService)
-	original.UnmarshalJSON(telemetryservice.rawData)
+	readWriteFields := []string{"ServiceEnabled"}
 
-	readWriteFields := []string{
-		"ServiceEnabled",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(telemetryservice).Elem()
-
-	return telemetryservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return telemetryservice.UpdateFromRawData(telemetryservice, telemetryservice.rawData, readWriteFields)
 }
 
 // GetTelemetryService will get a TelemetryService instance from the service.

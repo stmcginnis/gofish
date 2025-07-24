@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -72,20 +71,10 @@ func (sessionservice *SessionService) Sessions() ([]*Session, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (sessionservice *SessionService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(SessionService)
-	original.UnmarshalJSON(sessionservice.rawData)
+	readWriteFields := []string{"ServiceEnabled",
+		"SessionTimeout"}
 
-	readWriteFields := []string{
-		"ServiceEnabled",
-		"SessionTimeout",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(sessionservice).Elem()
-
-	return sessionservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return sessionservice.UpdateFromRawData(sessionservice, sessionservice.rawData, readWriteFields)
 }
 
 // GetSessionService will get a SessionService instance from the service.

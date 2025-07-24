@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -256,14 +255,6 @@ func GetPowerDistribution(c common.Client, uri string) (*PowerDistribution, erro
 
 // Update commits updates to this object's properties to the running system.
 func (powerDistribution *PowerDistribution) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	pd := new(PowerDistribution)
-	err := pd.UnmarshalJSON(powerDistribution.rawData)
-	if err != nil {
-		return err
-	}
-
 	// Note: current definition (2023.3) only includes AssetTag and UserLabel.
 	// May have errors trying to set other values, but keeping in here for backwards
 	// compatibility.
@@ -286,10 +277,7 @@ func (powerDistribution *PowerDistribution) Update() error {
 		"UnderVoltageRMSPercentage",
 	}
 
-	originalElement := reflect.ValueOf(pd).Elem()
-	currentElement := reflect.ValueOf(powerDistribution).Elem()
-
-	return powerDistribution.Entity.Update(originalElement, currentElement, readWriteFields)
+	return powerDistribution.UpdateFromRawData(powerDistribution, powerDistribution.rawData, readWriteFields)
 }
 
 // This action shall transfer power input from the existing mains circuit to the alternative mains circuit.

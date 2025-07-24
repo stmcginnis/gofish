@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -570,19 +569,11 @@ func (logentry *LogEntry) RelatedLogEntries() ([]*LogEntry, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (logentry *LogEntry) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(LogEntry)
-	original.UnmarshalJSON(logentry.rawData)
-
 	readWriteFields := []string{
 		"Resolved",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(logentry).Elem()
-
-	return logentry.Entity.Update(originalElement, currentElement, readWriteFields)
+	return logentry.UpdateFromRawData(logentry, logentry.rawData, readWriteFields)
 }
 
 // GetLogEntry will get a LogEntry instance from the service.

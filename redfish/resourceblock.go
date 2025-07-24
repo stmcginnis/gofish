@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -267,20 +266,10 @@ func (resourceblock *ResourceBlock) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (resourceblock *ResourceBlock) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(ResourceBlock)
-	original.UnmarshalJSON(resourceblock.rawData)
+	readWriteFields := []string{"Client",
+		"Pool"}
 
-	readWriteFields := []string{
-		"Client",
-		"Pool",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(resourceblock).Elem()
-
-	return resourceblock.Entity.Update(originalElement, currentElement, readWriteFields)
+	return resourceblock.UpdateFromRawData(resourceblock, resourceblock.rawData, readWriteFields)
 }
 
 // GetResourceBlock will get a ResourceBlock instance from the service.

@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -170,11 +169,6 @@ func (aggregationsource *AggregationSource) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (aggregationsource *AggregationSource) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(AggregationSource)
-	original.UnmarshalJSON(aggregationsource.rawData)
-
 	readWriteFields := []string{
 		"AggregationType",
 		"HostName",
@@ -182,10 +176,7 @@ func (aggregationsource *AggregationSource) Update() error {
 		"UserName",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(aggregationsource).Elem()
-
-	return aggregationsource.Entity.Update(originalElement, currentElement, readWriteFields)
+	return aggregationsource.UpdateFromRawData(aggregationsource, aggregationsource.rawData, readWriteFields)
 }
 
 // GetAggregationSource will get a AggregationSource instance from the service.

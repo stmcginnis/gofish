@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -233,14 +232,6 @@ func (virtualmedia *VirtualMedia) ClientCertificates() ([]*Certificate, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (virtualmedia *VirtualMedia) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(VirtualMedia)
-	err := original.UnmarshalJSON(virtualmedia.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"EjectPolicy",
 		"EjectTimeout",
@@ -254,10 +245,7 @@ func (virtualmedia *VirtualMedia) Update() error {
 		"WriteProtected",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(virtualmedia).Elem()
-
-	return virtualmedia.Entity.Update(originalElement, currentElement, readWriteFields)
+	return virtualmedia.UpdateFromRawData(virtualmedia, virtualmedia.rawData, readWriteFields)
 }
 
 // EjectMedia sends a request to eject the media.

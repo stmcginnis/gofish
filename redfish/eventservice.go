@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 	"strings"
 	"time"
 
@@ -228,24 +227,13 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (eventservice *EventService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(EventService)
-	err := original.UnmarshalJSON(eventservice.RawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"DeliveryRetryAttempts",
 		"DeliveryRetryIntervalSeconds",
 		"ServiceEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(eventservice).Elem()
-
-	return eventservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return eventservice.UpdateFromRawData(eventservice, eventservice.RawData, readWriteFields)
 }
 
 // GetEventService will get a EventService instance from the service.

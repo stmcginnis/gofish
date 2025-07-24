@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -446,14 +445,6 @@ func GetCircuit(c common.Client, uri string) (*Circuit, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (circuit *Circuit) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	ct := new(Circuit)
-	err := ct.UnmarshalJSON(circuit.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"ConfigurationLocked",
 		"CriticalCircuit",
@@ -471,10 +462,7 @@ func (circuit *Circuit) Update() error {
 		"UserLabel",
 	}
 
-	originalElement := reflect.ValueOf(ct).Elem()
-	currentElement := reflect.ValueOf(circuit).Elem()
-
-	return circuit.Entity.Update(originalElement, currentElement, readWriteFields)
+	return circuit.UpdateFromRawData(circuit, circuit.rawData, readWriteFields)
 }
 
 // This action shall control the state of the circuit breaker or over-current protection device.

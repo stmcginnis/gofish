@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -233,22 +232,12 @@ func (sw *Switch) Reset(resetType ResetType) error {
 
 // Update commits updates to this object's properties to the running system.
 func (sw *Switch) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Switch)
-	original.UnmarshalJSON(sw.rawData)
-
-	readWriteFields := []string{
-		"AssetTag",
+	readWriteFields := []string{"AssetTag",
 		"Enabled",
 		"IsManaged",
-		"LocationIndicatorActive",
-	}
+		"LocationIndicatorActive"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(sw).Elem()
-
-	return sw.Entity.Update(originalElement, currentElement, readWriteFields)
+	return sw.UpdateFromRawData(sw, sw.rawData, readWriteFields)
 }
 
 // GetSwitch will get a Switch instance from the service.

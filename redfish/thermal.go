@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -117,18 +116,9 @@ func (fan *ThermalFan) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (fan *ThermalFan) Update() error {
-	// Get a representation of the object's original state so we can find what to update.
-	original := new(ThermalFan)
-	original.UnmarshalJSON(fan.rawData)
+	readWriteFields := []string{"IndicatorLED"}
 
-	readWriteFields := []string{
-		"IndicatorLED",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(fan).Elem()
-
-	return fan.Entity.Update(originalElement, currentElement, readWriteFields)
+	return fan.UpdateFromRawData(fan, fan.rawData, readWriteFields)
 }
 
 // Temperature represents a temperature sensor in a Redfish system.
@@ -217,19 +207,10 @@ func (temperature *Temperature) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (temperature *Temperature) Update() error {
-	// Get a representation of the object's original state so we can find what to update.
-	original := new(Temperature)
-	original.UnmarshalJSON(temperature.rawData)
+	readWriteFields := []string{"LowerThresholdUser",
+		"UpperThresholdUser"}
 
-	readWriteFields := []string{
-		"LowerThresholdUser",
-		"UpperThresholdUser",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(temperature).Elem()
-
-	return temperature.Entity.Update(originalElement, currentElement, readWriteFields)
+	return temperature.UpdateFromRawData(temperature, temperature.rawData, readWriteFields)
 }
 
 // Thermal represents thermal management data in a Redfish system.
@@ -284,19 +265,10 @@ func (thermal *Thermal) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (thermal *Thermal) Update() error {
-	// Get a representation of the object's original state so we can find what to update.
-	original := new(Thermal)
-	original.UnmarshalJSON(thermal.rawData)
+	readWriteFields := []string{"Fans",
+		"Temperatures"}
 
-	readWriteFields := []string{
-		"Fans",
-		"Temperatures",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(thermal).Elem()
-
-	return thermal.Entity.Update(originalElement, currentElement, readWriteFields)
+	return thermal.UpdateFromRawData(thermal, thermal.rawData, readWriteFields)
 }
 
 // GetThermal will get a Thermal instance from the service.

@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -448,14 +447,6 @@ func (accountservice *AccountService) PrivilegeMap() (*PrivilegeRegistry, error)
 
 // Update commits updates to this object's properties to the running system.
 func (accountservice *AccountService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(AccountService)
-	err := original.UnmarshalJSON(accountservice.RawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AccountLockoutCounterResetAfter",
 		"AccountLockoutCounterResetEnabled",
@@ -468,10 +459,7 @@ func (accountservice *AccountService) Update() error {
 		"ServiceEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(accountservice).Elem()
-
-	return accountservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return accountservice.UpdateFromRawData(accountservice, accountservice.RawData, readWriteFields)
 }
 
 // GetAccountService will get the AccountService instance from the Redfish

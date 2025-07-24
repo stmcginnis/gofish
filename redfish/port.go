@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -937,14 +936,6 @@ func (port *Port) GenZVCAT() ([]*VCATEntry, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (port *Port) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Port)
-	err := original.UnmarshalJSON(port.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"BackpressureSampleInterval",
 		"CompletionCollectionInterval",
@@ -979,10 +970,7 @@ func (port *Port) Update() error {
 		"LocationIndicatorActive",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(port).Elem()
-
-	return port.Entity.Update(originalElement, currentElement, readWriteFields)
+	return port.UpdateFromRawData(port, port.rawData, readWriteFields)
 }
 
 // GetPort will get a Port instance from the service.

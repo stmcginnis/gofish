@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/stmcginnis/gofish/common"
@@ -180,14 +179,6 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (logservice *LogService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(LogService)
-	err := original.UnmarshalJSON(logservice.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AutoDSTEnabled",
 		"DateTime",
@@ -195,10 +186,7 @@ func (logservice *LogService) Update() error {
 		"ServiceEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(logservice).Elem()
-
-	return logservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return logservice.UpdateFromRawData(logservice, logservice.rawData, readWriteFields)
 }
 
 // GetLogService will get a LogService instance from the service.
