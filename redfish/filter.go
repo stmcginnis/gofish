@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -109,11 +108,6 @@ func (filter *Filter) Assembly() (*Assembly, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (filter *Filter) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Filter)
-	original.UnmarshalJSON(filter.rawData)
-
 	readWriteFields := []string{
 		"LocationIndicatorActive",
 		"ServiceHours",
@@ -121,10 +115,7 @@ func (filter *Filter) Update() error {
 		"UserLabel",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(filter).Elem()
-
-	return filter.Entity.Update(originalElement, currentElement, readWriteFields)
+	return filter.UpdateFromRawData(filter, filter.rawData, readWriteFields)
 }
 
 // GetFilter will get a Filter instance from the service.

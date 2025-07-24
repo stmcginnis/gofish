@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -563,14 +562,6 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (memory *Memory) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Memory)
-	err := original.UnmarshalJSON(memory.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"Enabled",
 		"LocationIndicatorActive",
@@ -581,10 +572,7 @@ func (memory *Memory) Update() error {
 		"VolatileSizeLimitMiB",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(memory).Elem()
-
-	return memory.Entity.Update(originalElement, currentElement, readWriteFields)
+	return memory.UpdateFromRawData(memory, memory.rawData, readWriteFields)
 }
 
 // GetMemory will get a Memory instance from the service.

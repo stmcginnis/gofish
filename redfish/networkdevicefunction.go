@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -488,14 +487,6 @@ func (networkdevicefunction *NetworkDeviceFunction) PhysicalPortAssignment() (*N
 
 // Update commits updates to this object's properties to the running system.
 func (networkdevicefunction *NetworkDeviceFunction) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(NetworkDeviceFunction)
-	err := original.UnmarshalJSON(networkdevicefunction.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"BootMode",
 		"DeviceEnabled",
@@ -503,10 +494,7 @@ func (networkdevicefunction *NetworkDeviceFunction) Update() error {
 		"SAVIEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(networkdevicefunction).Elem()
-
-	return networkdevicefunction.Entity.Update(originalElement, currentElement, readWriteFields)
+	return networkdevicefunction.UpdateFromRawData(networkdevicefunction, networkdevicefunction.rawData, readWriteFields)
 }
 
 // GetNetworkDeviceFunction will get a NetworkDeviceFunction instance from the service.

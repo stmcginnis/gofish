@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -106,23 +105,13 @@ func (registeredclient *RegisteredClient) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (registeredclient *RegisteredClient) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(RegisteredClient)
-	original.UnmarshalJSON(registeredclient.rawData)
-
-	readWriteFields := []string{
-		"ClientType",
+	readWriteFields := []string{"ClientType",
 		"ClientURI",
 		"Context",
 		"ExpirationDate",
-		"SubContext",
-	}
+		"SubContext"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(registeredclient).Elem()
-
-	return registeredclient.Entity.Update(originalElement, currentElement, readWriteFields)
+	return registeredclient.UpdateFromRawData(registeredclient, registeredclient.rawData, readWriteFields)
 }
 
 // GetRegisteredClient will get a RegisteredClient instance from the service.

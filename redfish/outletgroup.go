@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -140,11 +139,6 @@ func (outletgroup *OutletGroup) Outlets() ([]*Outlet, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (outletgroup *OutletGroup) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(OutletGroup)
-	original.UnmarshalJSON(outletgroup.rawData)
-
 	readWriteFields := []string{
 		"ConfigurationLocked",
 		"CreatedBy",
@@ -156,10 +150,7 @@ func (outletgroup *OutletGroup) Update() error {
 		"PowerRestorePolicy",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(outletgroup).Elem()
-
-	return outletgroup.Entity.Update(originalElement, currentElement, readWriteFields)
+	return outletgroup.UpdateFromRawData(outletgroup, outletgroup.rawData, readWriteFields)
 }
 
 // GetOutletGroup will get a OutletGroup instance from the service.

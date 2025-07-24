@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 	"time"
 
 	"github.com/stmcginnis/gofish/common"
@@ -83,20 +82,10 @@ func (taskService *TaskService) Tasks() ([]*Task, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (taskService *TaskService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(TaskService)
-	original.UnmarshalJSON(taskService.rawData)
+	readWriteFields := []string{"ServiceEnabled",
+		"TaskAutoDeleteTimeoutMinutes"}
 
-	readWriteFields := []string{
-		"ServiceEnabled",
-		"TaskAutoDeleteTimeoutMinutes",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(taskService).Elem()
-
-	return taskService.Entity.Update(originalElement, currentElement, readWriteFields)
+	return taskService.UpdateFromRawData(taskService, taskService.rawData, readWriteFields)
 }
 
 // GetTaskService will get a TaskService instance from the service.

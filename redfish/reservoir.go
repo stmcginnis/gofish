@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -130,20 +129,10 @@ func (reservoir *Reservoir) Filters() ([]*Filter, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (reservoir *Reservoir) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Reservoir)
-	original.UnmarshalJSON(reservoir.rawData)
+	readWriteFields := []string{"LocationIndicatorActive",
+		"UserLabel"}
 
-	readWriteFields := []string{
-		"LocationIndicatorActive",
-		"UserLabel",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(reservoir).Elem()
-
-	return reservoir.Entity.Update(originalElement, currentElement, readWriteFields)
+	return reservoir.UpdateFromRawData(reservoir, reservoir.rawData, readWriteFields)
 }
 
 // GetReservoir will get a Reservoir instance from the service.

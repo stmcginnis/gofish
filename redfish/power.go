@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strconv"
 
 	"github.com/stmcginnis/gofish/common"
@@ -425,17 +424,9 @@ func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, 
 
 // Update commits updates to this object's properties to the running system.
 func (powersupply *PowerSupply) Update() error {
-	original := new(PowerSupply)
-	err := original.UnmarshalJSON(powersupply.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{"IndicatorLED"}
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(powersupply).Elem()
 
-	return powersupply.Entity.Update(originalElement, currentElement, readWriteFields)
+	return powersupply.UpdateFromRawData(powersupply, powersupply.rawData, readWriteFields)
 }
 
 // GetAssembly retrieves the containing Assembly.

@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -137,19 +136,11 @@ func (fan *Fan) CoolingChassis() ([]*Chassis, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (fan *Fan) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Fan)
-	original.UnmarshalJSON(fan.rawData)
-
 	readWriteFields := []string{
 		"LocationIndicatorActive",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(fan).Elem()
-
-	return fan.Entity.Update(originalElement, currentElement, readWriteFields)
+	return fan.UpdateFromRawData(fan, fan.rawData, readWriteFields)
 }
 
 // GetFan will get a Fan instance from the service.

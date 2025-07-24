@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -176,19 +175,11 @@ func (heater *Heater) Metrics() (*HeaterMetrics, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (heater *Heater) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Heater)
-	original.UnmarshalJSON(heater.rawData)
-
 	readWriteFields := []string{
 		"LocationIndicatorActive",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(heater).Elem()
-
-	return heater.Entity.Update(originalElement, currentElement, readWriteFields)
+	return heater.UpdateFromRawData(heater, heater.rawData, readWriteFields)
 }
 
 // GetHeater will get a Heater instance from the service.

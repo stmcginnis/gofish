@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -415,14 +414,6 @@ func (drive *Drive) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (drive *Drive) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Drive)
-	err := original.UnmarshalJSON(drive.RawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AssetTag",
 		"HotspareReplacementMode",
@@ -434,10 +425,7 @@ func (drive *Drive) Update() error {
 		"IndicatorLED",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(drive).Elem()
-
-	return drive.Entity.Update(originalElement, currentElement, readWriteFields)
+	return drive.UpdateFromRawData(drive, drive.RawData, readWriteFields)
 }
 
 // GetDrive will get a Drive instance from the service.

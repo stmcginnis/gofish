@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -156,23 +155,13 @@ func (pump *Pump) Filters() ([]*Filter, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (pump *Pump) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Pump)
-	original.UnmarshalJSON(pump.rawData)
-
-	readWriteFields := []string{
-		"AssetTag",
+	readWriteFields := []string{"AssetTag",
 		"LocationIndicatorActive",
 		"ServiceHours",
 		"SpeedControlPercent",
-		"UserLabel",
-	}
+		"UserLabel"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(pump).Elem()
-
-	return pump.Entity.Update(originalElement, currentElement, readWriteFields)
+	return pump.UpdateFromRawData(pump, pump.rawData, readWriteFields)
 }
 
 // GetPump will get a Pump instance from the service.

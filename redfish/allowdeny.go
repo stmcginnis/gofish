@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -100,11 +99,6 @@ func (allowdeny *AllowDeny) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (allowdeny *AllowDeny) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(AllowDeny)
-	_ = original.UnmarshalJSON(allowdeny.rawData)
-
 	readWriteFields := []string{
 		"AllowType",
 		"DestinationPortLower",
@@ -119,10 +113,7 @@ func (allowdeny *AllowDeny) Update() error {
 		"StatefulSession",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(allowdeny).Elem()
-
-	return allowdeny.Entity.Update(originalElement, currentElement, readWriteFields)
+	return allowdeny.UpdateFromRawData(allowdeny, allowdeny.rawData, readWriteFields)
 }
 
 // GetAllowDeny will get a AllowDeny instance from the service.

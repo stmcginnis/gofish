@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -209,24 +208,13 @@ func (powerSupplyUnit *PowerSupplyUnit) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (powerSupplyUnit *PowerSupplyUnit) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	psu := new(PowerSupplyUnit)
-	err := psu.UnmarshalJSON(powerSupplyUnit.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"ElectricalSourceManagerURIs",
 		"ElectricalSourceNames",
 		"LocationIndicatorActive",
 	}
 
-	originalElement := reflect.ValueOf(psu).Elem()
-	currentElement := reflect.ValueOf(powerSupplyUnit).Elem()
-
-	return powerSupplyUnit.Entity.Update(originalElement, currentElement, readWriteFields)
+	return powerSupplyUnit.UpdateFromRawData(powerSupplyUnit, powerSupplyUnit.rawData, readWriteFields)
 }
 
 // GetPowerSupplyUnit will get a PowerSupplyUnit instance from the Redfish service.

@@ -241,6 +241,35 @@ func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (pay
 	return payload
 }
 
+// UpdateFromRawData provides a generic update implementation for resources
+// that store their original JSON data in a RawData field.
+func (e *Entity) UpdateFromRawData(resource interface{}, rawData []byte, allowedUpdates []string) error {
+	// Create a new instance of the same type for the original state
+	resourceType := reflect.TypeOf(resource)
+	if resourceType.Kind() == reflect.Ptr {
+		resourceType = resourceType.Elem()
+	}
+
+	original := reflect.New(resourceType).Interface()
+
+	// Unmarshal the original data
+	if unmarshaler, ok := original.(json.Unmarshaler); ok {
+		if err := unmarshaler.UnmarshalJSON(rawData); err != nil {
+			return fmt.Errorf("failed to unmarshal original data: %w", err)
+		}
+	} else {
+		if err := json.Unmarshal(rawData, original); err != nil {
+			return fmt.Errorf("failed to unmarshal original data: %w", err)
+		}
+	}
+
+	// Get reflect values for comparison
+	originalElement := reflect.ValueOf(original).Elem()
+	currentElement := reflect.ValueOf(resource).Elem()
+
+	return e.Update(originalElement, currentElement, allowedUpdates)
+}
+
 type SchemaObject interface {
 	SetClient(Client)
 	SetETag(string)

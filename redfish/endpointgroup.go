@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -106,20 +105,12 @@ func (endpointgroup *EndpointGroup) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (endpointgroup *EndpointGroup) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(EndpointGroup)
-	original.UnmarshalJSON(endpointgroup.rawData)
-
 	readWriteFields := []string{
 		"GroupType",
 		"TargetEndpointGroupIdentifier",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(endpointgroup).Elem()
-
-	return endpointgroup.Entity.Update(originalElement, currentElement, readWriteFields)
+	return endpointgroup.UpdateFromRawData(endpointgroup, endpointgroup.rawData, readWriteFields)
 }
 
 // GetEndpointGroup will get a EndpointGroup instance from the service.

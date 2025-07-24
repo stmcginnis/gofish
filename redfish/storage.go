@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -352,21 +351,11 @@ func (storage *Storage) SetEncryptionKey(key, currentEncryptionKey, encryptionKe
 
 // Update commits updates to this object's properties to the running system.
 func (storage *Storage) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Storage)
-	original.UnmarshalJSON(storage.rawData)
-
-	readWriteFields := []string{
-		"AutoVolumeCreate",
+	readWriteFields := []string{"AutoVolumeCreate",
 		"EncryptionMode",
-		"HotspareActivationPolicy",
-	}
+		"HotspareActivationPolicy"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(storage).Elem()
-
-	return storage.Entity.Update(originalElement, currentElement, readWriteFields)
+	return storage.UpdateFromRawData(storage, storage.rawData, readWriteFields)
 }
 
 // GetStorage will get a Storage instance from the service.
