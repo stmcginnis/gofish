@@ -12,6 +12,7 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+// powerBody contains a complete Power resource example for testing.
 var powerBody = strings.NewReader(
 	`{
 		"@odata.context": "/redfish/v1/$metadata#Power.Power",
@@ -153,6 +154,7 @@ var powerBody = strings.NewReader(
 		"Voltages@odata.count": 1
 	}`)
 
+// invalidPowerBody contains an invalid Power resource example for testing error cases.
 var invalidPowerBody = strings.NewReader(
 	`{
 		"@odata.context": "/redfish/v1/$metadata#Chassis/Members(*)/Self/Power/$entity",
@@ -526,7 +528,7 @@ var invalidPowerBody = strings.NewReader(
 	  }
 	}`)
 
-// TestPower tests the parsing of Power objects.
+// TestPower verifies the parsing of Power objects from JSON.
 func TestPower(t *testing.T) {
 	var result Power
 	err := json.NewDecoder(powerBody).Decode(&result)
@@ -547,7 +549,7 @@ func TestPower(t *testing.T) {
 		t.Errorf("Invalid physical context: %s", result.PowerControl[0].PhysicalContext)
 	}
 
-	if result.PowerControl[0].PowerLimit.CorrectionInMs != 10000 {
+	if *result.PowerControl[0].PowerLimit.CorrectionInMs != 10000 {
 		t.Errorf("Invalid CorrectionInMs: %d", result.PowerControl[0].PowerLimit.CorrectionInMs)
 	}
 
@@ -560,8 +562,8 @@ func TestPower(t *testing.T) {
 			result.PowerSupplies[0].IndicatorLED)
 	}
 
-	if result.Voltages[0].MaxReadingRange != 10 {
-		t.Errorf("Invalid MaxReadingRange: %f", result.Voltages[0].MaxReadingRange)
+	if *result.Voltages[0].MaxReadingRange != 10 {
+		t.Errorf("Invalid MaxReadingRange: %f", *result.Voltages[0].MaxReadingRange)
 	}
 }
 
@@ -583,5 +585,366 @@ func TestNonconformingPower(t *testing.T) {
 	voltage := result.Voltages[0]
 	if voltage.MemberID != "218" {
 		t.Errorf("Expected first Voltage MemberID to be '218': %s", voltage.MemberID)
+	}
+}
+
+// TestVoltageUnmarshalJSON_MemberIDAsString verifies parsing Voltage with string MemberId.
+func TestVoltageUnmarshalJSON_MemberIDAsString(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/1",
+		"MemberId": "1",
+		"Name": "CPU Voltage",
+		"ReadingVolts": 3.3,
+		"RelatedItem@odata.count": 2,
+		"RelatedItem": [
+			{"@odata.id": "/redfish/v1/Chassis/1"},
+			{"@odata.id": "/redfish/v1/Systems/1"}
+		]
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if voltage.MemberID != "1" {
+		t.Errorf("Expected MemberID '1', got '%s'", voltage.MemberID)
+	}
+	if voltage.Name != "CPU Voltage" {
+		t.Errorf("Expected Name 'CPU Voltage', got '%s'", voltage.Name)
+	}
+	if *voltage.ReadingVolts != 3.3 {
+		t.Errorf("Expected ReadingVolts 3.3, got %f", *voltage.ReadingVolts)
+	}
+	if len(voltage.RelatedItem) != 2 {
+		t.Errorf("Expected 2 RelatedItems, got %d", len(voltage.RelatedItem))
+	}
+}
+
+// TestVoltageUnmarshalJSON_MemberIDAsNumber verifies parsing Voltage with numeric MemberId.
+func TestVoltageUnmarshalJSON_MemberIDAsNumber(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/2",
+		"MemberId": 2,
+		"Name": "Memory Voltage",
+		"ReadingVolts": 1.2,
+		"RelatedItem@odata.count": 1,
+		"RelatedItem": [
+			{"@odata.id": "/redfish/v1/Chassis/1"}
+		]
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if voltage.MemberID != "2" {
+		t.Errorf("Expected MemberID '2', got '%s'", voltage.MemberID)
+	}
+	if voltage.Name != "Memory Voltage" {
+		t.Errorf("Expected Name 'Memory Voltage', got '%s'", voltage.Name)
+	}
+	if *voltage.ReadingVolts != 1.2 {
+		t.Errorf("Expected ReadingVolts 1.2, got %f", *voltage.ReadingVolts)
+	}
+	if len(voltage.RelatedItem) != 1 {
+		t.Errorf("Expected 1 RelatedItem, got %d", len(voltage.RelatedItem))
+	}
+}
+
+// TestVoltageUnmarshalJSON_InvalidJSON verifies error handling for invalid JSON.
+func TestVoltageUnmarshalJSON_InvalidJSON(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/3",
+		"MemberId": "3",
+		"ReadingVolts: 5.0,  // Missing quote
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err == nil {
+		t.Error("Expected error for invalid JSON, but got none")
+	}
+}
+
+// TestVoltageUnmarshalJSON_OptionalFields verifies parsing with optional fields.
+func TestVoltageUnmarshalJSON_OptionalFields(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/4",
+		"MemberId": "4",
+		"Status": {
+			"State": "Enabled",
+			"Health": "OK"
+		}
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if voltage.MemberID != "4" {
+		t.Errorf("Expected MemberID '4', got '%s'", voltage.MemberID)
+	}
+	if voltage.Status.State != "Enabled" {
+		t.Errorf("Expected Status.State 'Enabled', got '%s'", voltage.Status.State)
+	}
+	if voltage.Status.Health != "OK" {
+		t.Errorf("Expected Status.Health 'OK', got '%s'", voltage.Status.Health)
+	}
+	if voltage.ReadingVolts != nil {
+		t.Error("Expected ReadingVolts to be nil")
+	}
+}
+
+// TestVoltageUnmarshalJSON_Thresholds verifies parsing of threshold values.
+func TestVoltageUnmarshalJSON_Thresholds(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/5",
+		"MemberId": "5",
+		"LowerThresholdCritical": 2.8,
+		"UpperThresholdCritical": 3.6,
+		"ReadingVolts": 3.3
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if *voltage.LowerThresholdCritical != 2.8 {
+		t.Errorf("Expected LowerThresholdCritical 2.8, got %f", *voltage.LowerThresholdCritical)
+	}
+	if *voltage.UpperThresholdCritical != 3.6 {
+		t.Errorf("Expected UpperThresholdCritical 3.6, got %f", *voltage.UpperThresholdCritical)
+	}
+	if voltage.LowerThresholdFatal != nil {
+		t.Errorf("Expected UpperThresholdCritical nil, got %f", *voltage.UpperThresholdCritical)
+	}
+	if voltage.UpperThresholdFatal != nil {
+		t.Errorf("Expected UpperThresholdFatal nil, got %f", *voltage.UpperThresholdCritical)
+	}
+}
+
+// TestVoltageUnmarshalJSON_CompleteData verifies parsing of complete Voltage data.
+func TestVoltageUnmarshalJSON_CompleteData(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/Serve/Power#/Voltages/0",
+		"LowerThresholdCritical": 1.1,
+		"LowerThresholdNonCritical": 1.15,
+		"MaxReadingRange": 255,
+		"MemberId": "VR_PVDQ_EFGH1_Output_Voltage",
+		"MinReadingRange": 0,
+		"Name": "VR PVDQ EFGH1 Output Voltage",
+		"ReadingVolts": 1.24,
+		"Status": {
+			"Health": "OK",
+			"State": "Enabled"
+		},
+		"UpperThresholdCritical": 1.35,
+		"UpperThresholdNonCritical": 1.3
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if voltage.ODataID != "/redfish/v1/Chassis/Serve/Power#/Voltages/0" {
+		t.Errorf("Expected ODataID '/redfish/v1/Chassis/Serve/Power#/Voltages/0', got '%s'", voltage.ODataID)
+	}
+	if *voltage.LowerThresholdCritical != 1.1 {
+		t.Errorf("Expected LowerThresholdCritical 1.1, got %f", *voltage.LowerThresholdCritical)
+	}
+	if *voltage.LowerThresholdNonCritical != 1.15 {
+		t.Errorf("Expected LowerThresholdNonCritical 1.15, got %f", *voltage.LowerThresholdNonCritical)
+	}
+	if *voltage.MaxReadingRange != 255 {
+		t.Errorf("Expected MaxReadingRange 255, got %f", *voltage.MaxReadingRange)
+	}
+	if voltage.MemberID != "VR_PVDQ_EFGH1_Output_Voltage" {
+		t.Errorf("Expected MemberID 'VR_PVDQ_EFGH1_Output_Voltage', got '%s'", voltage.MemberID)
+	}
+	if *voltage.MinReadingRange != 0 {
+		t.Errorf("Expected MinReadingRange 0, got %f", *voltage.MinReadingRange)
+	}
+	if voltage.Name != "VR PVDQ EFGH1 Output Voltage" {
+		t.Errorf("Expected Name 'VR PVDQ EFGH1 Output Voltage', got '%s'", voltage.Name)
+	}
+	if *voltage.ReadingVolts != 1.24 {
+		t.Errorf("Expected ReadingVolts 1.24, got %f", *voltage.ReadingVolts)
+	}
+	if voltage.Status.Health != "OK" {
+		t.Errorf("Expected Status.Health 'OK', got '%s'", voltage.Status.Health)
+	}
+	if voltage.Status.State != "Enabled" {
+		t.Errorf("Expected Status.State 'Enabled', got '%s'", voltage.Status.State)
+	}
+	if *voltage.UpperThresholdCritical != 1.35 {
+		t.Errorf("Expected UpperThresholdCritical 1.35, got %f", *voltage.UpperThresholdCritical)
+	}
+	if *voltage.UpperThresholdNonCritical != 1.3 {
+		t.Errorf("Expected UpperThresholdNonCritical 1.3, got %f", *voltage.UpperThresholdNonCritical)
+	}
+}
+
+// TestVoltageUnmarshalJSON_NullThresholds verifies parsing with null threshold values.
+func TestVoltageUnmarshalJSON_NullThresholds(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/Serve/Power#/Voltages/31",
+		"LowerThresholdCritical": null,
+		"LowerThresholdNonCritical": 198,
+		"MaxReadingRange": 300,
+		"MemberId": "PSU0_Input_Voltage",
+		"MinReadingRange": 0,
+		"Name": "PSU0 Input Voltage",
+		"ReadingVolts": 230.75,
+		"Status": {
+			"Health": "OK",
+			"State": "Enabled"
+		},
+		"UpperThresholdCritical": 260,
+		"UpperThresholdNonCritical": 253
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if voltage.LowerThresholdCritical != nil {
+		t.Error("Expected LowerThresholdCritical to be nil")
+	}
+	if *voltage.LowerThresholdNonCritical != 198 {
+		t.Errorf("Expected LowerThresholdNonCritical 198, got %f", *voltage.LowerThresholdNonCritical)
+	}
+	if *voltage.ReadingVolts != 230.75 {
+		t.Errorf("Expected ReadingVolts 230.75, got %f", *voltage.ReadingVolts)
+	}
+}
+
+// TestVoltageUnmarshalJSON_MinimalData verifies parsing with minimal required fields.
+func TestVoltageUnmarshalJSON_MinimalData(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/Serve/Power#/Voltages/4",
+		"MemberId": "VR_PVCSA1_Output_Voltage",
+		"ReadingVolts": 0.851
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
+
+	if voltage.ODataID != "/redfish/v1/Chassis/Serve/Power#/Voltages/4" {
+		t.Errorf("Unexpected ODataID: %s", voltage.ODataID)
+	}
+	if voltage.MemberID != "VR_PVCSA1_Output_Voltage" {
+		t.Errorf("Unexpected MemberID: %s", voltage.MemberID)
+	}
+	if *voltage.ReadingVolts != 0.851 {
+		t.Errorf("Unexpected ReadingVolts: %f", *voltage.ReadingVolts)
+	}
+	if voltage.LowerThresholdCritical != nil {
+		t.Error("Expected LowerThresholdCritical to be nil")
+	}
+	if voltage.Name != "" {
+		t.Error("Expected Name to be empty")
+	}
+}
+
+// TestVoltageUnmarshalJSON_InvalidData verifies error handling for invalid data.
+func TestVoltageUnmarshalJSON_InvalidData(t *testing.T) {
+	jsonData := `{
+		"@odata.id": "/redfish/v1/Chassis/Serve/Power#/Voltages/5",
+		"MemberId": "VR_P5V_AUX_Output_Voltage",
+		"ReadingVolts: 5.243260534504318
+	}`
+
+	var voltage Voltage
+	err := json.Unmarshal([]byte(jsonData), &voltage)
+	if err == nil {
+		t.Error("Expected error for invalid JSON, but got none")
+	}
+}
+
+// TestVoltageUnmarshalJSON_AllVoltages verifies parsing of multiple Voltage objects.
+func TestVoltageUnmarshalJSON_AllVoltages(t *testing.T) {
+	fullJSON := `{
+		"@odata.context": "/redfish/v1/$metadata#Power.Power",
+		"@odata.id": "/redfish/v1/Chassis/Serve/Power/",
+		"@odata.type": "#Power.v1_7_1.Power",
+		"Description": "The Power schema describes power metrics and represents the properties for power consumption and power limiting.",
+		"Id": "Power",
+		"Name": "Power",
+		"Voltages": [
+			{
+				"@odata.id": "/redfish/v1/Chassis/Serve/Power#/Voltages/0",
+				"LowerThresholdCritical": 1.1,
+				"LowerThresholdNonCritical": 1.15,
+				"MaxReadingRange": 255,
+				"MemberId": "VR_PVDQ_EFGH1_Output_Voltage",
+				"MinReadingRange": 0,
+				"Name": "VR PVDQ EFGH1 Output Voltage",
+				"ReadingVolts": 1.24,
+				"Status": {
+					"Health": "OK",
+					"State": "Enabled"
+				},
+				"UpperThresholdCritical": 1.35,
+				"UpperThresholdNonCritical": 1.3
+			},
+			{
+				"@odata.id": "/redfish/v1/Chassis/Serve/Power#/Voltages/30",
+				"LowerThresholdCritical": null,
+				"LowerThresholdNonCritical": 198,
+				"MaxReadingRange": 300,
+				"MemberId": "PSU1_Input_Voltage",
+				"MinReadingRange": 0,
+				"Name": "PSU1 Input Voltage",
+				"ReadingVolts": 229.25,
+				"Status": {
+					"Health": "OK",
+					"State": "Enabled"
+				},
+				"UpperThresholdCritical": 260,
+				"UpperThresholdNonCritical": 253
+			}
+		]
+	}`
+
+	type PowerResponse struct {
+		Voltages []Voltage `json:"Voltages"`
+	}
+
+	var power PowerResponse
+	err := json.Unmarshal([]byte(fullJSON), &power)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal full JSON: %v", err)
+	}
+
+	if len(power.Voltages) != 2 {
+		t.Fatalf("Expected 2 voltages, got %d", len(power.Voltages))
+	}
+
+	v0 := power.Voltages[0]
+	if v0.MemberID != "VR_PVDQ_EFGH1_Output_Voltage" {
+		t.Errorf("First voltage: expected MemberID 'VR_PVDQ_EFGH1_Output_Voltage', got '%s'", v0.MemberID)
+	}
+
+	v30 := power.Voltages[1]
+	if v30.MemberID != "PSU1_Input_Voltage" {
+		t.Errorf("Second voltage: expected MemberID 'PSU1_Input_Voltage', got '%s'", v30.MemberID)
+	}
+	if v30.LowerThresholdCritical != nil {
+		t.Error("Second voltage: expected LowerThresholdCritical to be nil")
 	}
 }
