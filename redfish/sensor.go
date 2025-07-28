@@ -11,467 +11,442 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+// ImplementationType specifies the method used to obtain the sensor reading.
 type ImplementationType string
 
 const (
-	// PhysicalSensorImplementationType The reading is acquired from a physical sensor.
-	PhysicalSensorImplementationType ImplementationType = "PhysicalSensor"
-	// CalculatedImplementationType The metric is implemented by applying a calculation on another metric property. The
-	// calculation is specified in the CalculationAlgorithm property.
-	CalculatedImplementationType ImplementationType = "Calculated"
-	// SynthesizedImplementationType The reading is obtained by applying a calculation on one or more properties or
-	// multiple sensors. The calculation is not provided.
-	SynthesizedImplementationType ImplementationType = "Synthesized"
-	// ReportedImplementationType The reading is obtained from software or a device.
-	ReportedImplementationType ImplementationType = "Reported"
-	// DigitalMeterImplementationType The metric is implemented as digital meter.
-	DigitalMeterImplementationType ImplementationType = "DigitalMeter"
+	// ImplementationTypePhysicalSensor indicates the reading comes from a physical sensor.
+	ImplementationTypePhysicalSensor ImplementationType = "PhysicalSensor"
+	// ImplementationTypeSynthesized indicates the reading is calculated from multiple sensors.
+	ImplementationTypeSynthesized ImplementationType = "Synthesized"
+	// ImplementationTypeReported indicates the reading comes from software or device reporting.
+	ImplementationTypeReported ImplementationType = "Reported"
 )
 
-// The implementation of the sensor.
-type SensorImplementation string
-
-const (
-	// The reading is acquired from a physical sensor.
-	PhysicalSensorImplementation SensorImplementation = "PhysicalSensor"
-	// The reading is obtained from software or a device.
-	ReportedImplementation SensorImplementation = "Reported"
-	// The reading is obtained by applying a calculation
-	// on one or more properties or multiple sensors.
-	// The calculation is not provided.
-	SynthesizedImplementation SensorImplementation = "Synthesized"
-)
-
-// The type of sensor.
+// ReadingType specifies the type of physical quantity being measured.
 type ReadingType string
 
 const (
-	// Absolute humidity (g/cu m).
-	AbsoluteHumidityReadingType ReadingType = "AbsoluteHumidity"
-	// Airflow (cu ft/min).
-	AirFlowReadingType ReadingType = "AirFlow"
-	// Air flow (m^3/min).
-	AirFlowCMMReadingType ReadingType = "AirFlowCMM"
-	// Altitude (m).
-	AltitudeReadingType ReadingType = "Altitude"
-	// Barometric pressure (mm).
-	BarometricReadingType ReadingType = "Barometric"
-	// Charge (Ah).
-	ChargeAhReadingType ReadingType = "ChargeAh"
-	// Current (A).
-	CurrentReadingType ReadingType = "Current"
-	// Energy (J).
-	EnergyJoulesReadingType ReadingType = "EnergyJoules"
-	// Energy (kWh).
-	EnergykWhReadingType ReadingType = "EnergykWh"
-	// Energy (Wh).
-	EnergyWhReadingType ReadingType = "EnergyWh"
-	// Frequency (Hz).
-	FrequencyReadingType ReadingType = "Frequency"
-	// Heat (kW).
-	HeatReadingType ReadingType = "Heat"
-	// Relative humidity (percent).
-	HumidityReadingType ReadingType = "Humidity"
-	// Deprecated: (v1.7) Liquid flow (L/s).
-	LiquidFlowReadingType ReadingType = "LiquidFlow"
-	// Liquid flow (L/min).
-	LiquidFlowLPMReadingType ReadingType = "LiquidFlowLPM"
-	// Liquid level (cm).
-	LiquidLevelReadingType ReadingType = "LiquidLevel"
-	// Percent (%).
-	PercentReadingType ReadingType = "Percent"
-	// Power (W).
-	PowerReadingType ReadingType = "Power"
-	// Deprecated: (v1.7) Pressure (Pa).
-	PressureReadingType ReadingType = "Pressure"
-	// Pressure (kPa).
-	PressurekPaReadingType ReadingType = "PressurekPa"
-	// Pressure (Pa).
-	PressurePaReadingType ReadingType = "PressurePa"
-	// Rotational (RPM).
-	RotationalReadingType ReadingType = "Rotational"
-	// Temperature (C).
-	TemperatureReadingType ReadingType = "Temperature"
-	// Voltage (VAC or VDC).
-	VoltageReadingType ReadingType = "Voltage"
+	// ReadingTypeAbsoluteHumidity measures absolute humidity in g/m^3.
+	ReadingTypeAbsoluteHumidity ReadingType = "AbsoluteHumidity"
+	// ReadingTypeAirFlow measures airflow in cu ft/min (deprecated in v1.7.0).
+	ReadingTypeAirFlow ReadingType = "AirFlow"
+	// ReadingTypeAirFlowCMM measures airflow in m^3/min.
+	ReadingTypeAirFlowCMM ReadingType = "AirFlowCMM"
+	// ReadingTypeAltitude measures altitude in meters.
+	ReadingTypeAltitude ReadingType = "Altitude"
+	// ReadingTypeBarometric measures barometric pressure in mmHg.
+	ReadingTypeBarometric ReadingType = "Barometric"
+	// ReadingTypeChargeAh measures charge in ampere-hours.
+	ReadingTypeChargeAh ReadingType = "ChargeAh"
+	// ReadingTypeCurrent measures current in amperes.
+	ReadingTypeCurrent ReadingType = "Current"
+	// ReadingTypeEnergyJoules measures energy in joules.
+	ReadingTypeEnergyJoules ReadingType = "EnergyJoules"
+	// ReadingTypeEnergykWh measures energy in kilowatt-hours.
+	ReadingTypeEnergykWh ReadingType = "EnergykWh"
+	// ReadingTypeEnergyWh measures energy in watt-hours.
+	ReadingTypeEnergyWh ReadingType = "EnergyWh"
+	// ReadingTypeFrequency measures frequency in hertz.
+	ReadingTypeFrequency ReadingType = "Frequency"
+	// ReadingTypeHeat measures heat in kilowatts.
+	ReadingTypeHeat ReadingType = "Heat"
+	// ReadingTypeHumidity measures relative humidity in percent.
+	ReadingTypeHumidity ReadingType = "Humidity"
+	// ReadingTypeLinearAcceleration measures linear acceleration in m/s^2.
+	ReadingTypeLinearAcceleration ReadingType = "LinearAcceleration"
+	// ReadingTypeLinearPosition measures linear position in meters.
+	ReadingTypeLinearPosition ReadingType = "LinearPosition"
+	// ReadingTypeLinearVelocity measures linear velocity in m/s.
+	ReadingTypeLinearVelocity ReadingType = "LinearVelocity"
+	// ReadingTypeLiquidFlow measures liquid flow in L/s (deprecated in v1.7.0).
+	ReadingTypeLiquidFlow ReadingType = "LiquidFlow"
+	// ReadingTypeLiquidFlowLPM measures liquid flow in L/min.
+	ReadingTypeLiquidFlowLPM ReadingType = "LiquidFlowLPM"
+	// ReadingTypeLiquidLevel measures liquid level in cm.
+	ReadingTypeLiquidLevel ReadingType = "LiquidLevel"
+	// ReadingTypePercent measures percentage values.
+	ReadingTypePercent ReadingType = "Percent"
+	// ReadingTypePower measures power in watts.
+	ReadingTypePower ReadingType = "Power"
+	// ReadingTypePressure measures pressure in pascals (deprecated in v1.7.0).
+	ReadingTypePressure ReadingType = "Pressure"
+	// ReadingTypePressurekPa measures pressure in kilopascals.
+	ReadingTypePressurekPa ReadingType = "PressurekPa"
+	// ReadingTypePressurePa measures pressure in pascals.
+	ReadingTypePressurePa ReadingType = "PressurePa"
+	// ReadingTypeRotational measures rotational speed in RPM.
+	ReadingTypeRotational ReadingType = "Rotational"
+	// ReadingTypeRotationalAcceleration measures rotational acceleration in rad/s^2.
+	ReadingTypeRotationalAcceleration ReadingType = "RotationalAcceleration"
+	// ReadingTypeRotationalPosition measures rotational position in radians.
+	ReadingTypeRotationalPosition ReadingType = "RotationalPosition"
+	// ReadingTypeRotationalVelocity measures rotational velocity in rad/s.
+	ReadingTypeRotationalVelocity ReadingType = "RotationalVelocity"
+	// ReadingTypeTemperature measures temperature in Celsius.
+	ReadingTypeTemperature ReadingType = "Temperature"
+	// ReadingTypeValve measures valve position in percent open.
+	ReadingTypeValve ReadingType = "Valve"
+	// ReadingTypeVoltage measures voltage in volts.
+	ReadingTypeVoltage ReadingType = "Voltage"
 )
 
+// ReadingBasisType specifies the reference basis for sensor readings.
 type ReadingBasisType string
 
 const (
-	// A reading that reports the difference between two measurements.
-	DeltaReadingBasisType ReadingBasisType = "Delta"
-	// A reading that decreases as it approaches a defined reference point.
-	HeadroomReadingBasisType ReadingBasisType = "Headroom"
-	// A zero-based reading.
-	ZeroReadingBasisType ReadingBasisType = "Zero"
+	// ReadingBasisTypeDelta indicates a difference between measurements.
+	ReadingBasisTypeDelta ReadingBasisType = "Delta"
+	// ReadingBasisTypeHeadroom indicates decreasing value approaching reference.
+	ReadingBasisTypeHeadroom ReadingBasisType = "Headroom"
+	// ReadingBasisTypeZero indicates zero-based measurement.
+	ReadingBasisTypeZero ReadingBasisType = "Zero"
 )
 
+// ThresholdActivation specifies how a threshold is triggered.
 type ThresholdActivation string
 
 const (
-	// Value decreases below the threshold.
-	DecreasingThresholdActivation ThresholdActivation = "Decreasing"
-	// The threshold is disabled.
-	DisabledThresholdActivation ThresholdActivation = "Disabled"
-	// Value crosses the threshold in either direction.
-	EitherThresholdActivation ThresholdActivation = "Either"
-	// Value increases above the threshold.
-	IncreasingThresholdActivation ThresholdActivation = "Increasing"
+	// ThresholdActivationIncreasing triggers when value rises above threshold.
+	ThresholdActivationIncreasing ThresholdActivation = "Increasing"
+	// ThresholdActivationDecreasing triggers when value falls below threshold.
+	ThresholdActivationDecreasing ThresholdActivation = "Decreasing"
+	// ThresholdActivationEither triggers on any crossing direction.
+	ThresholdActivationEither ThresholdActivation = "Either"
+	// ThresholdActivationDisabled indicates the threshold is inactive.
+	ThresholdActivationDisabled ThresholdActivation = "Disabled"
 )
 
+// Threshold defines parameters for sensor threshold monitoring.
 type Threshold struct {
-	// The direction of crossing that activates this threshold.
-	Activation ThresholdActivation
-	// The duration the sensor value must violate the threshold before the threshold is activated.
-	DwellTime string
-	// The duration the sensor value must not violate the threshold before the threshold is deactivated.
-	HysteresisDuration string
-	// The reading offset from the threshold value required to clear the threshold.
-	HysteresisReading float32
-	// The threshold value.
-	Reading float32
+	// Activation specifies the crossing direction that triggers this threshold.
+	Activation ThresholdActivation `json:"Activation,omitempty"`
+	// DwellTime specifies how long the reading must violate the threshold before triggering.
+	DwellTime *string `json:"DwellTime,omitempty"`
+	// HysteresisDuration specifies how long the reading must comply before clearing the threshold.
+	HysteresisDuration *string `json:"HysteresisDuration,omitempty"`
+	// HysteresisReading specifies the offset required to clear the threshold.
+	HysteresisReading *float32 `json:"HysteresisReading,omitempty"`
+	// Reading specifies the threshold value to monitor.
+	Reading *float32 `json:"Reading,omitempty"`
 }
 
+// Thresholds contains all threshold definitions for a sensor.
 type Thresholds struct {
-	// The value at which the reading is below normal range.
-	LowerCaution Threshold
-	// 	A user-defined value at which the reading is considered below normal range.
-	LowerCautionUser Threshold
-	// The value at which the reading is below normal range but not yet fatal.
-	LowerCritical Threshold
-	// A user-defined value at which the reading is considered below normal range but not yet fatal.
-	LowerCriticalUser Threshold
-	// The value at which the reading is below normal range and fatal.
-	LowerFatal Threshold
-	// The value at which the reading is above normal range.
-	UpperCaution Threshold
-	// A user-defined value at which the reading is considered above normal range.
-	UpperCautionUser Threshold
-	// The value at which the reading is above normal range but not yet fatal.
-	UpperCritical Threshold
-	// A user-defined value at which the reading is considered above normal range but not yet fatal.
-	UpperCriticalUser Threshold
-	// The value at which the reading is above normal range and fatal.
-	UpperFatal Threshold
+	// LowerCaution defines when reading is below normal range.
+	LowerCaution *Threshold `json:"LowerCaution,omitempty"`
+	// LowerCautionUser defines user-adjustable below-normal threshold.
+	LowerCautionUser *Threshold `json:"LowerCautionUser,omitempty"`
+	// LowerCritical defines when reading is below critical range.
+	LowerCritical *Threshold `json:"LowerCritical,omitempty"`
+	// LowerCriticalUser defines user-adjustable critical threshold.
+	LowerCriticalUser *Threshold `json:"LowerCriticalUser,omitempty"`
+	// LowerFatal defines when reading is below fatal range.
+	LowerFatal *Threshold `json:"LowerFatal,omitempty"`
+	// UpperCaution defines when reading is above normal range.
+	UpperCaution *Threshold `json:"UpperCaution,omitempty"`
+	// UpperCautionUser defines user-adjustable above-normal threshold.
+	UpperCautionUser *Threshold `json:"UpperCautionUser,omitempty"`
+	// UpperCritical defines when reading is above critical range.
+	UpperCritical *Threshold `json:"UpperCritical,omitempty"`
+	// UpperCriticalUser defines user-adjustable critical threshold.
+	UpperCriticalUser *Threshold `json:"UpperCriticalUser,omitempty"`
+	// UpperFatal defines when reading is above fatal range.
+	UpperFatal *Threshold `json:"UpperFatal,omitempty"`
 }
 
-// SensorArrayExcerpt shall represent a sensor for a Redfish implementation.
+// SensorArrayExcerpt represents a sensor array summary.
 type SensorArrayExcerpt struct {
-	// DataSourceURI shall contain a URI to the resource that provides the source of the excerpt contained within this
-	// copy.
-	DataSourceURI string
-	// DeviceName shall contain the name of the device associated with this sensor. If the device is represented by a
-	// resource, the value shall contain the value of the Name property of the associated resource.
-	DeviceName string
-	// PhysicalContext shall contain a description of the affected component or region within the equipment to which
-	// this sensor measurement applies.
-	PhysicalContext PhysicalContext
-	// PhysicalSubContext shall contain a description of the usage or sub-region within the equipment to which this
-	// sensor measurement applies. This property generally differentiates multiple sensors within the same
-	// PhysicalContext instance.
-	PhysicalSubContext PhysicalSubContext
-	// Reading shall contain the sensor value.
-	Reading float64
+	// DataSourceURI links to the source resource providing this data.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// DeviceName identifies the associated device.
+	DeviceName string `json:"DeviceName,omitempty"`
+	// PhysicalContext describes the measurement location.
+	PhysicalContext PhysicalContext `json:"PhysicalContext,omitempty"`
+	// PhysicalSubContext describes the sub-region being measured.
+	PhysicalSubContext PhysicalSubContext `json:"PhysicalSubContext,omitempty"`
+	// Reading contains the current sensor value.
+	Reading *float64 `json:"Reading,omitempty"`
 }
 
-// SensorCurrentExcerpt shall represent a sensor for a Redfish implementation.
+// SensorCurrentExcerpt represents current measurement summary.
 type SensorCurrentExcerpt struct {
-	// CrestFactor shall contain the ratio of the peak measurement divided by the RMS measurement and calculated over
-	// same N line cycles. A sine wave would have a value of 1.414.
-	CrestFactor float64
-	// DataSourceUri shall contain a URI to the resource that provides the source of the excerpt contained within this
-	// copy.
-	DataSourceURI string `json:"DataSourceUri"`
-	// Reading shall contain the sensor value.
-	Reading float64
-	// THDPercent shall contain the total harmonic distortion of the Reading property in percent units, typically '0'
-	// to '100'.
-	THDPercent float64
+	// CrestFactor indicates peak-to-RMS ratio.
+	CrestFactor *float64 `json:"CrestFactor,omitempty"`
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
+	// THDPercent indicates total harmonic distortion.
+	THDPercent *float64 `json:"THDPercent,omitempty"`
 }
 
-// SensorExcerpt shall represent a sensor for a Redfish implementation.
+// SensorExcerpt represents basic sensor information.
 type SensorExcerpt struct {
-	// The link to the resource that provides the data for this sensor.
-	DataSourceURI string `json:"DataSourceUri"`
-	// The sensor value.
-	Reading float64
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// Reading contains the sensor measurement.
+	Reading *float64 `json:"Reading,omitempty"`
 }
 
-// SensorFanArrayExcerpt shall represent a sensor for a Redfish implementation.
+// SensorFanArrayExcerpt represents fan array sensor summary.
 type SensorFanArrayExcerpt struct {
-	// DataSourceURI shall contain a URI to the resource that provides the source of the excerpt contained within this
-	// copy.
-	DataSourceURI string
-	// DeviceName shall contain the name of the device associated with this sensor. If the device is represented by a
-	// resource, the value shall contain the value of the Name property of the associated resource.
-	DeviceName string
-	// PhysicalContext shall contain a description of the affected component or region within the equipment to which
-	// this sensor measurement applies.
-	PhysicalContext PhysicalContext
-	// PhysicalSubContext shall contain a description of the usage or sub-region within the equipment to which this
-	// sensor measurement applies. This property generally differentiates multiple sensors within the same
-	// PhysicalContext instance.
-	PhysicalSubContext PhysicalSubContext
-	// Reading shall contain the sensor value.
-	Reading float64
-	// SpeedRPM shall contain a reading of the rotational speed of the device in revolutions per minute (RPM) units.
-	SpeedRPM float64
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// DeviceName identifies the fan array.
+	DeviceName string `json:"DeviceName,omitempty"`
+	// PhysicalContext describes the measurement location.
+	PhysicalContext PhysicalContext `json:"PhysicalContext,omitempty"`
+	// PhysicalSubContext describes the sub-region being measured.
+	PhysicalSubContext PhysicalSubContext `json:"PhysicalSubContext,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
+	// SpeedRPM indicates rotational speed.
+	SpeedRPM *float64 `json:"SpeedRPM,omitempty"`
 }
 
-// SensorFanExcerpt shall represent a sensor for a Redfish implementation.
+// SensorFanExcerpt represents fan sensor summary.
 type SensorFanExcerpt struct {
-	// DataSourceURI shall contain a URI to the resource that provides the source of the excerpt contained within this
-	// copy.
-	DataSourceURI string
-	// Reading shall contain the sensor value.
-	Reading float64
-	// SpeedRPM shall contain a reading of the rotational speed of the device in revolutions per minute (RPM) units.
-	SpeedRPM float64
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
+	// SpeedRPM indicates rotational speed.
+	SpeedRPM *float64 `json:"SpeedRPM,omitempty"`
 }
 
-// Energy consumption (kWh).
+// SensorEnergykWhExcerpt represents energy consumption summary.
 type SensorEnergykWhExcerpt struct {
-	// The apparent energy, in kilovolt-ampere-hour units
-	// for an electrical energy measurement.
-	ApparentkVAh float32
-	// The link to the resource that provides the data for this sensor.
-	DataSourceURI string `json:"DataSourceUri"`
-	// The total accumulation value for this sensor.
-	LifetimeReading float32
-	// The reactive energy, in kilovolt-ampere-hours (reactive) units
-	// for an electrical energy measurement.
-	ReactivekVARh float32
-	// The sensor value.
-	Reading float32
-	// The date and time when the time-based properties were last reset.
-	SensorResetTime string
+	// ApparentkVAh indicates apparent energy consumption.
+	ApparentkVAh *float64 `json:"ApparentkVAh,omitempty"`
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// LifetimeReading indicates total accumulated energy.
+	LifetimeReading *float64 `json:"LifetimeReading,omitempty"`
+	// ReactivekVARh indicates reactive energy consumption.
+	ReactivekVARh *float64 `json:"ReactivekVARh,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
+	// SensorResetTime indicates when metrics were last reset.
+	SensorResetTime string `json:"SensorResetTime,omitempty"`
 }
 
+// SensorPowerArrayExcerpt represents power array summary.
 type SensorPowerArrayExcerpt struct {
-	// ApparentVA shall contain the product of voltage (RMS) multiplied by current (RMS) for a circuit. This property
-	// can appear in sensors of the Power ReadingType, and shall not appear in sensors of other ReadingType values.
-	ApparentVA float64
-	// DataSourceUri shall contain a URI to the resource that provides the source of the excerpt contained within this
-	// copy.
-	DataSourceURI string
-	// PhaseAngleDegrees shall contain the phase angle, in degree units, between the current and voltage waveforms for
-	// an electrical measurement. This property can appear in sensors with a ReadingType containing 'Power', and shall
-	// not appear in sensors with other ReadingType values.
-	PhaseAngleDegrees float64
-	// PhysicalContext shall contain a description of the affected component or region within the equipment to which
-	// this sensor measurement applies.
-	PhysicalContext PhysicalContext
-	// PhysicalSubContext shall contain a description of the usage or sub-region within the equipment to which this
-	// sensor measurement applies. This property generally differentiates multiple sensors within the same
-	// PhysicalContext instance.
-	PhysicalSubContext PhysicalSubContext
-	// PowerFactor shall identify the quotient of real power (W) and apparent power (VA) for a circuit. PowerFactor is
-	// expressed in unit-less 1/100ths. This property can appear in sensors containing a ReadingType value of 'Power',
-	// and shall not appear in sensors of other ReadingType values.
-	PowerFactor float64
-	// ReactiveVAR shall contain the arithmetic mean of product terms of instantaneous voltage and quadrature current
-	// measurements calculated over an integer number of line cycles for a circuit. This property can appear in sensors
-	// of the Power ReadingType, and shall not appear in sensors of other ReadingType values.
-	ReactiveVAR float64
-	// Reading shall contain the sensor value.
-	Reading float64
+	// ApparentVA indicates apparent power.
+	ApparentVA *float64 `json:"ApparentVA,omitempty"`
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// PhaseAngleDegrees indicates current-voltage phase difference.
+	PhaseAngleDegrees *float64 `json:"PhaseAngleDegrees,omitempty"`
+	// PhysicalContext describes the measurement location.
+	PhysicalContext PhysicalContext `json:"PhysicalContext,omitempty"`
+	// PhysicalSubContext describes the sub-region being measured.
+	PhysicalSubContext PhysicalSubContext `json:"PhysicalSubContext,omitempty"`
+	// PowerFactor indicates power efficiency.
+	PowerFactor *float64 `json:"PowerFactor,omitempty"`
+	// ReactiveVAR indicates reactive power.
+	ReactiveVAR *float64 `json:"ReactiveVAR,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
 }
 
-// Power consumption (W).
+// SensorPowerExcerpt represents power measurement summary.
 type SensorPowerExcerpt struct {
-	// The product of voltage and current for an AC circuit, in volt-ampere units.
-	ApparentVA float32
-	// The link to the resource that provides the data for this sensor.
-	DataSourceURI string `json:"DataSourceUri"`
-	// The phase angle (degrees) between the current and voltage waveforms.
-	PhaseAngleDegrees float32
-	// The quotient of real power (W) and apparent power (VA) for a circuit.
-	// PowerFactor is expressed in unit-less 1/100ths.
-	PowerFactor float32
-	// The square root of the difference term of squared apparent VA and
-	// squared power (Reading) for a circuit, in VAR units.
-	ReactiveVAR float32
-	// The sensor value.
-	Reading float32
+	// ApparentVA indicates apparent power.
+	ApparentVA *float64 `json:"ApparentVA,omitempty"`
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// PhaseAngleDegrees indicates current-voltage phase difference.
+	PhaseAngleDegrees *float64 `json:"PhaseAngleDegrees,omitempty"`
+	// PowerFactor indicates power efficiency.
+	PowerFactor *float64 `json:"PowerFactor,omitempty"`
+	// ReactiveVAR indicates reactive power.
+	ReactiveVAR *float64 `json:"ReactiveVAR,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
 }
 
-// SensorPumpExcerpt shall represent a sensor for a Redfish implementation.
+// SensorPumpExcerpt represents pump sensor summary.
 type SensorPumpExcerpt struct {
-	// DataSourceUri shall contain a URI to the resource that provides the source of the excerpt contained within this
-	// copy.
-	DataSourceURI string `json:"DataSourceUri"`
-	// Reading shall contain the sensor value.
-	Reading float64
-	// SpeedRPM shall contain a reading of the rotational speed of the device in revolutions per minute (RPM) units.
-	SpeedRPM float64
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
+	// SpeedRPM indicates rotational speed.
+	SpeedRPM *float64 `json:"SpeedRPM,omitempty"`
 }
 
-// Voltage consumption (V).
+// SensorVoltageExcerpt represents voltage measurement summary.
 type SensorVoltageExcerpt struct {
-	// (v1.1+) The crest factor for this sensor.
-	// The ratio of the peak measurement divided by the RMS measurement
-	// and calculated over same N line cycles.
-	CrestFactor float32
-	// The link to the resource that provides the data for this sensor.
-	DataSourceURI string `json:"DataSourceUri"`
-	// The sensor value.
-	Reading float32
-	// (v1.1+) The total harmonic distortion (THD).
-	THDPercent float32
+	// CrestFactor indicates peak-to-RMS ratio.
+	CrestFactor *float64 `json:"CrestFactor,omitempty"`
+	// DataSourceURI links to the source resource.
+	DataSourceURI string `json:"DataSourceUri,omitempty"`
+	// Reading contains the current measurement.
+	Reading *float64 `json:"Reading,omitempty"`
+	// THDPercent indicates total harmonic distortion.
+	THDPercent *float64 `json:"THDPercent,omitempty"`
 }
 
-// Sensor represents the sensors located in the chassis and sub-components. (v1.9+)
+// Sensor represents a hardware or software sensor.
 type Sensor struct {
 	common.Entity
 
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// The estimated percent error of measured versus actual values.
-	Accuracy float32
-	// The adjusted maximum allowable operating value for this equipment based on the environmental conditions.
-	AdjustedMaxAllowableOperatingValue float32
-	// The adjusted minimum allowable operating value for this equipment based on the environmental conditions.
-	AdjustedMinAllowableOperatingValue float32
-	// Apparent energy (kVAh).
-	ApparentkVAh float32
-	// The product of voltage and current for an AC circuit, in volt-ampere units.
-	ApparentVA float32
-	// The average sensor value.
-	AverageReading float32
-	// The interval over which the average sensor value is calculated.
-	AveragingInterval string
-	// Indicates that enough readings were collected to calculate the average sensor reading over the averaging interval time.
-	AveragingIntervalAchieved bool
-	// The calibration offset applied to the Reading.
-	Calibration float32
-	// The date and time that the sensor was last calibrated.
-	CalibrationTime string
-	// The crest factor for this sensor.
-	CrestFactor float32
-	// The combination of current-carrying conductors.
-	ElectricalContext common.ElectricalContext
-	// The implementation of the sensor.
-	Implementation SensorImplementation
-	// The total accumulation value for this sensor.
-	LifetimeReading float32
-	// Deprecated: (v1.1) The power load utilization for this sensor.
-	LoadPercent float32
-	// The location information for this sensor.
-	Location common.Location
-	// The lowest sensor value.
-	LowestReading float32
-	// The time when the lowest sensor value occurred.
-	LowestReadingTime string
-	// The maximum allowable operating value for this equipment.
-	MaxAllowableOperatingValue float32
-	// The minimum allowable operating value for this equipment.
-	MinAllowableOperatingValue float32
-	// The peak sensor value.
-	PeakReading float32
-	// The time when the peak sensor value occurred.
-	PeakReadingTime string
-	// The phase angle (degrees) between the current and voltage waveforms.
-	PhaseAngleDegrees float32
-	// The area or device to which this sensor measurement applies.
-	PhysicalContext common.PhysicalContext
-	// The usage or location within a device to which this sensor measurement applies.
-	PhysicalSubContext common.PhysicalSubContext
-	// The power factor for this sensor.
-	PowerFactor float32
-	// The number of significant digits in the reading.
-	Precision float32
-	// Reactive energy (kVARh).
-	ReactivekVARh float32
-	// The square root of the difference term of squared apparent VA and squared power (Reading) for a circuit, in VAR units.
-	ReactiveVAR float32
-	// The sensor value.
-	Reading float32
-	// ReadingAccuracy shall contain the accuracy of the value of the Reading for this sensor. The value shall be the
-	// absolute value of the maximum deviation of the Reading from its actual value. The value shall be in units that
-	// follow the ReadingUnits for this sensor.
-	ReadingAccuracy float64
-	// The basis for the reading of this sensor.
-	ReadingBasis ReadingBasisType
-	// The maximum possible value for this sensor.
-	ReadingRangeMax float64
-	// The minimum possible value for this sensor.
-	ReadingRangeMin float64
-	// The date and time that the reading was acquired from the sensor.
-	ReadingTime string
-	// The type of sensor.
-	ReadingType ReadingType
-	// The units of the reading and thresholds.
-	ReadingUnits string
-	// Deprecated: (v1.1) The time interval between readings of the physical sensor.
-	SensingFrequency float32
-	// The time interval between readings of the sensor.
-	SensingInterval string
-	// The group of sensors that provide readings for this sensor.
-	SensorGroup RedundantGroup
-	// The date and time when the time-based properties were last reset.
-	SensorResetTime string
-	// The rotational speed.
-	SpeedRPM float32
-	// 	The status and health of the resource and its subordinate or dependent resources.
-	Status common.Status
-	// The total harmonic distortion (THD).
-	THDPercent float32
-	// The set of thresholds defined for this sensor.
-	Thresholds Thresholds
-	// This property shall represent the type of input voltage the sensor monitors.
-	VoltageType InputType
+	// ODataContext is the OData context URL.
+	ODataContext string `json:"@odata.context,omitempty"`
+	// ODataType is the OData type identifier.
+	ODataType string `json:"@odata.type,omitempty"`
 
-	// An array of links to resources or objects that this sensor services.
-	relatedItem      []string
-	RelatedItemCount int
-	// An array of links to the controls that can affect this sensor.
-	associatedControls      []string
-	AssociatedControlsCount int
-	// The manufacturer- or provider-specific data.
-	Oem json.RawMessage
-	// OEMLinks are all OEM data under link section
-	OemLinks json.RawMessage
+	// Accuracy indicates measurement error percentage (deprecated in v1.8.0).
+	Accuracy *float64 `json:"Accuracy,omitempty"`
+	// AdjustedMaxAllowableOperatingValue accounts for environmental conditions.
+	AdjustedMaxAllowableOperatingValue *float64 `json:"AdjustedMaxAllowableOperatingValue,omitempty"`
+	// AdjustedMinAllowableOperatingValue accounts for environmental conditions.
+	AdjustedMinAllowableOperatingValue *float64 `json:"AdjustedMinAllowableOperatingValue,omitempty"`
+	// ApparentkVAh measures apparent energy in kVAh.
+	ApparentkVAh *float64 `json:"ApparentkVAh,omitempty"`
+	// ApparentVA measures apparent power in volt-amperes.
+	ApparentVA *float64 `json:"ApparentVA,omitempty"`
+	// AverageReading provides mean value over time.
+	AverageReading *float64 `json:"AverageReading,omitempty"`
+	// AveragingInterval specifies the averaging period.
+	AveragingInterval string `json:"AveragingInterval,omitempty"`
+	// AveragingIntervalAchieved indicates sufficient data collected.
+	AveragingIntervalAchieved *bool `json:"AveragingIntervalAchieved,omitempty"`
+	// Calibration indicates sensor calibration offset.
+	Calibration *float64 `json:"Calibration,omitempty"`
+	// CalibrationTime records last calibration timestamp.
+	CalibrationTime string `json:"CalibrationTime,omitempty"`
+	// CrestFactor indicates peak-to-RMS ratio.
+	CrestFactor *float64 `json:"CrestFactor,omitempty"`
+	// ElectricalContext identifies the circuit being measured.
+	ElectricalContext common.ElectricalContext `json:"ElectricalContext,omitempty"`
+	// Enabled indicates if the sensor is active.
+	Enabled *bool `json:"Enabled,omitempty"`
+	// Implementation specifies how readings are obtained.
+	Implementation ImplementationType `json:"Implementation,omitempty"`
+	// LifetimeReading provides total accumulated value.
+	LifetimeReading *float64 `json:"LifetimeReading,omitempty"`
+	// LifetimeStartDateTime records when accumulation began.
+	LifetimeStartDateTime string `json:"LifetimeStartDateTime,omitempty"`
+	// LoadPercent indicates utilization percentage (deprecated in v1.1.0).
+	LoadPercent *float64 `json:"LoadPercent,omitempty"`
+	// Location describes physical placement.
+	Location *common.Location `json:"Location,omitempty"`
+	// LowestReading records minimum observed value.
+	LowestReading *float64 `json:"LowestReading,omitempty"`
+	// LowestReadingTime records when minimum occurred.
+	LowestReadingTime string `json:"LowestReadingTime,omitempty"`
+	// MaxAllowableOperatingValue specifies upper safe limit.
+	MaxAllowableOperatingValue *float64 `json:"MaxAllowableOperatingValue,omitempty"`
+	// MinAllowableOperatingValue specifies lower safe limit.
+	MinAllowableOperatingValue *float64 `json:"MinAllowableOperatingValue,omitempty"`
+	// PeakReading records maximum observed value.
+	PeakReading *float64 `json:"PeakReading,omitempty"`
+	// PeakReadingTime records when maximum occurred.
+	PeakReadingTime string `json:"PeakReadingTime,omitempty"`
+	// PhaseAngleDegrees indicates current-voltage phase difference.
+	PhaseAngleDegrees *float64 `json:"PhaseAngleDegrees,omitempty"`
+	// PhysicalContext describes measurement location.
+	PhysicalContext PhysicalContext `json:"PhysicalContext,omitempty"`
+	// PhysicalSubContext describes sub-region being measured.
+	PhysicalSubContext PhysicalSubContext `json:"PhysicalSubContext,omitempty"`
+	// PowerFactor indicates power efficiency.
+	PowerFactor *float64 `json:"PowerFactor,omitempty"`
+	// Precision indicates significant digits.
+	Precision *int `json:"Precision,omitempty"`
+	// ReactivekVARh measures reactive energy in kVARh.
+	ReactivekVARh *float64 `json:"ReactivekVARh,omitempty"`
+	// ReactiveVAR measures reactive power in volt-amperes reactive.
+	ReactiveVAR *float64 `json:"ReactiveVAR,omitempty"`
+	// Reading contains current measurement value.
+	Reading *float64 `json:"Reading,omitempty"`
+	// ReadingAccuracy indicates measurement uncertainty.
+	ReadingAccuracy *float64 `json:"ReadingAccuracy,omitempty"`
+	// ReadingBasis specifies measurement reference.
+	ReadingBasis ReadingBasisType `json:"ReadingBasis,omitempty"`
+	// ReadingRangeMax specifies maximum valid value.
+	ReadingRangeMax *float64 `json:"ReadingRangeMax,omitempty"`
+	// ReadingRangeMin specifies minimum valid value.
+	ReadingRangeMin *float64 `json:"ReadingRangeMin,omitempty"`
+	// ReadingTime records measurement timestamp.
+	ReadingTime string `json:"ReadingTime,omitempty"`
+	// ReadingType specifies what is being measured.
+	ReadingType ReadingType `json:"ReadingType,omitempty"`
+	// ReadingUnits specifies measurement units.
+	ReadingUnits string `json:"ReadingUnits,omitempty"`
+	// RelatedItem links to associated resources.
+	RelatedItem []string `json:"RelatedItem,omitempty"`
+	// RelatedItemCount indicates number of related items.
+	RelatedItemCount int `json:"RelatedItem@odata.count,omitempty"`
+	// SensingFrequency specifies sampling rate (deprecated in v1.1.0).
+	SensingFrequency *float64 `json:"SensingFrequency,omitempty"`
+	// SensingInterval specifies sampling period.
+	SensingInterval string `json:"SensingInterval,omitempty"`
+	// SensorGroup identifies contributing sensors.
+	SensorGroup *RedundantGroup `json:"SensorGroup,omitempty"`
+	// SensorResetTime records last metrics reset.
+	SensorResetTime string `json:"SensorResetTime,omitempty"`
+	// SpeedRPM indicates rotational speed.
+	SpeedRPM *float64 `json:"SpeedRPM,omitempty"`
+	// Status provides health and state information.
+	Status common.Status `json:"Status,omitempty"`
+	// THDPercent indicates total harmonic distortion.
+	THDPercent *float64 `json:"THDPercent,omitempty"`
+	// Thresholds defines operational limits.
+	Thresholds Thresholds `json:"Thresholds,omitempty"`
+	// UserLabel provides customizable identification.
+	UserLabel string `json:"UserLabel,omitempty"`
+	// VoltageType specifies AC/DC measurement type.
+	VoltageType VoltageType `json:"VoltageType,omitempty"`
 
-	resetMetricsTarget    string
-	resetToDefaultsTarget string
-	// OemActions contains all the vendor specific actions.
-	// It is vendor responsibility to parse this field accordingly
-	OemActions json.RawMessage
+	// AssociatedControls links to affecting controls.
+	AssociatedControls []string `json:"AssociatedControls,omitempty"`
+	// AssociatedControlsCount indicates number of controls.
+	AssociatedControlsCount int `json:"AssociatedControls@odata.count,omitempty"`
+
+	// Oem contains vendor-specific extensions.
+	Oem json.RawMessage `json:"Oem,omitempty"`
+	// OemActions contains vendor-specific actions.
+	OemActions json.RawMessage `json:"OemActions,omitempty"`
+	// OemLinks contains vendor-specific links.
+	OemLinks json.RawMessage `json:"OemLinks,omitempty"`
+
+	resetMetricsTarget    string `json:"-"`
+	resetToDefaultsTarget string `json:"-"`
 }
 
-// UnmarshalJSON unmarshals a NetworkAdapter object from the raw JSON.
+// UnmarshalJSON converts JSON data to a Sensor object.
 func (sensor *Sensor) UnmarshalJSON(b []byte) error {
 	type temp Sensor
-	type linkReference struct {
-		AssociatedControls      common.Links
-		AssociatedControlsCount int `json:"AssociatedControls@odata.count"`
-		Oem                     json.RawMessage
-	}
-	type actions struct {
+	type Actions struct {
 		ResetMetrics    common.ActionTarget `json:"#Sensor.ResetMetrics"`
 		ResetToDefaults common.ActionTarget `json:"#Sensor.ResetToDefaults"`
-		Oem             json.RawMessage     // OEM actions will be stored here
+		Oem             json.RawMessage     `json:"Oem"`
 	}
+	type Links struct {
+		AssociatedControls      common.Links `json:"AssociatedControls"`
+		AssociatedControlsCount int          `json:"AssociatedControls@odata.count"`
+		Oem                     json.RawMessage
+	}
+
 	var t struct {
 		temp
-		RelatedItem      common.Links
-		RelatedItemCount int `json:"RelatedItem@odata.count"`
-		Links            linkReference
-		Actions          actions
+		RelatedItem      common.Links `json:"RelatedItem"`
+		RelatedItemCount int          `json:"RelatedItem@odata.count"`
+		Links            Links        `json:"Links"`
+		Actions          Actions      `json:"Actions"`
 	}
 
 	if err := json.Unmarshal(b, &t); err != nil {
 		return err
 	}
 
-	// Extract the links to other entities for later
 	*sensor = Sensor(t.temp)
-	sensor.relatedItem = t.RelatedItem.ToStrings()
+	sensor.RelatedItem = t.RelatedItem.ToStrings()
 	sensor.RelatedItemCount = t.RelatedItemCount
-	sensor.associatedControls = t.Links.AssociatedControls.ToStrings()
+	sensor.AssociatedControls = t.Links.AssociatedControls.ToStrings()
 	sensor.AssociatedControlsCount = t.Links.AssociatedControlsCount
 	sensor.OemLinks = t.Links.Oem
 	sensor.resetMetricsTarget = t.Actions.ResetMetrics.Target
@@ -481,29 +456,28 @@ func (sensor *Sensor) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// GetSensor will get a Sensor instance from the Redfish service.
+// ResetMetrics clears accumulated sensor metrics.
+func (sensor *Sensor) ResetMetrics() error {
+	if sensor.resetMetricsTarget == "" {
+		return fmt.Errorf("ResetMetrics is not supported")
+	}
+	return sensor.Post(sensor.resetMetricsTarget, nil)
+}
+
+// ResetToDefaults restores factory settings (v1.6+).
+func (sensor *Sensor) ResetToDefaults() error {
+	if sensor.resetToDefaultsTarget == "" {
+		return fmt.Errorf("ResetToDefaults is not supported")
+	}
+	return sensor.Post(sensor.resetToDefaultsTarget, nil)
+}
+
+// GetSensor retrieves a specific sensor from the service.
 func GetSensor(c common.Client, uri string) (*Sensor, error) {
 	return common.GetObject[Sensor](c, uri)
 }
 
-// ListReferencedSensor gets the Sensor collection.
+// ListReferencedSensors retrieves a collection of sensors.
 func ListReferencedSensors(c common.Client, link string) ([]*Sensor, error) {
 	return common.GetCollectionObjects[Sensor](c, link)
-}
-
-func (sensor *Sensor) ResetMetrics() error {
-	if sensor.resetMetricsTarget == "" {
-		return fmt.Errorf("ResetMetrics is not supported") //nolint:golint
-	}
-
-	return sensor.Post(sensor.resetMetricsTarget, nil)
-}
-
-// Available for redfish v1.6+
-func (sensor *Sensor) ResetToDefaults() error {
-	if sensor.resetToDefaultsTarget == "" {
-		return fmt.Errorf("ResetToDefaults is not supported") //nolint:golint
-	}
-
-	return sensor.Post(sensor.resetToDefaultsTarget, nil)
 }

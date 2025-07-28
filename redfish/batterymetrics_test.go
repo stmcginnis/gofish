@@ -93,12 +93,12 @@ func TestBatteryMetrics(t *testing.T) {
 		t.Errorf("Unexpected discharge cycles result: %.2f", result.DischargeCycles)
 	}
 
-	if result.OutputVoltages[0].Reading != 12.22 {
-		t.Errorf("Unexpected output voltage reading: %.2f", result.OutputVoltages[0].Reading)
+	if *result.OutputVoltages[0].Reading != 12.22 {
+		t.Errorf("Unexpected output voltage reading: %.2f", *result.OutputVoltages[0].Reading)
 	}
 
-	if result.StoredEnergyWattHours.Reading != 19.41 {
-		t.Errorf("Unexpected stored energy watt hours: %.2f", result.StoredEnergyWattHours.Reading)
+	if *result.StoredEnergyWattHours.Reading != 19.41 {
+		t.Errorf("Unexpected stored energy watt hours: %.2f", *result.StoredEnergyWattHours.Reading)
 	}
 
 	if len(result.CellVoltages) != 8 {

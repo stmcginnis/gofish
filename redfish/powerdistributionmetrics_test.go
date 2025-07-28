@@ -55,7 +55,7 @@ func TestPowerDistributionMetrics(t *testing.T) {
 	assertEquals(t, "Metrics", result.ID)
 	assertEquals(t, "Summary Metrics", result.Name)
 	assertEquals(t, "/redfish/v1/PowerEquipment/RackPDUs/1/Sensors/PDUPower", result.PowerWatts.DataSourceURI)
-	assertEquals(t, "6438", fmt.Sprint(result.PowerWatts.Reading))
-	assertEquals(t, "0.93", fmt.Sprint(result.PowerWatts.PowerFactor))
-	assertEquals(t, "52.7", fmt.Sprint(result.HumidityPercent.Reading))
+	assertEquals(t, "6438", fmt.Sprint(*result.PowerWatts.Reading))
+	assertEquals(t, "0.93", fmt.Sprint(*result.PowerWatts.PowerFactor))
+	assertEquals(t, "52.7", fmt.Sprint(*result.HumidityPercent.Reading))
 }

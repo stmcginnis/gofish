@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
 var messageRegistryBody = `{
@@ -131,7 +133,7 @@ func TestMessageRegistry(t *testing.T) { //nolint:funlen,gocyclo
 		if m.Resolution != "The resolution for the first message." {
 			t.Errorf("Received invalid Resolution: %s for the messageKey: %s", m.Resolution, messageKey)
 		}
-		if m.Severity != "OK" {
+		if m.Severity != string(common.OKSeverity) {
 			t.Errorf("Received invalid Severity: %s for the messageKey: %s", m.Severity, messageKey)
 		}
 	} else {
