@@ -383,6 +383,8 @@ func (p *PartLocation) UnmarshalJSON(b []byte) error {
 			return fmt.Errorf("invalid string for LocationOrdinalValue: %v", err)
 		}
 		p.LocationOrdinalValue = i
+	case nil:
+		p.LocationOrdinalValue = 0
 	default:
 		return fmt.Errorf("unsupported type for LocationOrdinalValue: %T", v)
 	}
