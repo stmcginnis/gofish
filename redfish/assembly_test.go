@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
 const AssembyName = "Assembly One"
@@ -121,7 +123,7 @@ func TestAssemblyData(t *testing.T) {
 		t.Errorf("Received invalid binary data URI: %s", result.BinaryDataURI)
 	}
 
-	if result.Status.State != "Enabled" {
+	if result.Status.State != common.EnabledState {
 		t.Errorf("Received invalid status state: %s", result.Status.State)
 	}
 }

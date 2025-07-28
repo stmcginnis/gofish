@@ -693,7 +693,7 @@ func TestVoltageUnmarshalJSON_OptionalFields(t *testing.T) {
 	if voltage.Status.State != "Enabled" {
 		t.Errorf("Expected Status.State 'Enabled', got '%s'", voltage.Status.State)
 	}
-	if voltage.Status.Health != "OK" {
+	if voltage.Status.Health != common.OKHealth {
 		t.Errorf("Expected Status.Health 'OK', got '%s'", voltage.Status.Health)
 	}
 	if voltage.ReadingVolts != nil {
@@ -780,7 +780,7 @@ func TestVoltageUnmarshalJSON_CompleteData(t *testing.T) {
 	if *voltage.ReadingVolts != 1.24 {
 		t.Errorf("Expected ReadingVolts 1.24, got %f", *voltage.ReadingVolts)
 	}
-	if voltage.Status.Health != "OK" {
+	if voltage.Status.Health != common.OKHealth {
 		t.Errorf("Expected Status.Health 'OK', got '%s'", voltage.Status.Health)
 	}
 	if voltage.Status.State != "Enabled" {

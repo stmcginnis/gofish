@@ -48,7 +48,7 @@ func TestEnvironmentMetrics(t *testing.T) {
 	assertEquals(t, "/redfish/v1/Chassis/1U/Sensors/CPUFan1", result.FanSpeedsPercent[0].DataSourceURI)
 	assertEquals(t, "CPU #1 Fan Speed", result.FanSpeedsPercent[0].DeviceName)
 
-	if result.PowerWatts.Reading != 12.87 {
-		t.Errorf("Unexpected PowerWatts reading: %.2f", result.PowerWatts.Reading)
+	if *result.PowerWatts.Reading != 12.87 {
+		t.Errorf("Unexpected PowerWatts reading: %.2f", *result.PowerWatts.Reading)
 	}
 }

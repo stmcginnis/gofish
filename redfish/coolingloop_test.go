@@ -60,7 +60,7 @@ func TestCoolingLoop(t *testing.T) {
 	assertEquals(t, "Chiller", result.SupplyEquipmentNames[0])
 	assertEquals(t, "Rack #3 CDU", result.ConsumingEquipmentNames[2])
 
-	if result.CoolantLevelPercent.Reading != 95 {
-		t.Errorf("Unexpected CoolantLevelPercent, got %.2f", result.CoolantLevelPercent.Reading)
+	if *result.CoolantLevelPercent.Reading != 95 {
+		t.Errorf("Unexpected CoolantLevelPercent, got %.2f", *result.CoolantLevelPercent.Reading)
 	}
 }

@@ -58,8 +58,8 @@ func TestHeaterMetrics(t *testing.T) {
 		t.Errorf("Unexpected RuntimeHeatingTimeSeconds: %d", result.RuntimeHeatingTimeSeconds)
 	}
 
-	if result.PowerWatts.Reading != 200.3 {
-		t.Errorf("Unexpected RuntimeHeatingTimeSeconds: %.2f", result.PowerWatts.Reading)
+	if *result.PowerWatts.Reading != 200.3 {
+		t.Errorf("Unexpected RuntimeHeatingTimeSeconds: %.2f", *result.PowerWatts.Reading)
 	}
 }
 
