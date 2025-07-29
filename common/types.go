@@ -361,39 +361,36 @@ type PartLocation struct {
 }
 
 func (p *PartLocation) UnmarshalJSON(b []byte) error {
-	// Handles ordinals that may be in string format instead of raw integers.
-	temp := &struct {
-		LocationOrdinalValue interface{}
-		LocationType         LocationType
-		Orientation          Orientation
-		Reference            Reference
-		ServiceLabel         string
-	}{}
-
-	if err := json.Unmarshal(b, temp); err != nil {
-		return err
+	type temp PartLocation
+	var t struct {
+		temp
 	}
 
-	switch v := temp.LocationOrdinalValue.(type) {
-	case float64:
-		p.LocationOrdinalValue = int(v)
-	case string:
-		i, err := strconv.Atoi(v)
+	originalErr := json.Unmarshal(b, &t)
+	if originalErr != nil {
+		// Check if the ordinal is an integer as a string, e.g. "1" instead of 1.
+		var stringT struct {
+			temp
+			LocationOrdinalValue string
+		}
+		err := json.Unmarshal(b, &stringT)
 		if err != nil {
-			return fmt.Errorf("invalid string for LocationOrdinalValue: %v", err)
+			return err
+		}
+		i, err := strconv.Atoi(stringT.LocationOrdinalValue)
+		if err != nil {
+			return originalErr
 		}
 		p.LocationOrdinalValue = i
-	case nil:
-		p.LocationOrdinalValue = 0
-	default:
-		return fmt.Errorf("unsupported type for LocationOrdinalValue: %T", v)
+		p.LocationType = stringT.LocationType
+		p.Orientation = stringT.Orientation
+		p.Reference = stringT.Reference
+		p.ServiceLabel = stringT.ServiceLabel
+
+		return nil
 	}
 
-	p.LocationType = temp.LocationType
-	p.Orientation = temp.Orientation
-	p.Reference = temp.Reference
-	p.ServiceLabel = temp.ServiceLabel
-
+	*p = PartLocation(t.temp)
 	return nil
 }
 
