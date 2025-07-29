@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 // DefaultServiceRoot is the default path to the Redfish service endpoint.
@@ -357,6 +358,40 @@ type PartLocation struct {
 	Reference Reference
 	// ServiceLabel shall be the label assigned for service at the part location.
 	ServiceLabel string
+}
+
+func (p *PartLocation) UnmarshalJSON(b []byte) error {
+	type temp PartLocation
+	var t struct {
+		temp
+	}
+
+	originalErr := json.Unmarshal(b, &t)
+	if originalErr != nil {
+		// Check if the ordinal is an integer as a string, e.g. "1" instead of 1.
+		var stringT struct {
+			temp
+			LocationOrdinalValue string
+		}
+		err := json.Unmarshal(b, &stringT)
+		if err != nil {
+			return err
+		}
+		i, err := strconv.Atoi(stringT.LocationOrdinalValue)
+		if err != nil {
+			return originalErr
+		}
+		p.LocationOrdinalValue = i
+		p.LocationType = stringT.LocationType
+		p.Orientation = stringT.Orientation
+		p.Reference = stringT.Reference
+		p.ServiceLabel = stringT.ServiceLabel
+
+		return nil
+	}
+
+	*p = PartLocation(t.temp)
+	return nil
 }
 
 // Placement shall describe a location within a resource. Examples include a
