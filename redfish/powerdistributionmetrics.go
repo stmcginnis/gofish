@@ -49,6 +49,9 @@ type PowerDistributionMetrics struct {
 	// OemActions contains all the vendor specific actions.
 	// It is vendor responsibility to parse this field accordingly
 	OemActions json.RawMessage
+
+	// rawData holds the original JSON if needed
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerDistributionMetrics object from the raw JSON.
@@ -72,6 +75,8 @@ func (metrics *PowerDistributionMetrics) UnmarshalJSON(b []byte) error {
 	*metrics = PowerDistributionMetrics(t.temp)
 	metrics.resetMetricsTarget = t.Actions.ResetMetrics.Target
 	metrics.OemActions = t.Actions.Oem
+
+	metrics.RawData = b
 
 	return nil
 }
