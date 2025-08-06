@@ -14,30 +14,30 @@ import (
 
 // Entity provides the common basis for all Redfish and Swordfish objects.
 type Entity struct {
-	// ODataID is the location of the resource.
+	// ODataID is the location of the resource
 	ODataID string `json:"@odata.id"`
-	// ID uniquely identifies the resource.
+	// ID uniquely identifies the resource
 	ID string `json:"Id"`
-	// Name is the name of the resource or array element.
+	// Name is the name of the resource or array element
 	Name string `json:"Name"`
-	// Client is the REST client interface to the system.
+
+	// client is the REST client interface to the system
 	client Client
-	// etag contains the etag header when fetching the object. This is used to
-	// control updates to make sure the object has not been modified my a different
-	// process between fetching and updating that could cause conflicts.
+
+	// etag contains the etag header when fetching the object to control updates
+	// and prevent conflicts between concurrent modifications
 	etag string
-	// Removes surrounding quotes of etag used in If-Match header of PATCH and POST requests.
-	// Only use this option to resolve bad vendor implementation where If-Match only matches the unquoted etag string.
+
+	// stripEtagQuotes removes surrounding quotes of etag used in If-Match header
+	// Only use for vendor implementations where If-Match only matches unquoted etag
 	stripEtagQuotes bool
-	// DisableEtagMatch when set will skip the If-Match header from PATCH and POST requests.
-	//
-	// This is a work around for bad vendor implementations where the If-Match header does not work - even with the '*' value
-	// and requests are incorrectly denied with an ETag mismatch error.
+
+	// disableEtagMatch skips the If-Match header from PATCH and POST requests
+	// Workaround for vendor implementations where If-Match header doesn't work properly
 	disableEtagMatch bool
 }
 
-// SetClient sets the API client connection to use for accessing this
-// entity.
+// SetClient sets the API client connection for accessing this entity.
 func (e *Entity) SetClient(c Client) {
 	e.client = c
 }
@@ -47,32 +47,31 @@ func (e *Entity) SetETag(tag string) {
 	e.etag = tag
 }
 
-// GetClient get the API client connection to use for accessing this
-// entity.
+// GetClient returns the API client connection for this entity.
 func (e *Entity) GetClient() Client {
 	return e.client
 }
 
-// Set stripEtagQuotes to enable/disable strupping etag quotes
+// StripEtagQuotes enables/disables stripping etag quotes.
 func (e *Entity) StripEtagQuotes(b bool) {
 	e.stripEtagQuotes = b
 }
 
-// Disable Etag Match header from being sent by the client.
+// DisableEtagMatch enables/disables the etag match header.
 func (e *Entity) DisableEtagMatch(b bool) {
 	e.disableEtagMatch = b
 }
 
-// IsEtagMatchDisabled indicates if etag matching is enabled on this entity
+// IsEtagMatchDisabled indicates if etag matching is disabled for this entity.
 func (e *Entity) IsEtagMatchDisabled() bool {
 	return e.disableEtagMatch
 }
 
-// Update commits changes to an entity.
+// Update commits changes to an entity after validating allowed updates.
 func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpdates []string) error {
 	payload := getPatchPayloadFromUpdate(originalEntity, updatedEntity)
 
-	// See if we are attempting to update anything that is not allowed
+	// Validate that all fields being updated are allowed
 	for field := range payload {
 		found := false
 		for _, name := range allowedUpdates {
@@ -87,8 +86,7 @@ func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpda
 		}
 	}
 
-	// If there are any allowed updates, try to send updates to the system and
-	// return the result.
+	// Send updates if there are any allowed changes
 	if len(payload) > 0 {
 		return e.Patch(e.ODataID, payload)
 	}
@@ -96,80 +94,83 @@ func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpda
 	return nil
 }
 
-// Get performs a Get request against the Redfish service and save etag
-func (e *Entity) Get(c Client, uri string, payload interface{}) error {
+// Get performs a GET request against the Redfish service and saves the etag.
+func (e *Entity) Get(c Client, uri string, payload any) error {
 	resp, err := c.Get(uri)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(payload)
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(payload); err != nil {
 		return err
 	}
 
-	if resp.Header["Etag"] != nil {
-		e.etag = resp.Header["Etag"][0]
+	if etag := resp.Header.Get("Etag"); etag != "" {
+		e.etag = etag
 	}
 	e.SetClient(c)
+
 	return nil
 }
 
-// Patch performs a Patch request against the Redfish service with etag
-func (e *Entity) Patch(uri string, payload interface{}) error {
+// Patch performs a PATCH request against the Redfish service with etag headers.
+func (e *Entity) Patch(uri string, payload any) error {
 	resp, err := e.client.PatchWithHeaders(uri, payload, e.headers())
-	if err == nil {
-		return resp.Body.Close()
+	if err != nil {
+		return err
 	}
-	return err
+	return resp.Body.Close()
 }
 
-// Post performs a Post request against the Redfish service with etag
-func (e *Entity) Post(uri string, payload interface{}) error {
+// Post performs a POST request against the Redfish service with etag headers.
+func (e *Entity) Post(uri string, payload any) error {
 	resp, err := e.PostWithResponse(uri, payload)
-	if err == nil {
-		return resp.Body.Close()
+	if err != nil {
+		return err
 	}
-
-	return err
+	return resp.Body.Close()
 }
 
-// PostWithResponse performs a Post request against the Redfish service with etag,
-// returning the response from the service.
-// Callers should make sure to call `resp.Body.Close()` when done with the response.
-func (e *Entity) PostWithResponse(uri string, payload interface{}) (*http.Response, error) {
+// PostWithResponse performs a POST request and returns the full response.
+// Callers must close the response body when done.
+func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
 	return e.client.PostWithHeaders(uri, payload, e.headers())
 }
 
+// headers generates the appropriate headers including etag if configured.
 func (e *Entity) headers() map[string]string {
 	header := make(map[string]string)
 	if e.etag != "" && !e.disableEtagMatch {
 		if e.stripEtagQuotes {
-			e.etag = strings.Trim(e.etag, "\"")
+			e.etag = strings.Trim(e.etag, `"`)
 		}
-
 		header["If-Match"] = e.etag
 	}
 	return header
 }
 
+// Filter represents query filter options for API requests.
 type Filter string
 
+// FilterOption defines functions that can modify Filter settings.
 type FilterOption func(*Filter)
 
+// WithSkip adds a $skip parameter to the filter.
 func WithSkip(skipNum int) FilterOption {
 	return func(e *Filter) {
 		*e = Filter(fmt.Sprintf("%s$skip=%d", *e, skipNum))
 	}
 }
 
+// WithTop adds a $top parameter to the filter.
 func WithTop(topNum int) FilterOption {
 	return func(e *Filter) {
 		*e = Filter(fmt.Sprintf("%s$top=%d", *e, topNum))
 	}
 }
 
+// SetFilter configures the filter with the provided options.
 func (e *Filter) SetFilter(opts ...FilterOption) {
 	*e = "?"
 	lastIdx := len(opts) - 1
@@ -181,101 +182,246 @@ func (e *Filter) SetFilter(opts ...FilterOption) {
 	}
 }
 
+// ClearFilter resets the filter to empty.
 func (e *Filter) ClearFilter() {
 	*e = ""
 }
 
-func getPatchPayloadFromUpdate(originalEntity, updatedEntity reflect.Value) (payload map[string]interface{}) {
-	payload = make(map[string]interface{})
-
-	for i := 0; i < originalEntity.NumField(); i++ {
-		if !originalEntity.Field(i).CanInterface() {
-			// Private field or something that we can't access
-			continue
-		}
-		field := originalEntity.Type().Field(i)
-		if field.Type.Kind() == reflect.Ptr {
-			continue
-		}
-		fieldName := field.Name
-		jsonName := field.Tag.Get("json")
-		// Strip out marshaling directives
-		jsonName = strings.ReplaceAll(jsonName, ",omitempty", "")
-		if jsonName == "-" {
-			continue
-		}
-		if jsonName != "" {
-			fieldName = jsonName
-		}
-		originalValue := originalEntity.Field(i).Interface()
-		currentValue := updatedEntity.Field(i).Interface()
-		if originalValue == nil && currentValue == nil {
-			continue
-		}
-
-		if originalValue == nil {
-			payload[fieldName] = currentValue
-			continue
-		}
-
-		switch reflect.TypeOf(originalValue).Kind() {
-		case reflect.Slice, reflect.Map:
-			if !reflect.DeepEqual(originalValue, currentValue) {
-				payload[fieldName] = currentValue
-			}
-		case reflect.Struct:
-			structPayload := getPatchPayloadFromUpdate(originalEntity.Field(i), updatedEntity.Field(i))
-			if field.Anonymous {
-				for k, v := range structPayload {
-					payload[k] = v
-				}
-			} else if len(structPayload) != 0 {
-				payload[fieldName] = structPayload
-			}
-		default:
-			if originalValue != currentValue {
-				payload[fieldName] = currentValue
-			}
-		}
-	}
-	return payload
-}
-
 // UpdateFromRawData provides a generic update implementation for resources
 // that store their original JSON data in a RawData field.
-func (e *Entity) UpdateFromRawData(resource interface{}, rawData []byte, allowedUpdates []string) error {
-	// Create a new instance of the same type for the original state
+func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates []string) error {
+	if e == nil {
+		return fmt.Errorf("entity is nil")
+	}
+	if resource == nil {
+		return fmt.Errorf("resource is nil")
+	}
+	if len(rawData) == 0 {
+		return fmt.Errorf("rawData is empty")
+	}
+
 	resourceType := reflect.TypeOf(resource)
+	if resourceType == nil {
+		return fmt.Errorf("resource type is nil")
+	}
+
 	if resourceType.Kind() == reflect.Ptr {
 		resourceType = resourceType.Elem()
 	}
 
 	original := reflect.New(resourceType).Interface()
+	if original == nil {
+		return fmt.Errorf("failed to create original instance")
+	}
 
-	// Unmarshal the original data
+	// Handle custom unmarshalers if implemented
 	if unmarshaler, ok := original.(json.Unmarshaler); ok {
 		if err := unmarshaler.UnmarshalJSON(rawData); err != nil {
-			return fmt.Errorf("failed to unmarshal original data: %w", err)
+			return fmt.Errorf("custom unmarshal failed: %w", err)
 		}
-	} else {
-		if err := json.Unmarshal(rawData, original); err != nil {
-			return fmt.Errorf("failed to unmarshal original data: %w", err)
+	} else if err := json.Unmarshal(rawData, original); err != nil {
+		return fmt.Errorf("standard unmarshal failed: %w", err)
+	}
+
+	originalValue := reflect.ValueOf(original)
+	if !originalValue.IsValid() {
+		return fmt.Errorf("invalid original value")
+	}
+
+	currentValue := reflect.ValueOf(resource)
+	if !currentValue.IsValid() {
+		return fmt.Errorf("invalid current value")
+	}
+
+	if originalValue.Kind() == reflect.Ptr {
+		originalValue = originalValue.Elem()
+	}
+	if currentValue.Kind() == reflect.Ptr {
+		currentValue = currentValue.Elem()
+	}
+
+	if !originalValue.IsValid() || !currentValue.IsValid() {
+		return fmt.Errorf("invalid dereferenced values")
+	}
+
+	// Recover from any panics during update
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("recovered from panic in Update: %v\n", r)
+		}
+	}()
+
+	return e.Update(originalValue, currentValue, allowedUpdates)
+}
+
+// getPatchPayloadFromUpdate compares original and updated structures and returns
+// a map containing only the changed fields between them. Handles nested structs,
+// slices, maps, and respects JSON tags while ignoring private fields.
+// getPatchPayloadFromUpdate compares original and updated structures and returns
+// a map containing only the changed fields between them.
+func getPatchPayloadFromUpdate(original, updated reflect.Value) map[string]any {
+	payload := make(map[string]any)
+
+	if !isValidForComparison(original, updated) {
+		return payload
+	}
+
+	original, updated = derefPointers(original, updated)
+
+	if !isValidStructPair(original, updated) {
+		return payload
+	}
+
+	return compareStructFields(original, updated)
+}
+
+// isValidForComparison checks if the input values are valid for comparison.
+func isValidForComparison(original, updated reflect.Value) bool {
+	return original.IsValid() && updated.IsValid()
+}
+
+// derefPointers dereferences pointer values if needed and returns the dereferenced values.
+func derefPointers(original, updated reflect.Value) (derefOriginal, derefUpdated reflect.Value) {
+	derefOriginal = original
+	derefUpdated = updated
+
+	if original.Kind() == reflect.Ptr {
+		derefOriginal = original.Elem()
+	}
+	if updated.Kind() == reflect.Ptr {
+		derefUpdated = updated.Elem()
+	}
+	return
+}
+
+// isValidStructPair checks if both values are structs of the same type.
+func isValidStructPair(original, updated reflect.Value) bool {
+	return original.Kind() == reflect.Struct &&
+		updated.Kind() == reflect.Struct &&
+		original.Type() == updated.Type()
+}
+
+// compareStructFields compares all fields of two structs and returns differences.
+func compareStructFields(original, updated reflect.Value) map[string]any {
+	payload := make(map[string]any)
+
+	for i := 0; i < original.NumField(); i++ {
+		field := original.Type().Field(i)
+		if shouldSkipField(&field) {
+			continue
+		}
+
+		fieldName := getFieldName(&field)
+		originalField := original.Field(i)
+		updatedField := updated.Field(i)
+
+		if field.Anonymous {
+			addEmbeddedFields(payload, originalField, updatedField)
+			continue
+		}
+
+		compareField(payload, fieldName, originalField, updatedField)
+	}
+
+	return payload
+}
+
+// shouldSkipField determines if a field should be skipped during comparison.
+func shouldSkipField(field *reflect.StructField) bool {
+	// Skip private fields (those with PkgPath set)
+	return field.PkgPath != "" && !field.Anonymous
+}
+
+// getFieldName extracts the JSON field name from the struct tag.
+func getFieldName(field *reflect.StructField) string {
+	fieldName := field.Name
+	jsonTag := field.Tag.Get("json")
+
+	if jsonTag == "-" {
+		return ""
+	}
+
+	if jsonTag != "" {
+		if jsonTag == ",omitempty" {
+			return fieldName
+		}
+		if name := strings.Split(jsonTag, ",")[0]; name != "" {
+			return name
 		}
 	}
 
-	// Get reflect values for comparison
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(resource).Elem()
-
-	return e.Update(originalElement, currentElement, allowedUpdates)
+	return fieldName
 }
 
+// addEmbeddedFields handles comparison of embedded struct fields.
+func addEmbeddedFields(payload map[string]any, original, updated reflect.Value) {
+	embeddedPayload := getPatchPayloadFromUpdate(original, updated)
+	for k, v := range embeddedPayload {
+		payload[k] = v
+	}
+}
+
+// compareField compares individual fields and adds differences to the payload.
+func compareField(payload map[string]any, fieldName string, original, updated reflect.Value) {
+	if fieldName == "" {
+		return
+	}
+
+	switch original.Kind() {
+	case reflect.Struct:
+		handleStructField(payload, fieldName, original, updated)
+	case reflect.Ptr:
+		handlePointerField(payload, fieldName, original, updated)
+	case reflect.Slice, reflect.Map:
+		handleCompositeField(payload, fieldName, original, updated)
+	default:
+		handleSimpleField(payload, fieldName, original, updated)
+	}
+}
+
+// handleStructField handles comparison of struct fields.
+func handleStructField(payload map[string]any, fieldName string, original, updated reflect.Value) {
+	nestedPayload := getPatchPayloadFromUpdate(original, updated)
+	if len(nestedPayload) > 0 {
+		payload[fieldName] = nestedPayload
+	}
+}
+
+// handlePointerField handles comparison of pointer fields.
+func handlePointerField(payload map[string]any, fieldName string, original, updated reflect.Value) {
+	if original.IsNil() && updated.IsNil() {
+		return
+	}
+	if original.IsNil() || updated.IsNil() {
+		if !reflect.DeepEqual(original.Interface(), updated.Interface()) {
+			payload[fieldName] = updated.Interface()
+		}
+		return
+	}
+	compareField(payload, fieldName, original.Elem(), updated.Elem())
+}
+
+// handleCompositeField handles comparison of slice and map fields.
+func handleCompositeField(payload map[string]any, fieldName string, original, updated reflect.Value) {
+	if !reflect.DeepEqual(original.Interface(), updated.Interface()) {
+		payload[fieldName] = updated.Interface()
+	}
+}
+
+// handleSimpleField handles comparison of basic type fields.
+func handleSimpleField(payload map[string]any, fieldName string, original, updated reflect.Value) {
+	if !reflect.DeepEqual(original.Interface(), updated.Interface()) {
+		payload[fieldName] = updated.Interface()
+	}
+}
+
+// SchemaObject defines the minimum interface required for API objects.
 type SchemaObject interface {
 	SetClient(Client)
 	SetETag(string)
 }
 
-// GetObject retrieves an API object from the service.
+// GetObject retrieves a single API object from the service.
 func GetObject[T any, PT interface {
 	*T
 	SchemaObject
@@ -287,19 +433,19 @@ func GetObject[T any, PT interface {
 	defer resp.Body.Close()
 
 	entity := PT(new(T))
-	err = json.NewDecoder(resp.Body).Decode(&entity)
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(entity); err != nil {
 		return nil, err
 	}
 
-	if resp.Header["Etag"] != nil {
-		entity.SetETag(resp.Header["Etag"][0])
+	if etag := resp.Header.Get("Etag"); etag != "" {
+		entity.SetETag(etag)
 	}
 	entity.SetClient(c)
+
 	return entity, nil
 }
 
-// GetObject retrieves an API object from the service.
+// GetObjects retrieves multiple API objects concurrently from the service.
 func GetObjects[T any, PT interface {
 	*T
 	SchemaObject
@@ -317,16 +463,20 @@ func GetObjects[T any, PT interface {
 
 	ch := make(chan GetResult)
 	collectionError := NewCollectionError()
+
+	// Worker function to get a single object
 	get := func(link string) {
 		entity, err := GetObject[T, PT](c, link)
 		ch <- GetResult{Item: entity, Link: link, Error: err}
 	}
 
+	// Start workers for each URI
 	go func() {
 		CollectCollection(get, uris)
 		close(ch)
 	}()
 
+	// Process results
 	for r := range ch {
 		if r.Error != nil {
 			collectionError.Failures[r.Link] = r.Error
@@ -338,6 +488,5 @@ func GetObjects[T any, PT interface {
 	if collectionError.Empty() {
 		return result, nil
 	}
-
 	return result, collectionError
 }
