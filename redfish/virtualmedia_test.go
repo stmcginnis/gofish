@@ -75,19 +75,19 @@ func TestVirtualMedia(t *testing.T) {
 	}
 
 	if result.insertMediaTarget != "/redfish/v1/Managers/1/VirtualMedia/1/Actions/VirtualMedia.InsertMedia" {
-		t.Errorf("Received invalid InsertMedaiaAction target: %s", result.insertMediaTarget)
+		t.Errorf("Received invalid InsertMedia Action target: %s", result.insertMediaTarget)
 	}
 
-	if result.Inserted == true {
+	if *result.Inserted == true {
 		t.Error("Expected Inserted to be false")
 	}
 
-	if result.WriteProtected == false {
+	if *result.WriteProtected == false {
 		t.Error("Expected WriteProtected to be true")
 	}
 
-	if result.Image != "https://example.com/mygoldimage.iso" {
-		t.Errorf("Expected Image to be 'https://example.com/mygoldimage.iso', got %s", result.Image)
+	if *result.Image != "https://example.com/mygoldimage.iso" {
+		t.Errorf("Expected Image to be 'https://example.com/mygoldimage.iso', got %s", *result.Image)
 	}
 
 	if result.ImageName != "mygoldimage.iso" {
@@ -103,22 +103,27 @@ func TestVirtualMedia(t *testing.T) {
 func TestVirtualMediaUpdate(t *testing.T) {
 	var result VirtualMedia
 	err := json.NewDecoder(strings.NewReader(vmBody)).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
-
+	name := "Fred"
+	fls := false
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
-	result.UserName = "Fred"
-	result.WriteProtected = false
-	err = result.Update()
+	result.UserName = &name
+	result.WriteProtected = &fls
 
+	err = result.Update()
 	if err != nil {
 		t.Errorf("Error making Update call: %s", err)
 	}
 
 	calls := testClient.CapturedCalls()
+
+	// Проверяем, что был сделан хотя бы один вызов
+	if len(calls) == 0 {
+		t.Errorf("No calls were captured")
+	}
 
 	if !strings.Contains(calls[0].Payload, "UserName:Fred") {
 		t.Errorf("Unexpected UserName update payload: %s", calls[0].Payload)
@@ -149,7 +154,7 @@ func TestVirtualMediaEject(t *testing.T) {
 
 	calls := testClient.CapturedCalls()
 
-	if calls[0].Payload != "map[]" {
+	if calls[0].Payload != "" {
 		t.Errorf("Unexpected EjectMedia payload: %s", calls[0].Payload)
 	}
 }
@@ -198,13 +203,18 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
+	Inserted := true
+	MediaType := CDMediaType
+	Password := "test1234"
+	UserName := "root"
+	WriteProtected := true
 	virtualMediaConfig := VirtualMediaConfig{
 		Image:          "https://example.com/image",
-		Inserted:       true,
-		MediaType:      "CD",
-		Password:       "test1234",
-		UserName:       "root",
-		WriteProtected: true,
+		Inserted:       &Inserted,
+		MediaType:      &MediaType,
+		Password:       &Password,
+		UserName:       &UserName,
+		WriteProtected: &WriteProtected,
 	}
 
 	_, err = result.InsertMediaConfig(virtualMediaConfig)
@@ -221,15 +231,15 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "MediaType:CD") {
-		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
+		t.Errorf("Unexpected InsertMedia MediaType payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "Password:test1234") {
-		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
+		t.Errorf("Unexpected InsertMedia Password payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "UserName:root") {
-		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
+		t.Errorf("Unexpected InsertMedia UserName payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "WriteProtected:true") {
-		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
+		t.Errorf("Unexpected InsertMedia WriteProtected payload: %s", calls[0].Payload)
 	}
 }
