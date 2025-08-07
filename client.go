@@ -268,6 +268,13 @@ func (c *APIClient) GetService() *Service {
 	return c.Service
 }
 
+// WithContext returns a copy of the client using the provided context
+func (c *APIClient) WithContext(ctx context.Context) *APIClient {
+	newClient := *c
+	newClient.ctx = ctx
+	return &newClient
+}
+
 // CloneWithSession will create a new Client with a session instead of basic auth.
 func (c *APIClient) CloneWithSession() (*APIClient, error) {
 	if c.auth.Session != "" {
