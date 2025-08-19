@@ -55,11 +55,11 @@ func TestReservoir(t *testing.T) {
 		t.Errorf("Unexpected CapacityLiters: %.2f", result.CapacityLiters)
 	}
 
-	if result.FluidLevelPercent.Reading != 64.8 {
-		t.Errorf("Unexpected FluidLevelPercent.Reading: %.2f", result.FluidLevelPercent.Reading)
+	if *result.FluidLevelPercent.Reading != 64.8 {
+		t.Errorf("Unexpected FluidLevelPercent.Reading: %.2f", *result.FluidLevelPercent.Reading)
 	}
 
-	if result.InternalPressurekPa.Reading != 138.7 {
-		t.Errorf("Unexpected InternalPressurekPa.Reading: %.2f", result.InternalPressurekPa.Reading)
+	if *result.InternalPressurekPa.Reading != 138.7 {
+		t.Errorf("Unexpected InternalPressurekPa.Reading: %.2f", *result.InternalPressurekPa.Reading)
 	}
 }

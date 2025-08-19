@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -17,7 +16,6 @@ import (
 type ConnectedVia string
 
 const (
-
 	// NotConnectedConnectedVia No current connection.
 	NotConnectedConnectedVia ConnectedVia = "NotConnected"
 	// URIConnectedVia Connected to a URI location.
@@ -28,13 +26,13 @@ const (
 	OemConnectedVia ConnectedVia = "Oem"
 )
 
+// EjectPolicy is the ejection policy for virtual media.
 type EjectPolicy string
 
 const (
 	// OnPowerOffEjectPolicy The virtual media ejection occurs during a system power or reset event.
 	OnPowerOffEjectPolicy EjectPolicy = "OnPowerOff"
-	// SessionEjectPolicy The virtual media ejection occurs when a session is terminated. The session might be outside
-	// the Redfish service.
+	// SessionEjectPolicy The virtual media ejection occurs when a session is terminated.
 	SessionEjectPolicy EjectPolicy = "Session"
 	// TimedEjectPolicy The virtual media ejection occurs when a timer configured by the EjectTimeout property expires.
 	TimedEjectPolicy EjectPolicy = "Timed"
@@ -48,7 +46,6 @@ const (
 type VirtualMediaType string
 
 const (
-
 	// CDMediaType A CD-ROM format (ISO) image.
 	CDMediaType VirtualMediaType = "CD"
 	// FloppyMediaType A floppy disk image.
@@ -63,11 +60,9 @@ const (
 type TransferMethod string
 
 const (
-
 	// StreamTransferMethod Stream image file data from the source URI.
 	StreamTransferMethod TransferMethod = "Stream"
-	// UploadTransferMethod Upload the entire image file from the source URI
-	// to the service.
+	// UploadTransferMethod Upload the entire image file from the source URI to the service.
 	UploadTransferMethod TransferMethod = "Upload"
 )
 
@@ -75,7 +70,6 @@ const (
 type TransferProtocolType string
 
 const (
-
 	// CIFSTransferProtocolType Common Internet File System (CIFS).
 	CIFSTransferProtocolType TransferProtocolType = "CIFS"
 	// FTPTransferProtocolType File Transfer Protocol (FTP).
@@ -96,8 +90,7 @@ const (
 	OEMTransferProtocolType TransferProtocolType = "OEM"
 )
 
-// VirtualMedia shall represent a virtual media service for a Redfish
-// implementation.
+// VirtualMedia shall represent a virtual media service for a Redfish implementation.
 type VirtualMedia struct {
 	common.Entity
 
@@ -105,87 +98,72 @@ type VirtualMedia struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Certificates shall contain a link to a resource collection of type CertificateCollection that represents the
-	// server certificates for the server referenced by the Image property. If VerifyCertificate is 'true', services
-	// shall compare the certificates in this collection with the certificate obtained during handshaking with the
-	// image server in order to verify the identity of the image server prior to completing the remote media
-	// connection. If the server cannot be verified, the service shall not complete the remote media connection. If
-	// VerifyCertificate is 'false', the service shall not perform certificate verification with certificates in this
-	// collection. Regardless of the contents of this collection, services may perform additional verification based on
-	// other factors, such as the configuration of the SecurityPolicy resource.
+	// Certificates shall contain a link to a resource collection of type CertificateCollection.
 	certificates []string
-	// ClientCertificates shall contain a link to a resource collection of type CertificateCollection that represents
-	// the client identity certificates that are provided to the server referenced by the Image property as part of TLS
-	// handshaking.
+	// ClientCertificates shall contain a link to a resource collection of type CertificateCollection.
 	clientCertificates []string
-	// ConnectedVia shall contain the current connection method from a client to the virtual media that this Resource
-	// represents.
+	// ConnectedVia shall contain the current connection method.
 	ConnectedVia ConnectedVia
 	// Description provides a description of this resource.
 	Description string
 	// EjectPolicy shall contain the ejection policy for the virtual media.
-	EjectPolicy EjectPolicy
-	// EjectTimeout shall indicate the amount of time before virtual media is automatically ejected when EjectPolicy
-	// contains 'Timed'.
-	EjectTimeout string
-	// Image shall contain an URI. A null value indicated
-	// no image connection.
-	Image string
+	EjectPolicy *EjectPolicy
+	// EjectTimeout shall indicate the amount of time before virtual media is automatically ejected.
+	EjectTimeout *string
+	// Image shall contain an URI. A null value indicates no image connection.
+	Image *string
 	// ImageName shall contain the name of the image.
 	ImageName string
 	// Inserted shall indicate whether media is present in the virtual media device.
-	Inserted bool
+	Inserted *bool
+	// MediaType is the connection media type used.
+	MediaType *VirtualMediaType
 	// MediaTypes shall be the supported media types for this connection.
 	MediaTypes []VirtualMediaType
-	// Password shall represent the password to access the
-	// Image parameter-specified URI. The value shall be null in responses.
-	Password string
-	// TransferMethod shall describe how the image transfer
-	// occurs.
-	TransferMethod TransferMethod
-	// TransferProtocolType shall represent the network
-	// protocol to use with the specified image URI.
-	TransferProtocolType TransferProtocolType
-	// UserName shall represent the user name to access the
-	// Image parameter-specified URI.
-	UserName string
-	// VerifyCertificate shall indicate whether the service will verify the certificate of the server referenced by the
-	// Image property prior to completing the remote media connection with the certificates found in the collection
-	// referenced by the Certificates property. If this property is not supported by the service, it shall be assumed
-	// to be 'false'. This property should default to 'false' in order to maintain compatibility with older clients.
-	// Regardless of the value of this property, services may perform additional verification based on other factors,
-	// such as the configuration of the SecurityPolicy resource.
-	VerifyCertificate bool
-	// WriteProtected shall indicate whether the remote
-	// device media prevents writing to that media.
-	WriteProtected bool
-	// rawData holds the original serialized JSON so we can compare updates.
+	// Password shall represent the password to access the Image parameter-specified URI.
+	Password *string
+	// TransferMethod shall describe how the image transfer occurs.
+	TransferMethod *TransferMethod
+	// TransferProtocolType shall represent the network protocol to use.
+	TransferProtocolType *TransferProtocolType
+	// UserName shall represent the user name to access the Image parameter-specified URI.
+	UserName *string
+	// VerifyCertificate shall indicate whether the service will verify the certificate.
+	VerifyCertificate *bool
+	// WriteProtected shall indicate whether the remote device media prevents writing.
+	WriteProtected *bool
+	// Status contains the status and health of the resource.
+	Status *common.Status
+	// Oem contains the OEM extensions.
+	Oem json.RawMessage
+	// rawData holds the original serialized JSON.
 	rawData []byte
 
 	// ejectMediaTarget is the URL to send EjectMedia requests.
-	ejectMediaTarget string
-	// insertMediaTarget is the URL to send InsertMedia requests.
-	insertMediaTarget string
-	// SupportsMediaEject indicates if this implementation supports ejecting
-	// virtual media or not (added in schema 1.2.0).
+	ejectMedia common.ActionTarget
+	// SupportsMediaEject indicates if ejecting virtual media is supported.
 	SupportsMediaEject bool
-	// SupportsMediaInsert indicates if this implementation supports inserting
-	// virtual media or not (added in schema 1.2.0).
+
+	// insertMediaTarget is the URL to send InsertMedia requests.
+	insertMedia common.ActionTarget
+	// SupportsMediaInsert indicates if inserting virtual media is supported.
 	SupportsMediaInsert bool
 }
 
 // UnmarshalJSON unmarshals a VirtualMedia object from the raw JSON.
 func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
-	type temp VirtualMedia
-	type actions struct {
-		EjectMedia  common.ActionTarget `json:"#VirtualMedia.EjectMedia"`
-		InsertMedia common.ActionTarget `json:"#VirtualMedia.InsertMedia"`
-	}
+	type tVirtualMedia VirtualMedia
 	var t struct {
-		temp
-		Actions           actions
-		Certificates      common.LinksCollection
-		ClientCertificate common.LinksCollection
+		tVirtualMedia
+		Actions struct {
+			EjectMedia  common.ActionTarget `json:"#VirtualMedia.EjectMedia"`
+			InsertMedia common.ActionTarget `json:"#VirtualMedia.InsertMedia"`
+			Oem         json.RawMessage     `json:"Oem"`
+		}
+		Certificates       common.LinksCollection
+		ClientCertificates common.LinksCollection
+		Status             *common.Status
+		Oem                json.RawMessage
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -193,17 +171,19 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*virtualmedia = VirtualMedia(t.temp)
+	*virtualmedia = VirtualMedia(t.tVirtualMedia)
+	virtualmedia.Status = t.Status
+	virtualmedia.Oem = t.Oem
 
 	// Extract the links to other entities for later
 	virtualmedia.certificates = t.Certificates.ToStrings()
-	virtualmedia.clientCertificates = t.ClientCertificate.ToStrings()
+	virtualmedia.clientCertificates = t.ClientCertificates.ToStrings()
 
-	virtualmedia.ejectMediaTarget = t.Actions.EjectMedia.Target
-	virtualmedia.insertMediaTarget = t.Actions.InsertMedia.Target
+	virtualmedia.ejectMedia = t.Actions.EjectMedia
+	virtualmedia.insertMedia = t.Actions.InsertMedia
 
-	virtualmedia.SupportsMediaEject = (virtualmedia.ejectMediaTarget != "")
-	virtualmedia.SupportsMediaInsert = (virtualmedia.insertMediaTarget != "")
+	virtualmedia.SupportsMediaEject = virtualmedia.ejectMedia.Target != ""
+	virtualmedia.SupportsMediaInsert = virtualmedia.insertMedia.Target != ""
 
 	// This is a read/write object, so we need to save the raw object data for later
 	virtualmedia.rawData = b
@@ -211,33 +191,20 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Certificates gets the the server certificates for the server referenced by the
-// Image property. If VerifyCertificate is `true`, services shall compare the
-// certificates in this collection with the certificate obtained during handshaking
-// with the image server in order to verify the identity of the image server prior
-// to completing the remote media connection. If the server cannot be verified,
-// the service shall not complete the remote media connection. If VerifyCertificate
-// is `false`, the service shall not perform certificate verification with
-// certificates in this collection. Regardless of the contents of this collection,
-// services may perform additional verification based on other factors, such as the
-// configuration of the SecurityPolicy resource.
+// Certificates gets the server certificates for the server referenced by the Image property.
 func (virtualmedia *VirtualMedia) Certificates() ([]*Certificate, error) {
 	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.certificates)
 }
 
-// ClientCertificates gets the client identity certificates that are provided to
-// the server referenced by the Image property as part of TLS handshaking.
+// ClientCertificates gets the client identity certificates.
 func (virtualmedia *VirtualMedia) ClientCertificates() ([]*Certificate, error) {
 	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.clientCertificates)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (virtualmedia *VirtualMedia) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
 	original := new(VirtualMedia)
-	err := original.UnmarshalJSON(virtualmedia.rawData)
-	if err != nil {
+	if err := original.UnmarshalJSON(virtualmedia.rawData); err != nil {
 		return err
 	}
 
@@ -251,13 +218,20 @@ func (virtualmedia *VirtualMedia) Update() error {
 		"TransferMethod",
 		"TransferProtocolType",
 		"UserName",
+		"VerifyCertificate",
 		"WriteProtected",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(virtualmedia).Elem()
+	return virtualmedia.UpdateFromRawData(virtualmedia, virtualmedia.rawData, readWriteFields)
+}
 
-	return virtualmedia.Entity.Update(originalElement, currentElement, readWriteFields)
+// EjectMediaActionInfo provides the ActionInfo, if supported, for an EjectMedia Action
+func (virtualmedia *VirtualMedia) EjectMediaActionInfo() (*ActionInfo, error) {
+	if virtualmedia.insertMedia.ActionInfoTarget == "" {
+		return nil, errors.New("VirtualMedia EjectMedia ActionInfo not supported by this service")
+	}
+
+	return common.GetObject[ActionInfo](virtualmedia.GetClient(), virtualmedia.insertMedia.ActionInfoTarget)
 }
 
 // EjectMedia sends a request to eject the media.
@@ -266,43 +240,51 @@ func (virtualmedia *VirtualMedia) EjectMedia() error {
 		return errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
 	}
 
-	return virtualmedia.Post(virtualmedia.ejectMediaTarget, struct{}{})
+	return virtualmedia.Post(virtualmedia.ejectMedia.Target, nil)
+}
+
+// VirtualMediaConfig is used to pass config data when inserting media.
+type VirtualMediaConfig struct {
+	Image                string                `json:"Image"`
+	Inserted             *bool                 `json:"Inserted,omitempty"`
+	MediaType            *VirtualMediaType     `json:"MediaType,omitempty"`
+	Password             *string               `json:"Password,omitempty"`
+	TransferMethod       *TransferMethod       `json:"TransferMethod,omitempty"`
+	TransferProtocolType *TransferProtocolType `json:"TransferProtocolType,omitempty"`
+	UserName             *string               `json:"UserName,omitempty"`
+	WriteProtected       *bool                 `json:"WriteProtected,omitempty"`
+}
+
+// InsertMediaActionInfo provides the ActionInfo, if supported, for an InsertMedia Action
+func (virtualmedia *VirtualMedia) InsertMediaActionInfo() (*ActionInfo, error) {
+	if virtualmedia.insertMedia.ActionInfoTarget == "" {
+		return nil, errors.New("VirtualMedia InsertMedia ActionInfo not supported by this service")
+	}
+
+	return common.GetObject[ActionInfo](virtualmedia.GetClient(), virtualmedia.insertMedia.ActionInfoTarget)
 }
 
 // InsertMedia sends a request to insert virtual media.
 func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProtected bool) (*Task, error) {
 	return virtualmedia.InsertMediaConfig(VirtualMediaConfig{
 		Image:          image,
-		Inserted:       inserted,
-		WriteProtected: writeProtected,
+		Inserted:       &inserted,
+		WriteProtected: &writeProtected,
 	})
 }
 
-// VirtualMediaConfig is an struct used to pass config data to build the HTTP body when inserting media
-type VirtualMediaConfig struct {
-	Image                string
-	Inserted             bool                 `json:",omitempty"`
-	MediaType            VirtualMediaType     `json:",omitempty"`
-	Password             string               `json:",omitempty"`
-	TransferMethod       TransferMethod       `json:",omitempty"`
-	TransferProtocolType TransferProtocolType `json:",omitempty"`
-	UserName             string               `json:",omitempty"`
-	WriteProtected       bool                 `json:",omitempty"`
-}
-
-// InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct
-func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (*Task, error) { //nolint
+// InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct.
+func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (*Task, error) {
 	if !virtualmedia.SupportsMediaInsert {
 		return nil, errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
 
-	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMediaTarget, config)
+	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMedia.Target, config)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	// TODO: maybe also check StatusOK/200
 	if resp.StatusCode != http.StatusAccepted {
 		return nil, nil
 	}
@@ -310,8 +292,6 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (
 	if location := resp.Header["Location"]; len(location) > 0 {
 		return GetTask(virtualmedia.GetClient(), location[0])
 	}
-
-	// TODO: check if there's a task link in the body
 
 	return nil, nil
 }
@@ -321,8 +301,7 @@ func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
 	return common.GetObject[VirtualMedia](c, uri)
 }
 
-// ListReferencedVirtualMedias gets the collection of VirtualMedia from
-// a provided reference.
+// ListReferencedVirtualMedias gets the collection of VirtualMedia from a provided reference.
 func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) {
 	return common.GetCollectionObjects[VirtualMedia](c, link)
 }

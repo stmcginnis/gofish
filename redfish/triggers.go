@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -100,21 +99,11 @@ func (discretetrigger *DiscreteTrigger) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (discretetrigger *DiscreteTrigger) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(DiscreteTrigger)
-	original.UnmarshalJSON(discretetrigger.rawData)
-
-	readWriteFields := []string{
-		"DwellTime",
+	readWriteFields := []string{"DwellTime",
 		"Severity",
-		"Value",
-	}
+		"Value"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(discretetrigger).Elem()
-
-	return discretetrigger.Entity.Update(originalElement, currentElement, readWriteFields)
+	return discretetrigger.UpdateFromRawData(discretetrigger, discretetrigger.rawData, readWriteFields)
 }
 
 // Triggers shall contain a trigger that applies to metrics.
@@ -225,23 +214,13 @@ func (triggers *Triggers) MetricReportDefinitions() ([]*MetricReportDefinition, 
 
 // Update commits updates to this object's properties to the running system.
 func (triggers *Triggers) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Triggers)
-	original.UnmarshalJSON(triggers.rawData)
-
-	readWriteFields := []string{
-		"EventTriggers",
+	readWriteFields := []string{"EventTriggers",
 		"HysteresisDuration",
 		"HysteresisReading",
 		"MetricIds",
-		"MetricProperties",
-	}
+		"MetricProperties"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(triggers).Elem()
-
-	return triggers.Entity.Update(originalElement, currentElement, readWriteFields)
+	return triggers.UpdateFromRawData(triggers, triggers.rawData, readWriteFields)
 }
 
 // GetTriggers will get a Triggers instance from the service.

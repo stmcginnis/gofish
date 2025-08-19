@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -53,22 +52,11 @@ func (assembly *Assembly) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (assembly *Assembly) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Assembly)
-	err := original.UnmarshalJSON(assembly.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"Assemblies",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(assembly).Elem()
-
-	return assembly.Entity.Update(originalElement, currentElement, readWriteFields)
+	return assembly.UpdateFromRawData(assembly, assembly.rawData, readWriteFields)
 }
 
 // GetAssembly will get a Assembly instance from the service.

@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -67,24 +66,13 @@ func (vlannetworkinterface *VLanNetworkInterface) UnmarshalJSON(b []byte) error 
 
 // Update commits updates to this object's properties to the running system.
 func (vlannetworkinterface *VLanNetworkInterface) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(VLanNetworkInterface)
-	err := original.UnmarshalJSON(vlannetworkinterface.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"VLANEnable",
 		"VLANId",
 		"VLANPriority",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(vlannetworkinterface).Elem()
-
-	return vlannetworkinterface.Entity.Update(originalElement, currentElement, readWriteFields)
+	return vlannetworkinterface.UpdateFromRawData(vlannetworkinterface, vlannetworkinterface.rawData, readWriteFields)
 }
 
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.

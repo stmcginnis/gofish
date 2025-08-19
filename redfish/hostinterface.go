@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -187,24 +186,13 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (hostinterface *HostInterface) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(HostInterface)
-	err := original.UnmarshalJSON(hostinterface.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AuthNoneRoleId",
 		"AuthenticationModes",
 		"InterfaceEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(hostinterface).Elem()
-
-	return hostinterface.Entity.Update(originalElement, currentElement, readWriteFields)
+	return hostinterface.UpdateFromRawData(hostinterface, hostinterface.rawData, readWriteFields)
 }
 
 // GetHostInterface will get a HostInterface instance from the service.

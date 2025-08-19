@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -199,20 +198,12 @@ func (coolingunit *CoolingUnit) SetMode(mode CoolingUnitMode) error {
 
 // Update commits updates to this object's properties to the running system.
 func (coolingunit *CoolingUnit) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(CoolingUnit)
-	original.UnmarshalJSON(coolingunit.rawData)
-
 	readWriteFields := []string{
 		"AssetTag",
 		"UserLabel",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(coolingunit).Elem()
-
-	return coolingunit.Entity.Update(originalElement, currentElement, readWriteFields)
+	return coolingunit.UpdateFromRawData(coolingunit, coolingunit.rawData, readWriteFields)
 }
 
 // GetCoolingUnit will get a CoolingUnit instance from the service.

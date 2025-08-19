@@ -47,11 +47,11 @@ func TestPump(t *testing.T) {
 	assertEquals(t, "Liquid", string(result.PumpType))
 	assertEquals(t, "1.03b", result.Version)
 
-	if result.PumpSpeedPercent.Reading != 62 {
-		t.Errorf("Unexpected PumpSpeedPercent.Reading: %.2f", result.PumpSpeedPercent.Reading)
+	if *result.PumpSpeedPercent.Reading != 62 {
+		t.Errorf("Unexpected PumpSpeedPercent.Reading: %.2f", *result.PumpSpeedPercent.Reading)
 	}
 
-	if result.PumpSpeedPercent.SpeedRPM != 1800 {
-		t.Errorf("Unexpected PumpSpeedPercent.SpeedRPM: %.2f", result.PumpSpeedPercent.SpeedRPM)
+	if *result.PumpSpeedPercent.SpeedRPM != 1800 {
+		t.Errorf("Unexpected PumpSpeedPercent.SpeedRPM: %.2f", *result.PumpSpeedPercent.SpeedRPM)
 	}
 }

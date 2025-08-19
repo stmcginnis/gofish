@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -204,14 +203,6 @@ func (manageraccount *ManagerAccount) ChangePassword(newPassword, sessionAccount
 
 // Update commits updates to this object's properties to the running system.
 func (manageraccount *ManagerAccount) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(ManagerAccount)
-	err := original.UnmarshalJSON(manageraccount.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AccountExpiration",
 		"AccountTypes",
@@ -229,10 +220,7 @@ func (manageraccount *ManagerAccount) Update() error {
 		"UserName",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(manageraccount).Elem()
-
-	return manageraccount.Entity.Update(originalElement, currentElement, readWriteFields)
+	return manageraccount.UpdateFromRawData(manageraccount, manageraccount.rawData, readWriteFields)
 }
 
 // GetManagerAccount will get a ManagerAccount instance from the service.

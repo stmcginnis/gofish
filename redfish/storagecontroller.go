@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -414,22 +413,11 @@ func (storagecontroller *StorageController) PCIeFunctions() ([]*PCIeFunction, er
 
 // Update commits updates to this object's properties to the running system.
 func (storagecontroller *StorageController) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(StorageController)
-	err := original.UnmarshalJSON(storagecontroller.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AssetTag",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(storagecontroller).Elem()
-
-	return storagecontroller.Entity.Update(originalElement, currentElement, readWriteFields)
+	return storagecontroller.UpdateFromRawData(storagecontroller, storagecontroller.rawData, readWriteFields)
 }
 
 // GetStorageController will get a Storage controller instance from the service.

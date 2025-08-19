@@ -62,7 +62,7 @@ func TestLeakDetection(t *testing.T) {
 	assertEquals(t, "LeakDetection", result.ID)
 	assertEquals(t, "Leak Detection Systems", result.Name)
 	assertEquals(t, "Detectors under and around the CDU", result.LeakDetectorGroups[0].GroupName)
-	assertEquals(t, "45", fmt.Sprintf("%.0f", result.LeakDetectorGroups[0].HumidityPercent.Reading))
+	assertEquals(t, "45", fmt.Sprintf("%.0f", *result.LeakDetectorGroups[0].HumidityPercent.Reading))
 	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/LeakDetection/LeakDetectors/Overflow", result.LeakDetectorGroups[0].Detectors[2].DataSourceURI)
 	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/LeakDetection/LeakDetectors", result.leakDetectors)
 }

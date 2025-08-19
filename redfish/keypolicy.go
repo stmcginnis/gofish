@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -145,19 +144,11 @@ func (keypolicy *KeyPolicy) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (keypolicy *KeyPolicy) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(KeyPolicy)
-	original.UnmarshalJSON(keypolicy.rawData)
-
 	readWriteFields := []string{
 		"IsDefault",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(keypolicy).Elem()
-
-	return keypolicy.Entity.Update(originalElement, currentElement, readWriteFields)
+	return keypolicy.UpdateFromRawData(keypolicy, keypolicy.rawData, readWriteFields)
 }
 
 // GetKeyPolicy will get a KeyPolicy instance from the service.

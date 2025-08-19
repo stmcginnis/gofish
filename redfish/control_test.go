@@ -61,7 +61,7 @@ func TestControl(t *testing.T) {
 		t.Errorf("Unexpected allowable min, got %.2f", result.AllowableMin)
 	}
 
-	if result.Sensor.Reading != 374 {
-		t.Errorf("Unexpected sensor reading, got %.2f", result.Sensor.Reading)
+	if *result.Sensor.Reading != 374 {
+		t.Errorf("Unexpected sensor reading, got %.2f", *result.Sensor.Reading)
 	}
 }

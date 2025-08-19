@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -250,11 +249,6 @@ func (cable *Cable) UptreamPorts() ([]*Port, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (cable *Cable) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Cable)
-	original.UnmarshalJSON(cable.rawData)
-
 	readWriteFields := []string{
 		"AssetTag",
 		"CableClass",
@@ -275,10 +269,7 @@ func (cable *Cable) Update() error {
 		"Vendor",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(cable).Elem()
-
-	return cable.Entity.Update(originalElement, currentElement, readWriteFields)
+	return cable.UpdateFromRawData(cable, cable.rawData, readWriteFields)
 }
 
 // GetCable will get a Cable instance from the service.

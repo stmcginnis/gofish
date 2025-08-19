@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -572,14 +571,6 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (chassis *Chassis) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Chassis)
-	err := original.UnmarshalJSON(chassis.RawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AssetTag",
 		"IndicatorLED",
@@ -591,10 +582,7 @@ func (chassis *Chassis) Update() error {
 		"LocationIndicatorActive",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(chassis).Elem()
-
-	return chassis.Entity.Update(originalElement, currentElement, readWriteFields)
+	return chassis.UpdateFromRawData(chassis, chassis.RawData, readWriteFields)
 }
 
 // GetChassis will get a Chassis instance from the Redfish service.

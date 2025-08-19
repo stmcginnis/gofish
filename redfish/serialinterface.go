@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -191,13 +190,6 @@ func (serialInterface *SerialInterface) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (serialInterface *SerialInterface) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(SerialInterface)
-	if err := original.UnmarshalJSON(serialInterface.rawData); err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"BitRate",
 		"DataBits",
@@ -207,10 +199,7 @@ func (serialInterface *SerialInterface) Update() error {
 		"StopBits",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(serialInterface).Elem()
-
-	return serialInterface.Entity.Update(originalElement, currentElement, readWriteFields)
+	return serialInterface.UpdateFromRawData(serialInterface, serialInterface.rawData, readWriteFields)
 }
 
 // GetSerialInterface will get a SerialInterface instance from the service.

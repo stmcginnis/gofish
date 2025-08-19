@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -154,19 +153,9 @@ func (softwareinventory *SoftwareInventory) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (softwareinventory *SoftwareInventory) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(SoftwareInventory)
-	original.UnmarshalJSON(softwareinventory.rawData)
+	readWriteFields := []string{"WriteProtected"}
 
-	readWriteFields := []string{
-		"WriteProtected",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(softwareinventory).Elem()
-
-	return softwareinventory.Entity.Update(originalElement, currentElement, readWriteFields)
+	return softwareinventory.UpdateFromRawData(softwareinventory, softwareinventory.rawData, readWriteFields)
 }
 
 // GetSoftwareInventory will get a SoftwareInventory instance from the service.

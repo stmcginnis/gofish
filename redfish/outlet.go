@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -287,11 +286,6 @@ func (outlet *Outlet) PowerSupplies() ([]*PowerSupply, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (outlet *Outlet) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Outlet)
-	original.UnmarshalJSON(outlet.rawData)
-
 	readWriteFields := []string{
 		"ConfigurationLocked",
 		"ElectricalConsumerNames",
@@ -305,10 +299,7 @@ func (outlet *Outlet) Update() error {
 		"UserLabel",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(outlet).Elem()
-
-	return outlet.Entity.Update(originalElement, currentElement, readWriteFields)
+	return outlet.UpdateFromRawData(outlet, outlet.rawData, readWriteFields)
 }
 
 // GetOutlet will get a Outlet instance from the service.

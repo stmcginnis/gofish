@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -109,17 +108,9 @@ type LeakDetectorExcerpt struct {
 }
 
 func (leakdetector *LeakDetector) Update() error {
-	ld := new(LeakDetector)
-	err := ld.OEM.UnmarshalJSON(leakdetector.RawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"Enabled",
 	}
 
-	originalElement := reflect.ValueOf(ld).Elem()
-	currentElement := reflect.ValueOf(leakdetector).Elem()
-	return leakdetector.Entity.Update(originalElement, currentElement, readWriteFields)
+	return leakdetector.UpdateFromRawData(leakdetector, leakdetector.RawData, readWriteFields)
 }

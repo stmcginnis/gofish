@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -164,19 +163,9 @@ func (securitypolicy *SecurityPolicy) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (securitypolicy *SecurityPolicy) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(SecurityPolicy)
-	original.UnmarshalJSON(securitypolicy.rawData)
+	readWriteFields := []string{"OverrideParentManager"}
 
-	readWriteFields := []string{
-		"OverrideParentManager",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(securitypolicy).Elem()
-
-	return securitypolicy.Entity.Update(originalElement, currentElement, readWriteFields)
+	return securitypolicy.UpdateFromRawData(securitypolicy, securitypolicy.rawData, readWriteFields)
 }
 
 // GetSecurityPolicy will get a SecurityPolicy instance from the service.

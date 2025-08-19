@@ -121,16 +121,16 @@ func TestOutlet(t *testing.T) {
 		t.Errorf("Unexpected RatedCurrentAmps value: %.2f", result.RatedCurrentAmps)
 	}
 
-	if result.CurrentAmps.Reading != 1.68 {
-		t.Errorf("Unexpected current amps reading: %.2f", result.CurrentAmps.Reading)
+	if *result.CurrentAmps.Reading != 1.68 {
+		t.Errorf("Unexpected current amps reading: %.2f", *result.CurrentAmps.Reading)
 	}
 
-	if result.PolyPhaseCurrentAmps.Line1.Reading != 1.68 {
-		t.Errorf("Unexpected PolyPhaseCurrentAmps line1 reading: %.2f", result.PolyPhaseCurrentAmps.Line1.Reading)
+	if *result.PolyPhaseCurrentAmps.Line1.Reading != 1.68 {
+		t.Errorf("Unexpected PolyPhaseCurrentAmps line1 reading: %.2f", *result.PolyPhaseCurrentAmps.Line1.Reading)
 	}
 
-	if result.PowerWatts.ReactiveVAR != 0 {
-		t.Errorf("Unexpected PowerWatts.ReactiveVAR value: %.2f", result.PowerWatts.ReactiveVAR)
+	if *result.PowerWatts.ReactiveVAR != 0 {
+		t.Errorf("Unexpected PowerWatts.ReactiveVAR value: %.2f", *result.PowerWatts.ReactiveVAR)
 	}
 }
 

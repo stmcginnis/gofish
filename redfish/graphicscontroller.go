@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -118,19 +117,11 @@ func (graphicscontroller *GraphicsController) Processors() ([]*Processor, error)
 
 // Update commits updates to this object's properties to the running system.
 func (graphicscontroller *GraphicsController) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(GraphicsController)
-	original.UnmarshalJSON(graphicscontroller.rawData)
-
 	readWriteFields := []string{
 		"AssetTag",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(graphicscontroller).Elem()
-
-	return graphicscontroller.Entity.Update(originalElement, currentElement, readWriteFields)
+	return graphicscontroller.UpdateFromRawData(graphicscontroller, graphicscontroller.rawData, readWriteFields)
 }
 
 // GetGraphicsController will get a GraphicsController instance from the service.

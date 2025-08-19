@@ -89,7 +89,7 @@ func TestThermalMetrics(t *testing.T) {
 	assertEquals(t, "/redfish/v1/Chassis/1U/Sensors/CPU1Temp", result.TemperatureSummaryCelsius.Internal.DataSourceURI)
 	assertEquals(t, "SystemBoard", result.TemperatureReadingsCelsius[0].DeviceName)
 
-	if result.PowerWatts.Reading != 24.72 {
-		t.Errorf("Unexpected PowerWatts.Reading value: %.2f", result.PowerWatts.Reading)
+	if *result.PowerWatts.Reading != 24.72 {
+		t.Errorf("Unexpected PowerWatts.Reading value: %.2f", *result.PowerWatts.Reading)
 	}
 }

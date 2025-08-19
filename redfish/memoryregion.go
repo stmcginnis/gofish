@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -149,20 +148,12 @@ func (memoryregion *MemoryRegion) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (memoryregion *MemoryRegion) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(MemoryRegion)
-	original.UnmarshalJSON(memoryregion.rawData)
-
 	readWriteFields := []string{
 		"BlockSizeMiB",
 		"SanitizeOnRelease",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(memoryregion).Elem()
-
-	return memoryregion.Entity.Update(originalElement, currentElement, readWriteFields)
+	return memoryregion.UpdateFromRawData(memoryregion, memoryregion.rawData, readWriteFields)
 }
 
 // GetMemoryRegion will get a MemoryRegion instance from the service.

@@ -78,8 +78,8 @@ func TestBattery(t *testing.T) {
 		t.Error("Expected Hot Pluggable to be true")
 	}
 
-	if result.StateOfHealthPercent.Reading != 91 {
-		t.Errorf("Expected state of health percent reading to be 91, got %.0f", result.StateOfHealthPercent.Reading)
+	if *result.StateOfHealthPercent.Reading != 91 {
+		t.Errorf("Expected state of health percent reading to be 91, got %.0f", *result.StateOfHealthPercent.Reading)
 	}
 }
 

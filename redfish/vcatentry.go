@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -59,19 +58,9 @@ func (vcatentry *VCATEntry) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (vcatentry *VCATEntry) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(VCATEntry)
-	original.UnmarshalJSON(vcatentry.rawData)
+	readWriteFields := []string{"RawEntryHex"}
 
-	readWriteFields := []string{
-		"RawEntryHex",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(vcatentry).Elem()
-
-	return vcatentry.Entity.Update(originalElement, currentElement, readWriteFields)
+	return vcatentry.UpdateFromRawData(vcatentry, vcatentry.rawData, readWriteFields)
 }
 
 // GetVCATEntry will get a VCATEntry instance from the service.

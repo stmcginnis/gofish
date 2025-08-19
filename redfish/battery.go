@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -171,19 +170,11 @@ func (battery *Battery) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (battery *Battery) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Battery)
-	_ = original.UnmarshalJSON(battery.rawData)
-
 	readWriteFields := []string{
 		"LocationIndicatorActive",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(battery).Elem()
-
-	return battery.Entity.Update(originalElement, currentElement, readWriteFields)
+	return battery.UpdateFromRawData(battery, battery.rawData, readWriteFields)
 }
 
 // GetBattery will get a Battery instance from the service.

@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -178,21 +177,13 @@ func (memorychunks *MemoryChunks) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (memorychunks *MemoryChunks) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(MemoryChunks)
-	original.UnmarshalJSON(memorychunks.rawData)
-
 	readWriteFields := []string{
 		"DisplayName",
 		"MediaLocation",
 		"RequestedOperationalState",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(memorychunks).Elem()
-
-	return memorychunks.Entity.Update(originalElement, currentElement, readWriteFields)
+	return memorychunks.UpdateFromRawData(memorychunks, memorychunks.rawData, readWriteFields)
 }
 
 // GetMemoryChunks will get a MemoryChunks instance from the service.

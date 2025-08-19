@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -255,21 +254,12 @@ func (zone *Zone) ResourceBlocks() ([]*ResourceBlock, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (zone *Zone) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Zone)
-	original.UnmarshalJSON(zone.rawData)
-
-	readWriteFields := []string{
-		"DefaultRoutingEnabled",
+	readWriteFields := []string{"DefaultRoutingEnabled",
 		"ExternalAccessibility",
 		"ZoneType",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(zone).Elem()
-
-	return zone.Entity.Update(originalElement, currentElement, readWriteFields)
+	return zone.UpdateFromRawData(zone, zone.rawData, readWriteFields)
 }
 
 // GetZone will get a Zone instance from the service.

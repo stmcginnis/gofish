@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -104,23 +103,12 @@ func (role *Role) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (role *Role) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Role)
-	err := original.UnmarshalJSON(role.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AssignedPrivileges",
 		"OemPrivileges",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(role).Elem()
-
-	return role.Entity.Update(originalElement, currentElement, readWriteFields)
+	return role.UpdateFromRawData(role, role.rawData, readWriteFields)
 }
 
 // GetRole will get a Role instance from the service.

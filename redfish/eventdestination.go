@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"reflect"
 	"strings"
 
 	"github.com/stmcginnis/gofish/common"
@@ -369,24 +368,13 @@ func (eventdestination *EventDestination) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (eventdestination *EventDestination) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(EventDestination)
-	err := original.UnmarshalJSON(eventdestination.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"Context",
 		"DeliveryRetryPolicy",
 		"VerifyCertificate",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(eventdestination).Elem()
-
-	return eventdestination.Entity.Update(originalElement, currentElement, readWriteFields)
+	return eventdestination.UpdateFromRawData(eventdestination, eventdestination.rawData, readWriteFields)
 }
 
 // GetEventDestination will get a EventDestination instance from the service.

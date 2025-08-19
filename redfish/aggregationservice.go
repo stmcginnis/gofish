@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -127,19 +126,11 @@ func (aggregationservice *AggregationService) ConnectionMethods() ([]*Connection
 
 // Update commits updates to this object's properties to the running system.
 func (aggregationservice *AggregationService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(AggregationService)
-	original.UnmarshalJSON(aggregationservice.rawData)
-
 	readWriteFields := []string{
 		"ServiceEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(aggregationservice).Elem()
-
-	return aggregationservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return aggregationservice.UpdateFromRawData(aggregationservice, aggregationservice.rawData, readWriteFields)
 }
 
 // GetAggregationService will get a AggregationService instance from the service.

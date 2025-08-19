@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -362,14 +361,6 @@ func (ethernetinterface *EthernetInterface) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (ethernetinterface *EthernetInterface) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(EthernetInterface)
-	err := original.UnmarshalJSON(ethernetinterface.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AutoNeg",
 		"DHCPv4",
@@ -392,10 +383,7 @@ func (ethernetinterface *EthernetInterface) Update() error {
 		"VLAN",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(ethernetinterface).Elem()
-
-	return ethernetinterface.Entity.Update(originalElement, currentElement, readWriteFields)
+	return ethernetinterface.UpdateFromRawData(ethernetinterface, ethernetinterface.rawData, readWriteFields)
 }
 
 // GetEthernetInterface will get a EthernetInterface instance from the service.

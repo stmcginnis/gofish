@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -229,19 +228,11 @@ func (componentintegrity *ComponentIntegrity) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (componentintegrity *ComponentIntegrity) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(ComponentIntegrity)
-	original.UnmarshalJSON(componentintegrity.rawData)
-
 	readWriteFields := []string{
 		"ComponentIntegrityEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(componentintegrity).Elem()
-
-	return componentintegrity.Entity.Update(originalElement, currentElement, readWriteFields)
+	return componentintegrity.UpdateFromRawData(componentintegrity, componentintegrity.rawData, readWriteFields)
 }
 
 // GetComponentIntegrity will get a ComponentIntegrity instance from the service.

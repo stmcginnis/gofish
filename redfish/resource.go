@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -210,7 +209,7 @@ type ResourceLocation struct {
 	OEM json.RawMessage `json:"Oem"`
 	// PartLocation shall contain the part location for a resource within an enclosure. This representation shall
 	// indicate the location of a part within a location specified by the Placement property.
-	PartLocation PartLocation
+	PartLocation common.PartLocation
 	// PartLocationContext shall contain a human-readable string to enable differentiation between PartLocation values
 	// for parts in the same enclosure, which may include hierarchical information of containing PartLocation values
 	// for the part. The value of this property shall not include values of the PartLocation properties for the part
@@ -226,21 +225,6 @@ type ResourceLocation struct {
 	Placement Placement
 	// PostalAddress shall contain a postal address of the resource.
 	PostalAddress PostalAddress
-}
-
-// PartLocation shall describe a location for a resource within an enclosure.
-type PartLocation struct {
-	// LocationOrdinalValue shall contain the number that represents the location of the part based on the
-	// LocationType. LocationOrdinalValue shall be measured based on the Orientation value starting with '0'.
-	LocationOrdinalValue int
-	// LocationType shall contain the type of location of the part.
-	LocationType LocationType
-	// Orientation shall contain the orientation for the ordering used by the LocationOrdinalValue property.
-	Orientation Orientation
-	// Reference shall contain the general location within the unit of the part.
-	Reference Reference
-	// ServiceLabel shall contain the label assigned for service at the part location.
-	ServiceLabel string
 }
 
 // PhysicalAddress shall contain a physical address for a resource.
@@ -385,13 +369,7 @@ func (postaladdress *PostalAddress) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (postaladdress *PostalAddress) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(PostalAddress)
-	original.UnmarshalJSON(postaladdress.rawData)
-
-	readWriteFields := []string{
-		"AdditionalCode",
+	readWriteFields := []string{"AdditionalCode",
 		"AdditionalInfo",
 		"Building",
 		"City",
@@ -420,13 +398,9 @@ func (postaladdress *PostalAddress) Update() error {
 		"StreetSuffix",
 		"Territory",
 		"TrailingStreetSuffix",
-		"Unit",
-	}
+		"Unit"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(postaladdress).Elem()
-
-	return postaladdress.Entity.Update(originalElement, currentElement, readWriteFields)
+	return postaladdress.UpdateFromRawData(postaladdress, postaladdress.rawData, readWriteFields)
 }
 
 // ReferenceableMember shall contain the location of this element within an item.

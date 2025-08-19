@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -66,20 +65,10 @@ func (routeentry *RouteEntry) RouteSet() ([]*RouteSetEntry, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (routeentry *RouteEntry) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(RouteEntry)
-	original.UnmarshalJSON(routeentry.rawData)
+	readWriteFields := []string{"MinimumHopCount",
+		"RawEntryHex"}
 
-	readWriteFields := []string{
-		"MinimumHopCount",
-		"RawEntryHex",
-	}
-
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(routeentry).Elem()
-
-	return routeentry.Entity.Update(originalElement, currentElement, readWriteFields)
+	return routeentry.UpdateFromRawData(routeentry, routeentry.rawData, readWriteFields)
 }
 
 // GetRouteEntry will get a RouteEntry instance from the service.

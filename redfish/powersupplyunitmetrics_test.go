@@ -114,12 +114,12 @@ func TestPowerSupplyUnitMetrics(t *testing.T) {
 
 	assertEquals(t, "Metrics", result.ID)
 	assertEquals(t, "Metrics for Power Supply 1", result.Name)
-	assertEquals(t, "5.19", fmt.Sprint(result.InputCurrentAmps.Reading))
-	assertEquals(t, "937.4", fmt.Sprint(result.InputPowerWatts.Reading))
-	assertEquals(t, "230.2", fmt.Sprint(result.InputVoltage.Reading))
-	assertEquals(t, "60", fmt.Sprint(result.FrequencyHz.Reading))
+	assertEquals(t, "5.19", fmt.Sprint(*result.InputCurrentAmps.Reading))
+	assertEquals(t, "937.4", fmt.Sprint(*result.InputPowerWatts.Reading))
+	assertEquals(t, "230.2", fmt.Sprint(*result.InputVoltage.Reading))
+	assertEquals(t, "60", fmt.Sprint(*result.FrequencyHz.Reading))
 	assertEquals(t, "68", fmt.Sprint(result.FanSpeedPercent.Reading))
 	assertEquals(t, "3290", fmt.Sprint(result.FanSpeedPercent.SpeedRPM))
-	assertEquals(t, "79.84", fmt.Sprint(result.RailPowerWatts[0].Reading))
-	assertEquals(t, "1.25", fmt.Sprint(result.RailCurrentAmps[1].Reading))
+	assertEquals(t, "79.84", fmt.Sprint(*result.RailPowerWatts[0].Reading))
+	assertEquals(t, "1.25", fmt.Sprint(*result.RailCurrentAmps[1].Reading))
 }

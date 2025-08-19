@@ -67,35 +67,35 @@ func TestCoolantConnector(t *testing.T) {
 		t.Errorf("Unexpected RatedFlowLitersPerMinute, got %.2f", result.RatedFlowLitersPerMinute)
 	}
 
-	if result.FlowLitersPerMinute.Reading != 24.3 {
-		t.Errorf("Unexpected FlowLitersPerMinute reading, got %.2f", result.FlowLitersPerMinute.Reading)
+	if *result.FlowLitersPerMinute.Reading != 24.3 {
+		t.Errorf("Unexpected FlowLitersPerMinute reading, got %.2f", *result.FlowLitersPerMinute.Reading)
 	}
 
-	if result.SupplyTemperatureCelsius.Reading != 14.8 {
-		t.Errorf("Unexpected SupplyTemperatureCelsius reading, got %.2f", result.SupplyTemperatureCelsius.Reading)
+	if *result.SupplyTemperatureCelsius.Reading != 14.8 {
+		t.Errorf("Unexpected SupplyTemperatureCelsius reading, got %.2f", *result.SupplyTemperatureCelsius.Reading)
 	}
 
-	if result.ReturnTemperatureCelsius.Reading != 38.2 {
-		t.Errorf("Unexpected ReturnTemperatureCelsius reading, got %.2f", result.ReturnTemperatureCelsius.Reading)
+	if *result.ReturnTemperatureCelsius.Reading != 38.2 {
+		t.Errorf("Unexpected ReturnTemperatureCelsius reading, got %.2f", *result.ReturnTemperatureCelsius.Reading)
 	}
 
-	if result.ReturnTemperatureCelsius.Reading != 38.2 {
-		t.Errorf("Unexpected ReturnTemperatureCelsius reading, got %.2f", result.ReturnTemperatureCelsius.Reading)
+	if *result.ReturnTemperatureCelsius.Reading != 38.2 {
+		t.Errorf("Unexpected ReturnTemperatureCelsius reading, got %.2f", *result.ReturnTemperatureCelsius.Reading)
 	}
 
-	if result.DeltaTemperatureCelsius.Reading != 23.4 {
-		t.Errorf("Unexpected DeltaTemperatureCelsius reading, got %.2f", result.DeltaTemperatureCelsius.Reading)
+	if *result.DeltaTemperatureCelsius.Reading != 23.4 {
+		t.Errorf("Unexpected DeltaTemperatureCelsius reading, got %.2f", *result.DeltaTemperatureCelsius.Reading)
 	}
 
-	if result.SupplyPressurekPa.Reading != 426.6 {
-		t.Errorf("Unexpected SupplyPressurekPa reading, got %.2f", result.SupplyPressurekPa.Reading)
+	if *result.SupplyPressurekPa.Reading != 426.6 {
+		t.Errorf("Unexpected SupplyPressurekPa reading, got %.2f", *result.SupplyPressurekPa.Reading)
 	}
 
-	if result.ReturnPressurekPa.Reading != 409.9 {
-		t.Errorf("Unexpected ReturnPressurekPa reading, got %.2f", result.ReturnPressurekPa.Reading)
+	if *result.ReturnPressurekPa.Reading != 409.9 {
+		t.Errorf("Unexpected ReturnPressurekPa reading, got %.2f", *result.ReturnPressurekPa.Reading)
 	}
 
-	if result.DeltaPressurekPa.Reading != 31.7 {
-		t.Errorf("Unexpected DeltaPressurekPa reading, got %.2f", result.DeltaPressurekPa.Reading)
+	if *result.DeltaPressurekPa.Reading != 31.7 {
+		t.Errorf("Unexpected DeltaPressurekPa reading, got %.2f", *result.DeltaPressurekPa.Reading)
 	}
 }

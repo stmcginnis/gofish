@@ -153,7 +153,6 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		}
 
 		if config.ReuseConnections {
-			client.keepAlive = true
 			transport.DisableKeepAlives = false
 			transport.IdleConnTimeout = 1 * time.Minute
 		}
@@ -161,6 +160,11 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		if config.TLSHandshakeTimeout != 0 {
 			transport.TLSHandshakeTimeout = time.Duration(config.TLSHandshakeTimeout) * time.Second
 		}
+	}
+
+	// Allow provided HTTPClients that don't use the standard Transport to reuse connections.
+	if config.ReuseConnections {
+		client.keepAlive = true
 	}
 
 	// Fetch the service root
@@ -262,6 +266,13 @@ func ConnectDefaultContext(ctx context.Context, endpoint string) (c *APIClient, 
 // GetService returns the APIClient's service.
 func (c *APIClient) GetService() *Service {
 	return c.Service
+}
+
+// WithContext returns a copy of the client using the provided context
+func (c *APIClient) WithContext(ctx context.Context) *APIClient {
+	newClient := *c
+	newClient.ctx = ctx
+	return &newClient
 }
 
 // CloneWithSession will create a new Client with a session instead of basic auth.

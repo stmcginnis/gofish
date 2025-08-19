@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -492,14 +491,6 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (manager *Manager) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Manager)
-	err := original.UnmarshalJSON(manager.RawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AutoDSTEnabled",
 		"DateTime",
@@ -509,10 +500,7 @@ func (manager *Manager) Update() error {
 		"TimeZoneName",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(manager).Elem()
-
-	return manager.Entity.Update(originalElement, currentElement, readWriteFields)
+	return manager.UpdateFromRawData(manager, manager.RawData, readWriteFields)
 }
 
 // GetManager will get a Manager instance from the Swordfish service.

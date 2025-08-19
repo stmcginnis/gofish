@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 	"strconv"
 
 	"github.com/stmcginnis/gofish/common"
@@ -698,24 +697,14 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (processor *Processor) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Processor)
-	original.UnmarshalJSON(processor.rawData)
-
-	readWriteFields := []string{
-		"AppliedOperatingConfig",
+	readWriteFields := []string{"AppliedOperatingConfig",
 		"Enabled",
 		"LocationIndicatorActive",
 		"OperatingSpeedRangeMHz",
 		"SpeedLimitMHz",
-		"SpeedLocked",
-	}
+		"SpeedLocked"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(processor).Elem()
-
-	return processor.Entity.Update(originalElement, currentElement, readWriteFields)
+	return processor.UpdateFromRawData(processor, processor.rawData, readWriteFields)
 }
 
 // Reset resets the processor.

@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -923,13 +922,7 @@ func (volume *Volume) ServerEndpoints() ([]*Endpoint, error) {
 
 // Update commits updates to this object's properties to the running system.
 func (volume *Volume) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Volume)
-	original.UnmarshalJSON(volume.rawData)
-
-	readWriteFields := []string{
-		"AccessCapabilities",
+	readWriteFields := []string{"AccessCapabilities",
 		"CapacityBytes",
 		"CapacitySources",
 		"Compressed",
@@ -946,13 +939,9 @@ func (volume *Volume) Update() error {
 		"ReplicationEnabled",
 		"StripSizeBytes",
 		"WriteCachePolicy",
-		"WriteHoleProtectionPolicy",
-	}
+		"WriteHoleProtectionPolicy"}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(volume).Elem()
-
-	return volume.Entity.Update(originalElement, currentElement, readWriteFields)
+	return volume.UpdateFromRawData(volume, volume.rawData, readWriteFields)
 }
 
 // GetVolume will get a Volume instance from the service.

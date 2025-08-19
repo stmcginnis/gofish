@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -331,19 +330,11 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (networkadapter *NetworkAdapter) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(NetworkAdapter)
-	original.UnmarshalJSON(networkadapter.rawData)
-
 	readWriteFields := []string{
 		"LLDPEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(networkadapter).Elem()
-
-	return networkadapter.Entity.Update(originalElement, currentElement, readWriteFields)
+	return networkadapter.UpdateFromRawData(networkadapter, networkadapter.rawData, readWriteFields)
 }
 
 // GetNetworkAdapter will get a NetworkAdapter instance from the Redfish service.

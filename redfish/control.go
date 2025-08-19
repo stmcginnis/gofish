@@ -7,7 +7,6 @@ package redfish
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -207,11 +206,6 @@ func (control *Control) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (control *Control) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Control)
-	original.UnmarshalJSON(control.rawData)
-
 	readWriteFields := []string{
 		"ControlDelaySeconds",
 		"ControlMode",
@@ -221,10 +215,7 @@ func (control *Control) Update() error {
 		"SettingMin",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(control).Elem()
-
-	return control.Entity.Update(originalElement, currentElement, readWriteFields)
+	return control.UpdateFromRawData(control, control.rawData, readWriteFields)
 }
 
 // GetControl will get a Control instance from the service.

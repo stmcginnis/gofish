@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -188,11 +187,6 @@ func (metricdefinition *MetricDefinition) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (metricdefinition *MetricDefinition) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(MetricDefinition)
-	original.UnmarshalJSON(metricdefinition.rawData)
-
 	readWriteFields := []string{
 		"Calculable",
 		"CalculationTimeInterval",
@@ -205,10 +199,7 @@ func (metricdefinition *MetricDefinition) Update() error {
 		"Units",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(metricdefinition).Elem()
-
-	return metricdefinition.Entity.Update(originalElement, currentElement, readWriteFields)
+	return metricdefinition.UpdateFromRawData(metricdefinition, metricdefinition.rawData, readWriteFields)
 }
 
 // GetMetricDefinition will get a MetricDefinition instance from the service.

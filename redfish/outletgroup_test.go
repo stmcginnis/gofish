@@ -86,8 +86,8 @@ func TestOutletGroup(t *testing.T) {
 		t.Errorf("Unexpected PowerOffDelaySeconds value: %.2f", result.PowerOffDelaySeconds)
 	}
 
-	if result.PowerWatts.Reading != 412.36 {
-		t.Errorf("Unexpected PowerWatts.Reading value: %.2f", result.PowerWatts.Reading)
+	if *result.PowerWatts.Reading != 412.36 {
+		t.Errorf("Unexpected PowerWatts.Reading value: %.2f", *result.PowerWatts.Reading)
 	}
 }
 

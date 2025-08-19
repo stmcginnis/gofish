@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -134,11 +133,6 @@ func (externalaccountprovider *ExternalAccountProvider) Certificates() ([]*Certi
 
 // Update commits updates to this object's properties to the running system.
 func (externalaccountprovider *ExternalAccountProvider) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(ExternalAccountProvider)
-	original.UnmarshalJSON(externalaccountprovider.rawData)
-
 	readWriteFields := []string{
 		"Priority",
 		"Retries",
@@ -147,10 +141,7 @@ func (externalaccountprovider *ExternalAccountProvider) Update() error {
 		"TimeoutSeconds",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(externalaccountprovider).Elem()
-
-	return externalaccountprovider.Entity.Update(originalElement, currentElement, readWriteFields)
+	return externalaccountprovider.UpdateFromRawData(externalaccountprovider, externalaccountprovider.rawData, readWriteFields)
 }
 
 // GetExternalAccountProvider will get a ExternalAccountProvider instance from the service.

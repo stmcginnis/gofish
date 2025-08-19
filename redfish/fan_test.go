@@ -64,7 +64,7 @@ func TestFan(t *testing.T) {
 		t.Error("Expected to be hot pluggable")
 	}
 
-	if result.SpeedPercent.SpeedRPM != 2200 {
-		t.Errorf("Unexpected SpeedPercent.SpeedRPM: %.2f", result.SpeedPercent.SpeedRPM)
+	if *result.SpeedPercent.SpeedRPM != 2200 {
+		t.Errorf("Unexpected SpeedPercent.SpeedRPM: %.2f", *result.SpeedPercent.SpeedRPM)
 	}
 }

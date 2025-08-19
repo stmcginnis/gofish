@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -150,23 +149,12 @@ func (compositionservice *CompositionService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (compositionservice *CompositionService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(CompositionService)
-	err := original.UnmarshalJSON(compositionservice.rawData)
-	if err != nil {
-		return err
-	}
-
 	readWriteFields := []string{
 		"AllowOverprovisioning",
 		"ServiceEnabled",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(compositionservice).Elem()
-
-	return compositionservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return compositionservice.UpdateFromRawData(compositionservice, compositionservice.rawData, readWriteFields)
 }
 
 // GetCompositionService will get a CompositionService instance from the service.
