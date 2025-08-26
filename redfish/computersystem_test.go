@@ -79,6 +79,10 @@ var computerSystemBody = `{
 				"Boot0002"
 				],
 			"UefiTargetBootSourceOverride": "uefi device path",
+			"UefiTargetBootSourceOverride@Redfish.AllowableValues": [
+				"UsbClass(0xFFFF,0xFFFF,0xFF,0xFF,0xFF)",
+				"PciRoot(0x1)/Pci(0x1,0x0)/Pci(0x0,0x3)/MAC(00CDE21FAC3D,0x1)/IPv4(0.0.0.0)"
+			],
 			"HttpBootUri": "http://localhost/boot.efi"
 		},
 		"BiosVersion": "P79 v1.00 (09/20/2013)",
@@ -324,6 +328,12 @@ func TestComputerSystem(t *testing.T) { //nolint
 
 	if result.operatingSystem != "/redfish/v1/Systems/1/OperatingSystem" {
 		t.Errorf("Received invalid OperatingSystem reference: %s", result.operatingSystem)
+	}
+	if result.Boot.AllowableBootSourceOverrideTargetValues[0] != NoneBootSourceOverrideTarget {
+		t.Errorf("Received invalid AllowablebootSourceOverrideTargetValue: %s", result.Boot.AllowableBootSourceOverrideTargetValues[0])
+	}
+	if result.Boot.AllowableUefiTargetBootSourceOverrideValues[0] != "UsbClass(0xFFFF,0xFFFF,0xFF,0xFF,0xFF)" {
+		t.Errorf("Received invalid AllowableUefiTargetBootSourceOverrideValues: %s", result.Boot.AllowableUefiTargetBootSourceOverrideValues[0])
 	}
 }
 
