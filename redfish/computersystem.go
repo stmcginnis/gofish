@@ -510,7 +510,8 @@ type Boot struct {
 	// boot from the UEFI BootOptionReference found in BootNext. Changes to
 	// this property do not alter the BIOS persistent boot order
 	// configuration.
-	BootSourceOverrideTarget BootSourceOverrideTarget `json:",omitempty"`
+	BootSourceOverrideTarget                BootSourceOverrideTarget   `json:",omitempty"`
+	AllowableBootSourceOverrideTargetValues []BootSourceOverrideTarget `json:"BootSourceOverrideTarget@Redfish.AllowableValues,omitempty"`
 	// The link to a collection of certificates used for booting through HTTPS by this computer system.
 	certificates string
 	// The URI to boot from when BootSourceOverrideTarget is set to UefiHttp.
@@ -531,7 +532,8 @@ type Boot struct {
 	// for UEFI Boot Source Override as this setting is defined in UEFI as a
 	// one time boot only. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
-	UefiTargetBootSourceOverride string `json:",omitempty"`
+	UefiTargetBootSourceOverride                string   `json:",omitempty"`
+	AllowableUefiTargetBootSourceOverrideValues []string `json:"UefiTargetBootSourceOverride@Redfish.AllowableValues,omitempty"`
 }
 
 // UnmarshalJSON unmarshals a Boot object from the raw JSON.
