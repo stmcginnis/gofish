@@ -341,6 +341,23 @@ func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request 
 	return &response, nil
 }
 
+// SPDMGetSignedMeasurementsAsync sometime the response is a Task for the SPDMGetSignedMeasurements operation
+func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurementsAsync(request *SPDMGetSignedMeasurementsRequest) (*Task, error) {
+	resp, err := componentintegrity.PostWithResponse(componentintegrity.spdmGetSignedMeasurementsTarget, request)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var response Task
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+}
+
 // TPMGetSignedMeasurements generates a TPM cryptographic signed statement over the given nonce and PCRs of the TPM for TPM 2.0 devices.
 func (componentintegrity *ComponentIntegrity) TPMGetSignedMeasurements(request *TPMGetSignedMeasurementsRequest) (*TPMGetSignedMeasurementsResponse, error) {
 	resp, err := componentintegrity.PostWithResponse(componentintegrity.tpmGetSignedMeasurementsTarget, request)
