@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -324,21 +325,29 @@ func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) setC
 }
 
 // SPDMGetSignedMeasurements generates an SPDM cryptographic signed statement over the given nonce and measurements of the SPDM Responder.
-func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request *SPDMGetSignedMeasurementsRequest) (*SPDMGetSignedMeasurementsResponse, error) {
+func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request *SPDMGetSignedMeasurementsRequest) (*SPDMGetSignedMeasurementsResponse, *Task, error) {
 	resp, err := componentintegrity.PostWithResponse(componentintegrity.spdmGetSignedMeasurementsTarget, request)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
+
+	// Return Task if applicable
+	if resp.StatusCode == http.StatusAccepted {
+		if location := resp.Header["Location"]; len(location) > 0 {
+			task, err := GetTask(componentintegrity.GetClient(), location[0])
+			return nil, task, err
+		}
+	}
 
 	var response SPDMGetSignedMeasurementsResponse
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	response.setClient(componentintegrity.GetClient())
-	return &response, nil
+	return &response, nil, nil
 }
 
 // TPMGetSignedMeasurements generates a TPM cryptographic signed statement over the given nonce and PCRs of the TPM for TPM 2.0 devices.
