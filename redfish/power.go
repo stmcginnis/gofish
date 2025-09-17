@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -383,17 +384,23 @@ type PowerSupply struct {
 	rawData          []byte
 	redundancyLinks  []string
 	relateditemLinks []string
+
+	resetTarget string
 }
 
 // UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.
 func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	type ps PowerSupply
+	type actions struct {
+		Reset common.ActionTarget `json:"#PowerSupply.Reset"`
+	}
 	var t struct {
 		ps
 		Assembly    common.Link  `json:"Assembly"`
 		Metrics     common.Link  `json:"Metrics"`
 		Redundancy  common.Links `json:"Redundancy"`
 		RelatedItem common.Links `json:"RelatedItem"`
+		Actions     actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -407,6 +414,7 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 	powersupply.redundancyLinks = t.Redundancy.ToStrings()
 	powersupply.relateditemLinks = t.RelatedItem.ToStrings()
 	powersupply.rawData = b
+	powersupply.resetTarget = t.Actions.Reset.Target
 
 	return nil
 }
@@ -420,6 +428,21 @@ func GetPowerSupply(c common.Client, uri string) (*PowerSupply, error) {
 // ListReferencedPowerSupplies retrieves a collection of PowerSupplies from a reference.
 func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) {
 	return common.GetCollectionObjects[PowerSupply](c, link)
+}
+
+// Reset is an action that resets a power supply. A GracefulRestart ResetType
+// shall reset the power supply but shall not affect the power output. A
+// ForceRestart ResetType can affect the power supply output.
+func (powersupply *PowerSupply) Reset(resetType ResetType) error {
+	if powersupply.resetTarget == "" {
+		return errors.New("reset is not supported") //nolint:golint
+	}
+
+	t := struct {
+		ResetType ResetType
+	}{ResetType: resetType}
+
+	return powersupply.Post(powersupply.resetTarget, t)
 }
 
 // Update commits updates to this object's properties to the running system.
