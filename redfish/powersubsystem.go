@@ -96,6 +96,10 @@ func (powersubsystem *PowerSubsystem) PowerSupplies() ([]*PowerSupply, error) {
 	return ListReferencedPowerSupplies(powersubsystem.GetClient(), powersubsystem.powerSupplies)
 }
 
+func (powersubsystem *PowerSubsystem) PowerSuppliesURI() string {
+	return powersubsystem.powerSupplies
+}
+
 // GetPowerSubsystem will get a PowerSubsystem instance from the service.
 func GetPowerSubsystem(c common.Client, uri string) (*PowerSubsystem, error) {
 	return common.GetObject[PowerSubsystem](c, uri)
