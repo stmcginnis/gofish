@@ -152,8 +152,8 @@ type PowerSupplyUnit struct {
 	// It is vendor responsibility to parse this field accordingly
 	OemActions json.RawMessage
 
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerSupplyUnit object from the raw JSON.
@@ -201,7 +201,7 @@ func (powerSupplyUnit *PowerSupplyUnit) UnmarshalJSON(b []byte) error {
 	powerSupplyUnit.OemActions = t.Actions.Oem
 
 	// This is a read/write object, so we need to save the raw object data for later
-	powerSupplyUnit.rawData = b
+	powerSupplyUnit.RawData = b
 
 	return nil
 }
@@ -214,7 +214,7 @@ func (powerSupplyUnit *PowerSupplyUnit) Update() error {
 		"LocationIndicatorActive",
 	}
 
-	return powerSupplyUnit.UpdateFromRawData(powerSupplyUnit, powerSupplyUnit.rawData, readWriteFields)
+	return powerSupplyUnit.UpdateFromRawData(powerSupplyUnit, powerSupplyUnit.RawData, readWriteFields)
 }
 
 // GetPowerSupplyUnit will get a PowerSupplyUnit instance from the Redfish service.
