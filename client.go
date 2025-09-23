@@ -277,7 +277,7 @@ func (c *APIClient) WithContext(ctx context.Context) *APIClient {
 
 // CloneWithSession will create a new Client with a session instead of basic auth.
 func (c *APIClient) CloneWithSession() (*APIClient, error) {
-	if c.auth.Session != "" {
+	if c.auth != nil && c.auth.Session != "" {
 		return nil, fmt.Errorf("client already has a session")
 	}
 
