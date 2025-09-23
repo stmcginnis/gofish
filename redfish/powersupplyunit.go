@@ -152,7 +152,7 @@ type PowerSupplyUnit struct {
 	// It is vendor responsibility to parse this field accordingly
 	OemActions json.RawMessage
 
-	// rawData holds the original serialized JSON so we can compare updates.
+	// RawData holds the original serialized JSON so we can compare updates.
 	RawData []byte
 }
 
