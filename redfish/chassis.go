@@ -834,7 +834,7 @@ func (chassis *Chassis) GetSupportedResetTypes() ([]ResetType, error) {
 	}
 
 	// if we don't have ResetTypes, try to get from ActionInfo
-	if len(chassis.resetActionInfoTarget) > 0 {
+	if chassis.resetActionInfoTarget != "" {
 		resetActionInfo, err := chassis.ResetActionInfo()
 		if err != nil {
 			return nil, err

@@ -549,7 +549,7 @@ func (manager *Manager) GetSupportedResetTypes() ([]ResetType, error) {
 	}
 
 	// if we don't have ResetTypes, try to get from ActionInfo
-	if len(manager.actionInfo) > 0 {
+	if manager.actionInfo != "" {
 		resetActionInfo, err := manager.ResetActionInfo()
 		if err != nil {
 			return nil, err
@@ -619,7 +619,7 @@ func (manager *Manager) GetSupportedResetToDefaultsTypes() ([]ResetToDefaultsTyp
 	}
 
 	// if we don't have ResetTypes, try to get from ActionInfo
-	if len(manager.resetToDefaultsActionInfoTarget) > 0 {
+	if manager.resetToDefaultsActionInfoTarget != "" {
 		resetActionInfo, err := manager.ResetToDefaultsActionInfo()
 		if err != nil {
 			return nil, err

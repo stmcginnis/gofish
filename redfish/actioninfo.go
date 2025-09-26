@@ -65,7 +65,8 @@ func GetActionInfo(c common.Client, uri string) (*ActionInfo, error) {
 }
 
 func (actionInfo *ActionInfo) GetParamValues(name string, dataType ActionInfoDataTypes) ([]string, error) {
-	for _, param := range actionInfo.Parameters {
+	for idx := range actionInfo.Parameters {
+		param := &actionInfo.Parameters[idx]
 		if param.Name != name || (param.DataType != "" && param.DataType != dataType) {
 			continue
 		}

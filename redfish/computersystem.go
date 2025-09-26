@@ -1190,7 +1190,7 @@ func (computersystem *ComputerSystem) GetSupportedResetTypes() ([]ResetType, err
 	}
 
 	// if we don't have ResetTypes, try to get from ActionInfo
-	if len(computersystem.resetActionInfoTarget) > 0 {
+	if computersystem.resetActionInfoTarget != "" {
 		resetActionInfo, err := computersystem.ResetActionInfo()
 		if err != nil {
 			return nil, err
