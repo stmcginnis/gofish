@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -278,12 +279,76 @@ var managerBody = `{
 					"GracefulRestart"
 				]
 			},
+			"#Manager.ResetToDefaults": {
+				"target": "/redfish/v1/Managers/BMC-1/Actions/Manager.ResetToDefaults",
+				"ResetType@Redfish.AllowableValues": [
+					"ResetAll"
+				]
+			},
 			"Oem":
 ` + oemActions +
 	`	},
 		"Oem":
 ` + oemDataBody +
 	`	}`
+
+var managerResetBody = `{
+		"@Redfish.Copyright": "Copyright 2014-2019 DMTF. All rights reserved.",
+		"@odata.context": "/redfish/v1/$metadata#Manager.Manager",
+		"@odata.id": "/redfish/v1/Managers/BMC-1",
+		"@odata.type": "#Manager.v1_1_0.Manager",
+		"Id": "BMC-1",
+		"LastResetTime": "2022-11-17T08:46:24+00:00",
+		"Name": "Manager",
+		"Actions": {
+			"#Manager.Reset": {
+				"target": "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset",
+				"@Redfish.ActionInfo": "/redfish/v1/Managers/BMC-1/ResetActionInfo"
+			},
+			"#Manager.ResetToDefaults": {
+				"target": "/redfish/v1/Managers/BMC-1/Actions/Manager.ResetToDefaults",
+				"@Redfish.ActionInfo": "/redfish/v1/Managers/BMC-1/ResetToDefaultsActionInfo"
+			}
+		}
+}`
+
+var managerResetActionInfoTarget = "/redfish/v1/Managers/BMC-1/ResetActionInfo"
+var managerResetActionInfo = `{
+  "@odata.id": "/redfish/v1/Managers/BMC-1/ResetActionInfo",
+  "@odata.type": "#ActionInfo.v1_1_2.ActionInfo",
+  "Id": "ResetActionInfo",
+  "Name": "Reset Action Info",
+  "Parameters": [
+    {
+      "AllowableValues": [
+        "On",
+        "ForceOn",
+        "ForceOff"
+      ],
+      "DataType": "String",
+      "Name": "ResetType",
+      "Required": true
+    }
+  ]
+}`
+
+var managerResetToDefaultsActionInfoTarget = "/redfish/v1/Managers/BMC-1/ResetToDefaultsActionInfo"
+var managerResetToDefaultsActionInfo = `{
+  "@odata.id": "/redfish/v1/Managers/BMC-1/ResetToDefaultsActionInfo",
+  "@odata.type": "#ActionInfo.v1_1_2.ActionInfo",
+  "Id": "ResetActionInfo",
+  "Name": "Reset Action Info",
+  "Parameters": [
+    {
+      "AllowableValues": [
+        "ResetAll"
+      ],
+      "DataType": "String",
+      "Name": "ResetType",
+      "Required": true
+    }
+  ]
+}`
 
 // TestManager tests the parsing of Manager objects.
 func TestManager(t *testing.T) {
@@ -332,6 +397,10 @@ func TestManager(t *testing.T) {
 			t.Errorf("Invalid Reset target: %s", result.resetTarget)
 		}
 
+		if result.resetToDefaultsTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.ResetToDefaults" {
+			t.Errorf("Invalid ResetToDefaults target: %s", result.resetToDefaultsTarget)
+		}
+
 		var expectedOEM map[string]interface{}
 		if err := json.Unmarshal([]byte(oemLinksBody), &expectedOEM); err != nil {
 			t.Errorf("Failed to unmarshall link body: %v", err)
@@ -348,6 +417,24 @@ func TestManager(t *testing.T) {
 		}
 		if len(result.OemActions) == 0 {
 			t.Errorf("OemActions field empty, expected not empty")
+		}
+
+		resetTypes, err := result.GetSupportedResetTypes()
+		if err != nil {
+			t.Errorf("failed to get supported reset types")
+		}
+		if len(resetTypes) != 2 {
+			t.Errorf("Invalid allowable reset actions, expected 2, got %d",
+				len(resetTypes))
+		}
+
+		resetToDefaultsTypes, err := result.GetSupportedResetToDefaultsTypes()
+		if err != nil {
+			t.Errorf("failed to get supported reset to defaults types")
+		}
+		if len(resetToDefaultsTypes) != 1 {
+			t.Errorf("Invalid allowable reset actions, expected 1, got %d",
+				len(resetToDefaultsTypes))
 		}
 	})
 }
@@ -425,5 +512,81 @@ func TestManagerReset(t *testing.T) {
 
 	if calls[1].Payload != "map[]" {
 		t.Errorf("Unexpected payload: %s", calls[1].Payload)
+	}
+}
+
+// TestManagerResetTypes tests getting supported reset types for a manager.
+func TestManagerResetTypes(t *testing.T) {
+	var result Manager
+	err := json.NewDecoder(strings.NewReader(managerResetBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.actionInfo != managerResetActionInfoTarget {
+		t.Errorf("Invalid reset action info target: %s, expecting %s", result.actionInfo, managerResetActionInfoTarget)
+	}
+
+	testClient := &common.TestClient{
+		CustomReturnForActions: map[string][]interface{}{
+			http.MethodGet: {
+				getCall(managerResetActionInfo), //nolint
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	resetTypes, err := result.GetSupportedResetTypes()
+	if err != nil {
+		t.Errorf("Error getting reset types: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected 1 call to be made, captured: %v", calls)
+	}
+
+	if len(resetTypes) != 3 {
+		t.Errorf("Expected 3 reset types to be returned, got %d", len(resetTypes))
+	}
+}
+
+// TestManagerResetToDefaultsTypes tests getting supported reset to defaults types for a manager.
+func TestManagerResetToDefaultsTypes(t *testing.T) {
+	var result Manager
+	err := json.NewDecoder(strings.NewReader(managerResetBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.resetToDefaultsActionInfoTarget != managerResetToDefaultsActionInfoTarget {
+		t.Errorf("Invalid reset to defaults action info target: %s, expecting %s", result.resetToDefaultsActionInfoTarget, managerResetToDefaultsActionInfoTarget)
+	}
+
+	testClient := &common.TestClient{
+		CustomReturnForActions: map[string][]interface{}{
+			http.MethodGet: {
+				getCall(managerResetToDefaultsActionInfo), //nolint
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	resetTypes, err := result.GetSupportedResetToDefaultsTypes()
+	if err != nil {
+		t.Errorf("Error getting reset to defaults types: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected 1 call to be made, captured: %v", calls)
+	}
+
+	if len(resetTypes) != 1 {
+		t.Errorf("Expected 1 reset to defaults types to be returned, got %d", len(resetTypes))
 	}
 }
