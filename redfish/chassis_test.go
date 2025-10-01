@@ -17,6 +17,7 @@ import (
 
 const TestAssetTag = "TestAssetTag"
 const TestChassisPath = "/redfish/v1/Chassis/Chassis-1"
+const TestChassisActionInfoPath = "/redfish/v1/Chassis/System.Embedded.1/ResetActionInfo"
 
 var chassisBody = `{
 		"@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
@@ -75,6 +76,28 @@ var chassisBody = `{
 		}
 	}`
 
+var chassisBodyResetActionInfo = `{
+		"@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+		"@odata.id": "/redfish/v1/Chassis/Chassis-1",
+		"@odata.type": "#Chassis.v1_0_0.Chassis",
+		"Id": "Chassis-1",
+		"Name": "Computer System Chassis",
+		"ChassisType": "RackMount",
+		"Manufacturer": "Redfish Computers",
+		"Model": "3500RX",
+		"SKU": "8675309",
+		"SerialNumber": "437XR1138R2",
+		"Version": "1.02",
+		"PartNumber": "224071-J23",
+		"AssetTag": "Chicago-45Z-2381",
+		"Actions": {
+			"#Chassis.Reset": {
+				"@Redfish.ActionInfo": "/redfish/v1/Chassis/System.Embedded.1/ResetActionInfo",
+				"target": "/redfish/v1/Chassis/System.Embedded.1/Actions/Chassis.Reset"
+			}
+		}
+	}`
+
 var supermicroRAIDChassisBody = `{
     "@odata.type": "#Chassis.v1_9_1.Chassis",
     "@odata.id": "/redfish/v1/Chassis/HA-RAID.0.StorageEnclosure.0",
@@ -123,6 +146,25 @@ var driveCollection = `{
     ],
     "Members@odata.count": 1,
     "Name": "Drive Collection"
+}`
+
+var chassisResetActionInfoRes = `{
+  "@odata.id": "/redfish/v1/Chassis/System.Embedded.1/ResetActionInfo",
+  "@odata.type": "#ActionInfo.v1_1_2.ActionInfo",
+  "Id": "ResetActionInfo",
+  "Name": "Reset Action Info",
+  "Parameters": [
+    {
+      "AllowableValues": [
+        "On",
+        "ForceOn",
+        "ForceOff"
+      ],
+      "DataType": "String",
+      "Name": "ResetType",
+      "Required": true
+    }
+  ]
 }`
 
 // TestChassis tests the parsing of Chassis objects.
@@ -201,6 +243,15 @@ func TestChassis(t *testing.T) {
 	if len(result.SupportedResetTypes) != 2 {
 		t.Errorf("Invalid allowable reset actions, expected 2, got %d",
 			len(result.SupportedResetTypes))
+	}
+
+	resetTypes, err := result.GetSupportedResetTypes()
+	if err != nil {
+		t.Errorf("failed to get supported reset types")
+	}
+	if len(resetTypes) != 2 {
+		t.Errorf("Invalid allowable reset actions, expected 2, got %d",
+			len(resetTypes))
 	}
 }
 
@@ -368,5 +419,43 @@ func TestChassisLinkedDrives(t *testing.T) {
 
 	if len(drives) != 4 {
 		t.Errorf("Expected 4 drives to be returned, got %d", len(drives))
+	}
+}
+
+// TestChassisSupportedReset tests getting supported reset types for a chassis.
+func TestChassisSupportedReset(t *testing.T) {
+	var result Chassis
+	err := json.NewDecoder(strings.NewReader(chassisBodyResetActionInfo)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.resetActionInfoTarget != TestChassisActionInfoPath {
+		t.Errorf("Invalid reset action info target: %s, expecting %s", result.resetActionInfoTarget, TestChassisActionInfoPath)
+	}
+
+	testClient := &common.TestClient{
+		CustomReturnForActions: map[string][]interface{}{
+			http.MethodGet: {
+				getCall(chassisResetActionInfoRes), //nolint
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	resetTypes, err := result.GetSupportedResetTypes()
+	if err != nil {
+		t.Errorf("Error getting reset types: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected 1 call to be made, captured: %v", calls)
+	}
+
+	if len(resetTypes) != 3 {
+		t.Errorf("Expected 3 reset types to be returned, got %d", len(resetTypes))
 	}
 }

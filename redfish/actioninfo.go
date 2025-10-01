@@ -4,7 +4,11 @@
 
 package redfish
 
-import "github.com/stmcginnis/gofish/common"
+import (
+	"fmt"
+
+	"github.com/stmcginnis/gofish/common"
+)
 
 // ActionInfoDataTypes is the datatype for an ActionInfo value.
 type ActionInfoDataTypes string
@@ -58,4 +62,16 @@ type ActionInfoParameter struct {
 
 func GetActionInfo(c common.Client, uri string) (*ActionInfo, error) {
 	return common.GetObject[ActionInfo](c, uri)
+}
+
+func (actionInfo *ActionInfo) GetParamValues(name string, dataType ActionInfoDataTypes) ([]string, error) {
+	for idx := range actionInfo.Parameters {
+		param := &actionInfo.Parameters[idx]
+		if param.Name != name || (param.DataType != "" && param.DataType != dataType) {
+			continue
+		}
+
+		return param.AllowableValues, nil
+	}
+	return nil, fmt.Errorf("failed to find supported values of type %s", name)
 }

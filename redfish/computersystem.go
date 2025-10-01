@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -931,6 +932,8 @@ type ComputerSystem struct {
 	removeResourceBlockTarget string
 	// resetTarget is the internal URL to send reset targets to.
 	resetTarget string
+	// resetActionInfoTarget is the URL to check what values are supported
+	resetActionInfoTarget string
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
 	settingsTarget            string
@@ -945,8 +948,8 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		Decommission        common.ActionTarget `json:"#ComputerSystem.Decommission"`
 		RemoveResourceBlock common.ActionTarget `json:"#ComputerSystem.RemoveResourceBlock"`
 		Reset               struct {
+			common.ActionTarget
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
-			Target            string
 		} `json:"#ComputerSystem.Reset"`
 		SetDefaultBootOrder common.ActionTarget `json:"#ComputerSystem.SetDefaultBootOrder"`
 	}
@@ -1010,6 +1013,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.decommissionTarget = t.Actions.Decommission.Target
 	computersystem.removeResourceBlockTarget = t.Actions.RemoveResourceBlock.Target
 	computersystem.resetTarget = t.Actions.Reset.Target
+	computersystem.resetActionInfoTarget = t.Actions.Reset.ActionInfoTarget
 	computersystem.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
 	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
@@ -1176,6 +1180,42 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 	}{ResetType: resetType}
 
 	return computersystem.Post(computersystem.resetTarget, t)
+}
+
+// GetSupportedResetTypes returns any reset types that the ComputerSystem declares as supported
+// via either ActionInfo or AllowableValues.
+func (computersystem *ComputerSystem) GetSupportedResetTypes() ([]ResetType, error) {
+	if len(computersystem.SupportedResetTypes) > 0 {
+		return computersystem.SupportedResetTypes, nil
+	}
+
+	// if we don't have ResetTypes, try to get from ActionInfo
+	if computersystem.resetActionInfoTarget != "" {
+		resetActionInfo, err := computersystem.ResetActionInfo()
+		if err != nil {
+			return nil, err
+		}
+
+		vals, err := resetActionInfo.GetParamValues("ResetType", StringActionInfoDataTypes)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, val := range vals {
+			computersystem.SupportedResetTypes = append(computersystem.SupportedResetTypes, ResetType(val))
+		}
+	}
+
+	return computersystem.SupportedResetTypes, nil
+}
+
+// ResetActionInfo returns the ActionInfo for the ComputerSystem reset action if supported
+func (computersystem *ComputerSystem) ResetActionInfo() (*ActionInfo, error) {
+	if computersystem.resetActionInfoTarget == "" {
+		return nil, errors.New("ComputerSystem Reset ActionInfo not supported")
+	}
+
+	return common.GetObject[ActionInfo](computersystem.GetClient(), computersystem.resetActionInfoTarget)
 }
 
 // UpdateBootAttributesApplyAt is used to update attribute values and set apply time together
