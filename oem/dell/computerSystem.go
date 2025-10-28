@@ -6,6 +6,7 @@ package dell
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -153,5 +154,8 @@ func FromComputerSystem(computerSystem *redfish.ComputerSystem) (*ComputerSystem
 }
 
 func (cs *ComputerSystem) SoftwareInstallationService() (*SoftwareInstallationService, error) {
+	if cs.targetSoftwareInstallationService == "" {
+		return nil, errors.New("software installation service is not supported by this system")
+	}
 	return GetSoftwareInstallationService(cs.GetClient(), cs.targetSoftwareInstallationService)
 }

@@ -6,6 +6,7 @@ package dell
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/stmcginnis/gofish/redfish"
 )
@@ -112,6 +113,10 @@ func FromManager(manager *redfish.Manager) (*Manager, error) {
 //
 // This can be used to set BIOS, iDRAC, and device settings automatically.
 func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*redfish.Task, error) {
+	if m.importSystemConfigTarget == "" {
+		return nil, errors.New("import system config is not supported by this system")
+	}
+
 	res, err := m.PostWithResponse(m.importSystemConfigTarget, b)
 	if err != nil {
 		return nil, err
