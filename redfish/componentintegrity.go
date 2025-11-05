@@ -180,8 +180,8 @@ type ComponentIntegrity struct {
 	TargetComponentURI string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData                         []byte
-	spdmGetSignedMeasurementsTarget string
-	tpmGetSignedMeasurementsTarget  string
+	SPDMGetSignedMeasurementsTarget string
+	TPMGetSignedMeasurementsTarget  string
 	componentsProtected             []string
 	// ComponentsProtectedCount is the number of resources protected by the component identified by TargetComponentURI.
 	ComponentsProtectedCount int
@@ -216,8 +216,8 @@ func (componentintegrity *ComponentIntegrity) UnmarshalJSON(b []byte) error {
 	*componentintegrity = ComponentIntegrity(t.temp)
 
 	// Extract the links to other entities for later
-	componentintegrity.spdmGetSignedMeasurementsTarget = t.Actions.SPDMGetSignedMeasurements.Target
-	componentintegrity.tpmGetSignedMeasurementsTarget = t.Actions.TPMGetSignedMeasurements.Target
+	componentintegrity.SPDMGetSignedMeasurementsTarget = t.Actions.SPDMGetSignedMeasurements.Target
+	componentintegrity.TPMGetSignedMeasurementsTarget = t.Actions.TPMGetSignedMeasurements.Target
 	componentintegrity.componentsProtected = t.Links.ComponentsProtected.ToStrings()
 	componentintegrity.ComponentsProtectedCount = t.Links.ComponentsProtectedCount
 
@@ -326,7 +326,7 @@ func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) setC
 
 // SPDMGetSignedMeasurements generates an SPDM cryptographic signed statement over the given nonce and measurements of the SPDM Responder.
 func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request *SPDMGetSignedMeasurementsRequest) (*SPDMGetSignedMeasurementsResponse, *Task, error) {
-	resp, err := componentintegrity.PostWithResponse(componentintegrity.spdmGetSignedMeasurementsTarget, request)
+	resp, err := componentintegrity.PostWithResponse(componentintegrity.SPDMGetSignedMeasurementsTarget, request)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -352,7 +352,7 @@ func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request 
 
 // TPMGetSignedMeasurements generates a TPM cryptographic signed statement over the given nonce and PCRs of the TPM for TPM 2.0 devices.
 func (componentintegrity *ComponentIntegrity) TPMGetSignedMeasurements(request *TPMGetSignedMeasurementsRequest) (*TPMGetSignedMeasurementsResponse, error) {
-	resp, err := componentintegrity.PostWithResponse(componentintegrity.tpmGetSignedMeasurementsTarget, request)
+	resp, err := componentintegrity.PostWithResponse(componentintegrity.TPMGetSignedMeasurementsTarget, request)
 	if err != nil {
 		return nil, err
 	}
