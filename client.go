@@ -101,6 +101,9 @@ type ClientConfig struct {
 	// ReuseConnections can be useful if executing a lot of requests. Setting to `true` allows
 	// the TCP sessions to remain open and reused betweeen subsequent calls.
 	ReuseConnections bool
+
+	// NoModifyTransport if set indicates that the API client won't attempt to make any changes to the transport
+	NoModifyTransport bool
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -139,8 +142,9 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 	client.HTTPClient = config.HTTPClient
 
 	// if the provided HTTPClient uses a standard Transport, we want to
-	// amend its configuration to match what was provided to us
-	if transport, ok := client.HTTPClient.Transport.(*http.Transport); ok {
+	// amend its configuration to match what was provided to us if the user allows it.
+	// otherwise we'll rely on the user to configure the transport as they claim it's configured.
+	if transport, ok := client.HTTPClient.Transport.(*http.Transport); ok && !config.NoModifyTransport {
 		if config.Insecure {
 			// If we're using the default transport, need to make sure there
 			// is a TLSClientConfig set in order to set the SkipVerify flag.
