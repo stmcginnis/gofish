@@ -276,6 +276,16 @@ func (c *APIClient) GetService() *Service {
 func (c *APIClient) WithContext(ctx context.Context) *APIClient {
 	newClient := *c
 	newClient.ctx = ctx
+
+	// clone the service onto the new client so that any requests against it use the proper client
+	newService := Service{}
+	if newClient.Service != nil {
+		newService = *newClient.Service
+	}
+
+	newClient.Service = &newService
+	newClient.Service.SetClient(&newClient)
+
 	return &newClient
 }
 
