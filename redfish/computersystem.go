@@ -1238,10 +1238,10 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 	}
 
 	resp, err := computersystem.GetClient().Get(computersystem.settingsTarget)
+	defer common.CleanupHttpResponse(resp)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
@@ -1257,10 +1257,10 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 		}
 
 		resp, err = computersystem.GetClient().PatchWithHeaders(computersystem.settingsTarget, data, header)
+		defer common.CleanupHttpResponse(resp)
 		if err != nil {
 			return err
 		}
-		defer resp.Body.Close()
 	}
 
 	return nil

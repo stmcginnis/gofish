@@ -515,10 +515,10 @@ func (accountservice *AccountService) CreateAccount(userName, password, roleID s
 	}
 
 	resp, err := baseEntity.PostWithResponse(accountservice.accounts, t)
+	defer common.CleanupHttpResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	var result ManagerAccount
 	err = json.NewDecoder(resp.Body).Decode(&result)

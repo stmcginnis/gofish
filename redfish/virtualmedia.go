@@ -280,10 +280,10 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (
 	}
 
 	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMedia.Target, config)
+	defer common.CleanupHttpResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusAccepted {
 		return nil, nil
