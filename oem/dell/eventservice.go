@@ -39,7 +39,7 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 	}
 
 	resp, err := eventservice.GetClient().Post(eventservice.SubmitTestEventTarget, payload)
-	defer common.CleanupHttpResponse(resp)
+	defer common.CleanupHTTPResponse(resp)
 	if err != nil {
 		return fmt.Errorf("failed to post submitTestEvent due to: %w", err)
 	}

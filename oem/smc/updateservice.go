@@ -67,7 +67,7 @@ func (cert *SSLCert) Upload(certFile, keyFile io.Reader) error {
 		return err
 	}
 
-	return common.CleanupHttpResponse(resp)
+	return common.CleanupHTTPResponse(resp)
 }
 
 type IPMIConfig struct {

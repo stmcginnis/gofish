@@ -404,7 +404,7 @@ func (c *APIClient) Delete(url string) (*http.Response, error) {
 // DeleteWithHeaders performs a Delete request against the Redfish service but allowing custom headers
 func (c *APIClient) DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
 	resp, err := c.runRequestWithHeaders(http.MethodDelete, url, nil, customHeaders)
-	common.CleanupHttpResponse(resp)
+	common.CleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -576,13 +576,13 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 	// Dump response if needed.
 	if c.dumpWriter != nil {
 		if err := c.dumpResponse(resp); err != nil {
-			defer common.CleanupHttpResponse(resp)
+			defer common.CleanupHTTPResponse(resp)
 			return nil, err
 		}
 	}
 
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
-		defer common.CleanupHttpResponse(resp)
+		defer common.CleanupHTTPResponse(resp)
 		payload, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, common.ConstructError(0, []byte(err.Error()))

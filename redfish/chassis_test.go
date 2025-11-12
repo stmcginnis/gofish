@@ -362,8 +362,8 @@ func TestChassisDrives(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(driveCollection), //nolint
-				getCall(driveBody),       //nolint
+				getCall(driveCollection),
+				getCall(driveBody),
 			},
 		},
 	}
@@ -397,10 +397,10 @@ func TestChassisLinkedDrives(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(driveBody), //nolint
-				getCall(driveBody), //nolint
-				getCall(driveBody), //nolint
-				getCall(driveBody), //nolint
+				getCall(driveBody),
+				getCall(driveBody),
+				getCall(driveBody),
+				getCall(driveBody),
 			},
 		},
 	}
@@ -438,7 +438,7 @@ func TestChassisSupportedReset(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(chassisResetActionInfoRes), //nolint
+				getCall(chassisResetActionInfoRes),
 			},
 		},
 	}

@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 package common
 
 import (
@@ -6,9 +10,9 @@ import (
 	"net/http"
 )
 
-// CleanupHttpResponse MUST be called for any HTTP response to ensure that it is properly closed.
+// CleanupHTTPResponse MUST be called for any HTTP response to ensure that it is properly closed.
 // This function can safely be called even if the HTTP client returned an error.
-func CleanupHttpResponse(response *http.Response) error {
+func CleanupHTTPResponse(response *http.Response) error {
 	if response == nil || response.Body == nil {
 		return nil
 	}

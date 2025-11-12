@@ -957,7 +957,7 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 // AllowedVolumesUpdateApplyTimes returns the set of allowed apply times to request when setting the volumes values
 func AllowedVolumesUpdateApplyTimes(c common.Client, link string) ([]common.OperationApplyTime, error) {
 	resp, err := c.Get(link)
-	defer common.CleanupHttpResponse(resp)
+	defer common.CleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}

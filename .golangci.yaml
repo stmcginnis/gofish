@@ -2,7 +2,8 @@ version: "2"
 linters:
   default: none
   enable:
-    - bodyclose
+    # - bodyclose
+    # https://github.com/timakin/bodyclose/issues/10
     - depguard
     - dogsled
     - dupl
@@ -42,6 +43,10 @@ linters:
               desc: 'replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil'
     dupl:
       threshold: 200
+    errcheck:
+      exclude-functions:
+        - github.com/stmcginnis/gofish/common.CleanupHTTPResponse
+      verbose: true
     funlen:
       lines: 100
       statements: 50

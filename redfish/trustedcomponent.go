@@ -194,7 +194,7 @@ func (trustedcomponent *TrustedComponent) Certificates() ([]*Certificate, error)
 // TPMGetEventLog gets the event log for TPM 2.0 devices.
 func (trustedcomponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
 	resp, err := trustedcomponent.PostWithResponse(trustedcomponent.tpmGetEventLogTarget, nil)
-	defer common.CleanupHttpResponse(resp)
+	defer common.CleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}

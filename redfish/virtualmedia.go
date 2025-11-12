@@ -280,7 +280,7 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (
 	}
 
 	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMedia.Target, config)
-	defer common.CleanupHttpResponse(resp)
+	defer common.CleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}

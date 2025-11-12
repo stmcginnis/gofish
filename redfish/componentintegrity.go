@@ -328,7 +328,7 @@ func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) setC
 // SPDMGetSignedMeasurements generates an SPDM cryptographic signed statement over the given nonce and measurements of the SPDM Responder.
 func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request *SPDMGetSignedMeasurementsRequest) (*SPDMGetSignedMeasurementsResponse, *Task, error) {
 	resp, err := componentintegrity.PostWithResponse(componentintegrity.SPDMGetSignedMeasurementsTarget, request)
-	defer common.CleanupHttpResponse(resp)
+	defer common.CleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -354,7 +354,7 @@ func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request 
 // TPMGetSignedMeasurements generates a TPM cryptographic signed statement over the given nonce and PCRs of the TPM for TPM 2.0 devices.
 func (componentintegrity *ComponentIntegrity) TPMGetSignedMeasurements(request *TPMGetSignedMeasurementsRequest) (*TPMGetSignedMeasurementsResponse, error) {
 	resp, err := componentintegrity.PostWithResponse(componentintegrity.TPMGetSignedMeasurementsTarget, request)
-	defer common.CleanupHttpResponse(resp)
+	defer common.CleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}

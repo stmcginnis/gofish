@@ -119,7 +119,7 @@ func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*
 	}
 
 	res, err := m.PostWithResponse(m.importSystemConfigTarget, b)
-	defer common.CleanupHttpResponse(res)
+	defer common.CleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
