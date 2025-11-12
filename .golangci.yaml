@@ -2,7 +2,8 @@ version: "2"
 linters:
   default: none
   enable:
-    - bodyclose
+    # - bodyclose
+    # https://github.com/timakin/bodyclose/issues/10
     - depguard
     - dogsled
     - dupl

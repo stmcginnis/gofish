@@ -66,10 +66,10 @@ func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol r
 	}
 
 	resp, err := eventservice.GetClient().Post(eventservice.Subscriptions, z)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", fmt.Errorf("failed to POST subscribe request to redfish due to %w", err)
 	}
-	defer resp.Body.Close()
 
 	var ztSubscribeResponse SubscribeResponseType
 	err = json.NewDecoder(resp.Body).Decode(&ztSubscribeResponse)
@@ -110,7 +110,7 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 		}
 
 		if resp != nil {
-			_ = resp.Body.Close()
+			_ = common.CleanupHTTPResponse(resp)
 		}
 
 		time.Sleep(retryInterval)
@@ -119,7 +119,7 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer common.DeferredCleanupHTTPResponse(resp)
 
 	valid := map[int]bool{http.StatusAccepted: true}
 

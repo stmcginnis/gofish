@@ -1219,7 +1219,7 @@ func (computersystem *ComputerSystem) ResetActionInfo() (*ActionInfo, error) {
 }
 
 // UpdateBootAttributesApplyAt is used to update attribute values and set apply time together
-func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error { //nolint:dupl
+func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error {
 	payload := make(map[string]interface{})
 
 	// Get a representation of the object's original state so we can find what
@@ -1238,10 +1238,10 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 	}
 
 	resp, err := computersystem.GetClient().Get(computersystem.settingsTarget)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
@@ -1257,10 +1257,10 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 		}
 
 		resp, err = computersystem.GetClient().PatchWithHeaders(computersystem.settingsTarget, data, header)
+		defer common.DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
 		}
-		defer resp.Body.Close()
 	}
 
 	return nil

@@ -570,10 +570,10 @@ func sendCreateEventDestinationRequest(
 	}
 
 	resp, err := c.Post(uri, s)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
 
 	// return subscription link from returned location
 	subscriptionLink := resp.Header.Get("Location")
@@ -593,9 +593,7 @@ func DeleteEventDestination(c common.Client, uri string) error {
 	}
 
 	resp, err := c.Delete(uri)
-	if err == nil {
-		defer resp.Body.Close()
-	}
+	defer common.DeferredCleanupHTTPResponse(resp)
 
 	return err
 }

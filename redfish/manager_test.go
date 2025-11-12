@@ -531,7 +531,7 @@ func TestManagerResetTypes(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(managerResetActionInfo), //nolint
+				getCall(managerResetActionInfo),
 			},
 		},
 	}
@@ -569,7 +569,7 @@ func TestManagerResetToDefaultsTypes(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(managerResetToDefaultsActionInfo), //nolint
+				getCall(managerResetToDefaultsActionInfo),
 			},
 		},
 	}

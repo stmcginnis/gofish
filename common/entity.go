@@ -97,10 +97,10 @@ func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpda
 // Get performs a GET request against the Redfish service and saves the etag.
 func (e *Entity) Get(c Client, uri string, payload any) error {
 	resp, err := c.Get(uri)
+	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(payload); err != nil {
 		return err
@@ -120,7 +120,7 @@ func (e *Entity) Patch(uri string, payload any) error {
 	if err != nil {
 		return err
 	}
-	return resp.Body.Close()
+	return CleanupHTTPResponse(resp)
 }
 
 // Post performs a POST request against the Redfish service with etag headers.
@@ -129,7 +129,7 @@ func (e *Entity) Post(uri string, payload any) error {
 	if err != nil {
 		return err
 	}
-	return resp.Body.Close()
+	return CleanupHTTPResponse(resp)
 }
 
 // PostWithResponse performs a POST request and returns the full response.
@@ -427,10 +427,10 @@ func GetObject[T any, PT interface {
 	SchemaObject
 }](c Client, uri string) (*T, error) {
 	resp, err := c.Get(uri)
+	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	entity := PT(new(T))
 	if err := json.NewDecoder(resp.Body).Decode(entity); err != nil {

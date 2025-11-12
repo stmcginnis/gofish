@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
 )
 
@@ -118,10 +119,10 @@ func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*
 	}
 
 	res, err := m.PostWithResponse(m.importSystemConfigTarget, b)
+	defer common.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 
 	return redfish.GetTask(m.GetClient(), res.Header.Get("Location"))
 }

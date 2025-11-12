@@ -957,10 +957,11 @@ func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
 // AllowedVolumesUpdateApplyTimes returns the set of allowed apply times to request when setting the volumes values
 func AllowedVolumesUpdateApplyTimes(c common.Client, link string) ([]common.OperationApplyTime, error) {
 	resp, err := c.Get(link)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+
 	var temp struct {
 		OperationApplyTimeSupport common.OperationApplyTimeSupport `json:"@Redfish.OperationApplyTimeSupport"`
 	}

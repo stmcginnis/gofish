@@ -284,10 +284,10 @@ func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosti
 	}
 
 	resp, err := logservice.PostWithResponse(logservice.collectDiagnosticDataTarget, parameters)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
 
 	if location := resp.Header["Location"]; len(location) > 0 && location[0] != "" {
 		return location[0], nil

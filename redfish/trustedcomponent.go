@@ -194,10 +194,10 @@ func (trustedcomponent *TrustedComponent) Certificates() ([]*Certificate, error)
 // TPMGetEventLog gets the event log for TPM 2.0 devices.
 func (trustedcomponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
 	resp, err := trustedcomponent.PostWithResponse(trustedcomponent.tpmGetEventLogTarget, nil)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	var tpmGetEventLogResponse TPMGetEventLogResponse
 	err = json.NewDecoder(resp.Body).Decode(&tpmGetEventLogResponse)

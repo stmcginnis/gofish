@@ -179,10 +179,10 @@ type GenerateCSRRequest struct {
 // WARNING: this has not been fully tested and is subject to change.
 func (certificateservice *CertificateService) GenerateCSR(request *GenerateCSRRequest) (*GenerateCSRResponse, error) {
 	resp, err := certificateservice.PostWithResponse(certificateservice.generateCSRTarget, request)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	var csrResponse GenerateCSRResponse
 	err = json.NewDecoder(resp.Body).Decode(&csrResponse)

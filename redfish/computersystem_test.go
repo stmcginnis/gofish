@@ -482,7 +482,7 @@ func TestSystemSupportedResetTypes(t *testing.T) {
 	testClient := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
 			http.MethodGet: {
-				getCall(computerSystemBodyResetActionInfo), //nolint
+				getCall(computerSystemBodyResetActionInfo),
 			},
 		},
 	}
