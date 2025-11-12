@@ -1238,7 +1238,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 	}
 
 	resp, err := computersystem.GetClient().Get(computersystem.settingsTarget)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}
@@ -1257,7 +1257,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 		}
 
 		resp, err = computersystem.GetClient().PatchWithHeaders(computersystem.settingsTarget, data, header)
-		defer common.CleanupHTTPResponse(resp)
+		defer common.DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
 		}

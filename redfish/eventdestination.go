@@ -570,7 +570,7 @@ func sendCreateEventDestinationRequest(
 	}
 
 	resp, err := c.Post(uri, s)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", err
 	}
@@ -593,7 +593,7 @@ func DeleteEventDestination(c common.Client, uri string) error {
 	}
 
 	resp, err := c.Delete(uri)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 
 	return err
 }

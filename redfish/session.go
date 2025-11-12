@@ -142,7 +142,7 @@ func CreateSession(c common.Client, uri, username, password string) (auth *AuthT
 	}
 
 	resp, err := c.Post(uri, a)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return auth, err
 	}
@@ -161,7 +161,7 @@ func CreateSession(c common.Client, uri, username, password string) (auth *AuthT
 // DeleteSession deletes a session using the location as argument
 func DeleteSession(c common.Client, sessionURL string) (err error) {
 	resp, err := c.Delete(sessionURL)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}

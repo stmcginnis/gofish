@@ -168,7 +168,7 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTim
 	}
 
 	resp, err := bios.GetClient().Get(bios.settingsTarget)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTim
 		}
 
 		resp, err = bios.GetClient().PatchWithHeaders(bios.settingsTarget, data, header)
-		defer common.CleanupHTTPResponse(resp)
+		defer common.DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
 		}

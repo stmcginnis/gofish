@@ -284,7 +284,7 @@ func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosti
 	}
 
 	resp, err := logservice.PostWithResponse(logservice.collectDiagnosticDataTarget, parameters)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", err
 	}

@@ -515,7 +515,7 @@ func (accountservice *AccountService) CreateAccount(userName, password, roleID s
 	}
 
 	resp, err := baseEntity.PostWithResponse(accountservice.accounts, t)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}

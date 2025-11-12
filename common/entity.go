@@ -97,7 +97,7 @@ func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpda
 // Get performs a GET request against the Redfish service and saves the etag.
 func (e *Entity) Get(c Client, uri string, payload any) error {
 	resp, err := c.Get(uri)
-	defer CleanupHTTPResponse(resp) //nolint:errcheck
+	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}
@@ -427,7 +427,7 @@ func GetObject[T any, PT interface {
 	SchemaObject
 }](c Client, uri string) (*T, error) {
 	resp, err := c.Get(uri)
-	defer CleanupHTTPResponse(resp) //nolint:errcheck
+	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}

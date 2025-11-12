@@ -22,3 +22,8 @@ func CleanupHTTPResponse(response *http.Response) error {
 
 	return errors.Join(errFlush, errClose)
 }
+
+// DeferredCleanupHTTPResponse is the same as CleanupHTTPResponse but intended to be used when we don't care about the error.
+func DeferredCleanupHTTPResponse(response *http.Response) {
+	_ = CleanupHTTPResponse(response)
+}

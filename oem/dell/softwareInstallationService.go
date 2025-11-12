@@ -204,7 +204,7 @@ func (xul *xmlUpdateList) parseFromXML() UpdateList {
 // Returns a Dell OEM Job
 func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepoBody) (*Job, error) {
 	res, err := sis.PostWithResponse(sis.Actions.InstallFromRepository.Target, b)
-	defer common.CleanupHTTPResponse(res)
+	defer common.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepo
 func (sis *SoftwareInstallationService) GetRepoBasedUpdateList() (*UpdateList, error) {
 	var b struct{}
 	res, err := sis.PostWithResponse(sis.Actions.GetRepoBasedUpdateList.Target, b)
-	defer common.CleanupHTTPResponse(res)
+	defer common.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}

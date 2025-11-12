@@ -285,7 +285,7 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 // ServiceRoot will get a Service instance from the service.
 func ServiceRoot(c common.Client) (*Service, error) {
 	resp, err := c.Get(common.DefaultServiceRoot)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
