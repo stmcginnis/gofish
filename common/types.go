@@ -551,14 +551,63 @@ type ResourceCollection struct {
 
 // Operations shall describe a currently running operation on the resource.
 type Operations struct {
-	// AssociatedTask shall be a reference to a resource of type Task that
+	// associatedTask shall be a reference to a resource of type Task that
 	// represents the task associated with the operation.
-	AssociatedTask string
+	associatedTask Link
 	// OperationName shall be a string of the name of the operation.
 	OperationName string
 	// PercentageComplete shall be an integer of the percentage of the
 	// operation that has been completed.
 	PercentageComplete int
+}
+
+// UnmarshalJSON unmarshals an Operations object from the raw JSON.
+func (ops *Operations) UnmarshalJSON(b []byte) error {
+	type temp Operations
+	type t1 struct {
+		temp
+		AssociatedTask Link
+	}
+	var t t1
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		// Handle invalid data type returned for AssociatedTask
+		var t2 struct {
+			t1
+			// Unfortunately I'm presented with an empty array
+			// and unable to confidently say what the contents
+			// will actually be. This is a naive guess.
+			AssociatedTask Links
+		}
+
+		// Return the original error
+		if err2 := json.Unmarshal(b, &t2); err2 != nil {
+			return err
+		}
+
+		// Extract the real Operations struct and replace its AssociatedTask with
+		// the the first found link in an array
+		t = t2.t1
+		if len(t2.AssociatedTask) != 0 {
+			t.AssociatedTask = t2.AssociatedTask[0]
+		}
+	}
+
+	*ops = Operations(t.temp)
+
+	// Extract the links to other entities for later
+	ops.associatedTask = t.AssociatedTask
+
+	return nil
+}
+
+// AssociatedTask gets the associated task associated with this Operation.
+func (ops *Operations) AssociatedTask() (string, error) {
+	// The operations type lacks a client to fetch a task from this link
+	// and further, Task is a type in the redfish package.
+	// return GetObjects[Task](ops.GetClient(), ops.associatedTask)
+	return ops.associatedTask.String(), nil
 }
 
 // ApplyTime is when to apply a change.
