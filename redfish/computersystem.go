@@ -1098,8 +1098,8 @@ func (computersystem *ComputerSystem) ManagedBy() ([]*Manager, error) {
 }
 
 // Memory gets this system's memory.
-func (computersystem *ComputerSystem) Memory() ([]*Memory, error) {
-	return ListReferencedMemorys(computersystem.GetClient(), computersystem.memory)
+func (computersystem *ComputerSystem) Memory(queryOpts ...common.QueryOption) ([]*Memory, error) {
+	return ListReferencedMemorys(computersystem.GetClient(), computersystem.memory, queryOpts...)
 }
 
 // MemoryDomains gets this system's memory domains.
