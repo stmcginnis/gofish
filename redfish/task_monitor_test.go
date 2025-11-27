@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 package redfish_test
 
 import (
@@ -15,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPostWithTask(t *testing.T) {
+func TestPostWithTask(t *testing.T) { //nolint: funlen
 	tests := map[string]struct {
 		response         http.Response
 		expectedTask     *redfish.TaskMonitorInfo
@@ -90,7 +94,7 @@ func TestPostWithTask(t *testing.T) {
 		},
 	}
 
-	testUri := "/Action/test"
+	testURI := "/Action/test"
 	testPayload := map[string]string{}
 	var testHeaders map[string]string
 
@@ -104,7 +108,7 @@ func TestPostWithTask(t *testing.T) {
 				},
 			}
 
-			res, taskMonitorInfo, err := redfish.PostWithTask(c, testUri, testPayload, testHeaders, false)
+			res, taskMonitorInfo, err := redfish.PostWithTask(c, testURI, testPayload, testHeaders, false)
 			if test.expectedErr != "" {
 				require.ErrorContains(t, err, test.expectedErr)
 			} else {
@@ -124,9 +128,9 @@ func TestPostWithTask(t *testing.T) {
 	}
 }
 
-func TestWaitForTaskMonitor(t *testing.T) {
+func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 	startTime := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
-	testTaskMonitorUri := "/TaskService/TaskMonitors/1"
+	testTaskMonitorURI := "/TaskService/TaskMonitors/1"
 
 	tests := map[string]struct {
 		PollRate        time.Duration
@@ -157,7 +161,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			StatusChan:      true,
 			EndTime:         startTime, // no wait until first poll
 			TaskMonitor: &redfish.TaskMonitorInfo{
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 		},
 		"done when first polled, success": {
@@ -168,7 +172,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			StatusChan:      true,
 			EndTime:         startTime,
 			TaskMonitor: &redfish.TaskMonitorInfo{
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 		},
 		"two polls, then success": {
@@ -181,7 +185,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			StatusChan:      true,
 			EndTime:         startTime.Add(20 * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 		},
 		"two polls, then success, nil status channel": {
@@ -192,7 +196,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			},
 			EndTime: startTime.Add(20 * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 		},
 		"two polls, then fail": {
@@ -205,7 +209,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			StatusChan:      true,
 			EndTime:         startTime.Add(20 * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 			ExpectErr: "500:",
 		},
@@ -220,7 +224,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			EndTime:         startTime.Add(40 * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
 				RetryAfter:  startTime.Add(20 * time.Second),
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 		},
 		"two polls, with retry-after in response": {
@@ -236,7 +240,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			EndTime:         startTime.Add((30 + 20 + 10) * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
 				RetryAfter:  startTime.Add(20 * time.Second),
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 		},
 		"context timeout during initial wait": {
@@ -255,7 +259,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			EndTime:         startTime.Add(10 * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
 				RetryAfter:  startTime.Add(20 * time.Second),
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 			ExpectErr: context.DeadlineExceeded.Error(),
 		},
@@ -275,7 +279,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			EndTime:         startTime.Add(10 * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
 				RetryAfter:  startTime.Add(2 * time.Second),
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 			ExpectErr: context.DeadlineExceeded.Error(),
 		},
@@ -296,7 +300,7 @@ func TestWaitForTaskMonitor(t *testing.T) {
 			StatusChan: true,
 			EndTime:    startTime.Add(20 * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
-				TaskMonitor: testTaskMonitorUri,
+				TaskMonitor: testTaskMonitorURI,
 			},
 		},
 	}
