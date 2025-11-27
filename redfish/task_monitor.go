@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 package redfish
 
 import (
@@ -38,7 +42,7 @@ func PostWithTask(c common.Client, uri string, payload any, headers map[string]s
 		resp, err = c.PostWithHeaders(uri, payload, headers)
 	}
 	if err != nil {
-		defer common.CleanupHTTPResponse(resp)
+		defer common.DeferredCleanupHTTPResponse(resp)
 		return nil, nil, err
 	}
 
@@ -158,7 +162,7 @@ func WaitForTaskMonitorObject[T any,
 	PT common.GenericSchemaObjectPointer[T],
 ](ctx context.Context, c common.Client, defaultPollRate time.Duration, taskMonitor *TaskMonitorInfo, taskChan chan<- *Task) (*T, http.Header, error) {
 	resp, err := WaitForTaskMonitor(ctx, c, defaultPollRate, taskMonitor, taskChan)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, nil, err
 	}

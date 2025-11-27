@@ -51,8 +51,6 @@ const (
 
 // AMIUpdateService shall be used to represent an Update Service for a Redfish implementation. It represents the
 // properties that affect the service itself.
-//
-//nolint:revive
 type AMIUpdateService struct {
 	// FlashPercentage shall represent the FlashPercentage of the UpdateService. The format of the string shall be the
 	// Percentage completed for Flashing of the UpdateService.

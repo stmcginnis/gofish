@@ -24,8 +24,6 @@ const (
 )
 
 // AMIBIOSInventoryCRC provides the information related to inventory data/
-//
-//nolint:revive
 type AMIBIOSInventoryCRC struct {
 	// Bios provides the information related to inventory data.
 	Bios Bios

@@ -221,7 +221,7 @@ func (logservice *LogService) SupportsClearLog() bool {
 func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
 		logservice.clearLogTarget, struct{}{}, logservice.Headers(), false)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err == nil {
 		return taskInfo, nil
 	}
@@ -237,9 +237,9 @@ func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
 			LogEntriesETag string
 		}{LogEntriesETag: strings.Trim(entryCollection.ETag, "\"")}
 
-		resp, taskInfo, retryErr := PostWithTask(logservice.GetClient(),
+		resp, taskInfo, retryErr = PostWithTask(logservice.GetClient(),
 			logservice.clearLogTarget, payload, logservice.Headers(), false)
-		defer common.CleanupHTTPResponse(resp)
+		defer common.DeferredCleanupHTTPResponse(resp)
 		if retryErr == nil {
 			return taskInfo, nil
 		}
@@ -254,7 +254,7 @@ func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
 
 	resp, taskInfo, err = PostWithTask(logservice.GetClient(),
 		logservice.clearLogTarget, t, logservice.Headers(), false)
-	defer common.CleanupHTTPResponse(resp)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
 

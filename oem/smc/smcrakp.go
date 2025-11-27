@@ -20,8 +20,6 @@ const (
 )
 
 // SMCRAKP is an instance of an SMCRAKP object.
-//
-//nolint:revive
 type SMCRAKP struct {
 	common.Entity
 
