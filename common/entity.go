@@ -136,7 +136,7 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 
 // Patch performs a PATCH request against the Redfish service with etag headers.
 func (e *Entity) Patch(uri string, payload any) error {
-	resp, err := e.client.PatchWithHeaders(uri, payload, e.headers())
+	resp, err := e.client.PatchWithHeaders(uri, payload, e.Headers())
 	if err != nil {
 		return err
 	}
@@ -155,11 +155,11 @@ func (e *Entity) Post(uri string, payload any) error {
 // PostWithResponse performs a POST request and returns the full response.
 // Callers must close the response body when done.
 func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
-	return e.client.PostWithHeaders(uri, payload, e.headers())
+	return e.client.PostWithHeaders(uri, payload, e.Headers())
 }
 
-// headers generates the appropriate headers including etag if configured.
-func (e *Entity) headers() map[string]string {
+// Headers generates the appropriate Headers including etag if configured.
+func (e *Entity) Headers() map[string]string {
 	header := make(map[string]string)
 	if e.ODataEtag != "" && !e.disableEtagMatch {
 		if e.stripEtagQuotes {
