@@ -112,7 +112,7 @@ func GetPowerSupplyUnitMetrics(c common.Client, uri string) (*PowerSupplyUnitMet
 // This action resets the summary metrics related to this equipment.
 func (metrics *PowerSupplyUnitMetrics) ResetMetrics() error {
 	if metrics.resetMetricsTarget == "" {
-		return fmt.Errorf("ResetMetrics is not supported") //nolint:golint
+		return fmt.Errorf("ResetMetrics is not supported")
 	}
 
 	return metrics.Post(metrics.resetMetricsTarget, nil)
