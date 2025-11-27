@@ -1275,7 +1275,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributes(attrs SettingsAttribu
 func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 	// This action wasn't added until 1.5.0, make sure this is supported.
 	if computersystem.setDefaultBootOrderTarget == "" {
-		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") //nolint:golint
+		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
 	}
 
 	return computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)
