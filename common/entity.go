@@ -445,11 +445,13 @@ type SchemaObject interface {
 	GetExtendedInfo() []MessageExtendedInfo
 }
 
-// GetObject retrieves a single API object from the service.
-func GetObject[T any, PT interface {
+type GenericSchemaObjectPointer[T any] interface {
 	*T
 	SchemaObject
-}](c Client, uri string, opts ...QueryGroupOption) (*T, error) {
+}
+
+// GetObject retrieves a single API object from the service.
+func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string, opts ...QueryGroupOption) (*T, error) {
 	uri = BuildQuery(c, uri, false, opts...)
 
 	resp, err := c.Get(uri)
@@ -458,6 +460,11 @@ func GetObject[T any, PT interface {
 		return nil, err
 	}
 
+	return DecodeGenericEntity[T, PT](c, resp)
+}
+
+// DecodeGenericEntity attempts to decode an HTTP response into an Entity struct
+func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp *http.Response) (*T, error) {
 	entity := PT(new(T))
 	if err := json.NewDecoder(resp.Body).Decode(entity); err != nil {
 		return nil, err
@@ -467,7 +474,6 @@ func GetObject[T any, PT interface {
 		entity.SetETag(etag)
 	}
 	entity.SetClient(c)
-
 	return entity, nil
 }
 
