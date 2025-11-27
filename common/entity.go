@@ -421,17 +421,24 @@ type SchemaObject interface {
 	SetETag(string)
 }
 
-// GetObject retrieves a single API object from the service.
-func GetObject[T any, PT interface {
+type GenericSchemaObjectPointer[T any] interface {
 	*T
 	SchemaObject
-}](c Client, uri string) (*T, error) {
+}
+
+// GetObject retrieves a single API object from the service.
+func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string) (*T, error) {
 	resp, err := c.Get(uri)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
 
+	return DecodeGenericEntity[T, PT](c, resp)
+}
+
+// DecodeGenericEntity attempts to decode an HTTP response into an Entity struct
+func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp *http.Response) (*T, error) {
 	entity := PT(new(T))
 	if err := json.NewDecoder(resp.Body).Decode(entity); err != nil {
 		return nil, err
@@ -441,7 +448,6 @@ func GetObject[T any, PT interface {
 		entity.SetETag(etag)
 	}
 	entity.SetClient(c)
-
 	return entity, nil
 }
 
