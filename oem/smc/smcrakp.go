@@ -11,7 +11,6 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-//nolint:revive
 type SMCRAKPType string
 
 const (

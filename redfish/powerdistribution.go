@@ -283,7 +283,7 @@ func (powerDistribution *PowerDistribution) Update() error {
 // This action shall transfer power input from the existing mains circuit to the alternative mains circuit.
 func (powerDistribution *PowerDistribution) TransferControl() error {
 	if powerDistribution.transferControlTarget == "" {
-		return errors.New("TransferControl is not supported") //nolint:golint
+		return errors.New("TransferControl is not supported")
 	}
 
 	return powerDistribution.Post(powerDistribution.transferControlTarget, nil)

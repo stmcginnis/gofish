@@ -89,7 +89,7 @@ func GetPowerDistributionMetrics(c common.Client, uri string) (*PowerDistributio
 // This action shall reset any time intervals or counted values for this equipment.
 func (metrics *PowerDistributionMetrics) ResetMetrics() error {
 	if metrics.resetMetricsTarget == "" {
-		return fmt.Errorf("ResetMetrics is not supported") //nolint:golint
+		return fmt.Errorf("ResetMetrics is not supported")
 	}
 
 	return metrics.Post(metrics.resetMetricsTarget, nil)

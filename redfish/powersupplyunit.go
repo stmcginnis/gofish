@@ -232,7 +232,7 @@ func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSuppl
 // but shall not affect the power output. A ForceRestart ResetType can affect the power supply output.
 func (powerSupplyUnit *PowerSupplyUnit) Reset(resetType ResetType) error {
 	if powerSupplyUnit.resetTarget == "" {
-		return errors.New("Reset is not supported") //nolint:golint
+		return errors.New("Reset is not supported")
 	}
 
 	t := struct {
