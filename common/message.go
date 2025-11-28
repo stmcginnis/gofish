@@ -4,11 +4,10 @@
 
 package common
 
-// Message is This type shall define a Message as described in the
-// Redfish specification.
-type Message struct {
-	Entity
-
+type MessageExtendedInfo struct {
+	// MessageID shall be a key into message registry as described in the
+	// Redfish specification.
+	MessageID string `json:"MessageId"`
 	// Message shall contain an optional human readable message.
 	Message string
 	// MessageArgs shall contain the message substitution
@@ -16,19 +15,23 @@ type Message struct {
 	// shall only be included if the MessageID is present.  Number and
 	// integer type arguments shall be converted to strings.
 	MessageArgs []string
-	// MessageID shall be a key into message registry as described in the
-	// Redfish specification.
-	MessageID string `json:"MessageId"`
 	// RelatedProperties shall contain an array of JSON
 	// Pointers indicating the properties described by the message, if
 	// appropriate for the message.
-	RelatedProperties []string
-	// Resolution shall contain an override of the
-	// Resolution of the message in message registry, if present.
-	Resolution string
+	RelatedProperties []string `json:"RelatedProperties,omitempty"`
 	// Severity is The value of this property shall be the severity of the
 	// error, as defined in the Status section of the Redfish specification.
 	Severity string
+	// Resolution shall contain an override of the
+	// Resolution of the message in message registry, if present.
+	Resolution string
+}
+
+// Message is This type shall define a Message as described in the
+// Redfish specification.
+type Message struct {
+	Entity
+	MessageExtendedInfo
 }
 
 // GetMessage will get a Message instance from the service.
