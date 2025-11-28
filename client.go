@@ -55,6 +55,8 @@ type APIClient struct {
 
 	// keepAlive is a flag to indicate if we should try to keep idle connections open
 	keepAlive bool
+
+	Settings common.ClientSettings
 }
 
 // Session holds the session ID and auth token needed to identify an
@@ -104,6 +106,9 @@ type ClientConfig struct {
 
 	// NoModifyTransport if set indicates that the API client won't attempt to make any changes to the transport
 	NoModifyTransport bool
+
+	// AutoExpand enables $expand if supported and automatically falls back if $expand fails.
+	AutoExpand bool
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -175,6 +180,25 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 	client.Service, err = ServiceRoot(client)
 	if err != nil {
 		return nil, err
+	}
+
+	// Init default settings
+	if config.AutoExpand && client.Service != nil {
+		expand := common.ExpandNone
+		protocolFeats := client.Service.ProtocolFeaturesSupported
+		if protocolFeats.ExpandQuery.NoLinks {
+			expand = common.ExpandOptionPeriod
+		} else if protocolFeats.ExpandQuery.Links {
+			expand = common.ExpandOptionTilde
+		} else if protocolFeats.ExpandQuery.ExpandAll {
+			expand = common.ExpandOptionAsterisk
+		}
+
+		if expand != common.ExpandNone {
+			client.Settings.DefaultQueryOptions = append(client.Settings.DefaultQueryOptions,
+				common.WithCollectionQueryOpts(common.WithExpand(expand),
+					common.WithExpandFallback(true)))
+		}
 	}
 
 	return client, nil
@@ -648,4 +672,8 @@ func (c *APIClient) Logout() {
 // SetDumpWriter sets the client the DumpWriter dynamically
 func (c *APIClient) SetDumpWriter(writer io.Writer) {
 	c.dumpWriter = writer
+}
+
+func (c *APIClient) GetSettings() common.ClientSettings {
+	return c.Settings
 }

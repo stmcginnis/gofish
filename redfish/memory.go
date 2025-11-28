@@ -582,7 +582,7 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
-func ListReferencedMemorys(c common.Client, link string, queryOpts ...common.QueryOption) ([]*Memory, error) {
+func ListReferencedMemorys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
 	return common.GetCollectionObjects[Memory](c, link, queryOpts...)
 }
 

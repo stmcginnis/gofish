@@ -1098,7 +1098,7 @@ func (computersystem *ComputerSystem) ManagedBy() ([]*Manager, error) {
 }
 
 // Memory gets this system's memory.
-func (computersystem *ComputerSystem) Memory(queryOpts ...common.QueryOption) ([]*Memory, error) {
+func (computersystem *ComputerSystem) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
 	return ListReferencedMemorys(computersystem.GetClient(), computersystem.memory, queryOpts...)
 }
 
