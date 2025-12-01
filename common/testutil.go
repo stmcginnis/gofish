@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 package common
 
 import (
@@ -48,7 +52,7 @@ func AssertEqualMsg[T any](t *testing.T, expected, actual T, msg string, args ..
 }
 
 func RequireLessMsg[T int](t *testing.T, a, b T, msg string, args ...any) {
-	if !(a < b) {
+	if a >= b {
 		t.Fatalf(msg, args...)
 	}
 }
