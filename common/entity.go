@@ -136,7 +136,7 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 
 // Patch performs a PATCH request against the Redfish service with etag headers.
 func (e *Entity) Patch(uri string, payload any) error {
-	resp, err := e.client.PatchWithHeaders(uri, payload, e.headers())
+	resp, err := e.client.PatchWithHeaders(uri, payload, e.Headers())
 	if err != nil {
 		return err
 	}
@@ -155,11 +155,11 @@ func (e *Entity) Post(uri string, payload any) error {
 // PostWithResponse performs a POST request and returns the full response.
 // Callers must close the response body when done.
 func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
-	return e.client.PostWithHeaders(uri, payload, e.headers())
+	return e.client.PostWithHeaders(uri, payload, e.Headers())
 }
 
-// headers generates the appropriate headers including etag if configured.
-func (e *Entity) headers() map[string]string {
+// Headers generates the appropriate Headers including etag if configured.
+func (e *Entity) Headers() map[string]string {
 	header := make(map[string]string)
 	if e.ODataEtag != "" && !e.disableEtagMatch {
 		if e.stripEtagQuotes {
@@ -445,11 +445,13 @@ type SchemaObject interface {
 	GetExtendedInfo() []MessageExtendedInfo
 }
 
-// GetObject retrieves a single API object from the service.
-func GetObject[T any, PT interface {
+type GenericSchemaObjectPointer[T any] interface {
 	*T
 	SchemaObject
-}](c Client, uri string, opts ...QueryGroupOption) (*T, error) {
+}
+
+// GetObject retrieves a single API object from the service.
+func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string, opts ...QueryGroupOption) (*T, error) {
 	uri = BuildQuery(c, uri, false, opts...)
 
 	resp, err := c.Get(uri)
@@ -458,6 +460,11 @@ func GetObject[T any, PT interface {
 		return nil, err
 	}
 
+	return DecodeGenericEntity[T, PT](c, resp)
+}
+
+// DecodeGenericEntity attempts to decode an HTTP response into an Entity struct
+func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp *http.Response) (*T, error) {
 	entity := PT(new(T))
 	if err := json.NewDecoder(resp.Body).Decode(entity); err != nil {
 		return nil, err
@@ -467,7 +474,6 @@ func GetObject[T any, PT interface {
 		entity.SetETag(etag)
 	}
 	entity.SetClient(c)
-
 	return entity, nil
 }
 

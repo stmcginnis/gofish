@@ -218,10 +218,12 @@ func (logservice *LogService) SupportsClearLog() bool {
 
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
-func (logservice *LogService) ClearLog() error {
-	err := logservice.Post(logservice.clearLogTarget, struct{}{})
+func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
+		logservice.clearLogTarget, struct{}{}, logservice.Headers(), false)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err == nil {
-		return nil
+		return taskInfo, nil
 	}
 
 	// As of LogService 1.3.0, need to pass the LogEntryCollection etag. If our first attempt failed, try that.
@@ -235,9 +237,11 @@ func (logservice *LogService) ClearLog() error {
 			LogEntriesETag string
 		}{LogEntriesETag: strings.Trim(entryCollection.ETag, "\"")}
 
-		retryErr = logservice.Post(logservice.clearLogTarget, payload)
+		resp, taskInfo, retryErr = PostWithTask(logservice.GetClient(),
+			logservice.clearLogTarget, payload, logservice.Headers(), false)
+		defer common.DeferredCleanupHTTPResponse(resp)
 		if retryErr == nil {
-			return nil
+			return taskInfo, nil
 		}
 	}
 
@@ -248,7 +252,10 @@ func (logservice *LogService) ClearLog() error {
 		Action: "LogService.ClearLog",
 	}
 
-	return logservice.Post(logservice.clearLogTarget, t)
+	resp, taskInfo, err = PostWithTask(logservice.GetClient(),
+		logservice.clearLogTarget, t, logservice.Headers(), false)
+	defer common.DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
 }
 
 type CollectDiagnosticDataParameters struct {
@@ -278,22 +285,30 @@ func (logservice *LogService) SupportsCollectDiagnosticData() bool {
 // CollectDiagnosticData shall trigger the generation of a diagnostic data dump.
 // Returns the URI to a LogEntry that will contain the DiagnosticData in the `AdditionalDataURI` when ready.
 // This URI should be polled until the log is generated.
-func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosticDataParameters) (string, error) {
+func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosticDataParameters) (string, *TaskMonitorInfo, error) {
 	if !logservice.SupportsCollectDiagnosticData() {
-		return "", errors.New("CollectDiagnosticsData not supported by this service")
+		return "", nil, errors.New("CollectDiagnosticsData not supported by this service")
 	}
 
-	resp, err := logservice.PostWithResponse(logservice.collectDiagnosticDataTarget, parameters)
+	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
+		logservice.collectDiagnosticDataTarget, parameters, logservice.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
-		return "", err
+		return "", taskInfo, err
+	}
+
+	// CollectDiagnosticData can return either:
+	// Location pointing to a TaskMonitor if the action is async
+	// Location pointing to a LogEntry if the action is sync
+	if taskInfo != nil {
+		return "", taskInfo, err
 	}
 
 	if location := resp.Header["Location"]; len(location) > 0 && location[0] != "" {
-		return location[0], nil
+		return location[0], nil, nil
 	}
 
-	return "", nil
+	return "", nil, nil
 }
 
 // For Redfish v1.2+

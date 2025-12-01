@@ -6,7 +6,6 @@ package redfish
 
 import (
 	"encoding/json"
-	"net/http"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -289,6 +288,7 @@ type SPDMGetSignedMeasurementsResponse struct {
 	// the cryptographic signed statement. For example, '1.0', '1.1', or '1.2'.
 	Version string
 	client  common.Client
+	etag    string
 }
 
 // UnmarshalJSON unmarshals a SPDMGetSignedMeasurementsResponse object from the raw JSON.
@@ -321,51 +321,54 @@ func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) Cert
 	return GetCertificate(spdmgetsignedmeasurementsresponse.client, spdmgetsignedmeasurementsresponse.certificate)
 }
 
-func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) setClient(c common.Client) {
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) SetClient(c common.Client) {
 	spdmgetsignedmeasurementsresponse.client = c
 }
 
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetODataID() string {
+	return ""
+}
+
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetID() string {
+	return ""
+}
+
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetExtendedInfo() []common.MessageExtendedInfo {
+	return nil
+}
+
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetETag() string {
+	return spdmgetsignedmeasurementsresponse.etag
+}
+
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) SetETag(etag string) {
+	spdmgetsignedmeasurementsresponse.etag = etag
+}
+
 // SPDMGetSignedMeasurements generates an SPDM cryptographic signed statement over the given nonce and measurements of the SPDM Responder.
-func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request *SPDMGetSignedMeasurementsRequest) (*SPDMGetSignedMeasurementsResponse, *Task, error) {
-	resp, err := componentintegrity.PostWithResponse(componentintegrity.SPDMGetSignedMeasurementsTarget, request)
+func (componentintegrity *ComponentIntegrity) SPDMGetSignedMeasurements(request *SPDMGetSignedMeasurementsRequest) (*SPDMGetSignedMeasurementsResponse, *TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTask(componentintegrity.GetClient(), componentintegrity.SPDMGetSignedMeasurementsTarget, request,
+		componentintegrity.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
-	if err != nil {
-		return nil, nil, err
+	if err != nil || taskInfo != nil {
+		return nil, taskInfo, err
 	}
 
-	// Return Task if applicable
-	if resp.StatusCode == http.StatusAccepted {
-		if location := resp.Header["Location"]; len(location) > 0 {
-			task, err := GetTask(componentintegrity.GetClient(), location[0])
-			return nil, task, err
-		}
-	}
-
-	var response SPDMGetSignedMeasurementsResponse
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	response.setClient(componentintegrity.GetClient())
-	return &response, nil, nil
+	spdmResp, err := common.DecodeGenericEntity[SPDMGetSignedMeasurementsResponse](componentintegrity.GetClient(), resp)
+	return spdmResp, nil, err
 }
 
 // TPMGetSignedMeasurements generates a TPM cryptographic signed statement over the given nonce and PCRs of the TPM for TPM 2.0 devices.
-func (componentintegrity *ComponentIntegrity) TPMGetSignedMeasurements(request *TPMGetSignedMeasurementsRequest) (*TPMGetSignedMeasurementsResponse, error) {
-	resp, err := componentintegrity.PostWithResponse(componentintegrity.TPMGetSignedMeasurementsTarget, request)
+func (componentintegrity *ComponentIntegrity) TPMGetSignedMeasurements(request *TPMGetSignedMeasurementsRequest) (*TPMGetSignedMeasurementsResponse, *TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTask(componentintegrity.GetClient(),
+		componentintegrity.TPMGetSignedMeasurementsTarget, request, componentintegrity.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
-	if err != nil {
-		return nil, err
+	if err != nil || taskInfo != nil {
+		return nil, taskInfo, err
 	}
 
-	var response TPMGetSignedMeasurementsResponse
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response, nil
+	response, err := common.DecodeGenericEntity[TPMGetSignedMeasurementsResponse](componentintegrity.GetClient(), resp)
+	return response, nil, err
 }
 
 // SPDMcommunication shall contain information about communication between two components.
@@ -579,6 +582,33 @@ type TPMGetSignedMeasurementsResponse struct {
 	// value shall be the concatenation of the 'quoted' and 'signature' response values of the 'TPM2_Quote' command
 	// defined in the Trusted Platform Module Library Specification.
 	SignedMeasurements string
+
+	client common.Client
+	etag   string
+}
+
+func (t *TPMGetSignedMeasurementsResponse) SetClient(c common.Client) {
+	t.client = c
+}
+
+func (t *TPMGetSignedMeasurementsResponse) SetETag(etag string) {
+	t.etag = etag
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetODataID() string {
+	return ""
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetID() string {
+	return ""
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetExtendedInfo() []common.MessageExtendedInfo {
+	return nil
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetETag() string {
+	return t.etag
 }
 
 // TPMauth shall contain common identity-related authentication information.

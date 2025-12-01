@@ -431,7 +431,7 @@ func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, 
 // ForceRestart ResetType can affect the power supply output.
 func (powersupply *PowerSupply) Reset(resetType ResetType) error {
 	if powersupply.resetTarget == "" {
-		return errors.New("reset is not supported") //nolint:golint
+		return errors.New("reset is not supported")
 	}
 
 	t := struct {

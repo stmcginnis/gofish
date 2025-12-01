@@ -11,7 +11,6 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-//nolint:revive
 type SMCRAKPType string
 
 const (
@@ -20,8 +19,6 @@ const (
 )
 
 // SMCRAKP is an instance of an SMCRAKP object.
-//
-//nolint:revive
 type SMCRAKP struct {
 	common.Entity
 
