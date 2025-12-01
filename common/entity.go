@@ -27,9 +27,9 @@ type Entity struct {
 	// ODataEtag contains either the entity's declared ETag or the ETag header
 	// when fetching the object to control updates and prevent conflicts between
 	// concurrent modifications
-	ODataEtag string `json:"@odata.etag"`
+	ODataEtag string `json:"@odata.etag,omitempty"`
 
-	ExtendedInfo []MessageExtendedInfo `json:"@Message.ExtendedInfo"`
+	ExtendedInfo []MessageExtendedInfo `json:"@Message.ExtendedInfo,omitempty"`
 
 	// stripEtagQuotes removes surrounding quotes of etag used in If-Match header
 	// Only use for vendor implementations where If-Match only matches unquoted etag
