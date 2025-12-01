@@ -528,7 +528,77 @@ var invalidPowerBody = strings.NewReader(
 	  }
 	}`)
 
-// TestPower verifies the parsing of Power objects from JSON.
+var ciscoPowerBody = strings.NewReader(`{
+  "Id": "Power",
+  "Name": "Power",
+  "@odata.context": "/redfish/v1/$metadata#Chassis/Members/$entity/Power",
+  "PowerControl": {
+    "PhysicalContext": "PowerSupply",
+    "PowerLimit": {
+      "LimitException": "NoAction"
+    },
+    "PowerConsumedWatts": "152",
+    "PowerMetric": {
+      "IntervalInMin": 0.0833,
+      "MinConsumedWatts": "113",
+      "AverageConsumedWatts": "170",
+      "MaxConsumedWatts": "240"
+    }
+  },
+  "Voltages": [
+    {
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/Voltages/PSU1_VOUT",
+      "Status": {
+        "State": "Enabled",
+        "Health": "OK"
+      },
+      "SensorNumber": 41,
+      "Name": "PSU1_VOUT",
+      "UpperThresholdNonCritical": "N/A",
+      "MemberID": 1,
+      "LowerThresholdCritical": "N/A",
+      "PhysicalContext": "PowerSupply",
+      "LowerThresholdNonCritical": "N/A",
+      "UpperThresholdCritical": "14.000",
+      "ReadingVolts": "11.900"
+    }
+  ],
+  "@odata.type": "#Cisco_Power",
+  "Description": "Power",
+  "@odata.id": "/redfish/v1/Chassis/1/Power",
+  "PowerSupplies": [
+    {
+      "SerialNumber": "LIT21414FX5",
+      "FirmwareVersion": "10052021",
+      "@odata.id": "/redfish/v1/Chassis/1/Power#/PowerSupplies/PSU1",
+      "Status": {
+        "state": "Enabled"
+      },
+      "LineInputVoltage": "240",
+      "Name": "PSU1",
+      "InputRanges": [
+        {
+          "InputType": "AC",
+          "OutputWattage": 770,
+          "MaximumFrequencyHz": 63,
+          "MaximumVoltage": 264,
+          "MinimumVoltage": 90,
+          "MinimumFrequencyHz": 47
+        }
+      ],
+      "Manufacturer": "Cisco Systems Inc",
+      "MemberID": 1,
+      "LastPowerOutputWatts": "71",
+      "SparePartNumber": "341-0591-03",
+      "PartNumber": "341-0591-03",
+      "PowerSupplyType": "AC",
+      "Model": "PS-2771-1S-LF",
+      "LineInputVoltageType": "AC"
+    }
+  ]
+}`)
+
+// TestPower tests the parsing of Power objects.
 func TestPower(t *testing.T) {
 	var result Power
 	err := json.NewDecoder(powerBody).Decode(&result)
@@ -946,5 +1016,29 @@ func TestVoltageUnmarshalJSON_AllVoltages(t *testing.T) {
 	}
 	if v30.LowerThresholdCritical != nil {
 		t.Error("Second voltage: expected LowerThresholdCritical to be nil")
+	}
+}
+
+// TestCiscoPower tests the parsing of Cisco Power objects that do not conform
+// to the standard.
+func TestCiscoPower(t *testing.T) {
+	var result Power
+	err := json.NewDecoder(ciscoPowerBody).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.PowerControl[0].MemberID != "" {
+		t.Errorf("Expected first PowerController MemberID to be empty: %s", result.PowerControl[0].MemberID)
+	}
+
+	voltage := result.Voltages[0]
+	if voltage.MemberID != "1" {
+		t.Errorf("Expected first Voltage MemberID to be '1': %s", voltage.MemberID)
+	}
+
+	if *voltage.UpperThresholdCritical != 14.0 {
+		t.Errorf("Expected UpperThresholdCritical to be 14.0: %v", voltage.UpperThresholdCritical)
 	}
 }
