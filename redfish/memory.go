@@ -322,7 +322,7 @@ type Memory struct {
 	// represented by this resource.
 	MemoryType MemoryType
 	// Metrics is a reference to the Metrics associated with this Memory.
-	metrics string
+	metrics *MemoryMetrics
 	// Model shall indicate the model information as provided by the manufacturer of this memory.
 	Model string
 	// ModuleManufacturerID shall be the two byte manufacturer ID of this memory
@@ -512,7 +512,7 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 		Certificates       common.LinksCollection
 		EnvironmentMetrics common.Link
 		Log                common.Link
-		Metrics            common.Link
+		Metrics            *MemoryMetrics
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -527,7 +527,7 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 	memory.certificates = t.Certificates.ToStrings()
 	memory.environmentMetrics = t.EnvironmentMetrics.String()
 	memory.log = t.Log.String()
-	memory.metrics = t.Metrics.String()
+	memory.metrics = t.Metrics
 
 	memory.batteries = t.Links.Batteries.ToStrings()
 	memory.BatteriesCount = t.Links.BatteriesCount
@@ -582,8 +582,8 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
-func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
-	return common.GetCollectionObjects[Memory](c, link)
+func ListReferencedMemorys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetCollectionObjects[Memory](c, link, queryOpts...)
 }
 
 // Assembly gets this memory's assembly.
@@ -617,10 +617,13 @@ func (memory *Memory) Log() (*LogService, error) {
 
 // Metrics gets the memory metrics.
 func (memory *Memory) Metrics() (*MemoryMetrics, error) {
-	if memory.metrics == "" {
+	if memory.metrics == nil {
 		return nil, nil
 	}
-	return GetMemoryMetrics(memory.GetClient(), memory.metrics)
+	if memory.metrics.ID != "" {
+		return memory.metrics, nil
+	}
+	return GetMemoryMetrics(memory.GetClient(), memory.metrics.ODataID)
 }
 
 // Batteries gets the batteries that provide power to this memory device during

@@ -201,8 +201,6 @@ func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
 type PowerControl struct {
 	common.Entity
 
-	// ODataID is the OData identifier.
-	ODataID string `json:"@odata.id"`
 	// MemberID uniquely identifies this member within the collection.
 	MemberID string `json:"MemberId"`
 	// Name is the name of this power control function.
@@ -318,8 +316,6 @@ type PowerMetric struct {
 type PowerSupply struct {
 	common.Entity
 
-	// ODataID is the OData identifier.
-	ODataID string `json:"@odata.id"`
 	// Assembly is a link to the associated Assembly resource.
 	Assembly string `json:"Assembly,omitempty"`
 	// EfficiencyPercent is the measured power efficiency percentage.
@@ -477,8 +473,6 @@ func (powersupply *PowerSupply) GetRedundancy() ([]*Redundancy, error) {
 type Voltage struct {
 	common.Entity
 
-	// ODataID is the OData identifier.
-	ODataID string `json:"@odata.id"`
 	// Actions contains the available actions for this resource.
 	Actions *VoltageActions `json:"Actions,omitempty"`
 	// LowerThresholdCritical indicates the reading is below normal range but not yet fatal.

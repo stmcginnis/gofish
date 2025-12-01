@@ -15,8 +15,13 @@ import (
 // DefaultServiceRoot is the default path to the Redfish service endpoint.
 const DefaultServiceRoot = "/redfish/v1/"
 
+type ClientSettings struct {
+	DefaultQueryOptions []QueryGroupOption
+}
+
 // Client is a connection to a Redfish service.
 type Client interface {
+	GetSettings() ClientSettings
 	Get(url string) (*http.Response, error)
 	GetWithHeaders(url string, customHeaders map[string]string) (*http.Response, error)
 	Post(url string, payload interface{}) (*http.Response, error)
@@ -531,15 +536,16 @@ type Resource struct {
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
 	Description string
+	// Oem is The value of this string shall be of the format for the
+	// reserved word *Oem*.
+	OEM json.RawMessage `json:"Oem"`
 }
 
-// ResourceCollection is
+// ResourceCollection is a group of resources in a list
 type ResourceCollection struct {
 	Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -547,6 +553,15 @@ type ResourceCollection struct {
 	// Oem is The value of this string shall be of the format for the
 	// reserved word *Oem*.
 	OEM json.RawMessage `json:"Oem"`
+
+	MembersCount    int    `json:"Members@odata.count"`
+	MembersNextLink string `json:"Members@odata.nextLink"`
+}
+
+type ResourceCollectionGeneric[T SchemaObject] struct {
+	ResourceCollection
+
+	Members []T `json:"Members"`
 }
 
 // Operations shall describe a currently running operation on the resource.
@@ -741,22 +756,7 @@ func (e *Error) Error() string {
 }
 
 // ErrExtendedInfo is for redfish ExtendedInfo error response
-// TODO: support RelatedProperties
-type ErrExtendedInfo struct {
-	// Indicating a specific error or message (not to be confused with the HTTP status code).
-	// This code can be used to access a detailed message from a message registry.
-	MessageID string `json:"MessageId"`
-	// A human readable error message indicating the semantics associated with the error.
-	// This shall be the complete message, and not rely on substitution variables.
-	Message string
-	// An optional array of strings representing the substitution parameter values for the message.
-	// This shall be included in the response if a MessageId is specified for a parameterized message.
-	MessageArgs []string
-	// An optional string representing the severity of the error.
-	Severity string
-	// An optional string describing recommended action(s) to take to resolve the error.
-	Resolution string
-}
+type ErrExtendedInfo MessageExtendedInfo
 
 // ActionTarget is contains the target endpoint for object Actions.
 type ActionTarget struct {
