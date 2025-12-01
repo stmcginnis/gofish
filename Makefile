@@ -21,5 +21,13 @@ lint:
                 "golangci/golangci-lint:$(GOLANGCI_VERSION)" \
                 golangci-lint run -v
 
+fmt:
+	docker run --rm \
+                -v "$(ROOT_DIR)":/src \
+                -w /src \
+                "golangci/golangci-lint:$(GOLANGCI_VERSION)" \
+                golangci-lint fmt .
+
+
 clean:
 	go clean

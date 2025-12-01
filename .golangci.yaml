@@ -115,6 +115,16 @@ linters:
 formatters:
   enable:
     - gci
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/stmcginnis
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
   exclusions:
     generated: lax
     paths:
