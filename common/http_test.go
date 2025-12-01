@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"github.com/stmcginnis/gofish/common"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestParseRetryAfter(t *testing.T) {
@@ -42,17 +40,18 @@ func TestParseRetryAfter(t *testing.T) {
 	}
 
 	for name, testCase := range testCases {
+		testCase := testCase // to support go 1.21
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			res, err := common.ParseRetryAfter(testCase.input)
 			if testCase.expectErr != "" {
-				require.ErrorContains(t, err, testCase.expectErr)
+				common.RequireErrorContains(t, err, testCase.expectErr)
 			} else {
-				require.NoError(t, err)
+				common.RequireNoError(t, err)
 				expectedTime := testCase.output.UnixMilli()
 				actualTime := res.UnixMilli()
 
-				assert.InDelta(t, expectedTime, actualTime, 100)
+				common.AssertInDelta(t, expectedTime, actualTime, 100)
 			}
 		})
 	}

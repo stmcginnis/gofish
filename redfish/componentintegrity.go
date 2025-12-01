@@ -325,6 +325,22 @@ func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) SetC
 	spdmgetsignedmeasurementsresponse.client = c
 }
 
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetODataID() string {
+	return ""
+}
+
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetID() string {
+	return ""
+}
+
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetExtendedInfo() []common.MessageExtendedInfo {
+	return nil
+}
+
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) GetETag() string {
+	return spdmgetsignedmeasurementsresponse.etag
+}
+
 func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) SetETag(etag string) {
 	spdmgetsignedmeasurementsresponse.etag = etag
 }
@@ -577,6 +593,22 @@ func (t *TPMGetSignedMeasurementsResponse) SetClient(c common.Client) {
 
 func (t *TPMGetSignedMeasurementsResponse) SetETag(etag string) {
 	t.etag = etag
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetODataID() string {
+	return ""
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetID() string {
+	return ""
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetExtendedInfo() []common.MessageExtendedInfo {
+	return nil
+}
+
+func (t *TPMGetSignedMeasurementsResponse) GetETag() string {
+	return t.etag
 }
 
 // TPMauth shall contain common identity-related authentication information.

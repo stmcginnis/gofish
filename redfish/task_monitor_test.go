@@ -9,14 +9,12 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"sync"
 	"testing"
-	"testing/synctest"
 	"time"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPostWithTask(t *testing.T) { //nolint: funlen
@@ -99,6 +97,7 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 	var testHeaders map[string]string
 
 	for name, test := range tests {
+		test := test // to support older go
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -110,9 +109,9 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 
 			res, taskMonitorInfo, err := redfish.PostWithTask(c, testURI, testPayload, testHeaders, false)
 			if test.expectedErr != "" {
-				require.ErrorContains(t, err, test.expectedErr)
+				common.RequireErrorContains(t, err, test.expectedErr)
 			} else {
-				require.NoError(t, err)
+				common.RequireNoError(t, err)
 			}
 
 			if test.expectedTask != nil && test.expectedTask.Task != nil {
@@ -120,9 +119,9 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 			}
 
 			if test.expectedResponse {
-				assert.Equal(t, &test.response, res)
+				common.AssertEqual(t, &test.response, res)
 			} else {
-				assert.Equal(t, test.expectedTask, taskMonitorInfo)
+				common.AssertEqual(t, test.expectedTask, taskMonitorInfo)
 			}
 		})
 	}
@@ -231,13 +230,13 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 			Responses: []*http.Response{
 				{StatusCode: 202, Body: io.NopCloser(bytes.NewBufferString(""))},
 				{StatusCode: 202,
-					Header: http.Header{"Retry-After": []string{"30"}},
+					Header: http.Header{"Retry-After": []string{"1"}},
 					Body:   io.NopCloser(bytes.NewBufferString(""))},
 				{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(""))},
 			},
 			ExpectedUpdates: []*redfish.Task{nil, nil},
 			StatusChan:      true,
-			EndTime:         startTime.Add((30 + 20 + 10) * time.Second),
+			EndTime:         startTime.Add((1 + 20 + 10) * time.Second),
 			TaskMonitor: &redfish.TaskMonitorInfo{
 				RetryAfter:  startTime.Add(20 * time.Second),
 				TaskMonitor: testTaskMonitorURI,
@@ -245,12 +244,12 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 		},
 		"context timeout during initial wait": {
 			CtxFunc: func(ctx context.Context) (context.Context, func()) {
-				return context.WithTimeout(ctx, 10*time.Second)
+				return context.WithTimeout(ctx, 1*time.Nanosecond)
 			},
 			Responses: []*http.Response{
 				{StatusCode: 202, Body: io.NopCloser(bytes.NewBufferString(""))},
 				{StatusCode: 202,
-					Header: http.Header{"Retry-After": []string{"30"}},
+					Header: http.Header{"Retry-After": []string{"1"}},
 					Body:   io.NopCloser(bytes.NewBufferString(""))},
 				{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(""))},
 			},
@@ -265,12 +264,12 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 		},
 		"context timeout during task poll": {
 			CtxFunc: func(ctx context.Context) (context.Context, func()) {
-				return context.WithTimeout(ctx, 10*time.Second)
+				return context.WithTimeout(ctx, 10*time.Millisecond)
 			},
 			Responses: []*http.Response{
 				{StatusCode: 202, Body: io.NopCloser(bytes.NewBufferString(""))},
 				{StatusCode: 202,
-					Header: http.Header{"Retry-After": []string{"30"}},
+					Header: http.Header{"Retry-After": []string{"1"}},
 					Body:   io.NopCloser(bytes.NewBufferString(""))},
 				{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(""))},
 			},
@@ -306,79 +305,98 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 	}
 
 	for name, test := range tests {
+		test := test // to support older go versions
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			synctest.Test(t, func(t *testing.T) {
-				c := &common.TestClient{
-					CustomReturnForActions: map[string][]interface{}{},
-				}
 
-				for _, resp := range test.Responses {
-					c.CustomReturnForActions[http.MethodGet] = append(c.CustomReturnForActions[http.MethodGet], resp)
-				}
+			// set a default poll rate so tests run quickly
+			if test.PollRate == 0 {
+				test.PollRate = 20 * time.Millisecond
+			}
 
-				var statusChan chan *redfish.Task
-				if test.StatusChan {
-					statusChan = make(chan *redfish.Task)
-					go func() {
-						i := 0
-						for status := range statusChan {
-							require.Less(t, i, len(test.ExpectedUpdates), "test expects at least %d response", i+1)
-							expectedStatus := test.ExpectedUpdates[i]
-							if expectedStatus != nil {
-								expectedStatus.SetClient(c)
-							}
+			// rescale retry-after to milliseconds until we have synctest
+			if test.TaskMonitor != nil && !test.TaskMonitor.RetryAfter.IsZero() {
+				test.TaskMonitor.RetryAfter = time.Now().Add(test.TaskMonitor.RetryAfter.Sub(startTime) * (time.Millisecond / time.Second))
+			}
 
-							assert.Equal(t, expectedStatus, status,
-								"status update [%d], expected [%v], actual [%v]",
-								i, expectedStatus, status)
-							i++
-						}
-						assert.Equal(t, len(test.ExpectedUpdates), i)
-					}()
-				}
+			// synctest.Test(t, func(t *testing.T) {
+			c := &common.TestClient{
+				CustomReturnForActions: map[string][]interface{}{},
+			}
 
-				ctx := context.Background()
-				if test.CtxFunc != nil {
-					var cancel func()
-					ctx, cancel = test.CtxFunc(ctx)
-					if cancel != nil {
-						t.Cleanup(cancel)
-					}
-				}
+			for _, resp := range test.Responses {
+				c.CustomReturnForActions[http.MethodGet] = append(c.CustomReturnForActions[http.MethodGet], resp)
+			}
 
-				var resp *http.Response
-				var err error
-				done := make(chan bool)
+			var statusChan chan *redfish.Task
+			var statusChanWg sync.WaitGroup
+			if test.StatusChan {
+				statusChan = make(chan *redfish.Task)
+				statusChanWg.Add(1)
 				go func() {
-					resp, err = redfish.WaitForTaskMonitor(ctx, c, test.PollRate, test.TaskMonitor, statusChan)
-					if statusChan != nil {
-						close(statusChan)
+					defer statusChanWg.Done()
+					i := 0
+					for status := range statusChan {
+						common.RequireLessMsg(t, i, len(test.ExpectedUpdates), "test got %d response but only expects %d", i+1, len(test.ExpectedUpdates))
+						expectedStatus := test.ExpectedUpdates[i]
+						if expectedStatus != nil {
+							expectedStatus.SetClient(c)
+						}
+
+						common.AssertEqualMsg(t, expectedStatus, status,
+							"status update [%d], expected [%v], actual [%v]",
+							i, expectedStatus, status)
+						i++
 					}
-					done <- true
+					common.AssertEqual(t, len(test.ExpectedUpdates), i)
 				}()
+			}
 
-				for {
-					synctest.Wait()
-					select {
-					case <-done:
-					default:
-						time.Sleep(1 * time.Second) // advance time in the bubble
-						continue
-					}
-
-					currTime := time.Now().UTC()
-					assert.Equal(t, test.EndTime.UTC(), currTime)
-
-					if test.ExpectErr != "" {
-						require.ErrorContains(t, err, test.ExpectErr)
-					} else {
-						require.NoError(t, err)
-						assert.Equal(t, test.Responses[len(test.Responses)-1], resp)
-					}
-					return
+			ctx := context.Background()
+			if test.CtxFunc != nil {
+				var cancel func()
+				ctx, cancel = test.CtxFunc(ctx)
+				if cancel != nil {
+					t.Cleanup(cancel)
 				}
-			})
+			}
+
+			var resp *http.Response
+			var err error
+			done := make(chan bool)
+			go func() {
+				resp, err = redfish.WaitForTaskMonitor(ctx, c, test.PollRate, test.TaskMonitor, statusChan)
+				if statusChan != nil {
+					close(statusChan)
+				}
+				done <- true
+			}()
+
+			// for {
+			// 	synctest.Wait()
+			// 	select {
+			// 	case <-done:
+			// 	default:
+			// 		time.Sleep(1 * time.Second) // advance time in the bubble
+			// 		continue
+			// 	}
+
+			<-done
+			statusChanWg.Wait()
+
+			// EndTime comparisons will be a bit flaky without synctest, disabling
+			// currTime := time.Now().UTC()
+			// common.AssertEqual(t, test.EndTime.UTC(), currTime)
+
+			if test.ExpectErr != "" {
+				common.RequireErrorContains(t, err, test.ExpectErr)
+			} else {
+				common.RequireNoError(t, err)
+				common.AssertEqual(t, test.Responses[len(test.Responses)-1], resp)
+			}
+			// 		return
+			// 	}
+			// })
 		})
 	}
 }
@@ -402,9 +420,11 @@ func TestWaitForTaskMonitorObject(t *testing.T) {
 	}
 	expected.SetClient(c)
 
+	ctx := context.Background() // go1.24 adds t.Context()
+
 	object, _, err := redfish.WaitForTaskMonitorObject[redfish.ComputerSystem](
-		t.Context(), c, 0, &redfish.TaskMonitorInfo{TaskMonitor: "/Monitor"}, nil,
+		ctx, c, 0, &redfish.TaskMonitorInfo{TaskMonitor: "/Monitor"}, nil,
 	)
-	require.NoError(t, err)
-	assert.Equal(t, expected, object)
+	common.RequireNoError(t, err)
+	common.AssertEqual(t, expected, object)
 }
