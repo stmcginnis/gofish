@@ -207,6 +207,8 @@ type Manager struct {
 	// DateTimeLocalOffset is The value is property shall represent the offset
 	// from UTC time that the current value of DataTime property contains.
 	DateTimeLocalOffset string
+	// DateTimeSource shall contain the source of the current DateTime value for the manager.
+	DateTimeSource string
 	// DaylightSavingTime shall contain the daylight saving time settings for this manager.
 	DaylightSavingTime DaylightSavingTime
 	// DedicatedNetworkPorts shall contain a link to a resource collection of type PortCollection that represent the
@@ -502,6 +504,7 @@ func (manager *Manager) Update() error {
 		"AutoDSTEnabled",
 		"DateTime",
 		"DateTimeLocalOffset",
+		"DateTimeSource",
 		"LocationIndicatorActive",
 		"ServiceIdentification",
 		"TimeZoneName",
