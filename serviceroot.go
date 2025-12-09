@@ -77,8 +77,6 @@ type Service struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AccountService shall only contain a reference to a resource that complies

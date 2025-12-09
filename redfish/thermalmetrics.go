@@ -45,8 +45,6 @@ type ThermalMetrics struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AirFlowCubicMetersPerMinute shall contain the rate of air flow, in cubic meters per minute units, between the

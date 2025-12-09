@@ -135,8 +135,6 @@ type ComponentIntegrity struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// ComponentIntegrityEnabled shall indicate whether security protocols are enabled for the component. If

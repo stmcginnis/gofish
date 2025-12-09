@@ -13,8 +13,6 @@ type DriveMetrics struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// BadBlockCount shall contain the total number of bad blocks reported by the drive.
