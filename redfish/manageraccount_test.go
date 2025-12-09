@@ -70,7 +70,7 @@ func TestManagerAccountUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.ODataEtag = "aaa"
+	result.ODataEtag = "aaa" // etag might come from the HTTP header as something different
 	result.Enabled = false
 	result.Locked = false
 	result.Password = "Test"

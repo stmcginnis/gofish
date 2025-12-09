@@ -332,6 +332,11 @@ func compareStructFields(original, updated reflect.Value) map[string]any {
 		}
 
 		fieldName := getFieldName(&field)
+		// TODO: if we ever support deep patch, reconsider this decision
+		if fieldName == "@odata.etag" {
+			continue
+		}
+
 		originalField := original.Field(i)
 		updatedField := updated.Field(i)
 
