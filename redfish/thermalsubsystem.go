@@ -15,8 +15,6 @@ type ThermalSubsystem struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// CoolantConnectorRedundancy shall contain redundancy information for the set of coolant connectors attached to

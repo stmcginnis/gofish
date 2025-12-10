@@ -108,8 +108,6 @@ type Power struct {
 	common.Entity
 	// ODataContext is the OData context URL.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the OData ETag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the OData type.
 	ODataType string `json:"@odata.type"`
 	// Description provides a description of this resource.
@@ -224,8 +222,6 @@ type PowerControl struct {
 
 	// MemberID uniquely identifies this member within the collection.
 	MemberID string `json:"MemberId"`
-	// Name is the name of this power control function.
-	Name string `json:"Name,omitempty"`
 	// PhysicalContext describes the affected device(s) or region within the chassis.
 	PhysicalContext common.PhysicalContext `json:"PhysicalContext,omitempty"`
 	// PowerAllocatedWatts is the total power currently allocated to chassis resources.
@@ -368,8 +364,6 @@ type PowerSupply struct {
 	MemberID string `json:"MemberId"`
 	// Model is the model information for this power supply.
 	Model string `json:"Model,omitempty"`
-	// Name is the name of this power supply.
-	Name string `json:"Name,omitempty"`
 	// Oem contains OEM-specific extensions.
 	OEM json.RawMessage `json:"Oem,omitempty"`
 	// PartNumber is the part number for this power supply.
@@ -518,8 +512,6 @@ type Voltage struct {
 	MemberID string `json:"MemberId"`
 	// MinReadingRange indicates the lowest possible value for ReadingVolts.
 	MinReadingRange *float32 `json:"MinReadingRange,omitempty"`
-	// Name is the name of this voltage sensor.
-	Name string `json:"Name,omitempty"`
 	// Oem contains OEM-specific extensions.
 	OEM json.RawMessage `json:"Oem,omitempty"`
 	// PhysicalContext describes the affected device or region within the chassis.

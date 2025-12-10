@@ -15,8 +15,6 @@ type GraphicsController struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AssetTag shall contain the user-assigned asset tag, which is an identifying string that tracks the drive for
