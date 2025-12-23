@@ -532,11 +532,13 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 
 	endpoint := fmt.Sprintf("%s%s", c.endpoint, url)
 
-	body := io.Reader(payloadBuffer)
-	if body == nil {
-		body = http.NoBody
+	var req *http.Request
+	var err error
+	if payloadBuffer == nil {
+		req, err = http.NewRequestWithContext(c.ctx, method, endpoint, http.NoBody)
+	} else {
+		req, err = http.NewRequestWithContext(c.ctx, method, endpoint, payloadBuffer)
 	}
-	req, err := http.NewRequestWithContext(c.ctx, method, endpoint, body)
 	if err != nil {
 		return nil, err
 	}
