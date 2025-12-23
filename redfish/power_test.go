@@ -102,6 +102,12 @@ var powerBody = strings.NewReader(
 			"Status": {
 				"State": "Enabled",
 				"Health": "OK"
+			},
+			"Metrics": {
+				"@odata.id": "/Metrics"
+			},
+			"Assembly": {
+				"@odata.id": "/Assembly"
 			}
 		}],
 		"PowerSupplies@odata.count": 1,
@@ -602,7 +608,6 @@ var ciscoPowerBody = strings.NewReader(`{
 func TestPower(t *testing.T) {
 	var result Power
 	err := json.NewDecoder(powerBody).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
@@ -632,6 +637,16 @@ func TestPower(t *testing.T) {
 			result.PowerSupplies[0].IndicatorLED)
 	}
 
+	if result.PowerSupplies[0].assembly != "/Assembly" {
+		t.Errorf("Invalid PowerSupply Assembly: %s",
+			result.PowerSupplies[0].assembly)
+	}
+
+	if result.PowerSupplies[0].metrics != "/Metrics" {
+		t.Errorf("Invalid PowerSupply Metrics: %s",
+			result.PowerSupplies[0].metrics)
+	}
+
 	if *result.Voltages[0].MaxReadingRange != 10 {
 		t.Errorf("Invalid MaxReadingRange: %f", *result.Voltages[0].MaxReadingRange)
 	}
@@ -643,7 +658,6 @@ func TestPower(t *testing.T) {
 func TestNonconformingPower(t *testing.T) {
 	var result Power
 	err := json.NewDecoder(invalidPowerBody).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
@@ -1024,7 +1038,6 @@ func TestVoltageUnmarshalJSON_AllVoltages(t *testing.T) {
 func TestCiscoPower(t *testing.T) {
 	var result Power
 	err := json.NewDecoder(ciscoPowerBody).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
