@@ -426,6 +426,8 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	*powersupply = PowerSupply(t.temp)
+	powersupply.assembly = t.Assembly.String()
+	powersupply.metrics = t.Metrics.String()
 	powersupply.redundancyLinks = t.Redundancy.ToStrings()
 	powersupply.relateditemLinks = t.RelatedItem.ToStrings()
 
@@ -611,14 +613,12 @@ func toFloat32(val any) *float32 {
 		if math.IsInf(float64(conv), 1) {
 			// Too big, return float32 max as a fallback
 			ret = math.MaxFloat32
-		}
-
-		if math.IsInf(float64(conv), 0) {
+		} else if math.IsInf(float64(conv), 0) {
 			// Too large negative
 			ret = -math.MaxFloat32
+		} else {
+			ret = conv
 		}
-
-		ret = conv
 	}
 
 	return &ret
