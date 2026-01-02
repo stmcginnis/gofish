@@ -28,6 +28,11 @@ fmt:
                 "golangci/golangci-lint:$(GOLANGCI_VERSION)" \
                 golangci-lint fmt .
 
+OUTPUT_DIR ?= ../..
+
+generate:
+	cd tools/generator && \
+    go run ./cmd/generate-schemas --output-dir $(OUTPUT_DIR)
 
 clean:
 	go clean

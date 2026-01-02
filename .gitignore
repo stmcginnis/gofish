@@ -16,3 +16,4 @@ bin/*
 **/*.zip
 **/DSP*
 tools/gofiles*
+tools/generator/testdata/*

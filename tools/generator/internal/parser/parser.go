@@ -1,0 +1,873 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
+package parser
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"slices"
+	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/stmcginnis/gofish/tools/generator/internal/config"
+	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
+)
+
+// Parser handles parsing of JSON Schema files
+type Parser struct {
+	typeMapper *TypeMapper
+	schemaDir  string
+}
+
+// NewParser creates a new Parser
+func NewParser(schemaDir string) *Parser {
+	return &Parser{
+		typeMapper: NewTypeMapper(),
+		schemaDir:  schemaDir,
+	}
+}
+
+// ParseSchemaWithBase parses both base and versioned schema files, merging definitions
+func (p *Parser) ParseSchemaWithBase(baseSchemaFile, versionedSchemaFile string) ([]*schema.Definition, error) {
+	// Parse base schema to get base definitions
+	baseDefsMap := make(map[string]*schema.Definition)
+	if _, err := os.Stat(baseSchemaFile); err == nil {
+		baseDefs, err := p.ParseSchema(baseSchemaFile)
+		if err == nil {
+			// Build map of base definitions
+			for _, def := range baseDefs {
+				baseDefsMap[def.OriginalName] = def
+			}
+		}
+	}
+
+	// Parse versioned schema
+	versionedDefs, err := p.ParseSchema(versionedSchemaFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build map of versioned definitions
+	versionedDefsMap := make(map[string]*schema.Definition)
+	for _, def := range versionedDefs {
+		versionedDefsMap[def.OriginalName] = def
+	}
+
+	// Merge: start with all base definitions, then add/override with versioned
+	result := []*schema.Definition{}
+
+	// Add all base definitions that aren't in versioned schema
+	for name, baseDef := range baseDefsMap {
+		if _, inVersioned := versionedDefsMap[name]; !inVersioned {
+			result = append(result, baseDef)
+		}
+	}
+
+	// Add all versioned definitions (which override base)
+	result = append(result, versionedDefs...)
+
+	// Parse dependent schemas (cross-schema references)
+	depDefs, err := p.parseDependentSchemas(versionedSchemaFile, versionedDefsMap)
+	if err == nil && len(depDefs) > 0 {
+		// Only add dependent definitions that aren't already present
+		for _, depDef := range depDefs {
+			if _, exists := versionedDefsMap[depDef.OriginalName]; !exists {
+				if _, exists := baseDefsMap[depDef.OriginalName]; !exists {
+					result = append(result, depDef)
+				}
+			}
+		}
+	}
+
+	return result, nil
+}
+
+// parseDependentSchemas finds and parses schemas referenced by external $ref
+func (p *Parser) parseDependentSchemas(schemaFile string, existingDefs map[string]*schema.Definition) ([]*schema.Definition, error) {
+	data, err := os.ReadFile(schemaFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find all external schema references
+	refPattern := regexp.MustCompile(`"http://redfish\.dmtf\.org/schemas/v1/([A-Za-z]+)\.json#/definitions/([A-Za-z]+)"`)
+	matches := refPattern.FindAllStringSubmatch(string(data), -1)
+
+	depSchemas := make(map[string]bool)
+	for _, match := range matches {
+		if len(match) > 1 {
+			schemaName := match[1]
+			// Skip if it's the same schema or already parsed
+			if schemaName != filepath.Base(schemaFile)[:len(filepath.Base(schemaFile))-len(filepath.Ext(schemaFile))] {
+				depSchemas[schemaName] = true
+			}
+		}
+	}
+
+	// Parse each dependent schema
+	var allDefs []*schema.Definition
+	for depSchema := range depSchemas {
+		// Try to find base schema file for dependencies
+		depSchemaFile := filepath.Join(p.schemaDir, depSchema+".json")
+		if _, err := os.Stat(depSchemaFile); err == nil {
+			defs, err := p.ParseSchema(depSchemaFile)
+			if err == nil {
+				allDefs = append(allDefs, defs...)
+			}
+		}
+	}
+
+	return allDefs, nil
+}
+
+// ParseSchema parses a JSON schema file and returns definitions
+func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
+	data, err := os.ReadFile(schemaFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read schema file: %w", err)
+	}
+
+	var rawSchema map[string]any
+	if err := json.Unmarshal(data, &rawSchema); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON: %w", err)
+	}
+
+	definitions := []*schema.Definition{}
+
+	// Extract definitions section
+	defsMap, ok := rawSchema["definitions"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("no definitions found in schema")
+	}
+
+	// Extract version from filename
+	version := extractVersion(filepath.Base(schemaFile))
+
+	for defName, defData := range defsMap {
+		// Skip excluded definitions
+		if p.shouldSkipDefinition(defName) {
+			continue
+		}
+
+		defMap, ok := defData.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		// Check if this is an enum
+		if enumVals, hasEnum := defMap["enum"].([]any); hasEnum {
+			def := p.parseEnumDefinition(defName, defMap, enumVals, version)
+			definitions = append(definitions, def)
+			continue
+		}
+
+		// Check if this is an object type
+		if typeVal, hasType := defMap["type"]; hasType && typeVal == "object" {
+			// Skip action definitions (have target and title properties)
+			if props, hasProps := defMap["properties"].(map[string]any); hasProps {
+				if p.isActionDefinition(props) {
+					continue
+				}
+			}
+
+			def := p.parseObjectDefinition(defName, defMap, version)
+			definitions = append(definitions, def)
+		}
+	}
+
+	// Second pass: parse Actions and Links for definitions that have them
+	for _, def := range definitions {
+		// Get the original definition map to check for Actions/Links properties
+		if defData, ok := defsMap[def.OriginalName]; ok {
+			if defMap, ok := defData.(map[string]any); ok {
+				if propsData, ok := defMap["properties"].(map[string]any); ok {
+					// Parse Actions if this definition has an Actions property
+					if _, hasActions := propsData["Actions"]; hasActions {
+						if actionsDefData, ok := defsMap["Actions"]; ok {
+							if actionsDefMap, ok := actionsDefData.(map[string]any); ok {
+								def.Actions = p.parseActions(actionsDefMap, defsMap)
+							}
+						}
+					}
+
+					// Parse Links if this definition has a Links property
+					if _, hasLinks := propsData["Links"]; hasLinks {
+						if linksDefData, ok := defsMap["Links"]; ok {
+							if linksDefMap, ok := linksDefData.(map[string]any); ok {
+								def.Links = p.parseLinks(linksDefMap)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return definitions, nil
+}
+
+// parseEnumDefinition parses an enum type definition
+func (p *Parser) parseEnumDefinition(name string, defMap map[string]any, enumVals []any, version string) *schema.Definition {
+	def := &schema.Definition{
+		Name:         cleanIdentifier(name),
+		OriginalName: name,
+		IsEnum:       true,
+		Version:      version,
+		Description:  p.formatEnumDescription(name, defMap),
+	}
+
+	// Parse enum values
+	enumDescs := make(map[string]string)
+	if ed, ok := defMap["enumDescriptions"].(map[string]any); ok {
+		for k, v := range ed {
+			if str, ok := v.(string); ok {
+				enumDescs[k] = str
+			}
+		}
+	}
+	if eld, ok := defMap["enumLongDescriptions"].(map[string]any); ok {
+		for k, v := range eld {
+			if str, ok := v.(string); ok {
+				enumDescs[k] = str
+			}
+		}
+	}
+
+	for _, enumVal := range enumVals {
+		if strVal, ok := enumVal.(string); ok {
+			ev := &schema.EnumValue{
+				Name:        cleanIdentifier(strVal) + name,
+				Value:       strVal,
+				Description: p.formatEnumValueDescription(strVal, name, enumDescs[strVal]),
+			}
+			def.EnumValues = append(def.EnumValues, ev)
+		}
+	}
+
+	return def
+}
+
+// parseObjectDefinition parses an object type definition
+func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, version string) *schema.Definition {
+	name = cleanIdentifier(name)
+	def := &schema.Definition{
+		Name:         name,
+		OriginalName: name,
+		IsEnum:       false,
+		Version:      version,
+		Description:  p.formatTypeDescription(name, defMap),
+	}
+
+	// Parse properties
+	propsMap, hasProps := defMap["properties"].(map[string]any)
+	if !hasProps {
+		return def
+	}
+
+	// Check if this is an Entity (has Id, Name, @odata.id)
+	def.IsEntity = p.isEntity(propsMap)
+
+	for propName, propData := range propsMap {
+		// Skip entity base properties
+		if def.IsEntity && p.isEntityProperty(propName) {
+			continue
+		}
+
+		// Skip Actions and Links - they will be handled separately
+		if propName == "Actions" || propName == "Links" {
+			continue
+		}
+
+		// Skip OemActions - these are empty placeholders
+		if propName == "OemActions" {
+			continue
+		}
+
+		propMap, ok := propData.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		prop := p.parseProperty(propName, propMap)
+		if prop != nil {
+			def.Properties = append(def.Properties, prop)
+
+			// Track read-write properties
+			if !prop.IsReadOnly {
+				def.ReadWriteProperties = append(def.ReadWriteProperties, prop.Name)
+			}
+		}
+	}
+
+	// Sort properties by name for consistency
+	sort.Slice(def.Properties, func(i, j int) bool {
+		return def.Properties[i].Name < def.Properties[j].Name
+	})
+
+	return def
+}
+
+// parseProperty parses a single property
+func (p *Parser) parseProperty(propName string, propMap map[string]any) *schema.Property {
+	// Convert to JSONProperty for type mapping
+	propJSON := mapToJSONProperty(propMap)
+
+	goType, isPointer, isArray := p.typeMapper.MapType(propName, propJSON)
+
+	// Check if property is deprecated
+	isDeprecated := false
+	deprecationMsg := ""
+	deprecationVersion := ""
+	if deprecated, ok := propMap["deprecated"]; ok {
+		// deprecated can be either a boolean or a string
+		switch v := deprecated.(type) {
+		case bool:
+			isDeprecated = v
+		case string:
+			isDeprecated = true
+			deprecationMsg = v
+		}
+	}
+	// Get deprecation version if present
+	if versionDep, ok := propMap["versionDeprecated"].(string); ok {
+		deprecationVersion = convertVersionFormat(versionDep)
+	}
+
+	prop := &schema.Property{
+		Name:         config.GetGoFieldName(propName),
+		JSONName:     propName,
+		Type:         goType,
+		Description:  p.formatPropertyDescription(propName, propMap),
+		IsPointer:    isPointer,
+		IsArray:      isArray,
+		IsReadOnly:   p.isReadOnly(propMap),
+		IsLink:       IsLinkProperty(propName, propJSON),
+		IsCollection: IsCollectionProperty(propJSON),
+		IsDeprecated: isDeprecated,
+	}
+
+	// Extract version_added if present
+	if revisions, ok := propMap["Redfish.Revisions"].([]any); ok && len(revisions) > 0 {
+		if rev, ok := revisions[0].(map[string]any); ok {
+			if ver, ok := rev["Version"].(string); ok {
+				prop.VersionAdded = convertVersionFormat(ver)
+			}
+		}
+	}
+
+	// More likely to have versionAdded in the schema
+	if versionAdded, ok := propMap["versionAdded"].(string); ok {
+		prop.VersionAdded = convertVersionFormat(versionAdded)
+	}
+
+	// Add version added to description
+	if prop.VersionAdded != "" {
+		prop.Description = fmt.Sprintf(
+			"%s\n\t//\n\t// Version added: %s",
+			prop.Description,
+			prop.VersionAdded)
+	}
+
+	// Add deprecation notice to description
+	if isDeprecated {
+		var wrappedDeprecation string
+
+		// First line: Deprecated: v1.3.0
+		versionNotice := "Deprecated"
+		if deprecationVersion != "" {
+			versionNotice = "Deprecated: " + deprecationVersion
+		}
+
+		if deprecationMsg != "" {
+			// Version on first line, message on subsequent lines
+			wrappedDeprecation = "\t// " + versionNotice + "\n"
+			wrappedDeprecation += formatComment("", cleanDescription(deprecationMsg), "", false, "\t")
+		} else {
+			// Just the version
+			wrappedDeprecation = "\t// " + versionNotice
+		}
+
+		// Append to existing description
+		prop.Description = prop.Description + "\n\t//\n" + wrappedDeprecation
+	}
+
+	// Add JSON tag for special properties
+	if strings.Contains(propName, "@") || strings.Contains(propName, "odata") {
+		prop.JSONTag = fmt.Sprintf("`json:\"%s\"`", propName)
+	}
+
+	// Links and collections should be private with public getter
+	if prop.IsLink || prop.IsCollection {
+		prop.IsPrivate = true
+		prop.GetterMethod = "Get" + prop.Name
+	}
+
+	return prop
+}
+
+// Helper functions
+
+func (p *Parser) shouldSkipDefinition(name string) bool {
+	// Skip OemActions - these are parsed from RawData from OEM implementations
+	if strings.HasSuffix(name, "Actions") {
+		return true
+	}
+
+	// Skip Actions and Links definitions - they're handled specially
+	if name == "Actions" || name == "Links" {
+		return true
+	}
+
+	return slices.Contains(config.ExcludedDefinitions, name)
+}
+
+func (p *Parser) isActionDefinition(props map[string]any) bool {
+	_, hasTarget := props["target"]
+	_, hasTitle := props["title"]
+	return hasTarget && hasTitle
+}
+
+func (p *Parser) isEntity(props map[string]any) bool {
+	hasId := false
+	hasName := false
+	hasOData := false
+
+	for propName := range props {
+		if propName == "Id" {
+			hasId = true
+		}
+		if propName == "Name" {
+			hasName = true
+		}
+		if propName == "@odata.id" || propName == "@odata.type" {
+			hasOData = true
+		}
+	}
+
+	return hasId && hasName && hasOData
+}
+
+func (p *Parser) isEntityProperty(propName string) bool {
+	return slices.Contains(config.EntityProperties, propName)
+}
+
+func (p *Parser) isReadOnly(propMap map[string]any) bool {
+	ret := false
+	if ro, ok := propMap["readonly"].(bool); ok {
+		ret = ro
+	}
+
+	return ret
+}
+
+func (p *Parser) formatTypeDescription(name string, defMap map[string]any) string {
+	desc := p.getDescription(defMap)
+	if desc == "" {
+		return fmt.Sprintf("// %s represents the %s type.", name, name)
+	}
+	return formatComment(name, desc, "shall", false, "")
+}
+
+func (p *Parser) formatEnumDescription(name string, defMap map[string]any) string {
+	desc := p.getDescription(defMap)
+	if desc == "" {
+		return ""
+	}
+	return formatComment(name, desc, "", true, "")
+}
+
+func (p *Parser) formatEnumValueDescription(value, enumType, desc string) string {
+	constName := cleanIdentifier(value) + enumType
+	if desc == "" {
+		return fmt.Sprintf("\t// %s means %s", constName, value)
+	}
+	// Template adds indent to first line, but we need it on all lines
+	return formatComment(constName, desc, "shall", false, "\t")
+}
+
+func (p *Parser) formatPropertyDescription(name string, propMap map[string]any) string {
+	if stdDesc, ok := config.CommonDescriptions[name]; ok {
+		return "\t// " + stdDesc
+	}
+
+	desc := p.getDescription(propMap)
+	if desc == "" {
+		return fmt.Sprintf("\t// %s", name)
+	}
+	return formatComment(name, desc, "shall", false, "\t")
+}
+
+func (p *Parser) getDescription(m map[string]any) string {
+	if ld, ok := m["longDescription"].(string); ok && ld != "" {
+		return cleanDescription(ld)
+	}
+	if d, ok := m["description"].(string); ok {
+		return cleanDescription(d)
+	}
+	return ""
+}
+
+// formatComment formats a comment with proper wrapping and indentation
+// indent is the prefix to add to each line (e.g., "\t" for struct fields)
+func formatComment(name, description, cutpoint string, isEnum bool, indent string) string {
+	// Clean up description
+	desc := cleanDescription(description)
+
+	// Find cutpoint if specified
+	if cutpoint != "" && strings.Contains(desc, cutpoint) {
+		idx := strings.Index(desc, cutpoint)
+		desc = desc[idx:]
+	}
+
+	prefix := name
+	if isEnum {
+		prefix = name + " is"
+	}
+
+	fullText := prefix + " " + desc
+
+	// Word wrap at ~80 characters
+	maxLineLength := 80 - len(indent) - 3 // 3 for "// "
+	words := strings.Fields(fullText)
+	lines := []string{}
+	currentLine := ""
+
+	for _, word := range words {
+		if currentLine == "" {
+			currentLine = word
+		} else if len(currentLine)+len(word)+1 > maxLineLength {
+			lines = append(lines, indent+"// "+currentLine)
+			currentLine = word
+		} else {
+			currentLine += " " + word
+		}
+	}
+	if currentLine != "" {
+		lines = append(lines, indent+"// "+currentLine)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func cleanDescription(desc string) string {
+	// Replace backticks with single quotes
+	desc = strings.ReplaceAll(desc, "`", "'")
+	// Collapse multiple spaces
+	desc = regexp.MustCompile(`\s+`).ReplaceAllString(desc, " ")
+	desc = strings.TrimSpace(desc)
+	if strings.HasPrefix(desc, "A ") || strings.HasPrefix(desc, "An ") {
+		desc = "is a" + desc[1:]
+	}
+	return desc
+}
+
+func cleanIdentifier(name string) string {
+	// Remove all non-alphanumeric characters
+	return regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(name, "")
+}
+
+func extractVersion(filename string) string {
+	// Extract version like v1_2_0 from filename
+	re := regexp.MustCompile(`v(\d+)_(\d+)_(\d+)`)
+	matches := re.FindStringSubmatch(filename)
+	if len(matches) == 4 {
+		return fmt.Sprintf("v%s_%s_%s", matches[1], matches[2], matches[3])
+	}
+	return ""
+}
+
+func convertVersionFormat(ver string) string {
+	// Convert v1_3_0 to v1.3.0
+	return strings.ReplaceAll(ver, "_", ".")
+}
+
+// mapToJSONProperty converts a generic map to JSONProperty
+func mapToJSONProperty(m map[string]any) *schema.JSONProperty {
+	data, _ := json.Marshal(m)
+	var prop schema.JSONProperty
+	json.Unmarshal(data, &prop)
+	return &prop
+}
+
+// ResolveLatestVersion finds the latest version of a schema
+func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
+	data, err := os.ReadFile(baseFile)
+	if err != nil {
+		return "", err
+	}
+
+	var rawSchema map[string]any
+	if err := json.Unmarshal(data, &rawSchema); err != nil {
+		return "", err
+	}
+
+	// Get the base name (e.g., "LogService" from "LogService.json")
+	baseName := strings.TrimSuffix(filepath.Base(baseFile), ".json")
+
+	// Look in definitions
+	defsMap, ok := rawSchema["definitions"].(map[string]any)
+	if !ok {
+		return "", fmt.Errorf("no definitions found")
+	}
+
+	// Find the definition matching the base name
+	defData, ok := defsMap[baseName]
+	if !ok {
+		return "", fmt.Errorf("definition %s not found", baseName)
+	}
+
+	defMap, ok := defData.(map[string]any)
+	if !ok {
+		return "", fmt.Errorf("invalid definition format")
+	}
+
+	// Look for anyOf with $ref values
+	anyOf, ok := defMap["anyOf"].([]any)
+	if !ok {
+		return "", fmt.Errorf("no anyOf found")
+	}
+
+	// Find all version references
+	maxMajor, maxMinor, maxErrata := 0, 0, 0
+	versionFile := ""
+
+	for _, item := range anyOf {
+		itemMap, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		ref, ok := itemMap["$ref"].(string)
+		if !ok {
+			continue
+		}
+
+		// Skip idRef
+		if strings.Contains(ref, "idRef") {
+			continue
+		}
+
+		// Extract version from ref (e.g., "LogService.v1_2_0.json#/definitions/LogService")
+		re := regexp.MustCompile(`v(\d+)_(\d+)_(\d+)`)
+		matches := re.FindStringSubmatch(ref)
+		if len(matches) == 4 {
+			major, _ := strconv.Atoi(matches[1])
+			minor, _ := strconv.Atoi(matches[2])
+			errata, _ := strconv.Atoi(matches[3])
+
+			if major > maxMajor || (major == maxMajor && minor > maxMinor) ||
+				(major == maxMajor && minor == maxMinor && errata > maxErrata) {
+				maxMajor, maxMinor, maxErrata = major, minor, errata
+				// Extract filename from ref
+				parts := strings.Split(ref, "#")
+				if len(parts) > 0 {
+					versionFile = filepath.Join(schemaDir, filepath.Base(parts[0]))
+				}
+			}
+		}
+	}
+
+	if versionFile == "" {
+		return "", fmt.Errorf("no version found")
+	}
+
+	return versionFile, nil
+}
+
+// parseActions parses the Actions definition for a resource
+func (p *Parser) parseActions(actionsMap map[string]any, defsMap map[string]any) []*schema.Action {
+	var actions []*schema.Action
+
+	propsMap, ok := actionsMap["properties"].(map[string]any)
+	if !ok {
+		return actions
+	}
+
+	for actionName, actionData := range propsMap {
+		// Skip Oem actions
+		if strings.Contains(actionName, "Oem") {
+			continue
+		}
+
+		// Actions are formatted like "#ResourceName.ActionName"
+		if !strings.HasPrefix(actionName, "#") {
+			continue
+		}
+
+		// Parse the action reference
+		actionMap, ok := actionData.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		action := &schema.Action{
+			JSONName: actionName,
+		}
+
+		// Extract action name (e.g., "#Chassis.Reset" -> "Reset")
+		parts := strings.Split(actionName, ".")
+		if len(parts) == 2 {
+			action.Name = parts[1]
+		}
+
+		// Get the action definition by following the $ref
+		if ref, ok := actionMap["$ref"].(string); ok {
+			// ref looks like "#/definitions/Reset"
+			defName := strings.TrimPrefix(ref, "#/definitions/")
+			if actionDefData, ok := defsMap[defName]; ok {
+				if actionDefMap, ok := actionDefData.(map[string]any); ok {
+					// Get description
+					if desc, ok := actionDefMap["longDescription"].(string); ok {
+						action.Description = cleanDescription(desc)
+					} else if desc, ok := actionDefMap["description"].(string); ok {
+						action.Description = cleanDescription(desc)
+					}
+
+					// Parse parameters
+					if paramsMap, ok := actionDefMap["parameters"].(map[string]any); ok {
+						action.Parameters = p.parseActionParameters(paramsMap)
+					}
+				}
+			}
+		}
+
+		actions = append(actions, action)
+	}
+
+	return actions
+}
+
+// parseActionParameters parses action parameters
+func (p *Parser) parseActionParameters(paramsMap map[string]any) []*schema.ActionParameter {
+	var params []*schema.ActionParameter
+
+	for paramName, paramData := range paramsMap {
+		paramMap, ok := paramData.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		param := &schema.ActionParameter{
+			Name: strings.ToLower(paramName[:1]) + paramName[1:],
+			Type: "string",
+		}
+
+		// Get description
+		if desc, ok := paramMap["longDescription"].(string); ok {
+			param.Description = formatComment(param.Name+" -", desc, "", false, "\t")
+		} else if desc, ok := paramMap["description"].(string); ok {
+			param.Description = formatComment(param.Name+" -", desc, "", false, "\t")
+		}
+
+		// Check if required
+		if req, ok := paramMap["required"].(bool); ok {
+			param.Required = req
+		}
+
+		// Parse type from $ref
+		if ref, ok := paramMap["$ref"].(string); ok {
+			// Extract type name from ref like "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/ResetType"
+			parts := strings.Split(ref, "/")
+			if len(parts) > 0 {
+				param.Type = parts[len(parts)-1]
+			}
+		}
+
+		params = append(params, param)
+	}
+
+	return params
+}
+
+// parseLinks parses the Links definition for a resource
+func (p *Parser) parseLinks(linksMap map[string]any) []*schema.Link {
+	var links []*schema.Link
+
+	propsMap, ok := linksMap["properties"].(map[string]any)
+	if !ok {
+		return links
+	}
+
+	for linkName, linkData := range propsMap {
+		// Skip Oem links
+		if strings.Contains(linkName, "Oem") {
+			continue
+		}
+
+		// Skip @odata.count properties
+		if strings.Contains(linkName, "@odata.count") {
+			continue
+		}
+
+		linkMap, ok := linkData.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		link := &schema.Link{
+			Name:     linkName,
+			JSONName: linkName,
+		}
+
+		// Get description
+		if desc, ok := linkMap["longDescription"].(string); ok {
+			link.Description = cleanDescription(desc)
+		} else if desc, ok := linkMap["description"].(string); ok {
+			link.Description = cleanDescription(desc)
+		}
+
+		// Determine if it's an array by checking if it has "items"
+		if _, hasItems := linkMap["items"]; hasItems {
+			link.IsArray = true
+		}
+
+		// Try to determine the target type from $ref or description
+		if ref, ok := linkMap["$ref"].(string); ok {
+			link.Type = extractTypeFromRef(ref)
+		} else if items, ok := linkMap["items"].(map[string]any); ok {
+			if ref, ok := items["$ref"].(string); ok {
+				link.Type = extractTypeFromRef(ref)
+			}
+		}
+
+		// If we couldn't get type from $ref, try to infer from property name
+		if link.Type == "" {
+			// Remove trailing 's' if plural
+			typeName := linkName
+			if strings.HasSuffix(typeName, "s") && len(typeName) > 1 {
+				typeName = typeName[:len(typeName)-1]
+			}
+			link.Type = typeName
+		}
+
+		links = append(links, link)
+	}
+
+	return links
+}
+
+// extractTypeFromRef extracts the resource type name from a $ref URL
+func extractTypeFromRef(ref string) string {
+	// ref looks like "http://redfish.dmtf.org/schemas/v1/ComputerSystem.json#/definitions/ComputerSystem"
+	// or "#/definitions/Link" or similar
+	parts := strings.Split(ref, "/")
+	if len(parts) > 0 {
+		lastPart := parts[len(parts)-1]
+		// Handle cases where it ends with "Collection"
+		if strings.HasSuffix(lastPart, "Collection") {
+			return strings.TrimSuffix(lastPart, "Collection")
+		}
+		// Handle generic Link types
+		if lastPart == "Link" || lastPart == "Links" {
+			return ""
+		}
+		return lastPart
+	}
+	return ""
+}
