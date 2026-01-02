@@ -7,6 +7,8 @@ package dell
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
+	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -43,6 +45,7 @@ const (
 type IFRShareType string
 
 const (
+	LocalIFRShareType IFRShareType = "LOCAL"
 	NFSIFRShareType   IFRShareType = "NFS"
 	CIFSIFRShareType  IFRShareType = "CIFS"
 	HTTPIFRShareType  IFRShareType = "HTTP"
@@ -199,10 +202,53 @@ func (xul *xmlUpdateList) parseFromXML() UpdateList {
 	return updateList
 }
 
+// validateInstallFromRepoBody validates required fields in InstallFromRepoBody
+func validateInstallFromRepoBody(b *InstallFromRepoBody) error {
+	if b.IPAddress == "" {
+		return errors.New("IPAddress is required")
+	}
+	if b.ShareName == "" {
+		return errors.New("ShareName is required")
+	}
+	if b.ShareType == "" {
+		return errors.New("ShareType is required")
+	}
+
+	// Validate ShareType is one of the allowed values
+	validShareTypes := []IFRShareType{
+		LocalIFRShareType,
+		NFSIFRShareType,
+		CIFSIFRShareType,
+		HTTPIFRShareType,
+		HTTPSIFRShareType,
+	}
+
+	valid := false
+	for _, validType := range validShareTypes {
+		if b.ShareType == validType {
+			valid = true
+			break
+		}
+	}
+	if !valid {
+		return fmt.Errorf("invalid ShareType: %s, must be one of LOCAL, NFS, CIFS, HTTP, HTTPS", b.ShareType)
+	}
+
+	// Username is required for CIFS shares
+	if b.ShareType == CIFSIFRShareType && b.UserName == "" {
+		return errors.New("UserName is required for CIFS shares")
+	}
+
+	return nil
+}
+
 // Simple way to upgrade server firmware packages. Uses a Dell update catalog to compare FW versions and get download links for each package.
 //
 // Returns a Dell OEM Job
 func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepoBody) (*Job, error) {
+	if err := validateInstallFromRepoBody(b); err != nil {
+		return nil, fmt.Errorf("validation failed: %w", err)
+	}
 	res, err := sis.PostWithResponse(sis.Actions.InstallFromRepository.Target, b)
 	defer common.DeferredCleanupHTTPResponse(res)
 	if err != nil {
@@ -239,10 +285,15 @@ func (sis *SoftwareInstallationService) GetRepoBasedUpdateList() (*UpdateList, e
 
 	err = xml.Unmarshal([]byte(pl.PackageList), &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse XML package list: %w", err)
 	}
 
 	ul := t.parseFromXML()
+
+	// Validate that we got some packages
+	if len(ul) == 0 {
+		return nil, errors.New("no firmware packages found in update list - catalog may be empty or invalid")
+	}
 
 	return &ul, nil
 }
