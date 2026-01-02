@@ -5,7 +5,6 @@
 package dell
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -57,11 +56,12 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 
 // FromEventService converts a standard EventService object to the OEM implementation.
 func FromEventService(eventservice *redfish.EventService) (*EventService, error) {
-	es := &EventService{}
-	err := json.Unmarshal(eventservice.RawData, es)
-	if err != nil {
-		return nil, err
+	es := &EventService{
+		EventService: *eventservice,
 	}
+
+	// Extract any OEM-specific data from the raw JSON if needed
+	// For now, Dell EventService doesn't have additional OEM fields beyond the standard ones
 
 	es.SetClient(eventservice.GetClient())
 	return es, nil

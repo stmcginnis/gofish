@@ -7,6 +7,7 @@ package dell
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
@@ -130,21 +131,21 @@ func FromComputerSystem(computerSystem *redfish.ComputerSystem) (*ComputerSystem
 	var t struct {
 		Oem struct {
 			Dell struct {
-				DellSystem OEMSystem
-			}
-		}
+				DellSystem OEMSystem `json:",omitempty"`
+			} `json:",omitempty"`
+		} `json:",omitempty"`
 		Links struct {
 			Oem struct {
 				Dell struct {
-					DellSoftwareInstallationService common.Link
-				}
-			}
-		}
+					DellSoftwareInstallationService common.Link `json:",omitempty"`
+				} `json:",omitempty"`
+			} `json:",omitempty"`
+		} `json:",omitempty"`
 	}
 
 	err := json.Unmarshal(computerSystem.RawData, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal Dell OEM data: %w", err)
 	}
 
 	cs.targetSoftwareInstallationService = t.Links.Oem.Dell.DellSoftwareInstallationService.String()
