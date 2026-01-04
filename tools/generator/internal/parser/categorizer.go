@@ -33,6 +33,7 @@ var CommonTypes = map[string]bool{
 	"MessageRegistry":     true,
 	"Privileges":          true,
 	"PrivilegeRegistry":   true,
+	"PrivilegeType":       true,
 	"PhysicalContext":     true,
 	"Protocol":            true,
 	"IPAddresses":         true,
