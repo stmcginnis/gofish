@@ -23,6 +23,7 @@ import (
 type Parser struct {
 	typeMapper *TypeMapper
 	schemaDir  string
+	rawSchema  []byte // Raw JSON for extracting key order
 }
 
 // NewParser creates a new Parser
@@ -72,58 +73,7 @@ func (p *Parser) ParseSchemaWithBase(baseSchemaFile, versionedSchemaFile string)
 	// Add all versioned definitions (which override base)
 	result = append(result, versionedDefs...)
 
-	// Parse dependent schemas (cross-schema references)
-	depDefs, err := p.parseDependentSchemas(versionedSchemaFile, versionedDefsMap)
-	if err == nil && len(depDefs) > 0 {
-		// Only add dependent definitions that aren't already present
-		for _, depDef := range depDefs {
-			if _, exists := versionedDefsMap[depDef.OriginalName]; !exists {
-				if _, exists := baseDefsMap[depDef.OriginalName]; !exists {
-					result = append(result, depDef)
-				}
-			}
-		}
-	}
-
 	return result, nil
-}
-
-// parseDependentSchemas finds and parses schemas referenced by external $ref
-func (p *Parser) parseDependentSchemas(schemaFile string, existingDefs map[string]*schema.Definition) ([]*schema.Definition, error) {
-	data, err := os.ReadFile(schemaFile)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find all external schema references
-	refPattern := regexp.MustCompile(`"http://redfish\.dmtf\.org/schemas/v1/([A-Za-z]+)\.json#/definitions/([A-Za-z]+)"`)
-	matches := refPattern.FindAllStringSubmatch(string(data), -1)
-
-	depSchemas := make(map[string]bool)
-	for _, match := range matches {
-		if len(match) > 1 {
-			schemaName := match[1]
-			// Skip if it's the same schema or already parsed
-			if schemaName != filepath.Base(schemaFile)[:len(filepath.Base(schemaFile))-len(filepath.Ext(schemaFile))] {
-				depSchemas[schemaName] = true
-			}
-		}
-	}
-
-	// Parse each dependent schema
-	var allDefs []*schema.Definition
-	for depSchema := range depSchemas {
-		// Try to find base schema file for dependencies
-		depSchemaFile := filepath.Join(p.schemaDir, depSchema+".json")
-		if _, err := os.Stat(depSchemaFile); err == nil {
-			defs, err := p.ParseSchema(depSchemaFile)
-			if err == nil {
-				allDefs = append(allDefs, defs...)
-			}
-		}
-	}
-
-	return allDefs, nil
 }
 
 // ParseSchema parses a JSON schema file and returns definitions
@@ -132,6 +82,9 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read schema file: %w", err)
 	}
+
+	// Store raw schema for extracting key order
+	p.rawSchema = data
 
 	var rawSchema map[string]any
 	if err := json.Unmarshal(data, &rawSchema); err != nil {
@@ -149,6 +102,16 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 	// Extract version from filename
 	version := extractVersion(filepath.Base(schemaFile))
 
+	// Extract release and title from top-level schema
+	release := ""
+	if rel, ok := rawSchema["release"].(string); ok {
+		release = rel
+	}
+	title := ""
+	if t, ok := rawSchema["title"].(string); ok {
+		title = t
+	}
+
 	for defName, defData := range defsMap {
 		// Skip excluded definitions
 		if p.shouldSkipDefinition(defName) {
@@ -163,6 +126,8 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 		// Check if this is an enum
 		if enumVals, hasEnum := defMap["enum"].([]any); hasEnum {
 			def := p.parseEnumDefinition(defName, defMap, enumVals, version)
+			def.Release = release
+			def.Title = title
 			definitions = append(definitions, def)
 			continue
 		}
@@ -177,6 +142,8 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 			}
 
 			def := p.parseObjectDefinition(defName, defMap, version)
+			def.Release = release
+			def.Title = title
 			definitions = append(definitions, def)
 		}
 	}
@@ -619,7 +586,9 @@ func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
 	// Find the definition matching the base name
 	defData, ok := defsMap[baseName]
 	if !ok {
-		return "", fmt.Errorf("definition %s not found", baseName)
+		// This might be a utility schema (like Privileges.json) that doesn't have
+		// a main definition matching the schema name. In this case, use the base file.
+		return baseFile, nil
 	}
 
 	defMap, ok := defData.(map[string]any)
@@ -731,7 +700,18 @@ func (p *Parser) parseActions(actionsMap map[string]any, defsMap map[string]any)
 
 					// Parse parameters
 					if paramsMap, ok := actionDefMap["parameters"].(map[string]any); ok {
-						action.Parameters = p.parseActionParameters(paramsMap)
+						action.Parameters = p.parseActionParameters(defName, paramsMap)
+					}
+
+					// Parse action response
+					if actionResp, ok := actionDefMap["actionResponse"].(map[string]any); ok {
+						if ref, ok := actionResp["$ref"].(string); ok {
+							// Extract response type from ref like "#/definitions/GenerateCSRResponse"
+							parts := strings.Split(ref, "/")
+							if len(parts) > 0 {
+								action.ResponseType = parts[len(parts)-1]
+							}
+						}
 					}
 				}
 			}
@@ -743,9 +723,131 @@ func (p *Parser) parseActions(actionsMap map[string]any, defsMap map[string]any)
 	return actions
 }
 
+// extractJSONKeyOrder extracts the order of keys from raw JSON at a given path
+// path should be dot-separated like "definitions.Reset.parameters"
+func extractJSONKeyOrder(rawJSON []byte, path string) []string {
+	pathParts := strings.Split(path, ".")
+
+	// Find the position of the target object in the raw JSON
+	currentJSON := string(rawJSON)
+
+	for _, part := range pathParts {
+		// Find the key in the current JSON object
+		keyPattern := fmt.Sprintf(`"%s"\s*:\s*\{`, regexp.QuoteMeta(part))
+		re := regexp.MustCompile(keyPattern)
+		loc := re.FindStringIndex(currentJSON)
+		if loc == nil {
+			return nil
+		}
+
+		// Find the matching closing brace
+		startIdx := loc[1] - 1 // Position of the opening brace
+		braceCount := 1
+		i := startIdx + 1
+
+		for i < len(currentJSON) && braceCount > 0 {
+			if currentJSON[i] == '{' {
+				braceCount++
+			} else if currentJSON[i] == '}' {
+				braceCount--
+			}
+			i++
+		}
+
+		// Extract the object content
+		currentJSON = currentJSON[startIdx+1 : i-1]
+	}
+
+	// Now extract only top-level keys from the current object
+	var keys []string
+	depth := 0
+	i := 0
+
+	for i < len(currentJSON) {
+		ch := currentJSON[i]
+
+		// Skip whitespace
+		if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
+			i++
+			continue
+		}
+
+		// At depth 0, look for keys (strings followed by colon)
+		if depth == 0 && ch == '"' {
+			// Extract the string content
+			j := i + 1
+			keyStart := j
+			for j < len(currentJSON) && currentJSON[j] != '"' {
+				if currentJSON[j] == '\\' {
+					j++ // Skip escaped character
+					if j < len(currentJSON) {
+						j++ // Skip the escaped character itself
+					}
+				} else {
+					j++
+				}
+			}
+
+			if j < len(currentJSON) {
+				key := currentJSON[keyStart:j]
+
+				// Look ahead to see if this is a key (followed by colon)
+				k := j + 1
+				for k < len(currentJSON) && (currentJSON[k] == ' ' || currentJSON[k] == '\t' || currentJSON[k] == '\n' || currentJSON[k] == '\r') {
+					k++
+				}
+
+				if k < len(currentJSON) && currentJSON[k] == ':' {
+					// This is a top-level key
+					keys = append(keys, key)
+				}
+
+				i = j + 1
+				continue
+			}
+		}
+
+		// Handle nested structures
+		if ch == '"' {
+			// Skip over string values
+			i++
+			for i < len(currentJSON) && currentJSON[i] != '"' {
+				if currentJSON[i] == '\\' {
+					i++ // Skip escape character
+					if i < len(currentJSON) {
+						i++ // Skip escaped character
+					}
+				} else {
+					i++
+				}
+			}
+			i++ // Skip closing quote
+			continue
+		} else if ch == '{' || ch == '[' {
+			depth++
+		} else if ch == '}' || ch == ']' {
+			depth--
+		}
+
+		i++
+	}
+
+	return keys
+}
+
 // parseActionParameters parses action parameters
-func (p *Parser) parseActionParameters(paramsMap map[string]any) []*schema.ActionParameter {
+func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[string]any) []*schema.ActionParameter {
 	var params []*schema.ActionParameter
+
+	// Extract parameter order from raw JSON
+	path := fmt.Sprintf("definitions.%s.parameters", actionDefName)
+	paramOrder := extractJSONKeyOrder(p.rawSchema, path)
+
+	// Build a map of parameter name to ordinal position
+	ordinalMap := make(map[string]int)
+	for i, paramName := range paramOrder {
+		ordinalMap[paramName] = i
+	}
 
 	for paramName, paramData := range paramsMap {
 		paramMap, ok := paramData.(map[string]any)
@@ -754,8 +856,9 @@ func (p *Parser) parseActionParameters(paramsMap map[string]any) []*schema.Actio
 		}
 
 		param := &schema.ActionParameter{
-			Name: strings.ToLower(paramName[:1]) + paramName[1:],
-			Type: "string",
+			Name:    strings.ToLower(paramName[:1]) + paramName[1:],
+			Type:    "string",
+			Ordinal: ordinalMap[paramName], // Set ordinal from the raw JSON key order
 		}
 
 		// Get description
@@ -781,6 +884,11 @@ func (p *Parser) parseActionParameters(paramsMap map[string]any) []*schema.Actio
 
 		params = append(params, param)
 	}
+
+	// Sort parameters by their ordinal position to maintain schema order
+	sort.Slice(params, func(i, j int) bool {
+		return params[i].Ordinal < params[j].Ordinal
+	})
 
 	return params
 }

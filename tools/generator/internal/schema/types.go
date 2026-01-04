@@ -41,6 +41,10 @@ type Definition struct {
 	Actions []*Action
 	// Links are the links to related resources
 	Links []*Link
+	// Release is the schema release version (e.g., "2018.3")
+	Release string
+	// Title is the schema title (e.g., "#CertificateService.v1_0_1.CertificateService")
+	Title string
 }
 
 // Property represents a struct field
@@ -95,6 +99,8 @@ type Action struct {
 	Description string
 	// Parameters are the action parameters
 	Parameters []*ActionParameter
+	// ResponseType is the Go type name for the action response (e.g., "GenerateCSRResponse")
+	ResponseType string
 }
 
 // ActionParameter represents a parameter for an action
@@ -109,6 +115,8 @@ type ActionParameter struct {
 	Required bool
 	// AllowableValues are the allowed values (for enums)
 	AllowableValues []string
+	// Ordinal is the order position of this parameter
+	Ordinal int
 }
 
 // Link represents a link to a related resource

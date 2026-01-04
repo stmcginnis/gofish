@@ -1,6 +1,9 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+{{- if and .Release .Title }}
+// {{ .Release }} - {{ .Title }}
+{{- end }}
 
 package {{ .Package }}
 
@@ -181,6 +184,32 @@ func ListReferenced{{ .Name }}s(c {{ $pkg }}Client, link string) ([]*{{ .Name }}
 {{- range $i, $p := .Parameters }}
 {{ $p.Description }}
 {{- end }}
+{{- if .ResponseType }}
+func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .Parameters }}{{- if $i }}, {{ end }}{{ $p.Name }} {{ $p.Type }}{{- end }}) (*{{ .ResponseType }}, error) {
+	payload := make(map[string]interface{})
+{{- range .Parameters }}
+	payload["{{ .Name }}"] = {{ .Name }}
+{{- end }}
+
+	resp, err := {{ $receiverName }}.PostWithResponse({{ $receiverName }}.{{ .TargetField }}, payload)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, {{ $pkg }}CleanupHTTPResponse(resp)
+	}
+
+	var result {{ .ResponseType }}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+{{- else }}
 func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .Parameters }}{{- if $i }}, {{ end }}{{ $p.Name }} {{ $p.Type }}{{- end }}) error {
 	payload := make(map[string]interface{})
 {{- range .Parameters }}
@@ -188,6 +217,7 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .P
 {{- end }}
 	return {{ $receiverName }}.Post({{ $receiverName }}.{{ .TargetField }}, payload)
 }
+{{- end }}
 {{- end }}
 {{- range .Links }}
 {{- if .IsArray }}

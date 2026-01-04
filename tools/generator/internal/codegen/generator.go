@@ -8,6 +8,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os/exec"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -24,6 +25,8 @@ type TemplateData struct {
 	NeedsReflect bool
 	Enums        []*EnumData
 	Structs      []*StructData
+	Release      string
+	Title        string
 }
 
 // EnumData represents an enum for the template
@@ -59,11 +62,12 @@ type StructData struct {
 
 // ActionData represents an action for the template
 type ActionData struct {
-	Name        string
-	JSONName    string
-	Description string
-	TargetField string
-	Parameters  []*ActionParameterData
+	Name         string
+	JSONName     string
+	Description  string
+	TargetField  string
+	Parameters   []*ActionParameterData
+	ResponseType string
 }
 
 // ActionParameterData represents an action parameter for the template
@@ -72,6 +76,7 @@ type ActionParameterData struct {
 	Type        string
 	Description string
 	Required    bool
+	Ordinal     int
 }
 
 // LinkData represents a link for the template
@@ -133,6 +138,28 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 		}
 	}
 
+	// Set release and title from main type if available
+	if mainType != nil {
+		data.Release = mainType.Release
+		data.Title = mainType.Title
+	}
+
+	// Sort definitions by name for deterministic output
+	// Main type, then enums, then other structs
+	sort.Slice(definitions, func(i, j int) bool {
+		if definitions[i] == mainType {
+			return true
+		}
+		if definitions[j] == mainType {
+			return false
+		}
+		if definitions[i].IsEnum != definitions[j].IsEnum {
+			return definitions[i].IsEnum
+		}
+
+		return definitions[i].Name < definitions[j].Name
+	})
+
 	// Process all definitions
 	for _, def := range definitions {
 		if def.IsEnum {
@@ -189,6 +216,9 @@ func (g *Generator) buildEnumData(def *schema.Definition) *EnumData {
 
 // buildStructData converts a Definition to StructData
 func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *StructData {
+	// Sort for deterministic output
+	sort.Strings(def.ReadWriteProperties)
+
 	sd := &StructData{
 		Name:                def.Name,
 		Description:         def.Description,
@@ -282,14 +312,25 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		}
 	}
 
+	// Sort actions by name for deterministic output
+	sort.Slice(def.Actions, func(i, j int) bool {
+		return def.Actions[i].Name < def.Actions[j].Name
+	})
+
 	// Build action data
 	for _, action := range def.Actions {
 		ad := &ActionData{
-			Name:        action.Name,
-			JSONName:    action.JSONName,
-			Description: action.Description,
-			TargetField: strings.ToLower(action.Name[:1]) + action.Name[1:] + "Target",
+			Name:         action.Name,
+			JSONName:     action.JSONName,
+			Description:  action.Description,
+			TargetField:  strings.ToLower(action.Name[:1]) + action.Name[1:] + "Target",
+			ResponseType: action.ResponseType,
 		}
+
+		// Sort parameters by the order they are defined in the schema
+		sort.Slice(action.Parameters, func(i, j int) bool {
+			return action.Parameters[i].Ordinal < action.Parameters[j].Ordinal
+		})
 
 		for _, param := range action.Parameters {
 			pd := &ActionParameterData{
@@ -297,6 +338,7 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 				Type:        param.Type,
 				Description: param.Description,
 				Required:    param.Required,
+				Ordinal:     param.Ordinal,
 			}
 			ad.Parameters = append(ad.Parameters, pd)
 		}
@@ -304,6 +346,11 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		sd.Actions = append(sd.Actions, ad)
 	}
 	sd.HasActions = len(sd.Actions) > 0
+
+	// Sort links by name for deterministic ordering
+	sort.Slice(def.Links, func(i, j int) bool {
+		return def.Links[i].Name < def.Links[j].Name
+	})
 
 	// Build link data
 	for _, link := range def.Links {
@@ -378,7 +425,12 @@ func (g *Generator) getReceiverName(typeName string) string {
 	// Find first lowercase or end of acronym
 	name := strings.ToLower(typeName)
 	if len(name) > 0 {
-		return string(name[0])
+		ret := string(name[0])
+		if ret == "b" {
+			// Byte parameter to unmarshalling is already "b"
+			ret += string(name[1])
+		}
+		return ret
 	}
 
 	return "x"
