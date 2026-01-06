@@ -127,7 +127,7 @@ func (controllers *Controllers) UnmarshalJSON(b []byte) error {
 		NetworkDeviceFunctionsCount int `json:"NetworkDeviceFunctions@odata.count"`
 		NetworkPorts                common.Links
 		NetworkPortsCount           int `json:"EthernetInterfaces@odata.count"`
-		PCIeDevice                  common.Link
+		PCIeDevices                 common.Links
 		PCIeDevicesCount            int `json:"PCIeDevices@odata.count"`
 		// Ports shall contain an array of links to resources of type Port that represent the ports associated with this
 		// network controller.
@@ -156,8 +156,8 @@ func (controllers *Controllers) UnmarshalJSON(b []byte) error {
 	controllers.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
 	controllers.networkPorts = t.Links.NetworkPorts.ToStrings()
 	controllers.NetworkPortsCount = t.Links.NetworkPortsCount
-	controllers.pcieDevices = t.Links.NetworkDeviceFunctions.ToStrings()
-	controllers.PCIeDevicesCount = t.Links.NetworkDeviceFunctionsCount
+	controllers.pcieDevices = t.Links.PCIeDevices.ToStrings()
+	controllers.PCIeDevicesCount = t.Links.PCIeDevicesCount
 	controllers.ports = t.Links.Ports.ToStrings()
 	controllers.PortsCount = t.Links.PortsCount
 	controllers.softwareImages = t.Links.SoftwareImages.ToStrings()
