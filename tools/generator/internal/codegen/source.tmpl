@@ -89,8 +89,14 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 {{- end }}
 	}
 {{- end }}
-{{- if .HasLinkProperties }}
-	type {{ .ReceiverName }}LinkProps struct {
+	var tmp struct {
+		temp
+{{- if .HasActions }}
+		Actions {{ .ReceiverName }}Actions
+{{- end }}
+{{- if .HasLinks }}
+		Links {{ .ReceiverName }}Links
+{{- end }}
 {{- range .Properties }}
 {{- if and .IsLink .LinkType }}
 {{- if .IsArray }}
@@ -101,44 +107,31 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 {{- end }}
 {{- end }}
 	}
-{{- end }}
-	var t struct {
-		temp
-{{- if .HasActions }}
-		Actions {{ .ReceiverName }}Actions
-{{- end }}
-{{- if .HasLinks }}
-		Links {{ .ReceiverName }}Links
-{{- end }}
-{{- if .HasLinkProperties }}
-		LinkProps {{ .ReceiverName }}LinkProps
-{{- end }}
-	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*{{ .ReceiverName }} = {{ .Name }}(t.temp)
+	*{{ .ReceiverName }} = {{ .Name }}(tmp.temp)
 
 	// Extract the links to other entities for later
 {{- range .Actions }}
-	{{ $receiverName }}.{{ .TargetField }} = t.Actions.{{ .Name }}.Target
+	{{ $receiverName }}.{{ .TargetField }} = tmp.Actions.{{ .Name }}.Target
 {{- end }}
 {{- range .Links }}
 {{- if .IsArray }}
-	{{ $receiverName }}.{{ .FieldName }} = t.Links.{{ .Name }}.ToStrings()
+	{{ $receiverName }}.{{ .FieldName }} = tmp.Links.{{ .Name }}.ToStrings()
 {{- else }}
-	{{ $receiverName }}.{{ .FieldName }} = t.Links.{{ .Name }}.String()
+	{{ $receiverName }}.{{ .FieldName }} = tmp.Links.{{ .Name }}.String()
 {{- end }}
 {{- end }}
 {{- range .Properties }}
 {{- if and .IsLink .LinkType }}
 {{- if .IsArray }}
-	{{ $receiverName }}.{{ .Name }} = t.LinkProps.{{ .GetterMethod }}.ToStrings()
+	{{ $receiverName }}.{{ .Name }} = tmp.{{ .GetterMethod }}.ToStrings()
 {{- else }}
-	{{ $receiverName }}.{{ .Name }} = t.LinkProps.{{ .GetterMethod }}.String()
+	{{ $receiverName }}.{{ .Name }} = tmp.{{ .GetterMethod }}.String()
 {{- end }}
 {{- end }}
 {{- end }}

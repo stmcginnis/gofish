@@ -59,6 +59,15 @@ var ExcludedDefinitions = []string{
 	"Item",               // Base type, manually maintained
 }
 
+var ExcludeReadWriteProperties = []string{
+	"Oem",
+	"OEM",
+	"ODataContext",
+	"ODataType",
+	"odata.context",
+	"odata.type",
+}
+
 // PropertyHasTarget checks if a definition has 'target' and 'title' properties (action definitions)
 func IsActionDefinition(properties map[string]bool) bool {
 	hasTarget := properties["target"]

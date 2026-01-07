@@ -266,7 +266,7 @@ func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, versi
 			def.Properties = append(def.Properties, prop)
 
 			// Track read-write properties
-			if !prop.IsReadOnly {
+			if !prop.IsReadOnly && !slices.Contains(config.ExcludeReadWriteProperties, prop.Name) {
 				def.ReadWriteProperties = append(def.ReadWriteProperties, prop.Name)
 			}
 		}
@@ -372,7 +372,7 @@ func (p *Parser) parseProperty(propName string, propMap map[string]any) *schema.
 	// Links and collections should be private with public getter
 	if prop.IsLink || prop.IsCollection {
 		prop.IsPrivate = true
-		prop.GetterMethod = "Get" + prop.Name
+		prop.GetterMethod = prop.Name
 	}
 
 	return prop
