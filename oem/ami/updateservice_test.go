@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var updateServiceBody = `{
@@ -68,7 +68,7 @@ var updateServiceBody = `{
 
 // TestUpdateService tests the parsing of the UpdateService oem fields.
 func TestUpdateService(t *testing.T) {
-	us := &redfish.UpdateService{}
+	us := &schemas.UpdateService{}
 	if err := json.Unmarshal([]byte(updateServiceBody), us); err != nil {
 		t.Fatalf("error decoding json: %v", err)
 	}

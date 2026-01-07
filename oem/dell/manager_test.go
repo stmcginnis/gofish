@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 const managerBody = `{
@@ -280,7 +280,7 @@ const managerBody = `{
 }`
 
 func TestDellManager(t *testing.T) {
-	var m redfish.Manager
+	var m schemas.Manager
 	err := json.NewDecoder(strings.NewReader(managerBody)).Decode(&m)
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)

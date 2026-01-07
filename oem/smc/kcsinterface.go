@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // KCSInterface is an instance of a KCSInterface object.
 type KCSInterface struct {
-	common.Entity
+	schemas.Entity
 
 	// Privilege shall contain the current KCS privilege setting.
 	Privilege string
@@ -63,6 +63,6 @@ func (i *KCSInterface) Update() error {
 }
 
 // GetKCSInterface will get a KCSInterface instance from the service.
-func GetKCSInterface(c common.Client, uri string) (*KCSInterface, error) {
-	return common.GetObject[KCSInterface](c, uri)
+func GetKCSInterface(c schemas.Client, uri string) (*KCSInterface, error) {
+	return schemas.GetObject[KCSInterface](c, uri)
 }

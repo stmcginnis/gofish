@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var chassisBody = `{
@@ -83,7 +83,7 @@ var chassisBody = `{
 
 // TestChassis tests the parsing of Chassis objects.
 func TestChassis(t *testing.T) {
-	var cs redfish.Chassis
+	var cs schemas.Chassis
 	err := json.NewDecoder(strings.NewReader(chassisBody)).Decode(&cs)
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)

@@ -8,8 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // ErrActionNotSupported is returned when the requested OEM-specific action
@@ -17,9 +16,9 @@ import (
 // or upgraded to a new firmware that follows the DMTF standards.
 var ErrActionNotSupported = errors.New("oem-specific action unsupported")
 
-// Drive extends a redfish.Drive for additional OEM fields
+// Drive extends a schemas.Drive for additional OEM fields
 type Drive struct {
-	redfish.Drive
+	schemas.Drive
 
 	// Fields from the SMC OEM section
 	Temperature             int
@@ -30,8 +29,8 @@ type Drive struct {
 	indicateTarget string
 }
 
-// FromDrive returns an OEM-extended redfish drive
-func FromDrive(drive *redfish.Drive) (Drive, error) {
+// FromDrive returns an OEM-extended schemas.drive
+func FromDrive(drive *schemas.Drive) (Drive, error) {
 	smcDrive := Drive{
 		Drive: *drive,
 	}
@@ -46,8 +45,8 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 		} `json:"Oem"`
 		Actions struct {
 			Oem struct {
-				DriveIndicate    common.ActionTarget `json:"#Drive.Indicate"`
-				SmcDriveIndicate common.ActionTarget `json:"#SmcDrive.Indicate"`
+				DriveIndicate    schemas.ActionTarget `json:"#Drive.Indicate"`
+				SmcDriveIndicate schemas.ActionTarget `json:"#SmcDrive.Indicate"`
 			} `json:"Oem"`
 		} `json:"Actions"`
 	}
@@ -74,10 +73,10 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 
 // Indicate will set the indicator light activity, true for on, false for off
 func (d *Drive) Indicate(active bool) error {
-	// Return a common error to let the user try falling back on the normal gofish path
+	// Return a schemas.error to let the user try falling back on the normal gofish path
 	if d.indicateTarget == "" {
 		return ErrActionNotSupported
 	}
 
-	return d.Post(d.indicateTarget, map[string]interface{}{"Active": active})
+	return d.Post(d.indicateTarget, map[string]any{"Active": active})
 }

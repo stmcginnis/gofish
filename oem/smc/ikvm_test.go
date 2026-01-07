@@ -16,7 +16,7 @@ var iKVMBody = `{
   "Id": "IKVM",
   "Name": "IKVM",
   "Current interface": "HTML 5",
-  "URI": "/redfish/VVGBkzp32dNpSOI.IKVM",
+  "URI": "/schemas.VVGBkzp32dNpSOI.IKVM",
   "@odata.etag": "\"916e58e6235aa0579147a3114560a596\""
 }`
 
@@ -36,7 +36,7 @@ func TestIKVM(t *testing.T) {
 		t.Errorf("Invalid current interface: %s", result.CurrentInterface)
 	}
 
-	if result.URI != "/redfish/VVGBkzp32dNpSOI.IKVM" {
+	if result.URI != "/schemas.VVGBkzp32dNpSOI.IKVM" {
 		t.Errorf("Invalid URI: %s", result.URI)
 	}
 }

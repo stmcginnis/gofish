@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 func TestIDRACReset(t *testing.T) {
@@ -21,7 +21,7 @@ func TestIDRACReset(t *testing.T) {
 
 func TestIDRACMonitor_CheckHealth(t *testing.T) {
 	// Create a mock manager
-	baseManager := redfish.Manager{}
+	baseManager := schemas.Manager{}
 	baseManager.ID = "iDRAC.Embedded.1"
 	manager := &Manager{Manager: baseManager}
 
@@ -43,7 +43,7 @@ func TestIDRACMonitor_CheckHealth(t *testing.T) {
 }
 
 func TestIDRACMonitor_ExecuteWithRetry(t *testing.T) {
-	baseManager := redfish.Manager{}
+	baseManager := schemas.Manager{}
 	baseManager.ID = "iDRAC.Embedded.1"
 	manager := &Manager{Manager: baseManager}
 

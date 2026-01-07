@@ -7,17 +7,16 @@ package smc
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // USBCDBootSourceOverrideTarget is a Supermicro-specific boot target that is not
 // part of the Redfish specification.
-const USBCDBootSourceOverrideTarget redfish.BootSourceOverrideTarget = "UsbCd"
+const USBCDBootSourceOverrideTarget schemas.BootSource = "UsbCd"
 
 // ComputerSystem is a Supermicro OEM instance of a ComputerSystem.
 type ComputerSystem struct {
-	redfish.ComputerSystem
+	schemas.ComputerSystem
 	nodeManager    string
 	fixedBootOrder string
 }
@@ -33,11 +32,11 @@ func (cs *ComputerSystem) FixedBootOrder() (*FixedBootOrder, error) {
 }
 
 // FromComputerSystem converts a standard ComputerSystem object to the OEM implementation.
-func FromComputerSystem(system *redfish.ComputerSystem) (*ComputerSystem, error) {
+func FromComputerSystem(system *schemas.ComputerSystem) (*ComputerSystem, error) {
 	type Oem struct {
 		Supermicro struct {
-			NodeManager    common.Link `json:"NodeManager"`
-			FixedBootOrder common.Link `json:"FixedBootOrder"`
+			NodeManager    schemas.Link `json:"NodeManager"`
+			FixedBootOrder schemas.Link `json:"FixedBootOrder"`
 		} `json:"Supermicro"`
 	}
 

@@ -9,12 +9,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type Manager struct {
-	redfish.Manager
+	schemas.Manager
 
 	importSystemConfigTarget string
 }
@@ -92,24 +91,27 @@ type ImportSystemConfigurationBody struct {
 	ShutdownType ISCShutdownType `json:",omitempty"`
 }
 
-// Unmarshals a redfish.Manager into a dell.Manager
-func FromManager(manager *redfish.Manager) (*Manager, error) {
+// Unmarshals a schemas.Manager into a dell.Manager
+func FromManager(manager *schemas.Manager) (*Manager, error) {
 	m := Manager{
 		Manager: *manager,
 	}
 
-	var t struct {
-		ImportSystemConfiguration struct {
-			Target string `json:"target,omitempty"`
-		} `json:"#OemManager.ImportSystemConfiguration,omitempty"`
+	type oemActions struct {
+		ImportSystemConfiguration schemas.ActionTarget `json:"#OemManager.ImportSystemConfiguration,omitempty"`
+	}
+	var tmp struct {
+		Actions struct {
+			Oem oemActions
+		}
 	}
 
-	err := json.Unmarshal(manager.OemActions, &t)
+	err := json.Unmarshal(manager.RawData, &tmp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal Dell OEM manager actions: %w", err)
 	}
 
-	m.importSystemConfigTarget = t.ImportSystemConfiguration.Target
+	m.importSystemConfigTarget = tmp.Actions.Oem.ImportSystemConfiguration.Target
 
 	return &m, nil
 }
@@ -166,7 +168,7 @@ func validateImportSystemConfigurationBody(b *ImportSystemConfigurationBody) err
 // Import a system configuration in JSON format.
 //
 // This can be used to set BIOS, iDRAC, and device settings automatically.
-func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*redfish.Task, error) {
+func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*schemas.Task, error) {
 	if err := validateImportSystemConfigurationBody(b); err != nil {
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
@@ -175,10 +177,10 @@ func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*
 	}
 
 	res, err := m.PostWithResponse(m.importSystemConfigTarget, b)
-	defer common.DeferredCleanupHTTPResponse(res)
+	defer schemas.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
 
-	return redfish.GetTask(m.GetClient(), res.Header.Get("Location"))
+	return schemas.GetTask(m.GetClient(), res.Header.Get("Location"))
 }

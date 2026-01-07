@@ -7,20 +7,19 @@ package ami
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // EventService is an AMI OEM instance of an EventService.
 type EventService struct {
-	redfish.EventService
-	SecondarySMTP redfish.SMTP
+	schemas.EventService
+	SecondarySMTP schemas.SMTP
 
 	certificates string
 }
 
 // FromEventService converts a standard EventService object to the OEM implementation.
-func FromEventService(eventService *redfish.EventService) (*EventService, error) {
+func FromEventService(eventService *schemas.EventService) (*EventService, error) {
 	es := EventService{
 		EventService: *eventService,
 	}
@@ -28,8 +27,8 @@ func FromEventService(eventService *redfish.EventService) (*EventService, error)
 	var t struct {
 		Oem struct {
 			AMI struct {
-				Certificates  common.Link
-				SecondarySMTP redfish.SMTP
+				Certificates  schemas.Link
+				SecondarySMTP schemas.SMTP
 			} `json:"Ami"`
 		} `json:"Oem"`
 	}
@@ -47,6 +46,6 @@ func FromEventService(eventService *redfish.EventService) (*EventService, error)
 }
 
 // Certificates will get the Certificates for this EventService.
-func (es *EventService) Certificates() ([]*redfish.Certificate, error) {
-	return redfish.ListReferencedCertificates(es.GetClient(), es.certificates)
+func (es *EventService) Certificates() ([]*schemas.Certificate, error) {
+	return schemas.ListReferencedCertificates(es.GetClient(), es.certificates)
 }
