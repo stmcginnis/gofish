@@ -41,7 +41,7 @@ func AssertInDelta[T int64 | float32 | float64](t *testing.T, a, b, delta T) {
 
 func AssertEqual[T any](t *testing.T, expected, actual T) {
 	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("expected [%v] not equal to actual [%v]", expected, actual)
+		t.Errorf("expected [%+v] not equal to actual [%+v]", expected, actual)
 	}
 }
 

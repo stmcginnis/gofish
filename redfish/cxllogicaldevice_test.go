@@ -56,5 +56,5 @@ func TestCxlLogicalDevice(t *testing.T) {
 	assertEquals(t, "GCXLID", string(result.Identifiers[0].DurableNameFormat))
 	assertEquals(t, "CXLio", string(result.SemanticsSupported[0]))
 	assertEquals(t, "CXLcache", string(result.SemanticsSupported[1]))
-	assertEquals(t, "/redfish/v1/Chassis/CXL1/PCIeDevices/1/PCIeFunctions/1", result.pcieFunctions[0])
+	assertEquals(t, "/redfish/v1/Chassis/CXL1/PCIeDevices/1/PCIeFunctions/1", result.pCIeFunctions[0])
 }

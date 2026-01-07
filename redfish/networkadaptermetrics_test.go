@@ -42,31 +42,31 @@ func TestNetworkAdapterMetrics(t *testing.T) {
 	assertEquals(t, "NetworkAdapterMetrics", result.ID)
 	assertEquals(t, "Network Adapter Metrics", result.Name)
 
-	if result.HostBusRXPercent != 35.53 {
-		t.Errorf("Unexpected HostBusRXPercent value: %.2f", result.HostBusRXPercent)
+	if *result.HostBusRXPercent != 35.53 {
+		t.Errorf("Unexpected HostBusRXPercent value: %.2f", *result.HostBusRXPercent)
 	}
 
-	if result.HostBusTXPercent != 14.17 {
-		t.Errorf("Unexpected HostBusTXPercent value: %.2f", result.HostBusTXPercent)
+	if *result.HostBusTXPercent != 14.17 {
+		t.Errorf("Unexpected HostBusTXPercent value: %.2f", *result.HostBusTXPercent)
 	}
 
-	if result.CPUCorePercent != 8.35 {
-		t.Errorf("Unexpected CPUCorePercent value: %.2f", result.CPUCorePercent)
+	if *result.CPUCorePercent != 8.35 {
+		t.Errorf("Unexpected CPUCorePercent value: %.2f", *result.CPUCorePercent)
 	}
 
-	if result.NCSIRXFrames != 0 {
-		t.Errorf("Unexpected NCSIRXFrames value: %d", result.NCSIRXFrames)
+	if *result.NCSIRXFrames != 0 {
+		t.Errorf("Unexpected NCSIRXFrames value: %d", *result.NCSIRXFrames)
 	}
 
-	if result.RXBytes != 7754199970 {
+	if *result.RXBytes != 7754199970 {
 		t.Errorf("Unexpected RXBytes value: %d", result.RXBytes)
 	}
 
-	if result.RXMulticastFrames != 1941 {
+	if *result.RXMulticastFrames != 1941 {
 		t.Errorf("Unexpected RXMulticastFrames value: %d", result.RXMulticastFrames)
 	}
 
-	if result.TXUnicastFrames != 18205770 {
+	if *result.TXUnicastFrames != 18205770 {
 		t.Errorf("Unexpected TXUnicastFrames value: %d", result.TXUnicastFrames)
 	}
 }

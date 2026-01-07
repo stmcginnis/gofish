@@ -26,15 +26,24 @@ var CommonDescriptions = map[string]string{
 
 // CommonTypes maps property names to common Go types
 var CommonTypes = map[string]string{
-	"Status":             "common.Status",
-	"Identifier":         "common.Identifier",
-	"Location":           "common.Location",
-	"PhysicalContext":    "common.PhysicalContext",
-	"PhysicalSubContext": "common.PhysicalSubContext",
-	"LogicalContext":     "common.LogicalContext",
-	"ElectricalContext":  "common.ElectricalContext",
-	"Protocol":           "common.Protocol",
-	"Oem":                "json.RawMessage",
+	"Condition":         "common.Condition",
+	"ElectricalContext": "common.ElectricalContext",
+	"EventType":         "common.EventType",
+	"Health":            "common.Health",
+	"Identifier":        "common.Identifier",
+	"IndicatorLED":      "common.IndicatorLED",
+	"Location":          "common.Location",
+	"LogicalContext":    "common.LogicalContext",
+	"Oem":               "json.RawMessage",
+	"OperationType":     "common.OperationType",
+	"PowerState":        "common.PowerState",
+	"PrivilegeType":     "common.PrivilegeType",
+	"Protocol":          "common.Protocol",
+	"Redundancy":        "common.Redundancy",
+	"RedundantGroup":    "common.RedundantGroup",
+	"ResetType":         "common.ResetType",
+	"Schedule":          "common.Schedule",
+	"Status":            "common.Status",
 }
 
 // EntityProperties are properties that indicate a type should embed common.Entity

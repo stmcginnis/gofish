@@ -376,7 +376,7 @@ func TestManager(t *testing.T) {
 			t.Errorf("Received manager type: %s", result.ManagerType)
 		}
 
-		if result.PowerState != OnPowerState {
+		if result.PowerState != common.OnPowerState {
 			t.Errorf("Received power state: %s", result.PowerState)
 		}
 
@@ -399,24 +399,6 @@ func TestManager(t *testing.T) {
 
 		if result.resetToDefaultsTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.ResetToDefaults" {
 			t.Errorf("Invalid ResetToDefaults target: %s", result.resetToDefaultsTarget)
-		}
-
-		var expectedOEM map[string]interface{}
-		if err := json.Unmarshal([]byte(oemLinksBody), &expectedOEM); err != nil {
-			t.Errorf("Failed to unmarshall link body: %v", err)
-		}
-		if err := json.Unmarshal([]byte(oemDataBody), &expectedOEM); err != nil {
-			t.Errorf("Failed to unmarshall data body: %v", err)
-		}
-		// Check OEM fields
-		if len(result.Oem) == 0 {
-			t.Errorf("Oem field empty, expected not empty")
-		}
-		if len(result.OemLinks) == 0 {
-			t.Errorf("OemLinks field empty, expected not empty")
-		}
-		if len(result.OemActions) == 0 {
-			t.Errorf("OemActions field empty, expected not empty")
 		}
 
 		resetTypes, err := result.GetSupportedResetTypes()
@@ -482,8 +464,8 @@ func TestManagerReset(t *testing.T) {
 	result.SetClient(testClient)
 
 	// happy path
-	result.SupportedResetTypes = []ResetType{GracefulRestartResetType}
-	err = result.Reset(GracefulRestartResetType)
+	result.SupportedResetTypes = []common.ResetType{common.GracefulRestartResetType}
+	err = result.Reset(common.GracefulRestartResetType)
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}
@@ -495,22 +477,22 @@ func TestManagerReset(t *testing.T) {
 	}
 
 	// expect error when use non-supported reset type
-	result.SupportedResetTypes = []ResetType{GracefulRestartResetType}
-	err = result.Reset(ForceRestartResetType)
+	result.SupportedResetTypes = []common.ResetType{common.GracefulRestartResetType}
+	err = result.Reset(common.ForceRestartResetType)
 	if err == nil {
-		t.Errorf("No error when expected on Reset call: %s", err)
+		t.Error("No error when expected on Reset call")
 	}
 
 	// expect empty payload when no allowed reset types
-	result.SupportedResetTypes = []ResetType{}
-	err = result.Reset(GracefulRestartResetType)
+	result.SupportedResetTypes = []common.ResetType{}
+	err = result.Reset(common.GracefulRestartResetType)
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}
 
 	calls = testClient.CapturedCalls()
 
-	if calls[1].Payload != "map[]" {
+	if calls[1].Payload != "" {
 		t.Errorf("Unexpected payload: %s", calls[1].Payload)
 	}
 }
@@ -524,12 +506,12 @@ func TestManagerResetTypes(t *testing.T) {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	if result.actionInfo != managerResetActionInfoTarget {
-		t.Errorf("Invalid reset action info target: %s, expecting %s", result.actionInfo, managerResetActionInfoTarget)
+	if result.resetActionInfo != managerResetActionInfoTarget {
+		t.Errorf("Invalid reset action info target: %s, expecting %s", result.resetActionInfo, managerResetActionInfoTarget)
 	}
 
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
 				getCall(managerResetActionInfo),
 			},
@@ -567,7 +549,7 @@ func TestManagerResetToDefaultsTypes(t *testing.T) {
 	}
 
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
 				getCall(managerResetToDefaultsActionInfo),
 			},

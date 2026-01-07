@@ -117,7 +117,7 @@ func TestAMIEventService(t *testing.T) {
 		t.Errorf("unexpected certificates link: %s", eventService.certificates)
 	}
 
-	if eventService.SecondarySMTP.Port != 25 {
+	if *eventService.SecondarySMTP.Port != 25 {
 		t.Errorf("unexpected port: %d", eventService.SecondarySMTP.Port)
 	}
 }

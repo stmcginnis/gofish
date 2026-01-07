@@ -45,11 +45,11 @@ func TestFilter(t *testing.T) {
 	assertEquals(t, "Cooling Loop Filter", result.Name)
 	assertEquals(t, "North 1", result.Location.Placement.Row)
 
-	if result.RatedServiceHours != 10000 {
-		t.Errorf("Expected rated service hours: %.2f", result.RatedServiceHours)
+	if *result.RatedServiceHours != 10000 {
+		t.Errorf("Expected rated service hours: %.2f", *result.RatedServiceHours)
 	}
 
-	if result.ServiceHours != 5791 {
-		t.Errorf("Expected rated service hours: %.2f", result.ServiceHours)
+	if *result.ServiceHours != 5791 {
+		t.Errorf("Expected rated service hours: %.2f", *result.ServiceHours)
 	}
 }

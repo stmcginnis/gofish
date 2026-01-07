@@ -40,9 +40,9 @@ type Attribute struct {
 	// The unique name for the attribute.
 	AttributeName string
 	// The placeholder of the current value for the attribute.
-	CurrentValue interface{}
+	CurrentValue any
 	// The default value for the attribute.
-	DefaultValue interface{}
+	DefaultValue any
 	// The user-readable display string for the attribute
 	// in the defined language.
 	DisplayName string
@@ -208,7 +208,7 @@ type MapFrom struct {
 	// to use to evaluate this dependency expression.
 	MapFromProperty MapFromProperty
 	// The value to use to evaluate this dependency expression.
-	MapFromValue interface{}
+	MapFromValue any
 	// The logical term that combines two or more map-from conditions
 	// in this dependency expression.
 	MapTerms MapTerms
@@ -225,7 +225,7 @@ type DependencyExpression struct {
 	MapToProperty MapToProperty
 	// The value that the map-to property changes to
 	// if the dependency expression evaluates to true.
-	MapToValue interface{}
+	MapToValue any
 }
 
 // Dependency represents dependencies of attributes on this component.

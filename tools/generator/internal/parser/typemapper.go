@@ -52,8 +52,15 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 		return "string", false, false
 	}
 
+	// Handle type as string or array of strings
+	typeStr, nullable := extractTypeAndNullable(prop.Type)
+
 	// Check if this should be a Link type (lowercase start and not odata)
-	if len(propName) > 0 && propName[0] >= 'a' && propName[0] <= 'z' && !strings.Contains(strings.ToLower(propName), "odata") {
+	if len(propName) > 0 &&
+		typeStr != "string" &&
+		propName[0] >= 'a' &&
+		propName[0] <= 'z' &&
+		!strings.Contains(strings.ToLower(propName), "odata") {
 		return "common.Link", false, false
 	}
 
@@ -133,9 +140,6 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 			}
 		}
 	}
-
-	// Handle type as string or array of strings
-	typeStr, nullable := extractTypeAndNullable(prop.Type)
 
 	switch typeStr {
 	case "object":

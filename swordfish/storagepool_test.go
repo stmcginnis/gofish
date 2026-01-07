@@ -113,7 +113,7 @@ func TestStoragePool(t *testing.T) {
 		t.Errorf("Invalid allocated pool link: %s", result.allocatedPools)
 	}
 
-	if result.MaxBlockSizeBytes != 2199023255600 {
+	if *result.MaxBlockSizeBytes != 2199023255600 {
 		t.Errorf("Invalid max block size: %d", result.MaxBlockSizeBytes)
 	}
 }
@@ -133,7 +133,7 @@ func TestStoragePoolUpdate(t *testing.T) {
 	result.Compressed = false
 	result.Deduplicated = false
 	result.Encrypted = false
-	result.RecoverableCapacitySourceCount = 2
+	*result.RecoverableCapacitySourceCount = 2
 	err = result.Update()
 
 	if err != nil {

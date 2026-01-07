@@ -1,12 +1,12 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.4 - #Zone.v1_6_3.Zone
 
 package redfish
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -14,250 +14,151 @@ import (
 type ExternalAccessibility string
 
 const (
-	// GloballyAccessibleExternalAccessibility shall indicate that any external entity with the correct access details,
-	// which may include authorization information, can access the endpoints that this zone lists, regardless of zone.
+	// GloballyAccessibleExternalAccessibility shall indicate that any external
+	// entity with the correct access details, which may include authorization
+	// information, can access the endpoints that this zone lists, regardless of
+	// zone.
 	GloballyAccessibleExternalAccessibility ExternalAccessibility = "GloballyAccessible"
-	// NonZonedAccessibleExternalAccessibility shall indicate that any external entity that another zone does not
-	// explicitly list can access the endpoints that this zone lists.
+	// NonZonedAccessibleExternalAccessibility shall indicate that any external
+	// entity that another zone does not explicitly list can access the endpoints
+	// that this zone lists.
 	NonZonedAccessibleExternalAccessibility ExternalAccessibility = "NonZonedAccessible"
-	// ZoneOnlyExternalAccessibility shall indicate that endpoints in this zone are only accessible by endpoints that
-	// this zone explicitly lists.
+	// ZoneOnlyExternalAccessibility shall indicate that endpoints in this zone are
+	// only accessible by endpoints that this zone explicitly lists.
 	ZoneOnlyExternalAccessibility ExternalAccessibility = "ZoneOnly"
-	// NoInternalRoutingExternalAccessibility shall indicate that implicit routing within this zone is not defined.
+	// NoInternalRoutingExternalAccessibility shall indicate that implicit routing
+	// within this zone is not defined.
 	NoInternalRoutingExternalAccessibility ExternalAccessibility = "NoInternalRouting"
 )
 
 type ZoneType string
 
 const (
-	// DefaultZoneType shall indicate a zone in which all endpoints are added by default when instantiated. This value
-	// shall only be used for zones subordinate to the fabric collection.
+	// DefaultZoneType shall indicate a zone in which all endpoints are added by
+	// default when instantiated. This value shall only be used for zones
+	// subordinate to the fabric collection.
 	DefaultZoneType ZoneType = "Default"
-	// ZoneOfEndpointsZoneType shall indicate a zone that contains resources of type Endpoint. This value shall only be
-	// used for zones subordinate to the fabric collection.
+	// ZoneOfEndpointsZoneType shall indicate a zone that contains resources of
+	// type 'Endpoint'. This value shall only be used for zones subordinate to the
+	// fabric collection.
 	ZoneOfEndpointsZoneType ZoneType = "ZoneOfEndpoints"
-	// ZoneOfZonesZoneType shall indicate a zone that contains resources of type Zone. This value shall only be used
-	// for zones subordinate to the fabric collection.
+	// ZoneOfZonesZoneType shall indicate a zone that contains resources of type
+	// 'Zone'. This value shall only be used for zones subordinate to the fabric
+	// collection.
 	ZoneOfZonesZoneType ZoneType = "ZoneOfZones"
-	// ZoneOfResourceBlocksZoneType shall indicate a zone that contains resources of type ResourceBlock. This value
-	// shall only be used for zones subordinate to the composition service.
+	// ZoneOfResourceBlocksZoneType shall indicate a zone that contains resources
+	// of type 'ResourceBlock'. This value shall only be used for zones subordinate
+	// to the composition service.
 	ZoneOfResourceBlocksZoneType ZoneType = "ZoneOfResourceBlocks"
 )
-
-// ZoneLinks shall contain links to resources that are related to but are not contained by, or subordinate to, this
-// resource.
-type zoneLinks struct {
-	// AddressPools shall contain an array of links to resources of type AddressPool with which this zone is
-	// associated.
-	AddressPools common.Links
-	// AddressPools@odata.count
-	AddressPoolsCount int `json:"AddressPools@odata.count"`
-	// ContainedByZones shall contain an array of links to resources of type Zone that represent the zones that contain
-	// this zone. The zones referenced by this property shall not be contained by other zones.
-	ContainedByZones common.Links
-	// ContainedByZones@odata.count
-	ContainedByZonesCount int `json:"ContainedByZones@odata.count"`
-	// ContainsZones shall contain an array of links to resources of type Zone that represent the zones that are
-	// contained by this zone. The zones referenced by this property shall not contain other zones.
-	ContainsZones common.Links
-	// ContainsZones@odata.count
-	ContainsZonesCount int `json:"ContainsZones@odata.count"`
-	// Endpoints shall contain an array of links to resources of type Endpoint that this zone contains.
-	Endpoints common.Links
-	// Endpoints@odata.count
-	EndpointsCount int `json:"Endpoints@odata.count"`
-	// InvolvedSwitches shall contain an array of links to resources of type Switch in this zone.
-	InvolvedSwitches common.Links
-	// InvolvedSwitches@odata.count
-	InvolvedSwitchesCount int `json:"InvolvedSwitches@odata.count"`
-	// ResourceBlocks shall contain an array of links to resources of type ResourceBlock with which this zone is
-	// associated.
-	ResourceBlocks common.Links
-	// ResourceBlocks@odata.count
-	ResourceBlocksCount int `json:"ResourceBlocks@odata.count"`
-}
 
 // Zone shall represent a simple fabric zone for a Redfish implementation.
 type Zone struct {
 	common.Entity
+	// DefaultRoutingEnabled shall indicate whether routing within this zone is
+	// enabled.
+	//
+	// Version added: v1.4.0
+	DefaultRoutingEnabled bool
+	// ExternalAccessibility shall contain and indication of accessibility of
+	// endpoints in this zone to endpoints outside of this zone.
+	//
+	// Version added: v1.3.0
+	ExternalAccessibility ExternalAccessibility
+	// Identifiers shall contain a list of all known durable names for the
+	// associated zone.
+	//
+	// Version added: v1.2.0
+	Identifiers []Identifier
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// DefaultRoutingEnabled shall indicate whether routing within this zone is enabled.
-	DefaultRoutingEnabled bool
-	// Description provides a description of this resource.
-	Description string
-	// ExternalAccessibility shall contain and indication of accessibility of endpoints in this zone to endpoints
-	// outside of this zone.
-	ExternalAccessibility ExternalAccessibility
-	// Identifiers shall contain a list of all known durable names for the associated zone.
-	Identifiers []common.Identifier
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
 	// ZoneType shall contain the type of zone that this zone represents.
+	//
+	// Version added: v1.4.0
 	ZoneType ZoneType
+	// addEndpointTarget is the URL to send AddEndpoint requests.
+	addEndpointTarget string
+	// removeEndpointTarget is the URL to send RemoveEndpoint requests.
+	removeEndpointTarget string
+	// addressPools are the URIs for AddressPools.
+	addressPools []string
+	// containedByZones are the URIs for ContainedByZones.
+	containedByZones []string
+	// containsZones are the URIs for ContainsZones.
+	containsZones []string
+	// endpoints are the URIs for Endpoints.
+	endpoints []string
+	// involvedSwitches are the URIs for InvolvedSwitches.
+	involvedSwitches []string
+	// resourceBlocks are the URIs for ResourceBlocks.
+	resourceBlocks []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	addEndpointTarget    string
-	removeEndpointTarget string
-
-	addressPools []string
-	// AddressPoolsCount is the number of address pools associated with this zone.
-	AddressPoolsCount int
-	containedByZones  []string
-	// ContainedByZonesCount is the number of zones that contain this zone.
-	ContainedByZonesCount int
-	containsZones         []string
-	// ContainsZonesCount is the number of zones contained in this zone.
-	ContainsZonesCount int
-	endpoints          []string
-	// EndpointsCount is the number of endpoints that this zone contains.
-	EndpointsCount   int
-	involvedSwitches []string
-	// InvolvedSwitchesCount is the number of switches in this zone.
-	InvolvedSwitchesCount int
-	resourceBlocks        []string
-	// ResourceBlocksCount is the number of resource blocks with which this zone is associated.
-	ResourceBlockCount int
 }
 
 // UnmarshalJSON unmarshals a Zone object from the raw JSON.
-func (zone *Zone) UnmarshalJSON(b []byte) error {
+func (z *Zone) UnmarshalJSON(b []byte) error {
 	type temp Zone
-	var t struct {
+	type zActions struct {
+		AddEndpoint    common.ActionTarget `json:"#Zone.AddEndpoint"`
+		RemoveEndpoint common.ActionTarget `json:"#Zone.RemoveEndpoint"`
+	}
+	type zLinks struct {
+		AddressPools     common.Links `json:"AddressPools"`
+		ContainedByZones common.Links `json:"ContainedByZones"`
+		ContainsZones    common.Links `json:"ContainsZones"`
+		Endpoints        common.Links `json:"Endpoints"`
+		InvolvedSwitches common.Links `json:"InvolvedSwitches"`
+		ResourceBlocks   common.Links `json:"ResourceBlocks"`
+	}
+	var tmp struct {
 		temp
-		Actions struct {
-			AddEndpoint    common.ActionTarget `json:"#Zone.AddEndpoint"`
-			RemoveEndpoint common.ActionTarget `json:"#Zone.RemoveEndpoint"`
-		}
-		Links zoneLinks
+		Actions zActions
+		Links   zLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*zone = Zone(t.temp)
+	*z = Zone(tmp.temp)
 
 	// Extract the links to other entities for later
-	zone.addEndpointTarget = t.Actions.AddEndpoint.Target
-	zone.removeEndpointTarget = t.Actions.RemoveEndpoint.Target
-
-	zone.addressPools = t.Links.AddressPools.ToStrings()
-	zone.AddressPoolsCount = t.Links.AddressPoolsCount
-	zone.containedByZones = t.Links.ContainedByZones.ToStrings()
-	zone.ContainedByZonesCount = t.Links.ContainedByZonesCount
-	zone.containsZones = t.Links.ContainsZones.ToStrings()
-	zone.ContainsZonesCount = t.Links.ContainsZonesCount
-	zone.endpoints = t.Links.Endpoints.ToStrings()
-	zone.EndpointsCount = t.Links.EndpointsCount
-	zone.involvedSwitches = t.Links.InvolvedSwitches.ToStrings()
-	zone.InvolvedSwitchesCount = t.Links.InvolvedSwitchesCount
-	zone.resourceBlocks = t.Links.ResourceBlocks.ToStrings()
-	zone.ResourceBlockCount = t.Links.ResourceBlocksCount
+	z.addEndpointTarget = tmp.Actions.AddEndpoint.Target
+	z.removeEndpointTarget = tmp.Actions.RemoveEndpoint.Target
+	z.addressPools = tmp.Links.AddressPools.ToStrings()
+	z.containedByZones = tmp.Links.ContainedByZones.ToStrings()
+	z.containsZones = tmp.Links.ContainsZones.ToStrings()
+	z.endpoints = tmp.Links.Endpoints.ToStrings()
+	z.involvedSwitches = tmp.Links.InvolvedSwitches.ToStrings()
+	z.resourceBlocks = tmp.Links.ResourceBlocks.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	zone.rawData = b
+	z.rawData = b
 
 	return nil
 }
 
-// AddEndpoint adds an endpoint to a zone.
-//
-// `endpointURI` is the URI for the endpoint to add to the zone.
-//
-// `endpointETag` is the current ETag of the endpoint to add to the zone.
-//
-// `zoneETag` is the current ETag of the zone. If the client-provided ETag does not
-// match the current ETag of the zone, the service shall return the HTTP 428
-// (Precondition Required) status code to reject the request.
-func (zone *Zone) AddEndpoint(endpointURI, endpointETag, zoneETag string) error {
-	if zone.addEndpointTarget == "" {
-		return errors.New("addEndpoint not supported by this zone")
-	}
-
-	t := struct {
-		Endpoint     string
-		EndpointETag string
-		ZoneETag     string
-	}{
-		Endpoint:     endpointURI,
-		EndpointETag: endpointETag,
-		ZoneETag:     zoneETag,
-	}
-	return zone.Post(zone.addEndpointTarget, t)
-}
-
-// RemoveEndpoint removes an endpoint from a zone.
-//
-// `endpointURI` is the URI for the endpoint to remove from the zone.
-//
-// `endpointETag` is the current ETag of the endpoint to remove from the zone.
-//
-// `zoneETag` is the current ETag of the zone. If the client-provided ETag does not
-// match the current ETag of the zone, the service shall return the HTTP 428
-// (Precondition Required) status code to reject the request.
-func (zone *Zone) RemoveEndpoint(endpointURI, endpointETag, zoneETag string) error {
-	if zone.removeEndpointTarget == "" {
-		return errors.New("removeEndpoint not supported by this zone")
-	}
-
-	t := struct {
-		Endpoint     string
-		EndpointETag string
-		ZoneETag     string
-	}{
-		Endpoint:     endpointURI,
-		EndpointETag: endpointETag,
-		ZoneETag:     zoneETag,
-	}
-	return zone.Post(zone.removeEndpointTarget, t)
-}
-
-// AddressPools gets the address pools associated with this zone.
-func (zone *Zone) AddressPools() ([]*AddressPool, error) {
-	return common.GetObjects[AddressPool](zone.GetClient(), zone.addressPools)
-}
-
-// ContainedByZones gets the zone that contain this zone.
-func (zone *Zone) ContainedByZones() ([]*Zone, error) {
-	return common.GetObjects[Zone](zone.GetClient(), zone.containedByZones)
-}
-
-// ContainsZones gets the zones that are contained by this zone.
-func (zone *Zone) ContainsZones() ([]*Zone, error) {
-	return common.GetObjects[Zone](zone.GetClient(), zone.containsZones)
-}
-
-// Endpoints gets the endpoints that this zone contains.
-func (zone *Zone) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](zone.GetClient(), zone.endpoints)
-}
-
-// InvolvedSwitches gets the switches in this zone.
-func (zone *Zone) InvolvedSwitches() ([]*Switch, error) {
-	return common.GetObjects[Switch](zone.GetClient(), zone.involvedSwitches)
-}
-
-// ResourceBlocks gets the resource blocks with which this zone is associated.
-func (zone *Zone) ResourceBlocks() ([]*ResourceBlock, error) {
-	return common.GetObjects[ResourceBlock](zone.GetClient(), zone.resourceBlocks)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (zone *Zone) Update() error {
-	readWriteFields := []string{"DefaultRoutingEnabled",
+func (z *Zone) Update() error {
+	readWriteFields := []string{
+		"DefaultRoutingEnabled",
 		"ExternalAccessibility",
+		"Identifiers",
+		"Status",
 		"ZoneType",
 	}
 
-	return zone.UpdateFromRawData(zone, zone.rawData, readWriteFields)
+	return z.UpdateFromRawData(z, z.rawData, readWriteFields)
 }
 
 // GetZone will get a Zone instance from the service.
@@ -269,4 +170,74 @@ func GetZone(c common.Client, uri string) (*Zone, error) {
 // a provided reference.
 func ListReferencedZones(c common.Client, link string) ([]*Zone, error) {
 	return common.GetCollectionObjects[Zone](c, link)
+}
+
+// AddEndpoint shall add an endpoint to a zone.
+// endpoint - This parameter shall contain a link to the specified endpoint to
+// add to the zone.
+// endpointETag - This parameter shall contain the current ETag of the endpoint
+// to add to the zone. If the client-provided ETag does not match the current
+// ETag of the endpoint that the 'Endpoint' parameter specifies, the service
+// shall return the HTTP '428 Precondition Required' status code to reject the
+// request.
+// zoneETag - This parameter shall contain the current ETag of the zone. If the
+// client-provided ETag does not match the current ETag of the zone, the
+// service shall return the HTTP '428 Precondition Required' status code to
+// reject the request.
+func (z *Zone) AddEndpoint(endpoint string, endpointETag string, zoneETag string) error {
+	payload := make(map[string]any)
+	payload["Endpoint"] = endpoint
+	payload["EndpointETag"] = endpointETag
+	payload["ZoneETag"] = zoneETag
+	return z.Post(z.addEndpointTarget, payload)
+}
+
+// RemoveEndpoint shall remove an endpoint from a zone.
+// endpoint - This parameter shall contain a link to the specified endpoint to
+// remove from the zone.
+// endpointETag - This parameter shall contain the current ETag of the endpoint
+// to remove from the system. If the client-provided ETag does not match the
+// current ETag of the endpoint that the 'Endpoint' parameter specifies, the
+// service shall return the HTTP '428 Precondition Required' status code to
+// reject the request.
+// zoneETag - This parameter shall contain the current ETag of the zone. If the
+// client-provided ETag does not match the current ETag of the zone, the
+// service shall return the HTTP '428 Precondition Required' status code to
+// reject the request.
+func (z *Zone) RemoveEndpoint(endpoint string, endpointETag string, zoneETag string) error {
+	payload := make(map[string]any)
+	payload["Endpoint"] = endpoint
+	payload["EndpointETag"] = endpointETag
+	payload["ZoneETag"] = zoneETag
+	return z.Post(z.removeEndpointTarget, payload)
+}
+
+// AddressPools gets the AddressPools linked resources.
+func (z *Zone) AddressPools(client common.Client) ([]*AddressPool, error) {
+	return common.GetObjects[AddressPool](client, z.addressPools)
+}
+
+// ContainedByZones gets the ContainedByZones linked resources.
+func (z *Zone) ContainedByZones(client common.Client) ([]*Zone, error) {
+	return common.GetObjects[Zone](client, z.containedByZones)
+}
+
+// ContainsZones gets the ContainsZones linked resources.
+func (z *Zone) ContainsZones(client common.Client) ([]*Zone, error) {
+	return common.GetObjects[Zone](client, z.containsZones)
+}
+
+// Endpoints gets the Endpoints linked resources.
+func (z *Zone) Endpoints(client common.Client) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](client, z.endpoints)
+}
+
+// InvolvedSwitches gets the InvolvedSwitches linked resources.
+func (z *Zone) InvolvedSwitches(client common.Client) ([]*Switch, error) {
+	return common.GetObjects[Switch](client, z.involvedSwitches)
+}
+
+// ResourceBlocks gets the ResourceBlocks linked resources.
+func (z *Zone) ResourceBlocks(client common.Client) ([]*ResourceBlock, error) {
+	return common.GetObjects[ResourceBlock](client, z.resourceBlocks)
 }

@@ -254,10 +254,10 @@ func TestComputerSystem(t *testing.T) { //nolint
 		t.Errorf("Received invalid indicator status: %s", result.IndicatorLED)
 	}
 
-	if result.PowerState != OnPowerState {
+	if result.PowerState != common.OnPowerState {
 		t.Errorf("Received invalid power status: %s", result.PowerState)
 	}
-	if result.Boot.AutomaticRetryAttempts != 3 {
+	if *result.Boot.AutomaticRetryAttempts != 3 {
 		t.Errorf("Received invalid boot automatic retry attempts: %d", result.Boot.AutomaticRetryAttempts)
 	}
 
@@ -289,7 +289,7 @@ func TestComputerSystem(t *testing.T) { //nolint
 		t.Errorf("Received invalid processor summary state: %s", result.ProcessorSummary.Status.State)
 	}
 
-	if result.ProcessorSummary.Count != 2 {
+	if *result.ProcessorSummary.Count != 2 {
 		t.Errorf("Received invalid processor count: %d", result.ProcessorSummary.Count)
 	}
 
@@ -297,13 +297,13 @@ func TestComputerSystem(t *testing.T) { //nolint
 		t.Errorf("Received invalid memory summary state: %s", result.MemorySummary.Status.State)
 	}
 
-	if result.MemorySummary.TotalSystemMemoryGiB != 65536 {
-		t.Errorf("Received invalid total system memory: %f", result.MemorySummary.TotalSystemMemoryGiB)
+	if *result.MemorySummary.TotalSystemMemoryGiB != 65536 {
+		t.Errorf("Received invalid total system memory: %f", *result.MemorySummary.TotalSystemMemoryGiB)
 	}
 
-	if result.MemorySummary.TotalSystemPersistentMemoryGiB != 262144 {
+	if *result.MemorySummary.TotalSystemPersistentMemoryGiB != 262144 {
 		t.Errorf("Received invalid total system persistent memory: %f",
-			result.MemorySummary.TotalSystemPersistentMemoryGiB)
+			*result.MemorySummary.TotalSystemPersistentMemoryGiB)
 	}
 
 	if len(result.TrustedModules) != 1 {
@@ -353,9 +353,9 @@ func TestComputerSystem(t *testing.T) { //nolint
 		t.Errorf("Invalid reset action target: %s", result.resetTarget)
 	}
 
-	if len(result.SupportedResetTypes) != 6 {
+	if len(result.supportedResetTypes) != 6 {
 		t.Errorf("Invalid allowable reset actions, expected 6, got %d",
-			len(result.SupportedResetTypes))
+			len(result.supportedResetTypes))
 	}
 	if len(result.managedBy) != 1 {
 		t.Errorf("Received invalid number of ManagedBy: %d", len(result.managedBy))
@@ -367,7 +367,7 @@ func TestComputerSystem(t *testing.T) { //nolint
 	if result.operatingSystem != "/redfish/v1/Systems/1/OperatingSystem" {
 		t.Errorf("Received invalid OperatingSystem reference: %s", result.operatingSystem)
 	}
-	if result.Boot.AllowableBootSourceOverrideTargetValues[0] != NoneBootSourceOverrideTarget {
+	if result.Boot.AllowableBootSourceOverrideTargetValues[0] != NoneBootSource {
 		t.Errorf("Received invalid AllowablebootSourceOverrideTargetValue: %s", result.Boot.AllowableBootSourceOverrideTargetValues[0])
 	}
 	if result.Boot.AllowableUefiTargetBootSourceOverrideValues[0] != "UsbClass(0xFFFF,0xFFFF,0xFF,0xFF,0xFF)" {
@@ -480,7 +480,7 @@ func TestSystemSupportedResetTypes(t *testing.T) {
 	}
 
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
 				getCall(computerSystemBodyResetActionInfo),
 			},

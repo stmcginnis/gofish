@@ -44,8 +44,12 @@ var endpointBody = strings.NewReader(
 		"EndpointProtocol": "NVMe",
 		"HostReservationMemoryBytes": 8589934592,
 		"IPTransportDetails": [{
-				"IPv4Address": "127.0.0.1",
-				"IPv6Address": "2001:db8:85a3:0:0:8a2e:370:7334",
+				"IPv4Address": {
+					"Address": "127.0.0.1"
+				},
+				"IPv6Address": {
+					"Address": "2001:db8:85a3:0:0:8a2e:370:7334"
+				},
 				"Port": 8080,
 				"TransportProtocol": "iSCSI"
 			}
@@ -128,7 +132,7 @@ func TestEndpoint(t *testing.T) {
 		t.Errorf("Received endpoint protocol: %s", result.EndpointProtocol)
 	}
 
-	if result.HostReservationMemoryBytes != 8589934592 {
+	if *result.HostReservationMemoryBytes != 8589934592 {
 		t.Errorf("Received host reservation memory bytes: %d", result.HostReservationMemoryBytes)
 	}
 
@@ -136,7 +140,7 @@ func TestEndpoint(t *testing.T) {
 		t.Errorf("Received %d IP transport details", len(result.IPTransportDetails))
 	}
 
-	if result.IPTransportDetails[0].IPv4Address != "127.0.0.1" {
+	if result.IPTransportDetails[0].IPv4Address.Address != "127.0.0.1" {
 		t.Errorf("Received IP transport IPv4: %s", result.IPTransportDetails[0].IPv4Address)
 	}
 

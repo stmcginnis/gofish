@@ -88,9 +88,9 @@ var fileSystemBody = `{
 			"UTF_16"
 		],
 		"ClusterSizeBytes": 512,
-		"ExportedShares": {
-			"@odata.id": "/redfish/v1/Shares/1"
-		},
+		"ExportedShares": [
+			{"@odata.id": "/redfish/v1/Shares/1"}
+		],
 		"IOStatistics": {
 			"NonIORequestTime": "P0Y0M0DT0H0M5S",
 			"NonIORequests": 1000,
@@ -145,7 +145,7 @@ func TestFileSystem(t *testing.T) {
 		t.Errorf("Invalid access capability: %s", result.AccessCapabilities[3])
 	}
 
-	if result.BlockSizeBytes != 2147483648000 {
+	if *result.BlockSizeBytes != 2147483648000 {
 		t.Errorf("Invalid BlockSizeBytes: %d", result.BlockSizeBytes)
 	}
 
@@ -169,7 +169,7 @@ func TestFileSystem(t *testing.T) {
 		t.Errorf("Invalid character code set: %s", result.CharacterCodeSet[1])
 	}
 
-	if result.RemainingCapacityPercent != 43 {
+	if *result.RemainingCapacityPercent != 43 {
 		t.Errorf("Invalid RemainingCapacityPercent: %d", result.RemainingCapacityPercent)
 	}
 }
@@ -188,8 +188,8 @@ func TestFileSystemUpdate(t *testing.T) {
 
 	result.CasePreserved = true
 	result.CaseSensitive = false
-	result.ClusterSizeBytes = 1024
-	result.MaxFileNameLengthBytes = 1024
+	*result.ClusterSizeBytes = 1024
+	*result.MaxFileNameLengthBytes = 1024
 	err = result.Update()
 
 	if err != nil {

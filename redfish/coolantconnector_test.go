@@ -63,8 +63,8 @@ func TestCoolantConnector(t *testing.T) {
 	assertEquals(t, "Pair", string(result.CoolantConnectorType))
 	assertEquals(t, "/redfish/v1/ThermalEquipment/CoolingLoops/Rack4", result.connectedCoolingLoop)
 
-	if result.RatedFlowLitersPerMinute != 30 {
-		t.Errorf("Unexpected RatedFlowLitersPerMinute, got %.2f", result.RatedFlowLitersPerMinute)
+	if *result.RatedFlowLitersPerMinute != 30 {
+		t.Errorf("Unexpected RatedFlowLitersPerMinute, got %.2f", *result.RatedFlowLitersPerMinute)
 	}
 
 	if *result.FlowLitersPerMinute.Reading != 24.3 {

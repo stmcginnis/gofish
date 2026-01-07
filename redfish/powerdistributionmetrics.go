@@ -1,96 +1,143 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.1 - #PowerDistributionMetrics.v1_4_0.PowerDistributionMetrics
 
 package redfish
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// PowerDistributionMetrics shall be used to represent
-// the metrics of a power distribution component or unit for a Redfish implementation.
+// PowerDistributionMetrics shall represent the metrics of a power distribution
+// component or unit for a Redfish implementation.
 type PowerDistributionMetrics struct {
 	common.Entity
-
+	// AbsoluteHumidity shall contain the absolute (volumetric) humidity sensor
+	// reading, in grams per cubic meter units, for this resource. The value of the
+	// 'DataSourceUri' property, if present, shall reference a resource of type
+	// 'Sensor' with the 'ReadingType' property containing the value
+	// 'AbsoluteHumidity'.
+	//
+	// Version added: v1.3.0
+	AbsoluteHumidity SensorExcerpt
+	// AmbientTemperatureCelsius shall contain the ambient temperature, in degree
+	// Celsius units, for this resource. The ambient temperature shall be the
+	// temperature measured at a point exterior to the 'Chassis' containing this
+	// resource. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Temperature'. This property shall only be present, if
+	// supported, in resource instances subordinate to a 'Chassis' or 'CoolingUnit'
+	// resource.
+	//
+	// Version added: v1.4.0
+	AmbientTemperatureCelsius SensorExcerpt
+	// EnergykWh shall contain the total energy, in kilowatt-hour units, for this
+	// resource that represents the 'Total' 'ElectricalContext' sensor when
+	// multiple energy sensors exist. The value of the 'DataSourceUri' property, if
+	// present, shall reference a resource of type 'Sensor' with the 'ReadingType'
+	// property containing the value 'EnergykWh'.
+	EnergykWh SensorEnergykWhExcerpt
+	// HumidityPercent shall contain the humidity, in percent units, for this
+	// resource. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Humidity'.
+	//
+	// Version added: v1.1.0
+	HumidityPercent SensorExcerpt
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-
-	// The absolute (volumetric) humidity sensor reading,
-	// in grams/cubic meter units.
-	AbsoluteHumidity SensorExcerpt
-	// The total energy, in kilowatt-hours
-	// that represents the Total ElectricalContext sensor
-	// when multiple energy sensors exist.
-	EnergykWh SensorEnergykWhExcerpt
-	// The humidity, in percent units
-	HumidityPercent SensorExcerpt
-	// The power load, in percent units, for this device
-	// that represents the Total ElectricalContext for this device.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PowerLoadPercent shall contain the power load, in percent units, for this
+	// device that represents the 'Total' 'ElectricalContext' for this device. The
+	// value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Percent'.
+	//
+	// Version added: v1.2.0
 	PowerLoadPercent SensorExcerpt
-	// The total power, in watt units
-	// that represents the Total ElectricalContext sensor
-	// when multiple power sensors exist.
+	// PowerWatts shall contain the total power, in watt units, for this resource
+	// that represents the 'Total' 'ElectricalContext' sensor when multiple power
+	// sensors exist. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Power'.
 	PowerWatts SensorPowerExcerpt
-	// The temperature, in degrees Celsius units.
+	// TemperatureCelsius shall contain the temperature, in degree Celsius units,
+	// for this resource. The value of the 'DataSourceUri' property, if present,
+	// shall reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Temperature'.
+	//
+	// Version added: v1.1.0
 	TemperatureCelsius SensorExcerpt
-	Oem                json.RawMessage
-
-	// Actions section
-	// // This action resets the summary metrics related to this equipment.
+	// resetMetricsTarget is the URL to send ResetMetrics requests.
 	resetMetricsTarget string
-	// OemActions contains all the vendor specific actions.
-	// It is vendor responsibility to parse this field accordingly
-	OemActions json.RawMessage
-
-	// rawData holds the original JSON if needed
-	RawData []byte
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerDistributionMetrics object from the raw JSON.
-func (metrics *PowerDistributionMetrics) UnmarshalJSON(b []byte) error {
+func (p *PowerDistributionMetrics) UnmarshalJSON(b []byte) error {
 	type temp PowerDistributionMetrics
-
-	type actions struct {
+	type pActions struct {
 		ResetMetrics common.ActionTarget `json:"#PowerDistributionMetrics.ResetMetrics"`
-		Oem          json.RawMessage     // OEM actions will be stored here
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions actions
+		Actions pActions
 	}
 
-	if err := json.Unmarshal(b, &t); err != nil {
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
 		return err
 	}
 
-	// Extract the links to other entities for later
-	*metrics = PowerDistributionMetrics(t.temp)
-	metrics.resetMetricsTarget = t.Actions.ResetMetrics.Target
-	metrics.OemActions = t.Actions.Oem
+	*p = PowerDistributionMetrics(tmp.temp)
 
-	metrics.RawData = b
+	// Extract the links to other entities for later
+	p.resetMetricsTarget = tmp.Actions.ResetMetrics.Target
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.rawData = b
 
 	return nil
 }
 
-// GetPowerDistributionMetrics will get a PowerDistributionMetrics instance from the Redfish service.
+// Update commits updates to this object's properties to the running system.
+func (p *PowerDistributionMetrics) Update() error {
+	readWriteFields := []string{
+		"AbsoluteHumidity",
+		"AmbientTemperatureCelsius",
+		"EnergykWh",
+		"HumidityPercent",
+		"PowerLoadPercent",
+		"PowerWatts",
+		"TemperatureCelsius",
+	}
+
+	return p.UpdateFromRawData(p, p.rawData, readWriteFields)
+}
+
+// GetPowerDistributionMetrics will get a PowerDistributionMetrics instance from the service.
 func GetPowerDistributionMetrics(c common.Client, uri string) (*PowerDistributionMetrics, error) {
 	return common.GetObject[PowerDistributionMetrics](c, uri)
 }
 
-// This action shall reset any time intervals or counted values for this equipment.
-func (metrics *PowerDistributionMetrics) ResetMetrics() error {
-	if metrics.resetMetricsTarget == "" {
-		return fmt.Errorf("ResetMetrics is not supported")
-	}
+// ListReferencedPowerDistributionMetricss gets the collection of PowerDistributionMetrics from
+// a provided reference.
+func ListReferencedPowerDistributionMetricss(c common.Client, link string) ([]*PowerDistributionMetrics, error) {
+	return common.GetCollectionObjects[PowerDistributionMetrics](c, link)
+}
 
-	return metrics.Post(metrics.resetMetricsTarget, nil)
+// ResetMetrics shall reset any time intervals or counted values for this
+// equipment.
+func (p *PowerDistributionMetrics) ResetMetrics() error {
+	payload := make(map[string]any)
+	return p.Post(p.resetMetricsTarget, payload)
 }

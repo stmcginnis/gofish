@@ -72,7 +72,7 @@ func TestCreateSession(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodPost: {
 				// defining the custom return for the first POST operation
 				&http.Response{
@@ -151,7 +151,7 @@ func TestCreateSessionFullURIPath(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodPost: {
 				// defining the custom return for the first POST operation
 				&http.Response{

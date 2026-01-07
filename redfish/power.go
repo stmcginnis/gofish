@@ -1,89 +1,412 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.4 - #Power.v1_7_3.Power
 
 package redfish
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"math"
 	"strconv"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// InputType is the type of power input.
 type InputType string
 
 const (
-	// ACInputType indicates an Alternating Current (AC) input range.
+	// ACInputType Alternating Current (AC) input range.
 	ACInputType InputType = "AC"
-	// DCInputType indicates a Direct Current (DC) input range.
+	// DCInputType Direct Current (DC) input range.
 	DCInputType InputType = "DC"
 )
 
-// LineInputVoltageType is the type of line voltage supported by a power supply.
 type LineInputVoltageType string
 
 const (
-	// UnknownLineInputVoltageType indicates the power supply line input voltage type cannot be determined.
+	// UnknownLineInputVoltageType The power supply line input voltage type cannot
+	// be determined.
 	UnknownLineInputVoltageType LineInputVoltageType = "Unknown"
-
-	// ACLowLineLineInputVoltageType indicates 100-127V AC input. Deprecated in v1.1.0 in favor of AC120VLineInputVoltageType.
+	// ACLowLineLineInputVoltageType 100-127V AC input.
 	ACLowLineLineInputVoltageType LineInputVoltageType = "ACLowLine"
-	// ACMidLineLineInputVoltageType indicates 200-240V AC input. Deprecated in v1.1.0 in favor of AC240VLineInputVoltageType.
+	// ACMidLineLineInputVoltageType 200-240V AC input.
 	ACMidLineLineInputVoltageType LineInputVoltageType = "ACMidLine"
-	// ACHighLineLineInputVoltageType indicates 277V AC input. Deprecated in v1.1.0 in favor of AC277VLineInputVoltageType.
+	// ACHighLineLineInputVoltageType 277V AC input.
 	ACHighLineLineInputVoltageType LineInputVoltageType = "ACHighLine"
-
-	// DCNeg48VLineInputVoltageType indicates -48V DC input.
+	// DCNeg48VLineInputVoltageType -48V DC input.
 	DCNeg48VLineInputVoltageType LineInputVoltageType = "DCNeg48V"
-	// DC380VLineInputVoltageType indicates high-voltage DC input (380V).
+	// DC380VLineInputVoltageType High-voltage DC input (380V).
 	DC380VLineInputVoltageType LineInputVoltageType = "DC380V"
-
-	// AC120VLineInputVoltageType indicates AC 120V nominal input. Added in v1.1.0.
+	// AC120VLineInputVoltageType AC 120V nominal input.
 	AC120VLineInputVoltageType LineInputVoltageType = "AC120V"
-	// AC240VLineInputVoltageType indicates AC 240V nominal input. Added in v1.1.0.
+	// AC240VLineInputVoltageType AC 240V nominal input.
 	AC240VLineInputVoltageType LineInputVoltageType = "AC240V"
-	// AC277VLineInputVoltageType indicates AC 277V nominal input. Added in v1.1.0.
+	// AC277VLineInputVoltageType AC 277V nominal input.
 	AC277VLineInputVoltageType LineInputVoltageType = "AC277V"
-	// ACandDCWideRangeLineInputVoltageType indicates wide range AC or DC input. Added in v1.1.0.
+	// ACandDCWideRangeLineInputVoltageType Wide range AC or DC input.
 	ACandDCWideRangeLineInputVoltageType LineInputVoltageType = "ACandDCWideRange"
-	// ACWideRangeLineInputVoltageType indicates wide range AC input. Added in v1.1.0.
+	// ACWideRangeLineInputVoltageType Wide range AC input.
 	ACWideRangeLineInputVoltageType LineInputVoltageType = "ACWideRange"
-	// DC240VLineInputVoltageType indicates DC 240V nominal input. Added in v1.1.0.
+	// DC240VLineInputVoltageType DC 240V nominal input.
 	DC240VLineInputVoltageType LineInputVoltageType = "DC240V"
 )
 
-// PowerLimitException is the action taken when power cannot be maintained below the limit.
 type PowerLimitException string
 
 const (
-	// NoActionPowerLimitException indicates no action is taken when the limit is exceeded.
+	// NoActionPowerLimitException Take no action when the limit is exceeded.
 	NoActionPowerLimitException PowerLimitException = "NoAction"
-	// HardPowerOffPowerLimitException indicates power is turned off immediately when the limit is exceeded.
+	// HardPowerOffPowerLimitException Turn the power off immediately when the
+	// limit is exceeded.
 	HardPowerOffPowerLimitException PowerLimitException = "HardPowerOff"
-	// LogEventOnlyPowerLimitException indicates an event is logged when the limit is exceeded, but no further action is taken.
+	// LogEventOnlyPowerLimitException Log an event when the limit is exceeded, but
+	// take no further action.
 	LogEventOnlyPowerLimitException PowerLimitException = "LogEventOnly"
-	// OemPowerLimitException indicates an OEM-defined action is taken.
+	// OemPowerLimitException Take an OEM-defined action.
 	OemPowerLimitException PowerLimitException = "Oem"
 )
 
-// PowerSupplyType is the type of power supply.
-type PowerSupplyType string
+// Power shall contain the power metrics for a Redfish implementation.
+type Power struct {
+	common.Entity
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PowerControl shall contain the set of power control readings and settings.
+	PowerControl []PowerControl
+	// PowerControl@odata.count
+	PowerControlCount int `json:"PowerControl@odata.count"`
+	// PowerSupplies shall contain the set of power supplies associated with this
+	// system or device.
+	PowerSupplies []PowerPowerSupply
+	// PowerSupplies@odata.count
+	PowerSuppliesCount int `json:"PowerSupplies@odata.count"`
+	// Redundancy shall contain redundancy information for the set of power
+	// supplies in this system or device.
+	Redundancy []common.Redundancy
+	// Redundancy@odata.count
+	RedundancyCount int `json:"Redundancy@odata.count"`
+	// Voltages shall contain the set of voltage sensors for this chassis.
+	Voltages []Voltage
+	// Voltages@odata.count
+	VoltagesCount int `json:"Voltages@odata.count"`
+	// powerSupplyResetTarget is the URL to send PowerSupplyReset requests.
+	powerSupplyResetTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
 
-const (
-	// UnknownPowerSupplyType indicates the power supply type cannot be determined.
-	UnknownPowerSupplyType PowerSupplyType = "Unknown"
-	// ACPowerSupplyType indicates an Alternating Current (AC) power supply.
-	ACPowerSupplyType PowerSupplyType = "AC"
-	// DCPowerSupplyType indicates a Direct Current (DC) power supply.
-	DCPowerSupplyType PowerSupplyType = "DC"
-	// ACorDCPowerSupplyType indicates a power supply that supports both DC and AC input.
-	ACorDCPowerSupplyType PowerSupplyType = "ACorDC"
-)
+// UnmarshalJSON unmarshals a Power object from the raw JSON.
+func (p *Power) UnmarshalJSON(b []byte) error {
+	type temp Power
+	type pActions struct {
+		PowerSupplyReset common.ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
+	var tmp struct {
+		temp
+		Actions      pActions
+		PowerControl json.RawMessage
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = Power(tmp.temp)
+
+	powerControls := []PowerControl{}
+	err = json.Unmarshal(tmp.PowerControl, &powerControls)
+	if err != nil {
+		// Some Cisco implementations return a singular object instead of the
+		// expected array.
+		powerControl := PowerControl{}
+		err2 := json.Unmarshal(tmp.PowerControl, &powerControl)
+		if err2 != nil {
+			// Return the original error
+			return err
+		}
+
+		powerControls = append(powerControls, powerControl)
+	}
+
+	p.PowerControl = powerControls
+
+	// Extract the links to other entities for later
+	p.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (p *Power) Update() error {
+	readWriteFields := []string{
+		"PowerControl",
+		"PowerControl@odata.count",
+		"PowerSupplies",
+		"PowerSupplies@odata.count",
+		"Redundancy",
+		"Redundancy@odata.count",
+		"Voltages",
+		"Voltages@odata.count",
+	}
+
+	return p.UpdateFromRawData(p, p.rawData, readWriteFields)
+}
+
+// GetPower will get a Power instance from the service.
+func GetPower(c common.Client, uri string) (*Power, error) {
+	return common.GetObject[Power](c, uri)
+}
+
+// ListReferencedPowers gets the collection of Power from
+// a provided reference.
+func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
+	return common.GetCollectionObjects[Power](c, link)
+}
+
+// PowerSupplyReset shall reset a power supply specified by the 'MemberId' from the
+// 'PowerSupplies' array. A 'GracefulRestart' 'ResetType' shall reset the power
+// supply but shall not affect the power output. A 'ForceRestart' 'ResetType'
+// can affect the power supply output.
+// memberID - This parameter shall contain the identifier of the member within
+// the 'PowerSupplies' array on which to perform the reset.
+// resetType - This parameter shall contain the type of reset. The service can
+// accept a request without the parameter and shall perform a
+// 'GracefulRestart'.
+func (p *Power) PowerSupplyReset(memberID string, resetType common.ResetType) error {
+	payload := make(map[string]any)
+	payload["MemberId"] = memberID
+	payload["ResetType"] = resetType
+	return p.Post(p.powerSupplyResetTarget, payload)
+}
+
+// PowerInputRange shall describe an input range that the associated power supply can
+// utilize.
+type PowerInputRange struct {
+	// InputType shall contain the input type (AC or DC) of the associated range.
+	//
+	// Version added: v1.1.0
+	InputType InputType
+	// MaximumFrequencyHz shall contain the value, in hertz units, of the maximum
+	// line input frequency that the power supply is capable of consuming for this
+	// range.
+	//
+	// Version added: v1.1.0
+	MaximumFrequencyHz *float64 `json:",omitempty"`
+	// MaximumVoltage shall contain the value, in volt units, of the maximum line
+	// input voltage that the power supply is capable of consuming for this range.
+	//
+	// Version added: v1.1.0
+	MaximumVoltage *float64 `json:",omitempty"`
+	// MinimumFrequencyHz shall contain the value, in hertz units, of the minimum
+	// line input frequency that the power supply is capable of consuming for this
+	// range.
+	//
+	// Version added: v1.1.0
+	MinimumFrequencyHz *float64 `json:",omitempty"`
+	// MinimumVoltage shall contain the value, in volt units, of the minimum line
+	// input voltage that the power supply is capable of consuming for this range.
+	//
+	// Version added: v1.1.0
+	MinimumVoltage *float64 `json:",omitempty"`
+	// Oem shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	//
+	// Version added: v1.1.0
+	OEM json.RawMessage `json:"Oem"`
+	// OutputWattage shall contain the maximum amount of power, in watt units, that
+	// the associated power supply is rated to deliver while operating in this
+	// input range.
+	//
+	// Version added: v1.1.0
+	OutputWattage *float64 `json:",omitempty"`
+}
+
+// PowerControl represents the PowerControl type.
+type PowerControl struct {
+	common.Entity
+	// MemberId shall contain the unique identifier for this member within an
+	// array. For services supporting Redfish v1.6 or higher, this value shall
+	// contain the zero-based array index.
+	MemberID string `json:"MemberId"`
+	// Name is the name of the resource or array element.
+	Name string
+	// ODataID is the odata identifier.
+	ODataID string `json:"@odata.id"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PhysicalContext shall contain a description of the affected device(s) or
+	// region within the chassis to which this power control applies.
+	//
+	// Version added: v1.4.0
+	PhysicalContext PhysicalContext
+	// PowerAllocatedWatts shall represent the total power currently allocated or
+	// budgeted to the chassis.
+	PowerAllocatedWatts *float32 `json:",omitempty"`
+	// PowerAvailableWatts shall represent the amount of reserve power capacity, in
+	// watt units, that remains. This value is the PowerCapacityWatts value minus
+	// the 'PowerAllocatedWatts' value.
+	PowerAvailableWatts *float32 `json:",omitempty"`
+	// PowerCapacityWatts shall represent the total power capacity that can be
+	// allocated to the chassis.
+	PowerCapacityWatts *float32 `json:",omitempty"`
+	// PowerConsumedWatts shall represent the actual power that the chassis
+	// consumes, in watt units.
+	PowerConsumedWatts *float32 `json:",omitempty"`
+	// PowerLimit shall contain power limit status and configuration information
+	// for this chassis.
+	PowerLimit PowerLimit
+	// PowerMetrics shall contain power metrics for power readings, such as
+	// interval, minimum, maximum, and average power consumption, for the chassis.
+	PowerMetrics PowerMetric
+	// PowerRequestedWatts shall represent the amount of power, in watt units, that
+	// the chassis currently requests to be budgeted for future use.
+	PowerRequestedWatts *float32 `json:",omitempty"`
+	// RelatedItem shall contain an array of links to resources or objects
+	// associated with this power limit.
+	relatedItem []string
+	// RelatedItem@odata.count
+	RelatedItemCount int `json:"RelatedItem@odata.count"`
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
+	// powerSupplyResetTarget is the URL to send PowerSupplyReset requests.
+	powerSupplyResetTarget string
+}
+
+// UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
+func (p *PowerControl) UnmarshalJSON(b []byte) error {
+	type temp PowerControl
+	type pActions struct {
+		PowerSupplyReset common.ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
+	var tmp struct {
+		temp
+		Actions     pActions
+		RelatedItem common.Links `json:"RelatedItem"`
+
+		// Need to work around some non-standard data types in Dell and Cisco
+		// systems.
+		MemberID            any `json:"MemberId"`
+		PowerAllocatedWatts any
+		PowerAvailableWatts any
+		PowerCapacityWatts  any
+		PowerConsumedWatts  any
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PowerControl(tmp.temp)
+
+	// Standardize the property types
+	p.relatedItem = tmp.RelatedItem.ToStrings()
+	p.MemberID = parseMemberID(tmp.MemberID)
+	p.PowerAllocatedWatts = toFloat32(tmp.PowerAllocatedWatts)
+	p.PowerAvailableWatts = toFloat32(tmp.PowerAvailableWatts)
+	p.PowerCapacityWatts = toFloat32(tmp.PowerCapacityWatts)
+	p.PowerConsumedWatts = toFloat32(tmp.PowerConsumedWatts)
+
+	// Extract the links to other entities for later
+	p.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+
+	return nil
+}
+
+// RelatedItem gets the RelatedItem linked resources.
+func (p *PowerControl) RelatedItem(client common.Client) ([]*common.Entity, error) {
+	return common.GetObjects[common.Entity](client, p.relatedItem)
+}
+
+// PowerSupplyReset shall reset a power supply specified by the 'MemberId' from the
+// 'PowerSupplies' array. A 'GracefulRestart' 'ResetType' shall reset the power
+// supply but shall not affect the power output. A 'ForceRestart' 'ResetType'
+// can affect the power supply output.
+// memberID - This parameter shall contain the identifier of the member within
+// the 'PowerSupplies' array on which to perform the reset.
+// resetType - This parameter shall contain the type of reset. The service can
+// accept a request without the parameter and shall perform a
+// 'GracefulRestart'.
+func (p *PowerControl) PowerSupplyReset(memberID string, resetType common.ResetType) error {
+	payload := make(map[string]any)
+	payload["MemberId"] = memberID
+	payload["ResetType"] = resetType
+	return p.Post(p.powerSupplyResetTarget, payload)
+}
+
+// PowerLimit shall contain power limit status and configuration information for
+// this chassis.
+type PowerLimit struct {
+	// CorrectionInMs shall represent the time interval in ms required for the
+	// limiting process to react and reduce the power consumption below the limit.
+	CorrectionInMs *int `json:",omitempty"`
+	// LimitException shall represent the action to be taken if the resource power
+	// consumption cannot be limited below the specified limit after several
+	// correction time periods.
+	LimitException PowerLimitException
+	// LimitInWatts shall represent the power capping limit, in watt units, for the
+	// resource. If 'null', power capping shall be disabled.
+	LimitInWatts *float64 `json:",omitempty"`
+}
+
+// PowerMetric shall contain power metrics for power readings, such as interval,
+// minimum, maximum, and average power consumption, for a resource.
+type PowerMetric struct {
+	// AverageConsumedWatts shall represent the average power level that occurred
+	// over the last 'IntervalInMin' minutes.
+	AverageConsumedWatts *float32 `json:",omitempty"`
+	// IntervalInMin shall represent the time interval or window, in minutes, over
+	// which the power metrics are measured.
+	IntervalInMin *int `json:",omitempty"`
+	// MaxConsumedWatts shall represent the maximum power level, in watt units,
+	// that occurred within the last 'IntervalInMin' minutes.
+	MaxConsumedWatts *float32 `json:",omitempty"`
+	// MinConsumedWatts shall represent the minimum power level, in watt units,
+	// that occurred within the last 'IntervalInMin' minutes.
+	MinConsumedWatts *float32 `json:",omitempty"`
+}
+
+func (p *PowerMetric) UnmarshalJSON(b []byte) error {
+	type temp PowerMetric
+	type t1 struct {
+		temp
+		IntervalInMin    any
+		MaxConsumedWatts any
+		MinConsumedWatts any
+	}
+	var t t1
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	// Extract the links to other entities for later
+	*p = PowerMetric(t.temp)
+
+	if t.IntervalInMin != nil {
+		val := int(math.Round(float64(*toFloat32(t.IntervalInMin))))
+		p.IntervalInMin = &val
+	}
+	p.MaxConsumedWatts = toFloat32(t.MaxConsumedWatts)
+	p.MinConsumedWatts = toFloat32(t.MinConsumedWatts)
+
+	return nil
+}
 
 // InputRange describes an input range that a power supply can utilize.
 type InputRange struct {
@@ -103,443 +426,302 @@ type InputRange struct {
 	OEM json.RawMessage `json:"Oem,omitempty"`
 }
 
-// Power represents power metrics for a Redfish implementation.
-type Power struct {
+// PowerPowerSupply Details of a power supplies associated with this system or
+// device.
+type PowerPowerSupply struct {
 	common.Entity
-	// ODataContext is the OData context URL.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the OData type.
-	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description *string `json:"Description"`
-	// Oem contains OEM-specific extensions.
+	// Assembly shall contain a link to a resource of type 'Assembly'.
+	//
+	// Version added: v1.5.0
+	assembly string
+	// EfficiencyPercent shall contain the measured power efficiency, as a
+	// percentage, of the associated power supply.
+	//
+	// Version added: v1.5.0
+	EfficiencyPercent *float64 `json:",omitempty"`
+	// FirmwareVersion shall contain the firmware version as defined by the
+	// manufacturer for the associated power supply.
+	FirmwareVersion string
+	// HotPluggable shall indicate whether the device can be inserted or removed
+	// while the underlying equipment otherwise remains in its current operational
+	// state. Devices indicated as hot-pluggable shall allow the device to become
+	// operable without altering the operational state of the underlying equipment.
+	// Devices that cannot be inserted or removed from equipment in operation, or
+	// devices that cannot become operable without affecting the operational state
+	// of that equipment, shall be indicated as not hot-pluggable.
+	//
+	// Version added: v1.5.0
+	HotPluggable bool
+	// IndicatorLED shall contain the indicator light state for the indicator light
+	// associated with this power supply.
+	//
+	// Version added: v1.2.0
+	IndicatorLED common.IndicatorLED
+	// InputRanges shall contain a collection of ranges usable by the power supply
+	// unit.
+	//
+	// Version added: v1.1.0
+	InputRanges []InputRange
+	// LastPowerOutputWatts shall contain the average power output, measured in
+	// watt units, of the associated power supply.
+	LastPowerOutputWatts *float32 `json:",omitempty"`
+	// LineInputVoltage shall contain the value in volt units of the line input
+	// voltage (measured or configured for) that the power supply has been
+	// configured to operate with or is currently receiving.
+	LineInputVoltage *float32 `json:",omitempty"`
+	// LineInputVoltageType shall contain the type of input line voltage supported
+	// by the associated power supply.
+	LineInputVoltageType LineInputVoltageType
+	// Location shall contain the location information of the associated power
+	// supply.
+	//
+	// Version added: v1.5.0
+	Location common.Location
+	// Manufacturer shall contain the name of the organization responsible for
+	// producing the power supply. This organization may be the entity from whom
+	// the power supply is purchased, but this is not necessarily true.
+	//
+	// Version added: v1.1.0
+	Manufacturer string
+	// MemberId shall contain the unique identifier for this member within an
+	// array. For services supporting Redfish v1.6 or higher, this value shall
+	// contain the zero-based array index.
+	MemberID string `json:"MemberId"`
+	// Model shall contain the model information as defined by the manufacturer for
+	// the associated power supply.
+	Model string
+	// Name is the name of the resource or array element.
+	Name string
+	// ODataID is the odata identifier.
+	ODataID string `json:"@odata.id"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// PowerControl contains the set of power control readings and settings.
-	PowerControl []PowerControl `json:"PowerControl"`
-	// PowerControlCount is the number of power control items.
-	PowerControlCount int `json:"PowerControl@odata.count"`
-	// PowerSupplies contains the set of power supplies associated with this system or device.
-	PowerSupplies []PowerSupply `json:"PowerSupplies"`
-	// PowerSuppliesCount is the number of power supply items.
-	PowerSuppliesCount int `json:"PowerSupplies@odata.count"`
-	// Redundancy contains redundancy information for the set of power supplies.
-	Redundancy []Redundancy `json:"Redundancy"`
-	// RedundancyCount is the number of redundancy items.
+	// PartNumber shall contain the part number as defined by the manufacturer for
+	// the associated power supply.
+	PartNumber string
+	// PowerCapacityWatts shall contain the maximum amount of power, in watt units,
+	// that the associated power supply is rated to deliver.
+	PowerCapacityWatts *float32 `json:",omitempty"`
+	// PowerInputWatts shall contain the measured input power, in watt units, of
+	// the associated power supply.
+	//
+	// Version added: v1.5.0
+	PowerInputWatts *float32 `json:",omitempty"`
+	// PowerOutputWatts shall contain the measured output power, in watt units, of
+	// the associated power supply.
+	//
+	// Version added: v1.5.0
+	PowerOutputWatts *float32 `json:",omitempty"`
+	// PowerSupplyType shall contain the input power type (AC or DC) of the
+	// associated power supply.
+	PowerSupplyType PowerSupplyType
+	// Redundancy@odata.count
 	RedundancyCount int `json:"Redundancy@odata.count"`
-	// Voltages contains the set of voltage sensors for this chassis.
-	Voltages []Voltage `json:"Voltages"`
-	// VoltagesCount is the number of voltage items.
-	VoltagesCount int `json:"Voltages@odata.count"`
+	// RelatedItem shall contain an array of links to resources or objects
+	// associated with this power supply.
+	relatedItem []string
+	// RelatedItem@odata.count
+	RelatedItemCount int `json:"RelatedItem@odata.count"`
+	// SerialNumber shall contain the serial number as defined by the manufacturer
+	// for the associated power supply.
+	SerialNumber string
+	// SparePartNumber shall contain the spare or replacement part number as
+	// defined by the manufacturer for the associated power supply.
+	SparePartNumber string
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
 
+	rawData         []byte
+	metrics         string
+	redundancyLinks []string
+	// powerSupplyResetTarget is the URL to send PowerSupplyReset requests.
 	powerSupplyResetTarget string
 }
 
-// UnmarshalJSON unmarshals a Power object from the raw JSON.
-func (power *Power) UnmarshalJSON(b []byte) error {
-	type temp Power
-	type Actions struct {
+// UnmarshalJSON unmarshals a PowerPowerSupply object from the raw JSON.
+func (p *PowerPowerSupply) UnmarshalJSON(b []byte) error {
+	type temp PowerPowerSupply
+	type pActions struct {
 		PowerSupplyReset common.ActionTarget `json:"#Power.PowerSupplyReset"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions      Actions
-		PowerControl json.RawMessage
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	*power = Power(t.temp)
-
-	powerControls := []PowerControl{}
-	err = json.Unmarshal(t.PowerControl, &powerControls)
-	if err != nil {
-		// Some Cisco implementations return a singular object instead of the
-		// expected array.
-		powerControl := PowerControl{}
-		err2 := json.Unmarshal(t.PowerControl, &powerControl)
-		if err2 != nil {
-			// Return the original error
-			return err
-		}
-
-		powerControls = append(powerControls, powerControl)
-	}
-
-	power.PowerControl = powerControls
-
-	// Extract the links to other entities for later
-	power.powerSupplyResetTarget = t.Actions.PowerSupplyReset.Target
-
-	return nil
-}
-
-// PowerSupplyReset resets the specified power supply.
-// memberID identifies the power supply in the PowerSupplies array.
-// resetType specifies the type of reset to perform.
-func (power *Power) PowerSupplyReset(memberID string, resetType ResetType) error {
-	t := struct {
-		MemberID  string    `json:"MemberId"`
-		ResetType ResetType `json:"ResetType"`
-	}{
-		MemberID:  memberID,
-		ResetType: resetType,
-	}
-	return power.Post(power.powerSupplyResetTarget, t)
-}
-
-// RedundancySet returns the power supplies in the specified redundancy group.
-// memberID identifies the redundancy group in the Redundancy array.
-func (power *Power) RedundancySet(memberID int) []PowerSupply {
-	var powerSupplies []PowerSupply
-	if len(power.Redundancy) >= memberID+1 {
-		for _, psLink := range power.Redundancy[memberID].redundancySet {
-			for i := range power.PowerSupplies {
-				if power.PowerSupplies[i].ODataID == psLink {
-					powerSupplies = append(powerSupplies, power.PowerSupplies[i])
-				}
-			}
-		}
-	}
-	return powerSupplies
-}
-
-// GetPower retrieves a Power instance from the service.
-func GetPower(c common.Client, uri string) (*Power, error) {
-	return common.GetObject[Power](c, uri)
-}
-
-// ListReferencedPowers retrieves a collection of Power from a reference.
-func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
-	return common.GetCollectionObjects[Power](c, link)
-}
-
-// PowerControl represents power control functions for a chassis or system.
-type PowerControl struct {
-	common.Entity
-
-	// MemberID uniquely identifies this member within the collection.
-	MemberID string `json:"MemberId"`
-	// PhysicalContext describes the affected device(s) or region within the chassis.
-	PhysicalContext common.PhysicalContext `json:"PhysicalContext,omitempty"`
-	// PowerAllocatedWatts is the total power currently allocated to chassis resources.
-	PowerAllocatedWatts *float32 `json:"PowerAllocatedWatts,omitempty"`
-	// PowerAvailableWatts is the available power capacity (PowerCapacityWatts - PowerAllocatedWatts).
-	PowerAvailableWatts *float32 `json:"PowerAvailableWatts,omitempty"`
-	// PowerCapacityWatts is the total power capacity available for allocation.
-	PowerCapacityWatts *float32 `json:"PowerCapacityWatts,omitempty"`
-	// PowerConsumedWatts is the actual power being consumed by the chassis.
-	PowerConsumedWatts *float32 `json:"PowerConsumedWatts,omitempty"`
-	// PowerLimit contains power limit status and configuration information.
-	PowerLimit *PowerLimit `json:"PowerLimit,omitempty"`
-	// PowerMetrics contains power metrics including interval, min/max/avg consumption.
-	PowerMetrics *PowerMetric `json:"PowerMetrics,omitempty"`
-	// PowerRequestedWatts is the power currently requested for future use.
-	PowerRequestedWatts *float32 `json:"PowerRequestedWatts,omitempty"`
-	// RelatedItem contains links to resources associated with this power limit.
-	RelatedItem []common.Link `json:"RelatedItem,omitempty"`
-	// Status contains status and health properties of this resource.
-	Status common.Status `json:"Status,omitempty"`
-	// Oem contains OEM-specific extensions.
-	OEM json.RawMessage `json:"Oem,omitempty"`
-}
-
-// UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
-func (powercontrol *PowerControl) UnmarshalJSON(b []byte) error {
-	type temp PowerControl
-	type t1 struct {
-		temp
-
-		// Need to work around some non-standard data types in Dell and Cisco
-		// systems.
-		MemberID            any `json:"MemberId"`
-		PowerAllocatedWatts any
-		PowerAvailableWatts any
-		PowerCapacityWatts  any
-		PowerConsumedWatts  any
-	}
-	var t t1
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	// If first attempt failed, try to handle MemberID as any type
-	var raw map[string]any
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return fmt.Errorf("failed to unmarshal PowerControl: %v", err)
-	}
-
-	// Extract the links to other entities for later
-	*powercontrol = PowerControl(t.temp)
-
-	// Standardize the property types
-	powercontrol.MemberID = parseMemberID(t.MemberID)
-	powercontrol.PowerAllocatedWatts = toFloat32(t.PowerAllocatedWatts)
-	powercontrol.PowerAvailableWatts = toFloat32(t.PowerAvailableWatts)
-	powercontrol.PowerCapacityWatts = toFloat32(t.PowerCapacityWatts)
-	powercontrol.PowerConsumedWatts = toFloat32(t.PowerConsumedWatts)
-
-	return nil
-}
-
-// PowerLimit contains power limit status and configuration information.
-type PowerLimit struct {
-	// CorrectionInMs is the time required to reduce power consumption below the limit.
-	CorrectionInMs *int64 `json:"CorrectionInMs,omitempty"`
-	// LimitException is the action taken if power cannot be maintained below the limit.
-	LimitException PowerLimitException `json:"LimitException,omitempty"`
-	// LimitInWatts is the power cap limit. If null, power capping is disabled.
-	LimitInWatts *float32 `json:"LimitInWatts,omitempty"`
-}
-
-// PowerMetric contains power metrics including interval, min/max/avg consumption.
-type PowerMetric struct {
-	// AverageConsumedWatts is the average power over the last IntervalInMin minutes.
-	AverageConsumedWatts *float32 `json:"AverageConsumedWatts,omitempty"`
-	// IntervalInMin is the measurement window in minutes.
-	IntervalInMin *int `json:"IntervalInMin,omitempty"`
-	// MaxConsumedWatts is the maximum power within the measurement window.
-	MaxConsumedWatts *float32 `json:"MaxConsumedWatts,omitempty"`
-	// MinConsumedWatts is the minimum power within the measurement window.
-	MinConsumedWatts *float32 `json:"MinConsumedWatts,omitempty"`
-}
-
-func (pm *PowerMetric) UnmarshalJSON(b []byte) error {
-	type temp PowerMetric
-	type t1 struct {
-		temp
-		IntervalInMin    any
-		MaxConsumedWatts any
-		MinConsumedWatts any
-	}
-	var t t1
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	// Extract the links to other entities for later
-	*pm = PowerMetric(t.temp)
-
-	if t.IntervalInMin != nil {
-		val := int(math.Round(float64(*toFloat32(t.IntervalInMin))))
-		pm.IntervalInMin = &val
-	}
-	pm.MaxConsumedWatts = toFloat32(t.MaxConsumedWatts)
-	pm.MinConsumedWatts = toFloat32(t.MinConsumedWatts)
-
-	return nil
-}
-
-// PowerSupply represents a power supply associated with a system or device.
-type PowerSupply struct {
-	common.Entity
-
-	// EfficiencyPercent is the measured power efficiency percentage.
-	EfficiencyPercent *float32 `json:"EfficiencyPercent,omitempty"`
-	// FirmwareVersion is the firmware version of this power supply.
-	FirmwareVersion string `json:"FirmwareVersion,omitempty"`
-	// HotPluggable indicates if this device can be inserted/removed while operating.
-	HotPluggable *bool `json:"HotPluggable,omitempty"`
-	// IndicatorLED is the state of the indicator LED for this power supply.
-	IndicatorLED common.IndicatorLED `json:"IndicatorLED,omitempty"`
-	// InputRanges contains the input ranges this power supply can use.
-	InputRanges []InputRange `json:"InputRanges,omitempty"`
-	// LastPowerOutputWatts is the average power output in Watts.
-	LastPowerOutputWatts *float32 `json:"LastPowerOutputWatts,omitempty"`
-	// LineInputVoltage is the current line input voltage in Volts.
-	LineInputVoltage *float32 `json:"LineInputVoltage,omitempty"`
-	// LineInputVoltageType is the type of input line voltage.
-	LineInputVoltageType LineInputVoltageType `json:"LineInputVoltageType,omitempty"`
-	// Location contains location information for this power supply.
-	Location common.Location `json:"Location,omitempty"`
-	// Manufacturer is the name of the manufacturer.
-	Manufacturer string `json:"Manufacturer,omitempty"`
-	// MemberID uniquely identifies this member within the collection.
-	MemberID string `json:"MemberId"`
-	// Model is the model information for this power supply.
-	Model string `json:"Model,omitempty"`
-	// Oem contains OEM-specific extensions.
-	OEM json.RawMessage `json:"Oem,omitempty"`
-	// PartNumber is the part number for this power supply.
-	PartNumber string `json:"PartNumber,omitempty"`
-	// PowerCapacityWatts is the maximum power capacity in Watts.
-	PowerCapacityWatts *float32 `json:"PowerCapacityWatts,omitempty"`
-	// PowerInputWatts is the measured input power in Watts.
-	PowerInputWatts *float32 `json:"PowerInputWatts,omitempty"`
-	// PowerOutputWatts is the measured output power in Watts.
-	PowerOutputWatts *float32 `json:"PowerOutputWatts,omitempty"`
-	// PowerSupplyType is the input power type (AC or DC).
-	PowerSupplyType PowerSupplyType `json:"PowerSupplyType,omitempty"`
-	// RedundancyCount is the number of redundancy items.
-	RedundancyCount int `json:"Redundancy@odata.count,omitempty"`
-	// RelatedItem contains links to resources associated with this power supply.
-	RelatedItem []common.Link `json:"RelatedItem,omitempty"`
-	// RelatedItemCount is the number of related items.
-	RelatedItemCount int `json:"RelatedItem@odata.count,omitempty"`
-	// SerialNumber is the serial number for this power supply.
-	SerialNumber string `json:"SerialNumber,omitempty"`
-	// SparePartNumber is the spare part number for this power supply.
-	SparePartNumber string `json:"SparePartNumber,omitempty"`
-	// Status contains status and health properties of this resource.
-	Status common.Status `json:"Status,omitempty"`
-
-	rawData          []byte
-	assembly         string
-	metrics          string
-	redundancyLinks  []string
-	relateditemLinks []string
-
-	resetTarget string
-}
-
-// UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.
-func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
-	type temp PowerSupply
-	type actions struct {
-		Reset common.ActionTarget `json:"#PowerSupply.Reset"`
-	}
-	type t1 struct {
-		temp
-		Assembly             common.Link
+		Actions              pActions
+		Assembly             common.Link `json:"assembly"`
 		Metrics              common.Link
 		Redundancy           common.Links
 		RelatedItem          common.Links
-		Actions              actions
 		MemberID             any `json:"MemberId"`
 		LineInputVoltage     any
 		LastPowerOutputWatts any
 		PowerInputWatts      any
 		PowerOutputWatts     any
 	}
-	var t t1
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	// Extract the links to other entities for later
-	*powersupply = PowerSupply(t.temp)
-	powersupply.assembly = t.Assembly.String()
-	powersupply.metrics = t.Metrics.String()
-	powersupply.redundancyLinks = t.Redundancy.ToStrings()
-	powersupply.relateditemLinks = t.RelatedItem.ToStrings()
+	*p = PowerPowerSupply(tmp.temp)
 
-	powersupply.MemberID = parseMemberID(t.MemberID)
-	powersupply.LineInputVoltage = toFloat32(t.LineInputVoltage)
-	powersupply.LastPowerOutputWatts = toFloat32(t.LastPowerOutputWatts)
-	powersupply.PowerInputWatts = toFloat32(t.PowerInputWatts)
-	powersupply.PowerOutputWatts = toFloat32(t.PowerOutputWatts)
+	// Extract the links to other entities for later
+	p.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+	p.assembly = tmp.Assembly.String()
+	p.metrics = tmp.Metrics.String()
+	p.redundancyLinks = tmp.Redundancy.ToStrings()
+	p.relatedItem = tmp.RelatedItem.ToStrings()
+
+	p.MemberID = parseMemberID(tmp.MemberID)
+	p.LineInputVoltage = toFloat32(tmp.LineInputVoltage)
+	p.LastPowerOutputWatts = toFloat32(tmp.LastPowerOutputWatts)
+	p.PowerInputWatts = toFloat32(tmp.PowerInputWatts)
+	p.PowerOutputWatts = toFloat32(tmp.PowerOutputWatts)
 
 	// This is a read/write object, so we need to save the raw object data for later
-	powersupply.rawData = b
-	powersupply.resetTarget = t.Actions.Reset.Target
+	p.rawData = b
 
 	return nil
 }
 
-// Assembly gets the containing assembly.
-func (powersupply *PowerSupply) Assembly() (*Assembly, error) {
-	if powersupply.assembly == "" {
+// RelatedItem gets the RelatedItem linked resources.
+func (p *PowerPowerSupply) RelatedItem(client common.Client) ([]*common.Entity, error) {
+	return common.GetObjects[common.Entity](client, p.relatedItem)
+}
+
+// PowerSupplyReset shall reset a power supply specified by the 'MemberId' from the
+// 'PowerSupplies' array. A 'GracefulRestart' 'ResetType' shall reset the power
+// supply but shall not affect the power output. A 'ForceRestart' 'ResetType'
+// can affect the power supply output.
+// memberID - This parameter shall contain the identifier of the member within
+// the 'PowerSupplies' array on which to perform the reset.
+// resetType - This parameter shall contain the type of reset. The service can
+// accept a request without the parameter and shall perform a
+// 'GracefulRestart'.
+func (p *PowerPowerSupply) Reset(memberID string, resetType common.ResetType) error {
+	payload := make(map[string]any)
+	payload["MemberId"] = memberID
+	payload["ResetType"] = resetType
+	return p.Post(p.powerSupplyResetTarget, payload)
+}
+
+// Assembly gets the Assembly linked resource.
+func (p *PowerPowerSupply) Assembly(client common.Client) (*Assembly, error) {
+	if p.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(powersupply.GetClient(), powersupply.assembly)
+	return common.GetObject[Assembly](client, p.assembly)
 }
 
 // Metrics gets the metrics associated with this power supply.
-func (powersupply *PowerSupply) Metrics() (*PowerSupplyUnitMetrics, error) {
+func (powersupply *PowerPowerSupply) Metrics() (*PowerSupplyMetrics, error) {
 	if powersupply.metrics == "" {
 		return nil, nil
 	}
-	return GetPowerSupplyUnitMetrics(powersupply.GetClient(), powersupply.metrics)
+	return GetPowerSupplyMetrics(powersupply.GetClient(), powersupply.metrics)
 }
 
 // Redundancy gets the endpoints at the other end of the link.
-func (powersupply *PowerSupply) Redundancy() ([]*Redundancy, error) {
-	return common.GetObjects[Redundancy](powersupply.GetClient(), powersupply.redundancyLinks)
+func (powersupply *PowerPowerSupply) Redundancy() ([]*common.Redundancy, error) {
+	return common.GetObjects[common.Redundancy](powersupply.GetClient(), powersupply.redundancyLinks)
 }
 
-// GetPowerSupply retrieves a PowerSupply instance from the service.
-func GetPowerSupply(c common.Client, uri string) (*PowerSupply, error) {
-	var powerSupply PowerSupply
+// GetPowerPowerSupply retrieves a PowerPowerSupply instance from the service.
+func GetPowerPowerSupply(c common.Client, uri string) (*PowerPowerSupply, error) {
+	var powerSupply PowerPowerSupply
 	return &powerSupply, powerSupply.Get(c, uri, &powerSupply)
 }
 
-// ListReferencedPowerSupplies retrieves a collection of PowerSupplies from a reference.
-func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) {
-	return common.GetCollectionObjects[PowerSupply](c, link)
-}
-
-// Reset is an action that resets a power supply. A GracefulRestart ResetType
-// shall reset the power supply but shall not affect the power output. A
-// ForceRestart ResetType can affect the power supply output.
-func (powersupply *PowerSupply) Reset(resetType ResetType) error {
-	if powersupply.resetTarget == "" {
-		return errors.New("reset is not supported")
-	}
-
-	t := struct {
-		ResetType ResetType
-	}{ResetType: resetType}
-
-	return powersupply.Post(powersupply.resetTarget, t)
+// ListReferencedPowerPowerSupplies retrieves a collection of PowerSupplies from a reference.
+func ListReferencedPowerPowerSupplies(c common.Client, link string) ([]*PowerPowerSupply, error) {
+	return common.GetCollectionObjects[PowerPowerSupply](c, link)
 }
 
 // Update commits updates to this object's properties to the running system.
-func (powersupply *PowerSupply) Update() error {
+func (powersupply *PowerPowerSupply) Update() error {
 	readWriteFields := []string{"IndicatorLED"}
 
 	return powersupply.UpdateFromRawData(powersupply, powersupply.rawData, readWriteFields)
 }
 
-// Voltage represents a voltage sensor for a chassis.
+// Voltage represents the Voltage type.
 type Voltage struct {
 	common.Entity
-
-	// LowerThresholdCritical indicates the reading is below normal range but not yet fatal.
-	LowerThresholdCritical *float32 `json:"LowerThresholdCritical,omitempty"`
-	// LowerThresholdFatal indicates the reading is below normal range and fatal.
-	LowerThresholdFatal *float32 `json:"LowerThresholdFatal,omitempty"`
-	// LowerThresholdNonCritical indicates the reading is below normal range but not critical.
-	LowerThresholdNonCritical *float32 `json:"LowerThresholdNonCritical,omitempty"`
-	// MaxReadingRange indicates the highest possible value for ReadingVolts.
-	MaxReadingRange *float32 `json:"MaxReadingRange,omitempty"`
-	// MemberID uniquely identifies this member within the collection.
+	// LowerThresholdCritical shall contain the value at which the 'ReadingVolts'
+	// property is below the normal range but is not yet fatal. The value of the
+	// property shall use the same units as the 'ReadingVolts' property.
+	LowerThresholdCritical *float32 `json:",omitempty"`
+	// LowerThresholdFatal shall contain the value at which the 'ReadingVolts'
+	// property is below the normal range and is fatal. The value of the property
+	// shall use the same units as the 'ReadingVolts' property.
+	LowerThresholdFatal *float32 `json:",omitempty"`
+	// LowerThresholdNonCritical shall contain the value at which the
+	// 'ReadingVolts' property is below normal range. The value of the property
+	// shall use the same units as the 'ReadingVolts' property.
+	LowerThresholdNonCritical *float32 `json:",omitempty"`
+	// MaxReadingRange shall indicate the highest possible value for the
+	// 'ReadingVolts' property. The value of the property shall use the same units
+	// as the 'ReadingVolts' property.
+	MaxReadingRange *float32 `json:",omitempty"`
+	// MemberId shall contain the unique identifier for this member within an
+	// array. For services supporting Redfish v1.6 or higher, this value shall
+	// contain the zero-based array index.
 	MemberID string `json:"MemberId"`
-	// MinReadingRange indicates the lowest possible value for ReadingVolts.
-	MinReadingRange *float32 `json:"MinReadingRange,omitempty"`
-	// Oem contains OEM-specific extensions.
-	OEM json.RawMessage `json:"Oem,omitempty"`
-	// PhysicalContext describes the affected device or region within the chassis.
-	PhysicalContext common.PhysicalContext `json:"PhysicalContext,omitempty"`
-	// ReadingVolts is the present voltage reading.
-	ReadingVolts *float32 `json:"ReadingVolts,omitempty"`
-	// RelatedItem contains links to resources associated with this voltage measurement.
-	RelatedItem []common.Link `json:"RelatedItem,omitempty"`
-	// SensorNumber is a numerical identifier unique within this resource.
-	SensorNumber *int `json:"SensorNumber,omitempty"`
-	// Status contains status and health properties of this resource.
-	Status common.Status `json:"Status,omitempty"`
-	// UpperThresholdCritical indicates the reading is above normal range but not yet fatal.
-	UpperThresholdCritical *float32 `json:"UpperThresholdCritical,omitempty"`
-	// UpperThresholdFatal indicates the reading is above normal range and fatal.
-	UpperThresholdFatal *float32 `json:"UpperThresholdFatal,omitempty"`
-	// UpperThresholdNonCritical indicates the reading is above normal range but not critical.
-	UpperThresholdNonCritical *float32 `json:"UpperThresholdNonCritical,omitempty"`
+	// MinReadingRange shall indicate the lowest possible value for the
+	// 'ReadingVolts' property. The value of the property shall use the same units
+	// as the 'ReadingVolts' property.
+	MinReadingRange *float32 `json:",omitempty"`
+	// Name is the name of the resource or array element.
+	Name string
+	// ODataID is the odata identifier.
+	ODataID string `json:"@odata.id"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PhysicalContext shall contain a description of the affected device or region
+	// within the chassis to which this voltage measurement applies.
+	PhysicalContext PhysicalContext
+	// ReadingVolts shall contain the voltage sensor's reading.
+	ReadingVolts *float32 `json:",omitempty"`
+	// RelatedItem shall contain an array of links to resources or objects to which
+	// this voltage measurement applies.
+	relatedItem []string
+	// RelatedItem@odata.count
+	RelatedItemCount int `json:"RelatedItem@odata.count"`
+	// SensorNumber shall contain a numerical identifier for this voltage sensor
+	// that is unique within this resource.
+	SensorNumber *int `json:",omitempty"`
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
+	// UpperThresholdCritical shall contain the value at which the 'ReadingVolts'
+	// property is above the normal range but is not yet fatal. The value of the
+	// property shall use the same units as the 'ReadingVolts' property.
+	UpperThresholdCritical *float32 `json:",omitempty"`
+	// UpperThresholdFatal shall contain the value at which the 'ReadingVolts'
+	// property is above the normal range and is fatal. The value of the property
+	// shall use the same units as the 'ReadingVolts' property.
+	UpperThresholdFatal *float32 `json:",omitempty"`
+	// UpperThresholdNonCritical shall contain the value at which the
+	// 'ReadingVolts' property is above the normal range. The value of the property
+	// shall use the same units as the 'ReadingVolts' property.
+	UpperThresholdNonCritical *float32 `json:",omitempty"`
+	// powerSupplyResetTarget is the URL to send PowerSupplyReset requests.
+	powerSupplyResetTarget string
 }
 
 // UnmarshalJSON unmarshals a Voltage object from the raw JSON.
-func (voltage *Voltage) UnmarshalJSON(b []byte) error {
+func (v *Voltage) UnmarshalJSON(b []byte) error {
 	type temp Voltage
-	type t1 struct {
+	type vActions struct {
+		PowerSupplyReset common.ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
+	var tmp struct {
 		temp
-		RelatedItemCount int `json:"RelatedItem@odata.count"`
+		Actions     vActions
+		RelatedItem common.Links
 
 		// Need to work around some non-standard data types in Dell and Cisco
 		// systems.
@@ -552,27 +734,50 @@ func (voltage *Voltage) UnmarshalJSON(b []byte) error {
 		LowerThresholdNonCritical any
 		ReadingVolts              any
 	}
-	var t t1
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
+	*v = Voltage(tmp.temp)
+
 	// Extract the links to other entities for later
-	*voltage = Voltage(t.temp)
+	v.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+	v.relatedItem = tmp.RelatedItem.ToStrings()
 
 	// Standardize the property types
-	voltage.MemberID = parseMemberID(t.MemberID)
-	voltage.UpperThresholdCritical = toFloat32(t.UpperThresholdCritical)
-	voltage.UpperThresholdFatal = toFloat32(t.UpperThresholdFatal)
-	voltage.UpperThresholdNonCritical = toFloat32(t.UpperThresholdNonCritical)
-	voltage.LowerThresholdCritical = toFloat32(t.LowerThresholdCritical)
-	voltage.LowerThresholdFatal = toFloat32(t.LowerThresholdFatal)
-	voltage.LowerThresholdNonCritical = toFloat32(t.LowerThresholdNonCritical)
-	voltage.ReadingVolts = toFloat32(t.ReadingVolts)
+	v.MemberID = parseMemberID(tmp.MemberID)
+	v.UpperThresholdCritical = toFloat32(tmp.UpperThresholdCritical)
+	v.UpperThresholdFatal = toFloat32(tmp.UpperThresholdFatal)
+	v.UpperThresholdNonCritical = toFloat32(tmp.UpperThresholdNonCritical)
+	v.LowerThresholdCritical = toFloat32(tmp.LowerThresholdCritical)
+	v.LowerThresholdFatal = toFloat32(tmp.LowerThresholdFatal)
+	v.LowerThresholdNonCritical = toFloat32(tmp.LowerThresholdNonCritical)
+	v.ReadingVolts = toFloat32(tmp.ReadingVolts)
 
 	return nil
+}
+
+// RelatedItem gets the RelatedItem linked resources.
+func (v *Voltage) RelatedItem(client common.Client) ([]*common.Entity, error) {
+	return common.GetObjects[common.Entity](client, v.relatedItem)
+}
+
+// PowerSupplyReset shall reset a power supply specified by the 'MemberId' from the
+// 'PowerSupplies' array. A 'GracefulRestart' 'ResetType' shall reset the power
+// supply but shall not affect the power output. A 'ForceRestart' 'ResetType'
+// can affect the power supply output.
+// memberID - This parameter shall contain the identifier of the member within
+// the 'PowerSupplies' array on which to perform the reset.
+// resetType - This parameter shall contain the type of reset. The service can
+// accept a request without the parameter and shall perform a
+// 'GracefulRestart'.
+func (v *Voltage) PowerSupplyReset(memberID string, resetType common.ResetType) error {
+	payload := make(map[string]any)
+	payload["MemberId"] = memberID
+	payload["ResetType"] = resetType
+	return v.Post(v.powerSupplyResetTarget, payload)
 }
 
 func parseMemberID(val any) string {
@@ -621,5 +826,14 @@ func toFloat32(val any) *float32 {
 		}
 	}
 
+	return &ret
+}
+
+func toInt(val any) *int {
+	if val == nil {
+		return nil
+	}
+
+	ret := int(*toFloat32(val))
 	return &ret
 }

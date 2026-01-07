@@ -110,15 +110,15 @@ func TestDrive(t *testing.T) {
 		t.Errorf("Incorrect assembly link: %s", result.assembly)
 	}
 
-	if result.BlockSizeBytes != 512 {
+	if *result.BlockSizeBytes != 512 {
 		t.Errorf("Incorrect block size bytes: %d", result.BlockSizeBytes)
 	}
 
-	if result.CapableSpeedGbs != 40 {
-		t.Errorf("Incorrect capable speed: %f", result.CapableSpeedGbs)
+	if *result.CapableSpeedGbs != 40 {
+		t.Errorf("Incorrect capable speed: %f", *result.CapableSpeedGbs)
 	}
 
-	if result.CapacityBytes != 1099511627776 {
+	if *result.CapacityBytes != 1099511627776 {
 		t.Errorf("Incorrect capacity: %d", result.CapacityBytes)
 	}
 

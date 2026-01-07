@@ -75,7 +75,7 @@ func TestAggregateReset(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.Reset(5, 10, PowerCycleResetType)
+	err = result.Reset(5, 10, common.PowerCycleResetType)
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}

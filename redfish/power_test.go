@@ -620,7 +620,7 @@ func TestPower(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.PowerControl[0].PhysicalContext != common.UpperPhysicalContext {
+	if result.PowerControl[0].PhysicalContext != UpperPhysicalContext {
 		t.Errorf("Invalid physical context: %s", result.PowerControl[0].PhysicalContext)
 	}
 
@@ -701,8 +701,8 @@ func TestVoltageUnmarshalJSON_MemberIDAsString(t *testing.T) {
 	if *voltage.ReadingVolts != 3.3 {
 		t.Errorf("Expected ReadingVolts 3.3, got %f", *voltage.ReadingVolts)
 	}
-	if len(voltage.RelatedItem) != 2 {
-		t.Errorf("Expected 2 RelatedItems, got %d", len(voltage.RelatedItem))
+	if len(voltage.relatedItem) != 2 {
+		t.Errorf("Expected 2 RelatedItems, got %d", len(voltage.relatedItem))
 	}
 }
 
@@ -734,8 +734,8 @@ func TestVoltageUnmarshalJSON_MemberIDAsNumber(t *testing.T) {
 	if *voltage.ReadingVolts != 1.2 {
 		t.Errorf("Expected ReadingVolts 1.2, got %f", *voltage.ReadingVolts)
 	}
-	if len(voltage.RelatedItem) != 1 {
-		t.Errorf("Expected 1 RelatedItem, got %d", len(voltage.RelatedItem))
+	if len(voltage.relatedItem) != 1 {
+		t.Errorf("Expected 1 RelatedItem, got %d", len(voltage.relatedItem))
 	}
 }
 

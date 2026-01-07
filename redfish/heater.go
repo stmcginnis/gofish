@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2022.3 - #Heater.v1_0_2.Heater
 
 package redfish
 
@@ -10,174 +11,118 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// Heater shall represent the management properties for monitoring and management of heaters for a Redfish
-// implementation.
+// Heater shall represent the management properties for monitoring and
+// management of heaters for a Redfish implementation.
 type Heater struct {
 	common.Entity
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// Assembly shall contain a link to a resource of type Assembly.
+	// Assembly shall contain a link to a resource of type 'Assembly'.
 	assembly string
-	// Description provides a description of this resource.
-	Description string
-	// HotPluggable shall indicate whether the device can be inserted or removed while the underlying equipment
-	// otherwise remains in its current operational state. Hot-pluggable devices can become operable without altering
-	// the operational state of the underlying equipment. Devices that cannot be inserted or removed from equipment in
-	// operation, or devices that cannot become operable without affecting the operational state of that equipment,
+	// HotPluggable shall indicate whether the device can be inserted or removed
+	// while the underlying equipment otherwise remains in its current operational
+	// state. Hot-pluggable devices can become operable without altering the
+	// operational state of the underlying equipment. Devices that cannot be
+	// inserted or removed from equipment in operation, or devices that cannot
+	// become operable without affecting the operational state of that equipment,
 	// shall not be hot-pluggable.
 	HotPluggable bool
 	// Location shall contain the location information of this heater.
 	Location common.Location
-	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
-	// resource.
+	// LocationIndicatorActive shall contain the state of the indicator used to
+	// physically identify or locate this resource.
 	LocationIndicatorActive bool
-	// Manufacturer shall contain the name of the organization responsible for producing the heater. This organization
-	// may be the entity from whom the heater is purchased, but this is not necessarily true.
+	// Manufacturer shall contain the name of the organization responsible for
+	// producing the heater. This organization may be the entity from whom the
+	// heater is purchased, but this is not necessarily true.
 	Manufacturer string
-	// Metrics shall contain a link to a resource of type HeaterMetrics.
+	// Metrics shall contain a link to a resource of type 'HeaterMetrics'.
 	metrics string
-	// Model shall contain the model information as defined by the manufacturer for this heater.
+	// Model shall contain the model information as defined by the manufacturer for
+	// this heater.
 	Model string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// PartNumber shall contain the part number as defined by the manufacturer for this heater.
+	// PartNumber shall contain the part number as defined by the manufacturer for
+	// this heater.
 	PartNumber string
-	// PhysicalContext shall contain a description of the affected device or region within the chassis with which this
-	// heater is associated.
+	// PhysicalContext shall contain a description of the affected device or region
+	// within the chassis with which this heater is associated.
 	PhysicalContext PhysicalContext
-	// SerialNumber shall contain the serial number as defined by the manufacturer for this heater.
+	// SerialNumber shall contain the serial number as defined by the manufacturer
+	// for this heater.
 	SerialNumber string
-	// SparePartNumber shall contain the spare or replacement part number as defined by the manufacturer for this
-	// heater.
+	// SparePartNumber shall contain the spare or replacement part number as
+	// defined by the manufacturer for this heater.
 	SparePartNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// managers are the URIs for Managers.
+	managers []string
+	// memory are the URIs for Memory.
+	memory []string
+	// networkAdapters are the URIs for NetworkAdapters.
+	networkAdapters []string
+	// processors are the URIs for Processors.
+	processors []string
+	// storageControllers are the URIs for StorageControllers.
+	storageControllers []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	managers []string
-	// ManagersCount gets the number of managers for this heater.
-	ManagersCount int
-	memory        []string
-	// MemoryCount gets the number of memory units associated with this heater.
-	MemoryCount     int
-	networkAdapters []string
-	// NetworkAdaptersCount gets the number of network adapters associated with this heater.
-	NetworkAdaptersCount int
-	processors           []string
-	// ProcessorsCount gets the number of processors associated with this heater.
-	ProcessorsCount    int
-	storageControllers []string
-	// StorageControllersCount gets the number of storage controllers associated with this heater.
-	StorageControllersCount int
 }
 
 // UnmarshalJSON unmarshals a Heater object from the raw JSON.
-func (heater *Heater) UnmarshalJSON(b []byte) error {
+func (h *Heater) UnmarshalJSON(b []byte) error {
 	type temp Heater
-	type Links struct {
-		// Managers shall contain an array of links to the managers which this heater heats.
-		Managers      common.Links
-		ManagersCount int `json:"Managers@odata.count"`
-		// Memory shall contain an array of links to the memory devices which this heater heats.
-		Memory      common.Links
-		MemoryCount int `json:"Memory@odata.count"`
-		// NetworkAdapters shall contain an array of links to the network adapters which this heater heats.
-		NetworkAdapters      common.Links
-		NetworkAdaptersCount int `json:"NetworkAdapters@odata.count"`
-		// Processors shall contain an array of links to the processors which this heater heats.
-		Processors      common.Links
-		ProcessorsCount int `json:"Processors@odata.count"`
-		// StorageControllers shall contain an array of links to the storage controllers which this heater heats.
-		StorageControllers      common.Links
-		StorageControllersCount int `json:"StorageControllers@odata.count"`
+	type hLinks struct {
+		Managers           common.Links `json:"Managers"`
+		Memory             common.Links `json:"Memory"`
+		NetworkAdapters    common.Links `json:"NetworkAdapters"`
+		Processors         common.Links `json:"Processors"`
+		StorageControllers common.Links `json:"StorageControllers"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Assembly common.Link
-		Metrics  common.Link
-		Links    Links
+		Links    hLinks
+		Assembly common.Link `json:"assembly"`
+		Metrics  common.Link `json:"metrics"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*heater = Heater(t.temp)
+	*h = Heater(tmp.temp)
 
 	// Extract the links to other entities for later
-	heater.assembly = t.Assembly.String()
-	heater.metrics = t.Metrics.String()
-
-	heater.managers = t.Links.Managers.ToStrings()
-	heater.ManagersCount = t.Links.ManagersCount
-	heater.memory = t.Links.Memory.ToStrings()
-	heater.MemoryCount = t.Links.MemoryCount
-	heater.networkAdapters = t.Links.NetworkAdapters.ToStrings()
-	heater.NetworkAdaptersCount = t.Links.NetworkAdaptersCount
-	heater.processors = t.Links.Processors.ToStrings()
-	heater.ProcessorsCount = t.Links.ProcessorsCount
-	heater.storageControllers = t.Links.StorageControllers.ToStrings()
-	heater.StorageControllersCount = t.Links.StorageControllersCount
+	h.managers = tmp.Links.Managers.ToStrings()
+	h.memory = tmp.Links.Memory.ToStrings()
+	h.networkAdapters = tmp.Links.NetworkAdapters.ToStrings()
+	h.processors = tmp.Links.Processors.ToStrings()
+	h.storageControllers = tmp.Links.StorageControllers.ToStrings()
+	h.assembly = tmp.Assembly.String()
+	h.metrics = tmp.Metrics.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	heater.rawData = b
+	h.rawData = b
 
 	return nil
 }
 
-// Assembly gets the assembly for this heater.
-func (heater *Heater) Assembly() (*Assembly, error) {
-	if heater.assembly == "" {
-		return nil, nil
-	}
-	return GetAssembly(heater.GetClient(), heater.assembly)
-}
-
-// Managers gets the managers for this heater.
-func (heater *Heater) Managers() ([]*Manager, error) {
-	return common.GetObjects[Manager](heater.GetClient(), heater.managers)
-}
-
-// Memory gets the memory associated with this heater.
-func (heater *Heater) Memory() ([]*Memory, error) {
-	return common.GetObjects[Memory](heater.GetClient(), heater.memory)
-}
-
-// NetworkAdapters gets the network adapters associated with this heater.
-func (heater *Heater) NetworkAdapters() ([]*NetworkAdapter, error) {
-	return common.GetObjects[NetworkAdapter](heater.GetClient(), heater.networkAdapters)
-}
-
-// Processors gets this heater's processors.
-func (heater *Heater) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](heater.GetClient(), heater.processors)
-}
-
-// StorageControllers gets the storage controllers associated with this heater.
-func (heater *Heater) StorageControllers() ([]*StorageController, error) {
-	return common.GetObjects[StorageController](heater.GetClient(), heater.storageControllers)
-}
-
-// Metrics gets the heater metrics for this heater.
-func (heater *Heater) Metrics() (*HeaterMetrics, error) {
-	if heater.metrics == "" {
-		return nil, nil
-	}
-	return GetHeaterMetrics(heater.GetClient(), heater.metrics)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (heater *Heater) Update() error {
+func (h *Heater) Update() error {
 	readWriteFields := []string{
+		"Location",
 		"LocationIndicatorActive",
+		"Status",
 	}
 
-	return heater.UpdateFromRawData(heater, heater.rawData, readWriteFields)
+	return h.UpdateFromRawData(h, h.rawData, readWriteFields)
 }
 
 // GetHeater will get a Heater instance from the service.
@@ -189,4 +134,45 @@ func GetHeater(c common.Client, uri string) (*Heater, error) {
 // a provided reference.
 func ListReferencedHeaters(c common.Client, link string) ([]*Heater, error) {
 	return common.GetCollectionObjects[Heater](c, link)
+}
+
+// Managers gets the Managers linked resources.
+func (h *Heater) Managers(client common.Client) ([]*Manager, error) {
+	return common.GetObjects[Manager](client, h.managers)
+}
+
+// Memory gets the Memory linked resources.
+func (h *Heater) Memory(client common.Client) ([]*Memory, error) {
+	return common.GetObjects[Memory](client, h.memory)
+}
+
+// NetworkAdapters gets the NetworkAdapters linked resources.
+func (h *Heater) NetworkAdapters(client common.Client) ([]*NetworkAdapter, error) {
+	return common.GetObjects[NetworkAdapter](client, h.networkAdapters)
+}
+
+// Processors gets the Processors linked resources.
+func (h *Heater) Processors(client common.Client) ([]*Processor, error) {
+	return common.GetObjects[Processor](client, h.processors)
+}
+
+// StorageControllers gets the StorageControllers linked resources.
+func (h *Heater) StorageControllers(client common.Client) ([]*StorageController, error) {
+	return common.GetObjects[StorageController](client, h.storageControllers)
+}
+
+// Assembly gets the Assembly linked resource.
+func (h *Heater) Assembly(client common.Client) (*Assembly, error) {
+	if h.assembly == "" {
+		return nil, nil
+	}
+	return common.GetObject[Assembly](client, h.assembly)
+}
+
+// Metrics gets the Metrics linked resource.
+func (h *Heater) Metrics(client common.Client) (*HeaterMetrics, error) {
+	if h.metrics == "" {
+		return nil, nil
+	}
+	return common.GetObject[HeaterMetrics](client, h.metrics)
 }

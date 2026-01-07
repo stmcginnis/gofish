@@ -179,5 +179,5 @@ func (m *Manager) ManagerConfigReset(option ManagerConfigResetOption) error {
 		return errors.New("manager config reset not supported by this system")
 	}
 
-	return m.Post(m.managerConfigResetTarget, map[string]interface{}{"Option": option})
+	return m.Post(m.managerConfigResetTarget, map[string]any{"Option": option})
 }

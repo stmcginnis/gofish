@@ -42,7 +42,7 @@ func TestMetricDefinition(t *testing.T) {
 	assertEquals(t, "VoltageStatus", result.ID)
 	assertEquals(t, "Voltage status Metric Definition", result.Name)
 	assertEquals(t, "Status of the Voltage of Small Form Factor pluggable(SFP) Transceiver", result.Description)
-	assertEquals(t, "0", fmt.Sprintf("%.0f", result.Accuracy))
+	assertEquals(t, "0", fmt.Sprintf("%.0f", *result.Accuracy))
 	assertEquals(t, "PT60.0S", result.SensingInterval)
 	assertEquals(t, "4", fmt.Sprintf("%d", len(result.DiscreteValues)))
 	assertEquals(t, "Discrete", string(result.MetricType))

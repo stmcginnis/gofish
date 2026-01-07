@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2018.3 - #CertificateLocations.v1_0_4.CertificateLocations
 
 package redfish
 
@@ -10,46 +11,42 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// CertificateLocations shall represent the certificate location properties for a Redfish implementation.
+// CertificateLocations shall represent the certificate location properties for
+// a Redfish implementation.
 type CertificateLocations struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// certificates is the link to the certificates installed on this service.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// certificates are the URIs for Certificates.
 	certificates []string
-	// CertificatesCount is the number of certificates installed on this service.
-	CertificatesCount int
 }
 
 // UnmarshalJSON unmarshals a CertificateLocations object from the raw JSON.
-func (certificatelocations *CertificateLocations) UnmarshalJSON(b []byte) error {
+func (c *CertificateLocations) UnmarshalJSON(b []byte) error {
 	type temp CertificateLocations
-	type Links struct {
-		// Certificates shall contain an array of links to resources of type Certificate that are installed on this
-		// service.
-		Certificates common.Links
-		// Certificates@odata.count
-		CertificatesCount int `json:"Certificates@odata.count"`
+	type cLinks struct {
+		Certificates common.Links `json:"Certificates"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Links Links
+		Links cLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*certificatelocations = CertificateLocations(t.temp)
+	*c = CertificateLocations(tmp.temp)
 
 	// Extract the links to other entities for later
-	certificatelocations.certificates = t.Links.Certificates.ToStrings()
-	certificatelocations.CertificatesCount = t.Links.CertificatesCount
+	c.certificates = tmp.Links.Certificates.ToStrings()
 
 	return nil
 }
@@ -61,11 +58,11 @@ func GetCertificateLocations(c common.Client, uri string) (*CertificateLocations
 
 // ListReferencedCertificateLocationss gets the collection of CertificateLocations from
 // a provided reference.
-func ListReferencedCertificateLocations(c common.Client, link string) ([]*CertificateLocations, error) {
+func ListReferencedCertificateLocationss(c common.Client, link string) ([]*CertificateLocations, error) {
 	return common.GetCollectionObjects[CertificateLocations](c, link)
 }
 
-// Certificates retrieves a collection of the Certificates installed on the system.
-func (certificatelocations *CertificateLocations) Certificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](certificatelocations.GetClient(), certificatelocations.certificates)
+// Certificates gets the Certificates linked resources.
+func (c *CertificateLocations) Certificates(client common.Client) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](client, c.certificates)
 }

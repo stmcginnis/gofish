@@ -1,60 +1,107 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.2.2 - #DataProtectionLineOfService.v1_3_0.DataProtectionLineOfService
 
 package swordfish
 
 import (
+	"encoding/json"
+
 	"github.com/stmcginnis/gofish/common"
 )
 
-// DataProtectionLineOfService describes a replica that protects data from loss.
-// The requirements must be met collectively by the communication path and the
-// replica.
+// DataProtectionLineOfService This service option describes a replica that
+// protects data from loss. The requirements must be met collectively by the
+// communication path and the replica.
 type DataProtectionLineOfService struct {
 	common.Entity
-
+	// IsIsolated shall indicate that the replica is in a separate fault domain
+	// from its source. The default value of this property is false.
+	IsIsolated bool
+	// MinLifetime shall be an ISO 8601 duration that specifies the minimum
+	// required lifetime of the replica. Note: The maximum number of replicas can
+	// be determined using this value together with the replicaSchedule.
+	MinLifetime string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// IsIsolated is True shall indicate that the replica is in a separate
-	// fault domain from its source. The default value of this property is
-	// false.
-	IsIsolated bool
-	// MinLifetime shall be an ISO 8601 duration that specifies
-	// the minimum required lifetime of the replica. Note: The maximum number
-	// of replicas can be determined using this value together with the
-	// replicaSchedule.
-	MinLifetime string
-	// RecoveryGeographicObjective specifies the geographic scope of the failure
-	// domain.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// RecoveryGeographicObjective The value specifies the geographic scope of the
+	// failure domain.
 	RecoveryGeographicObjective FailureDomainScope
-	// RecoveryPointObjectiveTime shall be an ISO 8601 duration that specifies
-	// the maximum time over which source data may be lost on failure. In the
-	// case that IsIsolated = false, failure of the domain is not a
-	// consideration.
+	// RecoveryPointObjectiveTime shall be an ISO 8601 duration that specifies the
+	// maximum time over which source data may be lost on failure. In the case that
+	// IsIsolated = false, failure of the domain is not a consideration.
 	RecoveryPointObjectiveTime string
-	// RecoveryTimeObjective shall be an enumeration that
-	// indicates the maximum time required to access an alternate replica. In
-	// the case that IsIsolated = false, failure of the domain is not a
-	// consideration.
+	// RecoveryTimeObjective shall be an enumeration that indicates the maximum
+	// time required to access an alternate replica. In the case that IsIsolated =
+	// false, failure of the domain is not a consideration.
 	RecoveryTimeObjective RecoveryAccessScope
-	// ReplicaAccessLocation is used if the data access location of the
-	// replica is required to be at a specific location.   Note 1: The
-	// location value may be granular.  Note 2: A value may be required for
-	// some regulatory compliance.
+	// ReplicaAccessLocation shall be used if the data access location of the
+	// replica is required to be at a specific location. Note 1: The location value
+	// may be granular. Note 2: A value may be required for some regulatory
+	// compliance.
 	ReplicaAccessLocation common.Location
-	// ReplicaClassOfService shall reference the class of
-	// service that defines the required service levels of the replica.
+	// ReplicaClassOfService shall reference the class of service that defines the
+	// required service levels of the replica.
 	ReplicaClassOfService ClassOfService
-	// ReplicaType is the type of replica.
+	// ReplicaType shall conform to this value.
 	ReplicaType ReplicaType
-	// Schedule if a replica is made periodically, the value shall define
-	// the schedule.
+	// Schedule shall define the schedule.
 	Schedule common.Schedule
+	// createReplicasTarget is the URL to send CreateReplicas requests.
+	createReplicasTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals a DataProtectionLineOfService object from the raw JSON.
+func (d *DataProtectionLineOfService) UnmarshalJSON(b []byte) error {
+	type temp DataProtectionLineOfService
+	type dActions struct {
+		CreateReplicas common.ActionTarget `json:"#DataProtectionLineOfService.CreateReplicas"`
+	}
+	var tmp struct {
+		temp
+		Actions dActions
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*d = DataProtectionLineOfService(tmp.temp)
+
+	// Extract the links to other entities for later
+	d.createReplicasTarget = tmp.Actions.CreateReplicas.Target
+
+	// This is a read/write object, so we need to save the raw object data for later
+	d.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (d *DataProtectionLineOfService) Update() error {
+	readWriteFields := []string{
+		"IsIsolated",
+		"MinLifetime",
+		"RecoveryGeographicObjective",
+		"RecoveryPointObjectiveTime",
+		"RecoveryTimeObjective",
+		"ReplicaAccessLocation",
+		"ReplicaClassOfService",
+		"ReplicaType",
+		"Schedule",
+	}
+
+	return d.UpdateFromRawData(d, d.rawData, readWriteFields)
 }
 
 // GetDataProtectionLineOfService will get a DataProtectionLineOfService instance from the service.
@@ -68,11 +115,57 @@ func ListReferencedDataProtectionLineOfServices(c common.Client, link string) ([
 	return common.GetCollectionObjects[DataProtectionLineOfService](c, link)
 }
 
-// ReplicaRequest is a request for a replica.
+// CreateReplicas shall create an on-demand replica that conforms to the bound
+// DataProtectionLineOfService.
+// replicaLineOfService - The value shall reference the data protection line of
+// service this operation is bound to.
+// replicaRequests - Each value shall reference a source resource and provide a
+// name for the replica.
+func (d *DataProtectionLineOfService) CreateReplicas(replicaLineOfService string, replicaRequests []ReplicaRequest) error {
+	payload := make(map[string]any)
+	payload["ReplicaLineOfService"] = replicaLineOfService
+	payload["ReplicaRequests"] = replicaRequests
+	return d.Post(d.createReplicasTarget, payload)
+}
+
+// ReplicaRequest shall contain information about the ReplicaSource and the
+// ReplicaName.
 type ReplicaRequest struct {
 	// ReplicaName shall be the names of the replica.
+	//
+	// Version added: v1.1.0
 	ReplicaName string
-	// ReplicaSource shall reference a resource to be
-	// replicated.
-	ReplicaSource common.Link
+	// ReplicaSource shall reference a resource to be replicated.
+	//
+	// Version added: v1.1.0
+	replicaSource string
+}
+
+// UnmarshalJSON unmarshals a ReplicaRequest object from the raw JSON.
+func (r *ReplicaRequest) UnmarshalJSON(b []byte) error {
+	type temp ReplicaRequest
+	var tmp struct {
+		temp
+		ReplicaSource common.Link `json:"replicaSource"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*r = ReplicaRequest(tmp.temp)
+
+	// Extract the links to other entities for later
+	r.replicaSource = tmp.ReplicaSource.String()
+
+	return nil
+}
+
+// ReplicaSource gets the ReplicaSource linked resource.
+func (r *ReplicaRequest) ReplicaSource(client common.Client) (*common.Entity, error) {
+	if r.replicaSource == "" {
+		return nil, nil
+	}
+	return common.GetObject[common.Entity](client, r.replicaSource)
 }

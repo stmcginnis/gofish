@@ -49,16 +49,16 @@ func TestControl(t *testing.T) {
 	assertEquals(t, "W", result.SetPointUnits)
 	assertEquals(t, "/redfish/v1/Chassis/1U/Sensors/TotalPower", result.Sensor.DataSourceURI)
 
-	if result.SetPoint != 500 {
-		t.Errorf("Unexpected set point, got %.2f", result.SetPoint)
+	if *result.SetPoint != 500 {
+		t.Errorf("Unexpected set point, got %.2f", *result.SetPoint)
 	}
 
-	if result.AllowableMax != 1000 {
-		t.Errorf("Unexpected allowable max, got %.2f", result.AllowableMax)
+	if *result.AllowableMax != 1000 {
+		t.Errorf("Unexpected allowable max, got %.2f", *result.AllowableMax)
 	}
 
-	if result.AllowableMin != 150 {
-		t.Errorf("Unexpected allowable min, got %.2f", result.AllowableMin)
+	if *result.AllowableMin != 150 {
+		t.Errorf("Unexpected allowable min, got %.2f", *result.AllowableMin)
 	}
 
 	if *result.Sensor.Reading != 374 {

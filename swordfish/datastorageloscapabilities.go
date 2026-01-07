@@ -1,80 +1,88 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.0.7a - #DataStorageLoSCapabilities.v1_2_2.DataStorageLoSCapabilities
 
 package swordfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// ProvisioningPolicy is used to specify space provisioning policy.
+// ProvisioningPolicy is The enumeration literals may be used to specify space
+// provisioning policy.
 type ProvisioningPolicy string
 
 const (
 	// FixedProvisioningPolicy shall be fully allocated.
 	FixedProvisioningPolicy ProvisioningPolicy = "Fixed"
-	// ThinProvisioningPolicy specifies storage may be over allocated.
+	// ThinProvisioningPolicy This enumeration literal specifies storage may be
+	// over allocated.
 	ThinProvisioningPolicy ProvisioningPolicy = "Thin"
 )
 
-// StorageAccessCapability is used to describe abilities to read or write
-// storage.
+// StorageAccessCapability is StorageAccessCapability enumeration literals may
+// be used to describe abilities to read or write storage.
 type StorageAccessCapability string
 
 const (
-	// ReadStorageAccessCapability shall indicate that the storage may be
-	// read.
+	// ReadStorageAccessCapability shall indicate that the storage may be read.
 	ReadStorageAccessCapability StorageAccessCapability = "Read"
-	// WriteStorageAccessCapability shall indicate that the storage may be
-	// written multiple times.
+	// WriteStorageAccessCapability shall indicate that the storage may be written
+	// multiple times.
 	WriteStorageAccessCapability StorageAccessCapability = "Write"
-	// WriteOnceStorageAccessCapability shall indicate that the storage may
-	// be written only once.
+	// WriteOnceStorageAccessCapability shall indicate that the storage may be
+	// written only once.
 	WriteOnceStorageAccessCapability StorageAccessCapability = "WriteOnce"
-	// AppendStorageAccessCapability shall indicate that the storage may be
-	// written only to append.
+	// AppendStorageAccessCapability shall indicate that the storage may be written
+	// only to append.
 	AppendStorageAccessCapability StorageAccessCapability = "Append"
-	// StreamingStorageAccessCapability shall indicate that the storage may
-	// be read sequentially.
+	// StreamingStorageAccessCapability shall indicate that the storage may be read
+	// sequentially.
 	StreamingStorageAccessCapability StorageAccessCapability = "Streaming"
-	// ExecuteStorageAccessCapability shall indicate that Execute access is
-	// allowed by the file share.
+	// ExecuteStorageAccessCapability shall indicate that Execute access is allowed
+	// by the file share.
 	ExecuteStorageAccessCapability StorageAccessCapability = "Execute"
 )
 
-// DataStorageLoSCapabilities describes capabilities of the system to
-// support various data storage service options.
+// DataStorageLoSCapabilities Each instance of DataStorageLoSCapabilities
+// describes capabilities of the system to support various data storage service
+// options.
 type DataStorageLoSCapabilities struct {
 	common.Entity
-
+	// Identifier shall be unique within the managed ecosystem.
+	Identifier common.Identifier
+	// MaximumRecoverableCapacitySourceCount The maximum number of capacity source
+	// resources that can be supported for the purpose of recovery when in the
+	// event that an equivalent capacity source resource fails.
+	//
+	// Version added: v1.2.0
+	MaximumRecoverableCapacitySourceCount *int `json:",omitempty"`
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// Identifier shall be unique within the managed ecosystem.
-	Identifier common.Identifier
-	// MaximumRecoverableCapacitySourceCount is the maximum number of capacity
-	// source resources that can be supported for the purpose of recovery when
-	// in the event that an equivalent capacity source resource fails.
-	MaximumRecoverableCapacitySourceCount int
-	// SupportedAccessCapabilities specifies a storage access capabilities.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// SupportedAccessCapabilities Each entry specifies a storage access
+	// capability.
 	SupportedAccessCapabilities []StorageAccessCapability
-	// SupportedLinesOfService shall contain known and supported DataStorageLinesOfService.
+	// SupportedLinesOfService shall contain known and supported
+	// DataStorageLinesOfService.
 	SupportedLinesOfService []DataStorageLineOfService
-	// SupportedLinesOfServiceCount is
+	// SupportedLinesOfService@odata.count
 	SupportedLinesOfServiceCount int `json:"SupportedLinesOfService@odata.count"`
-	// SupportedProvisioningPolicies specifies supported storage allocation policies.
+	// SupportedProvisioningPolicies This collection specifies supported storage
+	// allocation policies.
 	SupportedProvisioningPolicies []ProvisioningPolicy
-	// SupportedRecoveryTimeObjectives specifies supported expectations for time
-	// to access the primary store after recovery.
+	// SupportedRecoveryTimeObjectives This collection specifies supported
+	// expectations for time to access the primary store after recovery.
 	SupportedRecoveryTimeObjectives []RecoveryAccessScope
-	// SupportsSpaceEfficiency specifies whether storage compression or
+	// SupportsSpaceEfficiency The value specifies whether storage compression or
 	// deduplication is supported. The default value for this property is false.
 	SupportsSpaceEfficiency bool
 	// rawData holds the original serialized JSON so we can compare updates.
@@ -82,50 +90,41 @@ type DataStorageLoSCapabilities struct {
 }
 
 // UnmarshalJSON unmarshals a DataStorageLoSCapabilities object from the raw JSON.
-func (datastorageloscapabilities *DataStorageLoSCapabilities) UnmarshalJSON(b []byte) error {
+func (d *DataStorageLoSCapabilities) UnmarshalJSON(b []byte) error {
 	type temp DataStorageLoSCapabilities
-	var t struct {
+	var tmp struct {
 		temp
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*datastorageloscapabilities = DataStorageLoSCapabilities(t.temp)
+	*d = DataStorageLoSCapabilities(tmp.temp)
 
 	// Extract the links to other entities for later
 
 	// This is a read/write object, so we need to save the raw object data for later
-	datastorageloscapabilities.rawData = b
+	d.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (datastorageloscapabilities *DataStorageLoSCapabilities) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(DataStorageLoSCapabilities)
-	err := original.UnmarshalJSON(datastorageloscapabilities.rawData)
-	if err != nil {
-		return err
-	}
-
+func (d *DataStorageLoSCapabilities) Update() error {
 	readWriteFields := []string{
+		"Identifier",
 		"MaximumRecoverableCapacitySourceCount",
 		"SupportedAccessCapabilities",
 		"SupportedLinesOfService",
+		"SupportedLinesOfService@odata.count",
 		"SupportedProvisioningPolicies",
 		"SupportedRecoveryTimeObjectives",
 		"SupportsSpaceEfficiency",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(datastorageloscapabilities).Elem()
-
-	return datastorageloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
+	return d.UpdateFromRawData(d, d.rawData, readWriteFields)
 }
 
 // GetDataStorageLoSCapabilities will get a DataStorageLoSCapabilities instance from the service.
@@ -133,8 +132,8 @@ func GetDataStorageLoSCapabilities(c common.Client, uri string) (*DataStorageLoS
 	return common.GetObject[DataStorageLoSCapabilities](c, uri)
 }
 
-// ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
+// ListReferencedDataStorageLoSCapabilitiess gets the collection of DataStorageLoSCapabilities from
 // a provided reference.
-func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) {
+func ListReferencedDataStorageLoSCapabilitiess(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) {
 	return common.GetCollectionObjects[DataStorageLoSCapabilities](c, link)
 }

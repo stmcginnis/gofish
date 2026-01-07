@@ -59,7 +59,7 @@ func TestSerialInterfaceUpdate(t *testing.T) {
 
 	newBitRate := BitRate57600
 	newFlowControl := HardwareSerialConnectionFlowControl
-	newParity := OddParityBit
+	newParity := OddParity
 
 	result.BitRate = newBitRate
 	result.FlowControl = newFlowControl

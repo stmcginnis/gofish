@@ -62,7 +62,6 @@ func TestUpdateService(t *testing.T) {
 		}
 		assertMessage(t, result.firmwareInventory, "/redfish/v1/UpdateService/FirmwareInventory")
 		assertMessage(t, result.HTTPPushURI, "/redfish/v1/UpdateService/FirmwareInventory")
-		assertMessage(t, result.TransferProtocol[0], "HTTP")
 		assertMessage(t, result.simpleUpdateTarget, "/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate")
 	})
 }

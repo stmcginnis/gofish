@@ -110,11 +110,9 @@ func TestPowerSubsystem(t *testing.T) {
 
 	assertEquals(t, "PowerSubsystem", result.ID)
 	assertEquals(t, "Power Subsystem for Chassis", result.Name)
-	assertEquals(t, "2000", fmt.Sprintf("%.0f", result.CapacityWatts))
-	assertEquals(t, "1500", fmt.Sprintf("%.0f", result.Allocation.RequestedWatts))
-	assertEquals(t, "1200", fmt.Sprintf("%.0f", result.Allocation.AllocatedWatts))
-	assertEquals(t, "Failover", string(result.PowerSupplyRedundancy[0].RedundancyType))
-	assertEquals(t, "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay2", result.PowerSupplyRedundancy[0].redundancyGroup[1])
+	assertEquals(t, "2000", fmt.Sprintf("%.0f", *result.CapacityWatts))
+	assertEquals(t, "1500", fmt.Sprintf("%.0f", *result.Allocation.RequestedWatts))
+	assertEquals(t, "1200", fmt.Sprintf("%.0f", *result.Allocation.AllocatedWatts))
 	assertEquals(t, "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies", result.powerSupplies)
 }
 

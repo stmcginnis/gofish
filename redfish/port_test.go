@@ -50,6 +50,6 @@ func TestPort(t *testing.T) {
 	assertEquals(t, "1", result.PortID)
 	assertEquals(t, "BidirectionalPort", fmt.Sprint(result.PortType))
 	assertEquals(t, "SAS", fmt.Sprint(result.PortProtocol))
-	assertEquals(t, "48", fmt.Sprint(result.CurrentSpeedGbps))
+	assertEquals(t, "48", fmt.Sprint(*result.CurrentSpeedGbps))
 	assertEquals(t, "LinkUp", fmt.Sprint(result.LinkStatus))
 }

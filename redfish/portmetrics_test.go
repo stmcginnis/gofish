@@ -42,15 +42,15 @@ func TestPortMetrics(t *testing.T) {
 	assertEquals(t, "Metrics", result.ID)
 	assertEquals(t, "Gen-Z Port 1 Metrics", result.Name)
 
-	if result.GenZ.PacketCRCErrors != 24 {
+	if *result.GenZ.PacketCRCErrors != 24 {
 		t.Errorf("Unexpected GenZ.PacketCRCErrors value: %d", result.GenZ.PacketCRCErrors)
 	}
 
-	if result.GenZ.EndToEndCRCErrors != 3 {
+	if *result.GenZ.EndToEndCRCErrors != 3 {
 		t.Errorf("Unexpected GenZ.EndToEndCRCErrors value: %d", result.GenZ.EndToEndCRCErrors)
 	}
 
-	if result.GenZ.RXStompedECRC != 1 {
+	if *result.GenZ.RXStompedECRC != 1 {
 		t.Errorf("Unexpected GenZ.RXStompedECRC value: %d", result.GenZ.RXStompedECRC)
 	}
 }

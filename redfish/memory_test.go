@@ -123,7 +123,7 @@ func TestMemory(t *testing.T) {
 		t.Errorf("Invalid operating memory mode results: %s", result.OperatingMemoryModes)
 	}
 
-	if result.PowerManagementPolicy.AveragePowerBudgetMilliWatts != 42 {
+	if *result.PowerManagementPolicy.AveragePowerBudgetMilliWatts != 42 {
 		t.Errorf("Invalid power management policy average power budget: %d",
 			result.PowerManagementPolicy.AveragePowerBudgetMilliWatts)
 	}

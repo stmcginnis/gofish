@@ -1,97 +1,85 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.1.0 - #IOPerformanceLineOfService.v1_1_1.IOPerformanceLineOfService
 
 package swordfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// IOPerformanceLineOfService is used to define a service option related
-// to IO performance.
+// IOPerformanceLineOfService This structure may be used to define a service
+// option related to IO performance.
 type IOPerformanceLineOfService struct {
 	common.Entity
-
+	// AverageIOOperationLatencyMicroseconds shall be the expected average IO
+	// latency in microseconds calculated over sample periods (see
+	// SamplePeriodSeconds).
+	AverageIOOperationLatencyMicroseconds *int `json:",omitempty"`
+	// IOOperationsPerSecondIsLimited shall not enforce a limit. The default value
+	// for this property is false.
+	IOOperationsPerSecondIsLimited bool
+	// IOWorkload shall be a description of the expected workload. The workload
+	// provides the context in which the values of
+	// MaxIOOperationsPerSecondPerTerabyte and
+	// AverageIOOperationLatencyMicroseconds are expected to be achievable.
+	IOWorkload IOWorkload
+	// MaxIOOperationsPerSecondPerTerabyte shall be the amount of IOPS a volume of
+	// a given committed size in Terabytes can support. This IOPS density value is
+	// useful as a metric that is independent of capacity. Cost is a function of
+	// this value and the AverageIOOperationLatencyMicroseconds.
+	MaxIOOperationsPerSecondPerTerabyte *int `json:",omitempty"`
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// AverageIOOperationLatencyMicroseconds shall be the expected average IO
-	// latency in microseconds calculated over sample periods (see
-	// SamplePeriodSeconds).
-	AverageIOOperationLatencyMicroseconds int
-	// Description provides a description of this resource.
-	Description string
-	// IOOperationsPerSecondIsLimited means if true, the system should not allow
-	// IOPS to exceed MaxIoOperationsPerSecondPerTerabyte * VolumeSize.
-	// Otherwise, the system shall not enforce a limit. The default value
-	// for this property is false.
-	IOOperationsPerSecondIsLimited bool
-	// IOWorkload shall be a description of the expected
-	// workload. The workload provides the context in which the values of
-	// MaxIOOperationsPerSecondPerTerabyte and
-	// AverageIOOperationLatencyMicroseconds are expected to be achievable.
-	IOWorkload IOWorkload
-	// MaxIOOperationsPerSecondPerTerabyte shall be the amount
-	// of IOPS a volume of a given committed size in Terabytes can support.
-	// This IOPS density value is useful as a metric that is independent of
-	// capacity. Cost is a function of this value and the
-	// AverageIOOperationLatencyMicroseconds.
-	MaxIOOperationsPerSecondPerTerabyte int
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// SamplePeriod shall be an ISO 8601 duration specifying the
-	// sampling period over which average values are calculated.
+	// SamplePeriod shall be an ISO 8601 duration specifying the sampling period
+	// over which average values are calculated.
 	SamplePeriod string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a IOPerformanceLineOfService object from the raw JSON.
-func (ioperformancelineofservice *IOPerformanceLineOfService) UnmarshalJSON(b []byte) error {
+func (i *IOPerformanceLineOfService) UnmarshalJSON(b []byte) error {
 	type temp IOPerformanceLineOfService
-	var t struct {
+	var tmp struct {
 		temp
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*ioperformancelineofservice = IOPerformanceLineOfService(t.temp)
+	*i = IOPerformanceLineOfService(tmp.temp)
 
 	// Extract the links to other entities for later
 
 	// This is a read/write object, so we need to save the raw object data for later
-	ioperformancelineofservice.rawData = b
+	i.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (ioperformancelineofservice *IOPerformanceLineOfService) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(IOPerformanceLineOfService)
-	original.UnmarshalJSON(ioperformancelineofservice.rawData)
-
+func (i *IOPerformanceLineOfService) Update() error {
 	readWriteFields := []string{
 		"AverageIOOperationLatencyMicroseconds",
 		"IOOperationsPerSecondIsLimited",
+		"IOWorkload",
 		"MaxIOOperationsPerSecondPerTerabyte",
 		"SamplePeriod",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(ioperformancelineofservice).Elem()
-
-	return ioperformancelineofservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.UpdateFromRawData(i, i.rawData, readWriteFields)
 }
 
 // GetIOPerformanceLineOfService will get a IOPerformanceLineOfService instance from the service.

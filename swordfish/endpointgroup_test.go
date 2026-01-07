@@ -20,9 +20,9 @@ var endpointGroupBody = `{
 		"Name": "EndpointGroupOne",
 		"Description": "EndpointGroup One",
 		"AccessState": "Optimized",
-		"Endpoints": {
-			"@odata.id": "/redfish/v1/Endpoints"
-		},
+		"Endpoints": [
+			{"@odata.id": "/redfish/v1/Endpoints"}
+		],
 		"GroupType": "Server",
 		"Preferred": true,
 		"TargetEndpointGroupIdentifier": 5
@@ -49,8 +49,8 @@ func TestEndpointGroup(t *testing.T) {
 		t.Errorf("Access state is %s", result.AccessState)
 	}
 
-	if result.endpoints != "/redfish/v1/Endpoints" {
-		t.Errorf("Invalid endpoints: %s", result.endpoints)
+	if len(result.endpoints) == 0 || result.endpoints[0] != "/redfish/v1/Endpoints" {
+		t.Errorf("Invalid endpoints: %v", result.endpoints)
 	}
 
 	if result.GroupType != ServerGroupType {
@@ -61,7 +61,7 @@ func TestEndpointGroup(t *testing.T) {
 		t.Error("Preferred should be true")
 	}
 
-	if result.TargetEndpointGroupIdentifier != 5 {
+	if *result.TargetEndpointGroupIdentifier != 5 {
 		t.Errorf("Invalid target endpoint group id: %d", result.TargetEndpointGroupIdentifier)
 	}
 }
@@ -81,7 +81,7 @@ func TestEndpointGroupUpdate(t *testing.T) {
 	result.AccessState = StandbyAccessState
 	result.GroupType = ClientGroupType
 	result.Preferred = true
-	result.TargetEndpointGroupIdentifier = 9
+	*result.TargetEndpointGroupIdentifier = 9
 	err = result.Update()
 
 	if err != nil {

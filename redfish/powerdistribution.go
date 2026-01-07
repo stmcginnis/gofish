@@ -1,359 +1,457 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.3 - #PowerDistribution.v1_5_0.PowerDistribution
 
 package redfish
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// The type of equipment this resource represents.
 type PowerEquipmentType string
 
 const (
-	// RackPDUPowerEquipmentType A power distribution unit providing outlets for a rack or similar quantity of devices.
+	// RackPDUPowerEquipmentType is a power distribution unit providing outlets for
+	// a rack or similar quantity of devices.
 	RackPDUPowerEquipmentType PowerEquipmentType = "RackPDU"
-	// FloorPDUPowerEquipmentType A power distribution unit providing feeder circuits for further power distribution.
+	// FloorPDUPowerEquipmentType is a power distribution unit providing feeder
+	// circuits for further power distribution.
 	FloorPDUPowerEquipmentType PowerEquipmentType = "FloorPDU"
-	// ManualTransferSwitchPowerEquipmentType A manual power transfer switch.
+	// ManualTransferSwitchPowerEquipmentType is a manual power transfer switch.
 	ManualTransferSwitchPowerEquipmentType PowerEquipmentType = "ManualTransferSwitch"
-	// AutomaticTransferSwitchPowerEquipmentType An automatic power transfer switch.
+	// AutomaticTransferSwitchPowerEquipmentType is an automatic power transfer
+	// switch.
 	AutomaticTransferSwitchPowerEquipmentType PowerEquipmentType = "AutomaticTransferSwitch"
 	// SwitchgearPowerEquipmentType Electrical switchgear.
 	SwitchgearPowerEquipmentType PowerEquipmentType = "Switchgear"
-	// PowerShelfPowerEquipmentType A power shelf.
+	// PowerShelfPowerEquipmentType is a power shelf.
 	PowerShelfPowerEquipmentType PowerEquipmentType = "PowerShelf"
-	// BusPowerEquipmentType An electrical bus.
+	// BusPowerEquipmentType is an electrical bus.
 	BusPowerEquipmentType PowerEquipmentType = "Bus"
-	// BatteryShelfPowerEquipmentType A battery shelf or battery-backed unit (BBU).
+	// BatteryShelfPowerEquipmentType is a battery shelf or battery-backed unit
+	// (BBU).
 	BatteryShelfPowerEquipmentType PowerEquipmentType = "BatteryShelf"
 )
 
-// The sensitivity to voltage waveform quality to satisfy the criterion for initiating a transfer.
-type TransferSensitivity string
+type TransferSensitivityType string
 
 const (
-	// High sensitivity for initiating a transfer.
-	HighTransferSensitivity TransferSensitivity = "High"
-	// Low sensitivity for initiating a transfer.
-	LowTransferSensitivity TransferSensitivity = "Low"
-	// Medium sensitivity for initiating a transfer.
-	MediumTransferSensitivity TransferSensitivity = "Medium"
+	// HighTransferSensitivityType High sensitivity for initiating a transfer.
+	HighTransferSensitivityType TransferSensitivityType = "High"
+	// MediumTransferSensitivityType Medium sensitivity for initiating a transfer.
+	MediumTransferSensitivityType TransferSensitivityType = "Medium"
+	// LowTransferSensitivityType Low sensitivity for initiating a transfer.
+	LowTransferSensitivityType TransferSensitivityType = "Low"
 )
 
-// The configuration settings for an automatic transfer switch.
-type TransferConfiguration struct {
-	// The mains circuit that is switched on and qualified
-	// to supply power to the output circuit.
-	ActiveMainsID string `json:"ActiveMainsId"`
-	// Indicates if the qualified alternate mains circuit is automatically switched on
-	// when the preferred mains circuit becomes unqualified and is automatically switched off.
-	AutoTransferEnabled bool
-	// Indicates if a make-before-break switching sequence of the mains circuits is permitted
-	// when they are both qualified and in synchronization.
-	ClosedTransitionAllowed bool
-	// The time in seconds to wait for a closed transition to occur.
-	ClosedTransitionTimeoutSeconds int64
-	// The preferred source for the mains circuit to this equipment.
-	PreferredMainsID string `json:"PreferredMainsId"`
-	// The time in seconds to delay the automatic transfer
-	// from the alternate mains circuit back to the preferred mains circuit.
-	RetransferDelaySeconds int64
-	// Indicates if the automatic transfer is permitted from the alternate mains circuit
-	// back to the preferred mains circuit after the preferred mains circuit is qualified again
-	// and the Retransfer Delay time has expired.
-	RetransferEnabled bool
-	// The time in seconds to delay the automatic transfer from the preferred mains circuit
-	// to the alternate mains circuit when the preferred mains circuit is disqualified.
-	TransferDelaySeconds int64
-	// Indicates if any transfer is inhibited.
-	TransferInhibit bool
-}
-
-// The criteria used to initiate a transfer for an automatic transfer switch.
-type TransferCriteria struct {
-	// The frequency in hertz over the nominal value
-	// that satisfies a criterion for transfer.
-	OverNominalFrequencyHz float32
-	// The positive percentage of voltage RMS over the nominal value
-	// that satisfies a criterion for transfer.
-	OverVoltageRMSPercentage int
-	// The sensitivity to voltage waveform quality
-	// to satisfy the criterion for initiating a transfer.
-	TransferSensitivity TransferSensitivity
-	// The frequency in hertz under the nominal value
-	// that satisfies a criterion for transfer.
-	UnderNominalFrequencyHz float32
-	// The negative percentage of voltage RMS under the nominal value
-	// that satisfies a criterion for transfer.
-	UnderVoltageRMSPercentage int
-}
-
-// PowerDistribution shall be used to represent
-// a power distribution component or unit for a Redfish implementation.
+// PowerDistribution shall represent a power distribution component or unit for
+// a Redfish implementation.
 type PowerDistribution struct {
 	common.Entity
-
+	// AssetTag shall contain the user-assigned asset tag, which is an identifying
+	// string that tracks the equipment for inventory purposes. Modifying this
+	// property may modify the 'AssetTag' in the containing 'Chassis' resource.
+	AssetTag string
+	// Branches shall contain a link to a resource collection of type
+	// 'CircuitCollection' that contains the branch circuits for this equipment.
+	branches string
+	// EquipmentType shall contain the type of equipment this resource represents.
+	EquipmentType PowerEquipmentType
+	// Feeders shall contain a link to a resource collection of type
+	// 'CircuitCollection' that contains the feeder circuits for this equipment.
+	feeders string
+	// FirmwareVersion shall contain a string describing the firmware version of
+	// this equipment as provided by the manufacturer.
+	FirmwareVersion string
+	// Location shall contain the location information of the associated equipment.
+	Location common.Location
+	// Mains shall contain a link to a resource collection of type
+	// 'CircuitCollection' that contains the power input circuits for this
+	// equipment.
+	mains string
+	// MainsRedundancy shall contain redundancy information for the mains (input)
+	// circuits for this equipment. The values of the 'RedundancyGroup' array shall
+	// reference resources of type 'Circuit'.
+	//
+	// Version added: v1.1.0
+	MainsRedundancy common.RedundantGroup
+	// Manufacturer shall contain the name of the organization responsible for
+	// producing the equipment. This organization may be the entity from which the
+	// equipment is purchased, but this is not necessarily true.
+	Manufacturer string
+	// Metrics shall contain a link to a resource of type
+	// 'PowerDistributionMetrics'.
+	metrics string
+	// Model shall contain the manufacturer-provided model information of this
+	// equipment.
+	Model string
+	// MultipartImportConfigurationPushURI shall contain a URI used to perform a
+	// multipart HTTP or HTTPS 'POST' of a vendor-specific configuration file for
+	// the purpose of importing the configuration contained within the file as
+	// defined by the 'Import configuration data' clause of the Redfish
+	// Specification. The value of this property should not contain a URI of a
+	// Redfish resource. See the 'Redfish-defined URIs and relative reference
+	// rules' clause in the Redfish Specification.
+	//
+	// Version added: v1.5.0
+	MultipartImportConfigurationPushURI string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-
-	// The user-assigned asset tag for this equipment.
-	AssetTag string
-	// A link to the branch circuits for this equipment.
-	branches string
-	// The type of equipment this resource represents.
-	EquipmentType PowerEquipmentType
-	// A link to the feeder circuits for this equipment.
-	feeders string
-	// The firmware version of this equipment.
-	FirmwareVersion string
-	// The location of the equipment.
-	Location common.Location
-	// A link to the power input circuits for this equipment.
-	mains string
-	// The redundancy information for the mains (input) circuits for this equipment.
-	MainsRedundancy RedundantGroup
-	// The manufacturer of this equipment.
-	Manufacturer string
-	// A link to the summary metrics for this equipment.
-	metrics string
-	// The product model number of this equipment.
-	Model string
-	// A link to the outlet groups for this equipment.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OutletGroups shall contain a link to a resource collection of type
+	// 'OutletCollection' that contains the outlet groups for this equipment.
 	outletGroups string
-	// A link to the outlets for this equipment.
+	// Outlets shall contain a link to a resource collection of type
+	// 'OutletCollection' that contains the outlets for this equipment.
 	outlets string
-	// The part number for this equipment.
+	// PartNumber shall contain the manufacturer-provided part number for the
+	// equipment.
 	PartNumber string
-	// Deprecated: (v1.3) The link to the collection of power supplies for this equipment.
-	// This property has been deprecated in favor of the PowerSupplies link in the Chassis resource.
+	// PowerCapacityVA shall contain the maximum power capacity, rated as apparent
+	// power, of this equipment, in volt-ampere units.
+	//
+	// Version added: v1.4.0
+	PowerCapacityVA *uint `json:",omitempty"`
+	// PowerSupplies shall contain a link to a resource collection of type
+	// 'PowerSupplyCollection'.
+	//
+	// Version added: v1.1.0
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of the 'PowerSupplies' link in
+	// the 'Chassis' resource.
 	powerSupplies string
-	// Deprecated: (v1.3) The redundancy information for the devices in a redundancy group.
-	// This property has been deprecated in favor of the PowerSupplyRedundancy property in the Chassis resource.
-	PowerSupplyRedundancy []RedundantGroup
-	// The production or manufacturing date of this equipment.
+	// PowerSupplyRedundancy shall contain redundancy information for the set of
+	// power supplies for this equipment. The values of the 'RedundancyGroup' array
+	// shall reference resources of type 'PowerSupply'.
+	//
+	// Version added: v1.1.0
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of the 'PowerSupplyRedundancy'
+	// property in the 'Chassis' resource.
+	PowerSupplyRedundancy []common.RedundantGroup
+	// ProductionDate shall contain the date of production or manufacture for this
+	// equipment.
 	ProductionDate string
-	// Deprecated: (v1.3) A link to the collection of sensors located in the equipment and sub-components.
-	// This property has been deprecated in favor of the Sensors link in the Chassis resource.
+	// Sensors shall be a link to a resource collection of type 'SensorCollection'
+	// that contains the sensors located in the equipment and sub-components.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of the 'Sensors' link in the
+	// 'Chassis' resource.
 	sensors string
-	// The serial number for this equipment.
+	// SerialNumber shall contain a manufacturer-allocated number that identifies
+	// the equipment.
 	SerialNumber string
-	// The status and health of the resource and its subordinate or dependent resources.
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// A link to the subfeed circuits for this equipment.
+	// Subfeeds shall contain a link to a resource collection of type
+	// 'CircuitCollection' that contains the subfeed circuits for this equipment.
 	subfeeds string
-	// The configuration settings for an automatic transfer switch.
+	// TransferConfiguration shall contain the configuration information regarding
+	// an automatic transfer switch function for this resource.
 	TransferConfiguration TransferConfiguration
-	// The criteria used to initiate a transfer for an automatic transfer switch.
+	// TransferCriteria shall contain the criteria for initiating a transfer within
+	// an automatic transfer switch function for this resource.
 	TransferCriteria TransferCriteria
-	// A user-assigned label.
-	UserLabel string
-	// The UUID for this equipment.
+	// UUID shall contain the UUID for the equipment.
 	UUID string
-	// The hardware version of this equipment.
+	// UserLabel shall contain a user-assigned label used to identify this
+	// resource. If a value has not been assigned by a user, the value of this
+	// property shall be an empty string.
+	//
+	// Version added: v1.3.0
+	UserLabel string
+	// Version shall contain the hardware version of this equipment as determined
+	// by the vendor or supplier.
 	Version string
-
-	// Links section
-	// An array of links to the chassis that contain this equipment.
-	chassis      []string
-	ChassisCount int
-	// A link to the facility that contains this equipment.
-	facility string
-	// An array of links to the managers responsible for managing this equipment.
-	managedBy      []string
-	ManagedByCount int
-	// OemLinks are all OEM data under link section
-	OemLinks json.RawMessage
-
-	// Actions section
-	// This action transfers control to the alternative input circuit.
+	// exportConfigurationTarget is the URL to send ExportConfiguration requests.
+	exportConfigurationTarget string
+	// transferControlTarget is the URL to send TransferControl requests.
 	transferControlTarget string
-	// OemActions contains all the vendor specific actions.
-	// It is vendor responsibility to parse this field accordingly
-	OemActions json.RawMessage
-
+	// chassis are the URIs for Chassis.
+	chassis []string
+	// facility is the URI for Facility.
+	facility string
+	// managedBy are the URIs for ManagedBy.
+	managedBy []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerDistribution object from the raw JSON.
-func (powerDistribution *PowerDistribution) UnmarshalJSON(b []byte) error {
+func (p *PowerDistribution) UnmarshalJSON(b []byte) error {
 	type temp PowerDistribution
-	type linkReference struct {
-		Chassis        common.Links
-		ChassisCount   int `json:"Chassis@odata.count"`
-		Facility       common.Link
-		ManagedBy      common.Links
-		ManagedByCount int `json:"ManagedBy@odata.count"`
-		Oem            json.RawMessage
+	type pActions struct {
+		ExportConfiguration common.ActionTarget `json:"#PowerDistribution.ExportConfiguration"`
+		TransferControl     common.ActionTarget `json:"#PowerDistribution.TransferControl"`
 	}
-	type actions struct {
-		TransferControl common.ActionTarget `json:"#PowerDistribution.TransferControl"`
-		Oem             json.RawMessage     // OEM actions will be stored here
+	type pLinks struct {
+		Chassis   common.Links `json:"Chassis"`
+		Facility  common.Link  `json:"Facility"`
+		ManagedBy common.Links `json:"ManagedBy"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-
-		Branches      common.Link
-		Feeders       common.Link
-		Mains         common.Link
-		Metrics       common.Link
-		OutletGroups  common.Link
-		Outlets       common.Link
-		PowerSupplies common.Link
-		Sensors       common.Link
-		Subfeeds      common.Link
-
-		Links   linkReference
-		Actions actions
+		Actions       pActions
+		Links         pLinks
+		Branches      common.Link `json:"branches"`
+		Feeders       common.Link `json:"feeders"`
+		Mains         common.Link `json:"mains"`
+		Metrics       common.Link `json:"metrics"`
+		OutletGroups  common.Link `json:"outletGroups"`
+		Outlets       common.Link `json:"outlets"`
+		PowerSupplies common.Link `json:"powerSupplies"`
+		Sensors       common.Link `json:"sensors"`
+		Subfeeds      common.Link `json:"subfeeds"`
 	}
 
-	if err := json.Unmarshal(b, &t); err != nil {
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
 		return err
 	}
 
+	*p = PowerDistribution(tmp.temp)
+
 	// Extract the links to other entities for later
-	*powerDistribution = PowerDistribution(t.temp)
-	powerDistribution.branches = t.Branches.String()
-	powerDistribution.feeders = t.Feeders.String()
-	powerDistribution.mains = t.Mains.String()
-	powerDistribution.metrics = t.Metrics.String()
-	powerDistribution.outletGroups = t.OutletGroups.String()
-	powerDistribution.outlets = t.Outlets.String()
-	powerDistribution.powerSupplies = t.PowerSupplies.String()
-	powerDistribution.sensors = t.Sensors.String()
-	powerDistribution.subfeeds = t.Subfeeds.String()
-
-	powerDistribution.chassis = t.Links.Chassis.ToStrings()
-	powerDistribution.ChassisCount = t.Links.ChassisCount
-	powerDistribution.facility = t.Links.Facility.String()
-	powerDistribution.managedBy = t.Links.ManagedBy.ToStrings()
-	powerDistribution.ManagedByCount = t.Links.ManagedByCount
-	powerDistribution.OemLinks = t.Links.Oem
-
-	powerDistribution.transferControlTarget = t.Actions.TransferControl.Target
-	powerDistribution.OemActions = t.Actions.Oem
+	p.exportConfigurationTarget = tmp.Actions.ExportConfiguration.Target
+	p.transferControlTarget = tmp.Actions.TransferControl.Target
+	p.chassis = tmp.Links.Chassis.ToStrings()
+	p.facility = tmp.Links.Facility.String()
+	p.managedBy = tmp.Links.ManagedBy.ToStrings()
+	p.branches = tmp.Branches.String()
+	p.feeders = tmp.Feeders.String()
+	p.mains = tmp.Mains.String()
+	p.metrics = tmp.Metrics.String()
+	p.outletGroups = tmp.OutletGroups.String()
+	p.outlets = tmp.Outlets.String()
+	p.powerSupplies = tmp.PowerSupplies.String()
+	p.sensors = tmp.Sensors.String()
+	p.subfeeds = tmp.Subfeeds.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	powerDistribution.rawData = b
+	p.rawData = b
 
 	return nil
 }
 
-// GetPowerDistribution will get a PowerDistribution instance from the Redfish service.
+// Update commits updates to this object's properties to the running system.
+func (p *PowerDistribution) Update() error {
+	readWriteFields := []string{
+		"AssetTag",
+		"Location",
+		"MainsRedundancy",
+		"PowerSupplyRedundancy",
+		"Status",
+		"TransferConfiguration",
+		"TransferCriteria",
+		"UserLabel",
+	}
+
+	return p.UpdateFromRawData(p, p.rawData, readWriteFields)
+}
+
+// GetPowerDistribution will get a PowerDistribution instance from the service.
 func GetPowerDistribution(c common.Client, uri string) (*PowerDistribution, error) {
 	return common.GetObject[PowerDistribution](c, uri)
 }
 
-// Update commits updates to this object's properties to the running system.
-func (powerDistribution *PowerDistribution) Update() error {
-	// Note: current definition (2023.3) only includes AssetTag and UserLabel.
-	// May have errors trying to set other values, but keeping in here for backwards
-	// compatibility.
-	readWriteFields := []string{
-		"AssetTag",
-		"UserLabel",
-		"ActiveMainsId",
-		"AutoTransferEnabled",
-		"ClosedTransitionAllowed",
-		"ClosedTransitionTimeoutSeconds",
-		"PreferredMainsId",
-		"RetransferDelaySeconds",
-		"RetransferEnabled",
-		"TransferDelaySeconds",
-		"TransferInhibit",
-		"OverNominalFrequencyHz",
-		"OverVoltageRMSPercentage",
-		"TransferSensitivity",
-		"UnderNominalFrequencyHz",
-		"UnderVoltageRMSPercentage",
-	}
-
-	return powerDistribution.UpdateFromRawData(powerDistribution, powerDistribution.rawData, readWriteFields)
-}
-
-// This action shall transfer power input from the existing mains circuit to the alternative mains circuit.
-func (powerDistribution *PowerDistribution) TransferControl() error {
-	if powerDistribution.transferControlTarget == "" {
-		return errors.New("TransferControl is not supported")
-	}
-
-	return powerDistribution.Post(powerDistribution.transferControlTarget, nil)
-}
-
-// ListReferencedPowerDistribution gets the collection of PowerDistribution from
+// ListReferencedPowerDistributions gets the collection of PowerDistribution from
 // a provided reference.
-func ListReferencedPowerDistributionUnits(c common.Client, link string) ([]*PowerDistribution, error) {
+func ListReferencedPowerDistributions(c common.Client, link string) ([]*PowerDistribution, error) {
 	return common.GetCollectionObjects[PowerDistribution](c, link)
 }
 
-// Deprecated: (v1.3) in favor of the Sensors link in the Chassis resource.
-func (powerDistribution *PowerDistribution) Sensors() ([]*Sensor, error) {
-	return ListReferencedSensors(powerDistribution.GetClient(), powerDistribution.sensors)
+// ExportConfiguration shall export the specified configuration of the equipment in a
+// vendor-specific format. Upon successful completion of the action and any
+// asynchronous processing, the 'Location' header in the response shall contain
+// a URI to a file that contains the configuration data.
+// components - This parameter shall contain an array of components of the
+// equipment for which to export configuration data.
+// encryptionPassphrase - This parameter shall contain the encryption
+// passphrase for the exported file. If this parameter is specified and has a
+// non-zero length, the service shall encrypt the exported file with the
+// passphrase. Otherwise, the service shall not encrypt the exported file.
+// exportType - This parameter shall contain the type of export to perform.
+// oEMComponents - This parameter shall contain an array of OEM-specific
+// components of the equipment for which to export configuration data.
+// security - This parameter shall contain the policy to apply when exporting
+// secure information.
+func (p *PowerDistribution) ExportConfiguration(components []string, encryptionPassphrase string, exportType ExportType, oEMComponents string, security ExportSecurity) error {
+	payload := make(map[string]any)
+	payload["Components"] = components
+	payload["EncryptionPassphrase"] = encryptionPassphrase
+	payload["ExportType"] = exportType
+	payload["OEMComponents"] = oEMComponents
+	payload["Security"] = security
+	return p.Post(p.exportConfigurationTarget, payload)
 }
 
-// Deprecated: (v1.3) in favor of the PowerSupplies link in the Chassis resource.
-func (powerDistribution *PowerDistribution) PowerSupplies() ([]*PowerSupplyUnit, error) {
-	return ListReferencedPowerSupplyUnits(powerDistribution.GetClient(), powerDistribution.powerSupplies)
+// TransferControl shall transfer power input from the existing mains circuit to
+// the alternative mains circuit.
+func (p *PowerDistribution) TransferControl() error {
+	payload := make(map[string]any)
+	return p.Post(p.transferControlTarget, payload)
 }
 
-// ManagedBy gets the collection of managers for this equipment.
-func (powerDistribution *PowerDistribution) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](powerDistribution.GetClient(), powerDistribution.managedBy)
+// Chassis gets the Chassis linked resources.
+func (p *PowerDistribution) Chassis(client common.Client) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](client, p.chassis)
 }
 
-// Chassis gets the collection of chassis for this equipment.
-func (powerDistribution *PowerDistribution) Chassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](powerDistribution.GetClient(), powerDistribution.chassis)
-}
-
-// Branches gets the collection that contains the branch circuits for this equipment.
-func (powerDistribution *PowerDistribution) Branches() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.branches)
-}
-
-// Feeders gets the collection that contains the feeder circuits for this equipment.
-func (powerDistribution *PowerDistribution) Feeders() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.feeders)
-}
-
-// Mains gets the collection that contains the power input circuits for this equipment.
-func (powerDistribution *PowerDistribution) Mains() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.mains)
-}
-
-// Subfeeds gets the collection that contains the subfeed circuits for this equipment.
-func (powerDistribution *PowerDistribution) Subfeeds() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.subfeeds)
-}
-
-// Facility gets a resource that represents the facility that contains this equipment.
-func (powerDistribution *PowerDistribution) Facility() (*Facility, error) {
-	return GetFacility(powerDistribution.GetClient(), powerDistribution.facility)
-}
-
-// Metrics gets the metrics of a power distribution component or unit.
-func (powerDistribution *PowerDistribution) Metrics() (metrics *PowerDistributionMetrics, err error) {
-	if powerDistribution.metrics == "" {
-		return
+// Facility gets the Facility linked resource.
+func (p *PowerDistribution) Facility(client common.Client) (*Facility, error) {
+	if p.facility == "" {
+		return nil, nil
 	}
-	return GetPowerDistributionMetrics(powerDistribution.GetClient(), powerDistribution.metrics)
+	return common.GetObject[Facility](client, p.facility)
 }
 
-// OutletGroups gets the collection that contains the outlet groups for this equipment.
-func (powerDistribution *PowerDistribution) OutletGroups() ([]*OutletGroup, error) {
-	return ListReferencedOutletGroups(powerDistribution.GetClient(), powerDistribution.outletGroups)
+// ManagedBy gets the ManagedBy linked resources.
+func (p *PowerDistribution) ManagedBy(client common.Client) ([]*Manager, error) {
+	return common.GetObjects[Manager](client, p.managedBy)
 }
 
-// Outlets gets the collection that contains the outlets for this equipment.
-func (powerDistribution *PowerDistribution) Outlets() ([]*Outlet, error) {
-	return ListReferencedOutlets(powerDistribution.GetClient(), powerDistribution.outlets)
+// Branches gets the Branches collection.
+func (p *PowerDistribution) Branches(client common.Client) ([]*Circuit, error) {
+	if p.branches == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Circuit](client, p.branches)
+}
+
+// Feeders gets the Feeders collection.
+func (p *PowerDistribution) Feeders(client common.Client) ([]*Circuit, error) {
+	if p.feeders == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Circuit](client, p.feeders)
+}
+
+// Mains gets the Mains collection.
+func (p *PowerDistribution) Mains(client common.Client) ([]*Circuit, error) {
+	if p.mains == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Circuit](client, p.mains)
+}
+
+// Metrics gets the Metrics linked resource.
+func (p *PowerDistribution) Metrics(client common.Client) (*PowerDistributionMetrics, error) {
+	if p.metrics == "" {
+		return nil, nil
+	}
+	return common.GetObject[PowerDistributionMetrics](client, p.metrics)
+}
+
+// OutletGroups gets the OutletGroups collection.
+func (p *PowerDistribution) OutletGroups(client common.Client) ([]*OutletGroup, error) {
+	if p.outletGroups == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[OutletGroup](client, p.outletGroups)
+}
+
+// Outlets gets the Outlets collection.
+func (p *PowerDistribution) Outlets(client common.Client) ([]*Outlet, error) {
+	if p.outlets == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Outlet](client, p.outlets)
+}
+
+// PowerSupplies gets the PowerSupplies collection.
+func (p *PowerDistribution) PowerSupplies(client common.Client) ([]*PowerSupply, error) {
+	if p.powerSupplies == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerSupply](client, p.powerSupplies)
+}
+
+// Sensors gets the Sensors collection.
+func (p *PowerDistribution) Sensors(client common.Client) ([]*Sensor, error) {
+	if p.sensors == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Sensor](client, p.sensors)
+}
+
+// Subfeeds gets the Subfeeds collection.
+func (p *PowerDistribution) Subfeeds(client common.Client) ([]*Circuit, error) {
+	if p.subfeeds == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Circuit](client, p.subfeeds)
+}
+
+// TransferConfiguration shall contain the configuration information regarding
+// an automatic transfer switch function for this resource.
+type TransferConfiguration struct {
+	// ActiveMainsId shall contain the mains circuit that is switched on and
+	// qualified to supply power to the output circuit. The value shall be a string
+	// that matches the 'Id' property value of a circuit contained in the
+	// collection referenced by the 'Mains' property.
+	ActiveMainsID string `json:"ActiveMainsId"`
+	// AutoTransferEnabled shall indicate if the qualified alternate mains circuit
+	// is automatically switched on when the preferred mains circuit becomes
+	// unqualified and is automatically switched off.
+	AutoTransferEnabled bool
+	// ClosedTransitionAllowed shall indicate if a make-before-break switching
+	// sequence of the mains circuits is permitted when they are both qualified and
+	// in synchronization.
+	ClosedTransitionAllowed bool
+	// ClosedTransitionTimeoutSeconds shall contain the time in seconds to wait for
+	// a closed transition to occur.
+	ClosedTransitionTimeoutSeconds *int `json:",omitempty"`
+	// PreferredMainsId shall contain the preferred source for mains circuit to
+	// this equipment. The value shall be a string that matches the 'Id' property
+	// value of a circuit contained in the collection referenced by the 'Mains'
+	// property.
+	PreferredMainsID string `json:"PreferredMainsId"`
+	// RetransferDelaySeconds shall contain the time in seconds to delay the
+	// automatic transfer from the alternate mains circuit back to the preferred
+	// mains circuit.
+	RetransferDelaySeconds *int `json:",omitempty"`
+	// RetransferEnabled shall indicate if the automatic transfer is permitted from
+	// the alternate mains circuit back to the preferred mains circuit after the
+	// preferred mains circuit is qualified again and the 'RetransferDelaySeconds'
+	// time has expired.
+	RetransferEnabled bool
+	// TransferDelaySeconds shall contain the time in seconds to delay the
+	// automatic transfer from the preferred mains circuit to the alternate mains
+	// circuit when the preferred mains circuit is disqualified. A value of zero
+	// shall mean it transfers as fast as possible.
+	TransferDelaySeconds *int `json:",omitempty"`
+	// TransferInhibit shall indicate if any transfer is inhibited.
+	TransferInhibit bool
+}
+
+// TransferCriteria shall contain the criteria for initiating a transfer within
+// an automatic transfer switch function for this resource.
+type TransferCriteria struct {
+	// OverNominalFrequencyHz shall contain the frequency in hertz units over the
+	// nominal value that satisfies a criterion for transfer.
+	OverNominalFrequencyHz *float64 `json:",omitempty"`
+	// OverVoltageRMSPercentage shall contain the positive percentage of voltage
+	// RMS over the nominal value that satisfies a criterion for transfer.
+	OverVoltageRMSPercentage *float64 `json:",omitempty"`
+	// TransferSensitivity shall contain the setting that adjusts the analytical
+	// sensitivity of the detection of the quality of voltage waveform that
+	// satisfies a criterion for transfer.
+	TransferSensitivity TransferSensitivityType
+	// UnderNominalFrequencyHz shall contain the frequency in hertz units under the
+	// nominal value that satisfies a criterion for transfer.
+	UnderNominalFrequencyHz *float64 `json:",omitempty"`
+	// UnderVoltageRMSPercentage shall contain the negative percentage of voltage
+	// RMS under the nominal value that satisfies a criterion for transfer.
+	UnderVoltageRMSPercentage *float64 `json:",omitempty"`
 }

@@ -56,8 +56,6 @@ func TestServiceConditions(t *testing.T) {
 	assertEquals(t, "Redfish Service Conditions", result.Name)
 	assertEquals(t, "Warning", string(result.HealthRollup))
 	assertEquals(t, "Temperature exceeds rated limit in power supply 'A'.", result.Conditions[0].Message)
-	assertEquals(t, "/redfish/v1/Chassis/1/Power", result.Conditions[0].originOfCondition)
-	assertEquals(t, "/redfish/v1/Managers/1/LogServices/Log1/Entries/1", result.Conditions[0].logEntry)
 	assertEquals(t, "Base.1.9.ConditionInRelatedResource", result.Conditions[1].MessageID)
 	assertEquals(t, "Warning", string(result.Conditions[1].Severity))
 }

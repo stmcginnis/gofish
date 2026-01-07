@@ -112,7 +112,7 @@ func TestNetworkAdapter(t *testing.T) {
 		t.Error("DCB should be enabled")
 	}
 
-	if result.Controllers[0].ControllerCapabilities.NPIV.MaxDeviceLogins != 1024 {
+	if *result.Controllers[0].ControllerCapabilities.NPIV.MaxDeviceLogins != 1024 {
 		t.Errorf("Received incorrect Controller NPIC max device logins: %d",
 			result.Controllers[0].ControllerCapabilities.NPIV.MaxDeviceLogins)
 	}

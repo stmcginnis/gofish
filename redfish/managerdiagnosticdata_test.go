@@ -93,19 +93,19 @@ func TestManagerDiagnosticData(t *testing.T) {
 	assertEquals(t, "Manager Diagnostic Data", result.Name)
 	assertEquals(t, "i2c-0", result.I2CBuses[0].I2CBusName)
 
-	if result.MemoryStatistics.TotalBytes != 1013052000 {
+	if *result.MemoryStatistics.TotalBytes != 1013052000 {
 		t.Errorf("Unexpected memory stats total bytes: %d", result.MemoryStatistics.TotalBytes)
 	}
 
-	if result.ProcessorStatistics.KernelPercent != 12.34 {
-		t.Errorf("Unexpected processor stats kernel percent: %.2f", result.ProcessorStatistics.KernelPercent)
+	if *result.ProcessorStatistics.KernelPercent != 12.34 {
+		t.Errorf("Unexpected processor stats kernel percent: %.2f", *result.ProcessorStatistics.KernelPercent)
 	}
 
-	if result.BootTimeStatistics.LoaderTimeSeconds != 12.3 {
-		t.Errorf("Unexpected memory stats total bytes: %.2f", result.BootTimeStatistics.LoaderTimeSeconds)
+	if *result.BootTimeStatistics.LoaderTimeSeconds != 12.3 {
+		t.Errorf("Unexpected memory stats total bytes: %.2f", *result.BootTimeStatistics.LoaderTimeSeconds)
 	}
 
-	if result.MemoryECCStatistics.CorrectableECCErrorCount != 1 {
+	if *result.MemoryECCStatistics.CorrectableECCErrorCount != 1 {
 		t.Errorf("Unexpected memory ECC stats correctable error count: %d", result.MemoryECCStatistics.CorrectableECCErrorCount)
 	}
 }

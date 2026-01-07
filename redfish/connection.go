@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2024.4 - #Connection.v1_4_0.Connection
 
 package redfish
 
@@ -13,143 +14,148 @@ import (
 type AccessCapability string
 
 const (
-	// ReadAccessCapability Endpoints are allowed to perform reads from the specified resource.
+	// ReadAccessCapability Endpoints are allowed to perform reads from the
+	// specified resource.
 	ReadAccessCapability AccessCapability = "Read"
-	// WriteAccessCapability Endpoints are allowed to perform writes to the specified resource.
+	// WriteAccessCapability Endpoints are allowed to perform writes to the
+	// specified resource.
 	WriteAccessCapability AccessCapability = "Write"
 )
 
-// AccessState describes the access to the associated resource in this connection.
+// AccessState is This type shall describe the access to the associated resource
+// in this connection.
 type AccessState string
 
 const (
-	// OptimizedAccessState shall indicate the resource is in an active and optimized state.
+	// OptimizedAccessState shall indicate the resource is in an active and
+	// optimized state.
 	OptimizedAccessState AccessState = "Optimized"
-	// NonOptimizedAccessState shall indicate the resource is in an active and non-optimized state.
+	// NonOptimizedAccessState shall indicate the resource is in an active and
+	// non-optimized state.
 	NonOptimizedAccessState AccessState = "NonOptimized"
 	// StandbyAccessState shall indicate the resource is in a standby state.
 	StandbyAccessState AccessState = "Standby"
-	// UnavailableAccessState shall indicate the resource is in an unavailable state.
+	// UnavailableAccessState shall indicate the resource is in an unavailable
+	// state.
 	UnavailableAccessState AccessState = "Unavailable"
-	// TransitioningAccessState shall indicate the resource is transitioning to a new state.
+	// TransitioningAccessState shall indicate the resource is transitioning to a
+	// new state.
 	TransitioningAccessState AccessState = "Transitioning"
 )
 
 type ConnectionType string
 
 const (
-	// StorageConnectionType is a connection to storage-related resources, such as volumes.
+	// StorageConnectionType is a connection to storage-related resources, such as
+	// volumes.
 	StorageConnectionType ConnectionType = "Storage"
 	// MemoryConnectionType is a connection to memory-related resources.
 	MemoryConnectionType ConnectionType = "Memory"
 )
 
-// CHAPConnectionKey shall contain the CHAP-specific permission key information for a connection.
-type CHAPConnectionKey struct {
-	// CHAPPassword shall contain the password for CHAP authentication. The value shall be 'null' in responses.
-	CHAPPassword string
-	// CHAPUsername shall contain the username for CHAP authentication.
-	CHAPUsername string
-	// InitiatorCHAPPassword shall contain the initiator shared secret for mutual (2-way) CHAP authentication. The
-	// value shall be 'null' in responses.
-	InitiatorCHAPPassword string
-	// InitiatorCHAPUsername shall contain the initiator username for mutual (2-way) CHAP authentication. For example,
-	// this would be the initiator iQN in iSCSI environments.
-	InitiatorCHAPUsername string
-	// TargetCHAPPassword shall contain the target shared secret for mutual (2-way) CHAP authentication. The value
-	// shall be 'null' in responses.
-	TargetCHAPPassword string
-}
-
-// Connection shall represent information about a connection in the Redfish Specification.
+// Connection shall represent information about a connection in the Redfish
+// Specification.
 type Connection struct {
 	common.Entity
+	// ConnectionKeys shall contain the permission keys required to access the
+	// specified resources for this connection. Some fabrics require permission
+	// checks on transactions from authorized initiators.
+	//
+	// Version added: v1.1.0
+	ConnectionKeys ConnectionKey
+	// ConnectionType shall contain the type of resources this connection
+	// specifies.
+	ConnectionType ConnectionType
+	// MemoryChunkInfo shall contain the set of memory chunks and access
+	// capabilities specified for this connection.
+	//
+	// Version added: v1.1.0
+	MemoryChunkInfo []MemoryChunkInfo
+	// MemoryRegionInfo shall contain the set of memory regions and access
+	// capabilities specified for this connection.
+	//
+	// Version added: v1.3.0
+	MemoryRegionInfo []MemoryRegionInfo
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// ConnectionKeys shall contain the permission keys required to access the specified resources for this connection.
-	// Some fabrics require permission checks on transactions from authorized initiators.
-	ConnectionKeys ConnectionKey
-	// ConnectionType shall contain the type of resources this connection specifies.
-	ConnectionType ConnectionType
-	// Description provides a description of this resource.
-	Description string
-	// MemoryChunkInfo shall contain the set of memory chunks and access capabilities specified for this connection.
-	MemoryChunkInfo []MemoryChunkInfo
-	// MemoryRegionInfo shall contain the set of memory regions and access capabilities specified for this connection.
-	MemoryRegionInfo []MemoryRegionInfo
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// VolumeInfo shall contain the set of volumes and access capabilities specified for this connection.
+	// VolumeInfo shall contain the set of volumes and access capabilities
+	// specified for this connection.
 	VolumeInfo []VolumeInfo
-
+	// addVolumeInfoTarget is the URL to send AddVolumeInfo requests.
+	addVolumeInfoTarget string
+	// removeVolumeInfoTarget is the URL to send RemoveVolumeInfo requests.
+	removeVolumeInfoTarget string
+	// initiatorEndpointGroups are the URIs for InitiatorEndpointGroups.
 	initiatorEndpointGroups []string
-	// InitiatorEndpointGroupsCount is the number of initiator endpoint groups associated with this connection.
-	InitiatorEndpointGroupsCount int
-	initiatorEndpoints           []string
-	// InititiatorEndpointsCount is the number of initiator endpoints associated with this connection.
-	InitiatorEndpointsCount int
-	targetEndpointGroups    []string
-	// TargetEndpointGroupsCount is the number of target endpoint groups associated with this connection.
-	TargetEndpointGroupsCount int
-	targetEndpoints           []string
-	// TargetEndpointsCount is the number of target endpoints associated with this connection.
-	TargetEndpointsCount int
+	// initiatorEndpoints are the URIs for InitiatorEndpoints.
+	initiatorEndpoints []string
+	// targetEndpointGroups are the URIs for TargetEndpointGroups.
+	targetEndpointGroups []string
+	// targetEndpoints are the URIs for TargetEndpoints.
+	targetEndpoints []string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Connection object from the raw JSON.
-func (connection *Connection) UnmarshalJSON(b []byte) error {
+func (c *Connection) UnmarshalJSON(b []byte) error {
 	type temp Connection
-	type Links struct {
-		// InitiatorEndpointGroups shall contain an array of links to resources of type EndpointGroup that are the
-		// initiator endpoint groups associated with this connection. If the referenced endpoint groups contain the
-		// GroupType property, the GroupType property shall contain the value 'Initiator' or 'Client'. This property shall
-		// not be present if InitiatorEndpoints is present.
-		InitiatorEndpointGroups      common.Links
-		InitiatorEndpointGroupsCount int `json:"InitiatorEndpointGroups@odata.count"`
-		// InitiatorEndpoints shall contain an array of links to resources of type Endpoint that are the initiator
-		// endpoints associated with this connection. If the referenced endpoints contain the EntityRole property, the
-		// EntityRole property shall contain the value 'Initiator' or 'Both'. This property shall not be present if
-		// InitiatorEndpointGroups is present.
-		InitiatorEndpoints      common.Links
-		InitiatorEndpointsCount int `json:"InitiatorEndpoints@odata.count"`
-		// TargetEndpointGroups shall contain an array of links to resources of type EndpointGroup that are the target
-		// endpoint groups associated with this connection. If the referenced endpoint groups contain the GroupType
-		// property, the GroupType property shall contain the value 'Target' or 'Server'. This property shall not be
-		// present if TargetEndpoints is present.
-		TargetEndpointGroups      common.Links
-		TargetEndpointGroupsCount int `json:"TargetEndpointGroups@odata.count"`
-		// TargetEndpoints shall contain an array of links to resources of type Endpoint that are the target endpoints
-		// associated with this connection. If the referenced endpoints contain the EntityRole property, the EntityRole
-		// property shall contain the value 'Target' or 'Both'. This property shall not be present if TargetEndpointGroups
-		// is present.
-		TargetEndpoints      common.Links
-		TargetEndpointsCount int `json:"TargetEndpoints@odata.count"`
+	type cActions struct {
+		AddVolumeInfo    common.ActionTarget `json:"#Connection.AddVolumeInfo"`
+		RemoveVolumeInfo common.ActionTarget `json:"#Connection.RemoveVolumeInfo"`
 	}
-	var t struct {
+	type cLinks struct {
+		InitiatorEndpointGroups common.Links `json:"InitiatorEndpointGroups"`
+		InitiatorEndpoints      common.Links `json:"InitiatorEndpoints"`
+		TargetEndpointGroups    common.Links `json:"TargetEndpointGroups"`
+		TargetEndpoints         common.Links `json:"TargetEndpoints"`
+	}
+	var tmp struct {
 		temp
-		Links Links
+		Actions cActions
+		Links   cLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*connection = Connection(t.temp)
+	*c = Connection(tmp.temp)
 
 	// Extract the links to other entities for later
-	connection.initiatorEndpointGroups = t.Links.InitiatorEndpointGroups.ToStrings()
-	connection.InitiatorEndpointGroupsCount = t.Links.InitiatorEndpointGroupsCount
-	connection.initiatorEndpoints = t.Links.InitiatorEndpoints.ToStrings()
-	connection.InitiatorEndpointsCount = t.Links.InitiatorEndpointsCount
-	connection.targetEndpointGroups = t.Links.TargetEndpointGroups.ToStrings()
-	connection.TargetEndpointGroupsCount = t.Links.TargetEndpointGroupsCount
-	connection.targetEndpoints = t.Links.TargetEndpoints.ToStrings()
-	connection.TargetEndpointsCount = t.Links.TargetEndpointsCount
+	c.addVolumeInfoTarget = tmp.Actions.AddVolumeInfo.Target
+	c.removeVolumeInfoTarget = tmp.Actions.RemoveVolumeInfo.Target
+	c.initiatorEndpointGroups = tmp.Links.InitiatorEndpointGroups.ToStrings()
+	c.initiatorEndpoints = tmp.Links.InitiatorEndpoints.ToStrings()
+	c.targetEndpointGroups = tmp.Links.TargetEndpointGroups.ToStrings()
+	c.targetEndpoints = tmp.Links.TargetEndpoints.ToStrings()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	c.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (c *Connection) Update() error {
+	readWriteFields := []string{
+		"ConnectionKeys",
+		"MemoryChunkInfo",
+		"MemoryRegionInfo",
+		"Status",
+		"VolumeInfo",
+	}
+
+	return c.UpdateFromRawData(c, c.rawData, readWriteFields)
 }
 
 // GetConnection will get a Connection instance from the service.
@@ -163,100 +169,304 @@ func ListReferencedConnections(c common.Client, link string) ([]*Connection, err
 	return common.GetCollectionObjects[Connection](c, link)
 }
 
-// InitiatorEndpointGroups get the initiator endpoint groups associated with this connection.
-func (connection *Connection) InitiatorEndpointGroups() ([]*EndpointGroup, error) {
-	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.initiatorEndpointGroups)
+// AddVolumeInfo shall add a volume to the connection. Services shall add the
+// volume to the 'VolumeInfo' property.
+// accessCapabilities - This parameter shall contain an array of the storage
+// access capabilities to assign to the volume. Services shall reject requests
+// that do not contain either 'LUN' or 'AccessCapabilities'.
+// lUN - This property shall contain the initiator-visible logical unit number
+// (LUN) to assign to the volume. Services shall reject requests that do not
+// contain either 'LUN' or 'AccessCapabilities'.
+// volume - This parameter shall contain a link to a resource of type 'Volume'
+// that represents the volume to add.
+func (c *Connection) AddVolumeInfo(accessCapabilities AccessCapability, lUN int, volume string) error {
+	payload := make(map[string]any)
+	payload["AccessCapabilities"] = accessCapabilities
+	payload["LUN"] = lUN
+	payload["Volume"] = volume
+	return c.Post(c.addVolumeInfoTarget, payload)
 }
 
-// InitiatorEndpoints get the initiator endpoint associated with this connection.
-func (connection *Connection) InitiatorEndpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](connection.GetClient(), connection.initiatorEndpoints)
+// RemoveVolumeInfo shall remove a volume to the connection. Services shall remove
+// the volume from the 'VolumeInfo' property.
+// lUN - This parameter shall contain the initiator-visible logical unit number
+// (LUN) assigned to this volume to remove. If this parameter is not provided,
+// the service shall remove all entries associated with volume referenced by
+// the 'Volume' parameter.
+// volume - This parameter shall contain a link to a resource of type 'Volume'
+// that represents the volume to remove.
+func (c *Connection) RemoveVolumeInfo(lUN int, volume string) error {
+	payload := make(map[string]any)
+	payload["LUN"] = lUN
+	payload["Volume"] = volume
+	return c.Post(c.removeVolumeInfoTarget, payload)
 }
 
-// TargetEndpointGroups get the target endpoint groups associated with this connection.
-func (connection *Connection) TargetEndpointGroups() ([]*EndpointGroup, error) {
-	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.targetEndpointGroups)
+// InitiatorEndpointGroups gets the InitiatorEndpointGroups linked resources.
+func (c *Connection) InitiatorEndpointGroups(client common.Client) ([]*EndpointGroup, error) {
+	return common.GetObjects[EndpointGroup](client, c.initiatorEndpointGroups)
 }
 
-// TargetEndpoints get the target endpoint associated with this connection.
-func (connection *Connection) TargetEndpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](connection.GetClient(), connection.targetEndpoints)
+// InitiatorEndpoints gets the InitiatorEndpoints linked resources.
+func (c *Connection) InitiatorEndpoints(client common.Client) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](client, c.initiatorEndpoints)
 }
 
-// ConnectionKey shall contain the permission key information required to access the target resources for a
-// connection.
+// TargetEndpointGroups gets the TargetEndpointGroups linked resources.
+func (c *Connection) TargetEndpointGroups(client common.Client) ([]*EndpointGroup, error) {
+	return common.GetObjects[EndpointGroup](client, c.targetEndpointGroups)
+}
+
+// TargetEndpoints gets the TargetEndpoints linked resources.
+func (c *Connection) TargetEndpoints(client common.Client) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](client, c.targetEndpoints)
+}
+
+// CHAPConnectionKey shall contain the CHAP-specific permission key information
+// for a connection.
+type CHAPConnectionKey struct {
+	// CHAPPassword shall contain the password for CHAP authentication. The value
+	// shall be 'null' in responses.
+	//
+	// Version added: v1.2.0
+	CHAPPassword string
+	// CHAPUsername shall contain the username for CHAP authentication.
+	//
+	// Version added: v1.2.0
+	CHAPUsername string
+	// InitiatorCHAPPassword shall contain the initiator shared secret for mutual
+	// (2-way) CHAP authentication. The value shall be 'null' in responses.
+	//
+	// Version added: v1.2.0
+	InitiatorCHAPPassword string
+	// InitiatorCHAPUsername shall contain the initiator username for mutual
+	// (2-way) CHAP authentication. For example, this would be the initiator iQN in
+	// iSCSI environments.
+	//
+	// Version added: v1.2.0
+	InitiatorCHAPUsername string
+	// TargetCHAPPassword shall contain the target shared secret for mutual (2-way)
+	// CHAP authentication. The value shall be 'null' in responses.
+	//
+	// Version added: v1.2.0
+	TargetCHAPPassword string
+}
+
+// ConnectionKey shall contain the permission key information required to access
+// the target resources for a connection.
 type ConnectionKey struct {
-	// CHAP shall contain the CHAP-specific permission key information for this connection. This property shall not be
-	// present if DHCHAP is present.
+	// CHAP shall contain the CHAP-specific permission key information for this
+	// connection. This property shall not be present if 'DHCHAP' is present.
+	//
+	// Version added: v1.2.0
 	CHAP CHAPConnectionKey
-	// DHCHAP shall contain the DHCHAP-specific permission key information for this connection. This property shall not
-	// be present if CHAP is present.
+	// DHCHAP shall contain the DHCHAP-specific permission key information for this
+	// connection. This property shall not be present if 'CHAP' is present.
+	//
+	// Version added: v1.2.0
 	DHCHAP DHCHAPKey
-	// GenZ shall contain the Gen-Z-specific permission key information for this connection.
+	// GenZ shall contain the Gen-Z-specific permission key information for this
+	// connection.
+	//
+	// Version added: v1.1.0
 	GenZ GenZConnectionKey
 }
 
-// DHCHAPKey shall contain the DHCHAP-specific permission key information for this connection.
+// DHCHAPKey shall contain the DHCHAP-specific permission key information for
+// this connection.
 type DHCHAPKey struct {
-	// LocalDHCHAPAuthSecret shall contain the local DHCHAP authentication secret. The value shall be 'null' in
-	// responses.
+	// LocalDHCHAPAuthSecret shall contain the local DHCHAP authentication secret.
+	// The value shall be 'null' in responses.
+	//
+	// Version added: v1.2.0
 	LocalDHCHAPAuthSecret string
-	// PeerDHCHAPAuthSecret shall contain the peer DHCHAP authentication secret. The value shall be 'null' in
-	// responses.
+	// PeerDHCHAPAuthSecret shall contain the peer DHCHAP authentication secret.
+	// The value shall be 'null' in responses.
+	//
+	// Version added: v1.2.0
 	PeerDHCHAPAuthSecret string
 }
 
-// GenZConnectionKey shall contain the Gen-Z-specific permission key information for a connection.
+// GenZConnectionKey shall contain the Gen-Z-specific permission key information
+// for a connection.
 type GenZConnectionKey struct {
-	// AccessKey shall contain the Gen-Z Core Specification-defined Access Key for this connection.
+	// AccessKey shall contain the Gen-Z Core Specification-defined Access Key for
+	// this connection.
+	//
+	// Version added: v1.1.0
 	AccessKey string
-	// RKeyDomainCheckingEnabled shall indicate whether Region Key domain checking is enabled for this connection.
-	RKeyDomainCheckingEnabled string
-	// RKeyReadOnlyKey shall contain the Gen-Z Core Specification-defined read-only Region Key for this connection.
+	// RKeyDomainCheckingEnabled shall indicate whether Region Key domain checking
+	// is enabled for this connection.
+	//
+	// Version added: v1.1.0
+	RKeyDomainCheckingEnabled bool
+	// RKeyReadOnlyKey shall contain the Gen-Z Core Specification-defined read-only
+	// Region Key for this connection.
+	//
+	// Version added: v1.1.0
 	RKeyReadOnlyKey string
-	// RKeyReadWriteKey shall contain the Gen-Z Core Specification-defined read-write Region Key for this connection.
+	// RKeyReadWriteKey shall contain the Gen-Z Core Specification-defined
+	// read-write Region Key for this connection.
+	//
+	// Version added: v1.1.0
 	RKeyReadWriteKey string
 }
 
-// MemoryChunkInfo shall contain the combination of permissions and memory chunk information.
+// MemoryChunkInfo shall contain the combination of permissions and memory chunk
+// information.
 type MemoryChunkInfo struct {
 	// AccessCapabilities shall specify a current memory access capability.
+	//
+	// Version added: v1.1.0
 	AccessCapabilities []AccessCapability
-	// AccessState shall contain the access state for the associated resource in this connection.
+	// AccessState shall contain the access state for the associated resource in
+	// this connection.
+	//
+	// Version added: v1.1.0
 	AccessState AccessState
-	// MemoryChunk shall contain a link to a resource of type MemoryChunk. The endpoints referenced by the
-	// InitiatorEndpoints or InitiatorEndpointGroups properties shall be given access to this memory chunk as described
-	// by this object. If TargetEndpoints or TargetEndpointGroups is present, the referenced initiator endpoints shall
-	// be required to access the referenced memory chunk through one of the referenced target endpoints.
-	MemoryChunk MemoryChunks
+	// MemoryChunk shall contain a link to a resource of type 'MemoryChunk'. The
+	// endpoints referenced by the 'InitiatorEndpoints' or
+	// 'InitiatorEndpointGroups' properties shall be given access to this memory
+	// chunk as described by this object. If 'TargetEndpoints' or
+	// 'TargetEndpointGroups' is present, the referenced initiator endpoints shall
+	// be required to access the referenced memory chunk through one of the
+	// referenced target endpoints.
+	//
+	// Version added: v1.1.0
+	memoryChunk string
 }
 
-// MemoryRegionInfo shall contain the combination of permissions and memory region information.
+// UnmarshalJSON unmarshals a MemoryChunkInfo object from the raw JSON.
+func (m *MemoryChunkInfo) UnmarshalJSON(b []byte) error {
+	type temp MemoryChunkInfo
+	var tmp struct {
+		temp
+		MemoryChunk common.Link `json:"memoryChunk"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MemoryChunkInfo(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.memoryChunk = tmp.MemoryChunk.String()
+
+	return nil
+}
+
+// MemoryChunk gets the MemoryChunk linked resource.
+func (m *MemoryChunkInfo) MemoryChunk(client common.Client) (*MemoryChunks, error) {
+	if m.memoryChunk == "" {
+		return nil, nil
+	}
+	return common.GetObject[MemoryChunks](client, m.memoryChunk)
+}
+
+// MemoryRegionInfo shall contain the combination of permissions and memory
+// region information.
 type MemoryRegionInfo struct {
 	// AccessCapabilities shall specify a current memory access capability.
+	//
+	// Version added: v1.3.0
 	AccessCapabilities []AccessCapability
-	// AccessState shall contain the access state for the associated resource in this connection.
+	// AccessState shall contain the access state for the associated resource in
+	// this connection.
+	//
+	// Version added: v1.3.0
 	AccessState AccessState
-	// MemoryRegion shall contain a link to a resource of type MemoryRegion. The endpoints referenced by the
-	// InitiatorEndpoints or InitiatorEndpointGroups properties shall be given access to this memory region as
-	// described by this object. If TargetEndpoints or TargetEndpointGroups is present, the referenced initiator
-	// endpoints shall be required to access the referenced memory region through one of the referenced target
-	// endpoints.
-	MemoryRegion MemoryRegion
+	// MemoryRegion shall contain a link to a resource of type 'MemoryRegion'. The
+	// endpoints referenced by the 'InitiatorEndpoints' or
+	// 'InitiatorEndpointGroups' properties shall be given access to this memory
+	// region as described by this object. If 'TargetEndpoints' or
+	// 'TargetEndpointGroups' is present, the referenced initiator endpoints shall
+	// be required to access the referenced memory region through one of the
+	// referenced target endpoints. For CXL fabrics, memory regions from
+	// 'Connection' resources are not allowed.
+	//
+	// Version added: v1.3.0
+	memoryRegion string
 }
 
-// VolumeInfo shall contain the combination of permissions and volume information.
+// UnmarshalJSON unmarshals a MemoryRegionInfo object from the raw JSON.
+func (m *MemoryRegionInfo) UnmarshalJSON(b []byte) error {
+	type temp MemoryRegionInfo
+	var tmp struct {
+		temp
+		MemoryRegion common.Link `json:"memoryRegion"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MemoryRegionInfo(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.memoryRegion = tmp.MemoryRegion.String()
+
+	return nil
+}
+
+// MemoryRegion gets the MemoryRegion linked resource.
+func (m *MemoryRegionInfo) MemoryRegion(client common.Client) (*MemoryRegion, error) {
+	if m.memoryRegion == "" {
+		return nil, nil
+	}
+	return common.GetObject[MemoryRegion](client, m.memoryRegion)
+}
+
+// VolumeInfo shall contain the combination of permissions and volume
+// information.
 type VolumeInfo struct {
 	// AccessCapabilities shall specify a current storage access capability.
 	AccessCapabilities []AccessCapability
-	// AccessState shall contain the access state for the associated resource in this connection.
+	// AccessState shall contain the access state for the associated resource in
+	// this connection.
 	AccessState AccessState
-	// LUN shall contain the initiator-visible logical unit number (LUN) assigned to this volume for initiators
-	// referenced by the InitiatorEndpoints or InitiatorEndpointGroups properties.
-	LUN int
-	// Volume shall contain a link to a resource of type Volume. The endpoints referenced by the InitiatorEndpoints or
-	// InitiatorEndpointGroups properties shall be given access to this volume as described by this object. If
-	// TargetEndpoints or TargetEndpointGroups is present, the referenced initiator endpoints shall be required to
-	// access the referenced volume through one of the referenced target endpoints.
-	Volume common.Link
+	// LUN shall contain the initiator-visible logical unit number (LUN) assigned
+	// to this volume for initiators referenced by the 'InitiatorEndpoints' or
+	// 'InitiatorEndpointGroups' properties.
+	//
+	// Version added: v1.2.0
+	LUN *int `json:",omitempty"`
+	// Volume shall contain a link to a resource of type 'Volume'. The endpoints
+	// referenced by the 'InitiatorEndpoints' or 'InitiatorEndpointGroups'
+	// properties shall be given access to this volume as described by this object.
+	// If 'TargetEndpoints' or 'TargetEndpointGroups' is present, the referenced
+	// initiator endpoints shall be required to access the referenced volume
+	// through one of the referenced target endpoints.
+	volume string
+}
+
+// UnmarshalJSON unmarshals a VolumeInfo object from the raw JSON.
+func (v *VolumeInfo) UnmarshalJSON(b []byte) error {
+	type temp VolumeInfo
+	var tmp struct {
+		temp
+		Volume common.Link `json:"volume"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*v = VolumeInfo(tmp.temp)
+
+	// Extract the links to other entities for later
+	v.volume = tmp.Volume.String()
+
+	return nil
+}
+
+// Volume gets the Volume linked resource.
+func (v *VolumeInfo) Volume(client common.Client) (*common.Volume, error) {
+	if v.volume == "" {
+		return nil, nil
+	}
+	return common.GetObject[common.Volume](client, v.volume)
 }

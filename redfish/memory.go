@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.3 - #Memory.v1_22_0.Memory
 
 package redfish
 
@@ -10,7 +11,6 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// BaseModuleType is the type of module.
 type BaseModuleType string
 
 const (
@@ -34,40 +34,37 @@ const (
 	SODIMM16bBaseModuleType BaseModuleType = "SO_DIMM_16b"
 	// SODIMM32bBaseModuleType SO_DIMM_32b.
 	SODIMM32bBaseModuleType BaseModuleType = "SO_DIMM_32b"
-	// DieBaseModuleType A die within a package.
+	// DieBaseModuleType is a die within a package.
 	DieBaseModuleType BaseModuleType = "Die"
+	// CAMMBaseModuleType Compression Attached Memory Module.
+	CAMMBaseModuleType BaseModuleType = "CAMM"
 )
 
-// ErrorCorrection is the type of error correction used.
 type ErrorCorrection string
 
 const (
 	// NoECCErrorCorrection No ECC available.
 	NoECCErrorCorrection ErrorCorrection = "NoECC"
-	// SingleBitECCErrorCorrection Single bit Data error can be corrected by
-	// ECC.
+	// SingleBitECCErrorCorrection Single bit data errors can be corrected by ECC.
 	SingleBitECCErrorCorrection ErrorCorrection = "SingleBitECC"
-	// MultiBitECCErrorCorrection Multi-bit Data errors can be corrected by
-	// ECC.
+	// MultiBitECCErrorCorrection Multibit data errors can be corrected by ECC.
 	MultiBitECCErrorCorrection ErrorCorrection = "MultiBitECC"
-	// AddressParityErrorCorrection Address Parity errors can be corrected.
+	// AddressParityErrorCorrection Address parity errors can be corrected.
 	AddressParityErrorCorrection ErrorCorrection = "AddressParity"
 )
 
-// MemoryClassification is the memory classification.
 type MemoryClassification string
 
 const (
 	// VolatileMemoryClassification Volatile memory.
 	VolatileMemoryClassification MemoryClassification = "Volatile"
-	// ByteAccessiblePersistentMemoryClassification Byte accessible
-	// persistent memory.
+	// ByteAccessiblePersistentMemoryClassification Byte-accessible persistent
+	// memory.
 	ByteAccessiblePersistentMemoryClassification MemoryClassification = "ByteAccessiblePersistent"
-	// BlockMemoryClassification Block accessible memory.
+	// BlockMemoryClassification Block-accessible memory.
 	BlockMemoryClassification MemoryClassification = "Block"
 )
 
-// MemoryDeviceType is the type of memory.
 type MemoryDeviceType string
 
 const (
@@ -109,39 +106,52 @@ const (
 	FastPageModeMemoryDeviceType MemoryDeviceType = "FastPageMode"
 	// PipelinedNibbleMemoryDeviceType Pipelined Nibble.
 	PipelinedNibbleMemoryDeviceType MemoryDeviceType = "PipelinedNibble"
-	// LogicalMemoryDeviceType Logical device, such as when the memory is fabric-attached.
+	// LogicalMemoryDeviceType Logical device, such as when the memory is
+	// fabric-attached.
 	LogicalMemoryDeviceType MemoryDeviceType = "Logical"
 	// HBMMemoryDeviceType High Bandwidth Memory.
 	HBMMemoryDeviceType MemoryDeviceType = "HBM"
 	// HBM2MemoryDeviceType The second generation of High Bandwidth Memory.
 	HBM2MemoryDeviceType MemoryDeviceType = "HBM2"
-	// HBM2EMemoryDeviceType An updated version of the second generation of High Bandwidth Memory.
+	// HBM2EMemoryDeviceType is an updated version of the second generation of High
+	// Bandwidth Memory.
 	HBM2EMemoryDeviceType MemoryDeviceType = "HBM2E"
 	// HBM3MemoryDeviceType The third generation of High Bandwidth Memory.
 	HBM3MemoryDeviceType MemoryDeviceType = "HBM3"
 	// GDDRMemoryDeviceType Synchronous graphics random-access memory.
 	GDDRMemoryDeviceType MemoryDeviceType = "GDDR"
-	// GDDR2MemoryDeviceType Double data rate type two synchronous graphics random-access memory.
+	// GDDR2MemoryDeviceType Double data rate type two synchronous graphics
+	// random-access memory.
 	GDDR2MemoryDeviceType MemoryDeviceType = "GDDR2"
-	// GDDR3MemoryDeviceType Double data rate type three synchronous graphics random-access memory.
+	// GDDR3MemoryDeviceType Double data rate type three synchronous graphics
+	// random-access memory.
 	GDDR3MemoryDeviceType MemoryDeviceType = "GDDR3"
-	// GDDR4MemoryDeviceType Double data rate type four synchronous graphics random-access memory.
+	// GDDR4MemoryDeviceType Double data rate type four synchronous graphics
+	// random-access memory.
 	GDDR4MemoryDeviceType MemoryDeviceType = "GDDR4"
-	// GDDR5MemoryDeviceType Double data rate type five synchronous graphics random-access memory.
+	// GDDR5MemoryDeviceType Double data rate type five synchronous graphics
+	// random-access memory.
 	GDDR5MemoryDeviceType MemoryDeviceType = "GDDR5"
-	// GDDR5XMemoryDeviceType Double data rate type five X synchronous graphics random-access memory.
+	// GDDR5XMemoryDeviceType Double data rate type five X synchronous graphics
+	// random-access memory.
 	GDDR5XMemoryDeviceType MemoryDeviceType = "GDDR5X"
-	// GDDR6MemoryDeviceType Double data rate type six synchronous graphics random-access memory.
+	// GDDR6MemoryDeviceType Double data rate type six synchronous graphics
+	// random-access memory.
 	GDDR6MemoryDeviceType MemoryDeviceType = "GDDR6"
-	// DDR5MemoryDeviceType Double data rate type five synchronous dynamic random-access memory.
+	// GDDR7MemoryDeviceType Double data rate type seven synchronous graphics
+	// random-access memory.
+	GDDR7MemoryDeviceType MemoryDeviceType = "GDDR7"
+	// DDR5MemoryDeviceType Double data rate type five synchronous dynamic
+	// random-access memory.
 	DDR5MemoryDeviceType MemoryDeviceType = "DDR5"
 	// OEMMemoryDeviceType OEM-defined.
 	OEMMemoryDeviceType MemoryDeviceType = "OEM"
 	// LPDDR5SDRAMMemoryDeviceType LPDDR5 SDRAM.
 	LPDDR5SDRAMMemoryDeviceType MemoryDeviceType = "LPDDR5_SDRAM"
+	// DDR5MRDIMMMemoryDeviceType DDR5 MRDIMM.
+	DDR5MRDIMMMemoryDeviceType MemoryDeviceType = "DDR5_MRDIMM"
 )
 
-// MemoryMedia is media type.
 type MemoryMedia string
 
 const (
@@ -155,37 +165,39 @@ const (
 	ProprietaryMemoryMedia MemoryMedia = "Proprietary"
 )
 
-// MemoryType is the type of memory.
 type MemoryType string
 
 const (
-	// DRAMMemoryType shall represent volatile DRAM.
+	// DRAMMemoryType shall represent a volatile DRAM memory device.
 	DRAMMemoryType MemoryType = "DRAM"
-	// NVDIMMNMemoryType shall represent NVDIMMN as defined by JEDEC.
+	// NVDIMMNMemoryType shall represent an NVDIMM_N memory device as defined by
+	// JEDEC.
 	NVDIMMNMemoryType MemoryType = "NVDIMM_N"
-	// NVDIMMFMemoryType shall represent NVDIMMF as defined by JEDEC.
+	// NVDIMMFMemoryType shall represent an NVDIMM_F memory device as defined by
+	// JEDEC.
 	NVDIMMFMemoryType MemoryType = "NVDIMM_F"
-	// NVDIMMPMemoryType shall represent NVDIMMP as defined by JEDEC.
+	// NVDIMMPMemoryType shall represent an NVDIMM_P memory device as defined by
+	// JEDEC.
 	NVDIMMPMemoryType MemoryType = "NVDIMM_P"
-	// IntelOptaneMemoryType shall represent Intel Optane DC Persistent
-	// Memory.
+	// IntelOptaneMemoryType shall represent an Intel Optane Persistent Memory
+	// Module.
 	IntelOptaneMemoryType MemoryType = "IntelOptane"
+	// CacheMemoryType shall represent cache memory.
+	CacheMemoryType MemoryType = "Cache"
 )
 
-// OperatingMemoryModes is is the memory operating mode.
 type OperatingMemoryModes string
 
 const (
 	// VolatileOperatingMemoryModes Volatile memory.
 	VolatileOperatingMemoryModes OperatingMemoryModes = "Volatile"
-	// PMEMOperatingMemoryModes Persistent memory, byte accessible through
-	// system address space.
+	// PMEMOperatingMemoryModes Persistent memory, byte-accessible through system
+	// address space.
 	PMEMOperatingMemoryModes OperatingMemoryModes = "PMEM"
-	// BlockOperatingMemoryModes Block accessible system memory.
+	// BlockOperatingMemoryModes Block-accessible system memory.
 	BlockOperatingMemoryModes OperatingMemoryModes = "Block"
 )
 
-// SecurityStates is memory security state.
 type SecurityStates string
 
 const (
@@ -194,385 +206,476 @@ const (
 	EnabledSecurityStates SecurityStates = "Enabled"
 	// DisabledSecurityStates Secure mode is disabled.
 	DisabledSecurityStates SecurityStates = "Disabled"
-	// UnlockedSecurityStates Secure mode is enabled and access to the data
-	// is unlocked.
+	// UnlockedSecurityStates Secure mode is enabled and access to the data is
+	// unlocked.
 	UnlockedSecurityStates SecurityStates = "Unlocked"
 	// LockedSecurityStates Secure mode is enabled and access to the data is
 	// locked.
 	LockedSecurityStates SecurityStates = "Locked"
-	// FrozenSecurityStates Secure state is frozen and can not be modified
-	// until reset.
+	// FrozenSecurityStates Secure state is frozen and cannot be modified until
+	// reset.
 	FrozenSecurityStates SecurityStates = "Frozen"
-	// PassphraselimitSecurityStates Number of attempts to unlock the Memory
+	// PassphraselimitSecurityStates Number of attempts to unlock the memory
 	// exceeded limit.
 	PassphraselimitSecurityStates SecurityStates = "Passphraselimit"
 )
 
-// MemoryCXL shall contain CXL-specific properties for a memory device.
-type MemoryCXL struct {
-	// LabelStorageSizeBytes shall contain the size of the label storage area in bytes of this memory device.
-	LabelStorageSizeBytes int
-	// StagedNonVolatileSizeMiB shall indicate the total device non-volatile memory capacity in mebibytes. The value
-	// shall be in multiples of 256 mebibytes.
-	StagedNonVolatileSizeMiB int
-	// StagedVolatileSizeMiB shall indicate the total device volatile memory capacity in mebibytes staged for next
-	// activation. This value shall be in multiples of 256 mebibytes.
-	StagedVolatileSizeMiB int
-}
-
-// MemoryHealthData is the health data of a memory device.
-type MemoryHealthData struct {
-	// PredictedMediaLifeLeftPercent is the current health of the memory device as a percentage.
-	// This property has been deprecated in favor of PredictedMediaLifeLeftPercent in the MemoryMetrics resource.
-	PredictedMediaLifeLeftPercent int
-}
-
-// Memory is used to represent the Memory in a Redfish implementation.
+// Memory shall represent a memory device in a Redfish implementation. It may
+// also represent a location, such as a slot, socket, or bay, where a unit may
+// be installed, but the 'State' property within the 'Status' property contains
+// 'Absent'.
 type Memory struct {
 	common.Entity
-
+	// AllocationAlignmentMiB shall contain the alignment boundary on which memory
+	// regions are allocated, measured in MiB.
+	//
+	// Version added: v1.2.0
+	AllocationAlignmentMiB *int `json:",omitempty"`
+	// AllocationIncrementMiB shall contain the allocation increment for regions,
+	// measured in MiB.
+	//
+	// Version added: v1.2.0
+	AllocationIncrementMiB *int `json:",omitempty"`
+	// AllowedSpeedsMHz shall contain the speeds supported by this memory device.
+	AllowedSpeedsMHz []int
+	// Assembly shall contain a link to a resource of type 'Assembly'.
+	//
+	// Version added: v1.4.0
+	assembly string
+	// BaseModuleType shall contain the base module type of the memory device.
+	BaseModuleType BaseModuleType
+	// BusWidthBits shall contain the bus width, in bits.
+	BusWidthBits *int `json:",omitempty"`
+	// CXL shall contain CXL-specific properties for this memory device.
+	//
+	// Version added: v1.17.0
+	CXL MemoryCXL
+	// CacheLevel shall contain the level of the cache memory. This property shall
+	// only be present if the 'MemoryType' contains the value 'Cache'.
+	//
+	// Version added: v1.20.0
+	CacheLevel int
+	// CacheSizeMiB shall contain the total size of the cache portion memory in
+	// MiB. If the 'MemoryType' property contains the value 'Cache', the
+	// 'CacheSizeMiB' property shall be absent and the 'CapacityMiB' property shall
+	// be present.
+	//
+	// Version added: v1.4.0
+	CacheSizeMiB *int `json:",omitempty"`
+	// CapacityMiB shall contain the memory capacity in MiB.
+	CapacityMiB *int `json:",omitempty"`
+	// Certificates shall contain a link to a resource collection of type
+	// 'CertificateCollection' that contains certificates for device identity and
+	// attestation.
+	//
+	// Version added: v1.11.0
+	certificates string
+	// ConfigurationLocked shall indicate whether the configuration of this memory
+	// device is locked and cannot be altered.
+	//
+	// Version added: v1.7.0
+	ConfigurationLocked bool
+	// DataWidthBits shall contain the data width in bits.
+	DataWidthBits *int `json:",omitempty"`
+	// DeviceID shall contain the device ID of the memory device.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of 'ModuleProductID'.
+	DeviceID string
+	// DeviceLocator shall contain the location of the memory device in the
+	// platform, typically marked in the silk screen.
+	//
+	// Deprecated: v1.9.0
+	// This property has been deprecated in favor of the 'ServiceLabel' property
+	// within 'Location'.
+	DeviceLocator string
+	// Enabled shall indicate if this memory is enabled.
+	//
+	// Version added: v1.12.0
+	Enabled bool
+	// EnvironmentMetrics shall contain a link to a resource of type
+	// 'EnvironmentMetrics' that specifies the environment metrics for this memory.
+	//
+	// Version added: v1.11.0
+	environmentMetrics string
+	// ErrorCorrection shall contain the error correction scheme supported for this
+	// memory device.
+	ErrorCorrection ErrorCorrection
+	// FirmwareAPIVersion shall contain the version of API supported by the
+	// firmware.
+	FirmwareAPIVersion string
+	// FirmwareRevision shall contain the revision of firmware on the memory
+	// controller.
+	FirmwareRevision string
+	// FunctionClasses shall contain the function classes by the memory device.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of 'OperatingMemoryModes' at the
+	// root of the resource, or 'MemoryClassification' found within 'RegionSet'.
+	FunctionClasses []string
+	// HealthData shall contain the health data of this memory device.
+	//
+	// Version added: v1.17.0
+	HealthData HealthData
+	// IsRankSpareEnabled shall indicate whether rank spare is enabled for this
+	// memory device.
+	IsRankSpareEnabled bool
+	// IsSpareDeviceEnabled shall indicate whether the spare device is enabled.
+	IsSpareDeviceEnabled bool
+	// Location shall contain the location information of the associated memory
+	// device.
+	//
+	// Version added: v1.4.0
+	Location common.Location
+	// LocationIndicatorActive shall contain the state of the indicator used to
+	// physically identify or locate this resource. A write to this property shall
+	// update the value of 'IndicatorLED' in this resource, if supported, to
+	// reflect the implementation of the locating function.
+	//
+	// Version added: v1.10.0
+	LocationIndicatorActive bool
+	// Log shall contain a link to a resource of type 'LogService'.
+	//
+	// Version added: v1.13.0
+	log string
+	// LogicalSizeMiB shall contain the total size of the logical memory in MiB.
+	//
+	// Version added: v1.4.0
+	LogicalSizeMiB *int `json:",omitempty"`
+	// Manufacturer shall contain the manufacturer of the memory device.
+	Manufacturer string
+	// MaxTDPMilliWatts shall contain an array of maximum power budgets supported
+	// by the memory device in milliwatt units.
+	MaxTDPMilliWatts []int
+	// Measurements shall contain an array of DSP0274-defined measurement blocks.
+	//
+	// Version added: v1.11.0
+	//
+	// Deprecated: v1.14.0
+	// This property has been deprecated in favor of the 'ComponentIntegrity'
+	// resource.
+	Measurements []MeasurementBlock
+	// MemoryDeviceType shall contain the Memory Device Type as defined by SMBIOS.
+	MemoryDeviceType MemoryDeviceType
+	// MemoryLocation shall contain properties that describe the memory connection
+	// information to sockets and memory controllers.
+	MemoryLocation MemoryLocation
+	// MemoryMedia shall contain the media types of this memory device.
+	MemoryMedia []MemoryMedia
+	// MemorySubsystemControllerManufacturerID shall contain the two byte
+	// manufacturer ID of the memory subsystem controller of this memory device as
+	// defined by JEDEC in JEP-106.
+	//
+	// Version added: v1.3.0
+	MemorySubsystemControllerManufacturerID string
+	// MemorySubsystemControllerProductID shall contain the two byte product ID of
+	// the memory subsystem controller of this memory device as defined by the
+	// manufacturer.
+	//
+	// Version added: v1.3.0
+	MemorySubsystemControllerProductID string
+	// MemoryType shall contain the type of memory device that this resource
+	// represents.
+	MemoryType MemoryType
+	// Metrics The link to the metrics associated with this memory device.
+	Metrics MemoryMetrics
+	// Model shall indicate the model information as provided by the manufacturer
+	// of this memory.
+	//
+	// Version added: v1.11.0
+	Model string
+	// ModuleManufacturerID shall contain the two byte manufacturer ID of this
+	// memory device as defined by JEDEC in JEP-106.
+	//
+	// Version added: v1.3.0
+	ModuleManufacturerID string
+	// ModuleProductID shall contain the two byte product ID of this memory device
+	// as defined by the manufacturer.
+	//
+	// Version added: v1.3.0
+	ModuleProductID string
+	// NonVolatileSizeLimitMiB shall contain the total non-volatile memory capacity
+	// in mebibytes (MiB).
+	//
+	// Version added: v1.17.0
+	NonVolatileSizeLimitMiB int
+	// NonVolatileSizeMiB shall contain the total size of the non-volatile portion
+	// memory in MiB.
+	//
+	// Version added: v1.4.0
+	NonVolatileSizeMiB *int `json:",omitempty"`
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// AllocationAlignmentMiB shall be the alignment boundary on which memory
-	// regions are allocated, measured in MiB.
-	AllocationAlignmentMiB int
-	// AllocationIncrementMiB shall be the allocation increment for regions,
-	// measured in MiB.
-	AllocationIncrementMiB int
-	// AllowedSpeedsMHz shall be the speed supported by this Memory (in MHz).
-	AllowedSpeedsMHz []int
-	// Assembly shall be a link to a resource of type Assembly.
-	assembly string
-	// BaseModuleType shall be the base module type of Memory.
-	BaseModuleType BaseModuleType
-	// BusWidthBits shall be the bus width in bits.
-	BusWidthBits int
-	// CXL shall contain CXL-specific properties for this memory device.
-	CXL MemoryCXL
-	// CacheSizeMiB shall be the total size of the cache portion memory in MiB.
-	CacheSizeMiB int
-	// CapacityMiB shall be the Memory capacity in MiB.
-	CapacityMiB int
-	// Certificates shall contain a link to a resource collection of type CertificateCollection that contains
-	// certificates for device identity and attestation.
-	certificates []string
-	// ConfigurationLocked shall be the current configuration lock state of this
-	// memory. True shall indicate that the configuration is locked and cannot
-	// be altered. False shall indicate that the configuration is not locked and
-	// may be altered.
-	ConfigurationLocked bool
-	// DataWidthBits shall be the data width in bits.
-	DataWidthBits int
-	// Description provides a description of this resource.
-	Description string
-	// DeviceLocator shall be location of the Memory in the platform, typically
-	// marked in the silk screen.
-	// This property has been deprecated in favor of the ServiceLabel property within Location.
-	DeviceLocator string
-	// Enabled shall indicate if this memory is enabled.
-	Enabled bool
-	// EnvironmentMetrics shall contain a link to a resource of type EnvironmentMetrics that specifies the environment
-	// metrics for this memory.
-	environmentMetrics string
-	// ErrorCorrection shall be the error correction scheme supported for this memory.
-	ErrorCorrection ErrorCorrection
-	// FirmwareAPIVersion shall be the version of API supported by the firmware.
-	FirmwareAPIVersion string `json:"FirmwareApiVersion"`
-	// FirmwareRevision shall be the revision of firmware on the Memory controller.
-	FirmwareRevision string
-	// HealthData shall contain the health data of this memory device.
-	HealthData string
-	// IsRankSpareEnabled shall be true if a rank spare is enabled for this Memory.
-	IsRankSpareEnabled bool
-	// IsSpareDeviceEnabled shall be true if a spare device is enabled for this Memory.
-	IsSpareDeviceEnabled bool
-	// Location shall contain location information of the associated memory.
-	Location common.Location
-	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
-	// resource. A write to this property shall update the value of IndicatorLED in this resource, if supported, to
-	// reflect the implementation of the locating function.
-	LocationIndicatorActive bool
-	// Log shall contain a link to a resource of type LogService.
-	log string
-	// LogicalSizeMiB shall be the total size of the logical memory in MiB.
-	LogicalSizeMiB int
-	// Manufacturer shall contain a string which identifies the manufacturer of the Memory.
-	Manufacturer string
-	// MaxTDPMilliWatts shall be the maximum power budgets supported by the
-	// Memory in milli Watts.
-	MaxTDPMilliWatts []int
-	// MemoryDeviceType shall be the Memory Device Type as defined by SMBIOS.
-	MemoryDeviceType MemoryDeviceType
-	// MemoryLocation shall contain properties which describe the Memory
-	// connection information to sockets and memory controllers.
-	MemoryLocation MemoryLocation
-	// MemoryMedia shall be the media types of this Memory.
-	MemoryMedia []MemoryMedia
-	// MemorySubsystemControllerManufacturerID shall be the two byte
-	// manufacturer ID of the memory subsystem controller of this memory module
-	// as defined by JEDEC in JEP-106.
-	MemorySubsystemControllerManufacturerID string
-	// MemorySubsystemControllerProductID shall
-	// be the two byte product ID of the memory subsystem controller of this
-	// memory module as defined by the manufacturer.
-	MemorySubsystemControllerProductID string
-	// MemoryType shall be the type of Memory
-	// represented by this resource.
-	MemoryType MemoryType
-	// Metrics is a reference to the Metrics associated with this Memory.
-	metrics *MemoryMetrics
-	// Model shall indicate the model information as provided by the manufacturer of this memory.
-	Model string
-	// ModuleManufacturerID shall be the two byte manufacturer ID of this memory
-	// module as defined by JEDEC in JEP-106.
-	ModuleManufacturerID string
-	// ModuleProductID shall be the two byte
-	// product ID of this memory module as defined by the manufacturer.
-	ModuleProductID string
-	// NonVolatileSizeLimitMiB shall contain the total non-volatile memory capacity in mebibytes (MiB).
-	NonVolatileSizeLimitMiB int
-	// NonVolatileSizeMiB shall contain the total size of the non-volatile portion memory in MiB.
-	NonVolatileSizeMiB int
-	// OperatingMemoryModes shall be the memory
-	// modes supported by the Memory.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OperatingMemoryModes shall contain the memory modes supported by the memory
+	// device.
 	OperatingMemoryModes []OperatingMemoryModes
-	// OperatingSpeedMhz shall be the operating
-	// speed of Memory in MHz or MT/s (mega-transfers per second) as reported
-	// by the memory device. Memory devices which operate at their bus speed
-	// shall report the operating speed in MHz (bus speed), while memory
-	// device which transfer data faster than their bus speed (e.g. DDR
-	// memory) shall report the operating speed in MT/s (mega-
-	// transfers/second). In any case, the reported value shall match the
-	// conventionally reported values for the technology utilized by the
-	// memory device.
-	OperatingSpeedMhz int
-	// PartNumber shall indicate the part number as provided by the manufacturer
-	// of this Memory.
+	// OperatingSpeedMhz shall contain the operating speed of the memory device in
+	// MHz or MT/s (mega-transfers per second) as reported by the memory device.
+	// Memory devices that operate at their bus speed shall report the operating
+	// speed in MHz (bus speed), while memory devices that transfer data faster
+	// than their bus speed, such as DDR memory, shall report the operating speed
+	// in MT/s (mega-transfers/second). The reported value shall match the
+	// conventionally reported values for the technology used by the memory device.
+	OperatingSpeedMhz *int `json:",omitempty"`
+	// OperatingSpeedRangeMHz shall contain the operating speed control, in
+	// megahertz units, for this resource. The value of the 'DataSourceUri'
+	// property, if present, shall reference a resource of type 'Control' with the
+	// 'ControlType' property containing the value of 'FrequencyMHz'.
+	//
+	// Version added: v1.13.0
+	OperatingSpeedRangeMHz ControlRangeExcerpt
+	// PartNumber shall indicate the part number as provided by the manufacturer of
+	// this memory device.
 	PartNumber string
-	// PersistentRegionNumberLimit shall be the total number of persistent
-	// regions this Memory can support.
-	PersistentRegionNumberLimit int
-	// PersistentRegionSizeLimitMiB shall be the total size of persistent regions in MiB.
-	PersistentRegionSizeLimitMiB int
-	// PersistentRegionSizeMaxMiB shall be the maximum size of a single persistent
+	// PersistentRegionNumberLimit shall contain the total number of persistent
+	// regions this memory device can support.
+	//
+	// Version added: v1.2.0
+	PersistentRegionNumberLimit *int `json:",omitempty"`
+	// PersistentRegionSizeLimitMiB shall contain the total size of persistent
 	// regions in MiB.
-	PersistentRegionSizeMaxMiB int
-	// PoisonListMaxMediaErrorRecords shall contain the maximum number of media error records this device can track in
-	// its poison list.
+	PersistentRegionSizeLimitMiB *int `json:",omitempty"`
+	// PersistentRegionSizeMaxMiB shall contain the maximum size of a single
+	// persistent regions in MiB.
+	//
+	// Version added: v1.2.0
+	PersistentRegionSizeMaxMiB *int `json:",omitempty"`
+	// PoisonListMaxMediaErrorRecords shall contain the maximum number of media
+	// error records this device can track in its poison list.
+	//
+	// Version added: v1.17.0
 	PoisonListMaxMediaErrorRecords int
-	// PowerManagementPolicy shall contain properties which describe the power
-	// management policy for the current resource.
+	// PowerManagementICManufacturerID shall contain the two byte manufacturer ID
+	// of the Power Management Integrated Controller on this memory device as
+	// defined by JEDEC in JESD301.
+	//
+	// Version added: v1.20.0
+	PowerManagementICManufacturerID string
+	// PowerManagementICRevisionID shall contain the two byte revision ID of the
+	// Power Management Integrated Controller on this memory device as defined by
+	// JEDEC in JESD301.
+	//
+	// Version added: v1.20.0
+	PowerManagementICRevisionID string
+	// PowerManagementPolicy shall contain properties that describe the power
+	// management policy for this resource.
 	PowerManagementPolicy PowerManagementPolicy
-	// RankCount is used for spare or interleave.
-	RankCount int
-	// Regions shall be the memory region information within the Memory.
+	// RankCount shall contain the number of ranks available in the memory device.
+	// The ranks could be used for spare or interleave.
+	RankCount *int `json:",omitempty"`
+	// Regions shall contain the memory region information within the memory
+	// device.
 	Regions []RegionSet
-	// SecurityCapabilities shall contain properties which describe the security
-	// capabilities of the Memory.
+	// SecurityCapabilities shall contain properties that describe the security
+	// capabilities of the memory device.
 	SecurityCapabilities SecurityCapabilities
-	// SecurityState shall be the current security state of this memory.
+	// SecurityState shall contain the current security state of this memory
+	// device.
+	//
+	// Version added: v1.7.0
 	SecurityState SecurityStates
 	// SecurityStates shall contain the security states of this memory device.
+	//
+	// Version added: v1.17.0
 	SecurityStates SecurityStateInfo
 	// SerialNumber shall indicate the serial number as provided by the
-	// manufacturer of this Memory.
+	// manufacturer of this memory device.
 	SerialNumber string
-	// SpareDeviceCount is used spare devices available in the Memory. If
-	// memory devices fails, the spare device could be used.
-	SpareDeviceCount int
+	// SpareDeviceCount shall contain the number of unused spare devices available
+	// in the memory device. If the memory device fails, the spare devices could be
+	// used.
+	SpareDeviceCount *int `json:",omitempty"`
 	// SparePartNumber shall contain the spare part number of the memory.
+	//
+	// Version added: v1.11.0
 	SparePartNumber string
-	// Status shall contain any status or health properties
-	// of the resource.
+	// Status shall contain any status or health properties of the resource.
+	//
+	// Version added: v1.1.0
 	Status common.Status
-	// VolatileRegionNumberLimit shall be the total number of volatile regions
-	// this Memory can support.
-	VolatileRegionNumberLimit int
-	// VolatileRegionSizeLimitMiB shall be the total size of volatile regions in MiB.
-	VolatileRegionSizeLimitMiB int
-	// VolatileRegionSizeMaxMiB shall be the maximum size of a single volatile
+	// SubsystemDeviceID shall contain the subsystem device ID of the memory
+	// device.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of
+	// 'MemorySubsystemControllerProductID'.
+	SubsystemDeviceID string
+	// SubsystemVendorID shall contain the subsystem vendor ID of the memory
+	// device.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of
+	// 'MemorySubsystemControllerManufacturerID'.
+	SubsystemVendorID string
+	// VendorID shall contain the vendor ID of the memory device.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated in favor of 'ModuleManufacturerID'.
+	VendorID string
+	// VolatileRegionNumberLimit shall contain the total number of volatile regions
+	// this memory device can support.
+	//
+	// Version added: v1.2.0
+	VolatileRegionNumberLimit *int `json:",omitempty"`
+	// VolatileRegionSizeLimitMiB shall contain the total size of volatile regions
+	// in MiB.
+	VolatileRegionSizeLimitMiB *int `json:",omitempty"`
+	// VolatileRegionSizeMaxMiB shall contain the maximum size of a single volatile
 	// regions in MiB.
-	VolatileRegionSizeMaxMiB int
-	// VolatileSizeLimitMiB shall contain the total volatile memory capacity in mebibytes (MiB).
+	//
+	// Version added: v1.2.0
+	VolatileRegionSizeMaxMiB *int `json:",omitempty"`
+	// VolatileSizeLimitMiB shall contain the total volatile memory capacity in
+	// mebibytes (MiB).
+	//
+	// Version added: v1.17.0
 	VolatileSizeLimitMiB int
-	// VolatileSizeMiB shall be the total size of the volatile portion memory in MiB.
-	VolatileSizeMiB int
+	// VolatileSizeMiB shall contain the total size of the volatile portion memory
+	// in MiB.
+	//
+	// Version added: v1.4.0
+	VolatileSizeMiB *int `json:",omitempty"`
+	// disableMasterPassphraseTarget is the URL to send DisableMasterPassphrase requests.
+	disableMasterPassphraseTarget string
+	// disablePassphraseTarget is the URL to send DisablePassphrase requests.
+	disablePassphraseTarget string
+	// freezeSecurityStateTarget is the URL to send FreezeSecurityState requests.
+	freezeSecurityStateTarget string
+	// injectPersistentPoisonTarget is the URL to send InjectPersistentPoison requests.
+	injectPersistentPoisonTarget string
+	// overwriteUnitTarget is the URL to send OverwriteUnit requests.
+	overwriteUnitTarget string
+	// resetTarget is the URL to send Reset requests.
+	resetTarget string
+	// resetToDefaultsTarget is the URL to send ResetToDefaults requests.
+	resetToDefaultsTarget string
+	// scanMediaTarget is the URL to send ScanMedia requests.
+	scanMediaTarget string
+	// secureEraseUnitTarget is the URL to send SecureEraseUnit requests.
+	secureEraseUnitTarget string
+	// setMasterPassphraseTarget is the URL to send SetMasterPassphrase requests.
+	setMasterPassphraseTarget string
+	// setPassphraseTarget is the URL to send SetPassphrase requests.
+	setPassphraseTarget string
+	// unlockUnitTarget is the URL to send UnlockUnit requests.
+	unlockUnitTarget string
+	// batteries are the URIs for Batteries.
+	batteries []string
+	// chassis is the URI for Chassis.
+	chassis string
+	// endpoints are the URIs for Endpoints.
+	endpoints []string
+	// memoryMediaSources are the URIs for MemoryMediaSources.
+	memoryMediaSources []string
+	// memoryRegionMediaSources are the URIs for MemoryRegionMediaSources.
+	memoryRegionMediaSources []string
+	// processors are the URIs for Processors.
+	processors []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	batteries []string
-	// BatteriesCount gets the number of batteries that provide power to this memory device during
-	// a power-loss event, such as with battery-backed NVDIMMs.
-	BatteriesCount int
-	chassis        string
-	endpoints      []string
-	// EndpointsCount gets the number of endpoints associated with this memory.
-	EndpointsCount     int
-	memoryMediaSources []string
-	// MemoryMediaSourcesCount gets the number of memory chunk instances providing media for this memory.
-	MemoryMediaSourcesCount  int
-	memoryRegionMediaSources []string
-	// MemoryMediaRegionSourcesCount gets the number of memory region instances providing media for this memory.
-	MemoryRegionMediaSourcesCount int
-	processors                    []string
-	// ProcessorsCount gets the number of processors associated with this memory device.
-	ProcessorsCount int
-
-	disableMasterPassphraseTarget string
-	disablePassphraseTarget       string
-	freezeSecurityStateTarget     string
-	injectPersistentPoisonTarget  string
-	overwriteUnitTarget           string
-	resetTarget                   string
-	resetToDefaultsTarget         string
-	scanMediaTarget               string
-	secureEraseUnitTarget         string
-	setMasterPassphraseTarget     string
-	setPassphraseTarget           string
-	unlockUnitTarget              string
-}
-
-type memoryActions struct {
-	DisableMasterPassphrase struct {
-		Target string
-	} `json:"#Memory.DisableMasterPassphrase"`
-	DisablePassphrase struct {
-		Target string
-	} `json:"#Memory.DisablePassphrase"`
-	FreezeSecurityState struct {
-		Target string
-	} `json:"#Memory.FreezeSecurityState"`
-	InjectPersistentPoison struct {
-		Target string
-	} `json:"#Memory.InjectPersistentPoison"`
-	OverwriteUnit struct {
-		Target string
-	} `json:"#Memory.OverwriteUnit"`
-	Reset struct {
-		Target string
-	} `json:"#Memory.Reset"`
-	ResetToDefaults struct {
-		Target string
-	} `json:"#Memory.ResetToDefaults"`
-	ScanMedia struct {
-		Target string
-	} `json:"#Memory.ScanMedia"`
-	SecureEraseUnit struct {
-		Target string
-	} `json:"#Memory.SecureEraseUnit"`
-	SetMasterPassphrase struct {
-		Target string
-	} `json:"#Memory.SetMasterPassphrase"`
-	SetPassphrase struct {
-		Target string
-	} `json:"#Memory.SetPassphrase"`
-	UnlockUnit struct {
-		Target string
-	} `json:"#Memory.UnlockUnit"`
-}
-
-type memoryLinks struct {
-	// Batteries shall contain an array of links to resources of type Battery that represent the batteries that provide
-	// power to this memory device during a power-loss event, such as with battery-backed NVDIMMs. This property shall
-	// not be present if the batteries power the containing chassis as a whole rather than the individual memory
-	// device.
-	Batteries      common.Links
-	BatteriesCount int `json:"Batteries@odata.count"`
-	// Chassis shall contain a link to a resource of type Chassis that represents the physical container associated
-	// with this memory device.
-	Chassis common.Link
-	// Endpoints shall contain an array of links to resources of type Endpoint that represent the endpoints associated
-	// with this memory.
-	Endpoints      common.Links
-	EndpointsCount int `json:"Endpoints@odata.count"`
-	// MemoryMediaSources shall contain an array of links to resources of type MemoryChunks that represent the memory
-	// chunk instances providing media for this memory.
-	MemoryMediaSources      common.Links
-	MemoryMediaSourcesCount int `json:"MemoryMediaSources@odata.count"`
-	// MemoryRegionMediaSources shall contain an array of links to resources of type MemoryRegion that represent the
-	// memory region instances providing media for this memory.
-	MemoryRegionMediaSources      common.Links
-	MemoryRegionMediaSourcesCount int `json:"MemoryRegionMediaSources@odata.count"`
-	// Processors shall contain an array of links to resources of type Processor that are associated with this memory
-	// device.
-	Processors      common.Links
-	ProcessorsCount int `json:"Processors@odata.count"`
 }
 
 // UnmarshalJSON unmarshals a Memory object from the raw JSON.
-func (memory *Memory) UnmarshalJSON(b []byte) error {
+func (m *Memory) UnmarshalJSON(b []byte) error {
 	type temp Memory
-	var t struct {
+	type mActions struct {
+		DisableMasterPassphrase common.ActionTarget `json:"#Memory.DisableMasterPassphrase"`
+		DisablePassphrase       common.ActionTarget `json:"#Memory.DisablePassphrase"`
+		FreezeSecurityState     common.ActionTarget `json:"#Memory.FreezeSecurityState"`
+		InjectPersistentPoison  common.ActionTarget `json:"#Memory.InjectPersistentPoison"`
+		OverwriteUnit           common.ActionTarget `json:"#Memory.OverwriteUnit"`
+		Reset                   common.ActionTarget `json:"#Memory.Reset"`
+		ResetToDefaults         common.ActionTarget `json:"#Memory.ResetToDefaults"`
+		ScanMedia               common.ActionTarget `json:"#Memory.ScanMedia"`
+		SecureEraseUnit         common.ActionTarget `json:"#Memory.SecureEraseUnit"`
+		SetMasterPassphrase     common.ActionTarget `json:"#Memory.SetMasterPassphrase"`
+		SetPassphrase           common.ActionTarget `json:"#Memory.SetPassphrase"`
+		UnlockUnit              common.ActionTarget `json:"#Memory.UnlockUnit"`
+	}
+	type mLinks struct {
+		Batteries                common.Links `json:"Batteries"`
+		Chassis                  common.Link  `json:"Chassis"`
+		Endpoints                common.Links `json:"Endpoints"`
+		MemoryMediaSources       common.Links `json:"MemoryMediaSources"`
+		MemoryRegionMediaSources common.Links `json:"MemoryRegionMediaSources"`
+		Processors               common.Links `json:"Processors"`
+	}
+	var tmp struct {
 		temp
-		Actions            memoryActions
-		Links              memoryLinks
-		Assembly           common.Link
-		Certificates       common.LinksCollection
-		EnvironmentMetrics common.Link
-		Log                common.Link
-		Metrics            *MemoryMetrics
+		Actions            mActions
+		Links              mLinks
+		Assembly           common.Link `json:"assembly"`
+		Certificates       common.Link `json:"certificates"`
+		EnvironmentMetrics common.Link `json:"environmentMetrics"`
+		Log                common.Link `json:"log"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*memory = Memory(t.temp)
+	*m = Memory(tmp.temp)
 
 	// Extract the links to other entities for later
-	memory.assembly = t.Assembly.String()
-	memory.certificates = t.Certificates.ToStrings()
-	memory.environmentMetrics = t.EnvironmentMetrics.String()
-	memory.log = t.Log.String()
-	memory.metrics = t.Metrics
-
-	memory.batteries = t.Links.Batteries.ToStrings()
-	memory.BatteriesCount = t.Links.BatteriesCount
-	memory.chassis = t.Links.Chassis.String()
-	memory.endpoints = t.Links.Endpoints.ToStrings()
-	memory.EndpointsCount = t.Links.EndpointsCount
-	memory.memoryMediaSources = t.Links.MemoryMediaSources.ToStrings()
-	memory.MemoryMediaSourcesCount = t.Links.MemoryMediaSourcesCount
-	memory.memoryRegionMediaSources = t.Links.MemoryRegionMediaSources.ToStrings()
-	memory.MemoryRegionMediaSourcesCount = t.Links.MemoryRegionMediaSourcesCount
-	memory.processors = t.Links.Processors.ToStrings()
-	memory.ProcessorsCount = t.Links.ProcessorsCount
-
-	memory.disableMasterPassphraseTarget = t.Actions.DisableMasterPassphrase.Target
-	memory.disablePassphraseTarget = t.Actions.DisablePassphrase.Target
-	memory.freezeSecurityStateTarget = t.Actions.FreezeSecurityState.Target
-	memory.injectPersistentPoisonTarget = t.Actions.InjectPersistentPoison.Target
-	memory.overwriteUnitTarget = t.Actions.OverwriteUnit.Target
-	memory.resetTarget = t.Actions.Reset.Target
-	memory.resetToDefaultsTarget = t.Actions.ResetToDefaults.Target
-	memory.scanMediaTarget = t.Actions.ScanMedia.Target
-	memory.secureEraseUnitTarget = t.Actions.SecureEraseUnit.Target
-	memory.setMasterPassphraseTarget = t.Actions.SetMasterPassphrase.Target
-	memory.setPassphraseTarget = t.Actions.SetPassphrase.Target
-	memory.unlockUnitTarget = t.Actions.UnlockUnit.Target
+	m.disableMasterPassphraseTarget = tmp.Actions.DisableMasterPassphrase.Target
+	m.disablePassphraseTarget = tmp.Actions.DisablePassphrase.Target
+	m.freezeSecurityStateTarget = tmp.Actions.FreezeSecurityState.Target
+	m.injectPersistentPoisonTarget = tmp.Actions.InjectPersistentPoison.Target
+	m.overwriteUnitTarget = tmp.Actions.OverwriteUnit.Target
+	m.resetTarget = tmp.Actions.Reset.Target
+	m.resetToDefaultsTarget = tmp.Actions.ResetToDefaults.Target
+	m.scanMediaTarget = tmp.Actions.ScanMedia.Target
+	m.secureEraseUnitTarget = tmp.Actions.SecureEraseUnit.Target
+	m.setMasterPassphraseTarget = tmp.Actions.SetMasterPassphrase.Target
+	m.setPassphraseTarget = tmp.Actions.SetPassphrase.Target
+	m.unlockUnitTarget = tmp.Actions.UnlockUnit.Target
+	m.batteries = tmp.Links.Batteries.ToStrings()
+	m.chassis = tmp.Links.Chassis.String()
+	m.endpoints = tmp.Links.Endpoints.ToStrings()
+	m.memoryMediaSources = tmp.Links.MemoryMediaSources.ToStrings()
+	m.memoryRegionMediaSources = tmp.Links.MemoryRegionMediaSources.ToStrings()
+	m.processors = tmp.Links.Processors.ToStrings()
+	m.assembly = tmp.Assembly.String()
+	m.certificates = tmp.Certificates.String()
+	m.environmentMetrics = tmp.EnvironmentMetrics.String()
+	m.log = tmp.Log.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	memory.rawData = b
+	m.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (memory *Memory) Update() error {
+func (m *Memory) Update() error {
 	readWriteFields := []string{
+		"CXL",
 		"Enabled",
+		"HealthData",
+		"Location",
 		"LocationIndicatorActive",
+		"Measurements",
+		"MemoryLocation",
 		"NonVolatileSizeLimitMiB",
 		"OperatingSpeedRangeMHz",
 		"PoisonListMaxMediaErrorRecords",
+		"PowerManagementPolicy",
+		"Regions",
+		"SecurityCapabilities",
 		"SecurityState",
+		"SecurityStates",
+		"Status",
 		"VolatileSizeLimitMiB",
 	}
 
-	return memory.UpdateFromRawData(memory, memory.rawData, readWriteFields)
+	return m.UpdateFromRawData(m, m.rawData, readWriteFields)
 }
 
 // GetMemory will get a Memory instance from the service.
@@ -582,279 +685,343 @@ func GetMemory(c common.Client, uri string) (*Memory, error) {
 
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
-func ListReferencedMemorys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
-	return common.GetCollectionObjects[Memory](c, link, queryOpts...)
+func ListReferencedMemorys(c common.Client, link string) ([]*Memory, error) {
+	return common.GetCollectionObjects[Memory](c, link)
 }
 
-// Assembly gets this memory's assembly.
-func (memory *Memory) Assembly() (*Assembly, error) {
-	if memory.assembly == "" {
-		return nil, nil
-	}
-	return GetAssembly(memory.GetClient(), memory.assembly)
+// DisableMasterPassphrase shall disable the master passphrase on the supplied region
+// provided the supplied master passphrase matches that of the region.
+// passphrase - This parameter shall contain the master passphrase for the
+// specified region.
+// regionID - This parameter shall contain the memory region ID to which to
+// disable the master passphrase.
+func (m *Memory) DisableMasterPassphrase(passphrase string, regionID string) error {
+	payload := make(map[string]any)
+	payload["Passphrase"] = passphrase
+	payload["RegionId"] = regionID
+	return m.Post(m.disableMasterPassphraseTarget, payload)
 }
 
-// Certificates gets certificates for device identity and attestation.
-func (memory *Memory) Certificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](memory.GetClient(), memory.certificates)
+// DisablePassphrase shall disable the need for passphrases on the supplied region
+// provided the supplied passphrase matches that of the region.
+// passphrase - This property shall contain the passphrase used in this action.
+// regionID - This property shall contain the memory region ID to which to
+// apply this action.
+func (m *Memory) DisablePassphrase(passphrase string, regionID string) error {
+	payload := make(map[string]any)
+	payload["Passphrase"] = passphrase
+	payload["RegionId"] = regionID
+	return m.Post(m.disablePassphraseTarget, payload)
 }
 
-// EnvironmentMetrics gets the environment metrics for this memory.
-func (memory *Memory) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if memory.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetEnvironmentMetrics(memory.GetClient(), memory.environmentMetrics)
+// FreezeSecurityState shall freeze the security state of the memory device.
+func (m *Memory) FreezeSecurityState() error {
+	payload := make(map[string]any)
+	return m.Post(m.freezeSecurityStateTarget, payload)
 }
 
-// Log gets the log service for this memory.
-func (memory *Memory) Log() (*LogService, error) {
-	if memory.log == "" {
-		return nil, nil
-	}
-	return GetLogService(memory.GetClient(), memory.log)
+// InjectPersistentPoison shall inject poison to a specific persistent memory address in
+// the memory device.
+// physicalAddress - This parameter shall contain the device persistent
+// physical address in which to perform a poison injection as a hex-encoded
+// string.
+func (m *Memory) InjectPersistentPoison(physicalAddress string) error {
+	payload := make(map[string]any)
+	payload["PhysicalAddress"] = physicalAddress
+	return m.Post(m.injectPersistentPoisonTarget, payload)
 }
 
-// Metrics gets the memory metrics.
-func (memory *Memory) Metrics() (*MemoryMetrics, error) {
-	if memory.metrics == nil {
-		return nil, nil
-	}
-	if memory.metrics.ID != "" {
-		return memory.metrics, nil
-	}
-	return GetMemoryMetrics(memory.GetClient(), memory.metrics.ODataID)
+// OverwriteUnit shall securely erase the supplied region provided the supplied
+// passphrase matches that of the given region using the NIST SP800-88 Purge:
+// Overwrite. Use the 'SecureEraseUnit' method to perform NIST SP800-88 Purge:
+// Cryptographic Erase.
+// passphrase - This property shall contain the passphrase used in this action.
+// regionID - This property shall contain the memory region ID to which to
+// apply this action.
+func (m *Memory) OverwriteUnit(passphrase string, regionID string) error {
+	payload := make(map[string]any)
+	payload["Passphrase"] = passphrase
+	payload["RegionId"] = regionID
+	return m.Post(m.overwriteUnitTarget, payload)
 }
 
-// Batteries gets the batteries that provide power to this memory device during
-// a power-loss event, such as with battery-backed NVDIMMs.
-func (memory *Memory) Batteries() ([]*Battery, error) {
-	return common.GetObjects[Battery](memory.GetClient(), memory.batteries)
+// Reset shall reset this memory device.
+// resetType - This parameter shall contain the type of reset. The service can
+// accept a request without the parameter and perform an
+// implementation-specific default reset.
+func (m *Memory) Reset(resetType common.ResetType) error {
+	payload := make(map[string]any)
+	payload["ResetType"] = resetType
+	return m.Post(m.resetTarget, payload)
 }
 
-// Chassis gets the containing chassis of this memory.
-func (memory *Memory) Chassis() (*Chassis, error) {
-	if memory.chassis == "" {
-		return nil, nil
-	}
-	return GetChassis(memory.GetClient(), memory.chassis)
-}
-
-// Endpoints gets the endpoints associated with this memory.
-func (memory *Memory) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](memory.GetClient(), memory.endpoints)
-}
-
-// MemoryMediaSources gets the memory chunks providing media for this memory.
-func (memory *Memory) MemoryMediaSources() ([]*MemoryChunks, error) {
-	return common.GetObjects[MemoryChunks](memory.GetClient(), memory.memoryMediaSources)
-}
-
-// MemoryRegionMediaSources gets the memory regions providing media for this memory.
-func (memory *Memory) MemoryRegionMediaSources() ([]*MemoryRegion, error) {
-	return common.GetObjects[MemoryRegion](memory.GetClient(), memory.memoryRegionMediaSources)
-}
-
-// Processors gets the processors associated with this memory device.
-func (memory *Memory) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](memory.GetClient(), memory.processors)
-}
-
-// DisalbeMasterPassphrase will disable the master passphrase on the supplied
-// region provided the supplied master passphrase matches that of the region.
-func (memory *Memory) DisableMasterPassphrase(passphrase, regionID string) error {
-	param := memoryParams{
-		Passphrase: passphrase,
-		RegionID:   regionID,
-	}
-	return memory.Post(memory.disableMasterPassphraseTarget, param)
-}
-
-// DisablePassphrase will disable the need for passphrases on the supplied
-// region provided the supplied passphrase matches that of the region.
-func (memory *Memory) DisablePassphrase(passphrase, regionID string) error {
-	param := memoryParams{
-		Passphrase: passphrase,
-		RegionID:   regionID,
-	}
-	return memory.Post(memory.disablePassphraseTarget, param)
-}
-
-// FreezeSecurityState will freeze the security state of the memory device.
-func (memory *Memory) FreezeSecurityState() error {
-	return memory.Post(memory.freezeSecurityStateTarget, nil)
-}
-
-// InjectPersistentPoison will inject poison to a specific persistent memory address
-// in the memory device.
-func (memory *Memory) InjectPersistentPoison(physicalAddress string) error {
-	param := struct {
-		PhysicalAddress string
-	}{
-		PhysicalAddress: physicalAddress,
-	}
-	return memory.Post(memory.injectPersistentPoisonTarget, param)
-}
-
-// OverwriteUnit will securely erase the supplied region provided the supplied
-// passphrase matches that of the given region using the NIST SP800-88 Purge: Overwrite.
-// Use the SecureEraseUnit method to perform NIST SP800-88 Purge: Cryptographic Erase.
-func (memory *Memory) OverwriteUnit(passphrase, regionID string) error {
-	param := memoryParams{
-		Passphrase: passphrase,
-		RegionID:   regionID,
-	}
-	return memory.Post(memory.overwriteUnitTarget, param)
-}
-
-// Reset resets this memory device.
-func (memory *Memory) Reset(resetType ResetType) error {
-	t := struct {
-		ResetType ResetType
-	}{ResetType: resetType}
-	return memory.Post(memory.resetTarget, t)
-}
-
-// ResetToDefaults will reset the values of writable properties in this resource
+// ResetToDefaults shall reset the values of writable properties in this resource
 // to their default values as specified by the manufacturer.
-func (memory *Memory) ResetToDefaults() error {
-	return memory.Post(memory.resetToDefaultsTarget, nil)
+func (m *Memory) ResetToDefaults() error {
+	payload := make(map[string]any)
+	return m.Post(m.resetToDefaultsTarget, payload)
 }
 
-// ScanMedia will scan the media of the memory device.
-// `length` is the length of the target region to scan in bytes from the physical address.
-// `noEventLog` is used to indicate whether events related to the media scan are not logged.
-// `physicalAddress` is the starting device physical address to scan as a hex-encoded string.
-func (memory *Memory) ScanMedia(length int, noEventLog bool, physicalAddress string) error {
-	param := struct {
-		Length          int
-		NoEventLog      bool
-		PhysicalAddress string
-	}{
-		Length:          length,
-		NoEventLog:      noEventLog,
-		PhysicalAddress: physicalAddress,
+// ScanMedia shall scan the media of the memory device.
+// length - This parameter shall contain the length of the target region to
+// scan in bytes from the PhysicalAddress parameter.
+// noEventLog - This parameter shall indicate whether events related to the
+// media scan are not logged. If not provided by the client, the value shall be
+// assumed to be 'false'.
+// physicalAddress - This parameter shall contain the starting device physical
+// address to scan as a hex-encoded string.
+func (m *Memory) ScanMedia(length int, noEventLog bool, physicalAddress string) error {
+	payload := make(map[string]any)
+	payload["Length"] = length
+	payload["NoEventLog"] = noEventLog
+	payload["PhysicalAddress"] = physicalAddress
+	return m.Post(m.scanMediaTarget, payload)
+}
+
+// SecureEraseUnit shall securely erase the supplied region provided the supplied
+// passphrase matches that of the given region using the NIST SP800-88 Purge:
+// Cryptographic Erase. Use the 'OverwriteUnit' method to perform NIST SP800-88
+// Purge: Overwrite.
+// passphrase - This property shall contain the passphrase used in this action.
+// regionID - This property shall contain the memory region ID to which to
+// apply this action.
+func (m *Memory) SecureEraseUnit(passphrase string, regionID string) error {
+	payload := make(map[string]any)
+	payload["Passphrase"] = passphrase
+	payload["RegionId"] = regionID
+	return m.Post(m.secureEraseUnitTarget, payload)
+}
+
+// SetMasterPassphrase shall set the supplied master passphrase to the supplied region.
+// passphrase - This parameter shall contain the master passphrase to set for
+// the specified region.
+// regionID - This parameter shall contain the memory region ID to which to
+// apply the master passphrase.
+func (m *Memory) SetMasterPassphrase(passphrase string, regionID string) error {
+	payload := make(map[string]any)
+	payload["Passphrase"] = passphrase
+	payload["RegionId"] = regionID
+	return m.Post(m.setMasterPassphraseTarget, payload)
+}
+
+// SetPassphrase shall apply the supplied passphrase to the supplied region.
+// passphrase - This property shall contain the passphrase used in this action.
+// regionID - This property shall contain the memory region ID to which to
+// apply this action.
+func (m *Memory) SetPassphrase(passphrase string, regionID string) error {
+	payload := make(map[string]any)
+	payload["Passphrase"] = passphrase
+	payload["RegionId"] = regionID
+	return m.Post(m.setPassphraseTarget, payload)
+}
+
+// UnlockUnit shall apply the supplied passphrase to the supplied region for
+// the purpose of unlocking the given regions.
+// passphrase - This property shall contain the passphrase required to complete
+// this action.
+// regionID - This property shall contain the memory region ID to which to
+// apply this action.
+func (m *Memory) UnlockUnit(passphrase string, regionID string) error {
+	payload := make(map[string]any)
+	payload["Passphrase"] = passphrase
+	payload["RegionId"] = regionID
+	return m.Post(m.unlockUnitTarget, payload)
+}
+
+// Batteries gets the Batteries linked resources.
+func (m *Memory) Batteries(client common.Client) ([]*Battery, error) {
+	return common.GetObjects[Battery](client, m.batteries)
+}
+
+// Chassis gets the Chassis linked resource.
+func (m *Memory) Chassis(client common.Client) (*Chassis, error) {
+	if m.chassis == "" {
+		return nil, nil
 	}
-	return memory.Post(memory.scanMediaTarget, param)
+	return common.GetObject[Chassis](client, m.chassis)
 }
 
-// SecureEraseUnit will securely erase the supplied region provided the supplied passphrase
-// matches that of the given region using the NIST SP800-88 Purge: Cryptographic Erase.
-// Use the OverwriteUnit method to perform NIST SP800-88 Purge: Overwrite.
-func (memory *Memory) SecureEraseUnit(passphrase, regionID string) error {
-	param := memoryParams{
-		Passphrase: passphrase,
-		RegionID:   regionID,
+// Endpoints gets the Endpoints linked resources.
+func (m *Memory) Endpoints(client common.Client) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](client, m.endpoints)
+}
+
+// MemoryMediaSources gets the MemoryMediaSources linked resources.
+func (m *Memory) MemoryMediaSources(client common.Client) ([]*MemoryChunks, error) {
+	return common.GetObjects[MemoryChunks](client, m.memoryMediaSources)
+}
+
+// MemoryRegionMediaSources gets the MemoryRegionMediaSources linked resources.
+func (m *Memory) MemoryRegionMediaSources(client common.Client) ([]*MemoryRegion, error) {
+	return common.GetObjects[MemoryRegion](client, m.memoryRegionMediaSources)
+}
+
+// Processors gets the Processors linked resources.
+func (m *Memory) Processors(client common.Client) ([]*Processor, error) {
+	return common.GetObjects[Processor](client, m.processors)
+}
+
+// Assembly gets the Assembly linked resource.
+func (m *Memory) Assembly(client common.Client) (*Assembly, error) {
+	if m.assembly == "" {
+		return nil, nil
 	}
-	return memory.Post(memory.secureEraseUnitTarget, param)
+	return common.GetObject[Assembly](client, m.assembly)
 }
 
-// SetMasterPassphrase will set the supplied master passphrase to the supplied region.
-func (memory *Memory) SetMasterPassphrase(passphrase, regionID string) error {
-	param := memoryParams{
-		Passphrase: passphrase,
-		RegionID:   regionID,
+// Certificates gets the Certificates collection.
+func (m *Memory) Certificates(client common.Client) ([]*Certificate, error) {
+	if m.certificates == "" {
+		return nil, nil
 	}
-	return memory.Post(memory.setMasterPassphraseTarget, param)
+	return common.GetCollectionObjects[Certificate](client, m.certificates)
 }
 
-// SetPassphrase will apply the supplied passphrase to the supplied region.
-func (memory *Memory) SetPassphrase(passphrase, regionID string) error {
-	param := memoryParams{
-		Passphrase: passphrase,
-		RegionID:   regionID,
+// EnvironmentMetrics gets the EnvironmentMetrics linked resource.
+func (m *Memory) EnvironmentMetrics(client common.Client) (*EnvironmentMetrics, error) {
+	if m.environmentMetrics == "" {
+		return nil, nil
 	}
-	return memory.Post(memory.setPassphraseTarget, param)
+	return common.GetObject[EnvironmentMetrics](client, m.environmentMetrics)
 }
 
-// UnlockUnit will apply the supplied passphrase to the supplied region for the purpose
-// of unlocking the given regions.
-func (memory *Memory) UnlockUnit(passphrase, regionID string) error {
-	param := memoryParams{
-		Passphrase: passphrase,
-		RegionID:   regionID,
+// Log gets the Log linked resource.
+func (m *Memory) Log(client common.Client) (*LogService, error) {
+	if m.log == "" {
+		return nil, nil
 	}
-	return memory.Post(memory.unlockUnitTarget, param)
+	return common.GetObject[LogService](client, m.log)
 }
 
-type memoryParams struct {
-	Passphrase string
-	RegionID   string `json:"RegionId"`
+// MemoryCXL shall contain CXL-specific properties for a memory device.
+type MemoryCXL struct {
+	// LabelStorageSizeBytes shall contain the size of the label storage area in
+	// bytes of this memory device.
+	//
+	// Version added: v1.17.0
+	LabelStorageSizeBytes int
+	// StagedNonVolatileSizeMiB shall indicate the total device non-volatile memory
+	// capacity in mebibytes. The value shall be in multiples of 256 mebibytes.
+	//
+	// Version added: v1.17.0
+	StagedNonVolatileSizeMiB int
+	// StagedVolatileSizeMiB shall indicate the total device volatile memory
+	// capacity in mebibytes staged for next activation. This value shall be in
+	// multiples of 256 mebibytes.
+	//
+	// Version added: v1.17.0
+	StagedVolatileSizeMiB int
 }
 
-// MemoryLocation shall contain properties which describe the Memory connection
+// MemoryLocation shall contain properties that describe the memory connection
 // information to sockets and memory controllers.
 type MemoryLocation struct {
-	// Channel is Channel number in which Memory is connected.
-	Channel int
-	// MemoryController is Memory controller number in which Memory is
+	// Channel shall contain the channel number to which the memory device is
 	// connected.
-	MemoryController int
-	// Slot is Slot number in which Memory is connected.
-	Slot int
-	// Socket is Socket number in which Memory is connected.
-	Socket int
+	Channel *int `json:",omitempty"`
+	// MemoryController shall contain the memory controller number to which the
+	// memory device is connected.
+	MemoryController *int `json:",omitempty"`
+	// Slot shall contain the slot number to which the memory device is connected.
+	Slot *int `json:",omitempty"`
+	// Socket shall contain the socket number to which the memory device is
+	// connected.
+	Socket *int `json:",omitempty"`
 }
 
-// PowerManagementPolicy shall contain properties which describe the power
-// management policy for the current resource.
+// PowerManagementPolicy shall contain properties that describe the power
+// management policy for this resource.
 type PowerManagementPolicy struct {
-	// AveragePowerBudgetMilliWatts is Average power budget in milli watts.
-	AveragePowerBudgetMilliWatts int
-	// MaxTDPMilliWatts is Maximum TDP in milli watts.
-	MaxTDPMilliWatts int
-	// PeakPowerBudgetMilliWatts is Peak power budget in milli watts.
-	PeakPowerBudgetMilliWatts int
-	// PolicyEnabled is Power management policy enabled status.
+	// AveragePowerBudgetMilliWatts shall contain the average power budget, in
+	// milliwatt units.
+	AveragePowerBudgetMilliWatts *int `json:",omitempty"`
+	// MaxTDPMilliWatts shall contain the maximum TDP in milliwatt units.
+	MaxTDPMilliWatts *int `json:",omitempty"`
+	// PeakPowerBudgetMilliWatts shall contain the peak power budget, in milliwatt
+	// units.
+	PeakPowerBudgetMilliWatts *int `json:",omitempty"`
+	// PolicyEnabled shall indicate whether the power management policy is enabled.
 	PolicyEnabled bool
 }
 
-// RegionSet shall describe the memory region information within a Memory entity.
+// RegionSet shall describe the memory region information within a memory
+// device.
 type RegionSet struct {
-	// MasterPassphraseEnabled shall indicate whether the master passphrase is enabled for this region.
+	// MasterPassphraseEnabled shall indicate whether the master passphrase is
+	// enabled for this region.
+	//
+	// Version added: v1.17.0
 	MasterPassphraseEnabled bool
-	// MemoryClassification is Classification of memory occupied by the given
-	// memory region.
+	// MemoryClassification shall contain the classification of memory that the
+	// memory region occupies.
 	MemoryClassification MemoryClassification
-	// OffsetMiB is Offset with in the Memory that corresponds to the
-	// starting of this memory region in MiB.
-	OffsetMiB int
-	// PassphraseEnabled shall be a boolean
-	// indicating if the passphrase is enabled for this region.
+	// OffsetMiB shall contain the offset within the memory that corresponds to the
+	// start of this memory region in MiB.
+	OffsetMiB *int `json:",omitempty"`
+	// PassphraseEnabled shall indicate whether the passphrase is enabled for this
+	// region.
+	//
+	// Version added: v1.5.0
 	PassphraseEnabled bool
-	// RegionID is Unique region ID representing a specific region within the
-	// Memory.
+	// PassphraseState shall indicate whether the state of the passphrase for this
+	// region is enabled.
+	//
+	// Deprecated: v1.5.0
+	// This property has been deprecated in favor of 'PassphraseEnabled' found
+	// within 'RegionSet'.
+	PassphraseState bool
+	// RegionId shall contain the unique region ID representing a specific region
+	// within the memory device.
 	RegionID string `json:"RegionId"`
-	// SizeMiB is Size of this memory region in MiB.
-	SizeMiB int
+	// SizeMiB shall contain the size of this memory region in MiB.
+	SizeMiB *int `json:",omitempty"`
 }
 
-// SecurityCapabilities shall contain properties which describe the security
-// capabilities of a Memory entity.
+// SecurityCapabilities shall contain properties that describe the security
+// capabilities of a memory device.
 type SecurityCapabilities struct {
-	// ConfigurationLockCapable shall indicate whether this memory supports the
-	// locking (freezing) of the configuration.
+	// ConfigurationLockCapable shall indicate whether this memory device supports
+	// the locking, or freezing, of the configuration.
+	//
+	// Version added: v1.7.0
 	ConfigurationLockCapable bool
-	// DataLockCapable shall indicate whether this memory supports the locking
-	// of data access.
+	// DataLockCapable shall indicate whether this memory device supports the
+	// locking of data access.
+	//
+	// Version added: v1.7.0
 	DataLockCapable bool
-	// MaxPassphraseCount is Maximum number of passphrases supported for this
-	// Memory.
-	MaxPassphraseCount int
-	// PassphraseCapable is Memory passphrase set capability.
+	// MaxPassphraseCount shall contain the maximum number of passphrases supported
+	// for this memory device.
+	MaxPassphraseCount *int `json:",omitempty"`
+	// PassphraseCapable shall indicate whether the memory device is passphrase
+	// capable.
 	PassphraseCapable bool
-	// PassphraseLockLimit shall be the maximum number of incorrect passphrase
-	// access attempts allowed before access to data is locked. A value of zero
-	// shall indicate that there is no limit to the number of attempts.
-	PassphraseLockLimit int
+	// PassphraseLockLimit shall contain the maximum number of incorrect passphrase
+	// access attempts allowed before access to data is locked. If 0, the number of
+	// attempts is infinite.
+	//
+	// Version added: v1.7.0
+	PassphraseLockLimit *int `json:",omitempty"`
+	// SecurityStates shall contain the security states supported by the memory
+	// device.
+	//
+	// Deprecated: v1.7.0
+	// This property has been deprecated in favor of using the individual
+	// 'PassphraseCapable', 'DataLockCapable', and 'ConfigurationLockCapable'
+	// properties.
+	SecurityStates []SecurityStates
 }
 
 // SecurityStateInfo shall contain the security states of a memory device.
 type SecurityStateInfo struct {
-	// MasterPassphraseAttemptCountReached shall indicate whether an incorrect master passphrase attempt count has been
-	// reached.
+	// MasterPassphraseAttemptCountReached shall indicate whether an incorrect
+	// master passphrase attempt count has been reached.
+	//
+	// Version added: v1.17.0
 	MasterPassphraseAttemptCountReached bool
-	// UserPassphraseAttemptCountReached shall indicate whether an incorrect user passphrase attempt count has been
-	// reached.
+	// UserPassphraseAttemptCountReached shall indicate whether an incorrect user
+	// passphrase attempt count has been reached.
+	//
+	// Version added: v1.17.0
 	UserPassphraseAttemptCountReached bool
 }

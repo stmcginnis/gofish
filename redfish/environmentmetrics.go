@@ -1,132 +1,180 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.2 - #EnvironmentMetrics.v1_5_0.EnvironmentMetrics
 
 package redfish
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// EnvironmentMetrics shall represent the environmental metrics for a Redfish implementation.
+// EnvironmentMetrics shall represent the environmental metrics for a Redfish
+// implementation.
 type EnvironmentMetrics struct {
 	common.Entity
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// AbsoluteHumidity shall contain the absolute (volumetric) humidity sensor reading, in grams per cubic meter
-	// units, for this resource. The value of the DataSourceUri property, if present, shall reference a resource of
-	// type Sensor with the ReadingType property containing the value 'AbsoluteHumidity'.
+	// AbsoluteHumidity shall contain the absolute (volumetric) humidity sensor
+	// reading, in grams per cubic meter units, for this resource. The value should
+	// reflect the humidity measured at the exterior of the containing 'Chassis'
+	// instance, or the interior of the containing 'Facility' instance. The value
+	// of the 'DataSourceUri' property, if present, shall reference a resource of
+	// type 'Sensor' with the 'ReadingType' property containing the value
+	// 'AbsoluteHumidity'.
+	//
+	// Version added: v1.2.0
 	AbsoluteHumidity SensorExcerpt
-	// Description provides a description of this resource.
-	Description string
-	// DewPointCelsius shall contain the dew point, in degree Celsius units, based on the temperature and humidity
-	// values for this resource. The value of the DataSourceUri property, if present, shall reference a resource of
-	// type Sensor with the ReadingType property containing the value 'Temperature'.
+	// AmbientTemperatureCelsius shall contain the ambient temperature, in degree
+	// Celsius units, for this resource. The ambient temperature shall be the
+	// temperature measured at a point exterior to the 'Chassis' containing this
+	// resource. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Temperature'. This property shall only be present, if
+	// supported, in resource instances subordinate to a 'Chassis' or 'CoolingUnit'
+	// resource.
+	//
+	// Version added: v1.4.0
+	AmbientTemperatureCelsius SensorExcerpt
+	// CurrentAmps shall contain the current, in ampere units, for this device. The
+	// value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Current'.
+	//
+	// Version added: v1.5.0
+	CurrentAmps SensorCurrentExcerpt
+	// DewPointCelsius shall contain the dew point, in degree Celsius units, based
+	// on the temperature and humidity values for this resource. The value of the
+	// 'DataSourceUri' property, if present, shall reference a resource of type
+	// 'Sensor' with the 'ReadingType' property containing the value 'Temperature'.
+	//
+	// Version added: v1.1.0
 	DewPointCelsius SensorExcerpt
-	// EnergyJoules shall contain the total energy, in joule units, for this resource. The value of the DataSourceUri
-	// property, if present, shall reference a resource of type Sensor with the ReadingType property containing the
-	// value 'EnergyJoules'. This property is used for reporting device-level energy consumption measurements, while
-	// EnergykWh is used for large-scale consumption measurements.
+	// EnergyJoules shall contain the total energy, in joule units, for this
+	// resource. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'EnergyJoules'. This property is used for reporting
+	// device-level energy consumption measurements, while 'EnergykWh' is used for
+	// large-scale consumption measurements.
+	//
+	// Version added: v1.2.0
 	EnergyJoules SensorExcerpt
-	// EnergykWh shall contain the total energy, in kilowatt-hour units, for this resource. The value of the
-	// DataSourceUri property, if present, shall reference a resource of type Sensor with the ReadingType property
+	// EnergykWh shall contain the total energy, in kilowatt-hour units, for this
+	// resource. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
 	// containing the value 'EnergykWh'.
 	EnergykWh SensorEnergykWhExcerpt
-	// FanSpeedsPercent shall contain the fan speeds, in percent units, for this resource. The value of the
-	// DataSourceUri property, if present, shall reference a resource of type Sensor with the ReadingType property
+	// FanSpeedsPercent shall contain the fan speeds, in percent units, for this
+	// resource. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
 	// containing the value 'Percent'.
 	FanSpeedsPercent []SensorFanArrayExcerpt
 	// FanSpeedsPercent@odata.count
 	FanSpeedsPercentCount int `json:"FanSpeedsPercent@odata.count"`
-	// HumidityPercent shall contain the humidity, in percent units, for this resource. The value of the DataSourceUri
-	// property, if present, shall reference a resource of type Sensor with the ReadingType property containing the
-	// value 'Humidity'.
+	// HumidityPercent shall contain the humidity, in percent units, for this
+	// resource. The value should reflect the humidity measured at the exterior of
+	// the containing 'Chassis' instance, or the interior of the containing
+	// 'Facility' instance. The value of the 'DataSourceUri' property, if present,
+	// shall reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Humidity'.
 	HumidityPercent SensorExcerpt
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// PowerLimitWatts shall contain the power limit control, in watt units, for this resource. The value of the
-	// DataSourceUri property, if present, shall reference a resource of type Control with the ControlType property
+	// PowerLimitWatts shall contain the power limit control, in watt units, for
+	// this resource. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Control' with the 'ControlType' property
 	// containing the value of 'Power'.
+	//
+	// Version added: v1.1.0
 	PowerLimitWatts ControlSingleExcerpt
-	// PowerLoadPercent shall contain the power load, in percent units, for this device that represents the 'Total'
-	// ElectricalContext for this device. The value of the DataSourceUri property, if present, shall reference a
-	// resource of type Sensor with the ReadingType property containing the value 'Percent'.
+	// PowerLoadPercent shall contain the power load, in percent units, for this
+	// device that represents the 'Total' 'ElectricalContext' for this device. The
+	// value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Percent'.
+	//
+	// Version added: v1.1.0
 	PowerLoadPercent SensorExcerpt
-	// PowerWatts shall contain the total power, in watt units, for this resource. The value of the DataSourceUri
-	// property, if present, shall reference a resource of type Sensor with the ReadingType property containing the
+	// PowerWatts shall contain the total power, in watt units, for this resource.
+	// The value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
 	// value 'Power'.
 	PowerWatts SensorPowerExcerpt
-	// TemperatureCelsius shall contain the temperature, in degree Celsius units, for this resource. The value of the
-	// DataSourceUri property, if present, shall reference a resource of type Sensor with the ReadingType property
+	// TemperatureCelsius shall contain the temperature, in degree Celsius units,
+	// for this resource. The value of the 'DataSourceUri' property, if present,
+	// shall reference a resource of type 'Sensor' with the 'ReadingType' property
 	// containing the value 'Temperature'.
 	TemperatureCelsius SensorExcerpt
+	// Voltage shall contain the voltage, in volt units, for this device. The value
+	// of the 'DataSourceUri' property, if present, shall reference a resource of
+	// type 'Sensor' with the 'ReadingType' property containing the value
+	// 'Voltage'.
+	//
+	// Version added: v1.5.0
+	Voltage SensorVoltageExcerpt
+	// resetMetricsTarget is the URL to send ResetMetrics requests.
+	resetMetricsTarget string
+	// resetToDefaultsTarget is the URL to send ResetToDefaults requests.
+	resetToDefaultsTarget string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	resetMetricsTarget    string
-	resetToDefaultsTarget string
 }
 
 // UnmarshalJSON unmarshals a EnvironmentMetrics object from the raw JSON.
-func (environmentmetrics *EnvironmentMetrics) UnmarshalJSON(b []byte) error {
+func (e *EnvironmentMetrics) UnmarshalJSON(b []byte) error {
 	type temp EnvironmentMetrics
-	type Actions struct {
+	type eActions struct {
 		ResetMetrics    common.ActionTarget `json:"#EnvironmentMetrics.ResetMetrics"`
 		ResetToDefaults common.ActionTarget `json:"#EnvironmentMetrics.ResetToDefaults"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions Actions
+		Actions eActions
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*environmentmetrics = EnvironmentMetrics(t.temp)
+	*e = EnvironmentMetrics(tmp.temp)
 
 	// Extract the links to other entities for later
-	environmentmetrics.resetMetricsTarget = t.Actions.ResetMetrics.Target
-	environmentmetrics.resetToDefaultsTarget = t.Actions.ResetToDefaults.Target
+	e.resetMetricsTarget = tmp.Actions.ResetMetrics.Target
+	e.resetToDefaultsTarget = tmp.Actions.ResetToDefaults.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
-	environmentmetrics.rawData = b
+	e.rawData = b
 
 	return nil
 }
 
-// ResetMetrics resets the summary metrics related to this equipment.
-func (environmentmetrics *EnvironmentMetrics) ResetMetrics() error {
-	if environmentmetrics.resetMetricsTarget == "" {
-		return fmt.Errorf("ResetMetrics is not supported by this system")
-	}
-
-	return environmentmetrics.Post(environmentmetrics.resetMetricsTarget, nil)
-}
-
-// ResetToDefaults resets the values of writable properties to factory defaults.
-func (environmentmetrics *EnvironmentMetrics) ResetToDefaults() error {
-	if environmentmetrics.resetToDefaultsTarget == "" {
-		return fmt.Errorf("ResetToDefaults is not supported by this system")
-	}
-
-	return environmentmetrics.Post(environmentmetrics.resetToDefaultsTarget, nil)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (environmentmetrics *EnvironmentMetrics) Update() error {
+func (e *EnvironmentMetrics) Update() error {
 	readWriteFields := []string{
+		"AbsoluteHumidity",
+		"AmbientTemperatureCelsius",
+		"CurrentAmps",
+		"DewPointCelsius",
+		"EnergyJoules",
+		"EnergykWh",
+		"FanSpeedsPercent",
+		"FanSpeedsPercent@odata.count",
+		"HumidityPercent",
 		"PowerLimitWatts",
+		"PowerLoadPercent",
+		"PowerWatts",
+		"TemperatureCelsius",
+		"Voltage",
 	}
 
-	return environmentmetrics.UpdateFromRawData(environmentmetrics, environmentmetrics.rawData, readWriteFields)
+	return e.UpdateFromRawData(e, e.rawData, readWriteFields)
 }
 
 // GetEnvironmentMetrics will get a EnvironmentMetrics instance from the service.
@@ -134,8 +182,22 @@ func GetEnvironmentMetrics(c common.Client, uri string) (*EnvironmentMetrics, er
 	return common.GetObject[EnvironmentMetrics](c, uri)
 }
 
-// ListReferencedEnvironmentMetrics gets the collection of EnvironmentMetrics from
+// ListReferencedEnvironmentMetricss gets the collection of EnvironmentMetrics from
 // a provided reference.
-func ListReferencedEnvironmentMetrics(c common.Client, link string) ([]*EnvironmentMetrics, error) {
+func ListReferencedEnvironmentMetricss(c common.Client, link string) ([]*EnvironmentMetrics, error) {
 	return common.GetCollectionObjects[EnvironmentMetrics](c, link)
+}
+
+// ResetMetrics shall reset any time intervals or counted values for this
+// equipment.
+func (e *EnvironmentMetrics) ResetMetrics() error {
+	payload := make(map[string]any)
+	return e.Post(e.resetMetricsTarget, payload)
+}
+
+// ResetToDefaults shall reset the values of writable properties in this resource
+// to their default values as specified by the manufacturer.
+func (e *EnvironmentMetrics) ResetToDefaults() error {
+	payload := make(map[string]any)
+	return e.Post(e.resetToDefaultsTarget, payload)
 }

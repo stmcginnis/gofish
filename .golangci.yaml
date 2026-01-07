@@ -55,6 +55,7 @@ linters:
         - dupImport
         - ifElseChain
         - octalLiteral
+        - paramTypeCombine
         - whyNoLint
         - wrapperFunc
       enabled-tags:
@@ -106,6 +107,8 @@ linters:
         text: '`(C|c)ancell.*` is a misspelling'
       - path: (.+)\.go$
         text: Error return value of `original.UnmarshalJSON` is not checked
+      - path: (.+)\.go$
+        text: Unexpected string
     paths:
       - examples
       - tools

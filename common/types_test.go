@@ -40,7 +40,7 @@ func TestPartLocationString(t *testing.T) {
 		t.Errorf("Received invalid location type: %s", result.LocationType)
 	}
 
-	if result.LocationOrdinalValue != 5 {
+	if *result.LocationOrdinalValue != 5 {
 		t.Errorf("Received invalid location ordinal value: %d", result.LocationOrdinalValue)
 	}
 }
@@ -61,7 +61,7 @@ func TestPartLocationInt(t *testing.T) {
 		t.Errorf("Received invalid location type: %s", result.LocationType)
 	}
 
-	if result.LocationOrdinalValue != 5 {
+	if *result.LocationOrdinalValue != 5 {
 		t.Errorf("Received invalid location ordinal value: %d", result.LocationOrdinalValue)
 	}
 }

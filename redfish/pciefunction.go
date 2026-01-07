@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2024.1 - #PCIeFunction.v1_6_0.PCIeFunction
 
 package redfish
 
@@ -10,204 +11,218 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// DeviceClass is the device class.
 type DeviceClass string
 
 const (
-	// UnclassifiedDeviceDeviceClass An unclassified device.
+	// UnclassifiedDeviceDeviceClass is an unclassified device.
 	UnclassifiedDeviceDeviceClass DeviceClass = "UnclassifiedDevice"
-	// MassStorageControllerDeviceClass A mass storage controller.
+	// MassStorageControllerDeviceClass is a mass storage controller.
 	MassStorageControllerDeviceClass DeviceClass = "MassStorageController"
-	// NetworkControllerDeviceClass A network controller.
+	// NetworkControllerDeviceClass is a network controller.
 	NetworkControllerDeviceClass DeviceClass = "NetworkController"
-	// DisplayControllerDeviceClass A display controller.
+	// DisplayControllerDeviceClass is a display controller.
 	DisplayControllerDeviceClass DeviceClass = "DisplayController"
-	// MultimediaControllerDeviceClass A multimedia controller.
+	// MultimediaControllerDeviceClass is a multimedia controller.
 	MultimediaControllerDeviceClass DeviceClass = "MultimediaController"
-	// MemoryControllerDeviceClass A memory controller.
+	// MemoryControllerDeviceClass is a memory controller.
 	MemoryControllerDeviceClass DeviceClass = "MemoryController"
-	// BridgeDeviceClass A bridge.
+	// BridgeDeviceClass is a bridge.
 	BridgeDeviceClass DeviceClass = "Bridge"
-	// CommunicationControllerDeviceClass A communication controller.
+	// CommunicationControllerDeviceClass is a communication controller.
 	CommunicationControllerDeviceClass DeviceClass = "CommunicationController"
-	// GenericSystemPeripheralDeviceClass A generic system peripheral.
+	// GenericSystemPeripheralDeviceClass is a generic system peripheral.
 	GenericSystemPeripheralDeviceClass DeviceClass = "GenericSystemPeripheral"
-	// InputDeviceControllerDeviceClass An input device controller.
+	// InputDeviceControllerDeviceClass is an input device controller.
 	InputDeviceControllerDeviceClass DeviceClass = "InputDeviceController"
-	// DockingStationDeviceClass A docking station.
+	// DockingStationDeviceClass is a docking station.
 	DockingStationDeviceClass DeviceClass = "DockingStation"
-	// ProcessorDeviceClass A processor.
+	// ProcessorDeviceClass is a processor.
 	ProcessorDeviceClass DeviceClass = "Processor"
-	// SerialBusControllerDeviceClass A serial bus controller.
+	// SerialBusControllerDeviceClass is a serial bus controller.
 	SerialBusControllerDeviceClass DeviceClass = "SerialBusController"
-	// WirelessControllerDeviceClass A wireless controller.
+	// WirelessControllerDeviceClass is a wireless controller.
 	WirelessControllerDeviceClass DeviceClass = "WirelessController"
-	// IntelligentControllerDeviceClass An intelligent controller.
+	// IntelligentControllerDeviceClass is an intelligent controller.
 	IntelligentControllerDeviceClass DeviceClass = "IntelligentController"
-	// SatelliteCommunicationsControllerDeviceClass A satellite
-	// communications controller.
+	// SatelliteCommunicationsControllerDeviceClass is a satellite communications
+	// controller.
 	SatelliteCommunicationsControllerDeviceClass DeviceClass = "SatelliteCommunicationsController"
-	// EncryptionControllerDeviceClass An encryption controller.
+	// EncryptionControllerDeviceClass is an encryption controller.
 	EncryptionControllerDeviceClass DeviceClass = "EncryptionController"
-	// SignalProcessingControllerDeviceClass A signal processing controller.
+	// SignalProcessingControllerDeviceClass is a signal processing controller.
 	SignalProcessingControllerDeviceClass DeviceClass = "SignalProcessingController"
-	// ProcessingAcceleratorsDeviceClass A processing accelerators.
+	// ProcessingAcceleratorsDeviceClass is a processing accelerators.
 	ProcessingAcceleratorsDeviceClass DeviceClass = "ProcessingAccelerators"
-	// NonEssentialInstrumentationDeviceClass A non-essential
-	// instrumentation.
+	// NonEssentialInstrumentationDeviceClass is a non-essential instrumentation.
 	NonEssentialInstrumentationDeviceClass DeviceClass = "NonEssentialInstrumentation"
-	// CoprocessorDeviceClass A coprocessor.
+	// CoprocessorDeviceClass is a coprocessor.
 	CoprocessorDeviceClass DeviceClass = "Coprocessor"
-	// UnassignedClassDeviceClass An unassigned class.
+	// UnassignedClassDeviceClass is an unassigned class.
 	UnassignedClassDeviceClass DeviceClass = "UnassignedClass"
-	// OtherDeviceClass A other class. The function Device Class Id needs to
-	// be verified.
+	// OtherDeviceClass Other class. The function Class Code needs to be verified.
 	OtherDeviceClass DeviceClass = "Other"
 )
 
 type FunctionProtocol string
 
 const (
-	// PCIeFunctionProtocol A standard PCIe function.
+	// PCIeFunctionProtocol is a standard PCIe function.
 	PCIeFunctionProtocol FunctionProtocol = "PCIe"
-	// CXLFunctionProtocol A PCIe function supporting CXL extensions.
+	// CXLFunctionProtocol is a PCIe function supporting CXL extensions.
 	CXLFunctionProtocol FunctionProtocol = "CXL"
 )
 
-// FunctionType is the function type.
 type FunctionType string
 
 const (
-	// PhysicalFunctionType A physical PCie function.
+	// PhysicalFunctionType is a physical PCIe function.
 	PhysicalFunctionType FunctionType = "Physical"
-	// VirtualFunctionType A virtual PCIe function.
+	// VirtualFunctionType is a virtual PCIe function.
 	VirtualFunctionType FunctionType = "Virtual"
 )
 
-// PCIeFunction is used to represent a PCIeFunction attached to a System.
+// PCIeFunction shall represent a PCIe function in a Redfish implementation.
 type PCIeFunction struct {
 	common.Entity
-
+	// BusNumber shall contain the PCIe bus number of the PCIe device function.
+	// This property shall not be present if the PCIe device function is
+	// fabric-attached or is shared with multiple systems.
+	//
+	// Version added: v1.6.0
+	BusNumber string
+	// ClassCode shall contain the PCI Class Code, Subclass, and Programming
+	// Interface of the PCIe device function in the order listed.
+	ClassCode string
+	// DeviceClass shall contain the device class of the PCIe device function, such
+	// as storage, network, or memory.
+	DeviceClass DeviceClass
+	// DeviceId shall contain the PCI Device ID of the PCIe device function with
+	// the most significant byte shown first.
+	DeviceID string `json:"DeviceId"`
+	// DeviceNumber shall contain the PCIe device number of the PCIe device
+	// function. This property shall not be present if the PCIe device function is
+	// fabric-attached or is shared with multiple systems.
+	//
+	// Version added: v1.6.0
+	DeviceNumber string
+	// Enabled shall indicate if this PCIe device function is enabled.
+	//
+	// Version added: v1.3.0
+	Enabled bool
+	// FunctionId shall contain the PCIe function number within a given PCIe
+	// device.
+	FunctionID *int `json:"FunctionId,omitempty"`
+	// FunctionNumber shall contain the PCIe function number of the PCIe device
+	// function. This property shall not be present if the PCIe device function is
+	// fabric-attached or is shared with multiple systems.
+	//
+	// Version added: v1.6.0
+	FunctionNumber string
+	// FunctionProtocol shall contain the protocol supported by this PCIe function.
+	//
+	// Version added: v1.5.0
+	FunctionProtocol FunctionProtocol
+	// FunctionType shall contain the function type of the PCIe device function
+	// such as physical or virtual.
+	FunctionType FunctionType
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// ClassCode shall be the PCI Class Code of the PCIe device function.
-	ClassCode string
-	// Description provides a description of this resource.
-	Description string
-	// DeviceClass shall be the device class of the PCIe device function such as
-	// Storage, Network, Memory etc.
-	DeviceClass DeviceClass
-	// DeviceID shall be the PCI Device ID of the PCIe device function.
-	DeviceID string
-	// FunctionID shall the PCIe device function number within a given PCIe
-	// device.
-	FunctionID int
-	// FunctionProtocol shall contain the protocol supported by this PCIe function.
-	FunctionProtocol FunctionProtocol
-	// FunctionType shall be the function type of the PCIe device function such
-	// as Physical or Virtual.
-	FunctionType FunctionType
-	// Oem shall contain the OEM extensions. All values for properties that
-	// this object contains shall conform to the Redfish Specification
-	// described requirements.
-	Oem json.RawMessage
-	// RevisionID shall be the PCI Revision ID of the PCIe device function.
-	RevisionID string
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// RevisionId shall contain the PCI Revision ID of the PCIe device function.
+	RevisionID string `json:"RevisionId"`
+	// SegmentNumber shall contain the PCIe segment number of the PCIe device
+	// function. This property shall not be present if the PCIe device function is
+	// fabric-attached or is shared with multiple systems.
+	//
+	// Version added: v1.6.0
+	SegmentNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// SubsystemID shall be the PCI Subsystem ID of the PCIe device function.
+	// SubsystemId shall contain the PCI Subsystem ID of the PCIe device function
+	// with the most significant byte shown first.
 	SubsystemID string `json:"SubsystemId"`
-	// SubsystemVendorID shall be the PCI Subsystem Vendor ID of the PCIe device
-	// function.
+	// SubsystemVendorId shall contain the PCI Subsystem Vendor ID of the PCIe
+	// device function with the most significant byte shown first.
 	SubsystemVendorID string `json:"SubsystemVendorId"`
-	// VendorID shall be the PCI Vendor ID of the PCIe device function.
+	// VendorId shall contain the PCI Vendor ID of the PCIe device function with
+	// the most significant byte shown first.
 	VendorID string `json:"VendorId"`
-
-	cxlLogicalDevice string
-	// Drives shall reference a resource of type Drive that represents the
-	// storage drives associated with this resource.
+	// cXLLogicalDevice is the URI for CXLLogicalDevice.
+	cXLLogicalDevice string
+	// drives are the URIs for Drives.
 	drives []string
-	// DrivesCount is the number of drives.
-	DrivesCount int
-	// EthernetInterfaces shall reference a resource of type EthernetInterface
-	// that represents the network interfaces associated with this resource.
+	// ethernetInterfaces are the URIs for EthernetInterfaces.
 	ethernetInterfaces []string
-	// EthernetInterfacesCount is the number of ethernet interfaces.
-	EthernetInterfacesCount int
-	// MemoryDomains shall contain an array of links to resources of type MemoryDomain that represent the memory
-	// domains associated with this PCIe function.
+	// memoryDomains are the URIs for MemoryDomains.
 	memoryDomains []string
-	// MemoryDomainsCount is the number of memory domains associated with this PCIe function.
-	MemoryDomainsCount int
-	// NetworkDeviceFunctions shall be an array of references to resources of
-	// type NetworkDeviceFunction that represents the network device functions
-	// associated with this resource.
+	// networkDeviceFunctions are the URIs for NetworkDeviceFunctions.
 	networkDeviceFunctions []string
-	// NetworkDeviceFunctionsCount is the number of network device functions.
-	NetworkDeviceFunctionsCount int
-	// PCIeDevice shall be a reference to the resource that this function is a
-	// part of and shall reference a resource of type PCIeDevice.
-	pcieDevice string
-	// Processor shall link to a resource of type Processor that represents the processor that is hosted on this PCIe
-	// function.
+	// pCIeDevice is the URI for PCIeDevice.
+	pCIeDevice string
+	// processor is the URI for Processor.
 	processor string
-	// StorageControllers shall reference a resource of type StorageController
-	// that represents the storage controllers associated with this resource.
+	// storageControllers are the URIs for StorageControllers.
 	storageControllers []string
-	// StorageControllersCount is the number of storage controllers.
-	StorageControllersCount int
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a PCIeFunction object from the raw JSON.
-func (pciefunction *PCIeFunction) UnmarshalJSON(b []byte) error {
+//
+//nolint:dupl
+func (p *PCIeFunction) UnmarshalJSON(b []byte) error {
 	type temp PCIeFunction
-
-	type links struct {
-		CXLLogicalDevice            common.Link
-		Drives                      common.Links
-		DrivesCount                 int `json:"Drives@odata.count"`
-		EthernetInterfaces          common.Links
-		EthernetInterfacesCount     int `json:"EthernetInterfaces@odata.count"`
-		MemoryDomains               common.Links
-		MemoryDomainsCount          int `json:"MemoryDomains@odata.count"`
-		NetworkDeviceFunctions      common.Links
-		NetworkDeviceFunctionsCount int `json:"NetworkDeviceFunctions@odata.count"`
-		PCIeDevice                  common.Link
-		Processor                   common.Link
-		StorageControllers          common.Links
-		StorageControllersCount     int `json:"StorageControllers@odata.count"`
+	type pLinks struct {
+		CXLLogicalDevice       common.Link  `json:"CXLLogicalDevice"`
+		Drives                 common.Links `json:"Drives"`
+		EthernetInterfaces     common.Links `json:"EthernetInterfaces"`
+		MemoryDomains          common.Links `json:"MemoryDomains"`
+		NetworkDeviceFunctions common.Links `json:"NetworkDeviceFunctions"`
+		PCIeDevice             common.Link  `json:"PCIeDevice"`
+		Processor              common.Link  `json:"Processor"`
+		StorageControllers     common.Links `json:"StorageControllers"`
 	}
-
-	var t struct {
+	var tmp struct {
 		temp
-		Links links
+		Links pLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*pciefunction = PCIeFunction(t.temp)
+	*p = PCIeFunction(tmp.temp)
 
 	// Extract the links to other entities for later
-	pciefunction.cxlLogicalDevice = t.Links.CXLLogicalDevice.String()
-	pciefunction.drives = t.Links.Drives.ToStrings()
-	pciefunction.DrivesCount = t.Links.DrivesCount
-	pciefunction.ethernetInterfaces = t.Links.EthernetInterfaces.ToStrings()
-	pciefunction.EthernetInterfacesCount = t.Links.EthernetInterfacesCount
-	pciefunction.memoryDomains = t.Links.MemoryDomains.ToStrings()
-	pciefunction.MemoryDomainsCount = t.Links.MemoryDomainsCount
-	pciefunction.networkDeviceFunctions = t.Links.NetworkDeviceFunctions.ToStrings()
-	pciefunction.NetworkDeviceFunctionsCount = t.Links.NetworkDeviceFunctionsCount
-	pciefunction.pcieDevice = t.Links.PCIeDevice.String()
-	pciefunction.processor = t.Links.Processor.String()
-	pciefunction.storageControllers = t.Links.StorageControllers.ToStrings()
-	pciefunction.StorageControllersCount = t.Links.StorageControllersCount
+	p.cXLLogicalDevice = tmp.Links.CXLLogicalDevice.String()
+	p.drives = tmp.Links.Drives.ToStrings()
+	p.ethernetInterfaces = tmp.Links.EthernetInterfaces.ToStrings()
+	p.memoryDomains = tmp.Links.MemoryDomains.ToStrings()
+	p.networkDeviceFunctions = tmp.Links.NetworkDeviceFunctions.ToStrings()
+	p.pCIeDevice = tmp.Links.PCIeDevice.String()
+	p.processor = tmp.Links.Processor.String()
+	p.storageControllers = tmp.Links.StorageControllers.ToStrings()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (p *PCIeFunction) Update() error {
+	readWriteFields := []string{
+		"Enabled",
+		"Status",
+	}
+
+	return p.UpdateFromRawData(p, p.rawData, readWriteFields)
 }
 
 // GetPCIeFunction will get a PCIeFunction instance from the service.
@@ -221,51 +236,51 @@ func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction,
 	return common.GetCollectionObjects[PCIeFunction](c, link)
 }
 
-// CXLLogicalDevice gets the CXL logical device to which this PCIe function is assigned.
-func (pciefunction *PCIeFunction) CXLLogicalDevice() (*CXLLogicalDevice, error) {
-	if pciefunction.cxlLogicalDevice == "" {
+// CXLLogicalDevice gets the CXLLogicalDevice linked resource.
+func (p *PCIeFunction) CXLLogicalDevice(client common.Client) (*CXLLogicalDevice, error) {
+	if p.cXLLogicalDevice == "" {
 		return nil, nil
 	}
-	return GetCXLLogicalDevice(pciefunction.GetClient(), pciefunction.cxlLogicalDevice)
+	return common.GetObject[CXLLogicalDevice](client, p.cXLLogicalDevice)
 }
 
-// Drives gets the PCIe function's drives.
-func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
-	return common.GetObjects[Drive](pciefunction.GetClient(), pciefunction.drives)
+// Drives gets the Drives linked resources.
+func (p *PCIeFunction) Drives(client common.Client) ([]*Drive, error) {
+	return common.GetObjects[Drive](client, p.drives)
 }
 
-// EthernetInterfaces gets the PCIe function's ethernet interfaces.
-func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, error) {
-	return common.GetObjects[EthernetInterface](pciefunction.GetClient(), pciefunction.ethernetInterfaces)
+// EthernetInterfaces gets the EthernetInterfaces linked resources.
+func (p *PCIeFunction) EthernetInterfaces(client common.Client) ([]*EthernetInterface, error) {
+	return common.GetObjects[EthernetInterface](client, p.ethernetInterfaces)
 }
 
-// MemoryDomains gets the memory domains associated with this PCIe function.
-func (pciefunction *PCIeFunction) MemoryDomains() ([]*MemoryDomain, error) {
-	return common.GetObjects[MemoryDomain](pciefunction.GetClient(), pciefunction.memoryDomains)
+// MemoryDomains gets the MemoryDomains linked resources.
+func (p *PCIeFunction) MemoryDomains(client common.Client) ([]*MemoryDomain, error) {
+	return common.GetObjects[MemoryDomain](client, p.memoryDomains)
 }
 
-// NetworkDeviceFunctions gets the PCIe function's ethernet interfaces.
-func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](pciefunction.GetClient(), pciefunction.networkDeviceFunctions)
+// NetworkDeviceFunctions gets the NetworkDeviceFunctions linked resources.
+func (p *PCIeFunction) NetworkDeviceFunctions(client common.Client) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjects[NetworkDeviceFunction](client, p.networkDeviceFunctions)
 }
 
-// PCIeDevice gets the associated PCIe device for this function.
-func (pciefunction *PCIeFunction) PCIeDevice() (*PCIeDevice, error) {
-	if pciefunction.pcieDevice == "" {
+// PCIeDevice gets the PCIeDevice linked resource.
+func (p *PCIeFunction) PCIeDevice(client common.Client) (*PCIeDevice, error) {
+	if p.pCIeDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(pciefunction.GetClient(), pciefunction.pcieDevice)
+	return common.GetObject[PCIeDevice](client, p.pCIeDevice)
 }
 
-// Processor gets the processor that is hosted on this PCIe function.
-func (pciefunction *PCIeFunction) Processor() (*Processor, error) {
-	if pciefunction.processor == "" {
+// Processor gets the Processor linked resource.
+func (p *PCIeFunction) Processor(client common.Client) (*Processor, error) {
+	if p.processor == "" {
 		return nil, nil
 	}
-	return GetProcessor(pciefunction.GetClient(), pciefunction.processor)
+	return common.GetObject[Processor](client, p.processor)
 }
 
-// StorageControllers gets the associated storage controllers.
-func (pciefunction *PCIeFunction) StorageControllers() ([]*StorageController, error) {
-	return common.GetObjects[StorageController](pciefunction.GetClient(), pciefunction.storageControllers)
+// StorageControllers gets the StorageControllers linked resources.
+func (p *PCIeFunction) StorageControllers(client common.Client) ([]*StorageController, error) {
+	return common.GetObjects[StorageController](client, p.storageControllers)
 }

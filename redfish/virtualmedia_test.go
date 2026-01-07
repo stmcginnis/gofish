@@ -89,16 +89,16 @@ func TestVirtualMedia(t *testing.T) {
 		t.Errorf("Received invalid InsertMediaActionInfo target: %s", result.insertMedia.ActionInfoTarget)
 	}
 
-	if *result.Inserted == true {
+	if *result.Inserted {
 		t.Error("Expected Inserted to be false")
 	}
 
-	if *result.WriteProtected == false {
+	if !result.WriteProtected {
 		t.Error("Expected WriteProtected to be true")
 	}
 
-	if *result.Image != "https://example.com/mygoldimage.iso" {
-		t.Errorf("Expected Image to be 'https://example.com/mygoldimage.iso', got %s", *result.Image)
+	if result.Image != "https://example.com/mygoldimage.iso" {
+		t.Errorf("Expected Image to be 'https://example.com/mygoldimage.iso', got %s", result.Image)
 	}
 
 	if result.ImageName != "mygoldimage.iso" {
@@ -117,12 +117,10 @@ func TestVirtualMediaUpdate(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
-	name := "Fred"
-	fls := false
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
-	result.UserName = &name
-	result.WriteProtected = &fls
+	result.UserName = "Fred"
+	result.WriteProtected = false
 
 	err = result.Update()
 	if err != nil {
@@ -131,7 +129,7 @@ func TestVirtualMediaUpdate(t *testing.T) {
 
 	calls := testClient.CapturedCalls()
 
-	// Проверяем, что был сделан хотя бы один вызов
+	// We check that at least one call was made
 	if len(calls) == 0 {
 		t.Errorf("No calls were captured")
 	}
@@ -210,7 +208,7 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 	result.SetClient(testClient)
 
 	Inserted := true
-	MediaType := CDMediaType
+	MediaType := CDVirtualMediaType
 	Password := "test1234"
 	UserName := "root"
 	WriteProtected := true
@@ -258,7 +256,7 @@ func TestVirtualMediaActionInfo(t *testing.T) {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	want := map[string]interface{}{
+	want := map[string]any{
 		"Id":   "InsertMedia",
 		"Name": "InsertMedia",
 		"Parameters": []ActionInfoParameter{
@@ -277,7 +275,7 @@ func TestVirtualMediaActionInfo(t *testing.T) {
 	}
 
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
 				&http.Response{
 					StatusCode: http.StatusOK,

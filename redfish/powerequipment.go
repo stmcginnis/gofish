@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2021.3 - #PowerEquipment.v1_2_3.PowerEquipment
 
 package redfish
 
@@ -10,127 +11,158 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// PowerEquipment shall be used to represent
-// the set of power equipment for a Redfish implementation.
+// PowerEquipment shall represent the set of power equipment for a Redfish
+// implementation.
 type PowerEquipment struct {
 	common.Entity
-
+	// ElectricalBuses shall contain a link to a resource collection of type
+	// 'PowerDistributionCollection' that contains a set of electrical bus units.
+	//
+	// Version added: v1.2.0
+	electricalBuses string
+	// FloorPDUs shall contain a link to a resource collection of type
+	// 'PowerDistributionCollection' that contains a set of floor power
+	// distribution units.
+	floorPDUs string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-
-	// A link to a collection of electrical buses.
-	electricalBuses string
-	// A link to a collection of floor power distribution units.
-	floorPDUs string
-	// A link to a collection of power shelves.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PowerShelves shall contain a link to a resource collection of type
+	// 'PowerDistributionCollection' that contains a set of power shelves.
+	//
+	// Version added: v1.1.0
 	powerShelves string
-	// A link to a collection of rack-level power distribution units.
+	// RackPDUs shall contain a link to a resource collection of type
+	// 'PowerDistributionCollection' that contains a set of rack-level power
+	// distribution units.
 	rackPDUs string
-	// The status and health of the resource and its subordinate or dependent resources.
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// A link to a collection of switchgear.
+	// Switchgear shall contain a link to a resource collection of type
+	// 'PowerDistributionCollection' that contains a set of switchgear.
 	switchgear string
-	// A link to a collection of transfer switches.
+	// TransferSwitches shall contain a link to a resource collection of type
+	// 'PowerDistributionCollection' that contains a set of transfer switches.
 	transferSwitches string
-
-	// Links section
-	// An array of links to the managers responsible for managing this power equipment.
-	managedBy      []string
-	ManagedByCount int
-	// OemLinks are all OEM data under link section
-	OemLinks json.RawMessage
-
-	// Actions section
-	// OemActions contains all the vendor specific actions.
-	// It is vendor responsibility to parse this field accordingly
-	OemActions json.RawMessage
+	// managedBy are the URIs for ManagedBy.
+	managedBy []string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerEquipment object from the raw JSON.
-func (powerEquipment *PowerEquipment) UnmarshalJSON(b []byte) error {
+func (p *PowerEquipment) UnmarshalJSON(b []byte) error {
 	type temp PowerEquipment
-	type linkReference struct {
-		ManagedBy      common.Links
-		ManagedByCount int `json:"ManagedBy@odata.count"`
-		Oem            json.RawMessage
+	type pLinks struct {
+		ManagedBy common.Links `json:"ManagedBy"`
 	}
-	type actions struct {
-		Oem json.RawMessage // OEM actions will be stored here
-	}
-	var t struct {
+	var tmp struct {
 		temp
-		ElectricalBuses  common.Link
-		FloorPDUs        common.Link
-		PowerShelves     common.Link
-		RackPDUs         common.Link
-		Switchgear       common.Link
-		TransferSwitches common.Link
-		Links            linkReference
-		Actions          actions
+		Links            pLinks
+		ElectricalBuses  common.Link `json:"electricalBuses"`
+		FloorPDUs        common.Link `json:"floorPDUs"`
+		PowerShelves     common.Link `json:"powerShelves"`
+		RackPDUs         common.Link `json:"rackPDUs"`
+		Switchgear       common.Link `json:"switchgear"`
+		TransferSwitches common.Link `json:"transferSwitches"`
 	}
 
-	if err := json.Unmarshal(b, &t); err != nil {
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
 		return err
 	}
 
+	*p = PowerEquipment(tmp.temp)
+
 	// Extract the links to other entities for later
-	*powerEquipment = PowerEquipment(t.temp)
-	powerEquipment.electricalBuses = t.ElectricalBuses.String()
-	powerEquipment.floorPDUs = t.FloorPDUs.String()
-	powerEquipment.powerShelves = t.PowerShelves.String()
-	powerEquipment.rackPDUs = t.RackPDUs.String()
-	powerEquipment.switchgear = t.Switchgear.String()
-	powerEquipment.transferSwitches = t.TransferSwitches.String()
+	p.managedBy = tmp.Links.ManagedBy.ToStrings()
+	p.electricalBuses = tmp.ElectricalBuses.String()
+	p.floorPDUs = tmp.FloorPDUs.String()
+	p.powerShelves = tmp.PowerShelves.String()
+	p.rackPDUs = tmp.RackPDUs.String()
+	p.switchgear = tmp.Switchgear.String()
+	p.transferSwitches = tmp.TransferSwitches.String()
 
-	powerEquipment.managedBy = t.Links.ManagedBy.ToStrings()
-	powerEquipment.ManagedByCount = t.Links.ManagedByCount
-	powerEquipment.OemLinks = t.Links.Oem
-
-	powerEquipment.OemActions = t.Actions.Oem
+	// This is a read/write object, so we need to save the raw object data for later
+	p.rawData = b
 
 	return nil
 }
 
-// GetPowerEquipment will get a PowerEquipment instance from the Redfish service.
+// Update commits updates to this object's properties to the running system.
+func (p *PowerEquipment) Update() error {
+	readWriteFields := []string{
+		"Status",
+	}
+
+	return p.UpdateFromRawData(p, p.rawData, readWriteFields)
+}
+
+// GetPowerEquipment will get a PowerEquipment instance from the service.
 func GetPowerEquipment(c common.Client, uri string) (*PowerEquipment, error) {
 	return common.GetObject[PowerEquipment](c, uri)
 }
 
-// ManagedBy gets the collection of managers of this PowerEquipment
-func (powerEquipment *PowerEquipment) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](powerEquipment.GetClient(), powerEquipment.managedBy)
+// ListReferencedPowerEquipments gets the collection of PowerEquipment from
+// a provided reference.
+func ListReferencedPowerEquipments(c common.Client, link string) ([]*PowerEquipment, error) {
+	return common.GetCollectionObjects[PowerEquipment](c, link)
 }
 
-// ElectricalBuses gets the collection that contains a set of electrical bus units.
-func (powerEquipment *PowerEquipment) ElectricalBuses() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.electricalBuses)
+// ManagedBy gets the ManagedBy linked resources.
+func (p *PowerEquipment) ManagedBy(client common.Client) ([]*Manager, error) {
+	return common.GetObjects[Manager](client, p.managedBy)
 }
 
-// FloorPDUs gets the collection that contains a set of floor power distribution units.
-func (powerEquipment *PowerEquipment) FloorPDUs() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.floorPDUs)
+// ElectricalBuses gets the ElectricalBuses collection.
+func (p *PowerEquipment) ElectricalBuses(client common.Client) ([]*PowerDistribution, error) {
+	if p.electricalBuses == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerDistribution](client, p.electricalBuses)
 }
 
-// PowerShelves gets the collection that contains a set of power shelves.
-func (powerEquipment *PowerEquipment) PowerShelves() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.powerShelves)
+// FloorPDUs gets the FloorPDUs collection.
+func (p *PowerEquipment) FloorPDUs(client common.Client) ([]*PowerDistribution, error) {
+	if p.floorPDUs == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerDistribution](client, p.floorPDUs)
 }
 
-// RackPDUs gets the collection that contains a set of rack-level power distribution units.
-func (powerEquipment *PowerEquipment) RackPDUs() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.rackPDUs)
+// PowerShelves gets the PowerShelves collection.
+func (p *PowerEquipment) PowerShelves(client common.Client) ([]*PowerDistribution, error) {
+	if p.powerShelves == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerDistribution](client, p.powerShelves)
 }
 
-// Switchgear gets the collection that contains a set of switchgear.
-func (powerEquipment *PowerEquipment) Switchgear() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.switchgear)
+// RackPDUs gets the RackPDUs collection.
+func (p *PowerEquipment) RackPDUs(client common.Client) ([]*PowerDistribution, error) {
+	if p.rackPDUs == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerDistribution](client, p.rackPDUs)
 }
 
-// TransferSwitches gets the collection that contains a set of transfer switches.
-func (powerEquipment *PowerEquipment) TransferSwitches() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.transferSwitches)
+// Switchgear gets the Switchgear collection.
+func (p *PowerEquipment) Switchgear(client common.Client) ([]*PowerDistribution, error) {
+	if p.switchgear == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerDistribution](client, p.switchgear)
+}
+
+// TransferSwitches gets the TransferSwitches collection.
+func (p *PowerEquipment) TransferSwitches(client common.Client) ([]*PowerDistribution, error) {
+	if p.transferSwitches == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerDistribution](client, p.transferSwitches)
 }

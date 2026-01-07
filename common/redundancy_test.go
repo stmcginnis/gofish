@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package redfish
+package common
 
 import (
 	"encoding/json"
 	"strings"
 	"testing"
-
-	"github.com/stmcginnis/gofish/common"
 )
 
 var redundancyBody = `{
@@ -49,7 +47,7 @@ func TestRedundancy(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.MaxNumSupported != 2 {
+	if *result.MaxNumSupported != 2 {
 		t.Errorf("Invalid MaxNumSupported: %d", result.MaxNumSupported)
 	}
 
@@ -67,7 +65,7 @@ func TestRedundancyUpdate(t *testing.T) {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	testClient := &common.TestClient{}
+	testClient := &TestClient{}
 	result.SetClient(testClient)
 
 	result.Mode = NotRedundantRedundancyMode

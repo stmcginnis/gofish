@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2024.4 - #Session.v1_8_0.Session
 
 package redfish
 
@@ -11,113 +12,159 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// SessionTypes is the type of session.
 type SessionTypes string
 
 const (
-	// HostConsoleSessionTypes shall indicate the session is the host's console, which could be connected through
-	// Telnet, SSH, or another protocol. If this session is terminated or deleted, the service shall close the
-	// connection for the respective host console session.
+	// HostConsoleSessionTypes shall indicate the session is the host's console,
+	// which could be connected through Telnet, SSH, or another protocol. If this
+	// session is terminated or deleted, the service shall close the connection for
+	// the respective host console session.
 	HostConsoleSessionTypes SessionTypes = "HostConsole"
-	// ManagerConsoleSessionTypes shall indicate the session is the manager's console, which could be connected through
-	// Telnet, SSH, SM CLP, or another protocol. If this session is terminated or deleted, the service shall close the
-	// connection for the respective manager console session.
+	// ManagerConsoleSessionTypes shall indicate the session is the manager's
+	// console, which could be connected through Telnet, SSH, SM CLP, or another
+	// protocol. If this session is terminated or deleted, the service shall close
+	// the connection for the respective manager console session.
 	ManagerConsoleSessionTypes SessionTypes = "ManagerConsole"
-	// IPMISessionTypes shall indicate the session is an Intelligent Platform Management Interface session. If this
-	// session is terminated or deleted, the service shall close the connection for the respective IPMI session.
+	// IPMISessionTypes shall indicate the session is an Intelligent Platform
+	// Management Interface session. If this session is terminated or deleted, the
+	// service shall close the connection for the respective IPMI session.
 	IPMISessionTypes SessionTypes = "IPMI"
-	// KVMIPSessionTypes shall indicate the session is a Keyboard-Video-Mouse over IP session. If this session is
-	// terminated or deleted, the service shall close the connection for the respective KVM-IP session.
+	// KVMIPSessionTypes shall indicate the session is a Keyboard-Video-Mouse over
+	// IP session. If this session is terminated or deleted, the service shall
+	// close the connection for the respective KVM-IP session.
 	KVMIPSessionTypes SessionTypes = "KVMIP"
-	// OEMSessionTypes shall indicate the session is an OEM-specific session and is further described by the
-	// OemSessionType property.
+	// OEMSessionTypes shall indicate the session is an OEM-specific session and is
+	// further described by the 'OemSessionType' property.
 	OEMSessionTypes SessionTypes = "OEM"
-	// RedfishSessionTypes shall indicate the session is a Redfish session defined by the 'Redfish session login
-	// authentication' clause of the Redfish Specification. If this session is terminated or deleted, the service shall
+	// RedfishSessionTypes shall indicate the session is a Redfish session defined
+	// by the 'Redfish session login authentication' clause of the Redfish
+	// Specification. If this session is terminated or deleted, the service shall
 	// invalidate the respective session token.
 	RedfishSessionTypes SessionTypes = "Redfish"
-	// VirtualMediaSessionTypes shall indicate the session is a virtual media session. If this session is terminated or
-	// deleted, the service shall close the connection for the respective virtual media session and make the media
+	// VirtualMediaSessionTypes shall indicate the session is a virtual media
+	// session. If this session is terminated or deleted, the service shall close
+	// the connection for the respective virtual media session and make the media
 	// inaccessible to the host.
 	VirtualMediaSessionTypes SessionTypes = "VirtualMedia"
-	// WebUISessionTypes shall indicate the session is a non-Redfish web user interface session. If this session is
-	// terminated or deleted, the service shall invalidate the respective session token.
+	// WebUISessionTypes shall indicate the session is a non-Redfish web user
+	// interface session. If this session is terminated or deleted, the service
+	// shall invalidate the respective session token.
 	WebUISessionTypes SessionTypes = "WebUI"
-	// OutboundConnectionSessionTypes shall indicate the session is an outbound connection defined by the 'Outbound
-	// connections' clause of the Redfish Specification. The 'OutboundConnection' property inside the 'Links' property
-	// shall contain the link to the outbound connection configuration. If this session is terminated or deleted, the
-	// service shall disable the associated 'OutboundConnection' resource.
+	// OutboundConnectionSessionTypes shall indicate the session is an outbound
+	// connection defined by the 'Outbound connections' clause of the Redfish
+	// Specification. The 'OutboundConnection' property inside the 'Links' property
+	// shall contain the link to the outbound connection configuration. If this
+	// session is terminated or deleted, the service shall disable the associated
+	// 'OutboundConnection' resource.
 	OutboundConnectionSessionTypes SessionTypes = "OutboundConnection"
 )
 
-// Session describes a single connection (session) between a client and a
-// Redfish service instance.
+// Session shall represent a session for a Redfish implementation.
 type Session struct {
 	common.Entity
-
+	// ClientOriginIPAddress shall contain the IP address of the client that
+	// created the session.
+	//
+	// Version added: v1.3.0
+	ClientOriginIPAddress string
+	// Context shall contain a client-supplied context that remains with the
+	// session through the session's lifetime.
+	//
+	// Version added: v1.5.0
+	Context string
+	// CreatedTime shall contain the date and time when the session was created.
+	//
+	// Version added: v1.4.0
+	CreatedTime string
+	// ExpirationTime shall contain the date and time when the session expires
+	// regardless of session activity. The service shall delete this resource when
+	// the expiration time is reached. If this property is not present, the session
+	// does not expire based on an absolute time.
+	//
+	// Version added: v1.8.0
+	ExpirationTime string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// ClientOriginIPAddress shall contain the IP address of the client that created the session.
-	ClientOriginIPAddress string
-	// Context shall contain a client-supplied context that remains with the session through the session's lifetime.
-	Context string
-	// CreatedTime shall contain the date and time when the session was created.
-	CreatedTime string
-	// Description provides a description of this resource.
-	Description string
-	// OemSessionType is used to report the OEM-specific session type. Thus,
-	// this property shall represent the type of OEM session that is
-	// currently active.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OemSessionType shall contain the OEM-specific session type that is currently
+	// active if 'SessionType' contains 'OEM'.
+	//
+	// Version added: v1.2.0
 	OemSessionType string
-	// Password shall be the password for this session. The value shall be null
-	// for GET requests.
+	// Password shall contain the password for this session. The value shall be
+	// 'null' in responses. When creating a session through a Redfish host
+	// interface using an 'AuthNone' role, the property shall contain an empty
+	// string in the request body.
 	Password string
-	// Roles shall contain the Redfish roles that contain the privileges of this session.
+	// Roles shall contain the Redfish roles that contain the privileges of this
+	// session.
+	//
+	// Version added: v1.7.0
 	Roles []string
 	// SessionType shall represent the type of session that is currently active.
+	//
+	// Version added: v1.2.0
 	SessionType SessionTypes
-	// Token shall contain the multi-factor authentication token for this session. The value shall be 'null' in
-	// responses.
+	// Token shall contain the multi-factor authentication token for this session.
+	// The value shall be 'null' in responses.
+	//
+	// Version added: v1.6.0
 	Token string
-	// UserName shall be the UserName that matches a registered account
-	// identified by a ManagerAccount resource registered with the Account
-	// Service.
+	// UserName shall contain the username that matches an account recognized by
+	// the account service. When a creating a session through a Redfish host
+	// interface using an 'AuthNone' role, the property shall contain an empty
+	// string in the request body.
 	UserName string
-
+	// outboundConnection is the URI for OutboundConnection.
 	outboundConnection string
 }
 
 // UnmarshalJSON unmarshals a Session object from the raw JSON.
-func (session *Session) UnmarshalJSON(b []byte) error {
+func (s *Session) UnmarshalJSON(b []byte) error {
 	type temp Session
-	var t struct {
+	type sLinks struct {
+		OutboundConnection common.Link `json:"OutboundConnection"`
+	}
+	var tmp struct {
 		temp
-		Links struct {
-			OutboundConnection common.Link
-		}
+		Links sLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*session = Session(t.temp)
+	*s = Session(tmp.temp)
 
 	// Extract the links to other entities for later
-	session.outboundConnection = t.Links.OutboundConnection.String()
+	s.outboundConnection = tmp.Links.OutboundConnection.String()
 
 	return nil
 }
 
-// OutboundConnection gets the outbound connection associated with this session.
-func (session *Session) OutboundConnection() (*OutboundConnection, error) {
-	if session.outboundConnection == "" {
+// GetSession will get a Session instance from the service.
+func GetSession(c common.Client, uri string) (*Session, error) {
+	return common.GetObject[Session](c, uri)
+}
+
+// ListReferencedSessions gets the collection of Session from
+// a provided reference.
+func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
+	return common.GetCollectionObjects[Session](c, link)
+}
+
+// OutboundConnection gets the OutboundConnection linked resource.
+func (s *Session) OutboundConnection(client common.Client) (*OutboundConnection, error) {
+	if s.outboundConnection == "" {
 		return nil, nil
 	}
-	return GetOutboundConnection(session.GetClient(), session.outboundConnection)
+	return common.GetObject[OutboundConnection](client, s.outboundConnection)
 }
 
 // AuthToken contains the authentication and session information.
@@ -166,14 +213,4 @@ func DeleteSession(c common.Client, sessionURL string) (err error) {
 		return err
 	}
 	return nil
-}
-
-// GetSession will get a Session instance from the Redfish service.
-func GetSession(c common.Client, uri string) (*Session, error) {
-	return common.GetObject[Session](c, uri)
-}
-
-// ListReferencedSessions gets the collection of Sessions
-func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
-	return common.GetCollectionObjects[Session](c, link)
 }

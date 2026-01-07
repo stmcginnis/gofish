@@ -59,7 +59,7 @@ func TestSimpleStorage(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.Devices[0].CapacityBytes != 549755813888 {
+	if *result.Devices[0].CapacityBytes != 549755813888 {
 		t.Errorf("Invalid device capacity: %d", result.Devices[0].CapacityBytes)
 	}
 

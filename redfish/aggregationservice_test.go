@@ -86,7 +86,7 @@ func TestAggregationServiceReset(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.Reset(5, 10, PowerCycleResetType, []string{"/link/1", "/link/2"})
+	err = result.Reset(5, 10, common.PowerCycleResetType, []string{"/link/1", "/link/2"})
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}

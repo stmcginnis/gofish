@@ -130,7 +130,7 @@ func TestSensorUnmarshalJSON(t *testing.T) {
 		if *sensor.ReadingRangeMin != 0 {
 			t.Errorf("Unexpected ReadingRangeMin: %v", *sensor.ReadingRangeMin)
 		}
-		if sensor.ReadingType != ReadingTypeTemperature {
+		if sensor.ReadingType != TemperatureReadingType {
 			t.Errorf("Unexpected ReadingType: %s", sensor.ReadingType)
 		}
 	})
@@ -145,16 +145,16 @@ func TestSensorUnmarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Check thresholds", func(t *testing.T) {
-		if sensor.Thresholds.LowerCaution == nil || *sensor.Thresholds.LowerCaution.Reading != 5 {
+		if *sensor.Thresholds.LowerCaution.Reading != 5 {
 			t.Error("LowerCaution threshold not parsed correctly")
 		}
-		if sensor.Thresholds.LowerCritical == nil || *sensor.Thresholds.LowerCritical.Reading != 0 {
+		if *sensor.Thresholds.LowerCritical.Reading != 0 {
 			t.Error("LowerCritical threshold not parsed correctly")
 		}
-		if sensor.Thresholds.UpperCaution == nil || *sensor.Thresholds.UpperCaution.Reading != 98 {
+		if *sensor.Thresholds.UpperCaution.Reading != 98 {
 			t.Error("UpperCaution threshold not parsed correctly")
 		}
-		if sensor.Thresholds.UpperCritical == nil || *sensor.Thresholds.UpperCritical.Reading != 103 {
+		if *sensor.Thresholds.UpperCritical.Reading != 103 {
 			t.Error("UpperCritical threshold not parsed correctly")
 		}
 	})
@@ -177,10 +177,10 @@ func TestSensorThresholds(t *testing.T) {
 			}}`,
 			wantErr: false,
 			check: func(s *Sensor) bool {
-				return s.Thresholds.LowerCaution != nil &&
-					s.Thresholds.LowerCritical != nil &&
-					s.Thresholds.UpperCaution != nil &&
-					s.Thresholds.UpperCritical != nil
+				return s.Thresholds.LowerCaution.Reading != nil &&
+					s.Thresholds.LowerCritical.Reading != nil &&
+					s.Thresholds.UpperCaution.Reading != nil &&
+					s.Thresholds.UpperCritical.Reading != nil
 			},
 		},
 		{
@@ -188,10 +188,10 @@ func TestSensorThresholds(t *testing.T) {
 			json:    `{}`,
 			wantErr: false,
 			check: func(s *Sensor) bool {
-				return s.Thresholds.LowerCaution == nil &&
-					s.Thresholds.LowerCritical == nil &&
-					s.Thresholds.UpperCaution == nil &&
-					s.Thresholds.UpperCritical == nil
+				return s.Thresholds.LowerCaution.Reading == nil &&
+					s.Thresholds.LowerCritical.Reading == nil &&
+					s.Thresholds.UpperCaution.Reading == nil &&
+					s.Thresholds.UpperCritical.Reading == nil
 			},
 		},
 		{
@@ -202,10 +202,10 @@ func TestSensorThresholds(t *testing.T) {
 			}}`,
 			wantErr: false,
 			check: func(s *Sensor) bool {
-				return s.Thresholds.LowerCaution == nil &&
-					s.Thresholds.LowerCritical == nil &&
-					s.Thresholds.UpperCaution != nil &&
-					s.Thresholds.UpperCritical != nil
+				return s.Thresholds.LowerCaution.Reading == nil &&
+					s.Thresholds.LowerCritical.Reading == nil &&
+					s.Thresholds.UpperCaution.Reading != nil &&
+					s.Thresholds.UpperCritical.Reading != nil
 			},
 		},
 	}
@@ -233,17 +233,17 @@ func TestSensorReadingTypes(t *testing.T) {
 	}{
 		{
 			json:      `{"ReadingType": "Temperature", "Reading": 23.5}`,
-			wantType:  ReadingTypeTemperature,
+			wantType:  TemperatureReadingType,
 			wantValue: 23.5,
 		},
 		{
 			json:      `{"ReadingType": "Voltage", "Reading": 12.2}`,
-			wantType:  ReadingTypeVoltage,
+			wantType:  VoltageReadingType,
 			wantValue: 12.2,
 		},
 		{
 			json:      `{"ReadingType": "Power", "Reading": 150.75}`,
-			wantType:  ReadingTypePower,
+			wantType:  PowerReadingType,
 			wantValue: 150.75,
 		},
 	}
@@ -345,23 +345,23 @@ func TestPowerSensorUnmarshalJSON(t *testing.T) {
 		if *sensor.ReadingRangeMin != 0 {
 			t.Errorf("Unexpected min range: %v", *sensor.ReadingRangeMin)
 		}
-		if sensor.ReadingType != ReadingTypePower {
+		if sensor.ReadingType != PowerReadingType {
 			t.Errorf("Expected Power reading type, got: %s", sensor.ReadingType)
 		}
 	})
 
 	t.Run("Check power sensor thresholds", func(t *testing.T) {
-		if sensor.Thresholds.UpperCaution == nil || *sensor.Thresholds.UpperCaution.Reading != 300 {
+		if *sensor.Thresholds.UpperCaution.Reading != 300 {
 			t.Error("UpperCaution threshold not parsed correctly")
 		}
-		if sensor.Thresholds.UpperCritical == nil || *sensor.Thresholds.UpperCritical.Reading != 300 {
+		if *sensor.Thresholds.UpperCritical.Reading != 300 {
 			t.Error("UpperCritical threshold not parsed correctly")
 		}
 		// Verify lower thresholds are nil for power sensor
-		if sensor.Thresholds.LowerCaution != nil {
+		if sensor.Thresholds.LowerCaution.Reading != nil {
 			t.Error("LowerCaution threshold should be nil for power sensor")
 		}
-		if sensor.Thresholds.LowerCritical != nil {
+		if sensor.Thresholds.LowerCritical.Reading != nil {
 			t.Error("LowerCritical threshold should be nil for power sensor")
 		}
 	})
@@ -441,7 +441,7 @@ func TestPowerSensorEdgeCases(t *testing.T) {
 			name: "Missing thresholds",
 			json: `{"ReadingType": "Power"}`,
 			check: func(t *testing.T, s *Sensor) {
-				if s.Thresholds.UpperCaution != nil {
+				if s.Thresholds.UpperCaution.Reading != nil {
 					t.Error("UpperCaution should be nil when missing")
 				}
 			},

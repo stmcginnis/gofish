@@ -98,18 +98,21 @@ func FromManager(manager *redfish.Manager) (*Manager, error) {
 		Manager: *manager,
 	}
 
-	var t struct {
-		ImportSystemConfiguration struct {
-			Target string `json:"target,omitempty"`
-		} `json:"#OemManager.ImportSystemConfiguration,omitempty"`
+	type oemActions struct {
+		ImportSystemConfiguration common.ActionTarget `json:"#OemManager.ImportSystemConfiguration,omitempty"`
+	}
+	var tmp struct {
+		Actions struct {
+			Oem oemActions
+		}
 	}
 
-	err := json.Unmarshal(manager.OemActions, &t)
+	err := json.Unmarshal(manager.RawData, &tmp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal Dell OEM manager actions: %w", err)
 	}
 
-	m.importSystemConfigTarget = t.ImportSystemConfiguration.Target
+	m.importSystemConfigTarget = tmp.Actions.Oem.ImportSystemConfiguration.Target
 
 	return &m, nil
 }

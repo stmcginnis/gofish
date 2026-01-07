@@ -206,7 +206,7 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodPost: {
 				// defining the custom return for the first POST operation
 				&http.Response{
@@ -230,7 +230,7 @@ func TestEventServiceCreateEventSubscription(t *testing.T) {
 	result.SetClient(testClient)
 
 	validDestinationURI := "https://myeventreceiver/eventreceiver"
-	validEventTypes := []EventType{AlertEventType}
+	validEventTypes := []common.EventType{common.AlertEventType}
 	validCustomHeader := map[string]string{
 		"Header": "HeaderValue"}
 	validDestinationProtocol := RedfishEventDestinationProtocol
@@ -304,7 +304,7 @@ func TestEventServiceCreateEventSubscriptionInstance(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodPost: {
 				// defining the custom return for the first POST operation
 				&http.Response{
@@ -394,7 +394,7 @@ func TestEventServiceDeleteEventSubscription(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodDelete: {
 				// defining the custom return for the
 				// first DELETE operation
@@ -424,7 +424,7 @@ func TestEventServiceGetEventSubscription(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
 				// defining the custom return for the first GET operation
 				&http.Response{
@@ -462,7 +462,7 @@ func TestEventServiceGetEventSubscriptions(t *testing.T) {
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
 				// defining the custom return for the first GET operation
 				&http.Response{
@@ -515,7 +515,7 @@ func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing
 
 	// create the custom test client
 	testClient := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodPost: {
 				// defining the custom return for the first POST operation
 				&http.Response{
@@ -539,7 +539,7 @@ func TestEventServiceCreateEventSubscriptionWithoutOptionalParameters(t *testing
 	result.SetClient(testClient)
 
 	validDestinationURI := "https://myeventreceiver/eventreceiver"
-	validEventTypes := []EventType{AlertEventType}
+	validEventTypes := []common.EventType{common.AlertEventType}
 	validDestinationProtocol := RedfishEventDestinationProtocol
 	validContext := "Public"
 
@@ -599,7 +599,7 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 	}
 
 	validDestinationURI := "https://myeventreceiver/eventreceiver"
-	validEventTypes := []EventType{AlertEventType}
+	validEventTypes := []common.EventType{common.AlertEventType}
 	validDestinationProtocol := RedfishEventDestinationProtocol
 	validContext := "Public"
 
@@ -666,7 +666,7 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 	// create event subscription empty event type
 	_, err = result.CreateEventSubscription(
 		validDestinationURI,
-		[]EventType{},
+		[]common.EventType{},
 		nil,
 		validDestinationProtocol,
 		validContext,
@@ -693,7 +693,7 @@ func TestEventServiceCreateEventSubscriptionInputParametersValidation(t *testing
 
 	// create event subscription empty
 	// subscription link in the event service
-	result.Subscriptions = ""
+	result.SubscriptionsLink = ""
 	_, err = result.CreateEventSubscription(
 		validDestinationURI,
 		validEventTypes,
@@ -760,7 +760,7 @@ func TestEventServiceGetEventSubscriptionsEmptySubscriptionsLink(t *testing.T) {
 	}
 
 	// get event subscriptions with empty subscription link
-	result.Subscriptions = ""
+	result.SubscriptionsLink = ""
 	_, err = result.GetEventSubscriptions()
 
 	// validate the returned error

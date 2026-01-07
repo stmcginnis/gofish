@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.1 - #SecureBoot.v1_1_2.SecureBoot
 
 package redfish
 
@@ -10,107 +11,112 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// ResetKeysType is method for resetting keys.
 type ResetKeysType string
 
 const (
-	// ResetAllKeysToDefaultResetKeysType Reset the content of all UEFI
-	// Secure Boot key databases (PK, KEK, DB, DBX) to their default values.
+	// ResetAllKeysToDefaultResetKeysType Reset the contents of all UEFI Secure
+	// Boot key databases, including the PK key database, to the default values.
 	ResetAllKeysToDefaultResetKeysType ResetKeysType = "ResetAllKeysToDefault"
-	// DeleteAllKeysResetKeysType Delete the content of all UEFI Secure Boot
-	// key databases (PK, KEK, DB, DBX). This puts the system in Setup Mode.
+	// DeleteAllKeysResetKeysType Delete the contents of all UEFI Secure Boot key
+	// databases, including the PK key database. This puts the system in Setup
+	// Mode.
 	DeleteAllKeysResetKeysType ResetKeysType = "DeleteAllKeys"
-	// DeletePKResetKeysType Delete the content of the PK UEFI Secure Boot
+	// DeletePKResetKeysType Delete the contents of the PK UEFI Secure Boot
 	// database. This puts the system in Setup Mode.
 	DeletePKResetKeysType ResetKeysType = "DeletePK"
 )
 
-// SecureBootCurrentBootType is the type of secure boot.
 type SecureBootCurrentBootType string
 
 const (
-
-	// EnabledSecureBootCurrentBootType Secure Boot is currently enabled.
+	// EnabledSecureBootCurrentBootType UEFI Secure Boot is currently enabled.
 	EnabledSecureBootCurrentBootType SecureBootCurrentBootType = "Enabled"
-	// DisabledSecureBootCurrentBootType Secure Boot is currently disabled.
+	// DisabledSecureBootCurrentBootType UEFI Secure Boot is currently disabled.
 	DisabledSecureBootCurrentBootType SecureBootCurrentBootType = "Disabled"
 )
 
-// SecureBootModeType is the boot mode.
 type SecureBootModeType string
 
 const (
-
-	// SetupModeSecureBootModeType Secure Boot is currently in Setup Mode.
+	// SetupModeSecureBootModeType UEFI Secure Boot is currently in Setup Mode.
 	SetupModeSecureBootModeType SecureBootModeType = "SetupMode"
-	// UserModeSecureBootModeType Secure Boot is currently in User Mode.
+	// UserModeSecureBootModeType UEFI Secure Boot is currently in User Mode.
 	UserModeSecureBootModeType SecureBootModeType = "UserMode"
-	// AuditModeSecureBootModeType Secure Boot is currently in Audit Mode.
+	// AuditModeSecureBootModeType UEFI Secure Boot is currently in Audit Mode.
 	AuditModeSecureBootModeType SecureBootModeType = "AuditMode"
-	// DeployedModeSecureBootModeType Secure Boot is currently in Deployed
+	// DeployedModeSecureBootModeType UEFI Secure Boot is currently in Deployed
 	// Mode.
 	DeployedModeSecureBootModeType SecureBootModeType = "DeployedMode"
 )
 
-// SecureBoot is used to represent a UEFI Secure Boot resource.
+// SecureBoot This resource contains UEFI Secure Boot information for a Redfish
+// implementation.
 type SecureBoot struct {
 	common.Entity
-
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// SecureBootCurrentBoot shall indicate the UEFI Secure Boot state during
-	// the current boot cycle.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// SecureBootCurrentBoot shall indicate the UEFI Secure Boot state during the
+	// current boot cycle.
 	SecureBootCurrentBoot SecureBootCurrentBootType
-	// SecureBootEnable set to true enables UEFI Secure Boot, and setting it to
-	// false disables it. This property can be enabled only in UEFI boot mode.
+	// SecureBootDatabases shall be a link to a resource collection of type
+	// 'SecureBootDatabaseCollection'.
+	//
+	// Version added: v1.1.0
+	secureBootDatabases string
+	// SecureBootEnable shall indicate whether the UEFI Secure Boot takes effect on
+	// next boot. This property can be enabled in UEFI boot mode only.
 	SecureBootEnable bool
-	// SecureBootMode shall contain the current Secure Boot mode, as defined in
-	// the UEFI Specification.
+	// SecureBootMode shall contain the current UEFI Secure Boot mode, as defined
+	// in the UEFI Specification.
 	SecureBootMode SecureBootModeType
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
-
 	// resetKeysTarget is the URL to send ResetKeys requests.
 	resetKeysTarget string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a SecureBoot object from the raw JSON.
-func (secureboot *SecureBoot) UnmarshalJSON(b []byte) error {
+func (s *SecureBoot) UnmarshalJSON(b []byte) error {
 	type temp SecureBoot
-	type actions struct {
+	type sActions struct {
 		ResetKeys common.ActionTarget `json:"#SecureBoot.ResetKeys"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions actions
+		Actions             sActions
+		SecureBootDatabases common.Link `json:"secureBootDatabases"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
+	*s = SecureBoot(tmp.temp)
+
 	// Extract the links to other entities for later
-	*secureboot = SecureBoot(t.temp)
-	secureboot.resetKeysTarget = t.Actions.ResetKeys.Target
+	s.resetKeysTarget = tmp.Actions.ResetKeys.Target
+	s.secureBootDatabases = tmp.SecureBootDatabases.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	secureboot.rawData = b
+	s.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (secureboot *SecureBoot) Update() error {
+func (s *SecureBoot) Update() error {
 	readWriteFields := []string{
 		"SecureBootEnable",
 	}
 
-	return secureboot.UpdateFromRawData(secureboot, secureboot.rawData, readWriteFields)
+	return s.UpdateFromRawData(s, s.rawData, readWriteFields)
 }
 
 // GetSecureBoot will get a SecureBoot instance from the service.
@@ -124,15 +130,23 @@ func ListReferencedSecureBoots(c common.Client, link string) ([]*SecureBoot, err
 	return common.GetCollectionObjects[SecureBoot](c, link)
 }
 
-// ResetKeys shall perform a reset of the Secure Boot key databases. The
-// ResetAllKeysToDefault value shall reset the UEFI Secure Boot key databases to
-// their default values. The DeleteAllKeys value shall delete the content of the
-// UEFI Secure Boot key databases. The DeletePK value shall delete the content
-// of the PK Secure boot key.
-func (secureboot *SecureBoot) ResetKeys(resetType ResetKeysType) error {
-	t := struct {
-		ResetKeysType ResetKeysType
-	}{ResetKeysType: resetType}
+// ResetKeys shall reset the UEFI Secure Boot key databases. The
+// 'ResetAllKeysToDefault' value shall reset all UEFI Secure Boot key databases
+// to their default values. The 'DeleteAllKeys' value shall delete the contents
+// of all UEFI Secure Boot key databases. The 'DeletePK' value shall delete the
+// contents of the PK Secure Boot key database.
+// resetKeysType - This parameter shall specify the type of reset or delete to
+// perform on the UEFI Secure Boot databases.
+func (s *SecureBoot) ResetKeys(resetKeysType ResetKeysType) error {
+	payload := make(map[string]any)
+	payload["ResetKeysType"] = resetKeysType
+	return s.Post(s.resetKeysTarget, payload)
+}
 
-	return secureboot.Post(secureboot.resetKeysTarget, t)
+// SecureBootDatabases gets the SecureBootDatabases collection.
+func (s *SecureBoot) SecureBootDatabases(client common.Client) ([]*SecureBootDatabase, error) {
+	if s.secureBootDatabases == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[SecureBootDatabase](client, s.secureBootDatabases)
 }

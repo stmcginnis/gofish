@@ -57,6 +57,8 @@ const (
 	// property is a single Section of a UEFI Specification-defined Common Platform Error Record. The CPER data shall
 	// contain one Section as defined by the UEFI Specification, with no Record Header.
 	CPERSectionLogDiagnosticDataTypes LogDiagnosticDataTypes = "CPERSection"
+	// DeviceLogDiagnosticDataTypes Device diagnostic data.
+	DeviceLogDiagnosticDataTypes LogDiagnosticDataTypes = "Device" // From logservice
 )
 
 type LogEntryCode string
@@ -368,7 +370,7 @@ type LogEntry struct {
 	// AdditionalDataURI property.
 	AdditionalDataURI string
 	// CPER shall contain the details for a CPER section or record that is the source of this log entry.
-	CPER CPER
+	CPER common.CPER
 	// CXLEntryType shall contain the specific CXL entry type. This property shall only be present if EntryType
 	// contains 'CXL'.
 	CXLEntryType CXLEntryType

@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2021.3 - #PowerDomain.v1_2_2.PowerDomain
 
 package redfish
 
@@ -10,132 +11,83 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// PowerDomain shall be used to represent a DCIM power domain for a Redfish implementation.
+// PowerDomain shall represent a DCIM power domain for a Redfish implementation.
 type PowerDomain struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Actions shall contain the available actions for this resource.
-	Actions string
-	// Description provides a description of this resource.
-	Description string
-	// Links shall contain links to resources that are related to but are not contained by, or subordinate to, this
-	// resource.
-	Links string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-
+	// electricalBuses are the URIs for ElectricalBuses.
 	electricalBuses []string
-	// ElectricalBusesCount is the number of electrical buses in this power domain.
-	ElectricalBusesCount int
-	floorPDUs            []string
-	// FloorPDUsCount is the number of floor power distribution units in this power domain.
-	FloorPDUsCount int
-	managedBy      []string
-	// ManagedByCount is the number of managers for this power domain.
-	ManagedByCount int
-	powerShelves   []string
-	// PowerShelvesCount is the number of power shelves in this power domain.
-	PowerShelvesCount int
-	rackPDUs          []string
-	// RackPDUsCount is the number of rack-level power distribution units in this power domain.
-	RackPDUsCount int
-	switchgear    []string
-	// SwitchGearCount is the number of switchgear in this power domain.
-	SwitchgearCount  int
+	// floorPDUs are the URIs for FloorPDUs.
+	floorPDUs []string
+	// managedBy are the URIs for ManagedBy.
+	managedBy []string
+	// powerShelves are the URIs for PowerShelves.
+	powerShelves []string
+	// rackPDUs are the URIs for RackPDUs.
+	rackPDUs []string
+	// switchgear are the URIs for Switchgear.
+	switchgear []string
+	// transferSwitches are the URIs for TransferSwitches.
 	transferSwitches []string
-	// TransferSwitchesCount is the number of transfer switches in this power domain.
-	TransferSwitchesCount int
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerDomain object from the raw JSON.
-func (powerdomain *PowerDomain) UnmarshalJSON(b []byte) error {
+func (p *PowerDomain) UnmarshalJSON(b []byte) error {
 	type temp PowerDomain
-	type Links struct {
-		ElectricalBuses       common.Links
-		ElectricalBusesCount  int `json:"ElectricalBuses@odata.count"`
-		FloorPDUs             common.Links
-		FloorPDUsCount        int `json:"FloorPDUs@odata.count"`
-		ManagedBy             common.Links
-		ManagedByCount        int `json:"ManagedBy@odata.count"`
-		PowerShelves          common.Links
-		PowerShelvesCount     int `json:"PowerShelves@odata.count"`
-		RackPDUs              common.Links
-		RackPDUsCount         int `json:"RackPDUs@odata.count"`
-		Switchgear            common.Links
-		SwitchgearCount       int `json:"Switchgear@odata.count"`
-		TransferSwitches      common.Links
-		TransferSwitchesCount int `json:"TransferSwitches@odata.count"`
+	type pLinks struct {
+		ElectricalBuses  common.Links `json:"ElectricalBuses"`
+		FloorPDUs        common.Links `json:"FloorPDUs"`
+		ManagedBy        common.Links `json:"ManagedBy"`
+		PowerShelves     common.Links `json:"PowerShelves"`
+		RackPDUs         common.Links `json:"RackPDUs"`
+		Switchgear       common.Links `json:"Switchgear"`
+		TransferSwitches common.Links `json:"TransferSwitches"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Links Links
+		Links pLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*powerdomain = PowerDomain(t.temp)
+	*p = PowerDomain(tmp.temp)
 
 	// Extract the links to other entities for later
-	powerdomain.electricalBuses = t.Links.ElectricalBuses.ToStrings()
-	powerdomain.ElectricalBusesCount = t.Links.ElectricalBusesCount
-	powerdomain.floorPDUs = t.Links.FloorPDUs.ToStrings()
-	powerdomain.FloorPDUsCount = t.Links.FloorPDUsCount
-	powerdomain.managedBy = t.Links.ManagedBy.ToStrings()
-	powerdomain.ManagedByCount = t.Links.ManagedByCount
-	powerdomain.powerShelves = t.Links.PowerShelves.ToStrings()
-	powerdomain.PowerShelvesCount = t.Links.PowerShelvesCount
-	powerdomain.rackPDUs = t.Links.RackPDUs.ToStrings()
-	powerdomain.RackPDUsCount = t.Links.RackPDUsCount
-	powerdomain.switchgear = t.Links.Switchgear.ToStrings()
-	powerdomain.SwitchgearCount = t.Links.SwitchgearCount
-	powerdomain.transferSwitches = t.Links.TransferSwitches.ToStrings()
-	powerdomain.TransferSwitchesCount = t.Links.TransferSwitchesCount
+	p.electricalBuses = tmp.Links.ElectricalBuses.ToStrings()
+	p.floorPDUs = tmp.Links.FloorPDUs.ToStrings()
+	p.managedBy = tmp.Links.ManagedBy.ToStrings()
+	p.powerShelves = tmp.Links.PowerShelves.ToStrings()
+	p.rackPDUs = tmp.Links.RackPDUs.ToStrings()
+	p.switchgear = tmp.Links.Switchgear.ToStrings()
+	p.transferSwitches = tmp.Links.TransferSwitches.ToStrings()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.rawData = b
 
 	return nil
 }
 
-// ElectricalBuses gets the electrical buses in this power domain.
-func (powerdomain *PowerDomain) ElectricalBuses() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.electricalBuses)
-}
+// Update commits updates to this object's properties to the running system.
+func (p *PowerDomain) Update() error {
+	readWriteFields := []string{
+		"Status",
+	}
 
-// FloorPDUs gets the floor power distribution units in this power domain.
-func (powerdomain *PowerDomain) FloorPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.floorPDUs)
-}
-
-// ManagedBy gets the managers that manage this power domain.
-func (powerdomain *PowerDomain) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](powerdomain.GetClient(), powerdomain.managedBy)
-}
-
-// PowerShelves gets the power shelves in this power domain.
-func (powerdomain *PowerDomain) PowerShelves() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.powerShelves)
-}
-
-// RackPDUs gets the rack-level power distribution units in this power domain.
-func (powerdomain *PowerDomain) RackPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.rackPDUs)
-}
-
-// Switchgear gets the switchgear in this power domain.
-func (powerdomain *PowerDomain) Switchgear() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.switchgear)
-}
-
-// TransferSwitches gets the transfer switches in this power domain.
-func (powerdomain *PowerDomain) TransferSwitches() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.transferSwitches)
+	return p.UpdateFromRawData(p, p.rawData, readWriteFields)
 }
 
 // GetPowerDomain will get a PowerDomain instance from the service.
@@ -147,4 +99,39 @@ func GetPowerDomain(c common.Client, uri string) (*PowerDomain, error) {
 // a provided reference.
 func ListReferencedPowerDomains(c common.Client, link string) ([]*PowerDomain, error) {
 	return common.GetCollectionObjects[PowerDomain](c, link)
+}
+
+// ElectricalBuses gets the ElectricalBuses linked resources.
+func (p *PowerDomain) ElectricalBuses(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, p.electricalBuses)
+}
+
+// FloorPDUs gets the FloorPDUs linked resources.
+func (p *PowerDomain) FloorPDUs(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, p.floorPDUs)
+}
+
+// ManagedBy gets the ManagedBy linked resources.
+func (p *PowerDomain) ManagedBy(client common.Client) ([]*Manager, error) {
+	return common.GetObjects[Manager](client, p.managedBy)
+}
+
+// PowerShelves gets the PowerShelves linked resources.
+func (p *PowerDomain) PowerShelves(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, p.powerShelves)
+}
+
+// RackPDUs gets the RackPDUs linked resources.
+func (p *PowerDomain) RackPDUs(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, p.rackPDUs)
+}
+
+// Switchgear gets the Switchgear linked resources.
+func (p *PowerDomain) Switchgear(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, p.switchgear)
+}
+
+// TransferSwitches gets the TransferSwitches linked resources.
+func (p *PowerDomain) TransferSwitches(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, p.transferSwitches)
 }

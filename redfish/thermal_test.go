@@ -621,15 +621,15 @@ func TestThermalFanParsing(t *testing.T) {
 		t.Errorf("Expected fan units RPM, got %v", fan.ReadingUnits)
 	}
 
-	if fan.PhysicalContext == nil || *fan.PhysicalContext != "Fan" {
+	if fan.PhysicalContext != "Fan" {
 		t.Errorf("Expected physical context 'Fan', got %v", fan.PhysicalContext)
 	}
 
-	if fan.HotPluggable == nil || !*fan.HotPluggable {
+	if !fan.HotPluggable {
 		t.Error("Expected fan to be hot-pluggable")
 	}
 
-	if fan.Status == nil || fan.Status.Health != common.OKHealth {
+	if fan.Status.Health != common.OKHealth {
 		t.Error("Expected fan health to be OK")
 	}
 }
@@ -664,7 +664,7 @@ func TestTemperatureParsing(t *testing.T) {
 		t.Errorf("Expected temp reading 63, got %v", temp.ReadingCelsius)
 	}
 
-	if temp.PhysicalContext == nil || *temp.PhysicalContext != "CPU" {
+	if temp.PhysicalContext != "CPU" {
 		t.Errorf("Expected physical context 'CPU', got %v", temp.PhysicalContext)
 	}
 
@@ -685,16 +685,11 @@ func TestThermalFanUpdate(t *testing.T) {
 		t.Fatalf("Error decoding fan JSON: %v", err)
 	}
 
-	// Store original data
-	originalJSON, err := json.Marshal(fan)
-	if err != nil {
-		t.Fatalf("Error marshaling fan: %v", err)
-	}
-	fan.rawData = originalJSON
+	testClient := &common.TestClient{}
+	fan.SetClient(testClient)
 
 	// Change LED state
-	newLED := common.BlinkingIndicatorLED
-	fan.IndicatorLED = &newLED
+	fan.IndicatorLED = common.BlinkingIndicatorLED
 
 	// Test update
 	err = fan.Update()
@@ -702,9 +697,14 @@ func TestThermalFanUpdate(t *testing.T) {
 		t.Errorf("Update failed: %v", err)
 	}
 
-	// Verify LED was changed
-	if *fan.IndicatorLED != common.BlinkingIndicatorLED {
-		t.Errorf("IndicatorLED not updated, still %v", *fan.IndicatorLED)
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected 1 API call, found %d", len(calls))
+	}
+
+	if !strings.Contains(calls[0].Payload, "IndicatorLED:Blinking") {
+		t.Errorf("Unexpected IndicatorLED update payload: %s", calls[0].Payload)
 	}
 }
 
@@ -720,16 +720,12 @@ func TestTemperatureUpdate(t *testing.T) {
 		t.Fatalf("Error decoding temperature JSON: %v", err)
 	}
 
-	// Store original data
-	originalJSON, err := json.Marshal(temp)
-	if err != nil {
-		t.Fatalf("Error marshaling temperature: %v", err)
-	}
-	temp.rawData = originalJSON
+	testClient := &common.TestClient{}
+	temp.SetClient(testClient)
 
 	// Change thresholds
-	newLower := float32(35.0)
-	newUpper := float32(75.0)
+	var newLower float32 = 35.0
+	var newUpper float32 = 75.0
 	temp.LowerThresholdUser = &newLower
 	temp.UpperThresholdUser = &newUpper
 
@@ -739,12 +735,18 @@ func TestTemperatureUpdate(t *testing.T) {
 		t.Errorf("Update failed: %v", err)
 	}
 
-	// Verify thresholds were updated
-	if *temp.LowerThresholdUser != 35.0 {
-		t.Errorf("LowerThresholdUser not updated, still %v", *temp.LowerThresholdUser)
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected 1 API call, found %d", len(calls))
 	}
-	if *temp.UpperThresholdUser != 75.0 {
-		t.Errorf("UpperThresholdUser not updated, still %v", *temp.UpperThresholdUser)
+
+	if !strings.Contains(calls[0].Payload, "LowerThresholdUser:35") {
+		t.Errorf("Unexpected LowerThresholdUser update payload: %s", calls[0].Payload)
+	}
+
+	if !strings.Contains(calls[0].Payload, "UpperThresholdUser:75") {
+		t.Errorf("Unexpected LowerThresholdUser update payload: %s", calls[0].Payload)
 	}
 }
 

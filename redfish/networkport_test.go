@@ -98,7 +98,7 @@ func TestNetworkPort(t *testing.T) {
 		t.Errorf("Invalid active link technology: %s", result.ActiveLinkTechnology)
 	}
 
-	if result.CurrentLinkSpeedMbps != 1000 {
+	if *result.CurrentLinkSpeedMbps != 1000 {
 		t.Errorf("Invalid current link speed: %d", result.CurrentLinkSpeedMbps)
 	}
 
@@ -106,7 +106,7 @@ func TestNetworkPort(t *testing.T) {
 		t.Errorf("Invalid flow control config: %s", result.FlowControlConfiguration)
 	}
 
-	if result.LinkStatus != UpPortLinkStatus {
+	if result.LinkStatus != UpLinkStatus {
 		t.Errorf("Invalid link status: %s", result.LinkStatus)
 	}
 
@@ -127,7 +127,8 @@ func TestNetworkPortUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.CurrentLinkSpeedMbps = 10000
+	currentLinkSpeedMbps := 10000
+	result.CurrentLinkSpeedMbps = &currentLinkSpeedMbps
 	result.EEEEnabled = true
 	result.WakeOnLANEnabled = true
 	err = result.Update()

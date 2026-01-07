@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2019.4 - #RouteEntry.v1_0_2.RouteEntry
 
 package redfish
 
@@ -10,63 +11,63 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// RouteEntry shall represent the content of route entry rows in the Redfish Specification.
+// RouteEntry shall represent the content of route entry rows in the Redfish
+// Specification.
 type RouteEntry struct {
 	common.Entity
+	// MinimumHopCount shall indicate the minimum hop count used to calculate the
+	// computed hop count.
+	MinimumHopCount int
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// MinimumHopCount shall indicate the minimum hop count used to calculate the computed hop count.
-	MinimumHopCount int
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// RawEntryHex shall contain a binary data that represents the content of route entry rows.
+	// RawEntryHex shall contain a binary data that represents the content of route
+	// entry rows.
 	RawEntryHex string
-	// RouteSet shall contain a link to a Resource Collection of type RouteSetEntryCollection.
+	// RouteSet shall contain a link to a resource collection of type
+	// 'RouteSetEntryCollection'.
 	routeSet string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a RouteEntry object from the raw JSON.
-func (routeentry *RouteEntry) UnmarshalJSON(b []byte) error {
+func (r *RouteEntry) UnmarshalJSON(b []byte) error {
 	type temp RouteEntry
-	var t struct {
+	var tmp struct {
 		temp
-		RouteSet common.Link
+		RouteSet common.Link `json:"routeSet"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*routeentry = RouteEntry(t.temp)
+	*r = RouteEntry(tmp.temp)
 
 	// Extract the links to other entities for later
-	routeentry.routeSet = t.RouteSet.String()
+	r.routeSet = tmp.RouteSet.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	routeentry.rawData = b
+	r.rawData = b
 
 	return nil
 }
 
-// RouteSet gets the associated route set.
-func (routeentry *RouteEntry) RouteSet() ([]*RouteSetEntry, error) {
-	return ListReferencedRouteSetEntrys(routeentry.GetClient(), routeentry.routeSet)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (routeentry *RouteEntry) Update() error {
-	readWriteFields := []string{"MinimumHopCount",
-		"RawEntryHex"}
+func (r *RouteEntry) Update() error {
+	readWriteFields := []string{
+		"MinimumHopCount",
+		"RawEntryHex",
+	}
 
-	return routeentry.UpdateFromRawData(routeentry, routeentry.rawData, readWriteFields)
+	return r.UpdateFromRawData(r, r.rawData, readWriteFields)
 }
 
 // GetRouteEntry will get a RouteEntry instance from the service.
@@ -78,4 +79,12 @@ func GetRouteEntry(c common.Client, uri string) (*RouteEntry, error) {
 // a provided reference.
 func ListReferencedRouteEntrys(c common.Client, link string) ([]*RouteEntry, error) {
 	return common.GetCollectionObjects[RouteEntry](c, link)
+}
+
+// RouteSet gets the RouteSet collection.
+func (r *RouteEntry) RouteSet(client common.Client) ([]*RouteSetEntry, error) {
+	if r.routeSet == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[RouteSetEntry](client, r.routeSet)
 }

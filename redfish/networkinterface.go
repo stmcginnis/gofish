@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.3 - #NetworkInterface.v1_2_3.NetworkInterface
 
 package redfish
 
@@ -10,71 +11,83 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// NetworkInterfaceLinks references to resources that are related to, but not
-// contained by (subordinate to), this resource.
-type NetworkInterfaceLinks struct {
-	// NetworkAdapter shall be a reference to a
-	// resource of type NetworkAdapter that represents the physical container
-	// associated with this NetworkInterface.
-	NetworkAdapter common.Link
-}
-
-// A NetworkInterface contains references linking NetworkAdapter, NetworkPort,
-// and NetworkDeviceFunction resources and represents the functionality
+// NetworkInterface This resource contains links to the network adapters,
+// network ports, and network device functions, and represents the functionality
 // available to the containing system.
 type NetworkInterface struct {
 	common.Entity
-
+	// NetworkDeviceFunctions shall contain a link to a resource collection of type
+	// 'NetworkDeviceFunctionCollection'. The members of this collection shall not
+	// contain 'NetworkDeviceFunction' resources whose 'NetDevFuncType' property
+	// contains 'Ethernet'.
+	networkDeviceFunctions string
+	// NetworkPorts shall contain a link to a resource collection of type
+	// 'NetworkPortCollection'.
+	//
+	// Deprecated: v1.2.0
+	// This property has been deprecated in favor of the 'Ports' property.
+	networkPorts string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// networkDeviceFunctions shall be a link to a collection of type
-	// NetworkDeviceFunctionCollection.
-	networkDeviceFunctions []string
-	// NetworkPorts shall be a link to a collection of type NetworkPortCollection.
-	// This property has been deprecated in favor of the Ports property.
-	networkPorts []string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// Ports shall contain a link to a resource collection of type PortCollection.
-	ports []string
+	// Ports shall contain a link to a resource collection of type
+	// 'PortCollection'.
+	//
+	// Version added: v1.2.0
+	ports string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-
-	// networkAdapter shall be a reference to a resource of type NetworkAdapter
-	// that represents the physical container associated with this NetworkInterface.
+	// networkAdapter is the URI for NetworkAdapter.
 	networkAdapter string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a NetworkInterface object from the raw JSON.
-func (networkinterface *NetworkInterface) UnmarshalJSON(b []byte) error {
+func (n *NetworkInterface) UnmarshalJSON(b []byte) error {
 	type temp NetworkInterface
-	var t struct {
+	type nLinks struct {
+		NetworkAdapter common.Link `json:"NetworkAdapter"`
+	}
+	var tmp struct {
 		temp
-		NetworkDeviceFunctions common.LinksCollection
-		NetworkPorts           common.LinksCollection
-		Ports                  common.LinksCollection
-		Links                  NetworkInterfaceLinks
+		Links                  nLinks
+		NetworkDeviceFunctions common.Link `json:"networkDeviceFunctions"`
+		NetworkPorts           common.Link `json:"networkPorts"`
+		Ports                  common.Link `json:"ports"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	// Extract the links to other entities for later
-	*networkinterface = NetworkInterface(t.temp)
-	networkinterface.networkAdapter = t.Links.NetworkAdapter.String()
+	*n = NetworkInterface(tmp.temp)
 
-	networkinterface.networkDeviceFunctions = t.NetworkDeviceFunctions.ToStrings()
-	networkinterface.networkPorts = t.NetworkPorts.ToStrings()
-	networkinterface.ports = t.Ports.ToStrings()
+	// Extract the links to other entities for later
+	n.networkAdapter = tmp.Links.NetworkAdapter.String()
+	n.networkDeviceFunctions = tmp.NetworkDeviceFunctions.String()
+	n.networkPorts = tmp.NetworkPorts.String()
+	n.ports = tmp.Ports.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	n.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (n *NetworkInterface) Update() error {
+	readWriteFields := []string{
+		"Status",
+	}
+
+	return n.UpdateFromRawData(n, n.rawData, readWriteFields)
 }
 
 // GetNetworkInterface will get a NetworkInterface instance from the service.
@@ -88,27 +101,34 @@ func ListReferencedNetworkInterfaces(c common.Client, link string) ([]*NetworkIn
 	return common.GetCollectionObjects[NetworkInterface](c, link)
 }
 
-// NetworkAdapter gets the NetworkAdapter for this interface.
-func (networkinterface *NetworkInterface) NetworkAdapter() (*NetworkAdapter, error) {
-	if networkinterface.networkAdapter == "" {
+// NetworkAdapter gets the NetworkAdapter linked resource.
+func (n *NetworkInterface) NetworkAdapter(client common.Client) (*NetworkAdapter, error) {
+	if n.networkAdapter == "" {
 		return nil, nil
 	}
-
-	return GetNetworkAdapter(networkinterface.GetClient(), networkinterface.networkAdapter)
+	return common.GetObject[NetworkAdapter](client, n.networkAdapter)
 }
 
-// NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network interface
-func (networkinterface *NetworkInterface) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](networkinterface.GetClient(), networkinterface.networkDeviceFunctions)
+// NetworkDeviceFunctions gets the NetworkDeviceFunctions collection.
+func (n *NetworkInterface) NetworkDeviceFunctions(client common.Client) ([]*NetworkDeviceFunction, error) {
+	if n.networkDeviceFunctions == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[NetworkDeviceFunction](client, n.networkDeviceFunctions)
 }
 
-// NetworkPorts gets the collection of NetworkPorts of this network interface
-// This property has been deprecated in favor of the Ports property.
-func (networkinterface *NetworkInterface) NetworkPorts() ([]*NetworkPort, error) {
-	return common.GetObjects[NetworkPort](networkinterface.GetClient(), networkinterface.networkPorts)
+// NetworkPorts gets the NetworkPorts collection.
+func (n *NetworkInterface) NetworkPorts(client common.Client) ([]*NetworkPort, error) {
+	if n.networkPorts == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[NetworkPort](client, n.networkPorts)
 }
 
-// Ports gets the ports associated with this network interface.
-func (networkinterface *NetworkInterface) Ports() ([]*Port, error) {
-	return common.GetObjects[Port](networkinterface.GetClient(), networkinterface.ports)
+// Ports gets the Ports collection.
+func (n *NetworkInterface) Ports(client common.Client) ([]*Port, error) {
+	if n.ports == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Port](client, n.ports)
 }

@@ -92,7 +92,7 @@ func TestSpareResourceSet(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.OnHandLocation.AltitudeMeters != 150 {
+	if *result.OnHandLocation.AltitudeMeters != 150 {
 		t.Errorf("OnHandLocation Altitude incorrect: %d", result.OnHandLocation.AltitudeMeters)
 	}
 

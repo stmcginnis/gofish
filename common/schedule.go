@@ -58,32 +58,35 @@ const (
 	EveryMonthOfYear MonthOfYear = "Every"
 )
 
-// Schedule is used to Schedule a series of occurrences.
+// Schedule shall be used to Schedule a series of occurrences.
 type Schedule struct {
-	// EnabledDaysOfMonth is Days of month when scheduled occurrences are
-	// enabled, for enabled days of week and months of year. If the array
-	// contains a single value of zero, or if the property is not present,
-	// all days of the month shall be enabled.
-	EnabledDaysOfMonth []int
-	// EnabledDaysOfWeek is Days of the week when scheduled occurrences are
-	// enabled. If not present, all days of the week shall be enabled.
+	// EnabledDaysOfMonth shall contain the days of the month when scheduled
+	// occurrences are enabled, for enabled days of week and months of year. If the
+	// array contains a single value of '0', or if the property is not present, all
+	// days of the month shall be enabled.
+	EnabledDaysOfMonth []*int
+	// EnabledDaysOfWeek shall be enabled.
 	EnabledDaysOfWeek []DayOfWeek
 	// EnabledIntervals shall be an ISO 8601 conformant interval specifying when
 	// occurrences are enabled.
+	//
+	// Version added: v1.1.0
 	EnabledIntervals []string
-	// EnabledMonthsOfYear is Months of year when scheduled occurrences are
-	// enabled, for enabled days of week and days of month. If not present,
-	// all months of the year shall be enabled.
+	// EnabledMonthsOfYear shall contain the months of the year when scheduled
+	// occurrences are enabled, for enabled days of week and days of month. If not
+	// present, all months of the year shall be enabled.
 	EnabledMonthsOfYear []MonthOfYear
-	// InitialStartTime shall be a date and time of day on which the initial
-	// occurrence is scheduled to occur.
+	// InitialStartTime shall be an ISO 8601 conformant time of day on which the
+	// initial occurrence is scheduled to occur.
 	InitialStartTime string
-	// Lifetime shall be a Redfish Duration describing the time after
+	// Lifetime shall be an ISO 8601 conformant duration describing the time after
 	// provisioning when the schedule expires.
 	Lifetime string
-	// MaxOccurrences is Maximum number of scheduled occurrences.
-	MaxOccurrences int
-	// RecurrenceInterval shall be a Redfish Duration describing the time until
-	// the next occurrence.
+	// MaxOccurrences Maximum number of scheduled occurrences.
+	MaxOccurrences *int `json:",omitempty"`
+	// Name is the name of the resource or array element.
+	Name string
+	// RecurrenceInterval shall be an ISO 8601 conformant duration describing the
+	// time until the next occurrence.
 	RecurrenceInterval string
 }

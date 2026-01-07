@@ -107,7 +107,7 @@ func TestCircuit(t *testing.T) {
 	assertEquals(t, "Branch", fmt.Sprint(result.CircuitType))
 	assertEquals(t, "TwoPhase3Wire", fmt.Sprint(result.PhaseWiringType))
 	assertEquals(t, "AC200To240V", fmt.Sprint(result.NominalVoltage))
-	assertEquals(t, "16", fmt.Sprint(result.RatedCurrentAmps))
+	assertEquals(t, "16", fmt.Sprint(*result.RatedCurrentAmps))
 	assertEquals(t, "Normal", fmt.Sprint(result.BreakerState))
 	assertEquals(t, "118.2", fmt.Sprint(*result.PolyPhaseVoltage.Line1ToNeutral.Reading))
 	assertEquals(t, "325675", fmt.Sprint(*result.EnergykWh.Reading))

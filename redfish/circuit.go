@@ -1,524 +1,717 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2024.1 - #Circuit.v1_8_1.Circuit
 
 package redfish
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// The state of the over current protection device.
-type BreakerState string
+type BreakerStates string
 
 const (
-	// The breaker is powered on.
-	NormalBreakerState BreakerState = "Normal"
-	// The breaker is off.
-	OffBreakerState BreakerState = "Off"
-	// The breaker has been tripped.
-	TrippedBreakerState BreakerState = "Tripped"
+	// NormalBreakerStates The breaker is powered on.
+	NormalBreakerStates BreakerStates = "Normal"
+	// TrippedBreakerStates The breaker has been tripped.
+	TrippedBreakerStates BreakerStates = "Tripped"
+	// OffBreakerStates The breaker is off.
+	OffBreakerStates BreakerStates = "Off"
 )
 
-// In Actions: BreakerControl, PowerControl:
-// The desired power state of the circuit if the breaker is reset successfully.
-type ActionPowerState string
-
-const (
-	// Power off.
-	OffActionPowerState ActionPowerState = "Off"
-	// Power on.
-	OnActionPowerState ActionPowerState = "On"
-	// Power cycle.
-	PowerCycleActionPowerState ActionPowerState = "PowerCycle"
-)
-
-// The type of circuit.
 type CircuitType string
 
 const (
-	// A branch (output) circuit.
-	BranchCircuitType CircuitType = "Branch"
-	// (v1.3+)	An electrical bus circuit.
-	BusCircuitType CircuitType = "Bus"
-	// A feeder (output) circuit.
-	FeederCircuitType CircuitType = "Feeder"
-	// A mains input or utility circuit.
+	// MainsCircuitType is a mains input or utility circuit.
 	MainsCircuitType CircuitType = "Mains"
-	// A subfeed (output) circuit.
+	// BranchCircuitType is a branch (output) circuit.
+	BranchCircuitType CircuitType = "Branch"
+	// SubfeedCircuitType is a subfeed (output) circuit.
 	SubfeedCircuitType CircuitType = "Subfeed"
+	// FeederCircuitType is a feeder (output) circuit.
+	FeederCircuitType CircuitType = "Feeder"
+	// BusCircuitType is an electrical bus circuit.
+	BusCircuitType CircuitType = "Bus"
 )
 
-// The nominal voltage for an outlet.
-type NominalVoltage string
+type NominalVoltageType string
 
 const (
-	// AC 100-127V nominal.
-	AC100To127VNominal NominalVoltage = "AC100To127V"
-	// AC 100-240V nominal.
-	AC100To240VNominal NominalVoltage = "AC100To240V"
-	// AC 100-277V nominal.
-	AC100To277VNominal NominalVoltage = "AC100To277V"
-	// AC 120V nominal.
-	AC120VNominal NominalVoltage = "AC120V"
-	// AC 200-240V nominal.
-	AC200To240VNominal NominalVoltage = "AC200To240V"
-	// AC 200-277V nominal.
-	AC200To277VNominal NominalVoltage = "AC200To277V"
-	// AC 208V nominal.
-	AC208VNominal NominalVoltage = "AC208V"
-	// AC 230V nominal.
-	AC230VNominal NominalVoltage = "AC230V"
-	// AC 200-240V and DC 380V.
-	AC240AndDC380VNominal NominalVoltage = "AC240AndDC380V"
-	// AC 240V nominal.
-	AC240VNominal NominalVoltage = "AC240V"
-	// AC 200-277V and DC 380V.
-	AC277AndDC380VNominal NominalVoltage = "AC277AndDC380V"
-	// AC 277V nominal.
-	AC277VNominal NominalVoltage = "AC277V"
-	// AC 400V or 415V nominal.
-	AC400VNominal NominalVoltage = "AC400V"
-	// AC 480V nominal.
-	AC480VNominal NominalVoltage = "AC480V"
-	// DC 12V nominal.
-	DC12VNominal NominalVoltage = "DC12V"
-	// DC 16V nominal.
-	DC16VNominal NominalVoltage = "DC16V"
-	// DC 1.8V nominal.
-	DC1_8VNominal NominalVoltage = "DC1_8V"
-	// DC 240V nominal.
-	DC240VNominal NominalVoltage = "DC240V"
-	// High Voltage DC (380V).
-	DC380VNominal NominalVoltage = "DC380V"
-	// DC 3.3V nominal.
-	DC3_3VNominal NominalVoltage = "DC3_3V"
-	// DC 48V nominal.
-	DC48VNominal NominalVoltage = "DC48V"
-	// DC 5V nominal.
-	DC5VNominal NominalVoltage = "DC5V"
-	// DC 9V nominal.
-	DC9VNominal NominalVoltage = "DC9V"
-	// -48V DC.
-	DCNeg48VNominal NominalVoltage = "DCNeg48V"
+	// AC100To127VNominalVoltageType shall indicate the device supports a nominal
+	// voltage in the complete range of 100-127VAC. Range values are generally used
+	// to describe support on device inputs or inlets.
+	AC100To127VNominalVoltageType NominalVoltageType = "AC100To127V"
+	// AC100To240VNominalVoltageType shall indicate the device supports a nominal
+	// voltage in the complete range of 100-240VAC. Range values are generally used
+	// to describe support on device inputs or inlets.
+	AC100To240VNominalVoltageType NominalVoltageType = "AC100To240V"
+	// AC100To277VNominalVoltageType shall indicate the device supports a nominal
+	// voltage in the complete range of 100-277VAC. Range values are generally used
+	// to describe support on device inputs or inlets.
+	AC100To277VNominalVoltageType NominalVoltageType = "AC100To277V"
+	// AC120VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 120VAC. Specific values are generally used to describe support on
+	// device outputs or outlets.
+	AC120VNominalVoltageType NominalVoltageType = "AC120V"
+	// AC200To240VNominalVoltageType shall indicate the device supports a nominal
+	// voltage in the complete range of 200-240VAC. Range values are generally used
+	// to describe support on device inputs or inlets.
+	AC200To240VNominalVoltageType NominalVoltageType = "AC200To240V"
+	// AC200To277VNominalVoltageType shall indicate the device supports a nominal
+	// voltage in the complete range of 200-277VAC. Range values are generally used
+	// to describe support on device inputs or inlets.
+	AC200To277VNominalVoltageType NominalVoltageType = "AC200To277V"
+	// AC208VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 208VAC. Specific AC voltage values are generally used to describe
+	// support on device outputs or outlets.
+	AC208VNominalVoltageType NominalVoltageType = "AC208V"
+	// AC230VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 230AC. Specific AC voltage values are generally used to describe
+	// support on device outputs or outlets.
+	AC230VNominalVoltageType NominalVoltageType = "AC230V"
+	// AC240VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 240VAC. Specific AC voltage values are generally used to describe
+	// support on device outputs or outlets.
+	AC240VNominalVoltageType NominalVoltageType = "AC240V"
+	// AC240AndDC380VNominalVoltageType shall indicate the device supports a
+	// nominal voltage in the complete range of 200-240VAC or a value of 380VDC.
+	// Range values are generally used to describe support on device inputs or
+	// inlets.
+	AC240AndDC380VNominalVoltageType NominalVoltageType = "AC240AndDC380V"
+	// AC277VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 277VAC. Specific AC high-voltage values may be used to describe
+	// support on device inputs or outputs.
+	AC277VNominalVoltageType NominalVoltageType = "AC277V"
+	// AC277AndDC380VNominalVoltageType shall indicate the device supports a
+	// nominal voltage in the complete range of 200-277VAC or a value of 380VDC.
+	// Range values are generally used to describe support on device inputs or
+	// inlets.
+	AC277AndDC380VNominalVoltageType NominalVoltageType = "AC277AndDC380V"
+	// AC400VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 400VAC or 415VAC. Specific AC high-voltage values may be used to
+	// describe support on device inputs or outputs.
+	AC400VNominalVoltageType NominalVoltageType = "AC400V"
+	// AC480VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 480VAC. Specific AC high-voltage values may be used to describe
+	// support on device inputs or outputs.
+	AC480VNominalVoltageType NominalVoltageType = "AC480V"
+	// DC48VNominalVoltageType shall indicate the device supports a nominal voltage
+	// of 48VDC.
+	DC48VNominalVoltageType NominalVoltageType = "DC48V"
+	// DC240VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 240VDC.
+	DC240VNominalVoltageType NominalVoltageType = "DC240V"
+	// DC380VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of 380VDC.
+	DC380VNominalVoltageType NominalVoltageType = "DC380V"
+	// DCNeg48VNominalVoltageType shall indicate the device supports a nominal
+	// voltage of -48VDC.
+	DCNeg48VNominalVoltageType NominalVoltageType = "DCNeg48V"
+	// DC16VNominalVoltageType shall indicate the device supports a nominal voltage
+	// of 16VDC.
+	DC16VNominalVoltageType NominalVoltageType = "DC16V"
+	// DC12VNominalVoltageType shall indicate the device supports a nominal voltage
+	// of 12VDC.
+	DC12VNominalVoltageType NominalVoltageType = "DC12V"
+	// DC9VNominalVoltageType shall indicate the device supports a nominal voltage
+	// of 9VDC.
+	DC9VNominalVoltageType NominalVoltageType = "DC9V"
+	// DC5VNominalVoltageType shall indicate the device supports a nominal voltage
+	// of 5VDC.
+	DC5VNominalVoltageType NominalVoltageType = "DC5V"
+	// DC33VNominalVoltageType shall indicate the device supports a nominal voltage
+	// of 3.3VDC.
+	DC33VNominalVoltageType NominalVoltageType = "DC3_3V"
+	// DC18VNominalVoltageType shall indicate the device supports a nominal voltage
+	// of 1.8VDC.
+	DC18VNominalVoltageType NominalVoltageType = "DC1_8V"
 )
 
-// The number of ungrounded current-carrying conductors (phases)
-// and the total number of conductors (wires).
 type PhaseWiringType string
 
 const (
-	// Single or Two-Phase / 3-Wire (Line1, Line2 or Neutral, Protective Earth).
-	OneOrTwoPhase3WirePhaseWiringType PhaseWiringType = "OneOrTwoPhase3Wire"
-	// Single-phase / 3-Wire (Line1, Neutral, Protective Earth).
+	// OnePhase3WirePhaseWiringType shall represent a single-phase / 3-wire (Line1,
+	// Neutral, Protective Earth) wiring.
 	OnePhase3WirePhaseWiringType PhaseWiringType = "OnePhase3Wire"
-	// Three-phase / 4-Wire (Line1, Line2, Line3, Protective Earth).
-	ThreePhase4WirePhaseWiringType PhaseWiringType = "ThreePhase4Wire"
-	// Three-phase / 5-Wire (Line1, Line2, Line3, Neutral, Protective Earth).
-	ThreePhase5WirePhaseWiringType PhaseWiringType = "ThreePhase5Wire"
-	// Two-phase / 3-Wire (Line1, Line2, Protective Earth).
+	// TwoPhase3WirePhaseWiringType shall represent a two-phase / 3-wire (Line1,
+	// Line2, Protective Earth) wiring.
 	TwoPhase3WirePhaseWiringType PhaseWiringType = "TwoPhase3Wire"
-	// Two-phase / 4-Wire (Line1, Line2, Neutral, Protective Earth).
+	// OneOrTwoPhase3WirePhaseWiringType shall represent a single or two-phase /
+	// 3-wire (Line1, Line2 or Neutral, Protective Earth) wiring. This value shall
+	// be used when both phase configurations are supported. This is most common
+	// where detachable cordsets are used. If poly-phase properties such as
+	// 'PolyPhaseVoltage' are supported, the service should populate the
+	// measurements as if the circuit is wired as Line1, Neutral, and Protective
+	// Earth.
+	OneOrTwoPhase3WirePhaseWiringType PhaseWiringType = "OneOrTwoPhase3Wire"
+	// TwoPhase4WirePhaseWiringType shall represent a two-phase / 4-wire (Line1,
+	// Line2, Neutral, Protective Earth) wiring.
 	TwoPhase4WirePhaseWiringType PhaseWiringType = "TwoPhase4Wire"
+	// ThreePhase4WirePhaseWiringType shall represent a three-phase / 4-wire
+	// (Line1, Line2, Line3, Protective Earth) wiring.
+	ThreePhase4WirePhaseWiringType PhaseWiringType = "ThreePhase4Wire"
+	// ThreePhase5WirePhaseWiringType shall represent a three-phase / 5-wire
+	// (Line1, Line2, Line3, Neutral, Protective Earth) wiring.
+	ThreePhase5WirePhaseWiringType PhaseWiringType = "ThreePhase5Wire"
 )
 
-// The type of plug according to NEMA, IEC, or regional standards.
 type PlugType string
 
 const (
-	// California Standard CS8265 (Single-phase 250V; 50A; 2P3W).
-	CaliforniaCS8265PlugType PlugType = "California_CS8265"
-	// California Standard CS8365 (Three-phase 250V; 50A; 3P4W).
-	CaliforniaCS8365PlugType PlugType = "California_CS8365"
-	// Field-wired; Three-phase 200-250V; 60A; 3P4W.
-	Field208V3P4W60APlugType PlugType = "Field_208V_3P4W_60A"
-	// Field-wired; Three-phase 200-240/346-415V; 32A; 3P5W.
-	Field400V3P5W32APlugType PlugType = "Field_400V_3P5W_32A"
-	// IEC 60309 316P6 (Single-phase 200-250V; 16A; 1P3W; Blue, 6-hour).
-	IEC60309316P6PlugType PlugType = "IEC_60309_316P6"
-	// IEC 60309 332P6 (Single-phase 200-250V; 32A; 1P3W; Blue, 6-hour).
-	IEC60309332P6PlugType PlugType = "IEC_60309_332P6"
-	// IEC 60309 363P6 (Single-phase 200-250V; 63A; 1P3W; Blue, 6-hour).
-	IEC60309363P6PlugType PlugType = "IEC_60309_363P6"
-	// IEC 60309 460P9 (Three-phase 200-250V; 60A; 3P4W; Blue; 9-hour).
-	IEC60309460P9PlugType PlugType = "IEC_60309_460P9"
-	// IEC 60309 516P6 (Three-phase 200-240/346-415V; 16A; 3P5W; Red; 6-hour).
-	IEC60309516P6PlugType PlugType = "IEC_60309_516P6"
-	// IEC 60309 532P6 (Three-phase 200-240/346-415V; 32A; 3P5W; Red; 6-hour).
-	IEC60309532P6PlugType PlugType = "IEC_60309_532P6"
-	// IEC 60309 560P9 (Three-phase 120-144/208-250V; 60A; 3P5W; Blue; 9-hour).
-	IEC60309560P9PlugType PlugType = "IEC_60309_560P9"
-	// IEC 60309 563P6 (Three-phase 200-240/346-415V; 63A; 3P5W; Red; 6-hour).
-	IEC60309563P6PlugType PlugType = "IEC_60309_563P6"
-	// IEC C14 (Single-phase 250V; 10A; 1P3W).
-	IEC60320C14PlugType PlugType = "IEC_60320_C14"
-	// IEC C20 (Single-phase 250V; 16A; 1P3W).
-	IEC60320C20PlugType PlugType = "IEC_60320_C20"
-	// NEMA 5-15P (Single-phase 125V; 15A; 1P3W).
+	// NEMA515PPlugType shall represent a plug that matches the NEMA specified 5-15
+	// straight (non-locking) plug (Single-phase 125V; 15A; 1P3W).
 	NEMA515PPlugType PlugType = "NEMA_5_15P"
-	// NEMA 5-20P (Single-phase 125V; 20A; 1P3W).
-	NEMA520PPlugType PlugType = "NEMA_5_20P"
-	// NEMA 6-15P (Single-phase 250V; 15A; 2P3W).
-	NEMA615PPlugType PlugType = "NEMA_6_15P"
-	// NEMA 6-20P (Single-phase 250V; 20A; 2P3W).
-	NEMA620PPlugType PlugType = "NEMA_6_20P"
-	// NEMA L14-20P (Split-phase 125/250V; 20A; 2P4W).
-	NEMAL1420PPlugType PlugType = "NEMA_L14_20P"
-	// NEMA L14-30P (Split-phase 125/250V; 30A; 2P4W).
-	NEMAL1430PPlugType PlugType = "NEMA_L14_30P"
-	// NEMA L15-20P (Three-phase 250V; 20A; 3P4W).
-	NEMAL1520PPlugType PlugType = "NEMA_L15_20P"
-	// NEMA L15-30P (Three-phase 250V; 30A; 3P4W).
-	NEMAL1530PPlugType PlugType = "NEMA_L15_30P"
-	// NEMA L21-20P (Three-phase 120/208V; 20A; 3P5W).
-	NEMAL2120PPlugType PlugType = "NEMA_L21_20P"
-	// NEMA L21-30P (Three-phase 120/208V; 30A; 3P5W).
-	NEMAL2130PPlugType PlugType = "NEMA_L21_30P"
-	// NEMA L22-20P (Three-phase 277/480V; 20A; 3P5W).
-	NEMAL2220PPlugType PlugType = "NEMA_L22_20P"
-	// NEMA L22-30P (Three-phase 277/480V; 30A; 3P5W).
-	NEMAL2230PPlugType PlugType = "NEMA_L22_30P"
-	// NEMA L5-15P (Single-phase 125V; 15A; 1P3W).
+	// NEMAL515PPlugType shall represent a plug that matches the NEMA specified
+	// locking L5-15 plug (Single-phase 125V; 15A; 1P3W).
 	NEMAL515PPlugType PlugType = "NEMA_L5_15P"
-	// NEMA L5-20P (Single-phase 125V; 20A; 1P3W).
+	// NEMA520PPlugType shall represent a plug that matches the NEMA specified 5-20
+	// straight (non-locking) plug that exhibits a T-slot (Single-phase 125V; 20A;
+	// 1P3W).
+	NEMA520PPlugType PlugType = "NEMA_5_20P"
+	// NEMAL520PPlugType shall represent a plug that matches the NEMA specified
+	// locking L5-20 plug (Single-phase 125V; 20A; 1P3W).
 	NEMAL520PPlugType PlugType = "NEMA_L5_20P"
-	// NEMA L5-30P (Single-phase 125V; 30A; 1P3W).
+	// NEMAL530PPlugType shall represent a plug that matches the NEMA specified
+	// locking L5-30 plug (Single-phase 125V; 30A; 1P3W).
 	NEMAL530PPlugType PlugType = "NEMA_L5_30P"
-	// NEMA L6-15P (Single-phase 250V; 15A; 2P3W).
+	// NEMA615PPlugType shall represent a plug that matches the NEMA specified 6-15
+	// straight (non-locking) plug (Single-phase 250V; 15A; 2P3W).
+	NEMA615PPlugType PlugType = "NEMA_6_15P"
+	// NEMAL615PPlugType shall represent a plug that matches the NEMA specified
+	// locking L6-15 plug (Single-phase 250V; 15A; 2P3W).
 	NEMAL615PPlugType PlugType = "NEMA_L6_15P"
-	// NEMA L6-20P (Single-phase 250V; 20A; 2P3W).
+	// NEMA620PPlugType shall represent a plug that matches the NEMA specified 6-20
+	// straight (non-locking) plug (Single-phase 250V; 20A; 2P3W).
+	NEMA620PPlugType PlugType = "NEMA_6_20P"
+	// NEMAL620PPlugType shall represent a plug that matches the NEMA specified
+	// locking L6-20 plug (Single-phase 250V; 20A; 2P3W).
 	NEMAL620PPlugType PlugType = "NEMA_L6_20P"
-	// NEMA L6-30P (Single-phase 250V; 30A; 2P3W).
+	// NEMAL630PPlugType shall represent a plug that matches the NEMA specified
+	// locking L6-30 plug (Single-phase 250V; 30A; 2P3W).
 	NEMAL630PPlugType PlugType = "NEMA_L6_30P"
+	// NEMAL1420PPlugType shall represent a plug that matches the NEMA specified
+	// locking L14-20 plug (Split-phase 125/250V; 20A; 2P4W).
+	NEMAL1420PPlugType PlugType = "NEMA_L14_20P"
+	// NEMAL1430PPlugType shall represent a plug that matches the NEMA specified
+	// locking L14-30 plug (Split-phase 125/250V; 30A; 2P4W).
+	NEMAL1430PPlugType PlugType = "NEMA_L14_30P"
+	// NEMAL1520PPlugType shall represent a plug that matches the NEMA specified
+	// locking L15-20 plug (Three-phase 250V; 20A; 3P4W).
+	NEMAL1520PPlugType PlugType = "NEMA_L15_20P"
+	// NEMAL1530PPlugType shall represent a plug that matches the NEMA specified
+	// locking L15-30 plug (Three-phase 250V; 30A; 3P4W).
+	NEMAL1530PPlugType PlugType = "NEMA_L15_30P"
+	// NEMAL2120PPlugType shall represent a plug that matches the NEMA specified
+	// locking L21-20 plug (Three-phase 120/208V; 20A; 3P5W).
+	NEMAL2120PPlugType PlugType = "NEMA_L21_20P"
+	// NEMAL2130PPlugType shall represent a plug that matches the NEMA specified
+	// locking L21-30 plug (Three-phase 120/208V; 30A; 3P5W).
+	NEMAL2130PPlugType PlugType = "NEMA_L21_30P"
+	// NEMAL2220PPlugType shall represent a plug that matches the NEMA specified
+	// locking L22-20 plug (Three-phase 277/480V; 20A; 3P5W).
+	NEMAL2220PPlugType PlugType = "NEMA_L22_20P"
+	// NEMAL2230PPlugType shall represent a plug that matches the NEMA specified
+	// locking L22-30 plug (Three-phase 277/480V; 30A; 3P5W).
+	NEMAL2230PPlugType PlugType = "NEMA_L22_30P"
+	// CaliforniaCS8265PlugType shall represent a plug that matches the 'California
+	// Standard' CS8265 style plug (Single-phase 250V; 50A; 2P3W).
+	CaliforniaCS8265PlugType PlugType = "California_CS8265"
+	// CaliforniaCS8365PlugType shall represent a plug that matches the 'California
+	// Standard' CS8365 style plug (Three-phase 250V; 50A; 3P4W).
+	CaliforniaCS8365PlugType PlugType = "California_CS8365"
+	// IEC60320C14PlugType shall represent a plug that matches the IEC 60320
+	// specified C14 input (Single-phase 250V; 10A; 1P3W).
+	IEC60320C14PlugType PlugType = "IEC_60320_C14"
+	// IEC60320C20PlugType shall represent a plug that matches the IEC 60320
+	// specified C20 input (Single-phase 250V; 16A; 1P3W).
+	IEC60320C20PlugType PlugType = "IEC_60320_C20"
+	// IEC60309316P6PlugType shall represent a plug that matches the IEC 60309
+	// 316P6 plug (Single-phase 200-250V; 16A; 1P3W; Blue, 6-hour).
+	IEC60309316P6PlugType PlugType = "IEC_60309_316P6"
+	// IEC60309332P6PlugType shall represent a plug that matches the IEC 60309
+	// 332P6 plug (Single-phase 200-250V; 32A; 1P3W; Blue, 6-hour).
+	IEC60309332P6PlugType PlugType = "IEC_60309_332P6"
+	// IEC60309363P6PlugType shall represent a plug that matches the IEC 60309
+	// 363P6 plug (Single-phase 200-250V; 63A; 1P3W; Blue, 6-hour).
+	IEC60309363P6PlugType PlugType = "IEC_60309_363P6"
+	// IEC60309516P6PlugType shall represent a plug that matches the IEC 60309
+	// 516P6 plug (Three-phase 200-240/346-415V; 16A; 3P5W; Red; 6-hour).
+	IEC60309516P6PlugType PlugType = "IEC_60309_516P6"
+	// IEC60309532P6PlugType shall represent a plug that matches the IEC 60309 plug
+	// 532P6 (Three-phase 200-240/346-415V; 32A; 3P5W; Red; 6-hour).
+	IEC60309532P6PlugType PlugType = "IEC_60309_532P6"
+	// IEC60309563P6PlugType shall represent a plug that matches the IEC 60309
+	// 563P6 plug (Three-phase 200-240/346-415V; 63A; 3P5W; Red; 6-hour).
+	IEC60309563P6PlugType PlugType = "IEC_60309_563P6"
+	// IEC60309460P9PlugType shall represent a plug that matches the IEC 60309
+	// 460P9 plug (Three-phase 200-250V; 60A; 3P4W; Blue; 9-hour).
+	IEC60309460P9PlugType PlugType = "IEC_60309_460P9"
+	// IEC60309560P9PlugType shall represent a plug that matches the IEC 60309 plug
+	// 560P9 (Three-phase 120-144/208-250V; 60A; 3P5W; Blue; 9-hour).
+	IEC60309560P9PlugType PlugType = "IEC_60309_560P9"
+	// Field208V3P4W60APlugType shall represent field-wired input that is
+	// three-phase 200-250V; 60A; 3P4W.
+	Field208V3P4W60APlugType PlugType = "Field_208V_3P4W_60A"
+	// Field400V3P5W32APlugType shall represent field-wired input that is
+	// three-phase 200-240/346-415V; 32A; 3P5W.
+	Field400V3P5W32APlugType PlugType = "Field_400V_3P5W_32A"
 )
 
-// The current readings for this circuit.
-type PolyPhaseCurrentAmps struct {
-	// 	Line 1 current (A).
-	Line1 SensorVoltageExcerpt
-	// 	Line 2 current (A).
-	Line2 SensorVoltageExcerpt
-	// 	Line 3 current (A).
-	Line3 SensorVoltageExcerpt
-	// Neutral line current (A).
-	Neutral SensorVoltageExcerpt
-}
-
-// The energy readings for this circuit.
-type PolyPhaseEnergykWh struct {
-	// The Line 1 to Line 2 energy (kWh) for this circuit.
-	Line1ToLine2 SensorEnergykWhExcerpt
-	// The Line 1 to Neutral energy (kWh) for this circuit.
-	Line1ToNeutral SensorEnergykWhExcerpt
-	// The Line 2 to Line 3 energy (kWh) for this circuit.
-	Line2ToLine3 SensorEnergykWhExcerpt
-	// The Line 2 to Neutral energy (kWh) for this circuit.
-	Line2ToNeutral SensorEnergykWhExcerpt
-	// The Line 3 to Line 1 energy (kWh) for this circuit.
-	Line3ToLine1 SensorEnergykWhExcerpt
-	// The Line 3 to Neutral energy (kWh) for this circuit.
-	Line3ToNeutral SensorEnergykWhExcerpt
-}
-
-// The power readings for this circuit.
-type PolyPhasePowerWatts struct {
-	// The Line 1 to Line 2 power (W) for this circuit.
-	Line1ToLine2 SensorPowerExcerpt
-	// The Line 1 to Neutral power (W) for this circuit.
-	Line1ToNeutral SensorPowerExcerpt
-	// The Line 2 to Line 3 power (W) for this circuit.
-	Line2ToLine3 SensorPowerExcerpt
-	// The Line 2 to Neutral power (W) for this circuit.
-	Line2ToNeutral SensorPowerExcerpt
-	// The Line 3 to Line 1 power (W) for this circuit.
-	Line3ToLine1 SensorPowerExcerpt
-	// The Line 3 to Neutral power (W) for this circuit.
-	Line3ToNeutral SensorPowerExcerpt
-}
-
-// The voltage readings for this circuit.
-type PolyPhaseVoltage struct {
-	// The Line 1 to Line 2 voltage (V) for this circuit.
-	Line1ToLine2 SensorVoltageExcerpt
-	// The Line 1 to Neutral voltage (V) for this circuit.
-	Line1ToNeutral SensorVoltageExcerpt
-	// The Line 2 to Line 3 voltage (V) for this circuit.
-	Line2ToLine3 SensorVoltageExcerpt
-	// The Line 2 to Neutral voltage (V) for this circuit.
-	Line2ToNeutral SensorVoltageExcerpt
-	// The Line 3 to Line 1 voltage (V) for this circuit.
-	Line3ToLine1 SensorVoltageExcerpt
-	// The Line 3 to Neutral voltage (V) for this circuit.
-	Line3ToNeutral SensorVoltageExcerpt
-}
-
-// Circuit shall be used to represent
-// an electrical circuit for a Redfish implementation.
+// Circuit shall be used to represent an electrical circuit for a Redfish
+// implementation.
 type Circuit struct {
 	common.Entity
-
+	// BreakerState shall contain the state of the overcurrent protection device.
+	BreakerState BreakerStates
+	// CircuitType shall contain the type of circuit.
+	CircuitType CircuitType
+	// ConfigurationLocked shall indicate whether modification requests to this
+	// resource are not permitted. If 'true', services shall reject modification
+	// requests to other properties in this resource.
+	//
+	// Version added: v1.5.0
+	ConfigurationLocked bool
+	// CriticalCircuit shall indicate whether the circuit is designated as a
+	// critical circuit, and therefore is excluded from autonomous logic that could
+	// affect the state of the circuit. The value shall be 'true' if the circuit is
+	// deemed critical, and 'false' if the circuit is not critical.
+	CriticalCircuit bool
+	// CurrentAmps shall contain the current, in ampere units, for this circuit.
+	// The value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Current'. This property shall not be present if 'PhaseWiringType'
+	// contains a value that indicates a 4-wire or greater configuration, such as
+	// 'TwoPhase4Wire'.
+	CurrentAmps SensorCurrentExcerpt
+	// ElectricalConsumerNames shall contain an array of user-assigned identifying
+	// strings that describe downstream devices that are powered by this circuit.
+	//
+	// Version added: v1.4.0
+	ElectricalConsumerNames []string
+	// ElectricalContext shall contain the combination of current-carrying
+	// conductors that distribute power.
+	ElectricalContext ElectricalContext
+	// ElectricalSourceManagerURI shall contain a URI to the management application
+	// or device that provides monitoring or control of the upstream electrical
+	// source that provides power to this circuit. If a value has not been assigned
+	// by a user, the value of this property shall be an empty string.
+	//
+	// Version added: v1.4.0
+	ElectricalSourceManagerURI string
+	// ElectricalSourceName shall contain a string that identifies the upstream
+	// electrical source, such as the name of a circuit or outlet, that provides
+	// power to this circuit. If a value has not been assigned by a user, the value
+	// of this property shall be an empty string.
+	//
+	// Version added: v1.4.0
+	ElectricalSourceName string
+	// EnergykWh shall contain the total energy, in kilowatt-hour units, for this
+	// circuit that represents the 'Total' 'ElectricalContext' sensor when multiple
+	// energy sensors exist for this circuit. The value of the 'DataSourceUri'
+	// property, if present, shall reference a resource of type 'Sensor' with the
+	// 'ReadingType' property containing the value 'EnergykWh'.
+	EnergykWh SensorEnergykWhExcerpt
+	// FrequencyHz shall contain the frequency, in hertz units, for this circuit.
+	// The value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Frequency'.
+	FrequencyHz SensorExcerpt
+	// IndicatorLED shall contain the indicator light state for the indicator light
+	// associated with this circuit.
+	//
+	// Deprecated: v1.1.0
+	// This property has been deprecated in favor of the 'LocationIndicatorActive'
+	// property.
+	IndicatorLED common.IndicatorLED
+	// LocationIndicatorActive shall contain the state of the indicator used to
+	// physically identify or locate this resource. A write to this property shall
+	// update the value of 'IndicatorLED' in this resource, if supported, to
+	// reflect the implementation of the locating function.
+	//
+	// Version added: v1.1.0
+	LocationIndicatorActive bool
+	// NominalFrequencyHz shall contain the nominal frequency for this circuit, in
+	// hertz units.
+	//
+	// Version added: v1.8.0
+	NominalFrequencyHz *float64 `json:",omitempty"`
+	// NominalVoltage shall contain the nominal voltage for this circuit, in volt
+	// units.
+	NominalVoltage NominalVoltageType
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-
-	// The state of the over current protection device.
-	BreakerState BreakerState
-	// The type of circuit.
-	CircuitType CircuitType
-	// Indicates whether the configuration is locked.
-	ConfigurationLocked bool
-	// Designates if this is a critical circuit.
-	CriticalCircuit bool
-	// The current (A) for this single phase circuit.
-	CurrentAmps SensorVoltageExcerpt
-	// An array of names of downstream devices that are powered by this circuit.
-	ElectricalConsumerNames []string
-	// The combination of current-carrying conductors.
-	ElectricalContext common.ElectricalContext
-	// The URI of the management interface
-	// for the upstream electrical source connection for this circuit.
-	ElectricalSourceManagerURI string
-	// The name of the upstream electrical source,
-	// such as a circuit or outlet, connected to this circuit.
-	ElectricalSourceName string
-	// The energy (kWh) for this circuit.
-	EnergykWh SensorEnergykWhExcerpt
-	// The frequency (Hz) for this circuit.
-	FrequencyHz SensorExcerpt
-	// Deprecated: (v1.1)
-	// The state of the indicator LED, which identifies the circuit.
-	IndicatorLED common.IndicatorLED
-	// An indicator allowing an operator to physically locate this resource.
-	LocationIndicatorActive bool
-	// The nominal voltage for this circuit.
-	NominalVoltage NominalVoltage
-	// The number of ungrounded current-carrying conductors (phases)
-	// and the total number of conductors (wires).
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PhaseWiringType shall contain the number of ungrounded current-carrying
+	// conductors (phases) and the total number of conductors (wires).
 	PhaseWiringType PhaseWiringType
-	// The type of plug according to NEMA, IEC, or regional standards.
+	// PlugType shall contain the type of physical plug used for this circuit, as
+	// defined by IEC, NEMA, or regional standards.
 	PlugType PlugType
-	// The current readings for this circuit.
-	PolyPhaseCurrentAmps PolyPhaseCurrentAmps
-	// The energy readings for this circuit.
-	PolyPhaseEnergykWh PolyPhaseEnergykWh
-	// The power readings for this circuit.
-	PolyPhasePowerWatts PolyPhasePowerWatts
-	// The voltage readings for this circuit.
-	PolyPhaseVoltage PolyPhaseVoltage
-	// Indicates whether power control requests are locked.
+	// PolyPhaseCurrentAmps shall contain the current sensors for this circuit. For
+	// 3-wire circuits, this property shall contain a duplicate copy of the current
+	// sensor referenced in the 'CurrentAmps' property, if present. For other
+	// circuits, this property should contain multiple current sensor readings used
+	// to fully describe the circuit.
+	PolyPhaseCurrentAmps CurrentSensors
+	// PolyPhaseEnergykWh shall contain the energy sensors for this circuit. For
+	// 3-wire circuits, this property shall contain a duplicate copy of the energy
+	// sensor referenced in the 'EnergykWh' property, if present. For other
+	// circuits, this property should contain multiple energy sensor readings used
+	// to fully describe the circuit.
+	PolyPhaseEnergykWh EnergySensors
+	// PolyPhasePowerWatts shall contain the power sensors for this circuit. For
+	// 3-wire circuits, this property shall contain a duplicate copy of the power
+	// sensor referenced in the 'PowerWatts' property, if present. For other
+	// circuits, this property should contain multiple power sensor readings used
+	// to fully describe the circuit.
+	PolyPhasePowerWatts PowerSensors
+	// PolyPhaseVoltage shall contain the voltage sensors for this circuit. For
+	// 3-wire circuits, this property shall contain a duplicate copy of the voltage
+	// sensor referenced in the 'Voltage' property, if present. For other circuits,
+	// this property should contain multiple voltage sensor readings used to fully
+	// describe the circuit.
+	PolyPhaseVoltage VoltageSensors
+	// PowerControlLocked shall indicate whether requests to the 'PowerControl'
+	// action are locked. If 'true', services shall reject requests to the
+	// 'PowerControl' action.
+	//
+	// Version added: v1.5.0
 	PowerControlLocked bool
-	// The number of seconds to delay power on
-	// after a PowerControl action to cycle power.
-	// Zero seconds indicates no delay.
-	PowerCycleDelaySeconds float32
-	// Indicates if the circuit can be powered.
+	// PowerCycleDelaySeconds shall contain the number of seconds to delay power on
+	// after a 'PowerControl' action to cycle power. The value '0' shall indicate
+	// no delay to power on.
+	PowerCycleDelaySeconds *int `json:",omitempty"`
+	// PowerEnabled shall indicate the power enable state of the circuit. The value
+	// 'true' shall indicate that the circuit can be powered on, and 'false' shall
+	// indicate that the circuit cannot be powered.
 	PowerEnabled bool
-	// The power load (percent) for this circuit.
+	// PowerLoadPercent shall contain the power load, in percent units, for this
+	// circuit that represents the 'Total' 'ElectricalContext' for this circuit.
+	//
+	// Version added: v1.3.0
 	PowerLoadPercent SensorExcerpt
-	// The number of seconds to delay power off after a PowerControl action.
-	// Zero seconds indicates no delay to power off.
-	PowerOffDelaySeconds float32
-	// The number of seconds to delay power up after a power cycle or
-	// a PowerControl action. Zero seconds indicates no delay to power up.
-	PowerOnDelaySeconds float32
-	// The number of seconds to delay power on after power has been restored.
-	// Zero seconds indicates no delay.
-	PowerRestoreDelaySeconds float32
-	// The desired power state of the circuit
-	// when power is restored after a power loss.
+	// PowerOffDelaySeconds shall contain the number of seconds to delay power off
+	// after a 'PowerControl' action. The value '0' shall indicate no delay to
+	// power off.
+	PowerOffDelaySeconds *int `json:",omitempty"`
+	// PowerOnDelaySeconds shall contain the number of seconds to delay power up
+	// after a power cycle or a 'PowerControl' action. The value '0' shall indicate
+	// no delay to power up.
+	PowerOnDelaySeconds *int `json:",omitempty"`
+	// PowerRestoreDelaySeconds shall contain the number of seconds to delay power
+	// on after a power fault. The value '0' shall indicate no delay to power on.
+	PowerRestoreDelaySeconds *int `json:",omitempty"`
+	// PowerRestorePolicy shall contain the desired 'PowerState' of the circuit
+	// when power is applied. The value 'LastState' shall return the circuit to the
+	// 'PowerState' it was in when power was lost.
 	PowerRestorePolicy PowerRestorePolicyTypes
-	// The power state of the circuit.
-	PowerState PowerState
-	// Indicates whether the power state is undergoing a delayed transition.
+	// PowerState shall contain the power state of the circuit.
+	PowerState common.PowerState
+	// PowerStateInTransition shall indicate whether the 'PowerState' property will
+	// undergo a transition between on and off states due to a configured delay.
+	// The transition may be due to the configuration of the power on, off, or
+	// restore delay properties. If 'true', the 'PowerState' property will
+	// transition at the conclusion of a configured delay.
+	//
+	// Version added: v1.5.0
 	PowerStateInTransition bool
-	// The power (W) for this circuit.
+	// PowerWatts shall contain the total power, in watt units, for this circuit
+	// that represents the 'Total' 'ElectricalContext' sensor when multiple power
+	// sensors exist for this circuit. The value of the 'DataSourceUri' property,
+	// if present, shall reference a resource of type 'Sensor' with the
+	// 'ReadingType' property containing the value 'Power'.
 	PowerWatts SensorPowerExcerpt
-	// The rated maximum current allowed for this circuit.
-	RatedCurrentAmps float32
-	// The status and health of the resource and its subordinate or dependent resources.
+	// RatedCurrentAmps shall contain the rated maximum current for this circuit,
+	// in ampere units, after any required de-rating, due to safety agency or other
+	// regulatory requirements, has been applied.
+	RatedCurrentAmps *float64 `json:",omitempty"`
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// The current imbalance (percent) between phases.
+	// UnbalancedCurrentPercent shall contain the current imbalance, in percent
+	// units, between phases in a poly-phase circuit. The value of the
+	// 'DataSourceUri' property, if present, shall reference a resource of type
+	// 'Sensor' with the 'ReadingType' property containing the value 'Percent'.
+	//
+	// Version added: v1.5.0
 	UnbalancedCurrentPercent SensorExcerpt
-	// The voltage imbalance (percent) between phases.
+	// UnbalancedVoltagePercent shall contain the voltage imbalance, in percent
+	// units, between phases in a poly-phase circuit. The value of the
+	// 'DataSourceUri' property, if present, shall reference a resource of type
+	// 'Sensor' with the 'ReadingType' property containing the value 'Percent'.
+	//
+	// Version added: v1.5.0
 	UnbalancedVoltagePercent SensorExcerpt
-	// A user-assigned label.
+	// UserLabel shall contain a user-assigned label used to identify this
+	// resource. If a value has not been assigned by a user, the value of this
+	// property shall be an empty string.
+	//
+	// Version added: v1.4.0
 	UserLabel string
-	// The voltage (V) for this single phase circuit.
+	// Voltage shall contain the voltage, in volt units, for this circuit. The
+	// value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Voltage'. This property shall not be present if 'PhaseWiringType'
+	// contains a value that indicates a 4-wire or greater configuration, such as
+	// 'TwoPhase4Wire'.
 	Voltage SensorVoltageExcerpt
-	// The type of voltage applied to the circuit.
-	VoltageType InputType
-
-	// Links section
-	// A reference to the branch circuit related to this circuit.
-	branchCircuit string
-	// An array of links to the circuits powered by this circuit.
-	distributionCircuits      []string
-	DistributionCircuitsCount int
-	// OemLinks are all OEM data under link section
-	OemLinks json.RawMessage
-	// An array of references to the outlets contained by this circuit.
-	outlets      []string
-	OutletsCount int
-	// A link to the power outlet that provides power to this circuit.
-	powerOutlet string
-	// A link to the circuit that provides power to this circuit.
-	sourceCircuit string
-
-	// Actions section
-	// This action attempts to reset the circuit breaker.
+	// VoltageType shall contain the type of voltage applied to the circuit.
+	VoltageType VoltageType
+	// breakerControlTarget is the URL to send BreakerControl requests.
 	breakerControlTarget string
-	// This action turns the circuit on or off.
+	// powerControlTarget is the URL to send PowerControl requests.
 	powerControlTarget string
-	// This action resets metrics related to this circuit.
+	// resetMetricsTarget is the URL to send ResetMetrics requests.
 	resetMetricsTarget string
-	// OemActions contains all the vendor specific actions.
-	// It is vendor responsibility to parse this field accordingly
-	OemActions json.RawMessage
-
+	// branchCircuit is the URI for BranchCircuit.
+	branchCircuit string
+	// distributionCircuits are the URIs for DistributionCircuits.
+	distributionCircuits []string
+	// outlets are the URIs for Outlets.
+	outlets []string
+	// powerOutlet is the URI for PowerOutlet.
+	powerOutlet string
+	// sourceCircuit is the URI for SourceCircuit.
+	sourceCircuit string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Circuit object from the raw JSON.
-func (circuit *Circuit) UnmarshalJSON(b []byte) error {
+func (c *Circuit) UnmarshalJSON(b []byte) error {
 	type temp Circuit
-	type linkReference struct {
-		BranchCircuit             common.Link
-		DistributionCircuits      common.Links
-		DistributionCircuitsCount int `json:"DistributionCircuits@odata.count"`
-		Outlets                   common.Links
-		OutletsCount              int `json:"Outlets@odata.count"`
-		Oem                       json.RawMessage
-		PowerOutlet               common.Link
-		SourceCircuit             common.Link
-	}
-	type actions struct {
+	type cActions struct {
 		BreakerControl common.ActionTarget `json:"#Circuit.BreakerControl"`
 		PowerControl   common.ActionTarget `json:"#Circuit.PowerControl"`
 		ResetMetrics   common.ActionTarget `json:"#Circuit.ResetMetrics"`
-		Oem            json.RawMessage     // OEM actions will be stored here
 	}
-	var t struct {
+	type cLinks struct {
+		BranchCircuit        common.Link  `json:"BranchCircuit"`
+		DistributionCircuits common.Links `json:"DistributionCircuits"`
+		Outlets              common.Links `json:"Outlets"`
+		PowerOutlet          common.Link  `json:"PowerOutlet"`
+		SourceCircuit        common.Link  `json:"SourceCircuit"`
+	}
+	var tmp struct {
 		temp
-
-		Links   linkReference
-		Actions actions
+		Actions cActions
+		Links   cLinks
 	}
 
-	if err := json.Unmarshal(b, &t); err != nil {
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
 		return err
 	}
 
+	*c = Circuit(tmp.temp)
+
 	// Extract the links to other entities for later
-	*circuit = Circuit(t.temp)
-
-	circuit.branchCircuit = t.Links.BranchCircuit.String()
-	circuit.distributionCircuits = t.Links.DistributionCircuits.ToStrings()
-	circuit.DistributionCircuitsCount = t.Links.DistributionCircuitsCount
-	circuit.outlets = t.Links.Outlets.ToStrings()
-	circuit.OutletsCount = t.Links.OutletsCount
-	circuit.OemLinks = t.Links.Oem
-	circuit.powerOutlet = t.Links.PowerOutlet.String()
-	circuit.sourceCircuit = t.Links.SourceCircuit.String()
-
-	circuit.breakerControlTarget = t.Actions.BreakerControl.Target
-	circuit.powerControlTarget = t.Actions.PowerControl.Target
-	circuit.resetMetricsTarget = t.Actions.ResetMetrics.Target
-	circuit.OemActions = t.Actions.Oem
+	c.breakerControlTarget = tmp.Actions.BreakerControl.Target
+	c.powerControlTarget = tmp.Actions.PowerControl.Target
+	c.resetMetricsTarget = tmp.Actions.ResetMetrics.Target
+	c.branchCircuit = tmp.Links.BranchCircuit.String()
+	c.distributionCircuits = tmp.Links.DistributionCircuits.ToStrings()
+	c.outlets = tmp.Links.Outlets.ToStrings()
+	c.powerOutlet = tmp.Links.PowerOutlet.String()
+	c.sourceCircuit = tmp.Links.SourceCircuit.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	circuit.rawData = b
+	c.rawData = b
 
 	return nil
 }
 
-// GetCircuit will get a Circuit instance from the Redfish service.
-func GetCircuit(c common.Client, uri string) (*Circuit, error) {
-	return common.GetObject[Circuit](c, uri)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (circuit *Circuit) Update() error {
+func (c *Circuit) Update() error {
 	readWriteFields := []string{
 		"ConfigurationLocked",
 		"CriticalCircuit",
+		"CurrentAmps",
 		"ElectricalConsumerNames",
 		"ElectricalSourceManagerURI",
 		"ElectricalSourceName",
+		"EnergykWh",
+		"FrequencyHz",
 		"IndicatorLED",
 		"LocationIndicatorActive",
+		"PolyPhaseCurrentAmps",
+		"PolyPhaseEnergykWh",
+		"PolyPhasePowerWatts",
+		"PolyPhaseVoltage",
 		"PowerControlLocked",
 		"PowerCycleDelaySeconds",
+		"PowerLoadPercent",
 		"PowerOffDelaySeconds",
 		"PowerOnDelaySeconds",
 		"PowerRestoreDelaySeconds",
 		"PowerRestorePolicy",
+		"PowerWatts",
+		"Status",
+		"UnbalancedCurrentPercent",
+		"UnbalancedVoltagePercent",
 		"UserLabel",
+		"Voltage",
 	}
 
-	return circuit.UpdateFromRawData(circuit, circuit.rawData, readWriteFields)
+	return c.UpdateFromRawData(c, c.rawData, readWriteFields)
 }
 
-// This action shall control the state of the circuit breaker or over-current protection device.
-func (circuit *Circuit) BreakerControl(powerState ActionPowerState) error {
-	if circuit.breakerControlTarget == "" {
-		return errors.New("BreakerControl is not supported")
-	}
-
-	t := struct {
-		PowerState ActionPowerState
-	}{PowerState: powerState}
-
-	return circuit.Post(circuit.breakerControlTarget, t)
+// GetCircuit will get a Circuit instance from the service.
+func GetCircuit(c common.Client, uri string) (*Circuit, error) {
+	return common.GetObject[Circuit](c, uri)
 }
 
-// This action shall control the power state of the circuit.
-func (circuit *Circuit) PowerControl(powerState ActionPowerState) error {
-	if circuit.powerControlTarget == "" {
-		return errors.New("PowerControl is not supported")
-	}
-
-	t := struct {
-		PowerState ActionPowerState
-	}{PowerState: powerState}
-
-	return circuit.Post(circuit.powerControlTarget, t)
-}
-
-// This action shall reset any time intervals or counted values for this circuit.
-func (circuit *Circuit) ResetMetrics() error {
-	if circuit.resetMetricsTarget == "" {
-		return errors.New("ResetMetrics is not supported")
-	}
-
-	return circuit.Post(circuit.resetMetricsTarget, nil)
-}
-
-// ListReferencedCircuits gets the collection of Circuits from
+// ListReferencedCircuits gets the collection of Circuit from
 // a provided reference.
 func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) {
 	return common.GetCollectionObjects[Circuit](c, link)
 }
 
-// BranchCircuit gets a resource that represents the branch circuit associated with this circuit.
-func (circuit *Circuit) BranchCircuit() (*Circuit, error) {
-	return GetCircuit(circuit.GetClient(), circuit.branchCircuit)
+// BreakerControl shall control the state of the circuit breaker or over-current
+// protection device.
+// powerState - This parameter shall contain the desired power state of the
+// circuit.
+func (c *Circuit) BreakerControl(powerState common.PowerState) error {
+	payload := make(map[string]any)
+	payload["PowerState"] = powerState
+	return c.Post(c.breakerControlTarget, payload)
 }
 
-// SourceCircuit gets a resource that represents the circuit that provides power to this circuit.
-func (circuit *Circuit) SourceCircuit() (*Circuit, error) {
-	return GetCircuit(circuit.GetClient(), circuit.sourceCircuit)
+// PowerControl shall control the power state of the circuit.
+// powerState - This parameter shall contain the desired power state of the
+// circuit.
+func (c *Circuit) PowerControl(powerState common.PowerState) error {
+	payload := make(map[string]any)
+	payload["PowerState"] = powerState
+	return c.Post(c.powerControlTarget, payload)
 }
 
-// DistributionCircuits gets the collection that contains the circuits powered by this circuit.
-func (circuit *Circuit) DistributionCircuits() ([]*Circuit, error) {
-	return common.GetObjects[Circuit](circuit.GetClient(), circuit.distributionCircuits)
+// ResetMetrics shall reset any time intervals or counted values for this
+// circuit.
+func (c *Circuit) ResetMetrics() error {
+	payload := make(map[string]any)
+	return c.Post(c.resetMetricsTarget, payload)
 }
 
-// TODO: outlets, power outlet
+// BranchCircuit gets the BranchCircuit linked resource.
+func (c *Circuit) BranchCircuit(client common.Client) (*Circuit, error) {
+	if c.branchCircuit == "" {
+		return nil, nil
+	}
+	return common.GetObject[Circuit](client, c.branchCircuit)
+}
+
+// DistributionCircuits gets the DistributionCircuits linked resources.
+func (c *Circuit) DistributionCircuits(client common.Client) ([]*Circuit, error) {
+	return common.GetObjects[Circuit](client, c.distributionCircuits)
+}
+
+// Outlets gets the Outlets linked resources.
+func (c *Circuit) Outlets(client common.Client) ([]*Outlet, error) {
+	return common.GetObjects[Outlet](client, c.outlets)
+}
+
+// PowerOutlet gets the PowerOutlet linked resource.
+func (c *Circuit) PowerOutlet(client common.Client) (*Outlet, error) {
+	if c.powerOutlet == "" {
+		return nil, nil
+	}
+	return common.GetObject[Outlet](client, c.powerOutlet)
+}
+
+// SourceCircuit gets the SourceCircuit linked resource.
+func (c *Circuit) SourceCircuit(client common.Client) (*Circuit, error) {
+	if c.sourceCircuit == "" {
+		return nil, nil
+	}
+	return common.GetObject[Circuit](client, c.sourceCircuit)
+}
+
+// EnergySensors shall contain properties that describe energy sensor readings
+// for a circuit.
+type EnergySensors struct {
+	// Line1ToLine2 shall contain the energy, in kilowatt-hour units, between L1
+	// and L2. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'EnergykWh'. This property shall not be present if the
+	// equipment does not include an L1-L2 measurement.
+	Line1ToLine2 SensorEnergykWhExcerpt
+	// Line1ToNeutral shall contain the energy, in kilowatt-hour units, between L1
+	// and Neutral. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'EnergykWh'. This property shall not be present if the
+	// equipment does not include an L1-Neutral measurement.
+	Line1ToNeutral SensorEnergykWhExcerpt
+	// Line2ToLine3 shall contain the energy, in kilowatt-hour units, between L2
+	// and L3. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'EnergykWh'. This property shall not be present if the
+	// equipment does not include an L2-L3 measurement.
+	Line2ToLine3 SensorEnergykWhExcerpt
+	// Line2ToNeutral shall contain the energy, in kilowatt-hour units, between L2
+	// and Neutral. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'EnergykWh'. This property shall not be present if the
+	// equipment does not include an L2-Neutral measurement.
+	Line2ToNeutral SensorEnergykWhExcerpt
+	// Line3ToLine1 shall contain the energy, in kilowatt-hour units, between L3
+	// and L1. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'EnergykWh'. This property shall not be present if the
+	// equipment does not include an L3-L1 measurement.
+	Line3ToLine1 SensorEnergykWhExcerpt
+	// Line3ToNeutral shall contain the energy, in kilowatt-hour units, between L3
+	// and Neutral. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'EnergykWh'. This property shall not be present if the
+	// equipment does not include an L3-Neutral measurement.
+	Line3ToNeutral SensorEnergykWhExcerpt
+}
+
+// PowerSensors shall contain properties that describe power sensor readings for
+// a circuit.
+type PowerSensors struct {
+	// Line1ToLine2 shall contain the power, in watt units, between L1 and L2. The
+	// value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Power'. This property shall not be present if the equipment does not
+	// include an L1-L2 measurement.
+	Line1ToLine2 SensorPowerExcerpt
+	// Line1ToNeutral shall contain the power, in watt units, between L1 and
+	// Neutral. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Power'. This property shall not be present if the
+	// equipment does not include an L1-Neutral measurement.
+	Line1ToNeutral SensorPowerExcerpt
+	// Line2ToLine3 shall contain the power, in watt units, between L2 and L3. The
+	// value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Power'. This property shall not be present if the equipment does not
+	// include an L2-L3 measurement.
+	Line2ToLine3 SensorPowerExcerpt
+	// Line2ToNeutral shall contain the power, in watt units, between L2 and
+	// Neutral. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Power'. This property shall not be present if the
+	// equipment does not include an L2-Neutral measurement.
+	Line2ToNeutral SensorPowerExcerpt
+	// Line3ToLine1 shall contain the power, in watt units, between L3 and L1. The
+	// value of the 'DataSourceUri' property, if present, shall reference a
+	// resource of type 'Sensor' with the 'ReadingType' property containing the
+	// value 'Power'. This property shall not be present if the equipment does not
+	// include an L3-L1 measurement.
+	Line3ToLine1 SensorPowerExcerpt
+	// Line3ToNeutral shall contain the power, in watt units, between L3 and
+	// Neutral. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Power'. This property shall not be present if the
+	// equipment does not include an L3-Neutral measurement.
+	Line3ToNeutral SensorPowerExcerpt
+}
