@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var eventServiceBody = `{
@@ -99,7 +99,7 @@ var eventServiceBody = `{
 
 // TestAMIEventService tests the parsing of the EventService.
 func TestAMIEventService(t *testing.T) {
-	es := &redfish.EventService{}
+	es := &schemas.EventService{}
 	if err := json.Unmarshal([]byte(eventServiceBody), es); err != nil {
 		t.Fatalf("error decoding json: %v", err)
 	}
@@ -117,7 +117,7 @@ func TestAMIEventService(t *testing.T) {
 		t.Errorf("unexpected certificates link: %s", eventService.certificates)
 	}
 
-	if eventService.SecondarySMTP.Port != 25 {
+	if *eventService.SecondarySMTP.Port != 25 {
 		t.Errorf("unexpected port: %d", eventService.SecondarySMTP.Port)
 	}
 }

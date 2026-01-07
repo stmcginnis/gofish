@@ -7,11 +7,11 @@ package hpe
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type Fan struct {
-	redfish.ThermalFan
+	schemas.ThermalFan
 	Oem FanOem
 }
 
@@ -26,7 +26,7 @@ type FanOem struct {
 }
 
 type Thermal struct {
-	redfish.Thermal
+	schemas.Thermal
 	Fans []Fan
 	Oem  ThermalOem
 }
@@ -40,7 +40,7 @@ type ThermalOem struct {
 	} `json:"Hpe"`
 }
 
-func FromThermal(thermal *redfish.Thermal) (Thermal, error) {
+func FromThermal(thermal *schemas.Thermal) (Thermal, error) {
 	oem := ThermalOem{}
 
 	_ = json.Unmarshal(thermal.OEM, &oem)
@@ -63,7 +63,7 @@ func FromThermal(thermal *redfish.Thermal) (Thermal, error) {
 	}, nil
 }
 
-func FromFan(fan *redfish.ThermalFan) (Fan, error) {
+func FromFan(fan *schemas.ThermalFan) (Fan, error) {
 	oem := FanOem{}
 
 	_ = json.Unmarshal(fan.OEM, &oem)

@@ -144,8 +144,8 @@ func TestServiceRoot(t *testing.T) {
 		t.Errorf("Invalid JobService link: %s", result.jobService)
 	}
 
-	if result.jsonSchemas != "/redfish/v1/JsonSchemas" {
-		t.Errorf("Invalid JsonSchemas link: %s", result.jsonSchemas)
+	if result.jSONSchemas != "/redfish/v1/JsonSchemas" {
+		t.Errorf("Invalid JsonSchemas link: %s", result.jSONSchemas)
 	}
 
 	if result.sessions != "/redfish/v1/Sessions" {
@@ -231,11 +231,11 @@ func TestServiceRootOEM(t *testing.T) {
 		t.Errorf("Received invalid ID: %s", result.ID)
 	}
 
-	if result.Oem == nil {
+	if result.OEM == nil {
 		t.Error("Invalid Oem link")
 	}
 	oemExp := strings.TrimSpace(oem)
-	oemObt := strings.TrimSpace(string(result.Oem))
+	oemObt := strings.TrimSpace(string(result.OEM))
 	if oemExp != oemObt {
 		t.Errorf("Expect\n%s\n,Obtain\n%s", oemExp, oemObt)
 	}

@@ -15,6 +15,7 @@ import (
 	"github.com/stmcginnis/gofish/tools/generator/internal/codegen"
 	"github.com/stmcginnis/gofish/tools/generator/internal/fetcher"
 	"github.com/stmcginnis/gofish/tools/generator/internal/parser"
+	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 
 	flag.StringVar(&objectName, "object", "", "Generate specific schema object only (optional)")
 	flag.StringVar(&localPath, "local", "", "Use local schema files instead of downloading (for testing)")
-	flag.StringVar(&outputDir, "output-dir", ".", "Base output directory (creates common/redfish/swordfish subdirs)")
+	flag.StringVar(&outputDir, "output-dir", ".", "Base output directory (creates schemas subdir)")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose logging")
 	flag.Parse()
 
@@ -167,28 +168,45 @@ func generateSingleObject(objectName, schemaDir, outputBaseDir string, verbose b
 		return fmt.Errorf("failed to create generator: %w", err)
 	}
 
-	// In single-object mode, we don't do full dependency analysis
-	// so we pass false for isSwordfishInCommon
-	code, err := gen.Generate(objectName, pkgType, definitions, false)
+	// Determine SF prefix based on schema origin
+	sfPrefix := false
+	if pkgType != "gofish" {
+		origin := parser.GetSchemaOrigin(baseFile, objectName)
+		sfPrefix = schema.NeedsSFPrefix(objectName, origin)
+	}
+
+	// Handle type renames (ServiceRoot -> Service)
+	var typeRenames map[string]string
+	if objectName == "ServiceRoot" {
+		typeRenames = map[string]string{"ServiceRoot": "Service"}
+	}
+
+	code, err := gen.Generate(objectName, pkgType, definitions, sfPrefix, typeRenames)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}
 
-	// Write output - ServiceRoot goes to root directory
+	// Write output - ServiceRoot goes to root, others to schemas/
 	var outputFile string
-	if objectName == "ServiceRoot" {
-		// Ensure base output directory exists
+	var logPrefix string
+	switch {
+	case objectName == "ServiceRoot":
 		if err := os.MkdirAll(outputBaseDir, 0755); err != nil {
 			return fmt.Errorf("failed to create output directory: %w", err)
 		}
 		outputFile = filepath.Join(outputBaseDir, strings.ToLower(objectName)+".go")
-	} else {
-		// Create output directory
-		outputDir := filepath.Join(outputBaseDir, string(pkgType))
+		logPrefix = ""
+	default:
+		outputDir := filepath.Join(outputBaseDir, "schemas")
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			return fmt.Errorf("failed to create output directory: %w", err)
 		}
-		outputFile = filepath.Join(outputDir, strings.ToLower(objectName)+".go")
+		filename := strings.ToLower(objectName) + ".go"
+		if sfPrefix {
+			filename = "sf" + filename
+		}
+		outputFile = filepath.Join(outputDir, filename)
+		logPrefix = "schemas/"
 	}
 
 	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
@@ -196,11 +214,7 @@ func generateSingleObject(objectName, schemaDir, outputBaseDir string, verbose b
 	}
 
 	if verbose {
-		if objectName == "ServiceRoot" {
-			log.Printf("Generated: %s", filepath.Base(outputFile))
-		} else {
-			log.Printf("Generated: %s/%s", pkgType, filepath.Base(outputFile))
-		}
+		log.Printf("Generated: %s%s", logPrefix, filepath.Base(outputFile))
 	} else {
 		fmt.Printf("Generated: %s\n", outputFile)
 	}

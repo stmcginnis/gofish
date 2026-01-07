@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // iDRACMonitor monitors iDRAC responsiveness and can trigger resets
 type iDRACMonitor struct {
-	service        *common.Entity // Using Entity as base for service access
+	service        *schemas.Entity // Using Entity as base for service access
 	manager        *Manager
 	timeout        time.Duration
 	maxRetries     int
@@ -33,7 +33,7 @@ type iDRACMonitorConfig struct {
 }
 
 // NewiDRACMonitor creates a new iDRAC monitor
-func NewiDRACMonitor(service *common.Entity, manager *Manager, config *iDRACMonitorConfig) *iDRACMonitor {
+func NewiDRACMonitor(service *schemas.Entity, manager *Manager, config *iDRACMonitorConfig) *iDRACMonitor {
 	if config == nil {
 		config = &iDRACMonitorConfig{
 			Timeout:        30 * time.Second,

@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var accountServiceBody = `{
@@ -86,7 +86,7 @@ var accountServiceBody = `{
 
 // TestSmcAccountServiceOem tests the parsing of the AccountService oem field
 func TestSmcAccountServiceOem(t *testing.T) {
-	drive := &redfish.AccountService{}
+	drive := &schemas.AccountService{}
 	if err := json.Unmarshal([]byte(accountServiceBody), drive); err != nil {
 		t.Fatalf("error decoding json: %v", err)
 	}

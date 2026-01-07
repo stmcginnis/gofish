@@ -9,12 +9,11 @@ import (
 	"errors"
 	"io"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type SSLCert struct {
-	common.Entity
+	schemas.Entity
 
 	// GoodThrough is the certificate expiration date.
 	GoodThrough string `json:"GoodTHRU"`
@@ -31,7 +30,7 @@ func (cert *SSLCert) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Actions struct {
-			Upload common.ActionTarget `json:"#SmcSSLCert.Upload"`
+			Upload schemas.ActionTarget `json:"#SmcSSLCert.Upload"`
 		}
 	}
 
@@ -48,8 +47,8 @@ func (cert *SSLCert) UnmarshalJSON(b []byte) error {
 
 // GetSSLCert will get the SSLCert instance from the Redfish
 // service.
-func GetSSLCert(c common.Client, uri string) (*SSLCert, error) {
-	return common.GetObject[SSLCert](c, uri)
+func GetSSLCert(c schemas.Client, uri string) (*SSLCert, error) {
+	return schemas.GetObject[SSLCert](c, uri)
 }
 
 // Upload will update the SSL certificate on the BMC with the provided certificate and key.
@@ -67,11 +66,11 @@ func (cert *SSLCert) Upload(certFile, keyFile io.Reader) error {
 		return err
 	}
 
-	return common.CleanupHTTPResponse(resp)
+	return schemas.CleanupHTTPResponse(resp)
 }
 
 type IPMIConfig struct {
-	common.Entity
+	schemas.Entity
 
 	uploadTarget   string
 	downloadTarget string
@@ -83,8 +82,8 @@ func (ipmi *IPMIConfig) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Actions struct {
-			Upload   common.ActionTarget `json:"#SmcIPMIConfig.Upload"`
-			Download common.ActionTarget `json:"#SmcIPMIConfig.Download"`
+			Upload   schemas.ActionTarget `json:"#SmcIPMIConfig.Upload"`
+			Download schemas.ActionTarget `json:"#SmcIPMIConfig.Download"`
 		}
 	}
 
@@ -102,8 +101,8 @@ func (ipmi *IPMIConfig) UnmarshalJSON(b []byte) error {
 
 // GetIPMIConfig will get the IPMIConfig instance from the Redfish
 // service.
-func GetIPMIConfig(c common.Client, uri string) (*IPMIConfig, error) {
-	return common.GetObject[IPMIConfig](c, uri)
+func GetIPMIConfig(c schemas.Client, uri string) (*IPMIConfig, error) {
+	return schemas.GetObject[IPMIConfig](c, uri)
 }
 
 // Upload restores a saved IPMI configuration.
@@ -132,7 +131,7 @@ func (ipmi *IPMIConfig) Download() error {
 
 // UpdateService is the update service instance associated with the system.
 type UpdateService struct {
-	redfish.UpdateService
+	schemas.UpdateService
 
 	sslCert    string
 	ipmiConfig string
@@ -141,7 +140,7 @@ type UpdateService struct {
 }
 
 // FromUpdateService gets the OEM instance of the UpdateService.
-func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, error) {
+func FromUpdateService(updateService *schemas.UpdateService) (*UpdateService, error) {
 	us := UpdateService{
 		UpdateService: *updateService,
 	}
@@ -149,13 +148,13 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 	var t struct {
 		Actions struct {
 			Oem struct {
-				Install common.ActionTarget `json:"#SmcUpdateService.Install"`
+				Install schemas.ActionTarget `json:"#SmcUpdateService.Install"`
 			}
 		}
 		Oem struct {
 			Supermicro struct {
-				SSLCert    common.Link
-				IPMIConfig common.Link
+				SSLCert    schemas.Link
+				IPMIConfig schemas.Link
 			}
 		}
 	}
@@ -174,8 +173,8 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 }
 
 // GetUpdateService will get a UpdateService instance from the service.
-func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri)
+func GetUpdateService(c schemas.Client, uri string) (*UpdateService, error) {
+	return schemas.GetObject[UpdateService](c, uri)
 }
 
 // Install performs the installation of an update.

@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type SMCRAKPType string
@@ -20,7 +20,7 @@ const (
 
 // SMCRAKP is an instance of an SMCRAKP object.
 type SMCRAKP struct {
-	common.Entity
+	schemas.Entity
 
 	Mode SMCRAKPType
 
@@ -69,6 +69,6 @@ func (i *SMCRAKP) Update() error {
 }
 
 // GetSMCRAKP will get a SMCRAKP instance from the service.
-func GetSMCRAKP(c common.Client, uri string) (*SMCRAKP, error) {
-	return common.GetObject[SMCRAKP](c, uri)
+func GetSMCRAKP(c schemas.Client, uri string) (*SMCRAKP, error) {
+	return schemas.GetObject[SMCRAKP](c, uri)
 }

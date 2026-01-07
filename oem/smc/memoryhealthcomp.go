@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // MemoryHealthComp is an instance of a MemoryHealthComp object.
 type MemoryHealthComp struct {
-	common.Entity
+	schemas.Entity
 
 	// Init shall contain the current state from Bios HII value.
 	Init string `json:"MemoryHealthCompInit"`
@@ -66,6 +66,6 @@ func (i *MemoryHealthComp) Update() error {
 }
 
 // GetMemoryHealthComp will get a MemoryHealthComp instance from the service.
-func GetMemoryHealthComp(c common.Client, uri string) (*MemoryHealthComp, error) {
-	return common.GetObject[MemoryHealthComp](c, uri)
+func GetMemoryHealthComp(c schemas.Client, uri string) (*MemoryHealthComp, error) {
+	return schemas.GetObject[MemoryHealthComp](c, uri)
 }

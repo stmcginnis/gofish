@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // NTP is an instance of an NTP object.
 type NTP struct {
-	common.Entity
+	schemas.Entity
 
 	Enabled            bool   `json:"NTPEnable"`
 	PrimaryServer      string `json:"PrimaryNTPServer"`
@@ -71,6 +71,6 @@ func (r *NTP) Update() error {
 }
 
 // GetNTP will get a NTP instance from the service.
-func GetNTP(c common.Client, uri string) (*NTP, error) {
-	return common.GetObject[NTP](c, uri)
+func GetNTP(c schemas.Client, uri string) (*NTP, error) {
+	return schemas.GetObject[NTP](c, uri)
 }

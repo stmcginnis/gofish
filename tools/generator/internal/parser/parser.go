@@ -129,10 +129,14 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 			continue
 		}
 
-		// Check if this is an object type
-		if typeVal, hasType := defMap["type"]; hasType && typeVal == "object" {
+		// Check if this is an object type (explicit "type": "object" or implicit via "properties")
+		typeVal, hasType := defMap["type"]
+		_, hasProps := defMap["properties"].(map[string]any)
+		isObject := (hasType && typeVal == "object") || hasProps
+
+		if isObject {
 			// Skip action definitions (have target and title properties)
-			if props, hasProps := defMap["properties"].(map[string]any); hasProps {
+			if props, ok := defMap["properties"].(map[string]any); ok {
 				if p.isActionDefinition(props) {
 					continue
 				}
@@ -183,7 +187,7 @@ func (p *Parser) parseEnumDefinition(name string, defMap map[string]any, enumVal
 		OriginalName: name,
 		IsEnum:       true,
 		Version:      version,
-		Description:  p.formatEnumDescription(name, defMap),
+		Description:  p.formatEnumDescription(cleanIdentifier(name), defMap),
 	}
 
 	// Parse enum values
@@ -206,9 +210,9 @@ func (p *Parser) parseEnumDefinition(name string, defMap map[string]any, enumVal
 	for _, enumVal := range enumVals {
 		if strVal, ok := enumVal.(string); ok {
 			ev := &schema.EnumValue{
-				Name:        cleanIdentifier(strVal) + name,
+				Name:        cleanIdentifier(strVal) + def.Name,
 				Value:       strVal,
-				Description: p.formatEnumValueDescription(strVal, name, enumDescs[strVal]),
+				Description: p.formatEnumValueDescription(strVal, def.Name, enumDescs[strVal]),
 			}
 			def.EnumValues = append(def.EnumValues, ev)
 		}
@@ -303,15 +307,17 @@ func (p *Parser) parseProperty(propName string, propMap map[string]any) *schema.
 		deprecationVersion = convertVersionFormat(versionDep)
 	}
 
+	cleanName := cleanIdentifier(config.GetGoFieldName(propName))
+
 	prop := &schema.Property{
-		Name:         config.GetGoFieldName(propName),
+		Name:         cleanName,
 		JSONName:     propName,
 		Type:         goType,
-		Description:  p.formatPropertyDescription(propName, propMap),
+		Description:  p.formatPropertyDescription(propName, cleanName, propMap),
 		IsPointer:    isPointer,
 		IsArray:      isArray,
 		IsReadOnly:   p.isReadOnly(propMap),
-		IsLink:       IsLinkProperty(propName, propJSON),
+		IsLink:       goType != "string" && IsLinkProperty(propName, propJSON),
 		IsCollection: IsCollectionProperty(propJSON),
 		IsDeprecated: isDeprecated,
 	}
@@ -376,7 +382,8 @@ func (p *Parser) parseProperty(propName string, propMap map[string]any) *schema.
 
 func (p *Parser) shouldSkipDefinition(name string) bool {
 	// Skip OemActions - these are parsed from RawData from OEM implementations
-	if strings.HasSuffix(name, "Actions") {
+	// But don't skip enum types that end with "Actions" (e.g., WatchdogTimeoutActions)
+	if name == "OemActions" {
 		return true
 	}
 
@@ -395,36 +402,26 @@ func (p *Parser) isActionDefinition(props map[string]any) bool {
 }
 
 func (p *Parser) isEntity(props map[string]any) bool {
-	hasId := false
-	hasName := false
-	hasOData := false
-
 	for propName := range props {
-		if propName == "Id" {
-			hasId = true
-		}
-		if propName == "Name" {
-			hasName = true
-		}
 		if propName == "@odata.id" || propName == "@odata.type" {
-			hasOData = true
+			return true
 		}
 	}
 
-	return hasId && hasName && hasOData
+	return false
 }
 
 func (p *Parser) isEntityProperty(propName string) bool {
 	return slices.Contains(config.EntityProperties, propName)
 }
 
+// isReadOnly returns true unless "readonly": false is explicitly set.
+// Properties without the readonly field are treated as read-only by default.
 func (p *Parser) isReadOnly(propMap map[string]any) bool {
-	ret := false
 	if ro, ok := propMap["readonly"].(bool); ok {
-		ret = ro
+		return ro
 	}
-
-	return ret
+	return true // default to read-only if not specified
 }
 
 func (p *Parser) formatTypeDescription(name string, defMap map[string]any) string {
@@ -452,16 +449,16 @@ func (p *Parser) formatEnumValueDescription(value, enumType, desc string) string
 	return formatComment(constName, desc, "shall", false, "\t")
 }
 
-func (p *Parser) formatPropertyDescription(name string, propMap map[string]any) string {
-	if stdDesc, ok := config.CommonDescriptions[name]; ok {
+func (p *Parser) formatPropertyDescription(propName, goName string, propMap map[string]any) string {
+	if stdDesc, ok := config.CommonDescriptions[propName]; ok {
 		return "\t// " + stdDesc
 	}
 
 	desc := p.getDescription(propMap)
 	if desc == "" {
-		return fmt.Sprintf("\t// %s", name)
+		return fmt.Sprintf("\t// %s", goName)
 	}
-	return formatComment(name, desc, "shall", false, "\t")
+	return formatComment(goName, desc, "shall", false, "\t")
 }
 
 func (p *Parser) getDescription(m map[string]any) string {
@@ -540,11 +537,15 @@ func cleanIdentifier(name string) string {
 	clean := regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(name, "")
 
 	// Replace some common things
+	clean = strings.ReplaceAll(clean, "Fpga", "FPGA")
 	clean = strings.ReplaceAll(clean, "Http", "HTTP")
 	clean = strings.ReplaceAll(clean, "Json", "JSON")
+	clean = strings.ReplaceAll(clean, "Dhcp", "DHCP")
 	clean = strings.ReplaceAll(clean, "Dns", "DNS")
 	clean = strings.ReplaceAll(clean, "Uri", "URI")
-	if !strings.Contains(clean, "Identif") && !strings.Contains(clean, "Idle") {
+	if !strings.Contains(clean, "Identif") &&
+		!strings.Contains(clean, "Idle") &&
+		!strings.Contains(clean, "Ident") {
 		clean = strings.ReplaceAll(clean, "Id", "ID")
 	}
 
@@ -614,12 +615,28 @@ func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
 		return "", fmt.Errorf("no definitions found")
 	}
 
-	// Find the definition matching the base name
-	defData, ok := defsMap[baseName]
+	// Determine which definition to use for finding versioned files.
+	// Check if root $ref points to a different definition (e.g., Capacity.json's
+	// main type is CapacitySource, not Capacity).
+	defName := baseName
+	if rootRef, ok := rawSchema["$ref"].(string); ok {
+		// Extract definition name from $ref like "#/definitions/CapacitySource"
+		if strings.HasPrefix(rootRef, "#/definitions/") {
+			defName = strings.TrimPrefix(rootRef, "#/definitions/")
+		}
+	}
+
+	// Find the definition to check for anyOf references
+	defData, ok := defsMap[defName]
 	if !ok {
-		// This might be a utility schema (like Privileges.json) that doesn't have
-		// a main definition matching the schema name. In this case, use the base file.
-		return baseFile, nil
+		// Try the base name if root $ref definition doesn't exist
+		defData, ok = defsMap[baseName]
+		if !ok {
+			// This might be a utility schema (like IPAddresses.json) that doesn't have
+			// a main definition matching the schema name. Try to find versioned files
+			// by glob pattern instead.
+			return resolveLatestVersionByGlob(baseName, schemaDir, baseFile)
+		}
 	}
 
 	defMap, ok := defData.(map[string]any)
@@ -630,7 +647,8 @@ func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
 	// Look for anyOf with $ref values
 	anyOf, ok := defMap["anyOf"].([]any)
 	if !ok {
-		return baseFile, nil
+		// Definition has no anyOf, try glob pattern to find versioned files
+		return resolveLatestVersionByGlob(baseName, schemaDir, baseFile)
 	}
 
 	// Find all version references
@@ -668,6 +686,43 @@ func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
 				if len(parts) > 0 {
 					versionFile = filepath.Join(schemaDir, filepath.Base(parts[0]))
 				}
+			}
+		}
+	}
+
+	if versionFile == "" {
+		return baseFile, nil
+	}
+
+	return versionFile, nil
+}
+
+// resolveLatestVersionByGlob finds the latest versioned file by glob pattern.
+// Used for utility schemas that don't have a main definition matching the schema name.
+func resolveLatestVersionByGlob(baseName, schemaDir, baseFile string) (string, error) {
+	// Find all versioned files matching the pattern
+	pattern := filepath.Join(schemaDir, baseName+".v*.json")
+	matches, err := filepath.Glob(pattern)
+	if err != nil || len(matches) == 0 {
+		// No versioned files found, use the base file
+		return baseFile, nil
+	}
+
+	// Find the latest version
+	maxMajor, maxMinor, maxErrata := 0, 0, 0
+	versionFile := ""
+
+	re := regexp.MustCompile(`\.v(\d+)_(\d+)_(\d+)\.json$`)
+	for _, match := range matches {
+		submatches := re.FindStringSubmatch(match)
+		if len(submatches) == 4 {
+			major, _ := strconv.Atoi(submatches[1])
+			minor, _ := strconv.Atoi(submatches[2])
+			errata, _ := strconv.Atoi(submatches[3])
+
+			if schema.CompareVersions(major, minor, errata, maxMajor, maxMinor, maxErrata) {
+				maxMajor, maxMinor, maxErrata = major, minor, errata
+				versionFile = match
 			}
 		}
 	}
@@ -737,7 +792,7 @@ func (p *Parser) parseActions(actionsMap map[string]any, defsMap map[string]any)
 							// Extract response type from ref like "#/definitions/GenerateCSRResponse"
 							parts := strings.Split(ref, "/")
 							if len(parts) > 0 {
-								action.ResponseType = parts[len(parts)-1]
+								action.ResponseType = cleanIdentifier(parts[len(parts)-1])
 							}
 						}
 					}
@@ -926,10 +981,11 @@ func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[strin
 		}
 
 		param := &schema.ActionParameter{
-			Name:         strings.ToLower(paramName[:1]) + paramName[1:],
+			Name:         cleanIdentifier(strings.ToLower(paramName[:1]) + paramName[1:]),
 			Type:         "string",
 			Ordinal:      ordinalMap[paramName], // Set ordinal from the raw JSON key order
 			OriginalName: paramName,
+			FieldName:    cleanIdentifier(paramName),
 		}
 
 		// Get description
@@ -937,31 +993,48 @@ func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[strin
 			param.Description = formatComment(param.Name+" -", desc, "", false, "\t")
 		}
 
+		// Struct-field style description (for parameter struct godoc)
+		// if desc := p.getDescription(paramMap); desc != "" {
+		param.FieldDescription = formatComment(param.FieldName, p.getDescription(paramMap), "shall", false, "\t")
+		// } else {
+		// 	param.FieldDescription = fmt.Sprintf("\t// %s", param.FieldName)
+		// }
+
 		// Check if required
 		if req, ok := paramMap["required"].(bool); ok {
 			param.Required = req
 		}
 
+		propJSON := mapToJSONProperty(paramMap)
+		isLink := IsLinkProperty(paramName, propJSON)
+
 		// Parse explicit type
 		if _, ok := paramMap["type"]; ok {
-			// Convert paramMap to JSONProperty so we can use TypeMapper
-			propJSON := mapToJSONProperty(paramMap)
-			goType, isPointer, _ := p.typeMapper.MapType(paramName, propJSON)
+			goType, isPointer, isArray := p.typeMapper.MapType(paramName, propJSON)
 
-			// Handle pointer types
-			if isPointer {
+			if isLink {
+				param.Type = "string"
+			} else if isPointer {
 				param.Type = "*" + goType
 			} else {
 				param.Type = goType
+			}
+
+			if isArray {
+				param.Type = "[]" + param.Type
 			}
 		}
 
 		// Parse type from $ref
 		if ref, ok := paramMap["$ref"].(string); ok {
-			// Extract type name from ref like "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/ResetType"
-			parts := strings.Split(ref, "/")
-			if len(parts) > 0 {
-				param.Type = parts[len(parts)-1]
+			if isLink {
+				param.Type = "string"
+			} else {
+				// Extract type name from ref like "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/ResetType"
+				parts := strings.Split(ref, "/")
+				if len(parts) > 0 {
+					param.Type = cleanIdentifier(parts[len(parts)-1])
+				}
 			}
 		}
 
@@ -1009,14 +1082,29 @@ func (p *Parser) parseLinks(linksMap map[string]any) []*schema.Link {
 		// Get description
 		link.Description = p.getDescription(linkMap)
 
+		// Check if deprecated
+		if _, hasDeprecated := linkMap["deprecated"]; hasDeprecated {
+			link.Deprecated = true
+		}
+
 		// Determine if it's an array by checking if it has "items"
 		if _, hasItems := linkMap["items"]; hasItems {
 			link.IsArray = true
 		}
 
-		// Try to determine the target type from $ref or description
+		// Try to determine the target type from $ref, anyOf, or items
 		if ref, ok := linkMap["$ref"].(string); ok {
 			link.Type = extractTypeFromRef(ref)
+		} else if anyOf, ok := linkMap["anyOf"].([]any); ok {
+			// Handle nullable links with anyOf: [{$ref: ...}, {type: null}]
+			for _, item := range anyOf {
+				if itemMap, ok := item.(map[string]any); ok {
+					if ref, ok := itemMap["$ref"].(string); ok {
+						link.Type = extractTypeFromRef(ref)
+						break
+					}
+				}
+			}
 		} else if items, ok := linkMap["items"].(map[string]any); ok {
 			if ref, ok := items["$ref"].(string); ok {
 				link.Type = extractTypeFromRef(ref)
@@ -1030,7 +1118,7 @@ func (p *Parser) parseLinks(linksMap map[string]any) []*schema.Link {
 			if strings.HasSuffix(typeName, "s") && len(typeName) > 1 {
 				typeName = typeName[:len(typeName)-1]
 			}
-			link.Type = typeName
+			link.Type = cleanIdentifier(typeName)
 		}
 
 		links = append(links, link)
@@ -1046,5 +1134,5 @@ func extractTypeFromRef(ref string) string {
 	if typeName == "Link" || typeName == "Links" {
 		return ""
 	}
-	return typeName
+	return cleanIdentifier(typeName)
 }

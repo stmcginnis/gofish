@@ -5,12 +5,12 @@
 package dell
 
 import (
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type Job struct {
-	common.Entity
-	common.Message
+	schemas.Entity
+	schemas.Message
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
@@ -32,6 +32,6 @@ type Job struct {
 }
 
 // GetJob will get a Job instance from the service.
-func GetJob(c common.Client, uri string) (*Job, error) {
-	return common.GetObject[Job](c, uri)
+func GetJob(c schemas.Client, uri string) (*Job, error) {
+	return schemas.GetObject[Job](c, uri)
 }

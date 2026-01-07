@@ -7,19 +7,19 @@ package smc
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // Chassis is a Supermicro OEM instance of a Chassis.
 type Chassis struct {
-	redfish.Chassis
+	schemas.Chassis
 	BoardSerialNumber string
 	GUID              string
 	BoardID           string
 }
 
 // FromChassis converts a standard Chassis object to the OEM implementation.
-func FromChassis(chassis *redfish.Chassis) (*Chassis, error) {
+func FromChassis(chassis *schemas.Chassis) (*Chassis, error) {
 	cs := Chassis{
 		Chassis: *chassis,
 	}

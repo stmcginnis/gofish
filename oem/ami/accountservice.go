@@ -7,8 +7,7 @@ package ami
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // PAMOrder is the PAM modules used for authentication.
@@ -27,7 +26,7 @@ const (
 
 // AccountServiceConfigurations allows additional configuring of the AMI AccountService.
 type AccountServiceConfigurations struct {
-	common.Entity
+	schemas.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -42,19 +41,19 @@ type AccountServiceConfigurations struct {
 
 // GetAccountServiceConfigurations will get an AccountServiceConfigurations instance from the Redfish
 // service.
-func GetAccountServiceConfigurations(c common.Client, uri string) (*AccountServiceConfigurations, error) {
-	return common.GetObject[AccountServiceConfigurations](c, uri)
+func GetAccountServiceConfigurations(c schemas.Client, uri string) (*AccountServiceConfigurations, error) {
+	return schemas.GetObject[AccountServiceConfigurations](c, uri)
 }
 
 // AccountService is an AMI OEM instance of an AccountService.
 type AccountService struct {
-	redfish.AccountService
+	schemas.AccountService
 
 	configuration string
 }
 
 // FromAccountService converts a standard AccountService object to the OEM implementation.
-func FromAccountService(accountService *redfish.AccountService) (*AccountService, error) {
+func FromAccountService(accountService *schemas.AccountService) (*AccountService, error) {
 	as := AccountService{
 		AccountService: *accountService,
 	}
@@ -62,7 +61,7 @@ func FromAccountService(accountService *redfish.AccountService) (*AccountService
 	var t struct {
 		Oem struct {
 			AMI struct {
-				Configurtion common.Link `json:"Configuration"`
+				Configurtion schemas.Link `json:"Configuration"`
 			} `json:"AMI"`
 		} `json:"Oem"`
 	}

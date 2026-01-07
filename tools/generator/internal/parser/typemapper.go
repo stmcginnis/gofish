@@ -12,6 +12,18 @@ import (
 	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
 )
 
+var NonLinkTypes = []string{
+	"Capacity",
+	"IOStatistics",
+	"PhysicalContext",
+	"ProvidedCapacity",
+	"ProvidedClassOfService",
+	"Manifest",
+	"Scheduler",
+	"ResolutionStep",
+	"MetricReportDefinition",
+}
+
 // TypeMapper handles conversion from JSON Schema types to Go types
 type TypeMapper struct {
 	commonTypes map[string]string
@@ -61,7 +73,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 		propName[0] >= 'a' &&
 		propName[0] <= 'z' &&
 		!strings.Contains(strings.ToLower(propName), "odata") {
-		return "common.Link", false, false
+		return "Link", false, false
 	}
 
 	// Handle $ref references
@@ -144,7 +156,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 	switch typeStr {
 	case "object":
 		// Custom type
-		return propName, false, false
+		return cleanIdentifier(propName), false, false
 
 	case "integer":
 		// Use uint if minimum is >= 0
@@ -180,21 +192,8 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 	}
 }
 
-func qualifyInfrastructureType(typeName string) string {
-	if schema.IsInfrastructureType(typeName) {
-		return "common." + typeName
-	}
-	return typeName
-}
-
-func qualifyRefType(typeName, ref string) string {
-	if schema.IsInfrastructureType(typeName) {
-		return "common." + typeName
-	}
-	if schema.IsCommonSchema(extractSchemaNameFromRef(ref)) {
-		return "common." + typeName
-	}
-	return typeName
+func qualifyRefType(typeName, _ string) string {
+	return cleanIdentifier(typeName)
 }
 
 // extractSchemaNameFromRef extracts the schema name from a $ref URL.
@@ -254,6 +253,10 @@ func extractTypeAndNullable(typeVal any) (string, bool) {
 
 // IsLinkProperty checks if a property is a link to another resource
 func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
+	if slices.Contains(NonLinkTypes, propName) {
+		return false
+	}
+
 	// Check for URIs or @odata.id pattern
 	if strings.HasSuffix(propName, "URI") || strings.HasSuffix(propName, "Uri") {
 		return true
@@ -272,6 +275,20 @@ func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
 	// Check for idRef - OData generic reference type
 	if prop.Ref != "" && strings.Contains(prop.Ref, "idRef") {
 		return true
+	}
+
+	// Check for direct reference to a standalone resource (non-array, non-collection)
+	// If the $ref points to a schema where the filename matches the definition name,
+	// it's a standalone entity with its own URI - a reference to it is a link
+	if prop.Ref != "" && !strings.Contains(prop.Ref, "Collection") {
+		// Skip odata primitive types and Resource.json definitions
+		if !strings.Contains(prop.Ref, "odata-v4.json") && !strings.Contains(prop.Ref, "Resource.json") {
+			schemaName := extractSchemaNameFromRef(prop.Ref)
+			typeName := extractRefType(prop.Ref)
+			if schemaName != "" && schemaName == typeName {
+				return true
+			}
+		}
 	}
 
 	// Check for array items that reference another resource type
