@@ -571,6 +571,12 @@ type BootProgress struct {
 	LastState BootProgressTypes
 	// LastStateTime shall contain the date and time when the last boot state was updated.
 	LastStateTime string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OemLastState shall represent the OEM-specific 'LastState' of the 'BootProgress'. This property shall only be
+	// present if 'LastState' is 'OEM'.
+	OEMLastState string `json:"OemLastState,omitempty"`
 }
 
 // Composition shall contain information about the composition capabilities and state of a computer system.
