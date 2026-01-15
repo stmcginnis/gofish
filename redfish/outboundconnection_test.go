@@ -62,11 +62,11 @@ func TestOutboundConnection(t *testing.T) {
 		t.Error("Expected connection to be enabled")
 	}
 
-	if result.RetryPolicy.RetryIntervalMinutes != 5 {
+	if *result.RetryPolicy.RetryIntervalMinutes != 5 {
 		t.Errorf("Unexpected RetryIntervalMinutes value: %d", result.RetryPolicy.RetryIntervalMinutes)
 	}
 
-	if result.WebSocketPingIntervalMinutes != 10 {
+	if *result.WebSocketPingIntervalMinutes != 10 {
 		t.Errorf("Unexpected WebSocketPingIntervalMinutes value: %d", result.WebSocketPingIntervalMinutes)
 	}
 }

@@ -117,6 +117,8 @@ type ActionParameter struct {
 	AllowableValues []string
 	// Ordinal is the order position of this parameter
 	Ordinal int
+	// OriginalName is the unmodified name of the JSON parameter definition
+	OriginalName string
 }
 
 // Link represents a link to a related resource
@@ -146,7 +148,7 @@ type JSONSchema struct {
 
 // JSONProperty represents a property in the JSON Schema
 type JSONProperty struct {
-	Type                 interface{}              `json:"type"` // can be string or []string
+	Type                 any                      `json:"type"` // can be string or []string
 	Description          string                   `json:"description"`
 	LongDescription      string                   `json:"longDescription"`
 	ReadOnly             bool                     `json:"readonly"`
@@ -162,5 +164,5 @@ type JSONProperty struct {
 	Minimum              *float64                 `json:"minimum"`
 	Pattern              string                   `json:"pattern"`
 	Format               string                   `json:"format"`
-	AdditionalInfo       map[string]interface{}   `json:"Redfish.Revisions"`
+	AdditionalInfo       map[string]any           `json:"Redfish.Revisions"`
 }

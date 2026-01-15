@@ -13,7 +13,7 @@ import (
 
 // USBCDBootSourceOverrideTarget is a Supermicro-specific boot target that is not
 // part of the Redfish specification.
-const USBCDBootSourceOverrideTarget redfish.BootSourceOverrideTarget = "UsbCd"
+const USBCDBootSourceOverrideTarget redfish.BootSource = "UsbCd"
 
 // ComputerSystem is a Supermicro OEM instance of a ComputerSystem.
 type ComputerSystem struct {

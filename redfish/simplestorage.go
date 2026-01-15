@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.3 - #SimpleStorage.v1_3_2.SimpleStorage
 
 package redfish
 
@@ -10,76 +11,70 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// Device shall describe a storage device visible to SimpleStorage.
-type Device struct {
-	// CapacityBytes shall represent the size (in bytes) of the Storage Device.
-	CapacityBytes int64
-	// Manufacturer shall indicate the name of the manufacturer of this storage device.
-	Manufacturer string
-	// Model shall indicate the model information as provided by the manufacturer
-	// of this storage device.
-	Model string
-	// Name shall be a user-friendly name for the device.
-	Name string
-	// Oem shall contain the OEM extensions. All values for properties contained in this object shall conform to the
-	// Redfish Specification-described requirements.
-	OEM json.RawMessage `json:"Oem"`
-	// Status shall contain any status or health properties
-	// of the resource.
-	Status common.Status
-}
-
-// SimpleStorage is used to represent a storage controller and its
+// SimpleStorage This resource contains a storage controller and its
 // directly-attached devices.
 type SimpleStorage struct {
 	common.Entity
-
+	// Devices shall contain a list of storage devices related to this resource.
+	Devices []Device
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// Devices shall contain a list of storage devices
-	// associated with this resource.
-	Devices []Device
-	// Status shall contain any status or health properties
-	// of the resource.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// UefiDevicePath is used to identify and locate the specific storage
-	// controller.
+	// UefiDevicePath shall contain the UEFI device path that identifies and
+	// locates the specific storage controller.
 	UefiDevicePath string
-
-	// chassis shall be a reference to a resource of type Chassis that
-	// represent the physical container associated with this Simple Storage.
+	// chassis is the URI for Chassis.
 	chassis string
-	// Storage shall contain a link to a Resource of type Storage that represents the same storage subsystem as this
-	// Resource.
+	// storage is the URI for Storage.
 	storage string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a SimpleStorage object from the raw JSON.
-func (simplestorage *SimpleStorage) UnmarshalJSON(b []byte) error {
+func (s *SimpleStorage) UnmarshalJSON(b []byte) error {
 	type temp SimpleStorage
-	var t struct {
+	type sLinks struct {
+		Chassis common.Link `json:"Chassis"`
+		Storage common.Link `json:"Storage"`
+	}
+	var tmp struct {
 		temp
-		Links struct {
-			Chassis common.Link
-			Storage common.Link
-		}
+		Links sLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
+	*s = SimpleStorage(tmp.temp)
+
 	// Extract the links to other entities for later
-	*simplestorage = SimpleStorage(t.temp)
-	simplestorage.chassis = t.Links.Chassis.String()
-	simplestorage.storage = t.Links.Storage.String()
+	s.chassis = tmp.Links.Chassis.String()
+	s.storage = tmp.Links.Storage.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	s.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (s *SimpleStorage) Update() error {
+	readWriteFields := []string{
+		"Devices",
+		"Status",
+	}
+
+	return s.UpdateFromRawData(s, s.rawData, readWriteFields)
 }
 
 // GetSimpleStorage will get a SimpleStorage instance from the service.
@@ -93,20 +88,40 @@ func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorag
 	return common.GetCollectionObjects[SimpleStorage](c, link)
 }
 
-// Chassis gets the chassis containing this storage service.
-func (simplestorage *SimpleStorage) Chassis() (*Chassis, error) {
-	if simplestorage.chassis == "" {
+// Chassis gets the Chassis linked resource.
+func (s *SimpleStorage) Chassis(client common.Client) (*Chassis, error) {
+	if s.chassis == "" {
 		return nil, nil
 	}
-
-	return GetChassis(simplestorage.GetClient(), simplestorage.chassis)
+	return common.GetObject[Chassis](client, s.chassis)
 }
 
-// Storage gets the chassis containing this storage service.
-func (simplestorage *SimpleStorage) Storage() (*Storage, error) {
-	if simplestorage.storage == "" {
+// Storage gets the Storage linked resource.
+func (s *SimpleStorage) Storage(client common.Client) (*Storage, error) {
+	if s.storage == "" {
 		return nil, nil
 	}
+	return common.GetObject[Storage](client, s.storage)
+}
 
-	return GetStorage(simplestorage.GetClient(), simplestorage.storage)
+// Device shall describe a storage device visible to simple storage.
+type Device struct {
+	// CapacityBytes shall represent the size, in bytes, of the storage device.
+	//
+	// Version added: v1.1.0
+	CapacityBytes *uint `json:",omitempty"`
+	// Manufacturer shall indicate the name of the manufacturer of this storage
+	// device.
+	Manufacturer string
+	// Model shall indicate the model information as provided by the manufacturer
+	// of this storage device.
+	Model string
+	// Name is the name of the resource or array element.
+	Name string
+	// Oem shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
 }

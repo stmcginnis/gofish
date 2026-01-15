@@ -66,7 +66,7 @@ func TestCable(t *testing.T) {
 	assertEquals(t, "HDMI", string(result.UpstreamConnectorTypes[0]))
 	assertEquals(t, "DisplayPort", string(result.DownstreamConnectorTypes[0]))
 
-	if result.LengthMeters != 0.1 {
-		t.Errorf("Unexpected cable meter length: %.2f", result.LengthMeters)
+	if *result.LengthMeters != 0.1 {
+		t.Errorf("Unexpected cable meter length: %.2f", *result.LengthMeters)
 	}
 }

@@ -103,11 +103,11 @@ func TestFileShare(t *testing.T) {
 		t.Errorf("Invalid FileShareQuotaType: %s", result.FileShareQuotaType)
 	}
 
-	if result.FileShareRemainingQuotaBytes != 536870912000 {
+	if *result.FileShareRemainingQuotaBytes != 536870912000 {
 		t.Errorf("Invalid FileShareRemainingQuotaBytes: %d", result.FileShareRemainingQuotaBytes)
 	}
 
-	if result.FileShareTotalQuotaBytes != 2147483648000 {
+	if *result.FileShareTotalQuotaBytes != 2147483648000 {
 		t.Errorf("Invalid FileShareTotalQuotaBytes: %d", result.FileShareTotalQuotaBytes)
 	}
 
@@ -142,7 +142,7 @@ func TestFileShareUpdate(t *testing.T) {
 
 	result.CASupported = false
 	result.FileShareQuotaType = SoftQuotaType
-	result.FileShareTotalQuotaBytes = 1024
+	*result.FileShareTotalQuotaBytes = 1024
 	err = result.Update()
 
 	if err != nil {

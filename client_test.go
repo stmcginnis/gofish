@@ -6,7 +6,6 @@ package gofish
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -61,16 +60,11 @@ func testError(code int, t *testing.T) {
 	if !ok {
 		t.Errorf("%d should return known error type: %v", code, err)
 	}
-	if errStruct.HTTPReturnedStatusCode != code {
-		t.Errorf("The error code is different from %d", code)
-	}
-	errBody, err := json.MarshalIndent(errStruct, "  ", "    ")
-	if err != nil {
-		t.Errorf("Marshall error %v got: %s", errStruct, err)
-	}
-	if errMsg != string(errBody) {
-		t.Errorf("Expect:\n%s\nGot:\n%s", errMsg, string(errBody))
-	}
+
+	common.AssertEqual(t, code, errStruct.HTTPReturnedStatusCode)
+	common.AssertEqual(t, "A general error has occurred. See ExtendedInfo for more information.", errStruct.Message)
+	common.AssertEqual(t, 2, len(errStruct.ExtendedInfos))
+	common.AssertEqual(t, "Base.1.0.GeneralError", errStruct.Code)
 }
 
 // TestError400 tests the parsing of error reply.

@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/stmcginnis/gofish/common"
 )
 
 var roleBody = strings.NewReader(
@@ -51,7 +53,7 @@ func TestRole(t *testing.T) {
 		t.Errorf("Expected 1 assigned privilege, found: %d", len(result.AssignedPrivileges))
 	}
 
-	if result.AssignedPrivileges[0] != LoginPrivilegeType {
+	if result.AssignedPrivileges[0] != common.LoginPrivilegeType {
 		t.Errorf("Expected 'Login' assigned privilege, got: %s", result.AssignedPrivileges[0])
 	}
 }

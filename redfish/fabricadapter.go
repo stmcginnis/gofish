@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2022.3 - #FabricAdapter.v1_5_3.FabricAdapter
 
 package redfish
 
@@ -10,168 +11,136 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// FabricAdapter shall represent a physical fabric adapter capable of connecting to an interconnect fabric.
+// FabricAdapter shall represent a physical fabric adapter capable of connecting
+// to an interconnect fabric.
 type FabricAdapter struct {
 	common.Entity
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// ASICManufacturer shall contain the manufacturer name of the ASIC for the fabric adapter as defined by the
-	// manufacturer.
+	// ASICManufacturer shall contain the manufacturer name of the ASIC for the
+	// fabric adapter as defined by the manufacturer.
 	ASICManufacturer string
-	// ASICPartNumber shall contain the part number of the ASIC for the fabric adapter as defined by the manufacturer.
+	// ASICPartNumber shall contain the part number of the ASIC for the fabric
+	// adapter as defined by the manufacturer.
 	ASICPartNumber string
-	// ASICRevisionIdentifier shall contain the revision identifier of the ASIC for the fabric adapter as defined by
-	// the manufacturer.
+	// ASICRevisionIdentifier shall contain the revision identifier of the ASIC for
+	// the fabric adapter as defined by the manufacturer.
 	ASICRevisionIdentifier string
-	// Description provides a description of this resource.
-	Description string
 	// FabricType shall contain the configured fabric type of this fabric adapter.
+	//
+	// Version added: v1.3.0
 	FabricType common.Protocol
-	// FabricTypeCapabilities shall contain an array of fabric types supported by this fabric adapter.
+	// FabricTypeCapabilities shall contain an array of fabric types supported by
+	// this fabric adapter.
+	//
+	// Version added: v1.3.0
 	FabricTypeCapabilities []common.Protocol
-	// FirmwareVersion shall contain the firmware version for the fabric adapter as defined by the manufacturer.
+	// FirmwareVersion shall contain the firmware version for the fabric adapter as
+	// defined by the manufacturer.
 	FirmwareVersion string
 	// GenZ shall contain the Gen-Z specific properties for this fabric adapter.
 	GenZ FabricAdapterGenZ
 	// Location shall contain the location information of the fabric adapter.
+	//
+	// Version added: v1.1.0
 	Location common.Location
-	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
-	// resource.
+	// LocationIndicatorActive shall contain the state of the indicator used to
+	// physically identify or locate this resource.
+	//
+	// Version added: v1.4.0
 	LocationIndicatorActive bool
-	// Manufacturer shall contain a value that represents the manufacturer of the fabric adapter.
+	// Manufacturer shall contain a value that represents the manufacturer of the
+	// fabric adapter.
 	Manufacturer string
-	// Model shall contain the information about how the manufacturer refers to this fabric adapter.
+	// Model shall contain the information about how the manufacturer refers to
+	// this fabric adapter.
 	Model string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// PCIeInterface shall contain details on the PCIe interface that connects this PCIe-based fabric adapter to its
-	// host.
+	// PCIeInterface shall contain details on the PCIe interface that connects this
+	// PCIe-based fabric adapter to its host.
 	PCIeInterface PCIeInterface
-	// PartNumber shall contain the part number for the fabric adapter as defined by the manufacturer.
+	// PartNumber shall contain the part number for the fabric adapter as defined
+	// by the manufacturer.
 	PartNumber string
-	// Ports shall contain a link to a resource collection of type PortCollection.
+	// Ports shall contain a link to a resource collection of type
+	// 'PortCollection'.
 	ports string
 	// SKU shall contain the SKU for the fabric adapter.
 	SKU string
 	// SerialNumber shall contain the serial number for the fabric adapter.
 	SerialNumber string
-	// SparePartNumber shall contain the spare part number for the fabric adapter as defined by the manufacturer.
+	// SparePartNumber shall contain the spare part number for the fabric adapter
+	// as defined by the manufacturer.
 	SparePartNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// UUID shall contain a universally unique identifier number for the fabric adapter.
+	// UUID shall contain a universally unique identifier number for the fabric
+	// adapter.
 	UUID string
+	// endpoints are the URIs for Endpoints.
+	endpoints []string
+	// memoryDomains are the URIs for MemoryDomains.
+	memoryDomains []string
+	// pCIeDevices are the URIs for PCIeDevices.
+	pCIeDevices []string
+	// processors are the URIs for Processors.
+	processors []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	endpoints []string
-	// EndpointsCount gets the number of logical fabric connections associated with this fabric adapter.
-	EndpointsCount int
-	memoryDomains  []string
-	// MemoryDomainsCount gets the number of memory domains associated with this fabric adapter.
-	MemoryDomainsCount int
-	pcieDevices        []string
-	// PCIeDevicesCount gets the number of PCIe devices associated with this fabric adapter.
-	PCIeDevicesCount int
-	processors       []string
-	// ProcessorsCount gets the number of processors that this fabric adapter provides to a fabric.
-	ProcessorsCount int
 }
 
 // UnmarshalJSON unmarshals a FabricAdapter object from the raw JSON.
-func (fabricadapter *FabricAdapter) UnmarshalJSON(b []byte) error {
+func (f *FabricAdapter) UnmarshalJSON(b []byte) error {
 	type temp FabricAdapter
-	type Links struct {
-		// Endpoints shall contain an array of links to resources of type Endpoint that represent the logical fabric
-		// connections associated with this fabric adapter.
-		Endpoints      common.Links
-		EndpointsCount int `json:"Endpoints@odata.count"`
-		// MemoryDomains shall contain an array of links to resources of type MemoryDomain that represent the memory
-		// domains associated with this fabric adapter.
-		MemoryDomains      common.Links
-		MemoryDomainsCount int `json:"MemoryDomains@odata.count"`
-		// Oem shall contain the OEM extensions. All values for properties contained in this object shall conform to the
-		// Redfish Specification-described requirements.
-		OEM json.RawMessage `json:"Oem"`
-		// PCIeDevices shall contain an array of links to resources of type PCIeDevice that represent the PCIe devices
-		// associated with this fabric adapter.
-		PCIeDevices      common.Links
-		PCIeDevicesCount int `json:"PCIeDevices@odata.count"`
-		// Processors shall contain an array of links to resources of type Processor that represent the processors that
-		// this fabric adapter provides to a fabric.
-		Processors      common.Links
-		ProcessorsCount int `json:"Processors@odata.count"`
+	type fLinks struct {
+		Endpoints     common.Links `json:"Endpoints"`
+		MemoryDomains common.Links `json:"MemoryDomains"`
+		PCIeDevices   common.Links `json:"PCIeDevices"`
+		Processors    common.Links `json:"Processors"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Ports common.Link
-		Links Links
+		Links fLinks
+		Ports common.Link `json:"ports"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*fabricadapter = FabricAdapter(t.temp)
+	*f = FabricAdapter(tmp.temp)
 
 	// Extract the links to other entities for later
-	fabricadapter.ports = t.Ports.String()
-
-	fabricadapter.endpoints = t.Links.Endpoints.ToStrings()
-	fabricadapter.EndpointsCount = t.Links.EndpointsCount
-	fabricadapter.memoryDomains = t.Links.MemoryDomains.ToStrings()
-	fabricadapter.MemoryDomainsCount = t.Links.MemoryDomainsCount
-	fabricadapter.pcieDevices = t.Links.PCIeDevices.ToStrings()
-	fabricadapter.PCIeDevicesCount = t.Links.PCIeDevicesCount
-	fabricadapter.processors = t.Links.Processors.ToStrings()
-	fabricadapter.ProcessorsCount = t.Links.ProcessorsCount
+	f.endpoints = tmp.Links.Endpoints.ToStrings()
+	f.memoryDomains = tmp.Links.MemoryDomains.ToStrings()
+	f.pCIeDevices = tmp.Links.PCIeDevices.ToStrings()
+	f.processors = tmp.Links.Processors.ToStrings()
+	f.ports = tmp.Ports.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	fabricadapter.rawData = b
+	f.rawData = b
 
 	return nil
 }
 
-// Ports gets any ports associated with this interface.
-func (fabricadapter *FabricAdapter) Ports() ([]*Port, error) {
-	if fabricadapter.ports == "" {
-		return []*Port{}, nil
-	}
-	return ListReferencedPorts(fabricadapter.GetClient(), fabricadapter.ports)
-}
-
-// Endpoints gets the endpoints connected to this interface.
-func (fabricadapter *FabricAdapter) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](fabricadapter.GetClient(), fabricadapter.endpoints)
-}
-
-// MemoryDomains gets the MemoryDomains associated to this interface.
-func (fabricadapter *FabricAdapter) MemoryDomains() ([]*MemoryDomain, error) {
-	return common.GetObjects[MemoryDomain](fabricadapter.GetClient(), fabricadapter.memoryDomains)
-}
-
-// PCIeDevices gets the PCIe devices associated to this interface.
-func (fabricadapter *FabricAdapter) PCIeDevices() ([]*PCIeDevice, error) {
-	return common.GetObjects[PCIeDevice](fabricadapter.GetClient(), fabricadapter.pcieDevices)
-}
-
-// Processors gets the processors associated to this interface.
-func (fabricadapter *FabricAdapter) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](fabricadapter.GetClient(), fabricadapter.processors)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (fabricadapter *FabricAdapter) Update() error {
+func (f *FabricAdapter) Update() error {
 	readWriteFields := []string{
 		"FabricType",
+		"GenZ",
+		"Location",
 		"LocationIndicatorActive",
+		"PCIeInterface",
+		"Status",
 	}
 
-	return fabricadapter.UpdateFromRawData(fabricadapter, fabricadapter.rawData, readWriteFields)
+	return f.UpdateFromRawData(f, f.rawData, readWriteFields)
 }
 
 // GetFabricAdapter will get a FabricAdapter instance from the service.
@@ -185,51 +154,115 @@ func ListReferencedFabricAdapters(c common.Client, link string) ([]*FabricAdapte
 	return common.GetCollectionObjects[FabricAdapter](c, link)
 }
 
+// Endpoints gets the Endpoints linked resources.
+func (f *FabricAdapter) Endpoints(client common.Client) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](client, f.endpoints)
+}
+
+// MemoryDomains gets the MemoryDomains linked resources.
+func (f *FabricAdapter) MemoryDomains(client common.Client) ([]*MemoryDomain, error) {
+	return common.GetObjects[MemoryDomain](client, f.memoryDomains)
+}
+
+// PCIeDevices gets the PCIeDevices linked resources.
+func (f *FabricAdapter) PCIeDevices(client common.Client) ([]*PCIeDevice, error) {
+	return common.GetObjects[PCIeDevice](client, f.pCIeDevices)
+}
+
+// Processors gets the Processors linked resources.
+func (f *FabricAdapter) Processors(client common.Client) ([]*Processor, error) {
+	return common.GetObjects[Processor](client, f.processors)
+}
+
+// Ports gets the Ports collection.
+func (f *FabricAdapter) Ports(client common.Client) ([]*Port, error) {
+	if f.ports == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Port](client, f.ports)
+}
+
 // FabricAdapterGenZ shall contain Gen-Z related properties for a fabric adapter.
 type FabricAdapterGenZ struct {
-	// MSDT shall contain a link to a resource collection of type RouteEntryCollection that represents the Gen-Z Core
-	// Specification-defined MSDT structure.
-	msdt string
-	// PIDT shall contain an array of table entry values for the Gen-Z Core Specification-defined Packet Injection
-	// Delay Table for the component.
+	// MSDT shall contain a link to a resource collection of type
+	// 'RouteEntryCollection' that represents the Gen-Z Core Specification-defined
+	// MSDT structure.
+	mSDT string
+	// PIDT shall contain an array of table entry values for the Gen-Z Core
+	// Specification-defined Packet Injection Delay Table for the component.
 	PIDT []string
-	// RITable shall contain an array of table entry values for the Gen-Z Core Specification-defined Responder
-	// Interface Table for the component.
+	// RITable shall contain an array of table entry values for the Gen-Z Core
+	// Specification-defined Responder Interface Table for the component.
 	RITable []string
-	// RequestorVCAT shall contain a link to a resource collection of type VCATEntryCollection that represents the
-	// Gen-Z Core Specification-defined REQ-VCAT structure.
+	// RequestorVCAT shall contain a link to a resource collection of type
+	// 'VCATEntryCollection' that represents the Gen-Z Core Specification-defined
+	// REQ-VCAT structure.
 	requestorVCAT string
-	// ResponderVCAT shall contain a link to a resource collection of type VCATEntryCollection that represents the
-	// Gen-Z Core Specification-defined RSP-VCAT structure.
+	// ResponderVCAT shall contain a link to a resource collection of type
+	// 'VCATEntryCollection' that represents the Gen-Z Core Specification-defined
+	// RSP-VCAT structure.
 	responderVCAT string
-	// SSDT shall contain a link to a resource collection of type RouteEntryCollection that represents the Gen-Z Core
-	// Specification-defined SSDT structure.
-	ssdt string
+	// SSDT shall contain a link to a resource collection of type
+	// 'RouteEntryCollection' that represents the Gen-Z Core Specification-defined
+	// SSDT structure.
+	sSDT string
 }
 
 // UnmarshalJSON unmarshals a GenZ object from the raw JSON.
-func (genz *FabricAdapterGenZ) UnmarshalJSON(b []byte) error {
+func (g *FabricAdapterGenZ) UnmarshalJSON(b []byte) error {
 	type temp FabricAdapterGenZ
-	var t struct {
+	var tmp struct {
 		temp
-		MSDT          common.Link
-		RequestorVCAT common.Link
-		ResponderVCAT common.Link
-		SSDT          common.Link
+		MSDT          common.Link `json:"mSDT"`
+		RequestorVCAT common.Link `json:"requestorVCAT"`
+		ResponderVCAT common.Link `json:"responderVCAT"`
+		SSDT          common.Link `json:"sSDT"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*genz = FabricAdapterGenZ(t.temp)
+	*g = FabricAdapterGenZ(tmp.temp)
 
 	// Extract the links to other entities for later
-	genz.msdt = t.MSDT.String()
-	genz.requestorVCAT = t.RequestorVCAT.String()
-	genz.responderVCAT = t.ResponderVCAT.String()
-	genz.ssdt = t.SSDT.String()
+	g.mSDT = tmp.MSDT.String()
+	g.requestorVCAT = tmp.RequestorVCAT.String()
+	g.responderVCAT = tmp.ResponderVCAT.String()
+	g.sSDT = tmp.SSDT.String()
 
 	return nil
+}
+
+// MSDT gets the MSDT collection.
+func (g *FabricAdapterGenZ) MSDT(client common.Client) ([]*RouteEntry, error) {
+	if g.mSDT == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[RouteEntry](client, g.mSDT)
+}
+
+// RequestorVCAT gets the RequestorVCAT collection.
+func (g *FabricAdapterGenZ) RequestorVCAT(client common.Client) ([]*VCATEntry, error) {
+	if g.requestorVCAT == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[VCATEntry](client, g.requestorVCAT)
+}
+
+// ResponderVCAT gets the ResponderVCAT collection.
+func (g *FabricAdapterGenZ) ResponderVCAT(client common.Client) ([]*VCATEntry, error) {
+	if g.responderVCAT == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[VCATEntry](client, g.responderVCAT)
+}
+
+// SSDT gets the SSDT collection.
+func (g *FabricAdapterGenZ) SSDT(client common.Client) ([]*RouteEntry, error) {
+	if g.sSDT == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[RouteEntry](client, g.sSDT)
 }

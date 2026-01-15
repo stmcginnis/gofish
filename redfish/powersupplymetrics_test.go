@@ -105,7 +105,7 @@ var powerSupplyUnitMetricsBody = strings.NewReader(
 
 // TestPowerDistributionMetrics tests the parsing of PowerDistributionMetrics objects.
 func TestPowerSupplyUnitMetrics(t *testing.T) {
-	var result PowerSupplyUnitMetrics
+	var result PowerSupplyMetrics
 	err := json.NewDecoder(powerSupplyUnitMetricsBody).Decode(&result)
 
 	if err != nil {
@@ -118,7 +118,7 @@ func TestPowerSupplyUnitMetrics(t *testing.T) {
 	assertEquals(t, "937.4", fmt.Sprint(*result.InputPowerWatts.Reading))
 	assertEquals(t, "230.2", fmt.Sprint(*result.InputVoltage.Reading))
 	assertEquals(t, "60", fmt.Sprint(*result.FrequencyHz.Reading))
-	assertEquals(t, "68", fmt.Sprint(result.FanSpeedPercent.Reading))
+	assertEquals(t, "68", fmt.Sprint(*result.FanSpeedPercent.Reading))
 	assertEquals(t, "3290", fmt.Sprint(result.FanSpeedPercent.SpeedRPM))
 	assertEquals(t, "79.84", fmt.Sprint(*result.RailPowerWatts[0].Reading))
 	assertEquals(t, "1.25", fmt.Sprint(*result.RailCurrentAmps[1].Reading))

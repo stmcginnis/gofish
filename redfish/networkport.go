@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.4 - #NetworkPort.v1_4_3.NetworkPort
 
 package redfish
 
@@ -10,254 +11,150 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// FlowControl is type of flow control for the port.
 type FlowControl string
 
 const (
 	// NoneFlowControl No IEEE 802.3x flow control is enabled on this port.
 	NoneFlowControl FlowControl = "None"
-	// TXFlowControl IEEE 802.3x flow control may be initiated by this
-	// station.
+	// TXFlowControl This station can initiate IEEE 802.3x flow control.
 	TXFlowControl FlowControl = "TX"
-	// RXFlowControl IEEE 802.3x flow control may be initiated by the link
-	// partner.
+	// RXFlowControl The link partner can initiate IEEE 802.3x flow control.
 	RXFlowControl FlowControl = "RX"
-	// TXRXFlowControl IEEE 802.3x flow control may be initiated by this
-	// station or the link partner.
+	// TXRXFlowControl This station or the link partner can initiate IEEE 802.3x
+	// flow control.
 	TXRXFlowControl FlowControl = "TX_RX"
 )
 
-// LinkNetworkTechnology is the link type.
-type LinkNetworkTechnology string
-
-const (
-	// EthernetLinkNetworkTechnology means the port is capable of connecting to an
-	// Ethernet network.
-	EthernetLinkNetworkTechnology LinkNetworkTechnology = "Ethernet"
-	// InfiniBandLinkNetworkTechnology means the port is capable of connecting to
-	// an InfiniBand network.
-	InfiniBandLinkNetworkTechnology LinkNetworkTechnology = "InfiniBand"
-	// FibreChannelLinkNetworkTechnology means the port is capable of connecting to
-	// a Fibre Channel network.
-	FibreChannelLinkNetworkTechnology LinkNetworkTechnology = "FibreChannel"
-
-	// The port is capable of connecting to a Gen-Z fabric.
-	GenZLinkNetworkTechnology LinkNetworkTechnology = "GenZ"
-	// (v1.8+) The port is capable of connecting to PCIe and CXL fabrics.
-	PCIeLinkNetworkTechnology LinkNetworkTechnology = "PCIe"
-)
-
-// PortConnectionType is
-type PortConnectionType string
-
-const (
-	// (v1.5+) This port connection type is a diagnostic port.
-	DPortPortConnectionType PortConnectionType = "DPort"
-	// (v1.5+) This port connection type is an extender fabric port.
-	EPortPortConnectionType PortConnectionType = "EPort"
-	// (v1.5+) This port connection type is an external fabric port.
-	EXPortPortConnectionType PortConnectionType = "EXPort"
-	// ExtenderFabricPortConnectionType means this port connection type is an
-	// extender fabric port.
-	ExtenderFabricPortConnectionType PortConnectionType = "ExtenderFabric"
-	// (v1.5+) This port connects in a fabric loop configuration.
-	FLPortPortConnectionType PortConnectionType = "FLPort"
-	// (v1.5+) This port connection type is a fabric port.
-	FPortPortConnectionType PortConnectionType = "FPort"
-	// (v1.5+) This port connection type is a generic fabric port.
-	GPortPortConnectionType PortConnectionType = "GPort"
-	// GenericPortConnectionType means this port connection type is a generic
-	// fabric port.
-	GenericPortConnectionType PortConnectionType = "Generic"
-	// (v1.5+) This port connects in a node loop configuration.
-	NLPortPortConnectionType PortConnectionType = "NLPort"
-	// NotConnectedPortConnectionType means this port is not connected.
-	NotConnectedPortConnectionType PortConnectionType = "NotConnected"
-	// NPortPortConnectionType means this port connects via an N-Port to a switch.
-	NPortPortConnectionType PortConnectionType = "NPort"
-	// (v1.5+) This port connection type is a proxy N port for N-Port virtualization.
-	NPPortPortConnectionType PortConnectionType = "NPPort"
-	// PointToPointPortConnectionType means this port connects in a Point-to-point
-	// configuration.
-	PointToPointPortConnectionType PortConnectionType = "PointToPoint"
-	// PrivateLoopPortConnectionType means this port connects in a private loop
-	// configuration.
-	PrivateLoopPortConnectionType PortConnectionType = "PrivateLoop"
-	// PublicLoopPortConnectionType means this port connects in a public
-	// configuration.
-	PublicLoopPortConnectionType PortConnectionType = "PublicLoop"
-	// (v1.5+) This port connection type is an trunking extender fabric port.
-	TEPortPortConnectionType PortConnectionType = "TEPort"
-	// (v1.5+) This port connection type is unassigned.
-	UPortPortConnectionType PortConnectionType = "UPort"
-)
-
-// SupportedEthernetCapabilities is
-type SupportedEthernetCapabilities string
-
-const (
-	// WakeOnLANSupportedEthernetCapabilities Wake on LAN (WoL) is supported
-	// on this port.
-	WakeOnLANSupportedEthernetCapabilities SupportedEthernetCapabilities = "WakeOnLAN"
-	// EEESupportedEthernetCapabilities IEEE 802.3az Energy Efficient
-	// Ethernet (EEE) is supported on this port.
-	EEESupportedEthernetCapabilities SupportedEthernetCapabilities = "EEE"
-)
-
-// NetDevFuncMaxBWAlloc shall describe a maximum bandwidth percentage allocation
-// for a network device function associated with a port.
-type NetDevFuncMaxBWAlloc struct {
-	// MaxBWAllocPercent shall be the maximum bandwidth percentage allocation
-	// for the associated network device function.
-	MaxBWAllocPercent int
-	// NetworkDeviceFunction shall be a reference of type NetworkDeviceFunction
-	// that represents the Network Device Function associated with this
-	// bandwidth setting of this Network Port.
-	NetworkDeviceFunction NetworkDeviceFunction
-}
-
-// NetDevFuncMinBWAlloc shall describe a minimum bandwidth percentage allocation
-// for a network device function associated with a port.
-type NetDevFuncMinBWAlloc struct {
-	// MinBWAllocPercent shall be the minimum bandwidth percentage allocation
-	// for the associated network device function. The sum total of all minimum
-	// percentages shall not exceed 100.
-	MinBWAllocPercent int
-	// NetworkDeviceFunction shall be a reference of type NetworkDeviceFunction
-	// that represents the Network Device Function associated with this
-	// bandwidth setting of this Network Port.
-	NetworkDeviceFunction NetworkDeviceFunction
-}
-
-// PortLinkStatus is the port link status.
-type NetworkPortLinkStatus string
-
-const (
-	// UpPortLinkStatus The port is enabled and link is good (up).
-	UpPortLinkStatus NetworkPortLinkStatus = "Up"
-	// DownPortLinkStatus  The port is enabled but link is down.
-	DownPortLinkStatus NetworkPortLinkStatus = "Down"
-)
-
-// Deprecated (v1.4+): NetworkPort represents a discrete physical port capable of connecting to a
-// network.
+// NetworkPort shall represent a discrete physical port that can connect to a
+// network in a Redfish implementation.
 type NetworkPort struct {
 	common.Entity
-
+	// ActiveLinkTechnology shall contain the configured link technology of this
+	// port.
+	ActiveLinkTechnology LinkNetworkTechnology
+	// AssociatedNetworkAddresses shall contain an array of configured network
+	// addresses that are associated with this network port, including the
+	// programmed address of the lowest-numbered network device function, the
+	// configured but not active address if applicable, the address for hardware
+	// port teaming, or other network addresses.
+	AssociatedNetworkAddresses []string
+	// CurrentLinkSpeedMbps shall contain the current configured link speed of this
+	// port.
+	//
+	// Version added: v1.2.0
+	CurrentLinkSpeedMbps *int `json:",omitempty"`
+	// EEEEnabled shall indicate whether IEEE 802.3az Energy-Efficient Ethernet
+	// (EEE) is enabled for this network port.
+	EEEEnabled bool
+	// FCFabricName shall indicate the FC Fabric Name provided by the switch.
+	//
+	// Version added: v1.2.0
+	FCFabricName string
+	// FCPortConnectionType shall contain the connection type for this port.
+	//
+	// Version added: v1.2.0
+	FCPortConnectionType PortConnectionType
+	// FlowControlConfiguration shall contain the locally configured 802.3x flow
+	// control setting for this network port.
+	FlowControlConfiguration FlowControl
+	// FlowControlStatus shall contain the 802.3x flow control behavior negotiated
+	// with the link partner for this network port (Ethernet-only).
+	FlowControlStatus FlowControl
+	// LinkStatus shall contain the link status between this port and its link
+	// partner.
+	LinkStatus LinkStatus
+	// MaxFrameSize shall contain the maximum frame size supported by the port.
+	//
+	// Version added: v1.2.0
+	MaxFrameSize *int `json:",omitempty"`
+	// NetDevFuncMaxBWAlloc shall contain an array of maximum bandwidth allocation
+	// percentages for the network device functions associated with this port.
+	NetDevFuncMaxBWAlloc []NetDevFuncMaxBWAlloc
+	// NetDevFuncMinBWAlloc shall contain an array of minimum bandwidth percentage
+	// allocations for each of the network device functions associated with this
+	// port.
+	NetDevFuncMinBWAlloc []NetDevFuncMinBWAlloc
+	// NumberDiscoveredRemotePorts shall contain the number of ports not on this
+	// adapter that this port has discovered.
+	//
+	// Version added: v1.2.0
+	NumberDiscoveredRemotePorts *int `json:",omitempty"`
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Actions shall contain the available actions for this resource.
-	// actions string
-	// ActiveLinkTechnology shall be the
-	// configured link technology of this port.
-	ActiveLinkTechnology LinkNetworkTechnology
-	// AssociatedNetworkAddresses shall be an array of configured network
-	// addresses that are associated with this network port, including the
-	// programmed address of the lowest numbered network device function, the
-	// configured but not active address if applicable, the address for hardware
-	// port teaming, or other network addresses.
-	AssociatedNetworkAddresses []string
-	// CurrentLinkSpeedMbps shall be the current configured link speed of this
-	// port.
-	CurrentLinkSpeedMbps int
-	// Description provides a description of this resource.
-	Description string
-	// EEEEnabled shall be a boolean indicating whether IEEE 802.3az Energy
-	// Efficient Ethernet (EEE) is enabled for this network port.
-	EEEEnabled bool
-	// FCFabricName shall indicate the FC Fabric Name provided by the switch.
-	FCFabricName string
-	// FCPortConnectionType shall be the connection type for this port.
-	FCPortConnectionType PortConnectionType
-	// FlowControlConfiguration shall be the
-	// locally configured 802.3x flow control setting for this network port.
-	FlowControlConfiguration FlowControl
-	// FlowControlStatus shall be the 802.3x
-	// flow control behavior negotiated with the link partner for this
-	// network port (Ethernet-only).
-	FlowControlStatus FlowControl
-	// LinkStatus shall be the link status between this port and its link
-	// partner.
-	LinkStatus NetworkPortLinkStatus
-	// MaxFrameSize shall be the maximum frame size supported by the port.
-	MaxFrameSize int
-	// NetDevFuncMaxBWAlloc shall be an array of maximum bandwidth allocation
-	// percentages for the Network Device Functions associated with this port.
-	NetDevFuncMaxBWAlloc []NetDevFuncMaxBWAlloc
-	// NetDevFuncMinBWAlloc shall be an array of minimum bandwidth percentage
-	// allocations for each of the network device functions associated with this
-	// port.
-	NetDevFuncMinBWAlloc []NetDevFuncMinBWAlloc
-	// NumberDiscoveredRemotePorts shall be the number of ports not on this
-	// adapter that this port has discovered.
-	NumberDiscoveredRemotePorts int
-	// PhysicalPortNumber shall be the physical port number on the network
-	// adapter hardware that this Network Port corresponds to. This value should
-	// match a value visible on the hardware. When HostPortEnabled and
-	// ManagementPortEnabled are both "false", the port shall not establish
-	// physical link.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PhysicalPortNumber shall contain the physical port number on the network
+	// adapter hardware that this network port corresponds to. This value should
+	// match a value visible on the hardware.
 	PhysicalPortNumber string
-	// PortMaximumMTU shall be the largest maximum transmission unit (MTU) that
-	// can be configured for this network port.
-	PortMaximumMTU int
-	// SignalDetected shall be a boolean
-	// indicating whether the port has detected enough signal on enough lanes
-	// to establish link.
+	// PortMaximumMTU shall contain the largest maximum transmission unit (MTU)
+	// that can be configured for this network port.
+	PortMaximumMTU *int `json:",omitempty"`
+	// SignalDetected shall indicate whether the port has detected enough signal on
+	// enough lanes to establish a link.
 	SignalDetected bool
-	// Status shall contain any status or health properties
-	// of the resource.
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// SupportedEthernetCapabilities shall be
-	// an array of zero or more Ethernet capabilities supported by this port.
+	// SupportedEthernetCapabilities shall contain an array of zero or more
+	// Ethernet capabilities supported by this port.
 	SupportedEthernetCapabilities []SupportedEthernetCapabilities
-	// SupportedLinkCapabilities is This object shall describe the static
-	// capabilities of the port, irrespective of transient conditions such as
-	// cabling, interface module presence, or remote link partner status or
-	// configuration.
+	// SupportedLinkCapabilities shall describe the static capabilities of the
+	// port, irrespective of transient conditions such as cabling, interface module
+	// presence, or remote link partner status or configuration.
 	SupportedLinkCapabilities []SupportedLinkCapabilities
-	// VendorID shall indicate the Vendor Identification string information as
+	// VendorId shall indicate the vendor identification string information as
 	// provided by the manufacturer of this port.
+	//
+	// Version added: v1.2.0
 	VendorID string `json:"VendorId"`
-	// WakeOnLANEnabled shall be a boolean
-	// indicating whether Wake on LAN (WoL) is enabled for this network port.
+	// WakeOnLANEnabled shall indicate whether Wake on LAN (WoL) is enabled for
+	// this network port.
 	WakeOnLANEnabled bool
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a NetworkPort object from the raw JSON.
-func (networkport *NetworkPort) UnmarshalJSON(b []byte) error {
+func (n *NetworkPort) UnmarshalJSON(b []byte) error {
 	type temp NetworkPort
-	var t struct {
+	var tmp struct {
 		temp
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*networkport = NetworkPort(t.temp)
+	*n = NetworkPort(tmp.temp)
+
+	// Extract the links to other entities for later
 
 	// This is a read/write object, so we need to save the raw object data for later
-	networkport.rawData = b
+	n.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (networkport *NetworkPort) Update() error {
+func (n *NetworkPort) Update() error {
 	readWriteFields := []string{
 		"ActiveLinkTechnology",
 		"CurrentLinkSpeedMbps",
 		"EEEEnabled",
 		"FlowControlConfiguration",
+		"NetDevFuncMaxBWAlloc",
+		"NetDevFuncMinBWAlloc",
+		"Status",
+		"SupportedLinkCapabilities",
 		"WakeOnLANEnabled",
 	}
 
-	return networkport.UpdateFromRawData(networkport, networkport.rawData, readWriteFields)
+	return n.UpdateFromRawData(n, n.rawData, readWriteFields)
 }
 
 // GetNetworkPort will get a NetworkPort instance from the service.
@@ -271,17 +168,111 @@ func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, e
 	return common.GetCollectionObjects[NetworkPort](c, link)
 }
 
+// NetDevFuncMaxBWAlloc shall describe a maximum bandwidth percentage allocation
+// for a network device function associated with a port.
+type NetDevFuncMaxBWAlloc struct {
+	// MaxBWAllocPercent shall contain the maximum bandwidth percentage allocation
+	// for the associated network device function.
+	MaxBWAllocPercent *int `json:",omitempty"`
+	// NetworkDeviceFunction shall contain a link to a resource of type
+	// 'NetworkDeviceFunction' that represents the network device function
+	// associated with this bandwidth setting of this network port.
+	networkDeviceFunction string
+}
+
+// UnmarshalJSON unmarshals a NetDevFuncMaxBWAlloc object from the raw JSON.
+func (n *NetDevFuncMaxBWAlloc) UnmarshalJSON(b []byte) error {
+	type temp NetDevFuncMaxBWAlloc
+	var tmp struct {
+		temp
+		NetworkDeviceFunction common.Link `json:"networkDeviceFunction"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*n = NetDevFuncMaxBWAlloc(tmp.temp)
+
+	// Extract the links to other entities for later
+	n.networkDeviceFunction = tmp.NetworkDeviceFunction.String()
+
+	return nil
+}
+
+// NetworkDeviceFunction gets the NetworkDeviceFunction linked resource.
+func (n *NetDevFuncMaxBWAlloc) NetworkDeviceFunction(client common.Client) (*NetworkDeviceFunction, error) {
+	if n.networkDeviceFunction == "" {
+		return nil, nil
+	}
+	return common.GetObject[NetworkDeviceFunction](client, n.networkDeviceFunction)
+}
+
+// NetDevFuncMinBWAlloc shall describe a minimum bandwidth percentage allocation
+// for a network device function associated with a port.
+type NetDevFuncMinBWAlloc struct {
+	// MinBWAllocPercent shall contain the minimum bandwidth percentage allocation
+	// for the associated network device function. The sum total of all minimum
+	// percentages shall not exceed 100.
+	MinBWAllocPercent *int `json:",omitempty"`
+	// NetworkDeviceFunction shall contain a link to a resource of type
+	// 'NetworkDeviceFunction' that represents the network device function
+	// associated with this bandwidth setting of this network port.
+	networkDeviceFunction string
+}
+
+// UnmarshalJSON unmarshals a NetDevFuncMinBWAlloc object from the raw JSON.
+func (n *NetDevFuncMinBWAlloc) UnmarshalJSON(b []byte) error {
+	type temp NetDevFuncMinBWAlloc
+	var tmp struct {
+		temp
+		NetworkDeviceFunction common.Link `json:"networkDeviceFunction"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*n = NetDevFuncMinBWAlloc(tmp.temp)
+
+	// Extract the links to other entities for later
+	n.networkDeviceFunction = tmp.NetworkDeviceFunction.String()
+
+	return nil
+}
+
+// NetworkDeviceFunction gets the NetworkDeviceFunction linked resource.
+func (n *NetDevFuncMinBWAlloc) NetworkDeviceFunction(client common.Client) (*NetworkDeviceFunction, error) {
+	if n.networkDeviceFunction == "" {
+		return nil, nil
+	}
+	return common.GetObject[NetworkDeviceFunction](client, n.networkDeviceFunction)
+}
+
 // SupportedLinkCapabilities shall describe the static capabilities of an
 // associated port, irrespective of transient conditions such as cabling,
 // interface module presence, or remote link partner status or configuration.
 type SupportedLinkCapabilities struct {
-	// AutoSpeedNegotiation shall be indicate whether the port is capable of
-	// auto-negotiating speed.
+	// AutoSpeedNegotiation shall indicate whether the port is capable of
+	// autonegotiating speed.
+	//
+	// Version added: v1.2.0
 	AutoSpeedNegotiation bool
-	// CapableLinkSpeedMbps shall be all of the possible network link speed
+	// CapableLinkSpeedMbps shall contain all of the possible network link speed
 	// capabilities of this port.
-	CapableLinkSpeedMbps []int
-	// LinkNetworkTechnology shall be a network technology capability of this
+	//
+	// Version added: v1.2.0
+	CapableLinkSpeedMbps []*int
+	// LinkNetworkTechnology shall contain a network technology capability of this
 	// port.
 	LinkNetworkTechnology LinkNetworkTechnology
+	// LinkSpeedMbps shall contain the speed of the link in megabits per second
+	// (Mbit/s) units for this port when this link network technology is active.
+	//
+	// Deprecated: v1.2.0
+	// This property has been deprecated in favor of the 'CapableLinkSpeedMbps'
+	// property.
+	LinkSpeedMbps *int `json:",omitempty"`
 }

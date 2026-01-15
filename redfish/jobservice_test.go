@@ -62,8 +62,9 @@ func TestJobService(t *testing.T) {
 		t.Errorf("Received invalid log link: %s", result.log)
 	}
 
-	if !result.ServiceCapabilities.Scheduling || result.ServiceCapabilities.
-		MaxJobs != 50 || result.ServiceCapabilities.MaxSteps != 50 {
+	if !result.ServiceCapabilities.Scheduling ||
+		*result.ServiceCapabilities.MaxJobs != 50 ||
+		*result.ServiceCapabilities.MaxSteps != 50 {
 		t.Errorf("Received invalid service capabilities")
 	}
 }

@@ -1,344 +1,339 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.2.6 - #StoragePool.v1_9_2.StoragePool
 
 package swordfish
 
 import (
 	"encoding/json"
-	"errors"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
 )
 
-// EndGrpLifetime This contains properties for the Endurance Group Lifetime attributes.
-type EndGrpLifetime struct {
-	// DataUnitsRead shall contain the total number of data units read from this endurance group. This value does not
-	// include controller reads due to internal operations such as garbage collection. The value is reported in
-	// billions, where a value of 1 corresponds to 1 billion bytes written, and is rounded up. A value of zero
-	// indicates the property is unsupported.
-	DataUnitsRead int
-	// DataUnitsWritten shall contain the total number of data units written from this endurance group. This value does
-	// not include controller writes due to internal operations such as garbage collection. The value is reported in
-	// billions, where a value of 1 corresponds to 1 billion bytes written, and is rounded up. A value of zero
-	// indicates the property is unsupported.
-	DataUnitsWritten int
-	// EnduranceEstimate shall contain an estimate of the total number of data bytes that may be written to the
-	// Endurance Group over the lifetime of the Endurance Group assuming a write amplication of 1. The value is
-	// reported in billions, where a value of 1 corresponds to 1 billion bytes written, and is rounded up. A value of
-	// zero indicates endurance estimates are unsupported.
-	EnduranceEstimate int
-	// ErrorInformationLogEntryCount shall contain the number of error information log entries over the life of the
-	// controller for the endurance group.
-	ErrorInformationLogEntryCount int
-	// HostReadCommandCount shall contain the number of read commands completed by all controllers in the NVM subsystem
-	// for the Endurance Group. For the NVM command set, the is the number of compare commands and read commands.
-	HostReadCommandCount int
-	// HostWriteCommandCount shall contain the number of write commands completed by all controllers in the NVM
-	// subsystem for the Endurance Group. For the NVM command set, the is the number of compare commands and write
-	// commands.
-	HostWriteCommandCount int
-	// MediaAndDataIntegrityErrorCount shall contain the number of occurrences where the controller detected an
-	// unrecovered data integrity error for the Endurance Group. Errors such as uncorrectable ECC, CRC checksum
-	// failure, or LBA tag mismatch are included in this field.
-	MediaAndDataIntegrityErrorCount int
-	// MediaUnitsWritten shall contain the total number of data units written from this endurance group. This value
-	// includes host and controller writes due to internal operations such as garbage collection. The value is reported
-	// in billions, where a value of 1 corresponds to 1 billion bytes written, and is rounded up. A value of zero
-	// indicates the property is unsupported.
-	MediaUnitsWritten int
-	// PercentUsed shall contain a vendor-specific estimate of the percent life used for the endurance group based on
-	// the actual usage and the manufacturer prediction of NVM life. A value of 100 indicates that the estimated
-	// endurance of the NVM in the Endurance Group has been consumed, but may not indicate an NVM failure. According to
-	// the NVMe and JEDEC specs, the value is allowed to exceed 100. Percentages greater than 254 shall be represented
-	// as 255.
-	PercentUsed int
-}
-
-// NVMeEnduranceGroupProperties contains properties to use when StoragePool is used to describe an NVMe
-// Endurance Group.
-type NVMeEnduranceGroupProperties struct {
-	// EndGrpLifetime shall contain any Endurance Group Lifetime properties.
-	EndGrpLifetime EndGrpLifetime
-	// PredictedMediaLifeLeftPercent shall contain an indicator of the percentage of life remaining in the drive's
-	// media.
-	PredictedMediaLifeLeftPercent float64
-}
-
 type NVMePoolType string
 
 const (
-	// EnduranceGroupNVMePoolType is of type EnduranceGroup, used by NVMe devices.
+	// EnduranceGroupNVMePoolType shall be used to specify a pool of type
+	// EnduranceGroup, used by NVMe devices.
 	EnduranceGroupNVMePoolType NVMePoolType = "EnduranceGroup"
-	// NVMSetNVMePoolType is of type NVMSet, used by NVMe devices.
+	// NVMSetNVMePoolType shall be used to specify a pool of type NVMSet, used by
+	// NVMe devices.
 	NVMSetNVMePoolType NVMePoolType = "NVMSet"
 )
-
-// NVMeProperties contains properties to use when StoragePool is used to describe an NVMe construct.
-type NVMeProperties struct {
-	// NVMePoolType shall indicate whether the StoragePool is used as an EnduranceGroup or an NVMSet.
-	NVMePoolType NVMePoolType
-}
-
-// NVMeSetProperties contains properties to use when StoragePool is used to describe an NVMe Set.
-type NVMeSetProperties struct {
-	// EnduranceGroupIdentifier shall contain a 16-bit hex value that contains the endurance group identifier. The
-	// endurance group identifier is unique within a subsystem. Reserved values include 0.
-	EnduranceGroupIdentifier string
-	// OptimalWriteSizeBytes shall contain the Optimal Write Size in Bytes for this NVMe Set.
-	OptimalWriteSizeBytes int
-	// Random4kReadTypicalNanoSeconds shall contain the typical time to complete a 4k read in 100 nano-second units
-	// when the NVM Set is in a Predictable Latency Mode Deterministic Window and there is 1 outstanding command per
-	// NVM Set.
-	Random4kReadTypicalNanoSeconds int
-	// SetIdentifier shall contain a 16-bit hex value that contains the NVMe Set group identifier. The NVM Set
-	// identifier is unique within a subsystem. Reserved values include 0.
-	SetIdentifier string
-	// UnallocatedNVMNamespaceCapacityBytes shall contain the unallocated capacity of the NVMe Set in bytes.
-	UnallocatedNVMNamespaceCapacityBytes int
-}
 
 type PoolType string
 
 const (
-	// BlockPoolType is of type block.
+	// BlockPoolType shall be used to specify a pool of type block. This is used
+	// when the pool serves block storage.
 	BlockPoolType PoolType = "Block"
-	// FilePoolType is of type file.
+	// FilePoolType shall be used to specify a pool of type file. This setting is
+	// used when the pool serves file storage.
 	FilePoolType PoolType = "File"
-	// ObjectPoolType is of type object.
+	// ObjectPoolType shall be used to specify a pool of type object.
 	ObjectPoolType PoolType = "Object"
-	// PoolPoolType is of type pool, indicating a hierarchy.
+	// PoolPoolType shall be used to specify a pool of type pool. This setting is
+	// used to indicate a 'pool of pools' hierarchy.
 	PoolPoolType PoolType = "Pool"
 )
 
-// StoragePool is a container of data storage capable of providing
-// capacity conforming to one of its supported classes of service. The
-// storage pool does not support IO to its data storage.
+// StoragePool is a container of data storage capable of providing capacity
+// conforming to one of its supported classes of service. The storage pool does
+// not support IO to its data storage.
 type StoragePool struct {
 	common.Entity
-
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// AllocatedPools shall contain a reference
-	// to the collection of storage pools allocated from this storage pool.
+	// AllocatedPools shall contain a reference to the collection of storage pools
+	// allocated from this storage pool.
 	allocatedPools string
-	// AllocatedVolumes shall contain a
-	// reference to the collection of volumes allocated from this storage
-	// pool.
+	// AllocatedVolumes shall contain a reference to the collection of volumes
+	// allocated from this storage pool.
 	allocatedVolumes string
-	// Capacity shall provide information about the actual utilization of the
+	// BlockSizeBytes Maximum size in bytes of the blocks which form this Volume.
+	// If the block size is variable, then the maximum block size in bytes should
+	// be specified. If the block size is unknown or if a block concept is not
+	// valid (for example, with Memory), enter a 1.
+	//
+	// Deprecated
+	// This property has been Deprecated in favor of
+	// StoragePool.v1_1_1.StoragePool.MaxBlockSizeBytes
+	BlockSizeBytes *uint `json:",omitempty"`
+	// Capacity shall provide an information about the actual utilization of the
 	// capacity within this storage pool.
 	Capacity Capacity
-	// CapacitySources is fully or partially consumed storage from a source
-	// resource. Each entry shall provide capacity allocation data from a
-	// named source resource.
-	capacitySources []string
-	// CapacitySourcesCount is the number of capacity sources.
+	// CapacitySources shall provide capacity allocation data from a named source
+	// resource.
+	CapacitySources []CapacitySource
+	// CapacitySources@odata.count
 	CapacitySourcesCount int `json:"CapacitySources@odata.count"`
 	// ClassesOfService shall contain references to all classes of service
 	// supported by this storage pool. Capacity allocated from this storage pool
 	// shall conform to one of the referenced classes of service.
 	classesOfService string
-	// Compressed shall contain a boolean indicator if the StoragePool is
-	// currently utilizing compression or not.
+	// Compressed shall contain a boolean indicator if the StoragePool is currently
+	// utilizing compression or not.
+	//
+	// Version added: v1.3.0
+	//
+	// Deprecated: v1.6.0
 	// This property has been deprecated in favor of the IsCompressed and
 	// DefaultCompressionBehavior properties.
 	Compressed bool
-	// CompressionEnabled shall indicate whether or not compression is enabled on the storage pool.
+	// CompressionEnabled shall indicate whether or not compression is enabled on
+	// the storage pool.
+	//
+	// Version added: v1.6.0
 	CompressionEnabled bool
-	// Deduplicted shall contain a boolean indicator if the StoragePool is
+	// Deduplicated shall contain a boolean indicator if the StoragePool is
 	// currently utilizing deduplication or not.
+	//
+	// Version added: v1.3.0
+	//
+	// Deprecated: v1.6.0
 	// This property has been deprecated in favor of the IsDeduplicated and
 	// DefaultDedupeBehavior properties.
 	Deduplicated bool
-	// DeduplicationEnabled shall indicate whether or not deduplication is enabled on the storage pool.
+	// DeduplicationEnabled shall indicate whether or not deduplication is enabled
+	// on the storage pool.
+	//
+	// Version added: v1.6.0
 	DeduplicationEnabled bool
-	// DefaultClassOfService is used.
+	// DefaultClassOfService shall reference the default class of service for
+	// entities allocated from this storage pool. If the ClassesOfService
+	// collection is not empty, then the value of this property shall be one of its
+	// entries. If not present, the default class of service of the containing
+	// StorageService entity shall be used.
+	//
+	// Version added: v1.2.0
 	defaultClassOfService string
-	// DefaultCompressionBehavior shall indicate the default dedupe behavior applied to the child resource (E.g.,
-	// volume or storage pool) created out of the storage pool if the 'Compressed' property is not set on the create
+	// DefaultCompressionBehavior shall indicate the default dedupe behavior
+	// applied to the child resource (E.g., volume or storage pool) created out of
+	// the storage pool if the 'Compressed' property is not set on the create
 	// request.
+	//
+	// Version added: v1.6.0
 	DefaultCompressionBehavior bool
-	// DefaultDeduplicationBehavior shall indicate the default deduplication behavior applied to the child resource
-	// (E.g., volume or storage pool) created out of the storage pool if the 'Deduplicated' property is not set on the
-	// create request.
+	// DefaultDeduplicationBehavior shall indicate the default deduplication
+	// behavior applied to the child resource (E.g., volume or storage pool)
+	// created out of the storage pool if the 'Deduplicated' property is not set on
+	// the create request.
+	//
+	// Version added: v1.6.0
 	DefaultDeduplicationBehavior bool
-	// DefaultEncryptionBehavior shall indicate the default dedupe behavior applied to the child resource (E.g., volume
-	// or storage pool) created out of the storage pool if the 'Encrypted' property is not set on the create request.
+	// DefaultEncryptionBehavior shall indicate the default dedupe behavior applied
+	// to the child resource (E.g., volume or storage pool) created out of the
+	// storage pool if the 'Encrypted' property is not set on the create request.
+	//
+	// Version added: v1.6.0
 	DefaultEncryptionBehavior bool
-	// Description provides a description of this resource.
-	Description string
-	// EncryptionEnabled shall indicate whether or not encryption is enabled on the storage pool.
-	EncryptionEnabled bool
-	// Encrypted shall contain a boolean indicator if the
-	// StoragePool is currently utilizing encryption or not.
-	// This property has been deprecated in favor of the IsEncrypted and DefaultEncryptionBehavior properties.
+	// Encrypted shall contain a boolean indicator if the StoragePool is currently
+	// utilizing encryption or not.
+	//
+	// Version added: v1.3.0
+	//
+	// Deprecated: v1.6.0
+	// This property has been deprecated in favor of the IsEncrypted and
+	// DefaultEncryptionBehavior properties.
 	Encrypted bool
-	// IOStatistics is the value shall represent IO statistics for this
-	// StoragePool.
+	// EncryptionEnabled shall indicate whether or not encryption is enabled on the
+	// storage pool.
+	//
+	// Version added: v1.6.0
+	EncryptionEnabled bool
+	// IOStatistics shall represent IO statistics for this StoragePool.
+	//
+	// Version added: v1.2.0
+	//
+	// Deprecated: v1.9.0
+	// This property has been deprecated in favor of the IOStatistics property in
+	// Metrics.
 	IOStatistics IOStatistics
 	// Identifier shall be unique within the managed ecosystem.
 	Identifier common.Identifier
-	// LowSpaceWarningThresholdPercents is each time the following value is
-	// less than one of the values in the array the
-	// LOW_SPACE_THRESHOLD_WARNING event shall be triggered: Across all
+	// LowSpaceWarningThresholdPercents shall be triggered: Across all
 	// CapacitySources entries, percent = (SUM(AllocatedBytes) -
 	// SUM(ConsumedBytes))/SUM(AllocatedBytes).
-	LowSpaceWarningThresholdPercents []int
-	// MaxBlockSizeBytes if present, the value is the maximum block size
-	// of an allocated resource. If the block size is unknown or if a block
-	// concept is not valid (for example, with Memory), this property shall
-	// be NULL.
-	MaxBlockSizeBytes int64
-	// Metrics shall contain a link to a resource of type StoragePoolMetrics that specifies the metrics for this
-	// storage pool. IO metrics are reported in the IOStatistics property.
+	LowSpaceWarningThresholdPercents []*int
+	// MaxBlockSizeBytes shall be NULL.
+	//
+	// Version added: v1.1.1
+	MaxBlockSizeBytes *uint `json:",omitempty"`
+	// Metrics shall contain a link to a resource of type StoragePoolMetrics that
+	// specifies the metrics for this storage pool. IO metrics are reported in the
+	// IOStatistics property.
+	//
+	// Version added: v1.9.0
 	metrics string
-	// NVMeEnduranceGroupProperties shall contain properties to use when StoragePool is used to describe an NVMe
-	// Endurance Group.
+	// NVMeEnduranceGroupProperties shall contain properties to use when
+	// StoragePool is used to describe an NVMe Endurance Group.
+	//
+	// Version added: v1.4.0
 	NVMeEnduranceGroupProperties NVMeEnduranceGroupProperties
 	// NVMeProperties shall indicate the type of storage pool.
+	//
+	// Version added: v1.6.0
 	NVMeProperties NVMeProperties
-	// NVMeSetProperties shall contain properties to use when StoragePool is used to describe an NVMe Set.
+	// NVMeSetProperties shall contain properties to use when StoragePool is used
+	// to describe an NVMe Set.
+	//
+	// Version added: v1.4.0
 	NVMeSetProperties NVMeSetProperties
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// RecoverableCapacitySourceCount is the value of the number of available
-	// capacity source resources currently available in the event that an
-	// equivalent capacity source resource fails.
-	RecoverableCapacitySourceCount int
-	// RemainingCapacityPercent if present, this value shall return
-	// {[(SUM(AllocatedBytes) - SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100
-	// represented as an integer value.
-	RemainingCapacityPercent int
-	// ReplicationEnabled shall indicate whether or not replication is enabled on the storage pool. If enabled for
-	// pool, replication can still be disabled on individual resources (e.g., volumes) within the pool.
+	// PoolType shall indicate the type of storage pool.
+	//
+	// Version added: v1.6.0
+	//
+	// Deprecated: v1.7.0
+	// This property has been deprecated in favor of the SupportedPoolTypes
+	// property.
+	PoolType []PoolType
+	// RecoverableCapacitySourceCount The value is the number of available capacity
+	// source resources currently available in the event that an equivalent
+	// capacity source resource fails.
+	//
+	// Version added: v1.2.0
+	RecoverableCapacitySourceCount *int `json:",omitempty"`
+	// RemainingCapacityPercent shall return {[(SUM(AllocatedBytes) -
+	// SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100 represented as an integer
+	// value.
+	//
+	// Version added: v1.1.0
+	RemainingCapacityPercent *int `json:",omitempty"`
+	// ReplicationEnabled shall indicate whether or not replication is enabled on
+	// the storage pool. If enabled for pool, replication can still be disabled on
+	// individual resources (e.g., volumes) within the pool.
+	//
+	// Version added: v1.8.0
 	ReplicationEnabled bool
-	// Status is the storage pool status.
+	// Status shall contain the status of the StoragePool.
 	Status common.Status
-	// SupportedPoolTypes shall contain all the PoolType values supported by the storage pool.
+	// SupportedPoolTypes shall contain all the PoolType values supported by the
+	// storage pool.
+	//
+	// Version added: v1.7.0
 	SupportedPoolTypes []PoolType
-	// SupportedProvisioningPolicies shall specify all supported storage allocation policies for the Storage Pool.
+	// SupportedProvisioningPolicies shall specify all supported storage allocation
+	// policies for the Storage Pool.
+	//
+	// Version added: v1.3.0
 	SupportedProvisioningPolicies []ProvisioningPolicy
-	// SupportedRAIDTypes shall contain all the RAIDType values supported by the storage pool.
+	// SupportedRAIDTypes shall contain all the RAIDType values supported by the
+	// storage pool.
+	//
+	// Version added: v1.3.0
 	SupportedRAIDTypes []RAIDType
+	// addDrivesTarget is the URL to send AddDrives requests.
+	addDrivesTarget string
+	// removeDrivesTarget is the URL to send RemoveDrives requests.
+	removeDrivesTarget string
+	// setCompressionStateTarget is the URL to send SetCompressionState requests.
+	setCompressionStateTarget string
+	// setDeduplicationStateTarget is the URL to send SetDeduplicationState requests.
+	setDeduplicationStateTarget string
+	// setEncryptionStateTarget is the URL to send SetEncryptionState requests.
+	setEncryptionStateTarget string
+	// dedicatedSpareDrives are the URIs for DedicatedSpareDrives.
+	dedicatedSpareDrives []string
+	// owningStorageResource is the URI for OwningStorageResource.
+	owningStorageResource string
+	// spareResourceSets are the URIs for SpareResourceSets.
+	spareResourceSets []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	// DedicatedSpareDrives shall be a reference to the resources that this
-	// StoragePool is associated with and shall reference resources of type
-	// Drive. This property shall only contain references to Drive entities
-	// which are currently assigned as a dedicated spare and are able to support
-	// this StoragePool.
-	dedicatedSpareDrives []string
-	// DedicatedSpareDrivesCount is the number of drives.
-	DedicatedSpareDrivesCount int
-	// OwningStorageResource shall be a pointer to the Storage resource that owns or contains this StoragePool.
-	owningStorageResource string
-	// SpareResourceSets shall contain resources that may be utilized to replace
-	// the capacity provided by a failed resource having a compatible type.
-	spareResourceSets []string
-	// SpareResourceSetsCount is the number of spare resource sets.
-	SpareResourceSetsCount int
-
-	addDrivesTarget             string
-	removeDrivesTarget          string
-	setCompressionStateTarget   string
-	setDeduplicationStateTarget string
-	setEncryptionStateTarget    string
 }
 
 // UnmarshalJSON unmarshals a StoragePool object from the raw JSON.
-func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
+func (s *StoragePool) UnmarshalJSON(b []byte) error {
 	type temp StoragePool
-	type links struct {
-		DedicatedSpareDrives      common.Links
-		DedicatedSpareDrivesCount int `json:"DedicatedSpareDrives@odata.count"`
-		OwningStorageResource     common.Link
-		SpareResourceSets         common.Links
-		SpareResourceSetsCount    int `json:"SpareResourceSets@odata.count"`
+	type sActions struct {
+		AddDrives             common.ActionTarget `json:"#StoragePool.AddDrives"`
+		RemoveDrives          common.ActionTarget `json:"#StoragePool.RemoveDrives"`
+		SetCompressionState   common.ActionTarget `json:"#StoragePool.SetCompressionState"`
+		SetDeduplicationState common.ActionTarget `json:"#StoragePool.SetDeduplicationState"`
+		SetEncryptionState    common.ActionTarget `json:"#StoragePool.SetEncryptionState"`
 	}
-	var t struct {
+	type sLinks struct {
+		DedicatedSpareDrives  common.Links `json:"DedicatedSpareDrives"`
+		DefaultClassOfService common.Link  `json:"DefaultClassOfService"`
+		OwningStorageResource common.Link  `json:"OwningStorageResource"`
+		SpareResourceSets     common.Links `json:"SpareResourceSets"`
+	}
+	var tmp struct {
 		temp
-		Links                 links
-		AllocatedPools        common.Link
-		AllocatedVolumes      common.Link
-		CapacitySource        common.Links
-		ClassesOfService      common.Link
-		DefaultClassOfService common.Link
-		Metrics               common.Link
-		Actions               struct {
-			AddDrives             common.ActionTarget `json:"#StoragePool.AddDrives"`
-			RemoveDrives          common.ActionTarget `json:"#StoragePool.RemoveDrives"`
-			SetCompressionState   common.ActionTarget `json:"#StoragePool.SetCompressionState"`
-			SetDeduplicationState common.ActionTarget `json:"#StoragePool.SetDeduplicationState"`
-			SetEncryptionState    common.ActionTarget `json:"#StoragePool.SetEncryptionState"`
-		}
+		Actions          sActions
+		Links            sLinks
+		AllocatedPools   common.Link `json:"allocatedPools"`
+		AllocatedVolumes common.Link `json:"allocatedVolumes"`
+		ClassesOfService common.Link `json:"classesOfService"`
+		Metrics          common.Link `json:"metrics"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*storagepool = StoragePool(t.temp)
+	*s = StoragePool(tmp.temp)
 
 	// Extract the links to other entities for later
-	storagepool.dedicatedSpareDrives = t.Links.DedicatedSpareDrives.ToStrings()
-	storagepool.DedicatedSpareDrivesCount = t.Links.DedicatedSpareDrivesCount
-	storagepool.owningStorageResource = t.Links.OwningStorageResource.String()
-	storagepool.spareResourceSets = t.Links.SpareResourceSets.ToStrings()
-	storagepool.SpareResourceSetsCount = t.Links.SpareResourceSetsCount
-
-	storagepool.allocatedPools = t.AllocatedPools.String()
-	storagepool.allocatedVolumes = t.AllocatedVolumes.String()
-	storagepool.capacitySources = t.CapacitySource.ToStrings()
-	storagepool.classesOfService = t.ClassesOfService.String()
-	storagepool.defaultClassOfService = t.DefaultClassOfService.String()
-	storagepool.metrics = t.Metrics.String()
-
-	storagepool.addDrivesTarget = t.Actions.AddDrives.Target
-	storagepool.removeDrivesTarget = t.Actions.RemoveDrives.Target
-	storagepool.setCompressionStateTarget = t.Actions.SetCompressionState.Target
-	storagepool.setDeduplicationStateTarget = t.Actions.SetDeduplicationState.Target
-	storagepool.setEncryptionStateTarget = t.Actions.SetEncryptionState.Target
+	s.addDrivesTarget = tmp.Actions.AddDrives.Target
+	s.removeDrivesTarget = tmp.Actions.RemoveDrives.Target
+	s.setCompressionStateTarget = tmp.Actions.SetCompressionState.Target
+	s.setDeduplicationStateTarget = tmp.Actions.SetDeduplicationState.Target
+	s.setEncryptionStateTarget = tmp.Actions.SetEncryptionState.Target
+	s.dedicatedSpareDrives = tmp.Links.DedicatedSpareDrives.ToStrings()
+	s.defaultClassOfService = tmp.Links.DefaultClassOfService.String()
+	s.owningStorageResource = tmp.Links.OwningStorageResource.String()
+	s.spareResourceSets = tmp.Links.SpareResourceSets.ToStrings()
+	s.allocatedPools = tmp.AllocatedPools.String()
+	s.allocatedVolumes = tmp.AllocatedVolumes.String()
+	s.classesOfService = tmp.ClassesOfService.String()
+	s.metrics = tmp.Metrics.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	storagepool.rawData = b
+	s.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (storagepool *StoragePool) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(StoragePool)
-	err := original.UnmarshalJSON(storagepool.rawData)
-	if err != nil {
-		return err
-	}
-
+func (s *StoragePool) Update() error {
 	readWriteFields := []string{
+		"Capacity",
 		"CapacitySources",
+		"CapacitySources@odata.count",
 		"ClassesOfService",
 		"Compressed",
+		"CompressionEnabled",
 		"Deduplicated",
+		"DeduplicationEnabled",
 		"DefaultClassOfService",
+		"DefaultCompressionBehavior",
+		"DefaultDeduplicationBehavior",
+		"DefaultEncryptionBehavior",
 		"Encrypted",
+		"EncryptionEnabled",
+		"IOStatistics",
+		"Identifier",
 		"LowSpaceWarningThresholdPercents",
+		"NVMeEnduranceGroupProperties",
+		"NVMeProperties",
+		"NVMeSetProperties",
 		"RecoverableCapacitySourceCount",
+		"ReplicationEnabled",
+		"Status",
 		"SupportedProvisioningPolicies",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(storagepool).Elem()
-
-	return storagepool.Entity.Update(originalElement, currentElement, readWriteFields)
+	return s.UpdateFromRawData(s, s.rawData, readWriteFields)
 }
 
 // GetStoragePool will get a StoragePool instance from the service.
@@ -352,156 +347,249 @@ func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, e
 	return common.GetCollectionObjects[StoragePool](c, link)
 }
 
-// DedicatedSpareDrives gets the Drive entities which are currently assigned as
-// a dedicated spare and are able to support this StoragePool.
-func (storagepool *StoragePool) DedicatedSpareDrives() ([]*redfish.Drive, error) {
-	return common.GetObjects[redfish.Drive](storagepool.GetClient(), storagepool.dedicatedSpareDrives)
+// AddDrives shall be used to add a drive, or set of drives, to an underlying
+// capacity source for the storage pool.
+// capacitySource - This parameter shall contain the target capacity source for
+// the drive(s). This property does not need to be specified if the storage
+// pool only contains one capacity source, or if the implementation is capable
+// of automatically selecting the appropriate capacity source.
+// drives - This parameter shall contain the Uri to the existing drive or
+// drives to be added to a capacity source of the storage pool. The
+// implementation may impose restrictions on the number of drives added
+// simultaneously.
+func (s *StoragePool) AddDrives(capacitySource string, drives []string) error {
+	payload := make(map[string]any)
+	payload["CapacitySource"] = capacitySource
+	payload["Drives"] = drives
+	return s.Post(s.addDrivesTarget, payload)
 }
 
-// SpareResourceSets gets resources that may be utilized to replace the capacity
-// provided by a failed resource having a compatible type.
-func (storagepool *StoragePool) SpareResourceSets() ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](storagepool.GetClient(), storagepool.spareResourceSets)
+// RemoveDrives shall be used to remove a drive from the StoragePool. This
+// action is targeted at a graceful drive removal process, such as initiating a
+// drive cleanup and data reallocation before drive removal from the pool. The
+// implementation may impose restrictions on the number of drives removed
+// simultaneously.
+// drives - This parameter shall contain the Uri to the drive or drives to be
+// removed from the underlying capacity source.
+func (s *StoragePool) RemoveDrives(drives []string) error {
+	payload := make(map[string]any)
+	payload["Drives"] = drives
+	return s.Post(s.removeDrivesTarget, payload)
 }
 
-// AllocatedPools gets the storage pools allocated from this storage pool.
-func (storagepool *StoragePool) AllocatedPools() ([]*StoragePool, error) {
-	return ListReferencedStoragePools(storagepool.GetClient(), storagepool.allocatedPools)
+// SetCompressionState shall be used to set the compression state of the storage pool.
+// This may be both a highly impactful, as well as a long running operation.
+// enable - This property shall indicate the desired compression state of the
+// storage pool.
+func (s *StoragePool) SetCompressionState(enable bool) error {
+	payload := make(map[string]any)
+	payload["Enable"] = enable
+	return s.Post(s.setCompressionStateTarget, payload)
 }
 
-// AllocatedVolumes gets the volumes allocated from this storage pool.
-func (storagepool *StoragePool) AllocatedVolumes() ([]*Volume, error) {
-	return ListReferencedVolumes(storagepool.GetClient(), storagepool.allocatedVolumes)
+// SetDeduplicationState shall be used to set the dedupe state of the storage pool. This
+// may be both a highly impactful, as well as a long running operation.
+// enable - This property shall indicate the desired deduplication state of the
+// storage pool.
+func (s *StoragePool) SetDeduplicationState(enable bool) error {
+	payload := make(map[string]any)
+	payload["Enable"] = enable
+	return s.Post(s.setDeduplicationStateTarget, payload)
 }
 
-// CapacitySources gets space allocations to this pool.
-func (storagepool *StoragePool) CapacitySources() ([]*CapacitySource, error) {
-	return common.GetObjects[CapacitySource](storagepool.GetClient(), storagepool.capacitySources)
+// SetEncryptionState shall be used to set the encryption state of the storage pool.
+// This may be both a highly impactful, as well as a long running operation.
+// enable - This property shall indicate the desired encryption state of the
+// storage pool.
+func (s *StoragePool) SetEncryptionState(enable bool) error {
+	payload := make(map[string]any)
+	payload["Enable"] = enable
+	return s.Post(s.setEncryptionStateTarget, payload)
 }
 
-// ClassesOfService gets references to all classes of service supported by this
-// storage pool. Capacity allocated from this storage pool shall conform to one
-// of the referenced classes of service.
-func (storagepool *StoragePool) ClassesOfService() ([]*ClassOfService, error) {
-	return ListReferencedClassOfServices(storagepool.GetClient(), storagepool.classesOfService)
+// DedicatedSpareDrives gets the DedicatedSpareDrives linked resources.
+func (s *StoragePool) DedicatedSpareDrives(client common.Client) ([]*redfish.Drive, error) {
+	return common.GetObjects[redfish.Drive](client, s.dedicatedSpareDrives)
 }
 
-// DefaultClassOfService gets the default ClassOfService for this pool.
-func (storagepool *StoragePool) DefaultClassOfService() (*ClassOfService, error) {
-	if storagepool.defaultClassOfService == "" {
+// DefaultClassOfService gets the DefaultClassOfService linked resource.
+func (s *StoragePool) DefaultClassOfService(client common.Client) (*ClassOfService, error) {
+	if s.defaultClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storagepool.GetClient(), storagepool.defaultClassOfService)
+	return common.GetObject[ClassOfService](client, s.defaultClassOfService)
 }
 
-// OwningStorageResource gets the Storage resource that owns or contains this StoragePool.
-func (storagepool *StoragePool) OwningStorageResource() (*redfish.Storage, error) {
-	if storagepool.owningStorageResource == "" {
+// OwningStorageResource gets the OwningStorageResource linked resource.
+func (s *StoragePool) OwningStorageResource(client common.Client) (*redfish.Storage, error) {
+	if s.owningStorageResource == "" {
 		return nil, nil
 	}
-
-	return redfish.GetStorage(storagepool.GetClient(), storagepool.owningStorageResource)
+	return common.GetObject[redfish.Storage](client, s.owningStorageResource)
 }
 
-// Metrics gets the metrics for this storage pool.
-func (storagepool *StoragePool) Metrics() (*StoragePoolMetrics, error) {
-	if storagepool.metrics == "" {
+// SpareResourceSets gets the SpareResourceSets linked resources.
+func (s *StoragePool) SpareResourceSets(client common.Client) ([]*SpareResourceSet, error) {
+	return common.GetObjects[SpareResourceSet](client, s.spareResourceSets)
+}
+
+// AllocatedPools gets the AllocatedPools collection.
+func (s *StoragePool) AllocatedPools(client common.Client) ([]*StoragePool, error) {
+	if s.allocatedPools == "" {
 		return nil, nil
 	}
-	return GetStoragePoolMetrics(storagepool.GetClient(), storagepool.metrics)
+	return common.GetCollectionObjects[StoragePool](client, s.allocatedPools)
 }
 
-// AddDrives will add an additional drive, or set of drives, to a capacity source for the storage pool.
-//
-// `capacitySource` is the target capacity source for the drive(s). This property does not need to be
-// specified if the storage pool only contains one capacity source, or if the implementation is
-// capable of automatically selecting the appropriate capacity source.
-// `drives` is the existing drive or drives to be added to a capacity source of the storage pool. The
-// implementation may impose restrictions on the number of drives added simultaneously.
-func (storagepool *StoragePool) AddDrives(capacitySource *CapacitySource, drives []*redfish.Drive) error {
-	if storagepool.addDrivesTarget == "" {
-		return errors.New("action not supported by this service")
+// AllocatedVolumes gets the AllocatedVolumes collection.
+func (s *StoragePool) AllocatedVolumes(client common.Client) ([]*common.Volume, error) {
+	if s.allocatedVolumes == "" {
+		return nil, nil
 	}
-
-	payload := struct {
-		CapacitySource string
-		Drives         []string
-	}{}
-
-	if capacitySource != nil {
-		payload.CapacitySource = capacitySource.ODataID
-	}
-
-	for _, drive := range drives {
-		payload.Drives = append(payload.Drives, drive.ODataID)
-	}
-
-	return storagepool.Post(storagepool.addDrivesTarget, payload)
+	return common.GetCollectionObjects[common.Volume](client, s.allocatedVolumes)
 }
 
-// RemoveDrives will remove drive(s) from the capacity source for the StoragePool.
-//
-// `drives` is the drive or drives to be removed from the underlying capacity source.
-func (storagepool *StoragePool) RemoveDrives(drives []*redfish.Drive) error {
-	if storagepool.removeDrivesTarget == "" {
-		return errors.New("action not supported by this service")
+// ClassesOfService gets the ClassesOfService collection.
+func (s *StoragePool) ClassesOfService(client common.Client) ([]*ClassOfService, error) {
+	if s.classesOfService == "" {
+		return nil, nil
 	}
-
-	payload := struct {
-		Drives []string
-	}{}
-
-	for _, drive := range drives {
-		payload.Drives = append(payload.Drives, drive.ODataID)
-	}
-
-	return storagepool.Post(storagepool.removeDrivesTarget, payload)
+	return common.GetCollectionObjects[ClassOfService](client, s.classesOfService)
 }
 
-// SetCompressionState will set the compression state of the storage pool.
-// This may be both a highly impactful, as well as a long running operation.
-//
-// `enable` indicates the desired compression state of the storage pool.
-func (storagepool *StoragePool) SetCompressionState(enable bool) error {
-	if storagepool.setCompressionStateTarget == "" {
-		return errors.New("action not supported by this service")
+// Metrics gets the Metrics linked resource.
+func (s *StoragePool) Metrics(client common.Client) (*StoragePoolMetrics, error) {
+	if s.metrics == "" {
+		return nil, nil
 	}
-
-	payload := struct {
-		Enable bool
-	}{Enable: enable}
-
-	return storagepool.Post(storagepool.setCompressionStateTarget, payload)
+	return common.GetObject[StoragePoolMetrics](client, s.metrics)
 }
 
-// SetDeduplicationState will set the dedupe state of the storage pool.
-// This may be both a highly impactful, as well as a long running operation.
-//
-// `enable` indicates the desired deduplication state of the storage pool.
-func (storagepool *StoragePool) SetDeduplicationState(enable bool) error {
-	if storagepool.setCompressionStateTarget == "" {
-		return errors.New("action not supported by this service")
-	}
-
-	payload := struct {
-		Enable bool
-	}{Enable: enable}
-
-	return storagepool.Post(storagepool.setCompressionStateTarget, payload)
+// EndGrpLifetime This contains properties for the Endurance Group Lifetime
+// attributes.
+type EndGrpLifetime struct {
+	// DataUnitsRead shall contain the total number of data units read from this
+	// endurance group. This value does not include controller reads due to
+	// internal operations such as garbage collection. The value is reported in
+	// billions, where a value of 1 corresponds to 1 billion bytes written, and is
+	// rounded up. A value of zero indicates the property is unsupported.
+	//
+	// Version added: v1.4.0
+	DataUnitsRead *uint `json:",omitempty"`
+	// DataUnitsWritten shall contain the total number of data units written from
+	// this endurance group. This value does not include controller writes due to
+	// internal operations such as garbage collection. The value is reported in
+	// billions, where a value of 1 corresponds to 1 billion bytes written, and is
+	// rounded up. A value of zero indicates the property is unsupported.
+	//
+	// Version added: v1.4.0
+	DataUnitsWritten *uint `json:",omitempty"`
+	// EnduranceEstimate shall contain an estimate of the total number of data
+	// bytes that may be written to the Endurance Group over the lifetime of the
+	// Endurance Group assuming a write amplication of 1. The value is reported in
+	// billions, where a value of 1 corresponds to 1 billion bytes written, and is
+	// rounded up. A value of zero indicates endurance estimates are unsupported.
+	//
+	// Version added: v1.4.0
+	EnduranceEstimate *uint `json:",omitempty"`
+	// ErrorInformationLogEntryCount shall contain the number of error information
+	// log entries over the life of the controller for the endurance group.
+	//
+	// Version added: v1.4.0
+	ErrorInformationLogEntryCount *uint `json:",omitempty"`
+	// HostReadCommandCount shall contain the number of read commands completed by
+	// all controllers in the NVM subsystem for the Endurance Group. For the NVM
+	// command set, the is the number of compare commands and read commands.
+	//
+	// Version added: v1.4.0
+	HostReadCommandCount *uint `json:",omitempty"`
+	// HostWriteCommandCount shall contain the number of write commands completed
+	// by all controllers in the NVM subsystem for the Endurance Group. For the NVM
+	// command set, the is the number of compare commands and write commands.
+	//
+	// Version added: v1.4.0
+	HostWriteCommandCount *uint `json:",omitempty"`
+	// MediaAndDataIntegrityErrorCount shall contain the number of occurrences where
+	// the controller detected an unrecovered data integrity error for the
+	// Endurance Group. Errors such as uncorrectable ECC, CRC checksum failure, or
+	// LBA tag mismatch are included in this field.
+	//
+	// Version added: v1.4.0
+	MediaAndDataIntegrityErrorCount *uint `json:",omitempty"`
+	// MediaUnitsWritten shall contain the total number of data units written from
+	// this endurance group. This value includes host and controller writes due to
+	// internal operations such as garbage collection. The value is reported in
+	// billions, where a value of 1 corresponds to 1 billion bytes written, and is
+	// rounded up. A value of zero indicates the property is unsupported.
+	//
+	// Version added: v1.4.0
+	MediaUnitsWritten *uint `json:",omitempty"`
+	// PercentUsed shall contain a vendor-specific estimate of the percent life
+	// used for the endurance group based on the actual usage and the manufacturer
+	// prediction of NVM life. A value of 100 indicates that the estimated
+	// endurance of the NVM in the Endurance Group has been consumed, but may not
+	// indicate an NVM failure. According to the NVMe and JEDEC specs, the value is
+	// allowed to exceed 100. Percentages greater than 254 shall be represented as
+	// 255.
+	//
+	// Version added: v1.4.0
+	PercentUsed *uint `json:",omitempty"`
 }
 
-// SetEncryptionState set the encryption state of the storage pool.
-// This may be both a highly impactful, as well as a long running operation.
-//
-// `enable` indicates the desired encryption state of the storage pool.
-func (storagepool *StoragePool) SetEncryptionState(enable bool) error {
-	if storagepool.setEncryptionStateTarget == "" {
-		return errors.New("action not supported by this service")
-	}
+// NVMeEnduranceGroupProperties This contains properties to use when StoragePool
+// is used to describe an NVMe Endurance Group.
+type NVMeEnduranceGroupProperties struct {
+	// EndGrpLifetime shall contain any Endurance Group Lifetime properties.
+	//
+	// Version added: v1.4.0
+	EndGrpLifetime EndGrpLifetime
+	// PredictedMediaLifeLeftPercent shall contain an indicator of the percentage
+	// of life remaining in the drive's media.
+	//
+	// Version added: v1.4.0
+	PredictedMediaLifeLeftPercent *float64 `json:",omitempty"`
+}
 
-	payload := struct {
-		Enable bool
-	}{Enable: enable}
+// NVMeProperties This contains properties to use when StoragePool is used to
+// describe an NVMe construct.
+type NVMeProperties struct {
+	// NVMePoolType shall indicate whether the StoragePool is used as an
+	// EnduranceGroup or an NVMSet.
+	//
+	// Version added: v1.6.0
+	NVMePoolType NVMePoolType
+}
 
-	return storagepool.Post(storagepool.setEncryptionStateTarget, payload)
+// NVMeSetProperties This contains properties to use when StoragePool is used to
+// describe an NVMe Set.
+type NVMeSetProperties struct {
+	// EnduranceGroupIdentifier shall contain a 16-bit hex value that contains the
+	// endurance group identifier. The endurance group identifier is unique within
+	// a subsystem. Reserved values include 0.
+	//
+	// Version added: v1.4.0
+	EnduranceGroupIdentifier string
+	// OptimalWriteSizeBytes shall contain the Optimal Write Size in Bytes for this
+	// NVMe Set.
+	//
+	// Version added: v1.4.0
+	OptimalWriteSizeBytes *uint `json:",omitempty"`
+	// Random4kReadTypicalNanoSeconds shall contain the typical time to complete a
+	// 4k read in 100 nano-second units when the NVM Set is in a Predictable
+	// Latency Mode Deterministic Window and there is 1 outstanding command per NVM
+	// Set.
+	//
+	// Version added: v1.4.0
+	Random4kReadTypicalNanoSeconds *uint `json:",omitempty"`
+	// SetIdentifier shall contain a 16-bit hex value that contains the NVMe Set
+	// group identifier. The NVM Set identifier is unique within a subsystem.
+	// Reserved values include 0.
+	//
+	// Version added: v1.4.0
+	SetIdentifier string
+	// UnallocatedNVMNamespaceCapacityBytes shall contain the unallocated capacity
+	// of the NVMe Set in bytes.
+	//
+	// Version added: v1.4.0
+	UnallocatedNVMNamespaceCapacityBytes *uint `json:",omitempty"`
 }

@@ -47,31 +47,31 @@ func TestNetworkDeviceFunctionMetrics(t *testing.T) {
 	assertEquals(t, "NetworkDeviceFunctionMetrics", result.ID)
 	assertEquals(t, "Network Device Function Metrics", result.Name)
 
-	if result.TXAvgQueueDepthPercent != 13.7 {
-		t.Errorf("Unexpected TXAvgQueueDepthPercent value: %.2f", result.TXAvgQueueDepthPercent)
+	if *result.TXAvgQueueDepthPercent != 13.7 {
+		t.Errorf("Unexpected TXAvgQueueDepthPercent value: %.2f", *result.TXAvgQueueDepthPercent)
 	}
 
-	if result.RXAvgQueueDepthPercent != 21.2 {
-		t.Errorf("Unexpected RXAvgQueueDepthPercent value: %.2f", result.RXAvgQueueDepthPercent)
+	if *result.RXAvgQueueDepthPercent != 21.2 {
+		t.Errorf("Unexpected RXAvgQueueDepthPercent value: %.2f", *result.RXAvgQueueDepthPercent)
 	}
 
-	if result.RXFrames != 27193387 {
+	if *result.RXFrames != 27193387 {
 		t.Errorf("Unexpected RXFrames value: %d", result.RXFrames)
 	}
 
-	if result.TXUnicastFrames != 17205770 {
+	if *result.TXUnicastFrames != 17205770 {
 		t.Errorf("Unexpected TXUnicastFrames value: %d", result.TXUnicastFrames)
 	}
 
-	if result.RXMulticastFrames != 1000000 {
+	if *result.RXMulticastFrames != 1000000 {
 		t.Errorf("Unexpected RXMulticastFrames value: %d", result.RXMulticastFrames)
 	}
 
-	if result.Ethernet.NumOffloadedIPv4Conns != 0 {
+	if *result.Ethernet.NumOffloadedIPv4Conns != 0 {
 		t.Errorf("Unexpected NumOffloadedIPv4Conns value: %d", result.Ethernet.NumOffloadedIPv4Conns)
 	}
 
-	if result.Ethernet.NumOffloadedIPv6Conns != 0 {
+	if *result.Ethernet.NumOffloadedIPv6Conns != 0 {
 		t.Errorf("Unexpected NumOffloadedIPv4Conns value: %d", result.Ethernet.NumOffloadedIPv6Conns)
 	}
 

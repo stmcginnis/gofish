@@ -60,7 +60,7 @@ func TestMemoryMetrics(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.CurrentPeriod.BlocksRead != 123456 {
+	if *result.CurrentPeriod.BlocksRead != 123456 {
 		t.Errorf("Invalid current period blocks read: %d", result.CurrentPeriod.BlocksRead)
 	}
 
@@ -72,7 +72,7 @@ func TestMemoryMetrics(t *testing.T) {
 		t.Error("Data loss detected should be false")
 	}
 
-	if result.LifeTime.BlocksWritten != 9876543210 {
+	if *result.LifeTime.BlocksWritten != 9876543210 {
 		t.Errorf("Invalid lifetime blocks written: %d", result.LifeTime.BlocksWritten)
 	}
 }

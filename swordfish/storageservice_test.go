@@ -79,9 +79,9 @@ var storageServiceBody = strings.NewReader(
 		"StoragePools": [{
 			"@odata.id": "/redfish/v1/StoragePools/1"
 		}],
-		"StorageSubsystems": {
+		"StorageSubsystems": [{
 			"@odata.id": "/redfish/v1/StorageSubsystems/1"
-		},
+		}],
 		"Volumes": {
 			"@odata.id": "/redfish/v1/Volumes/1"
 		},

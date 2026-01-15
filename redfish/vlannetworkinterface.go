@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2021.2 - #VLanNetworkInterface.v1_3_1.VLanNetworkInterface
 
 package redfish
 
@@ -10,69 +11,62 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// VLAN shall contain any attributes of a Virtual LAN.
-type VLAN struct {
-	// Tagged shall indicate whether this VLAN is tagged or untagged for this interface.
-	Tagged bool
-	// VLANEnable is used to indicate if this VLAN is enabled for this
-	// interface.
-	VLANEnable bool
-	// VLANID is used to indicate the VLAN identifier for this VLAN.
-	VLANID int16 `json:"VLANId"`
-	// VLANPriority shall contain the priority for this VLAN (0-7).
-	VLANPriority int
-}
-
-// VLanNetworkInterface shall contain any attributes of a Virtual LAN.
+// VLanNetworkInterface This resource contains information for a VLAN network
+// instance that is available on a manager, system, or other device for a
+// Redfish implementation.
 type VLanNetworkInterface struct {
 	common.Entity
-
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// VLANEnable is used to indicate if this VLAN is enabled for this
-	// interface.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// VLANEnable shall indicate whether this VLAN is enabled for this interface.
 	VLANEnable bool
-	// VLANID is used to indicate the VLAN identifier for this VLAN.
+	// VLANId shall contain the ID for this VLAN.
 	VLANID int16 `json:"VLANId"`
-	// VLANPriority shall contain the priority for this VLAN (0-7).
+	// VLANPriority shall contain the priority for this VLAN.
+	//
+	// Version added: v1.2.0
 	VLANPriority int
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
-// UnmarshalJSON unmarshals an object from the raw JSON.
-func (vlannetworkinterface *VLanNetworkInterface) UnmarshalJSON(b []byte) error {
+// UnmarshalJSON unmarshals a VLanNetworkInterface object from the raw JSON.
+func (v *VLanNetworkInterface) UnmarshalJSON(b []byte) error {
 	type temp VLanNetworkInterface
-	var t struct {
+	var tmp struct {
 		temp
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*vlannetworkinterface = VLanNetworkInterface(t.temp)
+	*v = VLanNetworkInterface(tmp.temp)
+
+	// Extract the links to other entities for later
 
 	// This is a read/write object, so we need to save the raw object data for later
-	vlannetworkinterface.rawData = b
+	v.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (vlannetworkinterface *VLanNetworkInterface) Update() error {
+func (v *VLanNetworkInterface) Update() error {
 	readWriteFields := []string{
 		"VLANEnable",
 		"VLANId",
 		"VLANPriority",
 	}
 
-	return vlannetworkinterface.UpdateFromRawData(vlannetworkinterface, vlannetworkinterface.rawData, readWriteFields)
+	return v.UpdateFromRawData(v, v.rawData, readWriteFields)
 }
 
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.
@@ -84,4 +78,22 @@ func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface
 // a provided reference.
 func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanNetworkInterface, error) {
 	return common.GetCollectionObjects[VLanNetworkInterface](c, link)
+}
+
+// VLAN shall contain any attributes of a VLAN.
+type VLAN struct {
+	// Tagged shall indicate whether this VLAN is tagged or untagged for this
+	// interface.
+	//
+	// Version added: v1.3.0
+	Tagged bool
+	// VLANEnable shall indicate whether this VLAN is enabled for this VLAN network
+	// interface.
+	VLANEnable bool
+	// VLANId shall contain the ID for this VLAN.
+	VLANID int16 `json:"VLANId"`
+	// VLANPriority shall contain the priority for this VLAN.
+	//
+	// Version added: v1.2.0
+	VLANPriority int
 }

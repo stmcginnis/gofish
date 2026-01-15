@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2023.1 - #Facility.v1_4_2.Facility
 
 package redfish
 
@@ -13,290 +14,145 @@ import (
 type FacilityType string
 
 const (
-	// RoomFacilityType A room inside of a building or floor.
+	// RoomFacilityType is a room inside of a building or floor.
 	RoomFacilityType FacilityType = "Room"
-	// FloorFacilityType A floor inside of a building.
+	// FloorFacilityType is a floor inside of a building.
 	FloorFacilityType FacilityType = "Floor"
-	// BuildingFacilityType A structure with a roof and walls.
+	// BuildingFacilityType is a structure with a roof and walls.
 	BuildingFacilityType FacilityType = "Building"
-	// SiteFacilityType A small area consisting of several buildings.
+	// SiteFacilityType is a small area consisting of several buildings.
 	SiteFacilityType FacilityType = "Site"
 )
 
-// Facility shall be used to represent a location containing equipment, such as a room, building, or campus, for a
-// Redfish implementation.
+// Facility shall be used to represent a location containing equipment, such as
+// a room, building, or campus, for a Redfish implementation.
 type Facility struct {
 	common.Entity
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// AmbientMetrics shall contain a link to a resource of type EnvironmentMetrics that specifies the outdoor
-	// environment metrics for this facility.
-	AmbientMetrics string
-	// Description provides a description of this resource.
-	Description string
-	// EnvironmentMetrics shall contain a link to a resource of type EnvironmentMetrics that specifies the environment
-	// metrics for this facility.
+	// AmbientMetrics shall contain a link to a resource of type
+	// 'EnvironmentMetrics' that specifies the outdoor environment metrics for this
+	// facility.
+	//
+	// Version added: v1.1.0
+	ambientMetrics string
+	// EnvironmentMetrics shall contain a link to a resource of type
+	// 'EnvironmentMetrics' that specifies the environment metrics for this
+	// facility.
+	//
+	// Version added: v1.1.0
 	environmentMetrics string
 	// FacilityType shall contain the type of location this resource represents.
 	FacilityType FacilityType
 	// Location shall contain the location information of the associated facility.
 	Location common.Location
-	// PowerDomains shall contain a link to a resource collection of type PowerDomainCollection that contains the power
-	// domains associated with this facility.
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PowerDomains shall contain a link to a resource collection of type
+	// 'PowerDomainCollection' that contains the power domains associated with this
+	// facility.
 	powerDomains string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// CDUs shall contain an array of links to resources of type CoolingUnit that represent the coolant distribution
-	// units in this facility.
-	cdus []string
-	// CDUCount is the number of coolant distribution units in this facility.
-	CDUsCount int
-	// ContainedByFacility shall contain a link to a resource of type Facility that represents the facility that
-	// contains this facility.
+	// cDUs are the URIs for CDUs.
+	cDUs []string
+	// containedByFacility is the URI for ContainedByFacility.
 	containedByFacility string
-	// ContainsChassis shall be an array of links to resources of type Chassis that represent the outermost chassis
-	// that this facility contains. This array shall only contain chassis instances that do not include a ContainedBy
-	// property within the Links property. That is, only chassis instances that are not contained by another chassis.
+	// containsChassis are the URIs for ContainsChassis.
 	containsChassis []string
-	// ContainsChassisCount is the number of Chassis that this facility contains.
-	ContainsChassisCount int
-	// ContainsFacilities shall be an array of links to resources of type Facility that represent the facilities that
-	// this facility contains.
+	// containsFacilities are the URIs for ContainsFacilities.
 	containsFacilities []string
-	// ContainsFacilitiesCount is the number of facilities that this facility contains.
-	ContainsFacilitiesCount int
-	// CoolingLoops shall contain an array of links to resources of type CoolingLoop that represent the cooling loops
-	// in this facility.
+	// coolingLoops are the URIs for CoolingLoops.
 	coolingLoops []string
-	// CoolingLoopsCount is the number of cooling loops in this facility.
-	CoolingLoopsCount int
-	// ElectricalBuses shall contain an array of links to resources of type PowerDistribution that represent the
-	// electrical buses in this facility.
+	// electricalBuses are the URIs for ElectricalBuses.
 	electricalBuses []string
-	// ElectricalBusesCount is the number of electrical buses in this facility.
-	ElectricalBusesCount int
-	// FloorPDUs shall be an array of links to resources of type PowerDistribution that represent the floor power
-	// distribution units in this facility.
+	// floorPDUs are the URIs for FloorPDUs.
 	floorPDUs []string
-	// FloorPDUs@odataCount is the number of floor power distribution units in this facility.
-	FloorPDUsCount int
-	// ImmersionUnits shall contain an array of links to resources of type CoolingUnit that represent the immersion
-	// cooling units in this facility.
+	// immersionUnits are the URIs for ImmersionUnits.
 	immersionUnits []string
-	// ImmersionUnitsCount is the number of immersion cooling units in this facility.
-	ImmersionUnitsCount int
-	// ManagedBy shall be an array of links to resources of type Manager that represent the managers that manager this
-	// facility.
+	// managedBy are the URIs for ManagedBy.
 	managedBy []string
-	// ManagedByCount is the number of Managers that manage this facility.
-	ManagedByCount int
-	// PowerShelves shall be an array of links to resources of type PowerDistribution that represent the power shelves
-	// in this facility.
+	// powerShelves are the URIs for PowerShelves.
 	powerShelves []string
-	// PowerShelvesCount is the number of power shelves in this facility.
-	PowerShelvesCount int
-	// RackPDUs shall be an array of links to resources of type PowerDistribution that represent the rack-level power
-	// distribution units in this facility.
+	// rackPDUs are the URIs for RackPDUs.
 	rackPDUs []string
-	// RackPDUsCount is the number of rack-level power distribution units in this facility.
-	RackPDUsCount int
-	// Switchgear shall be an array of links to resources of type PowerDistribution that represent the switchgear in
-	// this facility.
+	// switchgear are the URIs for Switchgear.
 	switchgear []string
-	// SwitchgearCount is the number of switch gear in this facility.
-	SwitchgearCount int
-	// TransferSwitches shall be an array of links to resources of type PowerDistribution that represent the transfer
-	// switches in this facility.
+	// transferSwitches are the URIs for TransferSwitches.
 	transferSwitches []string
-	// TransferSwitchesCount is the number of transfer switches in this community.
-	TransferSwitchesCount int
-}
-
-type facilityLinks struct {
-	// CDUs shall contain an array of links to resources of type CoolingUnit that represent the coolant distribution
-	// units in this facility.
-	CDUs common.Links
-	// CDUs@odata.count
-	CDUsCount int `json:"CDUs@odata.count"`
-	// ContainedByFacility shall contain a link to a resource of type Facility that represents the facility that
-	// contains this facility.
-	ContainedByFacility common.Link
-	// ContainsChassis shall be an array of links to resources of type Chassis that represent the outermost chassis
-	// that this facility contains. This array shall only contain chassis instances that do not include a ContainedBy
-	// property within the Links property. That is, only chassis instances that are not contained by another chassis.
-	ContainsChassis common.Links
-	// ContainsChassis@odata.count
-	ContainsChassisCount int `json:"ContainsChassis@odata.count"`
-	// ContainsFacilities shall be an array of links to resources of type Facility that represent the facilities that
-	// this facility contains.
-	ContainsFacilities common.Links
-	// ContainsFacilities@odata.count
-	ContainsFacilitiesCount int `json:"ContainsFacilities@odata.count"`
-	// CoolingLoops shall contain an array of links to resources of type CoolingLoop that represent the cooling loops
-	// in this facility.
-	CoolingLoops common.Links
-	// CoolingLoops@odata.count
-	CoolingLoopsCount int `json:"CoolingLoops@odata.count"`
-	// ElectricalBuses shall contain an array of links to resources of type PowerDistribution that represent the
-	// electrical buses in this facility.
-	ElectricalBuses common.Links
-	// ElectricalBuses@odata.count
-	ElectricalBusesCount int `json:"ElectricalBuses@odata.count"`
-	// FloorPDUs shall be an array of links to resources of type PowerDistribution that represent the floor power
-	// distribution units in this facility.
-	FloorPDUs common.Links
-	// FloorPDUs@odata.count
-	FloorPDUsCount int `json:"FloorPDUs@odata.count"`
-	// ImmersionUnits shall contain an array of links to resources of type CoolingUnit that represent the immersion
-	// cooling units in this facility.
-	ImmersionUnits common.Links
-	// ImmersionUnits@odata.count
-	ImmersionUnitsCount int `json:"ImmersionUnits@odata.count"`
-	// ManagedBy shall be an array of links to resources of type Manager that represent the managers that manager this
-	// facility.
-	ManagedBy common.Links
-	// ManagedBy@odata.count
-	ManagedByCount int `json:"ManagedBy@odata.count"`
-	// PowerShelves shall be an array of links to resources of type PowerDistribution that represent the power shelves
-	// in this facility.
-	PowerShelves common.Links
-	// PowerShelves@odata.count
-	PowerShelvesCount int `json:"PowerShelves@odata.count"`
-	// RackPDUs shall be an array of links to resources of type PowerDistribution that represent the rack-level power
-	// distribution units in this facility.
-	RackPDUs common.Links
-	// RackPDUs@odata.count
-	RackPDUsCount int `json:"RackPDUs@odata.count"`
-	// Switchgear shall be an array of links to resources of type PowerDistribution that represent the switchgear in
-	// this facility.
-	Switchgear common.Links
-	// Switchgear@odata.count
-	SwitchgearCount int `json:"Switchgear@odata.count"`
-	// TransferSwitches shall be an array of links to resources of type PowerDistribution that represent the transfer
-	// switches in this facility.
-	TransferSwitches common.Links
-	// TransferSwitches@odata.count
-	TransferSwitchesCount int `json:"TransferSwitches@odata.count"`
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Facility object from the raw JSON.
-func (facility *Facility) UnmarshalJSON(b []byte) error {
+func (f *Facility) UnmarshalJSON(b []byte) error {
 	type temp Facility
-	var t struct {
+	type fLinks struct {
+		CDUs                common.Links `json:"CDUs"`
+		ContainedByFacility common.Link  `json:"ContainedByFacility"`
+		ContainsChassis     common.Links `json:"ContainsChassis"`
+		ContainsFacilities  common.Links `json:"ContainsFacilities"`
+		CoolingLoops        common.Links `json:"CoolingLoops"`
+		ElectricalBuses     common.Links `json:"ElectricalBuses"`
+		FloorPDUs           common.Links `json:"FloorPDUs"`
+		ImmersionUnits      common.Links `json:"ImmersionUnits"`
+		ManagedBy           common.Links `json:"ManagedBy"`
+		PowerShelves        common.Links `json:"PowerShelves"`
+		RackPDUs            common.Links `json:"RackPDUs"`
+		Switchgear          common.Links `json:"Switchgear"`
+		TransferSwitches    common.Links `json:"TransferSwitches"`
+	}
+	var tmp struct {
 		temp
-		EnvironmentMetrics common.Link
-		PowerDomains       common.Link
-		Links              facilityLinks
+		Links              fLinks
+		AmbientMetrics     common.Link `json:"ambientMetrics"`
+		EnvironmentMetrics common.Link `json:"environmentMetrics"`
+		PowerDomains       common.Link `json:"powerDomains"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*facility = Facility(t.temp)
+	*f = Facility(tmp.temp)
 
 	// Extract the links to other entities for later
-	facility.environmentMetrics = t.EnvironmentMetrics.String()
-	facility.powerDomains = t.PowerDomains.String()
+	f.cDUs = tmp.Links.CDUs.ToStrings()
+	f.containedByFacility = tmp.Links.ContainedByFacility.String()
+	f.containsChassis = tmp.Links.ContainsChassis.ToStrings()
+	f.containsFacilities = tmp.Links.ContainsFacilities.ToStrings()
+	f.coolingLoops = tmp.Links.CoolingLoops.ToStrings()
+	f.electricalBuses = tmp.Links.ElectricalBuses.ToStrings()
+	f.floorPDUs = tmp.Links.FloorPDUs.ToStrings()
+	f.immersionUnits = tmp.Links.ImmersionUnits.ToStrings()
+	f.managedBy = tmp.Links.ManagedBy.ToStrings()
+	f.powerShelves = tmp.Links.PowerShelves.ToStrings()
+	f.rackPDUs = tmp.Links.RackPDUs.ToStrings()
+	f.switchgear = tmp.Links.Switchgear.ToStrings()
+	f.transferSwitches = tmp.Links.TransferSwitches.ToStrings()
+	f.ambientMetrics = tmp.AmbientMetrics.String()
+	f.environmentMetrics = tmp.EnvironmentMetrics.String()
+	f.powerDomains = tmp.PowerDomains.String()
 
-	facility.cdus = t.Links.CDUs.ToStrings()
-	facility.CDUsCount = t.Links.CDUsCount
-	facility.containedByFacility = t.Links.ContainedByFacility.String()
-	facility.containsChassis = t.Links.ContainsChassis.ToStrings()
-	facility.ContainsChassisCount = t.Links.ContainsChassisCount
-	facility.containsFacilities = t.Links.ContainsFacilities.ToStrings()
-	facility.ContainsFacilitiesCount = t.Links.ContainsFacilitiesCount
-	facility.coolingLoops = t.Links.CoolingLoops.ToStrings()
-	facility.CoolingLoopsCount = t.Links.CoolingLoopsCount
-	facility.electricalBuses = t.Links.ElectricalBuses.ToStrings()
-	facility.ElectricalBusesCount = t.Links.ElectricalBusesCount
-	facility.floorPDUs = t.Links.FloorPDUs.ToStrings()
-	facility.FloorPDUsCount = t.Links.FloorPDUsCount
-	facility.immersionUnits = t.Links.ImmersionUnits.ToStrings()
-	facility.ImmersionUnitsCount = t.Links.ImmersionUnitsCount
-	facility.managedBy = t.Links.ManagedBy.ToStrings()
-	facility.ManagedByCount = t.Links.ManagedByCount
-	facility.powerShelves = t.Links.PowerShelves.ToStrings()
-	facility.PowerShelvesCount = t.Links.PowerShelvesCount
-	facility.rackPDUs = t.Links.RackPDUs.ToStrings()
-	facility.RackPDUsCount = t.Links.RackPDUsCount
-	facility.switchgear = t.Links.Switchgear.ToStrings()
-	facility.SwitchgearCount = t.Links.SwitchgearCount
-	facility.transferSwitches = t.Links.TransferSwitches.ToStrings()
-	facility.TransferSwitchesCount = t.Links.TransferSwitchesCount
+	// This is a read/write object, so we need to save the raw object data for later
+	f.rawData = b
 
 	return nil
 }
 
-// CDUs get the cooling distribution units associated with this facility.
-func (facility *Facility) CDUs() ([]*CoolingUnit, error) {
-	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.cdus)
-}
-
-// ContainedByFacility get facility that contains this facility.
-func (facility *Facility) ContainedByFacility() (*Facility, error) {
-	if facility.containedByFacility == "" {
-		return nil, nil
+// Update commits updates to this object's properties to the running system.
+func (f *Facility) Update() error {
+	readWriteFields := []string{
+		"Location",
+		"Status",
 	}
-	return GetFacility(facility.GetClient(), facility.containedByFacility)
-}
 
-// ContainsChassis get the chassis within this facility.
-func (facility *Facility) ContainsChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](facility.GetClient(), facility.containsChassis)
-}
-
-// ContainsFacilities get facilities within this facility.
-func (facility *Facility) ContainsFacilities() ([]*Facility, error) {
-	return common.GetObjects[Facility](facility.GetClient(), facility.containsFacilities)
-}
-
-// CoolingLoops get cooling loops within this facility.
-func (facility *Facility) CoolingLoops() ([]*CoolingLoop, error) {
-	return common.GetObjects[CoolingLoop](facility.GetClient(), facility.coolingLoops)
-}
-
-// ElectricalBuses get electrical buses within this facility.
-func (facility *Facility) ElectricalBuses() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.electricalBuses)
-}
-
-// FloorPDUs get floor power distribution units within this facility.
-func (facility *Facility) FloorPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.floorPDUs)
-}
-
-// ImmersionUnits get immersion cooling units within this facility.
-func (facility *Facility) ImmersionUnits() ([]*CoolingUnit, error) {
-	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.immersionUnits)
-}
-
-// ManagedBy gets the managers of this facility.
-func (facility *Facility) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](facility.GetClient(), facility.managedBy)
-}
-
-// PowerShelves get power shelves within this facility.
-func (facility *Facility) PowerShelves() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.powerShelves)
-}
-
-// RackPDUs get rack power distribution units within this facility.
-func (facility *Facility) RackPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.rackPDUs)
-}
-
-// Switchgear get switchgear power distribution units within this facility.
-func (facility *Facility) Switchgear() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.switchgear)
-}
-
-// TransferSwitches get transfer switches within this facility.
-func (facility *Facility) TransferSwitches() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.transferSwitches)
+	return f.UpdateFromRawData(f, f.rawData, readWriteFields)
 }
 
 // GetFacility will get a Facility instance from the service.
@@ -304,8 +160,100 @@ func GetFacility(c common.Client, uri string) (*Facility, error) {
 	return common.GetObject[Facility](c, uri)
 }
 
-// ListReferencedFacilities gets the collection of Facility from
+// ListReferencedFacilitys gets the collection of Facility from
 // a provided reference.
-func ListReferencedFacilities(c common.Client, link string) ([]*Facility, error) {
+func ListReferencedFacilitys(c common.Client, link string) ([]*Facility, error) {
 	return common.GetCollectionObjects[Facility](c, link)
+}
+
+// CDUs gets the CDUs linked resources.
+func (f *Facility) CDUs(client common.Client) ([]*CoolingUnit, error) {
+	return common.GetObjects[CoolingUnit](client, f.cDUs)
+}
+
+// ContainedByFacility gets the ContainedByFacility linked resource.
+func (f *Facility) ContainedByFacility(client common.Client) (*Facility, error) {
+	if f.containedByFacility == "" {
+		return nil, nil
+	}
+	return common.GetObject[Facility](client, f.containedByFacility)
+}
+
+// ContainsChassis gets the ContainsChassis linked resources.
+func (f *Facility) ContainsChassis(client common.Client) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](client, f.containsChassis)
+}
+
+// ContainsFacilities gets the ContainsFacilities linked resources.
+func (f *Facility) ContainsFacilities(client common.Client) ([]*Facility, error) {
+	return common.GetObjects[Facility](client, f.containsFacilities)
+}
+
+// CoolingLoops gets the CoolingLoops linked resources.
+func (f *Facility) CoolingLoops(client common.Client) ([]*CoolingLoop, error) {
+	return common.GetObjects[CoolingLoop](client, f.coolingLoops)
+}
+
+// ElectricalBuses gets the ElectricalBuses linked resources.
+func (f *Facility) ElectricalBuses(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, f.electricalBuses)
+}
+
+// FloorPDUs gets the FloorPDUs linked resources.
+func (f *Facility) FloorPDUs(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, f.floorPDUs)
+}
+
+// ImmersionUnits gets the ImmersionUnits linked resources.
+func (f *Facility) ImmersionUnits(client common.Client) ([]*CoolingUnit, error) {
+	return common.GetObjects[CoolingUnit](client, f.immersionUnits)
+}
+
+// ManagedBy gets the ManagedBy linked resources.
+func (f *Facility) ManagedBy(client common.Client) ([]*Manager, error) {
+	return common.GetObjects[Manager](client, f.managedBy)
+}
+
+// PowerShelves gets the PowerShelves linked resources.
+func (f *Facility) PowerShelves(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, f.powerShelves)
+}
+
+// RackPDUs gets the RackPDUs linked resources.
+func (f *Facility) RackPDUs(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, f.rackPDUs)
+}
+
+// Switchgear gets the Switchgear linked resources.
+func (f *Facility) Switchgear(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, f.switchgear)
+}
+
+// TransferSwitches gets the TransferSwitches linked resources.
+func (f *Facility) TransferSwitches(client common.Client) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](client, f.transferSwitches)
+}
+
+// AmbientMetrics gets the AmbientMetrics linked resource.
+func (f *Facility) AmbientMetrics(client common.Client) (*EnvironmentMetrics, error) {
+	if f.ambientMetrics == "" {
+		return nil, nil
+	}
+	return common.GetObject[EnvironmentMetrics](client, f.ambientMetrics)
+}
+
+// EnvironmentMetrics gets the EnvironmentMetrics linked resource.
+func (f *Facility) EnvironmentMetrics(client common.Client) (*EnvironmentMetrics, error) {
+	if f.environmentMetrics == "" {
+		return nil, nil
+	}
+	return common.GetObject[EnvironmentMetrics](client, f.environmentMetrics)
+}
+
+// PowerDomains gets the PowerDomains collection.
+func (f *Facility) PowerDomains(client common.Client) ([]*PowerDomain, error) {
+	if f.powerDomains == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[PowerDomain](client, f.powerDomains)
 }

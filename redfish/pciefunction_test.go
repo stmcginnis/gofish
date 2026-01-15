@@ -75,7 +75,7 @@ func TestPCIeFunction(t *testing.T) {
 		t.Errorf("Invalid device class: %s", result.DeviceClass)
 	}
 
-	if result.FunctionID != 10 {
+	if *result.FunctionID != 10 {
 		t.Errorf("Invalid function ID: %d", result.FunctionID)
 	}
 

@@ -1,46 +1,90 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.1.0 - #DataSecurityLineOfService.v1_1_1.DataSecurityLineOfService
 
 package swordfish
 
 import (
+	"encoding/json"
+
 	"github.com/stmcginnis/gofish/common"
 )
 
-// DataSecurityLineOfService is used to describe data security service
+// DataSecurityLineOfService shall be used to describe data security service
 // level requirements.
 type DataSecurityLineOfService struct {
 	common.Entity
-
+	// AntivirusEngineProvider shall specify an AntiVirus provider.
+	AntivirusEngineProvider string
+	// AntivirusScanPolicies shall specify the policy for triggering an AntiVirus
+	// scan.
+	AntivirusScanPolicies []AntiVirusScanTrigger
+	// ChannelEncryptionStrength shall specify a key size in a symmetric encryption
+	// algorithm for transport channel encryption.
+	ChannelEncryptionStrength KeySize
+	// DataSanitizationPolicy shall specify the data sanitization policy.
+	DataSanitizationPolicy DataSanitizationPolicy
+	// HostAuthenticationType shall specify the authentication type for hosts
+	// (servers) or initiator endpoints.
+	HostAuthenticationType AuthenticationType
+	// MediaEncryptionStrength shall specify a key size in a symmetric encryption
+	// algorithm for media encryption.
+	MediaEncryptionStrength KeySize
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// AntivirusEngineProvider shall specify an AntiVirus provider.
-	AntivirusEngineProvider string
-	// AntivirusScanPolicies shall specify the
-	// policy for triggering an AntiVirus scan.
-	AntivirusScanPolicies []AntiVirusScanTrigger
-	// ChannelEncryptionStrength shall specify a key size in a symmetric
-	// encryption algorithm for transport channel encryption.
-	ChannelEncryptionStrength KeySize
-	// DataSanitizationPolicy shall specify the data sanitization policy.
-	DataSanitizationPolicy DataSanitizationPolicy
-	// Description provides a description of this resource.
-	Description string
-	// HostAuthenticationType shall specify the
-	// authentication type for hosts (servers) or initiator endpoints.
-	HostAuthenticationType AuthenticationType
-	// MediaEncryptionStrength shall specify a key
-	// size in a symmetric encryption algorithm for media encryption.
-	MediaEncryptionStrength KeySize
-	// SecureChannelProtocol shall specify the
-	// protocol that provide encrypted communication.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// SecureChannelProtocol shall specify the protocol that provide encrypted
+	// communication.
 	SecureChannelProtocol SecureChannelProtocol
-	// UserAuthenticationType shall specify the
-	// authentication type for users (or programs).
+	// UserAuthenticationType shall specify the authentication type for users (or
+	// programs).
 	UserAuthenticationType AuthenticationType
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
+// UnmarshalJSON unmarshals a DataSecurityLineOfService object from the raw JSON.
+func (d *DataSecurityLineOfService) UnmarshalJSON(b []byte) error {
+	type temp DataSecurityLineOfService
+	var tmp struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*d = DataSecurityLineOfService(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	// This is a read/write object, so we need to save the raw object data for later
+	d.rawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (d *DataSecurityLineOfService) Update() error {
+	readWriteFields := []string{
+		"AntivirusEngineProvider",
+		"AntivirusScanPolicies",
+		"ChannelEncryptionStrength",
+		"DataSanitizationPolicy",
+		"HostAuthenticationType",
+		"MediaEncryptionStrength",
+		"SecureChannelProtocol",
+		"UserAuthenticationType",
+	}
+
+	return d.UpdateFromRawData(d, d.rawData, readWriteFields)
 }
 
 // GetDataSecurityLineOfService will get a DataSecurityLineOfService instance from the service.

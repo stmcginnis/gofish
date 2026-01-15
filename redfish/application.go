@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2023.2 - #Application.v1_0_1.Application
 
 package redfish
 
@@ -10,23 +11,29 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// Application shall represent an application or service running on a computer system.
+// Application shall represent an application or service running on a computer
+// system.
 type Application struct {
 	common.Entity
+	// DestinationURIs shall contain an array of URIs to which this application
+	// pushes data. This is typically for applications that act as logging or
+	// metric agents that transmit data captured to remote servers.
+	DestinationURIs []string
+	// MetricsURIs shall contain an array of URIs that provide access to data or
+	// other information in this application. This is typically for applications
+	// that allow external users to perform requests to pull data from the
+	// application.
+	MetricsURIs []string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// DestinationURIs shall contain an array of URIs to which this application pushes data. This is typically for
-	// applications that act as logging or metric agents that transmit data captured to remote servers.
-	DestinationURIs []string
-	// MetricsURIs shall contain an array of URIs that provide access to data or other information in this application.
-	// This is typically for applications that allow external users to perform requests to pull data from the
-	// application.
-	MetricsURIs []string
-	// StartTime shall indicate the date and time when the application started running.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// StartTime shall indicate the date and time when the application started
+	// running.
 	StartTime string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
@@ -34,41 +41,53 @@ type Application struct {
 	Vendor string
 	// Version shall contain the version of this application.
 	Version string
-	// resetTarget is the internal URL to send reset actions to.
+	// resetTarget is the URL to send Reset requests.
 	resetTarget string
-	// softwareImage links a resource of type SoftwareInventory that represents the software image from which this application runs.
+	// softwareImage is the URI for SoftwareImage.
 	softwareImage string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Application object from the raw JSON.
-func (application *Application) UnmarshalJSON(b []byte) error {
+func (a *Application) UnmarshalJSON(b []byte) error {
 	type temp Application
-	type Actions struct {
-		ApplicationReset common.ActionTarget `json:"#Application.Reset"`
+	type aActions struct {
+		Reset common.ActionTarget `json:"#Application.Reset"`
 	}
-	type Links struct {
-		// SoftwareImage shall contain a link to a resource of type SoftwareInventory that represents the software image
-		// from which this application runs.
-		SoftwareImage string
+	type aLinks struct {
+		SoftwareImage common.Link `json:"SoftwareImage"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions Actions
-		Links   Links
+		Actions aActions
+		Links   aLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*application = Application(t.temp)
+	*a = Application(tmp.temp)
 
 	// Extract the links to other entities for later
-	application.resetTarget = t.Actions.ApplicationReset.Target
-	application.softwareImage = t.Links.SoftwareImage
+	a.resetTarget = tmp.Actions.Reset.Target
+	a.softwareImage = tmp.Links.SoftwareImage.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	a.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (a *Application) Update() error {
+	readWriteFields := []string{
+		"Status",
+	}
+
+	return a.UpdateFromRawData(a, a.rawData, readWriteFields)
 }
 
 // GetApplication will get a Application instance from the service.
@@ -82,21 +101,23 @@ func ListReferencedApplications(c common.Client, link string) ([]*Application, e
 	return common.GetCollectionObjects[Application](c, link)
 }
 
-// SoftwareImage returns a `SoftwareInventory“ that represents the software image from which this application runs.
-func (application *Application) SoftwareImage() (*SoftwareInventory, error) {
-	return GetSoftwareInventory(application.GetClient(), application.softwareImage)
+// Reset shall reset the application.
+// resetType - This parameter shall contain the type of reset.
+// 'GracefulRestart' and 'ForceRestart' shall indicate requests to restart the
+// application. 'GracefulShutdown' and 'ForceOff' shall indicate requests to
+// stop or disable the application. 'On' and 'ForceOn' shall indicate requests
+// to start or enable the application. The service can accept a request without
+// the parameter and shall perform a 'GracefulRestart'.
+func (a *Application) Reset(resetType common.ResetType) error {
+	payload := make(map[string]any)
+	payload["ResetType"] = resetType
+	return a.Post(a.resetTarget, payload)
 }
 
-// Reset resets the application.
-//
-// `ResetType` is the type of reset.
-// `GracefulRestart` and `ForceRestart` shall indicate requests to restart the application.
-// `GracefulShutdown` and `ForceOff` shall indicate requests to stop or disable the application.
-// `On` and `ForceOn` shall indicate requests to start or enable the application.
-func (application *Application) Reset(resetType ResetType) error {
-	t := struct {
-		ResetType ResetType
-	}{ResetType: resetType}
-
-	return application.Post(application.resetTarget, t)
+// SoftwareImage gets the SoftwareImage linked resource.
+func (a *Application) SoftwareImage(client common.Client) (*SoftwareInventory, error) {
+	if a.softwareImage == "" {
+		return nil, nil
+	}
+	return common.GetObject[SoftwareInventory](client, a.softwareImage)
 }

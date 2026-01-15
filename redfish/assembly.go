@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.3 - #Assembly.v1_6_0.Assembly
 
 package redfish
 
@@ -10,53 +11,58 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// Assembly is used to represent an assembly information resource for a
-// Redfish implementation.
+// Assembly shall represent an assembly for a Redfish implementation. Assembly
+// information contains details about a device, such as part number, serial
+// number, manufacturer, and production date. It also provides access to the
+// original data for the assembly.
 type Assembly struct {
 	common.Entity
-
+	// Assemblies shall define assembly records for a Redfish implementation.
+	Assemblies []AssemblyData
+	// Assemblies@odata.count
+	AssembliesCount int `json:"Assemblies@odata.count"`
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Assemblies shall be the definition for assembly records for a Redfish
-	// implementation.
-	Assemblies []AssemblyData
-	// Assemblies@odata.count is
-	AssembliesCount int `json:"Assemblies@odata.count"`
-	// Description provides a description of this resource.
-	Description string
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Assembly object from the raw JSON.
-func (assembly *Assembly) UnmarshalJSON(b []byte) error {
+func (a *Assembly) UnmarshalJSON(b []byte) error {
 	type temp Assembly
-	var t struct {
+	var tmp struct {
 		temp
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*assembly = Assembly(t.temp)
+	*a = Assembly(tmp.temp)
+
+	// Extract the links to other entities for later
 
 	// This is a read/write object, so we need to save the raw object data for later
-	assembly.rawData = b
+	a.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (assembly *Assembly) Update() error {
+func (a *Assembly) Update() error {
 	readWriteFields := []string{
 		"Assemblies",
+		"Assemblies@odata.count",
 	}
 
-	return assembly.UpdateFromRawData(assembly, assembly.rawData, readWriteFields)
+	return a.UpdateFromRawData(a, a.rawData, readWriteFields)
 }
 
 // GetAssembly will get a Assembly instance from the service.
@@ -70,63 +76,98 @@ func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) 
 	return common.GetCollectionObjects[Assembly](c, link)
 }
 
-// AssemblyData is information about an assembly.
+// AssemblyData represents the AssemblyData type.
 type AssemblyData struct {
-	// BinaryDataURI shall be a URI at which the Service provides for the
-	// download of the OEM-specific binary image of the assembly data. An HTTP
-	// GET from this URI shall return a response payload of MIME time
-	// application/octet-stream. An HTTP PUT to this URI, if supported by the
-	// Service, shall replace the binary image of the assembly.
+	// BinaryDataURI shall contain the URI at which to access an image of the
+	// assembly information, using the Redfish protocol and authentication methods.
+	// The service provides this URI for the download of the OEM-specific binary
+	// image of the assembly data. An HTTP 'GET' from this URI shall return a
+	// response payload of MIME type 'application/octet-stream'. If the service
+	// supports it, an HTTP 'PUT' to this URI shall replace the binary image of the
+	// assembly.
 	BinaryDataURI string
 	// Description provides a description of this resource.
 	Description string
-	// EngineeringChangeLevel shall be the Engineering Change Level (ECL) or
+	// EngineeringChangeLevel shall contain the engineering change level or
 	// revision of the assembly.
 	EngineeringChangeLevel string
-	// ISOCountryCodeOfOrigin shall contain the ISO 3166-1-defined alpha-2 or alpha-3 country code that reflects the
-	// manufacturing country of origin.
+	// ISOCountryCodeOfOrigin shall contain the ISO 3166-1-defined alpha-2 or
+	// alpha-3 country code that reflects the manufacturing country of origin.
+	//
+	// Version added: v1.5.0
 	ISOCountryCodeOfOrigin string
 	// Location shall contain the location information of the associated assembly.
+	//
+	// Version added: v1.3.0
 	Location common.Location
-	// MemberID shall uniquely identify the member within the collection.
-	MemberID string
-	// Model shall be the name by which the manufacturer generally refers to the
-	// assembly.
+	// LocationIndicatorActive shall contain the state of the indicator used to
+	// physically identify or locate this resource.
+	//
+	// Version added: v1.3.0
+	LocationIndicatorActive bool
+	// MemberId shall contain the unique identifier for this member within an
+	// array. For services supporting Redfish v1.6 or higher, this value shall
+	// contain the zero-based array index.
+	MemberID string `json:"MemberId"`
+	// Model shall contain the name by which the manufacturer generally refers to
+	// the assembly.
 	Model string
-	// Name provides the name of the resource.
+	// Name is the name of the resource or array element.
 	Name string
-	// PartNumber shall be the part number of the assembly.
+	// ODataID is the odata identifier.
+	ODataID string `json:"@odata.id"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PartNumber shall contain the part number of the assembly.
 	PartNumber string
-	// PhysicalContext shall be a description of the physical context for this
+	// PhysicalContext shall contain a description of the physical context for the
 	// assembly data.
-	PhysicalContext string
-	// Producer shall be the name of the company which supplied or manufactured
-	// this assembly. This value shall be equal to the 'Manufacturer' field in a
-	// PLDM FRU structure, if applicable, for this assembly.
+	//
+	// Version added: v1.2.0
+	PhysicalContext PhysicalContext
+	// Producer shall contain the name of the company that produced or manufactured
+	// the assembly. This value shall be equal to the 'Manufacturer' field value in
+	// a PLDM FRU structure, if applicable, for the assembly.
 	Producer string
-	// ProductionDate shall be the date of production or manufacture for this
-	// assembly. The time of day portion of the property shall be '00:00:00Z' if
+	// ProductionDate shall contain the date of production or manufacture for the
+	// assembly. The time of day portion of the property shall be '00:00:00Z', if
 	// the time of day is unknown.
 	ProductionDate string
-	// Replaceable shall indicate whether the component associated this assembly can be independently replaced as
-	// allowed by the vendor's replacement policy. A value of 'false' indicates the component needs to be replaced by
-	// policy as part of another component. If the 'LocationType' property of this assembly contains 'Embedded', this
-	// property shall contain 'false'.
+	// ReadyToRemove shall indicate whether the assembly is ready for removal.
+	// Setting the value to 'true' shall cause the service to perform appropriate
+	// actions to quiesce the device. A task may spawn while the device is
+	// quiescing.
+	//
+	// Version added: v1.6.0
+	ReadyToRemove bool
+	// Replaceable shall indicate whether the component associated this assembly
+	// can be independently replaced as allowed by the vendor's replacement policy.
+	// A value of 'false' indicates the component needs to be replaced by policy as
+	// part of another component. If the 'LocationType' property of this assembly
+	// contains 'Embedded', this property shall contain 'false'.
+	//
+	// Version added: v1.4.0
 	Replaceable bool
-	// SKU shall be the name of the assembly.
+	// SKU shall contain the SKU of the assembly.
 	SKU string
-	// SerialNumber is used to identify the assembly.
+	// SerialNumber shall contain a manufacturer-allocated number that identifies
+	// the assembly.
+	//
+	// Version added: v1.2.0
 	SerialNumber string
-	// SparePartNumber shall be the name of the assembly.
+	// SparePartNumber shall contain the spare part number of the assembly.
 	SparePartNumber string
-	// Status is This property shall contain any status or health properties
-	// of the resource.
+	// Status shall contain any status or health properties of the resource.
+	//
+	// Version added: v1.1.0
 	Status common.Status
-	// Vendor shall be the name of the company which provides the final product
-	// that includes this assembly. This value shall be equal to the 'Vendor'
-	// field in a PLDM FRU structure, if applicable, for this assembly.
+	// Vendor shall contain the name of the company that provides the final product
+	// that includes this assembly. This value shall be equal to the 'Vendor' field
+	// value in a PLDM FRU structure, if applicable, for the assembly.
 	Vendor string
-	// Version shall be the version of the assembly as determined by the vendor
-	// or supplier.
+	// Version shall contain the hardware version of the assembly as determined by
+	// the vendor or supplier.
 	Version string
 }

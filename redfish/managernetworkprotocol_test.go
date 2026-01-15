@@ -197,7 +197,7 @@ var managerNetworkProtocolBody = `{
 }`
 
 func TestNetworkProtocol(t *testing.T) {
-	var result NetworkProtocolSettings
+	var result ManagerNetworkProtocol
 	err := json.NewDecoder(strings.NewReader(networkProtocolBody)).Decode(&result)
 
 	if err != nil {
@@ -220,7 +220,7 @@ func TestNetworkProtocol(t *testing.T) {
 }
 
 func TestNetworkProtocolManager(t *testing.T) {
-	var result NetworkProtocolSettings
+	var result ManagerNetworkProtocol
 	err := json.NewDecoder(strings.NewReader(managerNetworkProtocolBody)).Decode(&result)
 
 	if err != nil {
@@ -249,7 +249,7 @@ func TestNetworkProtocolManager(t *testing.T) {
 }
 
 func TestNetworkProtocol_Update(t *testing.T) {
-	var result NetworkProtocolSettings
+	var result ManagerNetworkProtocol
 	err := json.NewDecoder(strings.NewReader(networkProtocolBody)).Decode(&result)
 
 	if err != nil {

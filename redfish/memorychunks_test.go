@@ -78,7 +78,7 @@ func TestMemoryChunks(t *testing.T) {
 		t.Error("Expected mirror not to be enabled")
 	}
 
-	if result.MemoryChunkSizeMiB != 32768 {
+	if *result.MemoryChunkSizeMiB != 32768 {
 		t.Errorf("Unexpected memory chunk size: %d", result.MemoryChunkSizeMiB)
 	}
 }

@@ -79,28 +79,28 @@ func TestDriveMetrics(t *testing.T) {
 	assertEquals(t, "Metrics", result.ID)
 	assertEquals(t, "Drive Metrics", result.Name)
 
-	if result.CorrectableIOReadErrorCount != 184 {
+	if *result.CorrectableIOReadErrorCount != 184 {
 		t.Errorf("Unexpected CorrectableIOReadErrorCount, %d", result.CorrectableIOReadErrorCount)
 	}
 
-	if result.UncorrectableIOReadErrorCount != 0 {
+	if *result.UncorrectableIOReadErrorCount != 0 {
 		t.Errorf("Unexpected UncorrectableIOReadErrorCount, %d", result.UncorrectableIOReadErrorCount)
 	}
 
-	if result.CorrectableIOWriteErrorCount != 18 {
+	if *result.CorrectableIOWriteErrorCount != 18 {
 		t.Errorf("Unexpected CorrectableIOWriteErrorCount, %d", result.CorrectableIOWriteErrorCount)
 	}
 
-	if result.UncorrectableIOWriteErrorCount != 0 {
+	if *result.UncorrectableIOWriteErrorCount != 0 {
 		t.Errorf("Unexpected UncorrectableIOWriteErrorCount, %d", result.UncorrectableIOWriteErrorCount)
 	}
 
-	if result.BadBlockCount != 123098 {
+	if *result.BadBlockCount != 123098 {
 		t.Errorf("Unexpected BadBlockCount, %d", result.BadBlockCount)
 	}
 
-	if result.PowerOnHours != 3 {
-		t.Errorf("Unexpected PowerOnHours, %.2f", result.PowerOnHours)
+	if *result.PowerOnHours != 3 {
+		t.Errorf("Unexpected PowerOnHours, %.2f", *result.PowerOnHours)
 	}
 
 	if result.NVMeSMART.CriticalWarnings.PMRUnreliable {
@@ -111,7 +111,7 @@ func TestDriveMetrics(t *testing.T) {
 		t.Errorf("Unexpected NVMeSMART.EGCriticalWarningSummary.ReliabilityDegraded, %t", result.NVMeSMART.EGCriticalWarningSummary.ReliabilityDegraded)
 	}
 
-	if result.NVMeSMART.CompositeTemperatureCelsius != 34 {
-		t.Errorf("Unexpected NVMeSMART.CompositeTemperatureCelsius, %.2f", result.NVMeSMART.CompositeTemperatureCelsius)
+	if *result.NVMeSMART.CompositeTemperatureCelsius != 34 {
+		t.Errorf("Unexpected NVMeSMART.CompositeTemperatureCelsius, %.2f", *result.NVMeSMART.CompositeTemperatureCelsius)
 	}
 }

@@ -89,8 +89,8 @@ func TestBatteryMetrics(t *testing.T) {
 	assertEquals(t, "/redfish/v1/Chassis/1U/Sensors/Battery1InputCurrent", result.InputCurrentAmps.DataSourceURI)
 	assertEquals(t, "/redfish/v1/Chassis/1U/Sensors/Battery1OutputVoltage", result.OutputVoltages[0].DataSourceURI)
 
-	if result.DischargeCycles != 8.67 {
-		t.Errorf("Unexpected discharge cycles result: %.2f", result.DischargeCycles)
+	if *result.DischargeCycles != 8.67 {
+		t.Errorf("Unexpected discharge cycles result: %.2f", *result.DischargeCycles)
 	}
 
 	if *result.OutputVoltages[0].Reading != 12.22 {

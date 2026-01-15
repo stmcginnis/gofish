@@ -34,6 +34,6 @@ func TestKeyService(t *testing.T) {
 
 	assertEquals(t, "KeyService", result.ID)
 	assertEquals(t, "Key Service", result.Name)
-	assertEquals(t, "/redfish/v1/KeyService/NVMeoFSecrets", result.nvmeoFSecrets)
-	assertEquals(t, "/redfish/v1/KeyService/NVMeoFKeyPolicies", result.nvmeoFKeyPolicies)
+	assertEquals(t, "/redfish/v1/KeyService/NVMeoFSecrets", result.nVMeoFSecrets)
+	assertEquals(t, "/redfish/v1/KeyService/NVMeoFKeyPolicies", result.nVMeoFKeyPolicies)
 }

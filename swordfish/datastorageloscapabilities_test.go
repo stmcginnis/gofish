@@ -64,7 +64,7 @@ func TestDataStorageLoSCapabilities(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.MaximumRecoverableCapacitySourceCount != 5 {
+	if *result.MaximumRecoverableCapacitySourceCount != 5 {
 		t.Errorf("Invalid MaximumRecoverableCapacitySource: %d",
 			result.MaximumRecoverableCapacitySourceCount)
 	}
@@ -94,7 +94,7 @@ func TestDataStorageLoSCapabilitiesUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.MaximumRecoverableCapacitySourceCount = 10
+	*result.MaximumRecoverableCapacitySourceCount = 10
 	result.SupportsSpaceEfficiency = true
 	err = result.Update()
 

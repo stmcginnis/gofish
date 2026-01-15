@@ -1,75 +1,96 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2023.2 - #Container.v1_0_1.Container
 
 package redfish
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// Container shall represent an instance of a container that is running on a computer system.
+// Container shall represent an instance of a container that is running on a
+// computer system.
 type Container struct {
 	common.Entity
+	// EthernetInterfaces shall contain a link to a resource collection of type
+	// 'EthernetInterfaceCollection'.
+	ethernetInterfaces string
+	// Limits shall contain the resource limits allocated to this container.
+	Limits Limits
+	// MountPoints shall contain the file system mount points configured for this
+	// container.
+	MountPoints []MountPoint
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// EthernetInterfaces shall contain a link to a resource collection of type EthernetInterfaceCollection.
-	ethernetInterfaces string
-	// Limits shall contain the resource limits allocated to this container.
-	Limits Limits
-	// MountPoints shall contain the file system mount points configured for this container.
-	MountPoints []MountPoint
-	// ProgrammaticID shall contain the programmatic identifier for this container. This is typically a hash string
-	// that represents the running instance of this container.
-	ProgrammaticID string
-	// StartTime shall indicate the date and time when the container started running.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// ProgrammaticId shall contain the programmatic identifier for this container.
+	// This is typically a hash string that represents the running instance of this
+	// container.
+	ProgrammaticID string `json:"ProgrammaticId"`
+	// StartTime shall indicate the date and time when the container started
+	// running.
 	StartTime string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-
+	// resetTarget is the URL to send Reset requests.
 	resetTarget string
-
+	// containerImage is the URI for ContainerImage.
 	containerImage string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Container object from the raw JSON.
-func (container *Container) UnmarshalJSON(b []byte) error {
+func (c *Container) UnmarshalJSON(b []byte) error {
 	type temp Container
-	type Actions struct {
+	type cActions struct {
 		Reset common.ActionTarget `json:"#Container.Reset"`
 	}
-	type Links struct {
-		// ContainerImage shall contain a link to a resource of type ContainerImage that represents the container image for
-		// this container.
-		ContainerImage common.Link
+	type cLinks struct {
+		ContainerImage common.Link `json:"ContainerImage"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions            Actions
-		EthernetInterfaces common.Link
-		Links              Links
+		Actions            cActions
+		Links              cLinks
+		EthernetInterfaces common.Link `json:"ethernetInterfaces"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*container = Container(t.temp)
+	*c = Container(tmp.temp)
 
 	// Extract the links to other entities for later
-	container.resetTarget = t.Actions.Reset.Target
-	container.ethernetInterfaces = t.EthernetInterfaces.String()
-	container.containerImage = t.Links.ContainerImage.String()
+	c.resetTarget = tmp.Actions.Reset.Target
+	c.containerImage = tmp.Links.ContainerImage.String()
+	c.ethernetInterfaces = tmp.EthernetInterfaces.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	c.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (c *Container) Update() error {
+	readWriteFields := []string{
+		"Limits",
+		"MountPoints",
+		"Status",
+	}
+
+	return c.UpdateFromRawData(c, c.rawData, readWriteFields)
 }
 
 // GetContainer will get a Container instance from the service.
@@ -83,46 +104,52 @@ func ListReferencedContainers(c common.Client, link string) ([]*Container, error
 	return common.GetCollectionObjects[Container](c, link)
 }
 
-// Reset resets the container.
-func (container *Container) Reset() error {
-	if container.resetTarget == "" {
-		return fmt.Errorf("Reset is not supported by this system")
-	}
-
-	return container.Post(container.resetTarget, nil)
+// Reset shall reset the container.
+// resetType - This parameter shall contain the type of reset.
+// 'GracefulRestart' and 'ForceRestart' shall indicate requests to restart the
+// container. 'GracefulShutdown' and 'ForceOff' shall indicate requests to stop
+// or disable the container. 'On' and 'ForceOn' shall indicate requests to
+// start or enable the container. The service can accept a request without the
+// parameter and shall perform a 'GracefulRestart'.
+func (c *Container) Reset(resetType common.ResetType) error {
+	payload := make(map[string]any)
+	payload["ResetType"] = resetType
+	return c.Post(c.resetTarget, payload)
 }
 
-// EthernetIntefaces gets the ethernet interfaces associated with this container.
-func (container *Container) EthernetInterfaces() ([]*EthernetInterface, error) {
-	if container.ethernetInterfaces == "" {
+// ContainerImage gets the ContainerImage linked resource.
+func (c *Container) ContainerImage(client common.Client) (*ContainerImage, error) {
+	if c.containerImage == "" {
 		return nil, nil
 	}
-
-	return ListReferencedEthernetInterfaces(container.GetClient(), container.ethernetInterfaces)
+	return common.GetObject[ContainerImage](client, c.containerImage)
 }
 
-// ContainerImage gets the image used by this container.
-func (container *Container) ContainerImage() (*ContainerImage, error) {
-	if container.containerImage == "" {
+// EthernetInterfaces gets the EthernetInterfaces collection.
+func (c *Container) EthernetInterfaces(client common.Client) ([]*EthernetInterface, error) {
+	if c.ethernetInterfaces == "" {
 		return nil, nil
 	}
-
-	return GetContainerImage(container.GetClient(), container.containerImage)
+	return common.GetCollectionObjects[EthernetInterface](client, c.ethernetInterfaces)
 }
 
 // Limits shall contain the resource limits allocated to a container.
 type Limits struct {
 	// CPUCount shall contain the number of processors available to this container.
-	CPUCount float32
-	// MemoryBytes shall contain the amount of memory available to this container in bytes.
-	MemoryBytes int
+	CPUCount *float32 `json:",omitempty"`
+	// MemoryBytes shall contain the amount of memory available to this container
+	// in bytes.
+	MemoryBytes *int `json:",omitempty"`
 }
 
-// MountPoint shall contain a file system mount point configured for a container.
+// MountPoint shall contain a file system mount point configured for a
+// container.
 type MountPoint struct {
-	// Destination shall contain the file system path in the container that is provided as the mount point to access
-	// the files and folders specified by the Source property.
+	// Destination shall contain the file system path in the container that is
+	// provided as the mount point to access the files and folders specified by the
+	// 'Source' property.
 	Destination string
-	// Source shall contain the file system path from the hosting system that is provided to this container.
+	// Source shall contain the file system path from the hosting system that is
+	// provided to this container.
 	Source string
 }

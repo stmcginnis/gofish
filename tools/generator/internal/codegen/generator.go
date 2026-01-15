@@ -72,11 +72,12 @@ type ActionData struct {
 
 // ActionParameterData represents an action parameter for the template
 type ActionParameterData struct {
-	Name        string
-	Type        string
-	Description string
-	Required    bool
-	Ordinal     int
+	Name         string
+	Type         string
+	Description  string
+	Required     bool
+	Ordinal      int
+	OriginalName string
 }
 
 // LinkData represents a link for the template
@@ -176,6 +177,10 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 		}
 	}
 
+	sort.Slice(data.Enums, func(i, j int) bool {
+		return data.Enums[i].Name < data.Enums[j].Name
+	})
+
 	// Execute template
 	var buf strings.Builder
 	if err := g.tmpl.Execute(&buf, data); err != nil {
@@ -203,8 +208,10 @@ func (g *Generator) buildEnumData(def *schema.Definition) *EnumData {
 	}
 
 	for _, ev := range def.EnumValues {
+		// Make sure it's public (iSCSI > ISCSI)
+		name := strings.ToUpper(ev.Name[:1]) + ev.Name[1:]
 		evd := &EnumValueData{
-			Name:        ev.Name,
+			Name:        name,
 			Value:       ev.Value,
 			Description: ev.Description,
 		}
@@ -334,11 +341,12 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 
 		for _, param := range action.Parameters {
 			pd := &ActionParameterData{
-				Name:        param.Name,
-				Type:        param.Type,
-				Description: param.Description,
-				Required:    param.Required,
-				Ordinal:     param.Ordinal,
+				Name:         param.Name,
+				Type:         param.Type,
+				Description:  param.Description,
+				Required:     param.Required,
+				Ordinal:      param.Ordinal,
+				OriginalName: param.OriginalName,
 			}
 			ad.Parameters = append(ad.Parameters, pd)
 		}
@@ -427,7 +435,7 @@ func (g *Generator) getReceiverName(typeName string) string {
 	if len(name) > 0 {
 		ret := string(name[0])
 		if ret == "b" {
-			// Byte parameter to unmarshalling is already "b"
+			// Byte parameter to unmarshaling is already "b"
 			ret += string(name[1])
 		}
 		return ret

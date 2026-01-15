@@ -79,5 +79,5 @@ func (d *Drive) Indicate(active bool) error {
 		return ErrActionNotSupported
 	}
 
-	return d.Post(d.indicateTarget, map[string]interface{}{"Active": active})
+	return d.Post(d.indicateTarget, map[string]any{"Active": active})
 }

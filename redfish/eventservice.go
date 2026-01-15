@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.1 - #EventService.v1_11_0.EventService
 
 package redfish
 
@@ -13,227 +14,199 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// EventFormatType is
-type EventFormatType string
-
-const (
-
-	// EventEventFormatType The subscription destination will receive JSON
-	// Bodies of the Resource Type Event.
-	EventEventFormatType EventFormatType = "Event"
-	// MetricReportEventFormatType The subscription destination will receive
-	// JSON Bodies of the Resource Type MetricReport.
-	MetricReportEventFormatType EventFormatType = "MetricReport"
-)
-
-// EventType is the event type.
-// This property has been deprecated. Starting with Redfish Specification v1.6 (Event v1.3),
-// subscriptions are based on the RegistryPrefix and ResourceType properties and not on the
-// EventType property.
-type EventType string
-
-const (
-	// AlertEventType indicates a condition exists which requires attention.
-	AlertEventType EventType = "Alert"
-	// ResourceAddedEventType indicates a resource has been added.
-	ResourceAddedEventType EventType = "ResourceAdded"
-	// ResourceRemovedEventType indicates a resource has been removed.
-	ResourceRemovedEventType EventType = "ResourceRemoved"
-	// ResourceUpdatedEventType indicates a resource has been updated.
-	ResourceUpdatedEventType EventType = "ResourceUpdated"
-	// StatusChangeEventType indicates the status of this resource has changed.
-	StatusChangeEventType EventType = "StatusChange"
-	// MetricReportEventType indicates the telemetry service is sending a metric report.
-	MetricReportEventType EventType = "MetricReport"
-	// OtherEventType is used to indicate that because EventType is deprecated as of Redfish
-	// Specification v1.6, the event is based on a registry or resource but not an EventType.
-	OtherEventType EventType = "Other"
-)
-
-// IsValidEventType will check if it is a valid EventType.
-// Should remove and leave it to the service to decide if it's valid, but since
-// this is deprecated leaving it in for now.
-func (et EventType) IsValidEventType() bool {
-	switch et {
-	case AlertEventType, ResourceAddedEventType,
-		ResourceRemovedEventType, ResourceUpdatedEventType,
-		StatusChangeEventType, MetricReportEventType, OtherEventType:
-		return true
-	}
-	return false
-}
-
-// SupportedEventTypes contains a map of supported EventType
-var SupportedEventTypes = map[string]EventType{
-	"Alert":                    AlertEventType,
-	"ResourceAdded":            ResourceAddedEventType,
-	"ResourceRemovedEventType": ResourceRemovedEventType,
-	"ResourceUpdated":          ResourceUpdatedEventType,
-	"StatusChange":             StatusChangeEventType,
-}
-
-// SMTPAuthenticationMethods is
 type SMTPAuthenticationMethods string
 
 const (
-
-	// NoneSMTPAuthenticationMethods shall indicate authentication is not
-	// required.
+	// NoneSMTPAuthenticationMethods shall indicate authentication is not required.
 	NoneSMTPAuthenticationMethods SMTPAuthenticationMethods = "None"
 	// AutoDetectSMTPAuthenticationMethods shall indicate authentication is
 	// auto-detected.
 	AutoDetectSMTPAuthenticationMethods SMTPAuthenticationMethods = "AutoDetect"
-	// PlainSMTPAuthenticationMethods shall indicate authentication conforms
-	// to the RFC4954-defined AUTH PLAIN mechanism.
+	// PlainSMTPAuthenticationMethods shall indicate authentication conforms to the
+	// RFC4954-defined AUTH PLAIN mechanism.
 	PlainSMTPAuthenticationMethods SMTPAuthenticationMethods = "Plain"
-	// LoginSMTPAuthenticationMethods shall indicate authentication conforms
-	// to the RFC4954-defined AUTH LOGIN mechanism.
+	// LoginSMTPAuthenticationMethods shall indicate authentication conforms to the
+	// RFC4954-defined AUTH LOGIN mechanism.
 	LoginSMTPAuthenticationMethods SMTPAuthenticationMethods = "Login"
-	// CRAMMD5SMTPAuthenticationMethods shall indicate authentication
-	// conforms to the RFC4954-defined AUTH CRAM-MD5 mechanism.
+	// CRAMMD5SMTPAuthenticationMethods shall indicate authentication conforms to
+	// the RFC4954-defined AUTH CRAM-MD5 mechanism.
 	CRAMMD5SMTPAuthenticationMethods SMTPAuthenticationMethods = "CRAM_MD5"
 )
 
-// SMTPConnectionProtocol is
 type SMTPConnectionProtocol string
 
 const (
-
-	// NoneSMTPConnectionProtocol shall indicate the connection is in clear
-	// text.
+	// NoneSMTPConnectionProtocol shall indicate the connection is in clear text.
 	NoneSMTPConnectionProtocol SMTPConnectionProtocol = "None"
 	// AutoDetectSMTPConnectionProtocol shall indicate the connection is
 	// auto-detected.
 	AutoDetectSMTPConnectionProtocol SMTPConnectionProtocol = "AutoDetect"
-	// StartTLSSMTPConnectionProtocol shall indicate the connection conforms
-	// to the RFC3207-defined StartTLS extension.
+	// StartTLSSMTPConnectionProtocol shall indicate the connection conforms to the
+	// RFC3207-defined StartTLS extension.
 	StartTLSSMTPConnectionProtocol SMTPConnectionProtocol = "StartTLS"
-	// TLSSSLSMTPConnectionProtocol shall indicate the connection is
-	// TLS/SSL.
+	// TLSSSLSMTPConnectionProtocol shall indicate the connection is TLS/SSL.
 	TLSSSLSMTPConnectionProtocol SMTPConnectionProtocol = "TLS_SSL"
 )
 
-// EventService is used to represent an event service for a Redfish
-// implementation.
+// EventService shall represent an event service for a Redfish implementation.
 type EventService struct {
 	common.Entity
-
+	// DeliveryRetryAttempts shall contain the number of times that the 'POST' of
+	// an event is retried before the subscription terminates or is suspended. This
+	// retry occurs at the service level, which means that the HTTP 'POST' to the
+	// event destination fails with an HTTP '4XX' or '5XX' status code or an HTTP
+	// timeout occurs this many times before the event destination subscription
+	// terminates or is suspended. The service shall delete the 'EventDestination'
+	// resource to terminate the subscription. The service shall set the value of
+	// the 'State' property within 'Status' of the 'EventDestination' resource to
+	// 'Disabled' for a suspended subscription.
+	DeliveryRetryAttempts int
+	// DeliveryRetryIntervalSeconds shall contain the interval, in seconds, between
+	// the retry attempts for any event sent to the subscription destination.
+	DeliveryRetryIntervalSeconds int
+	// EventFormatTypes shall contain the content types of the message that this
+	// service can send to the event destination. If this property is not present,
+	// the 'EventFormatType' shall be assumed to be 'Event'.
+	//
+	// Version added: v1.2.0
+	EventFormatTypes []EventFormatType
+	// EventTypesForSubscription shall contain the types of events to which a
+	// client can subscribe. The semantics associated with the enumeration values
+	// are defined in the Redfish Specification.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated. Starting with Redfish Specification v1.6
+	// (Event v1.3), subscriptions are based on the 'RegistryPrefix' and
+	// 'ResourceType' properties and not on the 'EventType' property.
+	EventTypesForSubscription []common.EventType
+	// ExcludeMessageId shall indicate whether this service supports filtering by
+	// the 'ExcludeMessageIds' property.
+	//
+	// Version added: v1.8.0
+	ExcludeMessageID bool `json:"ExcludeMessageId"`
+	// ExcludeRegistryPrefix shall indicate whether this service supports filtering
+	// by the 'ExcludeRegistryPrefixes' property.
+	//
+	// Version added: v1.8.0
+	ExcludeRegistryPrefix bool
+	// IncludeOriginOfConditionSupported shall indicate whether the service
+	// supports including the resource payload of the origin of condition in the
+	// event payload. If 'true', event subscriptions are allowed to specify the
+	// 'IncludeOriginOfCondition' property.
+	//
+	// Version added: v1.6.0
+	IncludeOriginOfConditionSupported bool
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// DeliveryRetryAttempts shall be the
-	// number of retries attempted for any given event to the subscription
-	// destination before the subscription is terminated.  This retry is at
-	// the service level, meaning the HTTP POST to the Event Destination was
-	// returned by the HTTP operation as unsuccessful (4xx or 5xx return
-	// code) or an HTTP timeout occurred this many times before the Event
-	// Destination subscription is terminated.
-	DeliveryRetryAttempts int
-	// DeliveryRetryIntervalSeconds shall be the interval in seconds between the
-	// retry attempts for any given event
-	// to the subscription destination.
-	DeliveryRetryIntervalSeconds int
-	// Description provides a description of this resource.
-	Description string
-	// EventFormatTypes shall indicate the
-	// content types of the message that this service can send to the event
-	// destination.  If this property is not present, the EventFormatType
-	// shall be assumed to be Event.
-	EventFormatTypes []EventFormatType
-	// EventTypesForSubscription is the types of Events that can be subscribed to.
-	// This property has been deprecated. Starting with Redfish Specification v1.6 (Event v1.3),
-	// subscriptions are based on the RegistryPrefix and ResourceType properties and not on the EventType property.
-	EventTypesForSubscription []EventType
-	// ExcludeMessageID shall indicate whether this service supports filtering by the ExcludeMessageIds property.
-	ExcludeMessageID bool
-	// ExcludeRegistryPrefix shall indicate whether this service supports filtering by the ExcludeRegistryPrefixes
-	// property.
-	ExcludeRegistryPrefix bool
-	// IncludeOriginOfConditionSupported shall indicate
-	// whether the service supports including the resource payload of the
-	// origin of condition in the event payload.  If `true`, event
-	// subscriptions are allowed to specify the IncludeOriginOfCondition
-	// property.
-	IncludeOriginOfConditionSupported bool
-	// RegistryPrefixes is the array of the Prefixes of the Message Registries
-	// that shall be allowed for an Event Subscription.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// RegistryPrefixes shall contain the array of the prefixes of the message
+	// registries that shall be allowed or excluded for an event subscription.
+	//
+	// Version added: v1.2.0
 	RegistryPrefixes []string
-	// ResourceTypes is used for an Event Subscription.
+	// ResourceTypes shall specify an array of the valid '@odata.type' values that
+	// can be used for an event subscription.
+	//
+	// Version added: v1.2.0
 	ResourceTypes []string
 	// SMTP shall contain settings for SMTP event delivery.
+	//
+	// Version added: v1.5.0
 	SMTP SMTP
-	// SSEFilterPropertiesSupported shall contain a set of properties that
-	// indicate which properties are supported in the $filter query parameter
-	// for the URI indicated by the ServerSentEventUri property.
+	// SSEFilterPropertiesSupported shall contain the properties that are supported
+	// in the '$filter' query parameter for the URI indicated by the
+	// 'ServerSentEventUri' property, as described by the Redfish Specification.
+	//
+	// Version added: v1.2.0
 	SSEFilterPropertiesSupported SSEFilterPropertiesSupported
-	// ServerSentEventURI shall be a URI that specifies an HTML5 Server-Sent
-	// Event conformant endpoint.
-	ServerSentEventURI string `json:"ServerSentEventUri"`
-	// ServiceEnabled shall be a boolean indicating whether this service is enabled.
+	// SSEIncludeOriginOfConditionSupported shall indicate whether the service
+	// supports the 'includeoriginofcondition' query parameter for the
+	// 'ServerSentEventUri', as described by the Redfish Specification.
+	//
+	// Version added: v1.11.0
+	SSEIncludeOriginOfConditionSupported bool
+	// ServerSentEventUri shall contain a URI that specifies an HTML5 Server-Sent
+	// Event-conformant endpoint.
+	//
+	// Version added: v1.1.0
+	ServerSentEventURI string
+	// ServiceEnabled shall indicate whether this service is enabled. If 'false',
+	// events are no longer published, new SSE connections cannot be established,
+	// and existing SSE connections are terminated.
 	ServiceEnabled bool
-	// Severities shall specify an array of the allowable severities that can be used for an event subscription. If
-	// this property is absent or contains an empty array, the service does not support severity-based subscriptions.
+	// Severities shall specify an array of the allowable severities that can be
+	// used for an event subscription. If this property is absent or contains an
+	// empty array, the service does not support severity-based subscriptions.
+	//
+	// Version added: v1.9.0
 	Severities []common.Health
-	// Status is This property shall contain any status or health properties of
-	// the resource.
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// SubordinateResourcesSupported is When set to true, the service is
-	// indicating that it supports the SubordinateResource property on Event
-	// Subscriptions and on generated Events.
+	// SubordinateResourcesSupported shall indicate whether the service supports
+	// the 'SubordinateResources' property on both event subscriptions and
+	// generated events.
+	//
+	// Version added: v1.2.0
 	SubordinateResourcesSupported bool
-	// Subscriptions shall contain the link to a collection of type
-	// EventDestination.
-	Subscriptions string
+	// Subscriptions shall contain the link to a resource collection of type
+	// 'EventDestinationCollection'.
+	SubscriptionsLink string
+	// submitTestEventTarget is the URL to send SubmitTestEvent requests.
+	SubmitTestEventTarget string
+	// testEventSubscriptionTarget is the URL to send TestEventSubscription requests.
+	testEventSubscriptionTarget string
 	// RawData holds the original serialized JSON so we can compare updates.
 	RawData []byte
-
-	// SubmitTestEventTarget is the URL to send SubmitTestEvent actions.
-	SubmitTestEventTarget string
-	// TestEventSubscriptionTarget is the URL to test event using the pre-defined test message.
-	testEventSubscriptionTarget string
 }
 
 // UnmarshalJSON unmarshals a EventService object from the raw JSON.
-func (eventservice *EventService) UnmarshalJSON(b []byte) error {
+func (e *EventService) UnmarshalJSON(b []byte) error {
 	type temp EventService
-	type Actions struct {
+	type eActions struct {
 		SubmitTestEvent       common.ActionTarget `json:"#EventService.SubmitTestEvent"`
 		TestEventSubscription common.ActionTarget `json:"#EventService.TestEventSubscription"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Subscriptions common.Link
-		Actions       Actions
+		Actions       eActions
+		Subscriptions common.Link `json:"subscriptions"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
+	*e = EventService(tmp.temp)
+
 	// Extract the links to other entities for later
-	*eventservice = EventService(t.temp)
-	// Need to make these publicly available for OEM versions to access
-	eventservice.Subscriptions = t.Subscriptions.String()
-	eventservice.SubmitTestEventTarget = t.Actions.SubmitTestEvent.Target
-	eventservice.testEventSubscriptionTarget = t.Actions.TestEventSubscription.Target
+	e.SubmitTestEventTarget = tmp.Actions.SubmitTestEvent.Target
+	e.testEventSubscriptionTarget = tmp.Actions.TestEventSubscription.Target
+	e.SubscriptionsLink = tmp.Subscriptions.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	eventservice.RawData = b
+	e.RawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (eventservice *EventService) Update() error {
+func (e *EventService) Update() error {
 	readWriteFields := []string{
 		"DeliveryRetryAttempts",
 		"DeliveryRetryIntervalSeconds",
+		"SMTP",
+		"SSEFilterPropertiesSupported",
 		"ServiceEnabled",
+		"Status",
 	}
 
-	return eventservice.UpdateFromRawData(eventservice, eventservice.RawData, readWriteFields)
+	return e.UpdateFromRawData(e, e.RawData, readWriteFields)
 }
 
 // GetEventService will get a EventService instance from the service.
@@ -248,20 +221,104 @@ func ListReferencedEventServices(c common.Client, link string) ([]*EventService,
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.
-func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
-	if strings.TrimSpace(eventservice.Subscriptions) == "" {
+func (e *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
+	if strings.TrimSpace(e.SubscriptionsLink) == "" {
 		return nil, errors.New("empty subscription link in the event service")
 	}
 
-	return ListReferencedEventDestinations(eventservice.GetClient(), eventservice.Subscriptions)
+	return ListReferencedEventDestinations(e.GetClient(), e.SubscriptionsLink)
 }
 
 // GetEventSubscription gets a specific subscription using the event service.
-func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
+func (e *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
 	if uri == "" {
 		return nil, errors.New("uri should not be empty")
 	}
-	return GetEventDestination(eventservice.GetClient(), uri)
+	return GetEventDestination(e.GetClient(), uri)
+}
+
+// SubmitTestEvent shall add a test event to the event service with the event data specified in the action parameters. Then, this message should be sent to any appropriate event destinations.
+// message - Event message content.
+func (e *EventService) SubmitTestEvent(message string) error {
+	payload := make(map[string]any)
+	payload["EventGroupId"] = "123"
+	payload["EventId"] = "TEST123"
+	payload["EventTimestamp"] = time.Now().String()
+	payload["EventType"] = "Alert"
+	payload["Message"] = message
+	payload["MessageID"] = "test123"
+	payload["OriginOfCondition"] = e.ODataID
+	payload["Severity"] = "Informational"
+	return e.Post(e.SubmitTestEventTarget, payload)
+}
+
+// SubmitFullTestEvent This action shall add a test event to the event service with the event data specified in the action parameters. Then, this message should be sent to any appropriate event destinations.
+// eventGroupId - The parameter shall contain the group identifier for the
+// event. It has the same semantics as the 'EventGroupId' property in the
+// 'Event' schema for Redfish. If not provided by the client, the resulting
+// event should not contain the 'EventGroupId' property.
+// eventId - This parameter shall have the same semantics as the 'EventId'
+// property in the 'Event' schema for Redfish. A service can ignore this value
+// and replace it with its own. If not provided by the client, the resulting
+// event may contain a service-defined 'EventId' property.
+// eventTimestamp - This parameter shall contain the date and time for the
+// event to add and have the same semantics as the 'EventTimestamp' property in
+// the 'Event' schema for Redfish. If not provided by the client, the resulting
+// event should not contain the 'EventTimestamp' property.
+// eventType - This parameter shall contain the property name for which the
+// following allowable values apply. If not provided by the client, the
+// resulting event should not contain the 'EventType' property.
+// message - This parameter shall have the same semantics as the 'Message'
+// property in the 'Event' schema for Redfish. If not provided by the client,
+// the resulting event should not contain the 'Message' property.
+// messageArgs - This parameter shall have the same semantics as the
+// 'MessageArgs' property in the 'Event' schema for Redfish. If not provided by
+// the client, the resulting event should not contain the 'MessageArgs'
+// property.
+// messageID - This parameter shall contain the 'MessageId' for the event to
+// add and have the same semantics as the 'MessageId' property in the 'Event'
+// schema for Redfish. Services should accept arbitrary values for this
+// parameter that match that match the defined pattern.
+// messageSeverity - This property shall contain the severity for the event to
+// add and have the same semantics as the 'MessageSeverity' property in the
+// 'Event' schema for Redfish. If not provided by the client, the resulting
+// event should not contain the 'MessageSeverity' property.
+// originOfCondition - This parameter shall be a string that represents the URL
+// contained by the 'OriginOfCondition' property in the 'Event' schema for
+// Redfish. If not provided by the client, the resulting event should not
+// contain the 'OriginOfCondition' property.
+// severity - This parameter shall contain the severity for the event to add
+// and have the same semantics as the 'Severity' property in the 'Event' schema
+// for Redfish. If not provided by the client, the resulting event should not
+// contain the 'Severity' property.
+func (e *EventService) SubmitFullTestEvent(eventGroupID int, eventID string, eventTimestamp string, eventType common.EventType, message string, messageArgs string, messageID string, messageSeverity common.Health, originOfCondition string, severity string) error {
+	payload := make(map[string]any)
+	payload["EventGroupId"] = eventGroupID
+	payload["EventId"] = eventID
+	payload["EventTimestamp"] = eventTimestamp
+	payload["EventType"] = eventType
+	payload["Message"] = message
+	payload["MessageArgs"] = messageArgs
+	payload["MessageId"] = messageID
+	payload["MessageSeverity"] = messageSeverity
+	payload["OriginOfCondition"] = originOfCondition
+	payload["Severity"] = severity
+	return e.Post(e.SubmitTestEventTarget, payload)
+}
+
+// TestEventSubscription shall send an event containing the 'TestMessage' message from
+// the Resource Event Message Registry to all appropriate event destinations.
+func (e *EventService) TestEventSubscription() error {
+	payload := make(map[string]any)
+	return e.Post(e.testEventSubscriptionTarget, payload)
+}
+
+// Subscriptions gets the Subscriptions collection.
+func (e *EventService) Subscriptions(client common.Client) ([]*EventDestination, error) {
+	if e.SubscriptionsLink == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[EventDestination](client, e.SubscriptionsLink)
 }
 
 // CreateEventSubscription creates the subscription using the event service.
@@ -279,21 +336,21 @@ func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestin
 
 // Deprecated: (v1.5) EventType-based eventing is DEPRECATED in the Redfish schema
 // in favor of using RegistryPrefix and ResourceTypes
-func (eventservice *EventService) CreateEventSubscription(
+func (e *EventService) CreateEventSubscription(
 	destination string,
-	eventTypes []EventType,
+	eventTypes []common.EventType,
 	httpHeaders map[string]string,
 	protocol EventDestinationProtocol,
 	context string,
-	oem interface{},
+	oem any,
 ) (string, error) {
-	if strings.TrimSpace(eventservice.Subscriptions) == "" {
+	if strings.TrimSpace(e.SubscriptionsLink) == "" {
 		return "", errors.New("empty subscription link in the event service")
 	}
 
 	return CreateEventDestination(
-		eventservice.GetClient(),
-		eventservice.Subscriptions,
+		e.GetClient(),
+		e.SubscriptionsLink,
 		destination,
 		eventTypes,
 		httpHeaders,
@@ -322,7 +379,7 @@ func (eventservice *EventService) CreateEventSubscription(
 // it should contain the vendor specific struct that goes inside the Oem session.
 // It returns the new subscription URI if the event subscription is created
 // with success or any error encountered.
-func (eventservice *EventService) CreateEventSubscriptionInstance(
+func (e *EventService) CreateEventSubscriptionInstance(
 	destination string,
 	registryPrefixes []string,
 	resourceTypes []string,
@@ -330,15 +387,15 @@ func (eventservice *EventService) CreateEventSubscriptionInstance(
 	protocol EventDestinationProtocol,
 	context string,
 	deliveryRetryPolicy DeliveryRetryPolicy,
-	oem interface{},
+	oem any,
 ) (string, error) {
-	if strings.TrimSpace(eventservice.Subscriptions) == "" {
+	if strings.TrimSpace(e.SubscriptionsLink) == "" {
 		return "", errors.New("empty subscription link in the event service")
 	}
 
 	return CreateEventDestinationInstance(
-		eventservice.GetClient(),
-		eventservice.Subscriptions,
+		e.GetClient(),
+		e.SubscriptionsLink,
 		destination,
 		registryPrefixes,
 		resourceTypes,
@@ -351,105 +408,102 @@ func (eventservice *EventService) CreateEventSubscriptionInstance(
 }
 
 // DeleteEventSubscription deletes a specific subscription using the event service.
-func (eventservice *EventService) DeleteEventSubscription(uri string) error {
-	return DeleteEventDestination(eventservice.GetClient(), uri)
+func (e *EventService) DeleteEventSubscription(uri string) error {
+	return DeleteEventDestination(e.GetClient(), uri)
 }
 
-// SubmitTestEvent shall add a test event to the event service with the event
-// data specified in the action parameters. This message should then be sent to
-// any appropriate ListenerDestination targets.
-func (eventservice *EventService) SubmitTestEvent(message string) error {
-	type temp struct {
-		EventGroupID      string `json:"EventGroupId"`
-		EventID           string `json:"EventId"`
-		EventTimestamp    string
-		EventType         string `json:"EventType,omitempty"`
-		Message           string `json:"Message,omitempty"`
-		MessageArgs       []string
-		MessageID         string `json:"MessageId"`
-		OriginOfCondition string
-		Severity          string
-	}
-	t := temp{
-		EventGroupID:      "TESTING123",
-		EventID:           "TEST123",
-		EventTimestamp:    time.Now().String(),
-		EventType:         "Alert",
-		Message:           message,
-		MessageID:         "test123",
-		OriginOfCondition: eventservice.ODataID,
-		Severity:          "Informational",
-	}
-
-	return eventservice.Post(eventservice.SubmitTestEventTarget, t)
-}
-
-// TestEventSubscription will send an event containing the TestMessage message from the
-// Resource Event Message Registry to all appropriate event destinations.
-func (eventservice *EventService) TestEventSubscription() error {
-	if eventservice.testEventSubscriptionTarget == "" {
-		return errors.New("TestEventSubsciption not supported by this service") //nolint:error-strings
-	}
-
-	var payload struct{}
-	return eventservice.Post(eventservice.testEventSubscriptionTarget, payload)
-}
-
-// SSEFilterPropertiesSupported shall contain a set of properties that indicate
-// which properties are supported in the $filter query parameter for the URI
-// indicated by the ServerSentEventUri property.
-type SSEFilterPropertiesSupported struct {
-	// EventFormatType shall be a boolean indicating if this service supports
-	// the use of the EventFormatType property in the $filter query parameter as
-	// described by the specification.
-	EventFormatType bool
-	// MessageID shall be a boolean indicating if this service supports the use
-	// of the MessageId property in the $filter query parameter as described by
-	// the specification.
-	MessageID bool `json:"MessageId"`
-	// MetricReportDefinition shall be a boolean indicating if this service
-	// supports the use of the MetricReportDefinition property in the $filter
-	// query parameter as described by the specification.
-	MetricReportDefinition bool
-	// OriginResource shall be a boolean indicating if this service supports the
-	// use of the OriginResource property in the $filter query parameter as
-	// described by the specification.
-	OriginResource bool
-	// RegistryPrefix shall be a boolean indicating if this service supports the
-	// use of the RegistryPrefix property in the $filter query parameter as
-	// described by the specification.
-	RegistryPrefix bool
-	// ResourceType shall be a boolean indicating if this service supports the
-	// use of the ResourceType property in the $filter query parameter as
-	// described by the specification.
-	ResourceType bool
-}
-
-// SMTP is shall contain settings for SMTP event delivery.
+// SMTP shall contain settings for SMTP event delivery.
 type SMTP struct {
-	// Authentication shall contain the authentication
-	// method for the SMTP server.
+	// Authentication shall contain the authentication method for the SMTP server.
+	//
+	// Version added: v1.5.0
 	Authentication SMTPAuthenticationMethods
-	// ConnectionProtocol shall contain the connection type
-	// to the outgoing SMTP server.
-	ConnectionProtocol SMTPConnectionProtocol
-	// FromAddress shall contain the email address to use
-	// for the 'from' field in an outgoing email.
-	FromAddress string
-	// Password shall contain the password for
-	// authentication with the SMTP server. The value shall be `null` in
-	// responses.
-	Password string
-	// Port shall contain the destination port for the SMTP
+	// ConnectionProtocol shall contain the connection type to the outgoing SMTP
 	// server.
-	Port int
-	// ServerAddress shall contain the address of the SMTP
-	// server for outgoing email.
+	//
+	// Version added: v1.5.0
+	ConnectionProtocol SMTPConnectionProtocol
+	// FromAddress shall contain the email address to use for the 'from' field in
+	// an outgoing email.
+	//
+	// Version added: v1.5.0
+	FromAddress string
+	// Password shall contain the password for authentication with the SMTP server.
+	// The value shall be 'null' in responses.
+	//
+	// Version added: v1.5.0
+	Password string
+	// PasswordSet shall contain 'true' if a valid value was provided for the
+	// 'Password' property. Otherwise, the property shall contain 'false'.
+	//
+	// Version added: v1.9.0
+	PasswordSet bool
+	// Port shall contain the destination port for the SMTP server.
+	//
+	// Version added: v1.5.0
+	Port *uint `json:",omitempty"`
+	// ServerAddress shall contain the address of the SMTP server for outgoing
+	// email.
+	//
+	// Version added: v1.5.0
 	ServerAddress string
-	// ServiceEnabled shall indicate if SMTP for event
-	// delivery is enabled.
+	// ServiceEnabled shall indicate if SMTP for event delivery is enabled.
+	//
+	// Version added: v1.5.0
 	ServiceEnabled bool
-	// Username shall contain the username for
-	// authentication with the SMTP server.
+	// Username shall contain the username for authentication with the SMTP server.
+	//
+	// Version added: v1.5.0
 	Username string
+}
+
+// SSEFilterPropertiesSupported shall contain a set of properties that are
+// supported in the '$filter' query parameter for the URI indicated by the
+// 'ServerSentEventUri' property, as described by the Redfish Specification.
+type SSEFilterPropertiesSupported struct {
+	// EventFormatType shall indicate whether this service supports filtering by
+	// the 'EventFormatType' property.
+	//
+	// Version added: v1.2.0
+	EventFormatType bool
+	// EventType shall indicate whether this service supports filtering by the
+	// 'EventTypes' property.
+	//
+	// Version added: v1.2.0
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated. Starting with Redfish Specification v1.6
+	// (Event v1.3), subscriptions are based on the 'RegistryPrefix' and
+	// 'ResourceType' properties and not on the 'EventType' property.
+	EventType bool
+	// MessageId shall indicate whether this service supports filtering by the
+	// 'MessageIds' property.
+	//
+	// Version added: v1.2.0
+	MessageID bool `json:"MessageId"`
+	// MetricReportDefinition shall indicate whether this service supports
+	// filtering by the 'MetricReportDefinitions' property.
+	//
+	// Version added: v1.2.0
+	MetricReportDefinition bool
+	// OriginResource shall indicate whether this service supports filtering by the
+	// 'OriginResources' property.
+	//
+	// Version added: v1.2.0
+	OriginResource bool
+	// RegistryPrefix shall indicate whether this service supports filtering by the
+	// 'RegistryPrefixes' property.
+	//
+	// Version added: v1.2.0
+	RegistryPrefix bool
+	// ResourceType shall indicate whether this service supports filtering by the
+	// 'ResourceTypes' property.
+	//
+	// Version added: v1.2.0
+	ResourceType bool
+	// SubordinateResources shall indicate whether this service supports filtering
+	// by the 'SubordinateResources' property.
+	//
+	// Version added: v1.4.0
+	SubordinateResources bool
 }

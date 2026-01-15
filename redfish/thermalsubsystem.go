@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.3 - #ThermalSubsystem.v1_5_0.ThermalSubsystem
 
 package redfish
 
@@ -10,117 +11,119 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// ThermalSubsystem shall represent a thermal subsystem for a Redfish implementation.
+// ThermalSubsystem shall represent a thermal subsystem for a Redfish
+// implementation.
 type ThermalSubsystem struct {
 	common.Entity
+	// CoolantConnectorRedundancy shall contain redundancy information for the set
+	// of coolant connectors attached to this equipment. The values of the
+	// 'RedundancyGroup' array shall reference resources of type
+	// 'CoolantConnector'.
+	//
+	// Version added: v1.3.0
+	CoolantConnectorRedundancy []common.RedundantGroup
+	// CoolantConnectors shall contain a link to a resource collection of type
+	// 'CoolantConnectorCollection' that contains the coolant connectors for this
+	// equipment.
+	//
+	// Version added: v1.2.0
+	coolantConnectors string
+	// FanRedundancy shall contain redundancy information for the groups of fans in
+	// this subsystem.
+	FanRedundancy []common.RedundantGroup
+	// Fans shall contain a link to a resource collection of type 'FanCollection'.
+	fans string
+	// FansFullSpeedOverrideEnable shall indicate whether the fans in this
+	// equipment are overridden to operate at full speed.
+	//
+	// Version added: v1.5.0
+	FansFullSpeedOverrideEnable bool
+	// Filters shall contain a link to a resource collection of type
+	// 'FilterCollection' that contains the filters for this equipment.
+	//
+	// Version added: v1.4.0
+	filters string
+	// Heaters shall contain a link to a resource collection of type
+	// 'HeaterCollection'.
+	//
+	// Version added: v1.1.0
+	heaters string
+	// LeakDetection shall contain a link to a resource of type 'LeakDetection'.
+	// This link should be used when the leak detection capabilities are tied to,
+	// or are internal to, a particular 'Chassis'. For detection capabilities that
+	// are tied to a 'CoolingUnit' resource, which may span multiple 'Chassis'
+	// resources, populating the 'LeakDetection' resource under 'CoolingUnit' for
+	// the relevant equipment is the preferred approach.
+	//
+	// Version added: v1.3.0
+	leakDetection string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// CoolantConnectorRedundancy shall contain redundancy information for the set of coolant connectors attached to
-	// this equipment. The values of the RedundancyGroup array shall reference resources of type CoolantConnector.
-	CoolantConnectorRedundancy []RedundantGroup
-	// CoolantConnectors shall contain a link to a resource collection of type CoolantConnectorCollection that contains
-	// the coolant connectors for this equipment.
-	coolantConnectors string
-	// Description provides a description of this resource.
-	Description string
-	// FanRedundancy shall contain redundancy information for the groups of fans in this subsystem.
-	FanRedundancy []RedundantGroup
-	// Fans shall contain a link to a resource collection of type FanCollection.
-	fans string
-	// filters shall contain a link to a resource collection of type Filter
-	filters string
-	// Heaters shall contain a link to a resource collection of type HeaterCollection.
-	heaters string
-	// LeakDetection shall contain a link to a resource collection of type LeakDetection.
-	leakDetection string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// Pumps shall contain a link to a resource collection of type PumpCollection that contains details for the pumps
-	// included in this equipment.
+	// Pumps shall contain a link to a resource collection of type 'PumpCollection'
+	// that contains details for the pumps included in this equipment.
+	//
+	// Version added: v1.3.0
 	pumps string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// ThermalMetrics shall contain a link to a resource collection of type ThermalMetrics.
+	// ThermalMetrics shall contain a link to a resource of type 'ThermalMetrics'.
 	thermalMetrics string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a ThermalSubsystem object from the raw JSON.
-func (thermalsubsystem *ThermalSubsystem) UnmarshalJSON(b []byte) error {
+func (t *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 	type temp ThermalSubsystem
-	var t struct {
+	var tmp struct {
 		temp
-		CoolantConnectors common.Link
-		Fans              common.Link
-		Heaters           common.Link
-		LeakDetection     common.Link
-		Pumps             common.Link
-		ThermalMetrics    common.Link
-		Filters           common.Link
+		CoolantConnectors common.Link `json:"coolantConnectors"`
+		Fans              common.Link `json:"fans"`
+		Filters           common.Link `json:"filters"`
+		Heaters           common.Link `json:"heaters"`
+		LeakDetection     common.Link `json:"leakDetection"`
+		Pumps             common.Link `json:"pumps"`
+		ThermalMetrics    common.Link `json:"thermalMetrics"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*thermalsubsystem = ThermalSubsystem(t.temp)
+	*t = ThermalSubsystem(tmp.temp)
 
 	// Extract the links to other entities for later
-	thermalsubsystem.coolantConnectors = t.CoolantConnectors.String()
-	thermalsubsystem.fans = t.Fans.String()
-	thermalsubsystem.heaters = t.Heaters.String()
-	thermalsubsystem.leakDetection = t.LeakDetection.String()
-	thermalsubsystem.pumps = t.Pumps.String()
-	thermalsubsystem.thermalMetrics = t.ThermalMetrics.String()
-	thermalsubsystem.filters = t.Filters.String()
+	t.coolantConnectors = tmp.CoolantConnectors.String()
+	t.fans = tmp.Fans.String()
+	t.filters = tmp.Filters.String()
+	t.heaters = tmp.Heaters.String()
+	t.leakDetection = tmp.LeakDetection.String()
+	t.pumps = tmp.Pumps.String()
+	t.thermalMetrics = tmp.ThermalMetrics.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	t.rawData = b
 
 	return nil
 }
 
-// CoolantConnectors gets the coolant connectors for this equipment.
-func (thermalsubsystem *ThermalSubsystem) CoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(thermalsubsystem.GetClient(), thermalsubsystem.coolantConnectors)
-}
-
-// Fans gets the fans for this equipment.
-func (thermalsubsystem *ThermalSubsystem) Fans() ([]*Fan, error) {
-	return ListReferencedFans(thermalsubsystem.GetClient(), thermalsubsystem.fans)
-}
-
-// Heaters gets the heaters within this subsystem.
-func (thermalsubsystem *ThermalSubsystem) Heaters() ([]*Heater, error) {
-	return ListReferencedHeaters(thermalsubsystem.GetClient(), thermalsubsystem.heaters)
-}
-
-// LeakDetection gets the leak detection system within the ThermalSubsystem.
-// This property has been deprecated in favor of LeakDetectors under the Chassis resource.
-func (thermalsubsystem *ThermalSubsystem) LeakDetection() (*LeakDetection, error) {
-	if thermalsubsystem.leakDetection == "" {
-		return nil, nil
+// Update commits updates to this object's properties to the running system.
+func (t *ThermalSubsystem) Update() error {
+	readWriteFields := []string{
+		"CoolantConnectorRedundancy",
+		"FanRedundancy",
+		"FansFullSpeedOverrideEnable",
+		"Status",
 	}
 
-	return GetLeakDetection(thermalsubsystem.GetClient(), thermalsubsystem.leakDetection)
-}
-
-// Pumps gets the pumps for this equipment.
-func (thermalsubsystem *ThermalSubsystem) Pumps() ([]*Pump, error) {
-	return ListReferencedPumps(thermalsubsystem.GetClient(), thermalsubsystem.pumps)
-}
-
-// Filters gets the filters within this subsystem.
-func (thermalsubsystem *ThermalSubsystem) Filters() ([]*Filter, error) {
-	return ListReferencedFilters(thermalsubsystem.GetClient(), thermalsubsystem.filters)
-}
-
-// ThermalMetrics gets the summary of thermal metrics for this subsystem.
-func (thermalsubsystem *ThermalSubsystem) ThermalMetrics() (*ThermalMetrics, error) {
-	if thermalsubsystem.thermalMetrics == "" {
-		return nil, nil
-	}
-	return GetThermalMetrics(thermalsubsystem.GetClient(), thermalsubsystem.thermalMetrics)
+	return t.UpdateFromRawData(t, t.rawData, readWriteFields)
 }
 
 // GetThermalSubsystem will get a ThermalSubsystem instance from the service.
@@ -132,4 +135,60 @@ func GetThermalSubsystem(c common.Client, uri string) (*ThermalSubsystem, error)
 // a provided reference.
 func ListReferencedThermalSubsystems(c common.Client, link string) ([]*ThermalSubsystem, error) {
 	return common.GetCollectionObjects[ThermalSubsystem](c, link)
+}
+
+// CoolantConnectors gets the CoolantConnectors collection.
+func (t *ThermalSubsystem) CoolantConnectors(client common.Client) ([]*CoolantConnector, error) {
+	if t.coolantConnectors == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[CoolantConnector](client, t.coolantConnectors)
+}
+
+// Fans gets the Fans collection.
+func (t *ThermalSubsystem) Fans(client common.Client) ([]*Fan, error) {
+	if t.fans == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Fan](client, t.fans)
+}
+
+// Filters gets the Filters collection.
+func (t *ThermalSubsystem) Filters(client common.Client) ([]*Filter, error) {
+	if t.filters == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Filter](client, t.filters)
+}
+
+// Heaters gets the Heaters collection.
+func (t *ThermalSubsystem) Heaters(client common.Client) ([]*Heater, error) {
+	if t.heaters == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Heater](client, t.heaters)
+}
+
+// LeakDetection gets the LeakDetection linked resource.
+func (t *ThermalSubsystem) LeakDetection(client common.Client) (*LeakDetection, error) {
+	if t.leakDetection == "" {
+		return nil, nil
+	}
+	return common.GetObject[LeakDetection](client, t.leakDetection)
+}
+
+// Pumps gets the Pumps collection.
+func (t *ThermalSubsystem) Pumps(client common.Client) ([]*Pump, error) {
+	if t.pumps == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Pump](client, t.pumps)
+}
+
+// ThermalMetrics gets the ThermalMetrics linked resource.
+func (t *ThermalSubsystem) ThermalMetrics(client common.Client) (*ThermalMetrics, error) {
+	if t.thermalMetrics == "" {
+		return nil, nil
+	}
+	return common.GetObject[ThermalMetrics](client, t.thermalMetrics)
 }

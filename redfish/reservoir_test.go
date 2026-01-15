@@ -51,8 +51,8 @@ func TestReservoir(t *testing.T) {
 	assertEquals(t, "Reserve", string(result.ReservoirType))
 	assertEquals(t, "North 1", result.Location.Placement.Row)
 
-	if result.CapacityLiters != 10 {
-		t.Errorf("Unexpected CapacityLiters: %.2f", result.CapacityLiters)
+	if *result.CapacityLiters != 10 {
+		t.Errorf("Unexpected CapacityLiters: %.2f", *result.CapacityLiters)
 	}
 
 	if *result.FluidLevelPercent.Reading != 64.8 {

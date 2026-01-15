@@ -1,21 +1,21 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.2.5 - #FileShare.v1_3_0.FileShare
 
 package swordfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
 )
 
-// QuotaType shall indicate whether quotas are enabled and enforced by this file
-// share. If QuotaType is present, a value of Soft shall mean that quotas are
-// enabled but not enforced, and a value of Hard shall mean that quotas are
-// enabled and enforced.
+// QuotaType is The value shall indicate whether quotas are enabled and enforced
+// by this file share. If QuotaType is present, a value of Soft shall mean that
+// quotas are enabled but not enforced, and a value of Hard shall mean that
+// quotas are enabled and enforced.
 type QuotaType string
 
 const (
@@ -25,15 +25,10 @@ const (
 	HardQuotaType QuotaType = "Hard"
 )
 
-// FileShare is used to represent a shared set of files with a common directory
-// structure.
+// FileShare shall be used to represent a shared set of files with a common
+// directory structure.
 type FileShare struct {
 	common.Entity
-
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
 	// CASupported shall indicate that Continuous Availability is supported.
 	// Client/Server mediated recovery from network and server failure with
 	// application transparency. This property shall be NULL unless the
@@ -41,12 +36,10 @@ type FileShare struct {
 	// property is false.
 	CASupported bool
 	// DefaultAccessCapabilities shall be an array containing entries for the
-	// default access capabilities for the file share. Each entry shall specify
-	// a default access privilege. The types of default access can include Read,
+	// default access capabilities for the file share. Each entry shall specify a
+	// default access privilege. The types of default access can include Read,
 	// Write, and/or Execute.
 	DefaultAccessCapabilities []StorageAccessCapability
-	// Description provides a description of this resource.
-	Description string
 	// EthernetInterfaces shall be a link to an EthernetInterfaceCollection with
 	// members that provide access to the file share.
 	ethernetInterfaces string
@@ -57,108 +50,106 @@ type FileShare struct {
 	// exported file or directory on the file system where this file share is
 	// hosted.
 	FileSharePath string
-	// FileShareQuotaType value of Soft shall specify that quotas are not
-	// enforced, and a value of Hard shall specify that writes shall fail if the
-	// space consumed would exceed the value of the FileShareTotalQuotaBytes
-	// property.
+	// FileShareQuotaType shall specify that quotas are not enforced, and a value
+	// of Hard shall specify that writes shall fail if the space consumed would
+	// exceed the value of the FileShareTotalQuotaBytes property.
 	FileShareQuotaType QuotaType
-	// FileShareRemainingQuotaBytes value of this property shall indicate the
-	// remaining number of bytes that may be consumed by this file share.
-	FileShareRemainingQuotaBytes int64
-	// FileShareTotalQuotaBytes value of this property shall indicate the
-	// maximum number of bytes that may be consumed by this file share.
-	FileShareTotalQuotaBytes int64
-	// FileSharingProtocols is This property shall be an array containing
-	// entries for the file sharing protocols supported by this file share.
-	// Each entry shall specify a file sharing protocol supported by the file
-	// system.
+	// FileShareRemainingQuotaBytes shall indicate the remaining number of bytes
+	// that may be consumed by this file share.
+	FileShareRemainingQuotaBytes *int `json:",omitempty"`
+	// FileShareTotalQuotaBytes shall indicate the maximum number of bytes that may
+	// be consumed by this file share.
+	FileShareTotalQuotaBytes *int `json:",omitempty"`
+	// FileSharingProtocols shall be an array containing entries for the file
+	// sharing protocols supported by this file share. Each entry shall specify a
+	// file sharing protocol supported by the file system.
 	FileSharingProtocols []FileProtocol
-	// LowSpaceWarningThresholdPercents is This property shall be an array
-	// containing entries for the percentages of file share capacity at which
-	// low space warning events are be issued. A LOW_SPACE_THRESHOLD_WARNING
-	// event shall be triggered each time the remaining file share capacity
-	// value becomes less than one of the values in the array. The following
-	// shall be true: Across all CapacitySources entries, percent =
-	// (SUM(AllocatedBytes) - SUM(ConsumedBytes))/SUM(AllocatedBytes)
-	LowSpaceWarningThresholdPercents []int
-	// RemainingCapacityPercent is If present, this value shall return
-	// {[(SUM(AllocatedBytes) - SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100
-	// represented as an integer value.
-	RemainingCapacityPercent int
-	// ReplicationEnabled shall indicate whether or not replication is enabled
-	// on the file share. This property shall be consistent with the state
-	// reflected at the storage pool level.
+	// LowSpaceWarningThresholdPercents shall be an array containing entries for
+	// the percentages of file share capacity at which low space warning events are
+	// be issued. A LOW_SPACE_THRESHOLD_WARNING event shall be triggered each time
+	// the remaining file share capacity value becomes less than one of the values
+	// in the array. The following shall be true: Across all CapacitySources
+	// entries, percent = (SUM(AllocatedBytes) -
+	// SUM(ConsumedBytes))/SUM(AllocatedBytes).
+	LowSpaceWarningThresholdPercents []*int
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// RemainingCapacityPercent shall return {[(SUM(AllocatedBytes) -
+	// SUM(ConsumedBytes)]/SUM(AllocatedBytes)}*100 represented as an integer
+	// value.
+	//
+	// Version added: v1.1.0
+	RemainingCapacityPercent *int `json:",omitempty"`
+	// ReplicationEnabled shall indicate whether or not replication is enabled on
+	// the file share. This property shall be consistent with the state reflected
+	// at the storage pool level.
+	//
+	// Version added: v1.3.0
 	ReplicationEnabled bool
-	// RootAccess shall indicate whether Root
-	// access is allowed by the file share. The default value for this
-	// property is false.
+	// RootAccess shall indicate whether Root access is allowed by the file share.
+	// The default value for this property is false.
 	RootAccess bool
-	// Status is This value of this property shall indicate the status of the
-	// file share.
+	// Status shall indicate the status of the file share.
 	Status common.Status
-	// WritePolicy shall define how writes are
-	// replicated to the shared source.
+	// WritePolicy shall define how writes are replicated to the shared source.
 	WritePolicy ReplicaUpdateMode
-	// classOfService shall be a link to the ClassOfService for this file share.
+	// classOfService is the URI for ClassOfService.
 	classOfService string
-	// fileSystem shall be a link to the file system containing the file share.
+	// fileSystem is the URI for FileSystem.
 	fileSystem string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a FileShare object from the raw JSON.
-func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
+func (f *FileShare) UnmarshalJSON(b []byte) error {
 	type temp FileShare
-	type links struct {
-		ClassOfService common.Link
-		FileSystem     common.Link
+	type fLinks struct {
+		ClassOfService common.Link `json:"ClassOfService"`
+		FileSystem     common.Link `json:"FileSystem"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Links              links
-		EthernetInterfaces common.Link
+		Links              fLinks
+		EthernetInterfaces common.Link `json:"ethernetInterfaces"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
+	*f = FileShare(tmp.temp)
+
 	// Extract the links to other entities for later
-	*fileshare = FileShare(t.temp)
-	fileshare.classOfService = t.Links.ClassOfService.String()
-	fileshare.fileSystem = t.Links.FileSystem.String()
-	fileshare.ethernetInterfaces = t.EthernetInterfaces.String()
+	f.classOfService = tmp.Links.ClassOfService.String()
+	f.fileSystem = tmp.Links.FileSystem.String()
+	f.ethernetInterfaces = tmp.EthernetInterfaces.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	fileshare.rawData = b
+	f.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (fileshare *FileShare) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(FileShare)
-	err := original.UnmarshalJSON(fileshare.rawData)
-	if err != nil {
-		return err
-	}
-
+func (f *FileShare) Update() error {
 	readWriteFields := []string{
 		"CASupported",
 		"FileShareQuotaType",
 		"FileShareTotalQuotaBytes",
 		"LowSpaceWarningThresholdPercents",
 		"ReplicationEnabled",
+		"Status",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(fileshare).Elem()
-
-	return fileshare.Entity.Update(originalElement, currentElement, readWriteFields)
+	return f.UpdateFromRawData(f, f.rawData, readWriteFields)
 }
 
 // GetFileShare will get a FileShare instance from the service.
@@ -166,31 +157,32 @@ func GetFileShare(c common.Client, uri string) (*FileShare, error) {
 	return common.GetObject[FileShare](c, uri)
 }
 
-// ListReferencedFileShares gets the collection of FileShare from a provided
-// reference.
+// ListReferencedFileShares gets the collection of FileShare from
+// a provided reference.
 func ListReferencedFileShares(c common.Client, link string) ([]*FileShare, error) {
 	return common.GetCollectionObjects[FileShare](c, link)
 }
 
-// ClassOfService gets the file share's class of service.
-func (fileshare *FileShare) ClassOfService() (*ClassOfService, error) {
-	var result *ClassOfService
-	if fileshare.classOfService == "" {
-		return result, nil
+// ClassOfService gets the ClassOfService linked resource.
+func (f *FileShare) ClassOfService(client common.Client) (*ClassOfService, error) {
+	if f.classOfService == "" {
+		return nil, nil
 	}
-	return GetClassOfService(fileshare.GetClient(), fileshare.classOfService)
+	return common.GetObject[ClassOfService](client, f.classOfService)
 }
 
-// FileSystem gets the file share's associated file system.
-func (fileshare *FileShare) FileSystem() (*FileSystem, error) {
-	var result *FileSystem
-	if fileshare.fileSystem == "" {
-		return result, nil
+// FileSystem gets the FileSystem linked resource.
+func (f *FileShare) FileSystem(client common.Client) (*FileSystem, error) {
+	if f.fileSystem == "" {
+		return nil, nil
 	}
-	return GetFileSystem(fileshare.GetClient(), fileshare.fileSystem)
+	return common.GetObject[FileSystem](client, f.fileSystem)
 }
 
-// EthernetInterfaces gets the EthernetInterfaces associated with this share.
-func (fileshare *FileShare) EthernetInterfaces() ([]*redfish.EthernetInterface, error) {
-	return redfish.ListReferencedEthernetInterfaces(fileshare.GetClient(), fileshare.ethernetInterfaces)
+// EthernetInterfaces gets the EthernetInterfaces collection.
+func (f *FileShare) EthernetInterfaces(client common.Client) ([]*redfish.EthernetInterface, error) {
+	if f.ethernetInterfaces == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[redfish.EthernetInterface](client, f.ethernetInterfaces)
 }

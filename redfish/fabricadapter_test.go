@@ -133,8 +133,8 @@ func TestFabricAdapter(t *testing.T) {
 	assertEquals(t, "Gen4", string(result.PCIeInterface.PCIeType))
 	assertEquals(t, "Gen4", string(result.PCIeInterface.MaxPCIeType))
 	assertEquals(t, "/redfish/v1/Fabrics/GenZ/Endpoints/3", result.endpoints[0])
-	assertEquals(t, "/redfish/v1/Systems/GenZ-example/FabricAdapters/1/SSDT", result.GenZ.ssdt)
-	assertEquals(t, "/redfish/v1/Systems/GenZ-example/FabricAdapters/1/MSDT", result.GenZ.msdt)
+	assertEquals(t, "/redfish/v1/Systems/GenZ-example/FabricAdapters/1/SSDT", result.GenZ.sSDT)
+	assertEquals(t, "/redfish/v1/Systems/GenZ-example/FabricAdapters/1/MSDT", result.GenZ.mSDT)
 	assertEquals(t, "/redfish/v1/Systems/GenZ-example/FabricAdapters/1/REQ-VCAT", result.GenZ.requestorVCAT)
 	assertEquals(t, "/redfish/v1/Systems/GenZ-example/FabricAdapters/1/RSP-VCAT", result.GenZ.responderVCAT)
 
@@ -146,7 +146,7 @@ func TestFabricAdapter(t *testing.T) {
 		t.Errorf("Unexpected PIDT elements: %#v", result.GenZ.PIDT)
 	}
 
-	if result.PCIeInterface.LanesInUse != 64 {
+	if *result.PCIeInterface.LanesInUse != 64 {
 		t.Errorf("Unexpected PCIeInterface lanes in use: %d", result.PCIeInterface.LanesInUse)
 	}
 }

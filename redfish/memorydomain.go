@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2022.3 - #MemoryDomain.v1_5_1.MemoryDomain
 
 package redfish
 
@@ -10,127 +11,114 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// MemoryDomain is used to represent Memory Domains.
+// MemoryDomain shall represent memory domains in a Redfish implementation.
 type MemoryDomain struct {
 	common.Entity
-
+	// AllowsBlockProvisioning shall indicate whether this memory domain supports
+	// the creation of blocks of memory.
+	AllowsBlockProvisioning bool
+	// AllowsMemoryChunkCreation shall indicate whether this memory domain supports
+	// the creation of memory chunks.
+	AllowsMemoryChunkCreation bool
+	// AllowsMirroring shall indicate whether this memory domain supports the
+	// creation of memory chunks with mirroring enabled.
+	//
+	// Version added: v1.1.0
+	AllowsMirroring bool
+	// AllowsSparing shall indicate whether this memory domain supports the
+	// creation of memory chunks with sparing enabled.
+	//
+	// Version added: v1.1.0
+	AllowsSparing bool
+	// InterleavableMemorySets shall represent the interleave sets for the memory
+	// chunk.
+	InterleavableMemorySets []MemorySet
+	// MemoryChunkIncrementMiB shall contain the incremental size, from
+	// 'MemoryChunkIncrementMiB', allowed for a memory chunk within this domain in
+	// mebibytes (MiB).
+	//
+	// Version added: v1.5.0
+	MemoryChunkIncrementMiB *int `json:",omitempty"`
+	// MemoryChunks shall contain a link to a resource collection of type
+	// 'MemoryChunksCollection'.
+	memoryChunks string
+	// MemorySizeMiB shall contain the total size of the memory domain in mebibytes
+	// (MiB).
+	//
+	// Version added: v1.5.0
+	MemorySizeMiB *int `json:",omitempty"`
+	// MinMemoryChunkSizeMiB shall contain the minimum size allowed for a memory
+	// chunk within this domain in mebibytes (MiB).
+	//
+	// Version added: v1.5.0
+	MinMemoryChunkSizeMiB *int `json:",omitempty"`
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// AllowsBlockProvisioning shall indicate if this Memory Domain supports the
-	// creation of Blocks of memory.
-	AllowsBlockProvisioning bool
-	// AllowsMemoryChunkCreation shall indicate if this Memory Domain supports
-	// the creation of Memory Chunks.
-	AllowsMemoryChunkCreation bool
-	// AllowsMirroring shall indicate if this Memory Domain supports the
-	// creation of Memory Chunks with mirroring enabled.
-	AllowsMirroring bool
-	// AllowsSparing shall indicate if this Memory Domain supports the creation
-	// of Memory Chunks with sparing enabled.
-	AllowsSparing bool
-	// Description provides a description of this resource.
-	Description string
-	// InterleavableMemorySets shall represent the interleave sets for the
-	// memory chunk.
-	InterleavableMemorySets []MemorySet
-	// MemoryChunkIncrementMiB shall contain the incremental size, from MemoryChunkIncrementMiB, allowed for a memory
-	// chunk within this domain in mebibytes (MiB).
-	MemoryChunkIncrementMiB int
-	// memoryChunks shall be a link to a collection of type MemoryChunkCollection.
-	memoryChunks string
-	// MemorySizeMiB shall contain the total size of the memory domain in mebibytes (MiB).
-	MemorySizeMiB int
-	// MinMemoryChunkSizeMiB shall contain the minimum size allowed for a memory chunk within this domain in mebibytes
-	// (MiB).
-	MinMemoryChunkSizeMiB int
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Status shall contain any status or health properties of the resource.
+	//
+	// Version added: v1.5.0
 	Status common.Status
-
-	cxlLogicalDevices []string
-	// CXLLogicalDevicesCount is the number of CXL logical devices that are associated with this memory domain.
-	CXLLogicalDevicesCount int
-	fabricAdapters         []string
-	// FabricAdaptersCount is the number of fabric adapters that present this memory domain to a fabric.
-	FabricAdaptersCount int
-	mediaControllers    []string
-	// MediaControllersCount is the number of media controllers for this memory domain.
-	// This property has been deprecated in favor of the FabricAdapters property.
-	MediaControllersCount int
-	pcieFunctions         []string
-	// PCIeFunctionsCount is the number of PCIe functions representing this memory domain.
-	PCIeFunctionsCount int
+	// cXLLogicalDevices are the URIs for CXLLogicalDevices.
+	cXLLogicalDevices []string
+	// fabricAdapters are the URIs for FabricAdapters.
+	fabricAdapters []string
+	// mediaControllers are the URIs for MediaControllers.
+	mediaControllers []string
+	// pCIeFunctions are the URIs for PCIeFunctions.
+	pCIeFunctions []string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a MemoryDomain object from the raw JSON.
-func (memorydomain *MemoryDomain) UnmarshalJSON(b []byte) error {
+func (m *MemoryDomain) UnmarshalJSON(b []byte) error {
 	type temp MemoryDomain
-	type Links struct {
-		// CXLLogicalDevices shall contain an array of links to resources of type CXLLogicalDevice that represent the CXL
-		// logical devices that are associated with this memory domain.
-		CXLLogicalDevices      common.Links
-		CXLLogicalDevicesCount int `json:"CXLLogicalDevices@odata.count"`
-		// FabricAdapters shall contain an array of links to resources of type FabricAdapter that represent the fabric
-		// adapters that present this memory domain to a fabric.
-		FabricAdapters      common.Links
-		FabricAdaptersCount int `json:"FabricAdapters@odata.count"`
-		// MediaControllers is array of links to the media controllers for this memory domain.
-		// This property has been deprecated in favor of the FabricAdapters property.
-		MediaControllers      common.Links
-		MediaControllersCount int `json:"MediaControllers@odata.count"`
-		// PCIeFunctions shall contain an array of links to resources of type PCIeFunction that represent the PCIe
-		// functions representing this memory domain.
-		PCIeFunctions      common.Links
-		PCIeFunctionsCount int `json:"PCIeFunctions@odata.count"`
+	type mLinks struct {
+		CXLLogicalDevices common.Links `json:"CXLLogicalDevices"`
+		FabricAdapters    common.Links `json:"FabricAdapters"`
+		MediaControllers  common.Links `json:"MediaControllers"`
+		PCIeFunctions     common.Links `json:"PCIeFunctions"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		MemoryChunks common.Link
-		Links        Links
+		Links        mLinks
+		MemoryChunks common.Link `json:"memoryChunks"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	// Extract the links to other entities for later
-	*memorydomain = MemoryDomain(t.temp)
-	memorydomain.memoryChunks = t.MemoryChunks.String()
+	*m = MemoryDomain(tmp.temp)
 
-	memorydomain.cxlLogicalDevices = t.Links.CXLLogicalDevices.ToStrings()
-	memorydomain.CXLLogicalDevicesCount = t.Links.CXLLogicalDevicesCount
-	memorydomain.fabricAdapters = t.Links.FabricAdapters.ToStrings()
-	memorydomain.FabricAdaptersCount = t.Links.FabricAdaptersCount
-	memorydomain.mediaControllers = t.Links.MediaControllers.ToStrings()
-	memorydomain.MediaControllersCount = t.Links.MediaControllersCount
-	memorydomain.pcieFunctions = t.Links.PCIeFunctions.ToStrings()
-	memorydomain.PCIeFunctionsCount = t.Links.PCIeFunctionsCount
+	// Extract the links to other entities for later
+	m.cXLLogicalDevices = tmp.Links.CXLLogicalDevices.ToStrings()
+	m.fabricAdapters = tmp.Links.FabricAdapters.ToStrings()
+	m.mediaControllers = tmp.Links.MediaControllers.ToStrings()
+	m.pCIeFunctions = tmp.Links.PCIeFunctions.ToStrings()
+	m.memoryChunks = tmp.MemoryChunks.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	m.rawData = b
 
 	return nil
 }
 
-// CXLLogicalDevices gets the CXLLogicalDevice that represent the CXL logical devices
-// that are associated with this memory domain.
-func (memorydomain *MemoryDomain) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
-	return common.GetObjects[CXLLogicalDevice](memorydomain.GetClient(), memorydomain.cxlLogicalDevices)
-}
+// Update commits updates to this object's properties to the running system.
+func (m *MemoryDomain) Update() error {
+	readWriteFields := []string{
+		"InterleavableMemorySets",
+		"Status",
+	}
 
-// FabricAdapters gets the fabric adapters that present this memory domain to a fabric.
-func (memorydomain *MemoryDomain) FabricAdapters() ([]*FabricAdapter, error) {
-	return common.GetObjects[FabricAdapter](memorydomain.GetClient(), memorydomain.fabricAdapters)
-}
-
-// MediaControllers gets the media controllers for this memory domain.
-// This property has been deprecated in favor of the FabricAdapters property.
-func (memorydomain *MemoryDomain) MediaControllers() ([]*MediaController, error) {
-	return common.GetObjects[MediaController](memorydomain.GetClient(), memorydomain.mediaControllers)
-}
-
-// PCIeFunctions gets the PCIe functions representing this memory domain.
-func (memorydomain *MemoryDomain) PCIeFunctions() ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](memorydomain.GetClient(), memorydomain.pcieFunctions)
+	return m.UpdateFromRawData(m, m.rawData, readWriteFields)
 }
 
 // GetMemoryDomain will get a MemoryDomain instance from the service.
@@ -144,35 +132,38 @@ func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain,
 	return common.GetCollectionObjects[MemoryDomain](c, link)
 }
 
+// CXLLogicalDevices gets the CXLLogicalDevices linked resources.
+func (m *MemoryDomain) CXLLogicalDevices(client common.Client) ([]*CXLLogicalDevice, error) {
+	return common.GetObjects[CXLLogicalDevice](client, m.cXLLogicalDevices)
+}
+
+// FabricAdapters gets the FabricAdapters linked resources.
+func (m *MemoryDomain) FabricAdapters(client common.Client) ([]*FabricAdapter, error) {
+	return common.GetObjects[FabricAdapter](client, m.fabricAdapters)
+}
+
+// MediaControllers gets the MediaControllers linked resources.
+func (m *MemoryDomain) MediaControllers(client common.Client) ([]*MediaController, error) {
+	return common.GetObjects[MediaController](client, m.mediaControllers)
+}
+
+// PCIeFunctions gets the PCIeFunctions linked resources.
+func (m *MemoryDomain) PCIeFunctions(client common.Client) ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](client, m.pCIeFunctions)
+}
+
+// MemoryChunks gets the MemoryChunks collection.
+func (m *MemoryDomain) MemoryChunks(client common.Client) ([]*MemoryChunks, error) {
+	if m.memoryChunks == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[MemoryChunks](client, m.memoryChunks)
+}
+
 // MemorySet shall represent the interleave sets for a memory chunk.
 type MemorySet struct {
-	// MemorySet shall be links to objects of type Memory.
-	memorySet []string
-	// MemorySetCount is the number of memory sets.
+	// MemorySet shall contain an array of links to resources of type 'Memory'.
+	MemorySet []Memory
+	// MemorySet@odata.count
 	MemorySetCount int `json:"MemorySet@odata.count"`
-}
-
-// UnmarshalJSON unmarshals a MemorySet object from the raw JSON.
-func (memoryset *MemorySet) UnmarshalJSON(b []byte) error {
-	type temp MemorySet
-	var t struct {
-		temp
-		MemorySet common.Links
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	// Extract the links to other entities for later
-	*memoryset = MemorySet(t.temp)
-	memoryset.memorySet = t.MemorySet.ToStrings()
-
-	return nil
-}
-
-// MemorySet gets the Memory objects that are part of this set.
-func (memoryset *MemorySet) MemorySet(c common.Client) ([]*Memory, error) {
-	return common.GetObjects[Memory](c, memoryset.memorySet)
 }

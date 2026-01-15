@@ -95,7 +95,7 @@ func TestTelemetryService(t *testing.T) {
 	assertEquals(t, "TelemetryService", result.ID)
 	assertEquals(t, "TelemetryService", result.Name)
 	assertEquals(t, "The Manager TelemetryService", result.Description)
-	assertEquals(t, "50", fmt.Sprintf("%d", result.MaxReports))
+	assertEquals(t, "50", fmt.Sprintf("%d", *result.MaxReports))
 	assertEquals(t, "/redfish/v1/TelemetryService/MetricDefinitions", result.metricDefinitions)
 	assertEquals(t, "/redfish/v1/TelemetryService/MetricReportDefinitions", result.metricReportDefinitions)
 	assertEquals(t, "/redfish/v1/TelemetryService/MetricReports", result.metricReports)
@@ -107,7 +107,7 @@ func TestTelemetryService(t *testing.T) {
 	assertEquals(t, "Average", string(result.SupportedCollectionFunctions[0]))
 }
 
-// TestTelemetryServiceSMC tests the workaround for a Supermicro typo bug in the  TelemetryService.
+// TestTelemetryServiceSMC tests the workaround for a Supermicro typo bug in the TelemetryService.
 func TestTelemetryServiceSMC(t *testing.T) {
 	var result TelemetryService
 	err := json.NewDecoder(smcBody).Decode(&result)

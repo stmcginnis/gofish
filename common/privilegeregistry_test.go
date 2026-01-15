@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package redfish
+package common
 
 import (
 	"encoding/json"

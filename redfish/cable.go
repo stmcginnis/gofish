@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2021.4 - #Cable.v1_2_4.Cable
 
 package redfish
 
@@ -13,48 +14,52 @@ import (
 type CableClass string
 
 const (
-	// PowerCableClass is used for connecting to a power system.
+	// PowerCableClass This cable is used for connecting to a power system.
 	PowerCableClass CableClass = "Power"
-	// NetworkCableClass is used for connecting to a networking system.
+	// NetworkCableClass This cable is used for connecting to a networking system.
 	NetworkCableClass CableClass = "Network"
-	// StorageCableClass is used for connecting to a storage system.
+	// StorageCableClass This cable is used for connecting to a storage system.
 	StorageCableClass CableClass = "Storage"
-	// FanCableClass is used for connecting to a fan system.
+	// FanCableClass This cable is used for connecting to a fan system.
 	FanCableClass CableClass = "Fan"
-	// PCIeCableClass is used for connecting to a PCIe endpoint.
+	// PCIeCableClass This cable is used for connecting to a PCIe endpoint.
 	PCIeCableClass CableClass = "PCIe"
-	// USBCableClass is used for connecting to a USB endpoint.
+	// USBCableClass This cable is used for connecting to a USB endpoint.
 	USBCableClass CableClass = "USB"
-	// VideoCableClass is used for connecting to a video system.
+	// VideoCableClass This cable is used for connecting to a video system.
 	VideoCableClass CableClass = "Video"
-	// FabricCableClass is used for connecting to a fabric.
+	// FabricCableClass This cable is used for connecting to a fabric.
 	FabricCableClass CableClass = "Fabric"
-	// SerialCableClass is used for connecting to a serial endpoint.
+	// SerialCableClass This cable is used for connecting to a serial endpoint.
 	SerialCableClass CableClass = "Serial"
-	// GeneralCableClass is used for providing general connectivity.
+	// GeneralCableClass This cable is used for providing general connectivity.
 	GeneralCableClass CableClass = "General"
 )
 
 type CableStatus string
 
 const (
-	// NormalCableStatus shall indicate the cable is operating normally. The State property in Status shall contain the
-	// value 'Enabled' and the Health property in Status shall contain the value 'OK'.
+	// NormalCableStatus shall indicate the cable is operating normally. The
+	// 'State' property in 'Status' shall contain the value 'Enabled' and the
+	// 'Health' property in 'Status' shall contain the value 'OK'.
 	NormalCableStatus CableStatus = "Normal"
-	// DegradedCableStatus shall indicate the cable is degraded. The State property in Status shall contain the value
-	// 'Enabled' and the Health property in Status shall contain the value 'Warning'.
+	// DegradedCableStatus shall indicate the cable is degraded. The 'State'
+	// property in 'Status' shall contain the value 'Enabled' and the 'Health'
+	// property in 'Status' shall contain the value 'Warning'.
 	DegradedCableStatus CableStatus = "Degraded"
-	// FailedCableStatus shall indicate the cable has failed. The State property in Status shall contain the value
-	// 'Enabled' and the Health property in Status shall contain the value 'Critical'.
+	// FailedCableStatus shall indicate the cable has failed. The 'State' property
+	// in 'Status' shall contain the value 'Enabled' and the 'Health' property in
+	// 'Status' shall contain the value 'Critical'.
 	FailedCableStatus CableStatus = "Failed"
-	// TestingCableStatus shall indicate the cable is under test. The State property in Status shall contain the value
-	// 'InTest'.
+	// TestingCableStatus shall indicate the cable is under test. The 'State'
+	// property in 'Status' shall contain the value 'InTest'.
 	TestingCableStatus CableStatus = "Testing"
-	// DisabledCableStatus shall indicate the cable is disabled. The State property in Status shall contain the value
-	// 'Disabled'.
+	// DisabledCableStatus shall indicate the cable is disabled. The 'State'
+	// property in 'Status' shall contain the value 'Disabled'.
 	DisabledCableStatus CableStatus = "Disabled"
-	// SetByServiceCableStatus shall indicate the status for the cable is not defined by the user. If implemented, the
-	// service shall determine the value of the State and Health properties in Status.
+	// SetByServiceCableStatus shall indicate the status for the cable is not
+	// defined by the user. If implemented, the service shall determine the value
+	// of the 'State' and 'Health' properties in 'Status'.
 	SetByServiceCableStatus CableStatus = "SetByService"
 )
 
@@ -67,7 +72,8 @@ const (
 	DB9CableConnectorType CableConnectorType = "DB9"
 	// DCPowerCableConnectorType This cable connects to a DC power connector.
 	DCPowerCableConnectorType CableConnectorType = "DCPower"
-	// DisplayPortCableConnectorType This cable connects to a DisplayPort power connector.
+	// DisplayPortCableConnectorType This cable connects to a DisplayPort power
+	// connector.
 	DisplayPortCableConnectorType CableConnectorType = "DisplayPort"
 	// HDMICableConnectorType This cable connects to an HDMI connector.
 	HDMICableConnectorType CableConnectorType = "HDMI"
@@ -103,15 +109,11 @@ const (
 	OSFPCableConnectorType CableConnectorType = "OSFP"
 )
 
-// Cable contains a simple cable for a Redfish implementation.
+// Cable This resource contains a simple cable for a Redfish implementation.
 type Cable struct {
 	common.Entity
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// Assembly shall contain a link to a resource of type Assembly.
-	Assembly string
+	// Assembly shall contain a link to a resource of type 'Assembly'.
+	assembly string
 	// AssetTag shall track the cable for inventory purposes.
 	AssetTag string
 	// CableClass shall contain the cable class for this cable.
@@ -120,133 +122,113 @@ type Cable struct {
 	CableStatus CableStatus
 	// CableType shall contain a user-defined type for this cable.
 	CableType string
-	// Description provides a description of this resource.
-	Description string
-	// DownstreamConnectorTypes shall contain an array of connector types this cable supports.
+	// DownstreamConnectorTypes shall contain an array of connector types this
+	// cable supports.
 	DownstreamConnectorTypes []CableConnectorType
 	// DownstreamName shall contain any identifier for a downstream resource.
 	DownstreamName string
 	// LengthMeters shall contain the length of the cable in meters.
-	LengthMeters float64
+	LengthMeters *float64 `json:",omitempty"`
 	// Location shall contain the location information of the associated assembly.
 	Location common.Location
-	// Manufacturer shall contain the name of the organization responsible for producing the cable. This organization
-	// might be the entity from whom the cable is purchased, but this is not necessarily true.
+	// Manufacturer shall contain the name of the organization responsible for
+	// producing the cable. This organization might be the entity from whom the
+	// cable is purchased, but this is not necessarily true.
 	Manufacturer string
-	// Model shall contain the name by which the manufacturer generally refers to the cable.
+	// Model shall contain the name by which the manufacturer generally refers to
+	// the cable.
 	Model string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// PartNumber shall contain the part number assigned by the organization that is responsible for producing or
-	// manufacturing the cable.
+	// PartNumber shall contain the part number assigned by the organization that
+	// is responsible for producing or manufacturing the cable.
 	PartNumber string
 	// SKU shall contain the stock-keeping unit (SKU) number for this cable.
 	SKU string
-	// SerialNumber shall contain the manufacturer-allocated number that identifies the cable.
+	// SerialNumber shall contain the manufacturer-allocated number that identifies
+	// the cable.
 	SerialNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-	// UpstreamConnectorTypes shall contain an array of connector types this cable supports.
+	// UpstreamConnectorTypes shall contain an array of connector types this cable
+	// supports.
 	UpstreamConnectorTypes []CableConnectorType
 	// UpstreamName shall contain any identifier for an upstream resource.
 	UpstreamName string
 	// UserDescription shall contain a user-defined description for this cable.
 	UserDescription string
-	// UserLabel shall contain a user-assigned label used to identify this resource. If a value has not been assigned
-	// by a user, the value of this property shall be an empty string.
+	// UserLabel shall contain a user-assigned label used to identify this
+	// resource. If a value has not been assigned by a user, the value of this
+	// property shall be an empty string.
+	//
+	// Version added: v1.1.0
 	UserLabel string
-	// Vendor shall contain the name of the company that provides the final product that includes this cable.
+	// Vendor shall contain the name of the company that provides the final product
+	// that includes this cable.
 	Vendor string
+	// downstreamChassis are the URIs for DownstreamChassis.
+	downstreamChassis []string
+	// downstreamPorts are the URIs for DownstreamPorts.
+	downstreamPorts []string
+	// downstreamResources are the URIs for DownstreamResources.
+	downstreamResources []string
+	// upstreamChassis are the URIs for UpstreamChassis.
+	upstreamChassis []string
+	// upstreamPorts are the URIs for UpstreamPorts.
+	upstreamPorts []string
+	// upstreamResources are the URIs for UpstreamResources.
+	upstreamResources []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	downstreamChassis []string
-	// DownstreamChassisCount is the number of physical downstream containers connected to this cable.
-	DownstreamChassisCount int
-	downstreamPorts        []string
-	// DownstreamPortsCount is the number of physical downstream connections connected to this cable.
-	DownstreamPortsCount int
-	downstreamResources  []string
-	// DownstreamResourcesCount is the number of physical downstream resources connected to this cable.
-	DownstreamResourcesCount int
-	upstreamChassis          []string
-	// UpstreamChassisCount is the number of physical upstream containers connected to this cable.
-	UpstreamChassisCount int
-	upstreamPorts        []string
-	// UpstreamPortsCount is the number of physical upstream connections connected to this cable.
-	UpstreamPortsCount int
-	upstreamResources  []string
-	// UpstreamResourcesCount is the number of physical upstream resources connected to this cable.
-	UpstreamResourcesCount int
 }
 
 // UnmarshalJSON unmarshals a Cable object from the raw JSON.
-func (cable *Cable) UnmarshalJSON(b []byte) error {
+func (c *Cable) UnmarshalJSON(b []byte) error {
 	type temp Cable
-	type Links struct {
-		DownstreamChassis        common.Links
-		DownstreamChassisCount   int `json:"DownstreamChassis@odata.count"`
-		DownstreamPorts          common.Links
-		DownstreamPortsCount     int `json:"DownstreamPorts@odata.count"`
-		DownstreamResources      common.Links
-		DownstreamResourcesCount int             `json:"DownstreamResources@odata.count"`
-		OEM                      json.RawMessage `json:"Oem"`
-		UpstreamChassis          common.Links
-		UpstreamChassisCount     int `json:"UpstreamChassis@odata.count"`
-		UpstreamPorts            common.Links
-		UpstreamPortsCount       int `json:"UpstreamPorts@odata.count"`
-		UpstreamResources        common.Links
-		UpstreamResourcesCount   int `json:"UpstreamResources@odata.count"`
+	type cLinks struct {
+		DownstreamChassis   common.Links `json:"DownstreamChassis"`
+		DownstreamPorts     common.Links `json:"DownstreamPorts"`
+		DownstreamResources common.Links `json:"DownstreamResources"`
+		UpstreamChassis     common.Links `json:"UpstreamChassis"`
+		UpstreamPorts       common.Links `json:"UpstreamPorts"`
+		UpstreamResources   common.Links `json:"UpstreamResources"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Links Links
+		Links    cLinks
+		Assembly common.Link `json:"assembly"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*cable = Cable(t.temp)
+	*c = Cable(tmp.temp)
 
 	// Extract the links to other entities for later
-	cable.downstreamChassis = t.Links.DownstreamChassis.ToStrings()
-	cable.downstreamPorts = t.Links.DownstreamPorts.ToStrings()
-	cable.downstreamResources = t.Links.DownstreamResources.ToStrings()
-	cable.upstreamChassis = t.Links.UpstreamChassis.ToStrings()
-	cable.upstreamPorts = t.Links.UpstreamPorts.ToStrings()
-	cable.upstreamResources = t.Links.UpstreamResources.ToStrings()
+	c.downstreamChassis = tmp.Links.DownstreamChassis.ToStrings()
+	c.downstreamPorts = tmp.Links.DownstreamPorts.ToStrings()
+	c.downstreamResources = tmp.Links.DownstreamResources.ToStrings()
+	c.upstreamChassis = tmp.Links.UpstreamChassis.ToStrings()
+	c.upstreamPorts = tmp.Links.UpstreamPorts.ToStrings()
+	c.upstreamResources = tmp.Links.UpstreamResources.ToStrings()
+	c.assembly = tmp.Assembly.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	cable.rawData = b
+	c.rawData = b
 
 	return nil
 }
 
-// DownstreamChassis gets the physical downstream containers connected to this cable.
-func (cable *Cable) DownstreamChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](cable.GetClient(), cable.downstreamChassis)
-}
-
-// DownstreamPorts gets the physical downstream connections connected to this cable.
-func (cable *Cable) DownstreamPorts() ([]*Port, error) {
-	return common.GetObjects[Port](cable.GetClient(), cable.downstreamPorts)
-}
-
-// UpstreamChassis gets the physical upstream containers connected to this cable.
-func (cable *Cable) UpstreamChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](cable.GetClient(), cable.upstreamChassis)
-}
-
-// UpstreamPorts gets the physical upstream connections connected to this cable.
-func (cable *Cable) UptreamPorts() ([]*Port, error) {
-	return common.GetObjects[Port](cable.GetClient(), cable.upstreamPorts)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (cable *Cable) Update() error {
+func (c *Cable) Update() error {
 	readWriteFields := []string{
 		"AssetTag",
 		"CableClass",
@@ -255,11 +237,13 @@ func (cable *Cable) Update() error {
 		"DownstreamConnectorTypes",
 		"DownstreamName",
 		"LengthMeters",
+		"Location",
 		"Manufacturer",
 		"Model",
 		"PartNumber",
 		"SKU",
 		"SerialNumber",
+		"Status",
 		"UpstreamConnectorTypes",
 		"UpstreamName",
 		"UserDescription",
@@ -267,7 +251,7 @@ func (cable *Cable) Update() error {
 		"Vendor",
 	}
 
-	return cable.UpdateFromRawData(cable, cable.rawData, readWriteFields)
+	return c.UpdateFromRawData(c, c.rawData, readWriteFields)
 }
 
 // GetCable will get a Cable instance from the service.
@@ -279,4 +263,42 @@ func GetCable(c common.Client, uri string) (*Cable, error) {
 // a provided reference.
 func ListReferencedCables(c common.Client, link string) ([]*Cable, error) {
 	return common.GetCollectionObjects[Cable](c, link)
+}
+
+// DownstreamChassis gets the DownstreamChassis linked resources.
+func (c *Cable) DownstreamChassis(client common.Client) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](client, c.downstreamChassis)
+}
+
+// DownstreamPorts gets the DownstreamPorts linked resources.
+func (c *Cable) DownstreamPorts(client common.Client) ([]*Port, error) {
+	return common.GetObjects[Port](client, c.downstreamPorts)
+}
+
+// DownstreamResources gets the DownstreamResources linked resources.
+func (c *Cable) DownstreamResources(client common.Client) ([]*common.Entity, error) {
+	return common.GetObjects[common.Entity](client, c.downstreamResources)
+}
+
+// UpstreamChassis gets the UpstreamChassis linked resources.
+func (c *Cable) UpstreamChassis(client common.Client) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](client, c.upstreamChassis)
+}
+
+// UpstreamPorts gets the UpstreamPorts linked resources.
+func (c *Cable) UpstreamPorts(client common.Client) ([]*Port, error) {
+	return common.GetObjects[Port](client, c.upstreamPorts)
+}
+
+// UpstreamResources gets the UpstreamResources linked resources.
+func (c *Cable) UpstreamResources(client common.Client) ([]*common.Entity, error) {
+	return common.GetObjects[common.Entity](client, c.upstreamResources)
+}
+
+// Assembly gets the Assembly linked resource.
+func (c *Cable) Assembly(client common.Client) (*Assembly, error) {
+	if c.assembly == "" {
+		return nil, nil
+	}
+	return common.GetObject[Assembly](client, c.assembly)
 }

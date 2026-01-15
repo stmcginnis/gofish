@@ -94,7 +94,7 @@ func TestTask(t *testing.T) {
 		t.Errorf("Incorrect number of task messages: %d", len(result.Messages))
 	}
 
-	if len(result.Oem) == 0 {
+	if len(result.OEM) == 0 {
 		t.Error("Expected Oem object with properties, got none")
 	}
 }

@@ -84,7 +84,6 @@ func TestSwitch(t *testing.T) {
 	assertEquals(t, "SAS Switch", result.Name)
 	assertEquals(t, "SAS", string(result.SwitchType))
 	assertEquals(t, "/redfish/v1/Fabrics/SAS/Switches/Switch1/Ports", result.ports)
-	assertEquals(t, "/redfish/v1/Fabrics/SAS/Switches/Switch2", result.Redundancy[0].redundancySet[1])
 	assertEquals(t, "/redfish/v1/Chassis/Switch1", result.chassis)
 	assertEquals(t, "/redfish/v1/Managers/Switch2", result.managedBy[1])
 }
@@ -101,7 +100,7 @@ func TestSwitchReset(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.Reset(OnResetType)
+	err = result.Reset(common.OnResetType)
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}

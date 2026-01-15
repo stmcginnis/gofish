@@ -117,7 +117,7 @@ func TestPCIeDevice(t *testing.T) {
 		t.Errorf("Invalid device type: %s", result.DeviceType)
 	}
 
-	if result.PCIeInterface.MaxLanes != 32 {
+	if *result.PCIeInterface.MaxLanes != 32 {
 		t.Errorf("Invalid max lanes: %d", result.PCIeInterface.MaxLanes)
 	}
 
@@ -147,7 +147,7 @@ func TestOldPCIeDevice(t *testing.T) {
 		t.Errorf("Invalid device type: %s", result.DeviceType)
 	}
 
-	if result.PCIeInterface.MaxLanes != 32 {
+	if *result.PCIeInterface.MaxLanes != 32 {
 		t.Errorf("Invalid max lanes: %d", result.PCIeInterface.MaxLanes)
 	}
 
@@ -155,8 +155,8 @@ func TestOldPCIeDevice(t *testing.T) {
 		t.Errorf("Invalid PCIe type: %s", result.PCIeInterface.PCIeType)
 	}
 
-	if len(result.pcieFunctionsArray) != 2 {
-		t.Errorf("Invalid PCIeFunctions count: %v", len(result.pcieFunctionsArray))
+	if len(result.pCIeFunctionLinks) != 2 {
+		t.Errorf("Invalid PCIeFunctions count: %d", len(result.pCIeFunctionLinks))
 	}
 }
 

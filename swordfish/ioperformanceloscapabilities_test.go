@@ -115,7 +115,7 @@ func TestIOPerformanceLoSCapabilities(t *testing.T) {
 		t.Error("IOLimitingIsSupported should be true")
 	}
 
-	if result.MinSupportedIoOperationLatencyMicroseconds != 1000 {
+	if *result.MinSupportedIoOperationLatencyMicroseconds != 1000 {
 		t.Errorf("Invalid MinSupportedIoOperationLatencyMicroseconds: %d",
 			result.MinSupportedIoOperationLatencyMicroseconds)
 	}
@@ -136,7 +136,7 @@ func TestIOPerformanceLoSCapabilitiesUpdate(t *testing.T) {
 	result.IOLimitingIsSupported = true
 	result.MaxSamplePeriod = "P3Y6M4DT12H30M0S"
 	result.MinSamplePeriod = "P0Y0M0DT0H0M5S"
-	result.MinSupportedIoOperationLatencyMicroseconds = 500
+	*result.MinSupportedIoOperationLatencyMicroseconds = 500
 	err = result.Update()
 
 	if err != nil {

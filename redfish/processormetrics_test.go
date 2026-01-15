@@ -89,23 +89,23 @@ func TestProcessorMetrics(t *testing.T) {
 	assertEquals(t, "Processor Metrics", result.Name)
 	assertEquals(t, "core0", result.CoreMetrics[0].CoreID)
 
-	if result.BandwidthPercent != 62 {
-		t.Errorf("Unexpected BandwidthPercent: %.2f", result.BandwidthPercent)
+	if *result.BandwidthPercent != 62 {
+		t.Errorf("Unexpected BandwidthPercent: %.2f", *result.BandwidthPercent)
 	}
 
-	if result.FrequencyRatio != 0.00432 {
-		t.Errorf("Unexpected FrequencyRatio: %.5f", result.FrequencyRatio)
+	if *result.FrequencyRatio != 0.00432 {
+		t.Errorf("Unexpected FrequencyRatio: %.5f", *result.FrequencyRatio)
 	}
 
 	if result.Cache[0].Level != "3" {
 		t.Errorf("Unexpected Cache[0].Level: %s", result.Cache[0].Level)
 	}
 
-	if result.Cache[0].CacheMissesPerInstruction != 0.00088 {
-		t.Errorf("Unexpected Cache[0].CacheMissesPerInstruction: %.5f", result.Cache[0].CacheMissesPerInstruction)
+	if *result.Cache[0].CacheMissesPerInstruction != 0.00088 {
+		t.Errorf("Unexpected Cache[0].CacheMissesPerInstruction: %.5f", *result.Cache[0].CacheMissesPerInstruction)
 	}
 
-	if result.CoreMetrics[0].CoreCache[0].CacheMiss != 0.472 {
-		t.Errorf("Unexpected CoreMetrics[0].CoreCache[0].CacheMiss: %.5f", result.CoreMetrics[0].CoreCache[0].CacheMiss)
+	if *result.CoreMetrics[0].CoreCache[0].CacheMiss != 0.472 {
+		t.Errorf("Unexpected CoreMetrics[0].CoreCache[0].CacheMiss: %.5f", *result.CoreMetrics[0].CoreCache[0].CacheMiss)
 	}
 }

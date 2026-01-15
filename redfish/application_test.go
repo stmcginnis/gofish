@@ -80,7 +80,7 @@ func TestApplicationReset(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	err = result.Reset(OnResetType)
+	err = result.Reset(common.OnResetType)
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}

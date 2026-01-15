@@ -381,12 +381,12 @@ func (c *APIClient) GetWithHeaders(url string, customHeaders map[string]string) 
 }
 
 // Post performs a Post request against the Redfish service.
-func (c *APIClient) Post(url string, payload interface{}) (*http.Response, error) {
+func (c *APIClient) Post(url string, payload any) (*http.Response, error) {
 	return c.PostWithHeaders(url, payload, nil)
 }
 
 // PostWithHeaders performs a Post request against the Redfish service but allowing custom headers
-func (c *APIClient) PostWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *APIClient) PostWithHeaders(url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	return c.runRequestWithHeaders(http.MethodPost, url, payload, customHeaders)
 }
 
@@ -401,22 +401,22 @@ func (c *APIClient) PostMultipartWithHeaders(url string, payload map[string]io.R
 }
 
 // Put performs a Put request against the Redfish service.
-func (c *APIClient) Put(url string, payload interface{}) (*http.Response, error) {
+func (c *APIClient) Put(url string, payload any) (*http.Response, error) {
 	return c.PutWithHeaders(url, payload, nil)
 }
 
 // PutWithHeaders performs a Put request against the Redfish service but allowing custom headers
-func (c *APIClient) PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *APIClient) PutWithHeaders(url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	return c.runRequestWithHeaders(http.MethodPut, url, payload, customHeaders)
 }
 
 // Patch performs a Patch request against the Redfish service.
-func (c *APIClient) Patch(url string, payload interface{}) (*http.Response, error) {
+func (c *APIClient) Patch(url string, payload any) (*http.Response, error) {
 	return c.PatchWithHeaders(url, payload, nil)
 }
 
 // PatchWithHeaders performs a Patch request against the Redfish service but allowing custom headers
-func (c *APIClient) PatchWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *APIClient) PatchWithHeaders(url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	return c.runRequestWithHeaders(http.MethodPatch, url, payload, customHeaders)
 }
 
@@ -436,7 +436,7 @@ func (c *APIClient) DeleteWithHeaders(url string, customHeaders map[string]strin
 }
 
 // runRequestWithHeaders performs JSON REST calls but allowing custom headers
-func (c *APIClient) runRequestWithHeaders(method, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *APIClient) runRequestWithHeaders(method, url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
 		return nil, fmt.Errorf("unable to execute request, no target provided")
 	}

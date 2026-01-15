@@ -52,12 +52,12 @@ func TestContainer(t *testing.T) {
 	assertEquals(t, "WebBusinessLogic", result.ID)
 	assertEquals(t, "Internal Web Business Logic", result.Name)
 
-	if result.Limits.MemoryBytes != 4294967296 {
+	if *result.Limits.MemoryBytes != 4294967296 {
 		t.Errorf("Unexpected memory limit, got %d", result.Limits.MemoryBytes)
 	}
 
-	if result.Limits.CPUCount != 1.5 {
-		t.Errorf("Unexpected CPU limit, got %.2f", result.Limits.CPUCount)
+	if *result.Limits.CPUCount != 1.5 {
+		t.Errorf("Unexpected CPU limit, got %.2f", *result.Limits.CPUCount)
 	}
 
 	assertEquals(t, "/opt/MyContainerStorage/WebConfig", result.MountPoints[0].Source)

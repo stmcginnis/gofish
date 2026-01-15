@@ -1,109 +1,87 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.0.7a - #SpareResourceSet.v1_0_2.SpareResourceSet
 
 package swordfish
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// SpareResourceSet define a set of spares of a particular type.
+// SpareResourceSet The values define a set of spares of a particular type.
 type SpareResourceSet struct {
 	common.Entity
-
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// OnHandLocation is the location where this set of spares is kept.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OnHandLocation The location where this set of spares is kept.
 	OnHandLocation common.Location
-	// OnLine indicates if the set is online.
+	// OnLine shall be available online.
 	OnLine bool
-	// ResourceType is the type of resources in the set.
+	// ResourceType The type of resources in the set.
 	ResourceType string
-	// TimeToProvision is the amount of time needed to make an on-hand resource
-	// available as a spare.
+	// TimeToProvision Amount of time needed to make an on-hand resource available
+	// as a spare.
 	TimeToProvision string
-	// TimeToReplenish is the amount of time to needed replenish consumed on-hand
+	// TimeToReplenish Amount of time needed to replenish consumed on-hand
 	// resources.
 	TimeToReplenish string
-	// OnHandSparesCount is the number of on hand spares.
-	OnHandSparesCount int `json:"OnHandSpares@odata.count"`
-	// ReplacementSpareSetsCount is the number of replacement spare sets.
-	ReplacementSpareSetsCount int `json:"ReplacementSpareSets@odata.count"`
-	// onHandSpares are links to available spares.
+	// onHandSpares are the URIs for OnHandSpares.
 	onHandSpares []string
-	// ReplacementSpareSets are other spare sets that can be utilized to
-	// replenish this spare set.
-	replacementSpareSets string
+	// replacementSpareSets are the URIs for ReplacementSpareSets.
+	replacementSpareSets []string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a SpareResourceSet object from the raw JSON.
-func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
+func (s *SpareResourceSet) UnmarshalJSON(b []byte) error {
 	type temp SpareResourceSet
-	type links struct {
-		OnHandSpares common.Links
-		// OnHandSparesCount is the number of on hand spares.
-		OnHandSparesCount int `json:"OnHandSpares@odata.count"`
-		// ReplacementSpareSets are other spare sets that can be utilized to
-		// replenish this spare set.
-		ReplacementSpareSets common.Link
-		// ReplacementSpareSets@odata.count is the number of replacement spare sets.
-		ReplacementSpareSetsCount int `json:"ReplacementSpareSets@odata.count"`
+	type sLinks struct {
+		OnHandSpares         common.Links `json:"OnHandSpares"`
+		ReplacementSpareSets common.Links `json:"ReplacementSpareSets"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Links links
+		Links sLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*spareresourceset = SpareResourceSet(t.temp)
+	*s = SpareResourceSet(tmp.temp)
 
 	// Extract the links to other entities for later
-	spareresourceset.OnHandSparesCount = t.OnHandSparesCount
-	spareresourceset.onHandSpares = t.Links.OnHandSpares.ToStrings()
-	spareresourceset.ReplacementSpareSetsCount = t.ReplacementSpareSetsCount
-	spareresourceset.replacementSpareSets = t.Links.ReplacementSpareSets.String()
+	s.onHandSpares = tmp.Links.OnHandSpares.ToStrings()
+	s.replacementSpareSets = tmp.Links.ReplacementSpareSets.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	spareresourceset.rawData = b
+	s.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (spareresourceset *SpareResourceSet) Update() error {
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(SpareResourceSet)
-	err := original.UnmarshalJSON(spareresourceset.rawData)
-	if err != nil {
-		return err
-	}
-
+func (s *SpareResourceSet) Update() error {
 	readWriteFields := []string{
+		"OnHandLocation",
 		"OnLine",
 		"ResourceType",
 		"TimeToProvision",
 		"TimeToReplenish",
 	}
 
-	originalElement := reflect.ValueOf(original).Elem()
-	currentElement := reflect.ValueOf(spareresourceset).Elem()
-
-	return spareresourceset.Entity.Update(originalElement, currentElement, readWriteFields)
+	return s.UpdateFromRawData(s, s.rawData, readWriteFields)
 }
 
 // GetSpareResourceSet will get a SpareResourceSet instance from the service.
@@ -117,8 +95,12 @@ func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareReso
 	return common.GetCollectionObjects[SpareResourceSet](c, link)
 }
 
-// ReplacementSpareSets gets other spare sets that can be utilized to replenish
-// this spare set.
-func (spareresourceset *SpareResourceSet) ReplacementSpareSets() ([]*SpareResourceSet, error) {
-	return ListReferencedSpareResourceSets(spareresourceset.GetClient(), spareresourceset.replacementSpareSets)
+// OnHandSpares gets the OnHandSpares linked resources.
+func (s *SpareResourceSet) OnHandSpares(client common.Client) ([]*common.Entity, error) {
+	return common.GetObjects[common.Entity](client, s.onHandSpares)
+}
+
+// ReplacementSpareSets gets the ReplacementSpareSets linked resources.
+func (s *SpareResourceSet) ReplacementSpareSets(client common.Client) ([]*SpareResourceSet, error) {
+	return common.GetObjects[SpareResourceSet](client, s.replacementSpareSets)
 }

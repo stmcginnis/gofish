@@ -59,7 +59,7 @@ func TestDataStorageLineOfService(t *testing.T) {
 		t.Errorf("Invalid provisioning policy: %s", result.ProvisioningPolicy)
 	}
 
-	if result.RecoverableCapacitySourceCount != 1 {
+	if *result.RecoverableCapacitySourceCount != 1 {
 		t.Errorf("RecoverableCapacitySource should be 1, was %d", result.RecoverableCapacitySourceCount)
 	}
 

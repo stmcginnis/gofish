@@ -82,7 +82,7 @@ func TestIOPerformanceLineOfService(t *testing.T) {
 		t.Error("IOOperationsPerSecondIsLimited should be true")
 	}
 
-	if result.MaxIOOperationsPerSecondPerTerabyte != 1000 {
+	if *result.MaxIOOperationsPerSecondPerTerabyte != 1000 {
 		t.Errorf("Invalid MaxIOOperationsPerSecondPerTerabyte: %d",
 			result.MaxIOOperationsPerSecondPerTerabyte)
 	}

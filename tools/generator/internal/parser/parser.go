@@ -222,13 +222,13 @@ func (p *Parser) parseEnumDefinition(name string, defMap map[string]any, enumVal
 
 // parseObjectDefinition parses an object type definition
 func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, version string) *schema.Definition {
-	name = cleanIdentifier(name)
+	cleanName := cleanIdentifier(name)
 	def := &schema.Definition{
-		Name:         name,
+		Name:         cleanName,
 		OriginalName: name,
 		IsEnum:       false,
 		Version:      version,
-		Description:  p.formatTypeDescription(name, defMap),
+		Description:  p.formatTypeDescription(cleanName, defMap),
 	}
 
 	// Parse properties
@@ -266,8 +266,8 @@ func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, versi
 			def.Properties = append(def.Properties, prop)
 
 			// Track read-write properties
-			if !prop.IsReadOnly {
-				def.ReadWriteProperties = append(def.ReadWriteProperties, prop.Name)
+			if !prop.IsReadOnly && !slices.Contains(config.ExcludeReadWriteProperties, prop.Name) {
+				def.ReadWriteProperties = append(def.ReadWriteProperties, prop.JSONName)
 			}
 		}
 	}
@@ -365,14 +365,25 @@ func (p *Parser) parseProperty(propName string, propMap map[string]any) *schema.
 	}
 
 	// Add JSON tag for special properties
-	if strings.Contains(propName, "@") || strings.Contains(propName, "odata") {
-		prop.JSONTag = fmt.Sprintf("`json:\"%s\"`", propName)
+	if prop.Name != propName || isPointer {
+		omit := ""
+		if isPointer {
+			omit = ",omitempty"
+		}
+
+		name := ""
+		if prop.Name != propName {
+			name = propName
+		}
+
+		jsonString := name + omit
+		prop.JSONTag = fmt.Sprintf("`json:%q`", jsonString)
 	}
 
 	// Links and collections should be private with public getter
 	if prop.IsLink || prop.IsCollection {
 		prop.IsPrivate = true
-		prop.GetterMethod = "Get" + prop.Name
+		prop.GetterMethod = prop.Name
 	}
 
 	return prop
@@ -536,7 +547,18 @@ func cleanDescription(desc string) string {
 
 func cleanIdentifier(name string) string {
 	// Remove all non-alphanumeric characters
-	return regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(name, "")
+	clean := regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(name, "")
+
+	// Replace some common things
+	clean = strings.ReplaceAll(clean, "Http", "HTTP")
+	clean = strings.ReplaceAll(clean, "Json", "JSON")
+	clean = strings.ReplaceAll(clean, "Dns", "DNS")
+	clean = strings.ReplaceAll(clean, "Uri", "URI")
+	if !strings.Contains(clean, "Identif") && !strings.Contains(clean, "Idle") {
+		clean = strings.ReplaceAll(clean, "Id", "ID")
+	}
+
+	return clean
 }
 
 func extractVersion(filename string) string {
@@ -693,9 +715,9 @@ func (p *Parser) parseActions(actionsMap map[string]any, defsMap map[string]any)
 				if actionDefMap, ok := actionDefData.(map[string]any); ok {
 					// Get description
 					if desc, ok := actionDefMap["longDescription"].(string); ok {
-						action.Description = cleanDescription(desc)
+						action.Description = formatComment("", desc, "", false, "\t")
 					} else if desc, ok := actionDefMap["description"].(string); ok {
-						action.Description = cleanDescription(desc)
+						action.Description = formatComment("", desc, "", false, "\t")
 					}
 
 					// Parse parameters
@@ -856,9 +878,10 @@ func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[strin
 		}
 
 		param := &schema.ActionParameter{
-			Name:    strings.ToLower(paramName[:1]) + paramName[1:],
-			Type:    "string",
-			Ordinal: ordinalMap[paramName], // Set ordinal from the raw JSON key order
+			Name:         strings.ToLower(paramName[:1]) + paramName[1:],
+			Type:         "string",
+			Ordinal:      ordinalMap[paramName], // Set ordinal from the raw JSON key order
+			OriginalName: paramName,
 		}
 
 		// Get description
@@ -871,6 +894,20 @@ func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[strin
 		// Check if required
 		if req, ok := paramMap["required"].(bool); ok {
 			param.Required = req
+		}
+
+		// Parse explicit type
+		if _, ok := paramMap["type"]; ok {
+			// Convert paramMap to JSONProperty so we can use TypeMapper
+			propJSON := mapToJSONProperty(paramMap)
+			goType, isPointer, _ := p.typeMapper.MapType(paramName, propJSON)
+
+			// Handle pointer types
+			if isPointer {
+				param.Type = "*" + goType
+			} else {
+				param.Type = goType
+			}
 		}
 
 		// Parse type from $ref

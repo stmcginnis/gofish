@@ -9,25 +9,6 @@ import (
 	"strings"
 )
 
-type ApplyTime string
-
-const (
-	// ImmediateApplyTime shall indicate the values within the settings resource are applied immediately. This value
-	// may result in an immediate host reset, manager reset, or other side effects.
-	ImmediateApplyTime ApplyTime = "Immediate"
-	// OnResetApplyTime shall indicate the values within settings resource are applied when the system or service is
-	// reset.
-	OnResetApplyTime ApplyTime = "OnReset"
-	// AtMaintenanceWindowStartApplyTime shall indicate the values within the settings resource are applied during the
-	// maintenance window specified by the MaintenanceWindowStartTime and MaintenanceWindowDurationInSeconds
-	// properties. A service can perform resets during this maintenance window.
-	AtMaintenanceWindowStartApplyTime ApplyTime = "AtMaintenanceWindowStart"
-	// InMaintenanceWindowOnResetApplyTime shall indicate the values within the settings resource are applied during
-	// the maintenance window specified by the MaintenanceWindowStartTime and MaintenanceWindowDurationInSeconds
-	// properties, and if a reset occurs within the maintenance window.
-	InMaintenanceWindowOnResetApplyTime ApplyTime = "InMaintenanceWindowOnReset"
-)
-
 // MaintenanceWindow shall indicate that a resource has a maintenance window assignment for applying settings or
 // operations. Other resources can link to this object to convey a common control surface for the configuration of
 // the maintenance window.
@@ -117,7 +98,7 @@ type Settings struct {
 
 // SettingsAttributes handles the settings attribute values that may be any of several
 // types and adds some basic helper methods to make accessing values easier.
-type SettingsAttributes map[string]interface{}
+type SettingsAttributes map[string]any
 
 // String gets the string representation of the attribute value.
 func (ba SettingsAttributes) String(name string) string {

@@ -51,19 +51,19 @@ func TestAddressPool(t *testing.T) {
 	assertEquals(t, "Address Pool 1", result.Name)
 	assertEquals(t, "0x1A", result.GenZ.AccessKey)
 
-	if result.GenZ.MinCID != 1 {
+	if *result.GenZ.MinCID != 1 {
 		t.Errorf("Expected Genz.MinCID to be 1, got %d", result.GenZ.MinCID)
 	}
 
-	if result.GenZ.MinSID != 100 {
+	if *result.GenZ.MinSID != 100 {
 		t.Errorf("Expected Genz.MinSID to be 100, got %d", result.GenZ.MinSID)
 	}
 
-	if result.GenZ.MaxCID != 4096 {
+	if *result.GenZ.MaxCID != 4096 {
 		t.Errorf("Expected Genz.MaxCID to be 4096, got %d", result.GenZ.MaxCID)
 	}
 
-	if result.GenZ.MaxSID != 8192 {
+	if *result.GenZ.MaxSID != 8192 {
 		t.Errorf("Expected Genz.MinSID to be 8192, got %d", result.GenZ.MaxSID)
 	}
 

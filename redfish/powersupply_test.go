@@ -102,7 +102,7 @@ var powerSupplyUnitBody = strings.NewReader(
 
 // TestPowerSupplyUnit tests the parsing of PowerSupplyUnit objects.
 func TestPowerSupplyUnit(t *testing.T) {
-	var result PowerSupplyUnit
+	var result PowerSupply
 	err := json.NewDecoder(powerSupplyUnitBody).Decode(&result)
 
 	if err != nil {

@@ -65,7 +65,7 @@ func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol r
 		Context:     eventContext,
 	}
 
-	resp, err := eventservice.GetClient().Post(eventservice.Subscriptions, z)
+	resp, err := eventservice.GetClient().Post(eventservice.SubscriptionsLink, z)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", fmt.Errorf("failed to POST subscribe request to redfish due to %w", err)

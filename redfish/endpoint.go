@@ -1,228 +1,219 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2022.3 - #Endpoint.v1_8_2.Endpoint
 
 package redfish
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/stmcginnis/gofish/common"
 )
 
-// EntityRole is the role of the endpoint.
 type EntityRole string
 
 const (
-	// InitiatorEntityRole means the entity is acting as an initiator.
+	// InitiatorEntityRole The entity sends commands, messages, or other types of
+	// requests to other entities on the fabric, but cannot receive commands from
+	// other entities.
 	InitiatorEntityRole EntityRole = "Initiator"
-	// TargetEntityRole means the entity is acting as a target.
+	// TargetEntityRole The entity receives commands, messages, or other types of
+	// requests from other entities on the fabric, but cannot send commands to
+	// other entities.
 	TargetEntityRole EntityRole = "Target"
-	// BothEntityRole means the entity is acting as both an initiator and a target.
+	// BothEntityRole The entity can both send and receive commands, messages, and
+	// other requests to or from other entities on the fabric.
 	BothEntityRole EntityRole = "Both"
 )
 
-// EntityType is the type of endpoint.
 type EntityType string
 
 const (
-	// StorageInitiatorEntityType shall indicate the entity this endpoint represents is a storage initiator. The
-	// EntityLink property, if present, should be of type StorageController.
+	// StorageInitiatorEntityType shall indicate the entity this endpoint
+	// represents is a storage initiator. The 'EntityLink' property, if present,
+	// should be of type 'StorageController'.
 	StorageInitiatorEntityType EntityType = "StorageInitiator"
-	// RootComplexEntityType shall indicate the entity this endpoint represents is a PCIe root complex. The EntityLink
-	// property, if present, should be of type ComputerSystem.
+	// RootComplexEntityType shall indicate the entity this endpoint represents is
+	// a PCIe root complex. The 'EntityLink' property, if present, should be of
+	// type 'ComputerSystem'.
 	RootComplexEntityType EntityType = "RootComplex"
-	// NetworkControllerEntityType shall indicate the entity this endpoint represents is a network controller. The
-	// EntityLink property, if present, should be of type NetworkDeviceFunction or EthernetInterface.
+	// NetworkControllerEntityType shall indicate the entity this endpoint
+	// represents is a network controller. The 'EntityLink' property, if present,
+	// should be of type 'NetworkDeviceFunction' or EthernetInterface.
 	NetworkControllerEntityType EntityType = "NetworkController"
-	// DriveEntityType shall indicate the entity this endpoint represents is a drive. The EntityLink property, if
-	// present, should be of type Drive.
+	// DriveEntityType shall indicate the entity this endpoint represents is a
+	// drive. The 'EntityLink' property, if present, should be of type 'Drive'.
 	DriveEntityType EntityType = "Drive"
-	// StorageExpanderEntityType shall indicate the entity this endpoint represents is a storage expander. The
-	// EntityLink property, if present, should be of type Chassis.
+	// StorageExpanderEntityType shall indicate the entity this endpoint represents
+	// is a storage expander. The 'EntityLink' property, if present, should be of
+	// type 'Chassis'.
 	StorageExpanderEntityType EntityType = "StorageExpander"
-	// DisplayControllerEntityType shall indicate the entity this endpoint represents is a display controller.
+	// DisplayControllerEntityType shall indicate the entity this endpoint
+	// represents is a display controller.
 	DisplayControllerEntityType EntityType = "DisplayController"
-	// BridgeEntityType shall indicate the entity this endpoint represents is a PCIe bridge.
+	// BridgeEntityType shall indicate the entity this endpoint represents is a
+	// PCIe bridge.
 	BridgeEntityType EntityType = "Bridge"
-	// ProcessorEntityType shall indicate the entity this endpoint represents is a processor. The EntityLink property,
-	// if present, should be of type Processor.
+	// ProcessorEntityType shall indicate the entity this endpoint represents is a
+	// processor. The 'EntityLink' property, if present, should be of type
+	// 'Processor'.
 	ProcessorEntityType EntityType = "Processor"
-	// VolumeEntityType shall indicate the entity this endpoint represents is a volume. The EntityLink property, if
-	// present, should be of type Volume.
+	// VolumeEntityType shall indicate the entity this endpoint represents is a
+	// volume. The 'EntityLink' property, if present, should be of type 'Volume'.
 	VolumeEntityType EntityType = "Volume"
-	// AccelerationFunctionEntityType shall indicate the entity this endpoint represents is an acceleration function.
-	// The EntityLink property, if present, should be of type AccelerationFunction.
+	// AccelerationFunctionEntityType shall indicate the entity this endpoint
+	// represents is an acceleration function. The 'EntityLink' property, if
+	// present, should be of type 'AccelerationFunction'.
 	AccelerationFunctionEntityType EntityType = "AccelerationFunction"
-	// MediaControllerEntityType shall indicate the entity this endpoint represents is a media controller. The
-	// EntityLink property, if present, should be of type MediaController.
+	// MediaControllerEntityType shall indicate the entity this endpoint represents
+	// is a media controller. The 'EntityLink' property, if present, should be of
+	// type 'MediaController'.
 	MediaControllerEntityType EntityType = "MediaController"
-	// MemoryChunkEntityType shall indicate the entity this endpoint represents is a memory chunk. The EntityLink
-	// property, if present, should be of type MemoryChunk.
+	// MemoryChunkEntityType shall indicate the entity this endpoint represents is
+	// a memory chunk. The 'EntityLink' property, if present, should be of type
+	// 'MemoryChunk'.
 	MemoryChunkEntityType EntityType = "MemoryChunk"
-	// SwitchEntityType shall indicate the entity this endpoint represents is a switch and not an expander. The
-	// EntityLink property, if present, should be of type Switch.
+	// SwitchEntityType shall indicate the entity this endpoint represents is a
+	// switch and not an expander. The 'EntityLink' property, if present, should be
+	// of type 'Switch'.
 	SwitchEntityType EntityType = "Switch"
-	// FabricBridgeEntityType shall indicate the entity this endpoint represents is a fabric bridge. The EntityLink
-	// property, if present, should be of type FabricAdapter.
+	// FabricBridgeEntityType shall indicate the entity this endpoint represents is
+	// a fabric bridge. The 'EntityLink' property, if present, should be of type
+	// 'FabricAdapter'.
 	FabricBridgeEntityType EntityType = "FabricBridge"
-	// ManagerEntityType shall indicate the entity this endpoint represents is a manager. The EntityLink property, if
-	// present, should be of type Manager.
+	// ManagerEntityType shall indicate the entity this endpoint represents is a
+	// manager. The 'EntityLink' property, if present, should be of type 'Manager'.
 	ManagerEntityType EntityType = "Manager"
-	// StorageSubsystemEntityType shall indicate the entity this endpoint represents is a storage subsystem. The
-	// EntityLink property, if present, should be of type Storage.
+	// StorageSubsystemEntityType shall indicate the entity this endpoint
+	// represents is a storage subsystem. The 'EntityLink' property, if present,
+	// should be of type 'Storage'.
 	StorageSubsystemEntityType EntityType = "StorageSubsystem"
-	// MemoryEntityType shall indicate the entity this endpoint represents is a memory device. The EntityLink property,
-	// if present, should be of type Memory.
+	// MemoryEntityType shall indicate the entity this endpoint represents is a
+	// memory device. The 'EntityLink' property, if present, should be of type
+	// 'Memory'.
 	MemoryEntityType EntityType = "Memory"
-	// CXLDeviceEntityType shall indicate the entity this endpoint represents is a CXL logical device. The EntityLink
-	// property, if present, should be of type CXLLogicalDevice.
+	// CXLDeviceEntityType shall indicate the entity this endpoint represents is a
+	// CXL logical device. The 'EntityLink' property, if present, should be of type
+	// 'CXLLogicalDevice'.
 	CXLDeviceEntityType EntityType = "CXLDevice"
 )
 
-// ConnectedEntity shall represent a remote resource that is
-// connected to a network accessible to an endpoint.
-type ConnectedEntity struct {
-	// entityLink shall be a reference to an entity of the
-	// type specified by the description of the value of the EntityType
-	// property.
-	// entityLink common.Link
-	// EntityPciID shall be the PCI ID of the connected PCIe entity.
-	EntityPciID PciID `json:"entityPciId"`
-	// entityRole shall indicate if the specified entity is an initiator,
-	// target, or both.
-	EntityRole EntityRole
-	// entityType shall indicate if type of connected entity.
-	EntityType EntityType
-	// GenZ shall contain the Gen-Z related properties for the entity.
-	GenZ GenZ
-	// Identifiers for the remote entity shall be unique in
-	// the context of other resources that can reached over the connected
-	// network.
-	Identifiers []common.Identifier
-}
-
-// Endpoint is used to represent a fabric endpoint for a Redfish
+// Endpoint This resource contains a fabric endpoint for a Redfish
 // implementation.
 type Endpoint struct {
 	common.Entity
-
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// ConnectedEntities shall contain all the entities which this endpoint
-	// allows access to.
+	// ConnectedEntities shall contain all entities to which this endpoint allows
+	// access.
 	ConnectedEntities []ConnectedEntity
-	// Description provides a description of this resource.
-	Description string
 	// EndpointProtocol shall contain the protocol this endpoint uses to
 	// communicate with other endpoints on this fabric.
 	EndpointProtocol common.Protocol
-	// HostReservationMemoryBytes shall be the amount of memory in Bytes that
-	// the Host should allocate to connect to this endpoint.
-	HostReservationMemoryBytes int64
-	// IPTransportDetails shall contain the details for each IP transport
-	// supported by this endpoint.
+	// HostReservationMemoryBytes shall contain the amount of memory in bytes that
+	// the host should allocate to connect to this endpoint.
+	HostReservationMemoryBytes *int `json:",omitempty"`
+	// IPTransportDetails shall contain the details for each IP transport supported
+	// by this endpoint.
+	//
+	// Version added: v1.1.0
 	IPTransportDetails []IPTransportDetails
 	// Identifiers shall be unique in the context of other endpoints that can
 	// reached over the connected network.
 	Identifiers []common.Identifier
-	// PciID shall be the PCI ID of the endpoint.
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PciId shall contain the PCI ID of the endpoint.
 	PciID PciID `json:"PciId"`
-	// Redundancy is used to show how this endpoint is grouped with other
-	// endpoints to form redundancy sets.
-	Redundancy []Redundancy
-	// RedundancyCount is the number of Redundancy objects.
+	// Redundancy shall show how this endpoint is grouped with other endpoints for
+	// form redundancy sets.
+	Redundancy []common.Redundancy
+	// Redundancy@odata.count
 	RedundancyCount int `json:"Redundancy@odata.count"`
-	// Status shall contain any status or health properties
-	// of the resource.
+	// Status shall contain any status or health properties of the resource.
 	Status common.Status
-
-	// MutuallyExclusiveEndpoints shall be an array of references of type
-	// Endpoint that cannot be used in a zone if this endpoint is used in a zone.
-	mutuallyExclusiveEndpoints []string
-	// MutuallyExclusiveEndpointsCount is the number of MutuallyExclusiveEndpoints.
-	MutuallyExclusiveEndpointsCount int
-	// NetworkDeviceFunction shall be a reference to a NetworkDeviceFunction
-	// resource, with which this endpoint is associated.
-	networkDeviceFunction []string
-	// NetworkDeviceFunctionCount is the number of NetworkDeviceFunctions.
-	NetworkDeviceFunctionCount int
-	// Ports shall be an array of references of type Port that are utilized by
-	// this endpoint.
-	ports []string
-	// PortsCount is the number of Ports.
-	PortsCount int
-	// addressPools shall contain an array of links to
-	// resources of type AddressPool with which this endpoint is associated.
+	// addressPools are the URIs for AddressPools.
 	addressPools []string
-	// AddressPoolsCount is the number of AddressPools.
-	AddressPoolsCount int
-	// connectedPorts shall contain an array of links to
-	// resources of type Port that represent ports associated with this
-	// endpoint.
+	// connectedPorts are the URIs for ConnectedPorts.
 	connectedPorts []string
-	// ConnectedPortCount is the number of ConnectedPorts.
-	ConnectedPortsCount int
+	// connections are the URIs for Connections.
+	connections []string
+	// localPorts are the URIs for LocalPorts.
+	localPorts []string
+	// mutuallyExclusiveEndpoints are the URIs for MutuallyExclusiveEndpoints.
+	mutuallyExclusiveEndpoints []string
+	// networkDeviceFunction are the URIs for NetworkDeviceFunction.
+	networkDeviceFunction []string
+	// ports are the URIs for Ports.
+	ports []string
+	// zones are the URIs for Zones.
+	zones []string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Endpoint object from the raw JSON.
-func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
+//
+//nolint:dupl
+func (e *Endpoint) UnmarshalJSON(b []byte) error {
 	type temp Endpoint
-	type links struct {
-		// AddressPools shall contain an array of links to
-		// resources of type AddressPool with which this endpoint is associated.
-		AddressPools common.Links
-		// AddressPools@odata.count is
-		AddressPoolsCount int `json:"AddressPools@odata.count"`
-		// ConnectedPorts shall contain an array of links to
-		// resources of type Port that represent ports associated with this
-		// endpoint.
-		ConnectedPorts common.Links
-		// ConnectedPorts@odata.count is
-		ConnectedPortsCount int `json:"ConnectedPorts@odata.count"`
-		// MutuallyExclusiveEndpoints shall be an array of references of type
-		// Endpoint that cannot be used in a zone if this endpoint is used in a zone.
-		MutuallyExclusiveEndpoints common.Links
-		// MutuallyExclusiveEndpointsCount is the number of MutuallyExclusiveEndpoints.
-		MutuallyExclusiveEndpointsCount int `json:"MutuallyExclusiveEndpoints@odata.count"`
-		// NetworkDeviceFunction shall be a reference to a NetworkDeviceFunction
-		// resource, with which this endpoint is associated.
-		NetworkDeviceFunction common.Links
-		// NetworkDeviceFunctionCount is the number of NetworkDeviceFunctions.
-		NetworkDeviceFunctionCount int `json:"NetworkDeviceFunction@odata.count"`
-		// Ports shall be an array of references of type Port that are utilized by
-		// this endpoint.
-		Ports common.Links
-		// PortsCount is the number of Ports.
-		PortsCount int `json:"Ports@odata.count"`
+	type eLinks struct {
+		AddressPools               common.Links `json:"AddressPools"`
+		ConnectedPorts             common.Links `json:"ConnectedPorts"`
+		Connections                common.Links `json:"Connections"`
+		LocalPorts                 common.Links `json:"LocalPorts"`
+		MutuallyExclusiveEndpoints common.Links `json:"MutuallyExclusiveEndpoints"`
+		NetworkDeviceFunction      common.Links `json:"NetworkDeviceFunction"`
+		Ports                      common.Links `json:"Ports"`
+		Zones                      common.Links `json:"Zones"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Links      links
-		Redundancy common.Links
+		Links eLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
+	*e = Endpoint(tmp.temp)
+
 	// Extract the links to other entities for later
-	*endpoint = Endpoint(t.temp)
-	endpoint.addressPools = t.Links.AddressPools.ToStrings()
-	endpoint.AddressPoolsCount = t.Links.AddressPoolsCount
-	endpoint.connectedPorts = t.Links.ConnectedPorts.ToStrings()
-	endpoint.ConnectedPortsCount = t.Links.ConnectedPortsCount
-	endpoint.mutuallyExclusiveEndpoints = t.Links.MutuallyExclusiveEndpoints.ToStrings()
-	endpoint.MutuallyExclusiveEndpointsCount = t.Links.MutuallyExclusiveEndpointsCount
-	endpoint.networkDeviceFunction = t.Links.NetworkDeviceFunction.ToStrings()
-	endpoint.NetworkDeviceFunctionCount = t.Links.NetworkDeviceFunctionCount
-	endpoint.ports = t.Links.Ports.ToStrings()
-	endpoint.PortsCount = t.Links.PortsCount
+	e.addressPools = tmp.Links.AddressPools.ToStrings()
+	e.connectedPorts = tmp.Links.ConnectedPorts.ToStrings()
+	e.connections = tmp.Links.Connections.ToStrings()
+	e.localPorts = tmp.Links.LocalPorts.ToStrings()
+	e.mutuallyExclusiveEndpoints = tmp.Links.MutuallyExclusiveEndpoints.ToStrings()
+	e.networkDeviceFunction = tmp.Links.NetworkDeviceFunction.ToStrings()
+	e.ports = tmp.Links.Ports.ToStrings()
+	e.zones = tmp.Links.Zones.ToStrings()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	e.rawData = b
 
 	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (e *Endpoint) Update() error {
+	readWriteFields := []string{
+		"ConnectedEntities",
+		"IPTransportDetails",
+		"Identifiers",
+		"PciId",
+		"Redundancy",
+		"Redundancy@odata.count",
+		"Status",
+	}
+
+	return e.UpdateFromRawData(e, e.rawData, readWriteFields)
 }
 
 // GetEndpoint will get a Endpoint instance from the service.
@@ -236,58 +227,229 @@ func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) 
 	return common.GetCollectionObjects[Endpoint](c, link)
 }
 
-// GCID shall contain the Gen-Z Core Specification-defined Global
-// Component ID.
+// AddressPools gets the AddressPools linked resources.
+func (e *Endpoint) AddressPools(client common.Client) ([]*AddressPool, error) {
+	return common.GetObjects[AddressPool](client, e.addressPools)
+}
+
+// ConnectedPorts gets the ConnectedPorts linked resources.
+func (e *Endpoint) ConnectedPorts(client common.Client) ([]*Port, error) {
+	return common.GetObjects[Port](client, e.connectedPorts)
+}
+
+// Connections gets the Connections linked resources.
+func (e *Endpoint) Connections(client common.Client) ([]*Connection, error) {
+	return common.GetObjects[Connection](client, e.connections)
+}
+
+// LocalPorts gets the LocalPorts linked resources.
+func (e *Endpoint) LocalPorts(client common.Client) ([]*Port, error) {
+	return common.GetObjects[Port](client, e.localPorts)
+}
+
+// MutuallyExclusiveEndpoints gets the MutuallyExclusiveEndpoints linked resources.
+func (e *Endpoint) MutuallyExclusiveEndpoints(client common.Client) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](client, e.mutuallyExclusiveEndpoints)
+}
+
+// NetworkDeviceFunction gets the NetworkDeviceFunction linked resources.
+func (e *Endpoint) NetworkDeviceFunction(client common.Client) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjects[NetworkDeviceFunction](client, e.networkDeviceFunction)
+}
+
+// Ports gets the Ports linked resources.
+func (e *Endpoint) Ports(client common.Client) ([]*Port, error) {
+	return common.GetObjects[Port](client, e.ports)
+}
+
+// Zones gets the Zones linked resources.
+func (e *Endpoint) Zones(client common.Client) ([]*Zone, error) {
+	return common.GetObjects[Zone](client, e.zones)
+}
+
+// ConnectedEntity shall represent a remote resource that is connected to a
+// network accessible to an endpoint.
+type ConnectedEntity struct {
+	// EntityLink shall contain a link to an entity of the type specified by the
+	// description of the 'EntityType' property value.
+	entityLink string
+	// EntityPciId shall contain the PCI ID of the connected PCIe entity.
+	EntityPciID PciID `json:"EntityPciId"`
+	// EntityRole shall indicate if the specified entity is an initiator, target,
+	// or both.
+	EntityRole EntityRole
+	// EntityType shall indicate if type of connected entity.
+	EntityType EntityType
+	// GenZ shall contain the Gen-Z related properties for the entity.
+	//
+	// Version added: v1.4.0
+	GenZ EndpointGenZ
+	// Identifiers shall be unique in the context of other resources that can
+	// reached over the connected network.
+	Identifiers []common.Identifier
+	// Oem shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PciClassCode shall contain the PCI Class Code, Subclass, and Programming
+	// Interface of the PCIe device function.
+	//
+	// Deprecated: v1.2.0
+	// This property has been deprecated in favor of the 'ClassCode' property
+	// inside the 'EntityPciId' object.
+	PciClassCode string
+	// PciFunctionNumber shall contain the PCI Function Number of the connected
+	// PCIe entity.
+	//
+	// Deprecated: v1.2.0
+	// This property has been deprecated in favor of the 'FunctionNumber' property
+	// inside the 'EntityPciId' object.
+	PciFunctionNumber *int `json:",omitempty"`
+}
+
+// UnmarshalJSON unmarshals a ConnectedEntity object from the raw JSON.
+func (c *ConnectedEntity) UnmarshalJSON(b []byte) error {
+	type temp ConnectedEntity
+	var tmp struct {
+		temp
+		EntityLink common.Link `json:"entityLink"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*c = ConnectedEntity(tmp.temp)
+
+	// Extract the links to other entities for later
+	c.entityLink = tmp.EntityLink.String()
+
+	return nil
+}
+
+// EntityLink gets the EntityLink linked resource.
+func (c *ConnectedEntity) EntityLink(client common.Client) (*common.Resource, error) {
+	if c.entityLink == "" {
+		return nil, nil
+	}
+	return common.GetObject[common.Resource](client, c.entityLink)
+}
+
+// GCID shall contain the Gen-Z Core Specification-defined Global Component ID.
 type GCID struct {
-	// CID shall contain the 12 bit component identifier
-	// portion of the GCID of the entity.
+	// CID shall contain the 12 bit component identifier portion of the GCID of the
+	// entity.
+	//
+	// Version added: v1.4.0
 	CID string
-	// SID shall contain the 16 bit subnet identifier
-	// portion of the GCID of the entity.
+	// SID shall contain the 16 bit subnet identifier portion of the GCID of the
+	// entity.
+	//
+	// Version added: v1.4.0
 	SID string
 }
 
-// GenZ shall contain the Gen-Z related properties for an entity.
-type GenZ struct {
-	// AccessKey shall contain the Gen-Z Core Specification-
-	// defined 6 bit Access Key for the entity.
+// EndpointGenZ shall contain the Gen-Z related properties for an entity.
+type EndpointGenZ struct {
+	// AccessKey shall contain the Gen-Z Core Specification-defined 6 bit Access
+	// Key for the entity.
+	//
+	// Version added: v1.4.0
+	//
+	// Deprecated: v1.6.0
+	// This property has been deprecated in favor of the 'ConnectionKeys' property
+	// in the 'Connection' resource.
 	AccessKey string
-	// GCID shall contain the Gen-Z Core Specification-
-	// defined Global Component ID for the entity.
+	// GCID shall contain the Gen-Z Core Specification-defined Global Component ID
+	// for the entity.
+	//
+	// Version added: v1.4.0
 	GCID GCID
-	// RegionKey shall contain the Gen-Z Core Specification-
-	// defined 32 bit Region Key for the entity.
+	// RegionKey shall contain the Gen-Z Core Specification-defined 32 bit Region
+	// Key for the entity.
+	//
+	// Version added: v1.4.0
+	//
+	// Deprecated: v1.6.0
+	// This property has been deprecated in favor of the 'ConnectionKeys' property
+	// in the 'Connection' resource.
 	RegionKey string
 }
 
-// IPTransportDetails shall contain properties which specify
-// the details of the transport supported by the endpoint.
+// IPTransportDetails shall contain properties that specify the details of the
+// transport supported by the endpoint.
 type IPTransportDetails struct {
-	// IPv4Address shall specify the IPv4Address.
-	IPv4Address string
-	// IPv6Address shall specify the IPv6Address.
-	IPv6Address string
-	// Port shall be an specify UDP or TCP port number used for communication
-	// with the Endpoint.
-	Port int
-	// TransportProtocol is used by the connection entity.
+	// IPv4Address shall contain the IPv4 address.
+	//
+	// Version added: v1.1.0
+	IPv4Address IPv4Address
+	// IPv6Address shall contain the IPv6 address.
+	//
+	// Version added: v1.1.0
+	IPv6Address IPv6Address
+	// Port shall contain a specified UDP or TCP port number used for communication
+	// with the endpoint.
+	//
+	// Version added: v1.1.0
+	Port uint
+	// TransportProtocol shall contain the protocol used by the connection entity.
+	//
+	// Version added: v1.1.0
 	TransportProtocol common.Protocol
 }
 
 // PciID shall describe a PCI ID.
 type PciID struct {
-	// ClassCode shall be the PCI Class Code,
-	// Subclass code, and Programming Interface code of the PCIe device
-	// function.
+	// ClassCode shall contain the PCI Class Code, Subclass, and Programming
+	// Interface of the PCIe device function.
+	//
+	// Version added: v1.2.0
 	ClassCode string
-	// DeviceID shall be the PCI Subsystem Vendor ID of the PCIe device function.
+	// DeviceId shall contain the PCI Device ID of the PCIe device function.
 	DeviceID string `json:"DeviceId"`
-	// FunctionNumber shall be the PCI Function Number of the connected PCIe entity.
-	FunctionNumber string
-	// SubsystemID shall be the PCI Subsystem Vendor ID of the PCIe device function.
+	// FunctionNumber shall contain the PCI Function Number of the connected PCIe
+	// entity.
+	//
+	// Version added: v1.2.0
+	FunctionNumber *int `json:",omitempty"`
+	// SubsystemId shall contain the PCI Subsystem ID of the PCIe device function.
 	SubsystemID string `json:"SubsystemId"`
-	// SubsystemVendorID shall be the PCI Subsystem Vendor ID of the PCIe device function.
+	// SubsystemVendorId shall contain the PCI Subsystem Vendor ID of the PCIe
+	// device function.
 	SubsystemVendorID string `json:"SubsystemVendorId"`
-	// VendorID shall be the PCI Vendor ID of the PCIe device function.
+	// VendorId shall contain the PCI Vendor ID of the PCIe device function.
 	VendorID string `json:"VendorId"`
+}
+
+// UnmarshalJSON unmarshals a ConnectedEntity object from the raw JSON.
+func (p *PciID) UnmarshalJSON(b []byte) error {
+	type temp PciID
+	var tmp struct {
+		temp
+		FunctionNumber any
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PciID(tmp.temp)
+
+	// Extract the links to other entities for later
+	if tmp.FunctionNumber != nil {
+		switch val := tmp.FunctionNumber.(type) {
+		case string:
+			fn, err := strconv.Atoi(val)
+			if err == nil {
+				p.FunctionNumber = &fn
+			}
+		case int:
+			fn := val
+			p.FunctionNumber = &fn
+		}
+	}
+
+	return nil
 }

@@ -34,7 +34,6 @@ var CommonTypes = map[string]bool{
 	"Privileges":          true,
 	"PrivilegeRegistry":   true,
 	"PrivilegeType":       true,
-	"PhysicalContext":     true,
 	"Protocol":            true,
 	"IPAddresses":         true,
 	"Schedule":            true,
@@ -42,35 +41,35 @@ var CommonTypes = map[string]bool{
 	"LogEntry":            true,
 	"Entity":              true,
 	// Storage-related types referenced by Redfish
-	"Volume":              true,
-	"Capacity":            true,
-	"IOStatistics":        true,
-	"StorageReplicaInfo":  true,
+	"Volume":             true,
+	"Capacity":           true,
+	"IOStatistics":       true,
+	"StorageReplicaInfo": true,
 }
 
 // SwordfishTypes lists schemas that are Swordfish-specific
 // Note: Types referenced by Redfish must be in CommonTypes instead
 var SwordfishTypes = map[string]bool{
-	"ClassOfService":                  true,
-	"ConsistencyGroup":                true,
-	"DataProtectionLineOfService":     true,
-	"DataProtectionLoSCapabilities":   true,
-	"DataSecurityLineOfService":       true,
-	"DataSecurityLoSCapabilities":     true,
-	"DataStorageLineOfService":        true,
-	"DataStorageLoSCapabilities":      true,
-	"EndpointGroup":                   true,
-	"FileShare":                       true,
-	"FileSystem":                      true,
-	"IOConnectivityLineOfService":     true,
-	"IOConnectivityLoSCapabilities":   true,
-	"IOPerformanceLineOfService":      true,
-	"IOPerformanceLoSCapabilities":    true,
-	"LineOfService":                   true,
-	"SpareResourceSet":                true,
-	"StorageGroup":                    true,
-	"StoragePool":                     true,
-	"StorageService":                  true,
+	"ClassOfService":                true,
+	"ConsistencyGroup":              true,
+	"DataProtectionLineOfService":   true,
+	"DataProtectionLoSCapabilities": true,
+	"DataSecurityLineOfService":     true,
+	"DataSecurityLoSCapabilities":   true,
+	"DataStorageLineOfService":      true,
+	"DataStorageLoSCapabilities":    true,
+	"EndpointGroup":                 true,
+	"FileShare":                     true,
+	"FileSystem":                    true,
+	"IOConnectivityLineOfService":   true,
+	"IOConnectivityLoSCapabilities": true,
+	"IOPerformanceLineOfService":    true,
+	"IOPerformanceLoSCapabilities":  true,
+	"LineOfService":                 true,
+	"SpareResourceSet":              true,
+	"StorageGroup":                  true,
+	"StoragePool":                   true,
+	"StorageService":                true,
 }
 
 // CategorizeSchema determines the package type for a schema
@@ -92,7 +91,7 @@ func CategorizeSchema(schemaFile, objectName string) schema.PackageType {
 		return schema.PackageRedfish
 	}
 
-	var rawSchema map[string]interface{}
+	var rawSchema map[string]any
 	if err := json.Unmarshal(data, &rawSchema); err != nil {
 		return schema.PackageRedfish
 	}
@@ -118,11 +117,11 @@ func CategorizeSchema(schemaFile, objectName string) schema.PackageType {
 	}
 
 	// Look at URIs to determine if it's common or redfish
-	defsMap, ok := rawSchema["definitions"].(map[string]interface{})
+	defsMap, ok := rawSchema["definitions"].(map[string]any)
 	if ok {
-		if def, ok := defsMap[objectName].(map[string]interface{}); ok {
+		if def, ok := defsMap[objectName].(map[string]any); ok {
 			// Check if this has URIs (only full resources have URIs, not common types)
-			if uris, ok := def["uris"].([]interface{}); ok && len(uris) > 0 {
+			if uris, ok := def["uris"].([]any); ok && len(uris) > 0 {
 				// Has URIs, so it's a full resource (redfish)
 				return schema.PackageRedfish
 			}

@@ -38,6 +38,6 @@ func TestThermalEquipment(t *testing.T) {
 
 	assertEquals(t, "ThermalEquipment", result.ID)
 	assertEquals(t, "Cooling Equipment", result.Name)
-	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs", result.cdus)
+	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs", result.cDUs)
 	assertEquals(t, "/redfish/v1/ThermalEquipment/CoolingLoops", result.coolingLoops)
 }

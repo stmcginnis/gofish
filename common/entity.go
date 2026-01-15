@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 )
 
@@ -20,6 +21,8 @@ type Entity struct {
 	ID string `json:"Id"`
 	// Name is the name of the resource or array element
 	Name string `json:"Name"`
+	// Description is a description of the resource
+	Description string `json:"Description"`
 
 	// client is the REST client interface to the system
 	client Client
@@ -29,7 +32,7 @@ type Entity struct {
 	// concurrent modifications
 	ODataEtag string `json:"@odata.etag,omitempty"`
 
-	ExtendedInfo []MessageExtendedInfo `json:"@Message.ExtendedInfo,omitempty"`
+	ExtendedInfo []Message `json:"@Message.ExtendedInfo,omitempty"`
 
 	// stripEtagQuotes removes surrounding quotes of etag used in If-Match header
 	// Only use for vendor implementations where If-Match only matches unquoted etag
@@ -48,7 +51,7 @@ func (e *Entity) GetODataID() string {
 	return e.ODataID
 }
 
-func (e *Entity) GetExtendedInfo() []MessageExtendedInfo {
+func (e *Entity) GetExtendedInfo() []Message {
 	return e.ExtendedInfo
 }
 
@@ -92,14 +95,7 @@ func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpda
 
 	// Validate that all fields being updated are allowed
 	for field := range payload {
-		found := false
-		for _, name := range allowedUpdates {
-			if name == field {
-				found = true
-				break
-			}
-		}
-
+		found := slices.Contains(allowedUpdates, field)
 		if !found {
 			return fmt.Errorf("%s field is read only", field)
 		}
@@ -337,6 +333,10 @@ func compareStructFields(original, updated reflect.Value) map[string]any {
 			continue
 		}
 
+		if strings.EqualFold(fieldName, "oem") {
+			continue
+		}
+
 		originalField := original.Field(i)
 		updatedField := updated.Field(i)
 
@@ -447,7 +447,7 @@ type SchemaObject interface {
 	SetETag(string)
 	GetID() string
 	GetODataID() string
-	GetExtendedInfo() []MessageExtendedInfo
+	GetExtendedInfo() []Message
 }
 
 type GenericSchemaObjectPointer[T any] interface {

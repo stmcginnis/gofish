@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.3 - #CoolingUnit.v1_4_0.CoolingUnit
 
 package redfish
 
@@ -13,195 +14,228 @@ import (
 type CoolingEquipmentType string
 
 const (
-	// CDUCoolingEquipmentType A coolant distribution unit (CDU).
+	// CDUCoolingEquipmentType is a coolant distribution unit (CDU).
 	CDUCoolingEquipmentType CoolingEquipmentType = "CDU"
-	// HeatExchangerCoolingEquipmentType A heat exchanger.
+	// HeatExchangerCoolingEquipmentType is a heat exchanger.
 	HeatExchangerCoolingEquipmentType CoolingEquipmentType = "HeatExchanger"
-	// ImmersionUnitCoolingEquipmentType An immersion cooling unit.
+	// ImmersionUnitCoolingEquipmentType is an immersion cooling unit.
 	ImmersionUnitCoolingEquipmentType CoolingEquipmentType = "ImmersionUnit"
+	// RPUCoolingEquipmentType is a reservoir and pumping unit (RPU).
+	RPUCoolingEquipmentType CoolingEquipmentType = "RPU"
 )
-
-// CoolingUnit shall represent a cooling system component or unit for a Redfish implementation.
-type CoolingUnit struct {
-	common.Entity
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
-	// AllowedCoolingUnitModes shall contain the allowed values for setting the mode of this cooling unit.
-	AllowedCoolingUnitModes []CoolingUnitMode
-	// Assembly shall contain a link to a resource of type Assembly.
-	assembly string
-	// AssetTag shall contain the user-assigned asset tag, which is an identifying string that tracks the equipment for
-	// inventory purposes.
-	AssetTag string
-	// Coolant shall contain details regarding the coolant contained or used by this unit.
-	Coolant Coolant
-	// CoolantConnectorRedundancy shall contain redundancy information for the set of coolant connectors attached to
-	// this equipment. The values of the RedundancyGroup array shall reference resources of type CoolantConnector.
-	coolantConnectorRedundancy []string
-	// CoolingCapacityWatts shall contain the manufacturer-provided cooling capacity, in watt units, of this equipment.
-	CoolingCapacityWatts int
-	// Description provides a description of this resource.
-	Description string
-	// EnvironmentMetrics shall contain a link to a resource of type EnvironmentMetrics that specifies the environment
-	// metrics for this equipment.
-	environmentMetrics string
-	// EquipmentType shall contain the type of equipment this resource represents.
-	EquipmentType CoolingEquipmentType
-	// FilterRedundancy shall contain redundancy information for the groups of filters in this unit.
-	FilterRedundancy []RedundantGroup
-	// Filters shall contain a link to a resource collection of type FilterCollection that contains the filter
-	// information for this equipment.
-	filters string
-	// FirmwareVersion shall contain a string describing the firmware version of this equipment as provided by the
-	// manufacturer.
-	FirmwareVersion string
-	// LeakDetection shall contain a link to a resource of type LeakDetection that contains the leak detection
-	// component information for this equipment.
-	leakDetection string
-	// Location shall contain the location information of the associated equipment.
-	Location common.Location
-	// Manufacturer shall contain the name of the organization responsible for producing the equipment. This
-	// organization may be the entity from which the equipment is purchased, but this is not necessarily true.
-	Manufacturer string
-	// Model shall contain the manufacturer-provided model information of this equipment.
-	Model string
-	// PartNumber shall contain the manufacturer-provided part number for the equipment.
-	PartNumber string
-	// PrimaryCoolantConnectors shall contain a link to a resource collection of type CoolantConnectorCollection that
-	// contains the primary coolant connectors for this equipment.
-	primaryCoolantConnectors string
-	// ProductionDate shall contain the date of production or manufacture for this equipment.
-	ProductionDate string
-	// PumpRedundancy shall contain redundancy information for the groups of pumps in this unit.
-	PumpRedundancy []RedundantGroup
-	// Pumps shall contain a link to a resource collection of type PumpCollection that contains the pump information
-	// for this equipment.
-	pumps string
-	// Reservoirs shall contain a link to a resource collection of type ReservoirCollection that contains the reservoir
-	// information for this equipment.
-	reservoirs string
-	// SecondaryCoolantConnectors shall contain a link to a resource collection of type CoolantConnectorCollection that
-	// contains the secondary coolant connectors for this equipment.
-	secondaryCoolantConnectors string
-	// SerialNumber shall contain a manufacturer-allocated number that identifies the equipment.
-	SerialNumber string
-	// setMode shall contain the action target for setting the mode of this cooling unit.
-	setMode string
-	// Status shall contain any status or health properties of the resource.
-	Status common.Status
-	// UserLabel shall contain a user-assigned label used to identify this resource. If a value has not been assigned
-	// by a user, the value of this property shall be an empty string.
-	UserLabel string
-	// Version shall contain the hardware version of this equipment as determined by the vendor or supplier.
-	Version string
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
-	chassis []string
-	// ChassisCount is the number of physical containers that contain this equipment.
-	ChassisCount int
-	facility     string
-	managedBy    []string
-	// ManagedByCount is the number of managers that manage this equipment.
-	ManagedByCount int
-}
 
 type CoolingUnitMode string
 
 const (
-	EnabledCoolingUnitMode  CoolingUnitMode = "Enabled"
+	// EnabledCoolingUnitMode shall indicate a request to enable the cooling unit.
+	// Upon successful completion, the 'State' property within 'Status', shall
+	// contain the value 'Enabled'.
+	EnabledCoolingUnitMode CoolingUnitMode = "Enabled"
+	// DisabledCoolingUnitMode shall indicate a request to disable the cooling
+	// unit. When disabled, primary functions of the cooling unit, such as pump
+	// activity, are also disabled. When disabled, the cooling unit may perform
+	// administrative functions, such as monitoring sensors, controlling valves,
+	// and accepting new firmware. Upon successful completion, the 'State' property
+	// within 'Status', shall contain the value 'Disabled'.
 	DisabledCoolingUnitMode CoolingUnitMode = "Disabled"
 )
 
+// CoolingUnit shall represent a cooling system component or unit for a Redfish
+// implementation.
+type CoolingUnit struct {
+	common.Entity
+	// Assembly shall contain a link to a resource of type 'Assembly'.
+	assembly string
+	// AssetTag shall contain the user-assigned asset tag, which is an identifying
+	// string that tracks the equipment for inventory purposes.
+	AssetTag string
+	// Coolant shall contain details regarding the coolant contained or used by
+	// this unit.
+	Coolant Coolant
+	// CoolantConnectorRedundancy shall contain redundancy information for the set
+	// of coolant connectors attached to this equipment. The values of the
+	// 'RedundancyGroup' array shall reference resources of type
+	// 'CoolantConnector'.
+	//
+	// Version added: v1.1.0
+	CoolantConnectorRedundancy []common.RedundantGroup
+	// CoolingCapacityWatts shall contain the manufacturer-provided cooling
+	// capacity, in watt units, of this equipment.
+	CoolingCapacityWatts *int `json:",omitempty"`
+	// EnvironmentMetrics shall contain a link to a resource of type
+	// 'EnvironmentMetrics' that specifies the environment metrics for this
+	// equipment.
+	environmentMetrics string
+	// EquipmentType shall contain the type of equipment this resource represents.
+	EquipmentType CoolingEquipmentType
+	// FilterRedundancy shall contain redundancy information for the groups of
+	// filters in this unit.
+	FilterRedundancy []common.RedundantGroup
+	// Filters shall contain a link to a resource collection of type
+	// 'FilterCollection' that contains the filter information for this equipment.
+	filters string
+	// FirmwareVersion shall contain a string describing the firmware version of
+	// this equipment as provided by the manufacturer.
+	FirmwareVersion string
+	// LeakDetection shall contain a link to a resource of type 'LeakDetection'
+	// that contains the leak detection component information for this equipment.
+	// This link should be used when the leak detection capabilities are tied to a
+	// particular cooling unit or system which may span multiple 'Chassis'
+	// resources. For equipment represented with a single 'Chassis' resource or
+	// detection inside a particular 'Chassis' resource, populating the
+	// 'LeakDetection' resource under 'ThermalSubsystem' for the relevant 'Chassis'
+	// is the preferred approach.
+	leakDetection string
+	// Location shall contain the location information of the associated equipment.
+	Location common.Location
+	// Manufacturer shall contain the name of the organization responsible for
+	// producing the equipment. This organization may be the entity from which the
+	// equipment is purchased, but this is not necessarily true.
+	Manufacturer string
+	// Model shall contain the manufacturer-provided model information of this
+	// equipment.
+	Model string
+	// MultipartImportConfigurationPushURI shall contain a URI used to perform a
+	// multipart HTTP or HTTPS 'POST' of a vendor-specific configuration file for
+	// the purpose of importing the configuration contained within the file as
+	// defined by the 'Import configuration data' clause of the Redfish
+	// Specification. The value of this property should not contain a URI of a
+	// Redfish resource. See the 'Redfish-defined URIs and relative reference
+	// rules' clause in the Redfish Specification.
+	//
+	// Version added: v1.4.0
+	MultipartImportConfigurationPushURI string
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PartNumber shall contain the manufacturer-provided part number for the
+	// equipment.
+	PartNumber string
+	// PrimaryCoolantConnectors shall contain a link to a resource collection of
+	// type 'CoolantConnectorCollection' that contains the primary coolant
+	// connectors for this equipment.
+	primaryCoolantConnectors string
+	// ProductionDate shall contain the date of production or manufacture for this
+	// equipment.
+	ProductionDate string
+	// PumpRedundancy shall contain redundancy information for the groups of pumps
+	// in this unit.
+	PumpRedundancy []common.RedundantGroup
+	// Pumps shall contain a link to a resource collection of type 'PumpCollection'
+	// that contains the pump information for this equipment.
+	pumps string
+	// RatedThermalLossToAirWatts shall contain the rated maximum amount of heat,
+	// in watt units, lost to the surrounding environment during normal operation.
+	//
+	// Version added: v1.4.0
+	RatedThermalLossToAirWatts *int `json:",omitempty"`
+	// Reservoirs shall contain a link to a resource collection of type
+	// 'ReservoirCollection' that contains the reservoir information for this
+	// equipment.
+	reservoirs string
+	// SecondaryCoolantConnectors shall contain a link to a resource collection of
+	// type 'CoolantConnectorCollection' that contains the secondary coolant
+	// connectors for this equipment.
+	secondaryCoolantConnectors string
+	// SerialNumber shall contain a manufacturer-allocated number that identifies
+	// the equipment.
+	SerialNumber string
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
+	// UserLabel shall contain a user-assigned label used to identify this
+	// resource. If a value has not been assigned by a user, the value of this
+	// property shall be an empty string.
+	UserLabel string
+	// Version shall contain the hardware version of this equipment as determined
+	// by the vendor or supplier.
+	Version string
+	// exportConfigurationTarget is the URL to send ExportConfiguration requests.
+	exportConfigurationTarget string
+	// setModeTarget is the URL to send SetMode requests.
+	setModeTarget string
+	// chassis are the URIs for Chassis.
+	chassis []string
+	// facility is the URI for Facility.
+	facility string
+	// managedBy are the URIs for ManagedBy.
+	managedBy []string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
+}
+
 // UnmarshalJSON unmarshals a CoolingUnit object from the raw JSON.
-func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
+func (c *CoolingUnit) UnmarshalJSON(b []byte) error {
 	type temp CoolingUnit
-	type Links struct {
-		// Chassis shall contain an array of links to resources of type Chassis that represent the physical containers that
-		// contain this equipment.
-		Chassis common.Links
-		// Chassis@odata.count
-		ChassisCount int `json:"Chassis@odata.count"`
-		// Facility shall contain a link to a resource of type Facility that represents the facility that contains this
-		// equipment.
-		Facility common.Link
-		// ManagedBy shall contain an array of links to resources of type Manager that represent the managers that manage
-		// this equipment.
-		ManagedBy common.Links
-		// ManagedBy@odata.count
-		ManagedByCount int `json:"ManagedBy@odata.count"`
+	type cActions struct {
+		ExportConfiguration common.ActionTarget `json:"#CoolingUnit.ExportConfiguration"`
+		SetMode             common.ActionTarget `json:"#CoolingUnit.SetMode"`
 	}
-	type CoolingUnitActions struct {
-		SetMode struct {
-			AllowedCoolingUnitModes []CoolingUnitMode `json:"Mode@Redfish.AllowableValues"`
-			Target                  string
-		} `json:"#CoolingUnit.SetMode"`
+	type cLinks struct {
+		Chassis   common.Links `json:"Chassis"`
+		Facility  common.Link  `json:"Facility"`
+		ManagedBy common.Links `json:"ManagedBy"`
 	}
-
-	var t struct {
+	var tmp struct {
 		temp
-		Actions                    CoolingUnitActions
-		Assembly                   common.Link
-		CoolantConnectorRedundancy common.Links
-		EnvironmentMetrics         common.Link
-		Filters                    common.Link
-		LeakDetection              common.Link
-		PrimaryCoolantConnectors   common.Link
-		Pumps                      common.Link
-		Reservoirs                 common.Link
-		SecondaryCoolantConnectors common.Link
-		Links                      Links
+		Actions                    cActions
+		Links                      cLinks
+		Assembly                   common.Link `json:"assembly"`
+		EnvironmentMetrics         common.Link `json:"environmentMetrics"`
+		Filters                    common.Link `json:"filters"`
+		LeakDetection              common.Link `json:"leakDetection"`
+		PrimaryCoolantConnectors   common.Link `json:"primaryCoolantConnectors"`
+		Pumps                      common.Link `json:"pumps"`
+		Reservoirs                 common.Link `json:"reservoirs"`
+		SecondaryCoolantConnectors common.Link `json:"secondaryCoolantConnectors"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*coolingunit = CoolingUnit(t.temp)
+	*c = CoolingUnit(tmp.temp)
 
 	// Extract the links to other entities for later
-	coolingunit.assembly = t.Assembly.String()
-	coolingunit.coolantConnectorRedundancy = t.CoolantConnectorRedundancy.ToStrings()
-	coolingunit.environmentMetrics = t.EnvironmentMetrics.String()
-	coolingunit.filters = t.Filters.String()
-	coolingunit.leakDetection = t.LeakDetection.String()
-	coolingunit.primaryCoolantConnectors = t.PrimaryCoolantConnectors.String()
-	coolingunit.pumps = t.Pumps.String()
-	coolingunit.reservoirs = t.Reservoirs.String()
-	coolingunit.secondaryCoolantConnectors = t.SecondaryCoolantConnectors.String()
-	coolingunit.chassis = t.Links.Chassis.ToStrings()
-	coolingunit.ChassisCount = t.Links.ChassisCount
-	coolingunit.facility = t.Links.Facility.String()
-	coolingunit.managedBy = t.Links.ManagedBy.ToStrings()
-	coolingunit.ManagedByCount = t.Links.ManagedByCount
-	coolingunit.AllowedCoolingUnitModes = t.Actions.SetMode.AllowedCoolingUnitModes
-	coolingunit.setMode = t.Actions.SetMode.Target
+	c.exportConfigurationTarget = tmp.Actions.ExportConfiguration.Target
+	c.setModeTarget = tmp.Actions.SetMode.Target
+	c.chassis = tmp.Links.Chassis.ToStrings()
+	c.facility = tmp.Links.Facility.String()
+	c.managedBy = tmp.Links.ManagedBy.ToStrings()
+	c.assembly = tmp.Assembly.String()
+	c.environmentMetrics = tmp.EnvironmentMetrics.String()
+	c.filters = tmp.Filters.String()
+	c.leakDetection = tmp.LeakDetection.String()
+	c.primaryCoolantConnectors = tmp.PrimaryCoolantConnectors.String()
+	c.pumps = tmp.Pumps.String()
+	c.reservoirs = tmp.Reservoirs.String()
+	c.secondaryCoolantConnectors = tmp.SecondaryCoolantConnectors.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	coolingunit.rawData = b
+	c.rawData = b
 
 	return nil
 }
 
-func (coolingunit *CoolingUnit) SetMode(mode CoolingUnitMode) error {
-	// TODO: check if mode is in Allowable values
-	properties := map[string]interface{}{
-		"Mode": mode,
-	}
-
-	return coolingunit.Post(coolingunit.setMode, properties)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (coolingunit *CoolingUnit) Update() error {
+func (c *CoolingUnit) Update() error {
 	readWriteFields := []string{
 		"AssetTag",
+		"Coolant",
+		"CoolantConnectorRedundancy",
+		"FilterRedundancy",
+		"Location",
+		"PumpRedundancy",
+		"Status",
 		"UserLabel",
 	}
 
-	return coolingunit.UpdateFromRawData(coolingunit, coolingunit.rawData, readWriteFields)
+	return c.UpdateFromRawData(c, c.rawData, readWriteFields)
 }
 
 // GetCoolingUnit will get a CoolingUnit instance from the service.
@@ -215,48 +249,118 @@ func ListReferencedCoolingUnits(c common.Client, link string) ([]*CoolingUnit, e
 	return common.GetCollectionObjects[CoolingUnit](c, link)
 }
 
-// Assembly gets a collection of assemblies.
-func (coolingunit *CoolingUnit) Assembly() ([]*Assembly, error) {
-	return ListReferencedAssemblys(coolingunit.GetClient(), coolingunit.assembly)
+// ExportConfiguration shall export the specified configuration of the equipment in a
+// vendor-specific format. Upon successful completion of the action and any
+// asynchronous processing, the 'Location' header in the response shall contain
+// a URI to a file that contains the configuration data.
+// components - This parameter shall contain an array of components of the
+// equipment for which to export configuration data.
+// encryptionPassphrase - This parameter shall contain the encryption
+// passphrase for the exported file. If this parameter is specified and has a
+// non-zero length, the service shall encrypt the exported file with the
+// passphrase. Otherwise, the service shall not encrypt the exported file.
+// exportType - This parameter shall contain the type of export to perform.
+// oEMComponents - This parameter shall contain an array of OEM-specific
+// components of the equipment for which to export configuration data.
+// security - This parameter shall contain the policy to apply when exporting
+// secure information.
+func (c *CoolingUnit) ExportConfiguration(components Component, encryptionPassphrase string, exportType ExportType, oEMComponents string, security ExportSecurity) error {
+	payload := make(map[string]any)
+	payload["Components"] = components
+	payload["EncryptionPassphrase"] = encryptionPassphrase
+	payload["ExportType"] = exportType
+	payload["OEMComponents"] = oEMComponents
+	payload["Security"] = security
+	return c.Post(c.exportConfigurationTarget, payload)
 }
 
-// EnvironmentMetrics gets the environment metrics for this cooling unit.
-func (coolingunit *CoolingUnit) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if coolingunit.environmentMetrics == "" {
+// SetMode shall set the operating mode of the cooling unit.
+// mode - This parameter shall contain the desired operating mode of the
+// cooling unit.
+func (c *CoolingUnit) SetMode(mode CoolingUnitMode) error {
+	payload := make(map[string]any)
+	payload["Mode"] = mode
+	return c.Post(c.setModeTarget, payload)
+}
+
+// Chassis gets the Chassis linked resources.
+func (c *CoolingUnit) Chassis(client common.Client) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](client, c.chassis)
+}
+
+// Facility gets the Facility linked resource.
+func (c *CoolingUnit) Facility(client common.Client) (*Facility, error) {
+	if c.facility == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(coolingunit.GetClient(), coolingunit.environmentMetrics)
+	return common.GetObject[Facility](client, c.facility)
 }
 
-// Filters gets a collection of filters.
-func (coolingunit *CoolingUnit) Filters() ([]*Filter, error) {
-	return ListReferencedFilters(coolingunit.GetClient(), coolingunit.filters)
+// ManagedBy gets the ManagedBy linked resources.
+func (c *CoolingUnit) ManagedBy(client common.Client) ([]*Manager, error) {
+	return common.GetObjects[Manager](client, c.managedBy)
 }
 
-// LeakDetection gets the of leak detection of this cooling unit.
-func (coolingunit *CoolingUnit) LeakDetection() (*LeakDetection, error) {
-	if coolingunit.leakDetection == "" {
+// Assembly gets the Assembly linked resource.
+func (c *CoolingUnit) Assembly(client common.Client) (*Assembly, error) {
+	if c.assembly == "" {
 		return nil, nil
 	}
-	return GetLeakDetection(coolingunit.GetClient(), coolingunit.leakDetection)
+	return common.GetObject[Assembly](client, c.assembly)
 }
 
-// PrimaryCoolantConnectors gets a collection of primary coolant connectors.
-func (coolingunit *CoolingUnit) PrimaryCoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.primaryCoolantConnectors)
+// EnvironmentMetrics gets the EnvironmentMetrics linked resource.
+func (c *CoolingUnit) EnvironmentMetrics(client common.Client) (*EnvironmentMetrics, error) {
+	if c.environmentMetrics == "" {
+		return nil, nil
+	}
+	return common.GetObject[EnvironmentMetrics](client, c.environmentMetrics)
 }
 
-// Pumps gets a collection of pumps.
-func (coolingunit *CoolingUnit) Pumps() ([]*Pump, error) {
-	return ListReferencedPumps(coolingunit.GetClient(), coolingunit.pumps)
+// Filters gets the Filters collection.
+func (c *CoolingUnit) Filters(client common.Client) ([]*Filter, error) {
+	if c.filters == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Filter](client, c.filters)
 }
 
-// Reservoirs gets a collection of reservoirs.
-func (coolingunit *CoolingUnit) Reservoirs() ([]*Reservoir, error) {
-	return ListReferencedReservoirs(coolingunit.GetClient(), coolingunit.reservoirs)
+// LeakDetection gets the LeakDetection linked resource.
+func (c *CoolingUnit) LeakDetection(client common.Client) (*LeakDetection, error) {
+	if c.leakDetection == "" {
+		return nil, nil
+	}
+	return common.GetObject[LeakDetection](client, c.leakDetection)
 }
 
-// SecondaryCoolantConnectors gets a collection of secondary coolant connectors.
-func (coolingunit *CoolingUnit) SecondaryCoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.secondaryCoolantConnectors)
+// PrimaryCoolantConnectors gets the PrimaryCoolantConnectors collection.
+func (c *CoolingUnit) PrimaryCoolantConnectors(client common.Client) ([]*CoolantConnector, error) {
+	if c.primaryCoolantConnectors == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[CoolantConnector](client, c.primaryCoolantConnectors)
+}
+
+// Pumps gets the Pumps collection.
+func (c *CoolingUnit) Pumps(client common.Client) ([]*Pump, error) {
+	if c.pumps == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Pump](client, c.pumps)
+}
+
+// Reservoirs gets the Reservoirs collection.
+func (c *CoolingUnit) Reservoirs(client common.Client) ([]*Reservoir, error) {
+	if c.reservoirs == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Reservoir](client, c.reservoirs)
+}
+
+// SecondaryCoolantConnectors gets the SecondaryCoolantConnectors collection.
+func (c *CoolingUnit) SecondaryCoolantConnectors(client common.Client) ([]*CoolantConnector, error) {
+	if c.secondaryCoolantConnectors == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[CoolantConnector](client, c.secondaryCoolantConnectors)
 }

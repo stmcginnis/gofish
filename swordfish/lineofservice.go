@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 1.2.1c - #LineOfService.v1_1_0.LineOfService
 
 package swordfish
 
@@ -10,18 +11,17 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// LineOfService This service option is the abstract base class for other ClassOfService and concrete lines of
-// service.
+// LineOfService This service option is the abstract base class for other
+// ClassOfService and concrete lines of service.
 type LineOfService struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
 }
 

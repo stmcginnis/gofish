@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2022.2 - #MetricReport.v1_5_2.MetricReport
 
 package redfish
 
@@ -10,59 +11,78 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// MetricReport shall represent a metric report in a Redfish implementation. When a metric report is deleted, the
-// historic metric data used to generate the report shall be deleted as well unless other metric reports are
-// consuming the data.
+// MetricReport shall represent a metric report in a Redfish implementation.
+// When a metric report is deleted, the historic metric data used to generate
+// the report shall be deleted as well unless other metric reports are consuming
+// the data.
 type MetricReport struct {
 	common.Entity
+	// Context shall contain a client supplied context for the event destination to
+	// which this event is being sent. This property shall only be present when
+	// sent as a payload in an event.
+	//
+	// Version added: v1.4.0
+	Context string
+	// MetricReportDefinition shall contain a link to a resource of type
+	// 'MetricReportDefinition'.
+	metricReportDefinition string
+	// MetricValues shall be metric values for this metric report.
+	MetricValues []MetricReportMetricValue
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Context shall contain a client supplied context for the event destination to which this event is being sent.
-	// This property shall only be present when sent as a payload in an event.
-	Context string
-	// Description provides a description of this resource.
-	Description string
-	// MetricReportDefinition shall contain a link to a resource of type MetricReportDefinition.
-	metricReportDefinition string
-	// MetricValues shall be metric values for this metric report.
-	MetricValues []MetricValue
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// ReportSequence shall contain the current sequence identifier for this metric
+	// report. The sequence identifier is a unique identifier assigned by the
+	// service for serializing metric reports as they are produced.
+	//
+	// Deprecated: v1.3.0
+	// This property has been deprecated due to specification changes with regards
+	// to Server-Sent Events.
+	ReportSequence string
 	// Timestamp shall contain the time when the metric report was generated.
+	//
+	// Version added: v1.1.0
 	Timestamp string
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a MetricReport object from the raw JSON.
-func (metricreport *MetricReport) UnmarshalJSON(b []byte) error {
+func (m *MetricReport) UnmarshalJSON(b []byte) error {
 	type temp MetricReport
-	var t struct {
+	var tmp struct {
 		temp
-		MetricReportDefinition common.Link
+		MetricReportDefinition common.Link `json:"metricReportDefinition"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*metricreport = MetricReport(t.temp)
+	*m = MetricReport(tmp.temp)
 
 	// Extract the links to other entities for later
-	metricreport.metricReportDefinition = t.MetricReportDefinition.String()
+	m.metricReportDefinition = tmp.MetricReportDefinition.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	m.rawData = b
 
 	return nil
 }
 
-// MetricReportDefinition gets the definition for this metric
-func (metricreport *MetricReport) MetricReportDefinition() (*MetricReportDefinition, error) {
-	if metricreport.metricReportDefinition == "" {
-		return nil, nil
+// Update commits updates to this object's properties to the running system.
+func (m *MetricReport) Update() error {
+	readWriteFields := []string{
+		"MetricValues",
 	}
 
-	return GetMetricReportDefinition(metricreport.GetClient(), metricreport.metricReportDefinition)
+	return m.UpdateFromRawData(m, m.rawData, readWriteFields)
 }
 
 // GetMetricReport will get a MetricReport instance from the service.
@@ -76,21 +96,75 @@ func ListReferencedMetricReports(c common.Client, link string) ([]*MetricReport,
 	return common.GetCollectionObjects[MetricReport](c, link)
 }
 
-// MetricValue shall contain properties that capture a metric value and other associated information.
-type MetricValue struct {
-	// MetricID shall contain the value of the ID property of the MetricDefinition resource that contains additional
-	// information for the source metric.
-	MetricID string
-	// MetricProperty shall contain a URI following RFC6901-specified JSON pointer notation to the property from which
-	// this metric is derived. The value of MetricValue may contain additional calculations performed on the property
-	// based upon the configuration of the MetricReportDefinition.
+// MetricReportDefinition gets the MetricReportDefinition linked resource.
+func (m *MetricReport) MetricReportDefinition(client common.Client) (*MetricReportDefinition, error) {
+	if m.metricReportDefinition == "" {
+		return nil, nil
+	}
+	return common.GetObject[MetricReportDefinition](client, m.metricReportDefinition)
+}
+
+// MetricReportMetricValue shall contain properties that capture a metric value and other
+// associated information.
+type MetricReportMetricValue struct {
+	// MetricDefinition shall contain a link to a resource of type
+	// 'MetricDefinition' that describes what this metric value captures.
+	//
+	// Deprecated: v1.5.0
+	// This property has been deprecated in favor of the 'MetricId' property.
+	metricDefinition string
+	// MetricId shall contain the value of the 'Id' property of the
+	// 'MetricDefinition' resource that contains additional information for the
+	// source metric.
+	MetricID string `json:"MetricId"`
+	// MetricProperty shall contain a URI following RFC6901-specified JSON pointer
+	// notation to the property from which this metric is derived. The value of
+	// 'MetricValue' may contain additional calculations performed on the property
+	// based upon the configuration of the 'MetricReportDefinition'.
 	MetricProperty string
-	// MetricValue shall contain the metric value, as a string.
+	// MetricValue shall contain the metric value, as a string. For numeric
+	// metrics, the service shall convert the number to a string representation of
+	// the number. For array metrics, the service shall convert the array to an
+	// RFC8259-defined JSON string. For boolean metrics, this property shall
+	// contain the strings 'true' or 'false'. If the metric value is 'null', this
+	// property shall contain 'null'.
 	MetricValue string
-	// Oem shall contain the OEM extensions. All values for properties contained in this object shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	//
+	// Version added: v1.2.0
 	OEM json.RawMessage `json:"Oem"`
-	// Timestamp shall time when the metric value was obtained. Note that this value may be different from the time
-	// when this instance is created.
+	// Timestamp shall time when the metric value was obtained. Note that this
+	// value may be different from the time when this instance is created.
 	Timestamp string
+}
+
+// UnmarshalJSON unmarshals a MetricReportMetricValue object from the raw JSON.
+func (m *MetricReportMetricValue) UnmarshalJSON(b []byte) error {
+	type temp MetricReportMetricValue
+	var tmp struct {
+		temp
+		MetricDefinition common.Link `json:"metricDefinition"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MetricReportMetricValue(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.metricDefinition = tmp.MetricDefinition.String()
+
+	return nil
+}
+
+// MetricDefinition gets the MetricDefinition linked resource.
+func (m *MetricReportMetricValue) MetricDefinition(client common.Client) (*MetricDefinition, error) {
+	if m.metricDefinition == "" {
+		return nil, nil
+	}
+	return common.GetObject[MetricDefinition](client, m.metricDefinition)
 }

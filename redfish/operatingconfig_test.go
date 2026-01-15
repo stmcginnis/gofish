@@ -72,23 +72,23 @@ func TestOperatingConfig(t *testing.T) {
 	assertEquals(t, "0", result.ID)
 	assertEquals(t, "Processor Profile", result.Name)
 
-	if result.TotalAvailableCoreCount != 28 {
+	if *result.TotalAvailableCoreCount != 28 {
 		t.Errorf("Unexpected TotalAvailableCoreCount value: %d", result.TotalAvailableCoreCount)
 	}
 
-	if result.MaxJunctionTemperatureCelsius != 90 {
+	if *result.MaxJunctionTemperatureCelsius != 90 {
 		t.Errorf("Unexpected MaxJunctionTemperatureCelsius value: %d", result.MaxJunctionTemperatureCelsius)
 	}
 
-	if result.TurboProfile[0].ActiveCoreCount != 2 {
+	if *result.TurboProfile[0].ActiveCoreCount != 2 {
 		t.Errorf("Unexpected ActiveCoreCount value: %d", result.TurboProfile[0].ActiveCoreCount)
 	}
 
-	if result.TurboProfile[2].MaxSpeedMHz != 3800 {
+	if *result.TurboProfile[2].MaxSpeedMHz != 3800 {
 		t.Errorf("Unexpected MaxSpeedMHz value: %d", result.TurboProfile[2].MaxSpeedMHz)
 	}
 
-	if result.BaseSpeedPrioritySettings[0].BaseSpeedMHz != 2900 {
+	if *result.BaseSpeedPrioritySettings[0].BaseSpeedMHz != 2900 {
 		t.Errorf("Unexpected BaseSpeedMHz value: %d", result.BaseSpeedPrioritySettings[0].BaseSpeedMHz)
 	}
 }

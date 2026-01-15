@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.2 - #AggregationService.v1_0_3.AggregationService
 
 package redfish
 
@@ -10,125 +11,82 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// AggregationService shall represent an aggregation service for a Redfish implementation.
+// AggregationService shall represent an aggregation service for a Redfish
+// implementation.
 type AggregationService struct {
 	common.Entity
+	// Aggregates shall contain a link to a resource collection of type
+	// 'AggregateCollection'.
+	aggregates string
+	// AggregationSources shall contain a link to a resource collection of type
+	// 'AggregationSourceCollection'.
+	aggregationSources string
+	// ConnectionMethods shall contain a link to a resource collection of type
+	// 'ConnectionMethodCollection'.
+	connectionMethods string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Aggregates shall contain a link to a resource collection of type AggregateCollection.
-	aggregates string
-	// AggregationSources shall contain a link to a resource collection of type AggregationSourceCollection.
-	aggregationSources string
-	// ConnectionMethods shall contain a link to a resource collection of type ConnectionMethodCollection.
-	connectionMethods string
-	// Description provides a description of this resource.
-	Description string
-	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
-	// Redfish Specification-described requirements.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// ServiceEnabled shall indicate whether the aggregation service is enabled.
 	ServiceEnabled bool
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// resetTarget is the URL to send Reset requests.
+	resetTarget string
+	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder requests.
+	setDefaultBootOrderTarget string
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
-
-	resetTarget               string
-	setDefaultBootOrderTarget string
 }
 
 // UnmarshalJSON unmarshals a AggregationService object from the raw JSON.
-func (aggregationservice *AggregationService) UnmarshalJSON(b []byte) error {
+func (a *AggregationService) UnmarshalJSON(b []byte) error {
 	type temp AggregationService
-	type Actions struct {
+	type aActions struct {
 		Reset               common.ActionTarget `json:"#AggregationService.Reset"`
 		SetDefaultBootOrder common.ActionTarget `json:"#AggregationService.SetDefaultBootOrder"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions            Actions
-		Aggregates         common.Link
-		AggregationSources common.Link
-		ConnectionMethods  common.Link
+		Actions            aActions
+		Aggregates         common.Link `json:"aggregates"`
+		AggregationSources common.Link `json:"aggregationSources"`
+		ConnectionMethods  common.Link `json:"connectionMethods"`
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*aggregationservice = AggregationService(t.temp)
+	*a = AggregationService(tmp.temp)
 
 	// Extract the links to other entities for later
-	aggregationservice.resetTarget = t.Actions.Reset.Target
-	aggregationservice.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
-
-	aggregationservice.aggregates = t.Aggregates.String()
-	aggregationservice.aggregationSources = t.AggregationSources.String()
-	aggregationservice.connectionMethods = t.ConnectionMethods.String()
+	a.resetTarget = tmp.Actions.Reset.Target
+	a.setDefaultBootOrderTarget = tmp.Actions.SetDefaultBootOrder.Target
+	a.aggregates = tmp.Aggregates.String()
+	a.aggregationSources = tmp.AggregationSources.String()
+	a.connectionMethods = tmp.ConnectionMethods.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	aggregationservice.rawData = b
+	a.rawData = b
 
 	return nil
 }
 
-// Reset performs a reset of a set of resources.
-// `batchSize` is the number of elements in each batch being reset.
-// `delayBetweenBatchesInSeconds` is the delay of the batches of elements being reset.
-// `resetType` is the type of reset to perform.
-// `targetURIs` is an array of links to the resources being reset.
-func (aggregationservice *AggregationService) Reset(batchSize, delayBetweenBatchesInSeconds int, resetType ResetType, targetURIs []string) error {
-	t := struct {
-		BatchSize                    int
-		DelayBetweenBatchesInSeconds int
-		ResetType                    ResetType
-		TargetURIs                   []string
-	}{
-		BatchSize:                    batchSize,
-		DelayBetweenBatchesInSeconds: delayBetweenBatchesInSeconds,
-		ResetType:                    resetType,
-		TargetURIs:                   targetURIs,
-	}
-	return aggregationservice.Post(aggregationservice.resetTarget, t)
-}
-
-// SetDefaultBootOrder is used to restore the boot order to the default state
-// for the specified computer systems.
-// `systems` is an array of links to the ComputerSystems to be reset.
-func (aggregationservice *AggregationService) SetDefaultBootOrder(systems []string) error {
-	t := struct {
-		Systems []string
-	}{
-		Systems: systems,
-	}
-	return aggregationservice.Post(aggregationservice.setDefaultBootOrderTarget, t)
-}
-
-// Aggregates gets the aggregates associated with this service.
-func (aggregationservice *AggregationService) Aggregates() ([]*Aggregate, error) {
-	return ListReferencedAggregates(aggregationservice.GetClient(), aggregationservice.aggregates)
-}
-
-// AggregationSources gets the aggregation sources associated with this service.
-func (aggregationservice *AggregationService) AggregationSources() ([]*AggregationSource, error) {
-	return ListReferencedAggregationSources(aggregationservice.GetClient(), aggregationservice.aggregationSources)
-}
-
-// ConnectionMethods gets the connection methods associated with this service.
-func (aggregationservice *AggregationService) ConnectionMethods() ([]*ConnectionMethod, error) {
-	return ListReferencedConnectionMethods(aggregationservice.GetClient(), aggregationservice.connectionMethods)
-}
-
 // Update commits updates to this object's properties to the running system.
-func (aggregationservice *AggregationService) Update() error {
+func (a *AggregationService) Update() error {
 	readWriteFields := []string{
 		"ServiceEnabled",
+		"Status",
 	}
 
-	return aggregationservice.UpdateFromRawData(aggregationservice, aggregationservice.rawData, readWriteFields)
+	return a.UpdateFromRawData(a, a.rawData, readWriteFields)
 }
 
 // GetAggregationService will get a AggregationService instance from the service.
@@ -140,4 +98,57 @@ func GetAggregationService(c common.Client, uri string) (*AggregationService, er
 // a provided reference.
 func ListReferencedAggregationServices(c common.Client, link string) ([]*AggregationService, error) {
 	return common.GetCollectionObjects[AggregationService](c, link)
+}
+
+// Reset shall perform a reset of a set of resources.
+// batchSize - This parameter shall contain the number of elements in each
+// batch simultaneously being issued a reset.
+// delayBetweenBatchesInSeconds - This parameter shall contain the delay of the
+// batches of elements being reset in seconds.
+// resetType - This parameter shall contain the type of reset. The service can
+// accept a request without the parameter and perform an
+// implementation-specific default reset.
+// targetURIs - This parameter shall contain an array of links to the resources
+// being reset.
+func (a *AggregationService) Reset(batchSize uint, delayBetweenBatchesInSeconds uint, resetType common.ResetType, targetURIs []string) error {
+	payload := make(map[string]any)
+	payload["BatchSize"] = batchSize
+	payload["DelayBetweenBatchesInSeconds"] = delayBetweenBatchesInSeconds
+	payload["ResetType"] = resetType
+	payload["TargetURIs"] = targetURIs
+	return a.Post(a.resetTarget, payload)
+}
+
+// SetDefaultBootOrder shall restore the boot order to the default state for the
+// specified computer systems.
+// systems - This parameter shall contain an array of links to resources of
+// type 'ComputerSystem'.
+func (a *AggregationService) SetDefaultBootOrder(systems []string) error {
+	payload := make(map[string]any)
+	payload["Systems"] = systems
+	return a.Post(a.setDefaultBootOrderTarget, payload)
+}
+
+// Aggregates gets the Aggregates collection.
+func (a *AggregationService) Aggregates(client common.Client) ([]*Aggregate, error) {
+	if a.aggregates == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[Aggregate](client, a.aggregates)
+}
+
+// AggregationSources gets the AggregationSources collection.
+func (a *AggregationService) AggregationSources(client common.Client) ([]*AggregationSource, error) {
+	if a.aggregationSources == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[AggregationSource](client, a.aggregationSources)
+}
+
+// ConnectionMethods gets the ConnectionMethods collection.
+func (a *AggregationService) ConnectionMethods(client common.Client) ([]*ConnectionMethod, error) {
+	if a.connectionMethods == "" {
+		return nil, nil
+	}
+	return common.GetCollectionObjects[ConnectionMethod](client, a.connectionMethods)
 }

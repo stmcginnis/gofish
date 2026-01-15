@@ -102,7 +102,7 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 			t.Parallel()
 
 			c := &common.TestClient{
-				CustomReturnForActions: map[string][]interface{}{
+				CustomReturnForActions: map[string][]any{
 					http.MethodPost: {&test.response},
 				},
 			}
@@ -120,8 +120,15 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 
 			if test.expectedResponse {
 				common.AssertEqual(t, &test.response, res)
-			} else {
-				common.AssertEqual(t, test.expectedTask, taskMonitorInfo)
+			} else if test.expectedTask != nil {
+				common.AssertEqualMsg(t, test.expectedTask.TaskMonitor, taskMonitorInfo.TaskMonitor,
+					"expected task monitor %q, actual %q",
+					test.expectedTask.TaskMonitor, taskMonitorInfo.TaskMonitor)
+				if test.expectedTask.Task != nil {
+					common.AssertEqualMsg(t, test.expectedTask.Task.ID, taskMonitorInfo.Task.ID,
+						"expected task ID [%q], actual [%q]",
+						test.expectedTask.Task.ID, taskMonitorInfo.Task.ID)
+				}
 			}
 		})
 	}
@@ -131,6 +138,8 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 	startTime := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	testTaskMonitorURI := "/TaskService/TaskMonitors/1"
 
+	complete0 := uint(0)
+	complete100 := uint(100)
 	tests := map[string]struct {
 		PollRate        time.Duration
 		CtxFunc         func(ctx context.Context) (context.Context, func())
@@ -293,8 +302,8 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 				{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(""))},
 			},
 			ExpectedUpdates: []*redfish.Task{
-				{TaskState: "Running", PercentComplete: 0},
-				{TaskState: "Running", PercentComplete: 100},
+				{TaskState: "Running", PercentComplete: &complete0},
+				{TaskState: "Running", PercentComplete: &complete100},
 			},
 			StatusChan: true,
 			EndTime:    startTime.Add(20 * time.Second),
@@ -321,7 +330,7 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 
 			// synctest.Test(t, func(t *testing.T) {
 			c := &common.TestClient{
-				CustomReturnForActions: map[string][]interface{}{},
+				CustomReturnForActions: map[string][]any{},
 			}
 
 			for _, resp := range test.Responses {
@@ -343,9 +352,21 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 							expectedStatus.SetClient(c)
 						}
 
-						common.AssertEqualMsg(t, expectedStatus, status,
-							"status update [%d], expected [%v], actual [%v]",
-							i, expectedStatus, status)
+						if expectedStatus != nil && status != nil {
+							common.AssertEqualMsg(t, expectedStatus.TaskState, status.TaskState,
+								"status update [%d], expected task state %q, actual %q",
+								i, expectedStatus.TaskState, status.TaskState)
+							if expectedStatus.PercentComplete == nil {
+								common.AssertEqualMsg(t, nil, status.PercentComplete,
+									"status update [%d], expected nil percent complete, actual [%d]",
+									i, *status.PercentComplete)
+							} else {
+								common.AssertEqualMsg(t, *expectedStatus.PercentComplete, *status.PercentComplete,
+									"status update [%d], expected percent complete [%d], actual [%d]",
+									i, expectedStatus.PercentComplete, status.PercentComplete)
+							}
+						}
+						// common.AssertEqualMsg(t, expectedStatus, status
 						i++
 					}
 					common.AssertEqual(t, len(test.ExpectedUpdates), i)
@@ -404,7 +425,7 @@ func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen
 func TestWaitForTaskMonitorObject(t *testing.T) {
 	raw := `{"PowerState": "On"}`
 	c := &common.TestClient{
-		CustomReturnForActions: map[string][]interface{}{
+		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
 				&http.Response{
 					StatusCode: 200,

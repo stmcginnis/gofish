@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2025.2 - #ConnectionMethod.v1_2_0.ConnectionMethod
 
 package redfish
 
@@ -23,9 +24,16 @@ const (
 	IPMI20ConnectionMethodType ConnectionMethodType = "IPMI20"
 	// NETCONFConnectionMethodType shall indicate the connection method is NETCONF.
 	NETCONFConnectionMethodType ConnectionMethodType = "NETCONF"
-	// OEMConnectionMethodType shall indicate the connection method is OEM. The ConnectionMethodVariant property shall
-	// contain further identification information.
+	// OEMConnectionMethodType shall indicate the connection method is OEM. The
+	// 'ConnectionMethodVariant' property shall contain further identification
+	// information.
 	OEMConnectionMethodType ConnectionMethodType = "OEM"
+	// ModbusSerialConnectionMethodType shall indicate the connection method is
+	// Modbus serial (RTU).
+	ModbusSerialConnectionMethodType ConnectionMethodType = "ModbusSerial"
+	// ModbusTCPConnectionMethodType shall indicate the connection method is Modbus
+	// TCP.
+	ModbusTCPConnectionMethodType ConnectionMethodType = "ModbusTCP"
 )
 
 type TunnelingProtocolType string
@@ -33,57 +41,62 @@ type TunnelingProtocolType string
 const (
 	// SSHTunnelingProtocolType shall indicate that the tunneling protocol is SSH.
 	SSHTunnelingProtocolType TunnelingProtocolType = "SSH"
-	// OEMTunnelingProtocolType shall indicate that the tunneling protocol is OEM-specific.
+	// OEMTunnelingProtocolType shall indicate that the tunneling protocol is
+	// OEM-specific.
 	OEMTunnelingProtocolType TunnelingProtocolType = "OEM"
 )
 
-// ConnectionMethod shall represent a connection method for a Redfish implementation.
+// ConnectionMethod shall represent a connection method for a Redfish
+// implementation.
 type ConnectionMethod struct {
 	common.Entity
+	// ConnectionMethodType shall contain an identifier of the connection method.
+	ConnectionMethodType ConnectionMethodType
+	// ConnectionMethodVariant shall contain an additional identifier of the
+	// connection method. This property shall be present if 'ConnectionMethodType'
+	// is 'OEM'.
+	ConnectionMethodVariant string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// ConnectionMethodType shall contain an identifier of the connection method.
-	ConnectionMethodType ConnectionMethodType
-	// ConnectionMethodVariant shall contain an additional identifier of the connection method. This property shall be
-	// present if ConnectionMethodType is 'OEM'.
-	ConnectionMethodVariant string
-	// Description provides a description of this resource.
-	Description string
-	// TunnelingProtocol shall contain the tunneling protocol used for this connection method.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// TunnelingProtocol shall contain the tunneling protocol used for this
+	// connection method.
+	//
+	// Version added: v1.1.0
 	TunnelingProtocol TunnelingProtocolType
-
+	// aggregationSources are the URIs for AggregationSources.
 	aggregationSources []string
-	// AggregationSourcesCount is the number of AggregationSource that are using this connection method.
-	AggregationSourcesCount int
+	// serialInterface is the URI for SerialInterface.
+	serialInterface string
 }
 
 // UnmarshalJSON unmarshals a ConnectionMethod object from the raw JSON.
-func (connectionmethod *ConnectionMethod) UnmarshalJSON(b []byte) error {
+func (c *ConnectionMethod) UnmarshalJSON(b []byte) error {
 	type temp ConnectionMethod
-	type Links struct {
-		// AggregationSources shall contain an array of links to resources of type AggregationSource that are using this
-		// connection method.
-		AggregationSources common.Links
-		// AggregationSources@odata.count
-		AggregationSourcesCount int `json:"AggregationSources@odata.count"`
+	type cLinks struct {
+		AggregationSources common.Links `json:"AggregationSources"`
+		SerialInterface    common.Link  `json:"SerialInterface"`
 	}
-	var t struct {
+	var tmp struct {
 		temp
-		Links Links
+		Links cLinks
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*connectionmethod = ConnectionMethod(t.temp)
+	*c = ConnectionMethod(tmp.temp)
 
 	// Extract the links to other entities for later
-	connectionmethod.aggregationSources = t.Links.AggregationSources.ToStrings()
-	connectionmethod.AggregationSourcesCount = t.Links.AggregationSourcesCount
+	c.aggregationSources = tmp.Links.AggregationSources.ToStrings()
+	c.serialInterface = tmp.Links.SerialInterface.String()
 
 	return nil
 }
@@ -99,7 +112,15 @@ func ListReferencedConnectionMethods(c common.Client, link string) ([]*Connectio
 	return common.GetCollectionObjects[ConnectionMethod](c, link)
 }
 
-// AggregationSources gets the access points using this connection method.
-func (connectionmethod *ConnectionMethod) AggregationSources() ([]*AggregationSource, error) {
-	return common.GetObjects[AggregationSource](connectionmethod.GetClient(), connectionmethod.aggregationSources)
+// AggregationSources gets the AggregationSources linked resources.
+func (c *ConnectionMethod) AggregationSources(client common.Client) ([]*AggregationSource, error) {
+	return common.GetObjects[AggregationSource](client, c.aggregationSources)
+}
+
+// SerialInterface gets the SerialInterface linked resource.
+func (c *ConnectionMethod) SerialInterface(client common.Client) (*SerialInterface, error) {
+	if c.serialInterface == "" {
+		return nil, nil
+	}
+	return common.GetObject[SerialInterface](client, c.serialInterface)
 }

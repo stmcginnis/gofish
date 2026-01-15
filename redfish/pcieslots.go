@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2023.2 - #PCIeSlots.v1_6_1.PCIeSlots
 
 package redfish
 
@@ -13,145 +14,140 @@ import (
 type SlotTypes string
 
 const (
-	// Full-Length PCIe slot.
-	FullLength SlotTypes = "FullLength"
-	// Half-Length PCIe slot.
-	HalfLength SlotTypes = "HalfLength"
-	// Low-Profile or Slim PCIe slot.
-	LowProfile SlotTypes = "LowProfile"
-	// PCIe M.2 slot.
-	M2 SlotTypes = "M2"
-	// Mini PCIe slot.
-	Mini SlotTypes = "Mini"
-	// (v1.2+) Open Compute Project 3.0 large form factor slot.
-	OCP3Large SlotTypes = "OCP3Large"
-	// (v1.2+) Open Compute Project 3.0 small form factor slot.
-	OCP3Small SlotTypes = "OCP3Small"
-	// An OEM-specific slot.
-	OEM SlotTypes = "OEM"
-	// (v1.3+) U.2 / SFF-8639 slot or bay.
-	U2 SlotTypes = "U2"
+	// FullLengthSlotTypes Full-Length PCIe slot.
+	FullLengthSlotTypes SlotTypes = "FullLength"
+	// HalfLengthSlotTypes Half-Length PCIe slot.
+	HalfLengthSlotTypes SlotTypes = "HalfLength"
+	// LowProfileSlotTypes Low-Profile or Slim PCIe slot.
+	LowProfileSlotTypes SlotTypes = "LowProfile"
+	// MiniSlotTypes Mini PCIe slot.
+	MiniSlotTypes SlotTypes = "Mini"
+	// M2SlotTypes PCIe M.2 slot.
+	M2SlotTypes SlotTypes = "M2"
+	// OEMSlotTypes is an OEM-specific slot.
+	OEMSlotTypes SlotTypes = "OEM"
+	// OCP3SmallSlotTypes Open Compute Project 3.0 small form factor slot.
+	OCP3SmallSlotTypes SlotTypes = "OCP3Small"
+	// OCP3LargeSlotTypes Open Compute Project 3.0 large form factor slot.
+	OCP3LargeSlotTypes SlotTypes = "OCP3Large"
+	// U2SlotTypes U.2 / SFF-8639 slot or bay.
+	U2SlotTypes SlotTypes = "U2"
 )
 
-// PCIeSlot shall contain the definition for a PCIe Slot for a Redfish implementation.
-type PCIeSlot struct {
-	// HotPluggable is an indication of whether this PCIe slot supports hotplug.
-	HotPluggable bool
-	// Lanes is the number of PCIe lanes supported by this slot.
-	Lanes int
-	// Location is the location of the PCIe slot.
-	Location common.Location
-	// LocationIndicatorActive is an indicator allowing an operator to physically locate this resource.
-	LocationIndicatorActive bool
-	// PCIeType is the PCIe specification supported by this slot.
-	PCIeType PCIeTypes
-	// SlotType is the PCIe slot type for this slot
-	SlotType SlotTypes
-	// Status shall contain any status or health properties of the resource.
-	Status common.Status
-
-	// PCIeDevice shall be an array of links to the PCIe devices contained in this slot.
-	pcieDevice []string
-	// PCIeDeviceCount is the number of PCIe devices contained in this slot.
-	PCIeDeviceCount int
-	// Processors shall be an array of links to the processors
-	// that are directly connected or directly bridged to this PCIe slot.
-	processors []string
-	// ProcessorsCount is the number of processors
-	// that are directly connected or directly bridged to this PCIe slot.
-	ProcessorsCount int
-	// OEMLinks are all OEM data under link section
-	OemLinks json.RawMessage
-	// Oem shall contain the OEM extensions. All values for properties that
-	// this object contains shall conform to the Redfish Specification
-	// described requirements.
-	Oem json.RawMessage
-}
-
-// UnmarshalJSON unmarshals a Slot object from the raw JSON.
-func (slot *PCIeSlot) UnmarshalJSON(b []byte) error {
-	type temp PCIeSlot
-	type linkReference struct {
-		PCIeDevice      common.Links
-		PCIeDeviceCount int `json:"PCIeDevice@odata.count"`
-		Processors      common.Links
-		ProcessorsCount int `json:"Processors@odata.count"`
-		Oem             json.RawMessage
-	}
-
-	var t struct {
-		temp
-		Links linkReference
-	}
-
-	if err := json.Unmarshal(b, &t); err != nil {
-		return err
-	}
-
-	*slot = PCIeSlot(t.temp)
-	slot.pcieDevice = t.Links.PCIeDevice.ToStrings()
-	slot.PCIeDeviceCount = t.Links.PCIeDeviceCount
-	slot.processors = t.Links.Processors.ToStrings()
-	slot.ProcessorsCount = t.Links.ProcessorsCount
-	slot.OemLinks = t.Links.Oem
-
-	return nil
-}
-
-// PCIeDevices gets the PCIe devices contained in this slot.
-func (slot *PCIeSlot) PCIeDevice(c common.Client) ([]*PCIeDevice, error) {
-	return common.GetObjects[PCIeDevice](c, slot.pcieDevice)
-}
-
-// Processors gets the processors that are directly connected or directly bridged to this PCIe slot.
-func (slot *PCIeSlot) Processors(c common.Client) ([]*Processor, error) {
-	return common.GetObjects[Processor](c, slot.processors)
-}
-
-// PCIeSlots is used to represent a PCIeSlots resource for a Redfish implementation.
-// This schema has been deprecated in favor of the PCIeDevice schema.
-// Empty PCIe slots should be represented by PCIeDevice resources using the `Absent`
-// value of the State property within Status.
+// PCIeSlots shall represent a set of PCIe slot information for a Redfish
+// implementation.
 type PCIeSlots struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Description provides a description of this resource.
-	Description string
-	// Slots is an array of PCI Slot information.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// Slots shall contain an entry for each PCIe slot, including empty slots (with
+	// no device or card installed).
 	Slots []PCIeSlot
-	// Oem shall contain the OEM extensions. All values for properties that
-	// this object contains shall conform to the Redfish Specification
-	// described requirements.
-	Oem json.RawMessage
-	// OemActions contains all the vendor specific actions. It is vendor responsibility to parse this field accordingly
-	OemActions json.RawMessage
+	// rawData holds the original serialized JSON so we can compare updates.
+	rawData []byte
 }
 
-// UnmarshalJSON unmarshals a Slot object from the raw JSON.
-func (pcieSlots *PCIeSlots) UnmarshalJSON(b []byte) error {
+// UnmarshalJSON unmarshals a PCIeSlots object from the raw JSON.
+func (p *PCIeSlots) UnmarshalJSON(b []byte) error {
 	type temp PCIeSlots
-	type actions struct {
-		Oem json.RawMessage // OEM actions will be stored here
-	}
-	var t struct {
+	var tmp struct {
 		temp
-		Actions actions
 	}
 
-	if err := json.Unmarshal(b, &t); err != nil {
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
 		return err
 	}
 
-	*pcieSlots = PCIeSlots(t.temp)
-	pcieSlots.OemActions = t.Actions.Oem
+	*p = PCIeSlots(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.rawData = b
 
 	return nil
 }
 
-// GetPCIeSlots will get a PCIeSlots instance from the chassis.
+// Update commits updates to this object's properties to the running system.
+func (p *PCIeSlots) Update() error {
+	readWriteFields := []string{
+		"Slots",
+	}
+
+	return p.UpdateFromRawData(p, p.rawData, readWriteFields)
+}
+
+// GetPCIeSlots will get a PCIeSlots instance from the service.
 func GetPCIeSlots(c common.Client, uri string) (*PCIeSlots, error) {
 	return common.GetObject[PCIeSlots](c, uri)
+}
+
+// ListReferencedPCIeSlotss gets the collection of PCIeSlots from
+// a provided reference.
+func ListReferencedPCIeSlotss(c common.Client, link string) ([]*PCIeSlots, error) {
+	return common.GetCollectionObjects[PCIeSlots](c, link)
+}
+
+// PCIeLinks shall contain links to resources that are related to but are not
+// contained by, or subordinate to, this resource.
+type PCIeLinks struct {
+	// Oem shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PCIeDevice shall contain an array of links to resources of type 'PCIeDevice'
+	// with which this physical slot is associated. If the 'State' property in
+	// 'Status' of this slot is 'Absent', this property shall not appear in the
+	// resource.
+	PCIeDevice []PCIeDevice
+	// PCIeDevice@odata.count
+	PCIeDeviceCount int `json:"PCIeDevice@odata.count"`
+	// Processors shall contain an array of links to resources of type 'Processor'
+	// that represent processors that are directly connected or directly bridged to
+	// this PCIe slot.
+	//
+	// Version added: v1.5.0
+	Processors []Processor
+	// Processors@odata.count
+	ProcessorsCount int `json:"Processors@odata.count"`
+}
+
+// PCIeSlot shall contain the definition for a PCIe slot for a Redfish
+// implementation.
+type PCIeSlot struct {
+	// HotPluggable shall contain indicating whether this PCIe slot supports
+	// hotplug.
+	//
+	// Version added: v1.1.0
+	HotPluggable bool
+	// Lanes shall contain the maximum number of PCIe lanes supported by the slot.
+	Lanes *int `json:",omitempty"`
+	// Location shall contain part location information, including a 'ServiceLabel'
+	// of the associated PCIe slot.
+	Location common.Location
+	// LocationIndicatorActive shall contain the state of the indicator used to
+	// physically identify or locate this resource. A write to this property shall
+	// update the value of 'IndicatorLED' in this resource, if supported, to
+	// reflect the implementation of the locating function.
+	//
+	// Version added: v1.4.0
+	LocationIndicatorActive bool
+	// Oem shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// PCIeType shall contain the maximum PCIe specification that this slot
+	// supports.
+	PCIeType PCIeTypes
+	// SlotType shall contain the slot type as specified by the PCIe specification.
+	SlotType SlotTypes
+	// Status shall contain any status or health properties of the resource.
+	Status common.Status
 }

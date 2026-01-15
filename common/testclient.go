@@ -38,7 +38,7 @@ type TestClient struct {
 	// http.MethodPatch and http.MethodDelete.
 	// For each key it is possible to define a list of
 	// returns (in the order they should be returned).
-	CustomReturnForActions map[string][]interface{}
+	CustomReturnForActions map[string][]any
 	Settings               ClientSettings
 }
 
@@ -60,7 +60,7 @@ func (c *TestClient) actionCount(action string) int {
 }
 
 // getCustomReturnForAction gets the custom return for the action
-func (c *TestClient) getCustomReturnForAction(action string) interface{} {
+func (c *TestClient) getCustomReturnForAction(action string) any {
 	switch action {
 	case http.MethodGet, http.MethodPost,
 		http.MethodPut, http.MethodPatch,
@@ -84,7 +84,7 @@ func (c *TestClient) actionCountIndex(action string) int {
 
 // getPayloadToBeRecorded returns the payload that will
 // be recorded for the call.
-func (c *TestClient) getPayloadToBeRecorded(payload interface{}) string {
+func (c *TestClient) getPayloadToBeRecorded(payload any) string {
 	// when possible do Marshal/Unmarshal of the payload
 	// in order to have the json keys when using interfaces
 	// in the payload.
@@ -93,12 +93,14 @@ func (c *TestClient) getPayloadToBeRecorded(payload interface{}) string {
 		if err != nil {
 			return fmt.Sprintf("%v", payload)
 		}
-		var payloadInterface interface{}
+		var payloadInterface any
 		err = json.Unmarshal(payloadMarshaled, &payloadInterface)
 		if err != nil {
 			return fmt.Sprintf("%v", payload)
 		}
-		return fmt.Sprintf("%v", payloadInterface)
+		// Specifically to the test client since we are round-tripping the marshaling
+		// of the payload, need to strip out empty payloads.
+		return strings.ReplaceAll(fmt.Sprintf("%v", payloadInterface), "map[]", "")
 	}
 
 	return ""
@@ -107,11 +109,11 @@ func (c *TestClient) getPayloadToBeRecorded(payload interface{}) string {
 // Reset resets the captured information for this mock client.
 func (c *TestClient) Reset() {
 	c.calls = []TestAPICall{}
-	c.CustomReturnForActions = map[string][]interface{}{}
+	c.CustomReturnForActions = map[string][]any{}
 }
 
 // recordCall is a helper to record any API calls made through this client
-func (c *TestClient) recordCall(action, url string, payload interface{}, customHeaders map[string]string) {
+func (c *TestClient) recordCall(action, url string, payload any, customHeaders map[string]string) {
 	call := TestAPICall{
 		Action:        action,
 		URL:           url,
@@ -122,7 +124,7 @@ func (c *TestClient) recordCall(action, url string, payload interface{}, customH
 	c.calls = append(c.calls, call)
 }
 
-func (c *TestClient) performAction(action, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *TestClient) performAction(action, url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.recordCall(action, url, payload, customHeaders)
@@ -155,12 +157,12 @@ func (c *TestClient) GetWithHeaders(url string, customHeaders map[string]string)
 }
 
 // Post performs a Post request against the Redfish service.
-func (c *TestClient) Post(url string, payload interface{}) (*http.Response, error) {
+func (c *TestClient) Post(url string, payload any) (*http.Response, error) {
 	return c.performAction(http.MethodPost, url, payload, nil)
 }
 
 // PostWithHeaders performs a Post request against the Redfish service.
-func (c *TestClient) PostWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *TestClient) PostWithHeaders(url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	return c.performAction(http.MethodPost, url, payload, customHeaders)
 }
 
@@ -175,22 +177,22 @@ func (c *TestClient) PostMultipartWithHeaders(url string, payload map[string]io.
 }
 
 // Put performs a Put request against the Redfish service.
-func (c *TestClient) Put(url string, payload interface{}) (*http.Response, error) {
+func (c *TestClient) Put(url string, payload any) (*http.Response, error) {
 	return c.performAction(http.MethodPut, url, payload, nil)
 }
 
 // PutWithHeaders performs a Put request against the Redfish service.
-func (c *TestClient) PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *TestClient) PutWithHeaders(url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	return c.performAction(http.MethodPut, url, payload, customHeaders)
 }
 
 // Patch performs a Patch request against the Redfish service.
-func (c *TestClient) Patch(url string, payload interface{}) (*http.Response, error) {
+func (c *TestClient) Patch(url string, payload any) (*http.Response, error) {
 	return c.performAction(http.MethodPatch, url, payload, nil)
 }
 
 // PatchWithHeaders performs a Patch request against the Redfish service.
-func (c *TestClient) PatchWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+func (c *TestClient) PatchWithHeaders(url string, payload any, customHeaders map[string]string) (*http.Response, error) {
 	return c.performAction(http.MethodPatch, url, payload, customHeaders)
 }
 

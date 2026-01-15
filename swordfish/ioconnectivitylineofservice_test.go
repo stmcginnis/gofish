@@ -51,11 +51,11 @@ func TestIOConnectivityLineOfService(t *testing.T) {
 		t.Errorf("Invalid access protocol: %s", result.AccessProtocols[3])
 	}
 
-	if result.MaxBytesPerSecond != 5000000000 {
+	if *result.MaxBytesPerSecond != 5000000000 {
 		t.Errorf("Invalid MaxBytesPerSecond: %d", result.MaxBytesPerSecond)
 	}
 
-	if result.MaxIOPS != 1000000000 {
+	if *result.MaxIOPS != 1000000000 {
 		t.Errorf("Invalid MaxIOPS: %d", result.MaxIOPS)
 	}
 }

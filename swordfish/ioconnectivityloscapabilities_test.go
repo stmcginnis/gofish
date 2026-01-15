@@ -78,11 +78,11 @@ func TestIOConnectivityLoSCapabilities(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.MaxSupportedBytesPerSecond != 5000000000 {
+	if *result.MaxSupportedBytesPerSecond != 5000000000 {
 		t.Errorf("Invalid MaxSupportedBytesPerSecond: %d", result.MaxSupportedBytesPerSecond)
 	}
 
-	if result.MaxSupportedIOPS != 1000000000 {
+	if *result.MaxSupportedIOPS != 1000000000 {
 		t.Errorf("MaxSupportedIOPS: %d", result.MaxSupportedIOPS)
 	}
 
@@ -90,7 +90,7 @@ func TestIOConnectivityLoSCapabilities(t *testing.T) {
 		t.Errorf("Invalid AccessProtocol: %s", result.SupportedAccessProtocols[1])
 	}
 
-	if result.SupportedLinesOfService[0].MaxBytesPerSecond != 5000000000 {
+	if *result.SupportedLinesOfService[0].MaxBytesPerSecond != 5000000000 {
 		t.Errorf("Invalid MaxSupportedBytesPerSecond: %d", result.SupportedLinesOfService[0].MaxBytesPerSecond)
 	}
 }
@@ -107,8 +107,8 @@ func TestIOConnectivityLoSCapabilitiesUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
-	result.MaxSupportedBytesPerSecond = 500
-	result.MaxSupportedIOPS = 10000
+	*result.MaxSupportedBytesPerSecond = 500
+	*result.MaxSupportedIOPS = 10000
 	err = result.Update()
 
 	if err != nil {

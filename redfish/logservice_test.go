@@ -78,7 +78,7 @@ func TestLogService(t *testing.T) {
 		t.Errorf("Received %d max number of records", result.MaxNumberOfRecords)
 	}
 
-	if result.OverWritePolicy != WrapsWhenFullOverWritePolicy {
+	if result.OverWritePolicy != WrapsWhenFullLogServiceOverWritePolicy {
 		t.Errorf("Received %s overwrite policy", result.OverWritePolicy)
 	}
 
@@ -140,7 +140,7 @@ func TestLogServiceCollectDiagnosticsDataSuccess(t *testing.T) {
 
 	diagnosticLocation := "/redfish/v1/Managers/BMC/LogServices/Log/Entries/10"
 
-	testClient.CustomReturnForActions = map[string][]interface{}{
+	testClient.CustomReturnForActions = map[string][]any{
 		http.MethodPost: []interface{}{
 			&http.Response{
 				StatusCode: http.StatusCreated,
@@ -189,7 +189,7 @@ func TestLogServiceCollectionDiagnosticsDataUnsupported(t *testing.T) {
 func TestLogServiceCollectDiagnosticsActionInfo(t *testing.T) {
 	logSvc, testClient := initLogServiceClient(t, logServiceBody)
 
-	testClient.CustomReturnForActions = map[string][]interface{}{
+	testClient.CustomReturnForActions = map[string][]any{
 		http.MethodGet: {
 			&http.Response{
 				StatusCode: http.StatusOK,

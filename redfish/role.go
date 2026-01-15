@@ -1,6 +1,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+// 2020.4 - #Role.v1_3_3.Role
 
 package redfish
 
@@ -10,105 +11,80 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
-// PrivilegeType is the role privilege type.
-type PrivilegeType string
-
-const (
-	// LoginPrivilegeType Can log in to the service and read resources.
-	LoginPrivilegeType PrivilegeType = "Login"
-	// ConfigureManagerPrivilegeType Can configure managers.
-	ConfigureManagerPrivilegeType PrivilegeType = "ConfigureManager"
-	// ConfigureUsersPrivilegeType Can configure users and their accounts.
-	ConfigureUsersPrivilegeType PrivilegeType = "ConfigureUsers"
-	// ConfigureSelfPrivilegeType Can change the password for the current user account, log out of their own sessions,
-	// and perform operations on resources they created. Services will need to be aware of resource ownership to map
-	// this privilege to an operation from a particular user.
-	ConfigureSelfPrivilegeType PrivilegeType = "ConfigureSelf"
-	// ConfigureComponentsPrivilegeType Can configure components that this service manages.
-	ConfigureComponentsPrivilegeType PrivilegeType = "ConfigureComponents"
-	// NoAuthPrivilegeType shall be used to indicate an operation does not require authentication. This privilege shall
-	// not be used in Redfish roles.
-	NoAuthPrivilegeType PrivilegeType = "NoAuth"
-	// ConfigureCompositionInfrastructurePrivilegeType shall be used to indicate the user can view and configure
-	// composition service resources without matching the Client property in the ResourceBlock or
-	// CompositionReservation resources.
-	ConfigureCompositionInfrastructurePrivilegeType PrivilegeType = "ConfigureCompositionInfrastructure"
-	// AdministrateSystemsPrivilegeType Administrator for systems found in the systems collection. Able to manage boot
-	// configuration, keys, and certificates for systems.
-	AdministrateSystemsPrivilegeType PrivilegeType = "AdministrateSystems"
-	// OperateSystemsPrivilegeType Operator for systems found in the systems collection. Able to perform resets and
-	// configure interfaces.
-	OperateSystemsPrivilegeType PrivilegeType = "OperateSystems"
-	// AdministrateStoragePrivilegeType Administrator for storage subsystems and storage systems found in the storage
-	// collection and storage system collection respectively.
-	AdministrateStoragePrivilegeType PrivilegeType = "AdministrateStorage"
-	// OperateStorageBackupPrivilegeType Operator for storage backup functionality for storage subsystems and storage
-	// systems found in the storage collection and storage system collection respectively.
-	OperateStorageBackupPrivilegeType PrivilegeType = "OperateStorageBackup"
-)
-
-// Role represents the Redfish Role for the user account.
+// Role shall represent the Redfish role for the user account.
 type Role struct {
 	common.Entity
-
+	// AlternateRoleId shall contain a non-restricted 'RoleId' intended to be used
+	// in its place when the 'Restricted' property contains the value 'true'.
+	//
+	// Version added: v1.3.0
+	AlternateRoleID string `json:"AlternateRoleId"`
+	// AssignedPrivileges shall contain the Redfish privileges for this role. For
+	// predefined roles, this property shall be read-only. For custom roles, some
+	// implementations may prevent writing to this property.
+	AssignedPrivileges []common.PrivilegeType
+	// IsPredefined shall indicate whether the role is predefined by Redfish or an
+	// OEM as contrasted with a client-defined role. If this property is not
+	// present, the value should be assumed to be 'false'.
+	IsPredefined bool
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// AssignedPrivileges shall contain the Redfish
-	// privileges for this Role. For predefined Roles, this property shall
-	// be read-only. For custom Roles, some implementations may not allow
-	// writing to this property.
-	AssignedPrivileges []PrivilegeType
-	// Description provides a description of this resource.
-	Description string
-	// IsPredefined shall indicate whether the Role is a
-	// Redfish-predefined Role rather than a custom Redfish Role.
-	IsPredefined bool
-	// OemPrivileges shall contain the OEM privileges for
-	// this Role. For predefined Roles, this property shall be read-only.
-	// For custom Roles, some implementations may not allow writing to this
-	// property.
+	// Oem shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OemPrivileges shall contain the OEM privileges for this role. For predefined
+	// roles, this property shall be read-only. For custom roles, some
+	// implementations may prevent writing to this property.
 	OemPrivileges []string
-	// Restricted shall indicate whether use of the role is restricted by a service as defined by the 'Restricted roles
-	// and restricted privileges' clause of the Redfish Specification. If this property is not present, the value shall
-	// be assumed to be 'false'.
+	// Restricted shall indicate whether use of the role is restricted by a service
+	// as defined by the 'Restricted roles and restricted privileges' clause of the
+	// Redfish Specification. If this property is not present, the value shall be
+	// assumed to be 'false'.
+	//
+	// Version added: v1.3.0
 	Restricted bool
-	// RoleID shall contain the string name of the Role.
-	// This property shall contain the same value as the Id property.
+	// RoleId shall contain the string name of the role. This property shall
+	// contain the same value as the 'Id' property.
+	//
+	// Version added: v1.2.0
 	RoleID string `json:"RoleId"`
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
 }
 
 // UnmarshalJSON unmarshals a Role object from the raw JSON.
-func (role *Role) UnmarshalJSON(b []byte) error {
+func (r *Role) UnmarshalJSON(b []byte) error {
 	type temp Role
-	var t struct {
+	var tmp struct {
 		temp
 	}
 
-	err := json.Unmarshal(b, &t)
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
 
-	*role = Role(t.temp)
+	*r = Role(tmp.temp)
+
+	// Extract the links to other entities for later
 
 	// This is a read/write object, so we need to save the raw object data for later
-	role.rawData = b
+	r.rawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
-func (role *Role) Update() error {
+func (r *Role) Update() error {
 	readWriteFields := []string{
 		"AssignedPrivileges",
 		"OemPrivileges",
 	}
 
-	return role.UpdateFromRawData(role, role.rawData, readWriteFields)
+	return r.UpdateFromRawData(r, r.rawData, readWriteFields)
 }
 
 // GetRole will get a Role instance from the service.

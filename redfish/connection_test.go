@@ -56,6 +56,6 @@ func TestConnection(t *testing.T) {
 
 	assertEquals(t, "1", result.ID)
 	assertEquals(t, "Connection info for host 1", result.Name)
-	assertEquals(t, "/redfish/v1/Storage/NVMeoF/Volumes/1", result.VolumeInfo[0].Volume.String())
+	assertEquals(t, "/redfish/v1/Storage/NVMeoF/Volumes/1", result.VolumeInfo[0].volume)
 	assertEquals(t, "/redfish/v1/Fabrics/NVMeoF/Endpoints/Initiator1", result.initiatorEndpoints[0])
 }

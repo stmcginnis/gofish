@@ -61,7 +61,7 @@ func TestPCIeSlots(t *testing.T) {
 	assertEquals(t, "11", result.ID)
 	assertEquals(t, "PcieSlot_11", result.Name)
 	assertEquals(t, "true", fmt.Sprint(result.Slots[0].HotPluggable))
-	assertEquals(t, "32", fmt.Sprint(result.Slots[0].Lanes))
+	assertEquals(t, "32", fmt.Sprint(*result.Slots[0].Lanes))
 	assertEquals(t, "Gen3", fmt.Sprint(result.Slots[0].PCIeType))
 	assertEquals(t, "FullLength", fmt.Sprint(result.Slots[0].SlotType))
 }
