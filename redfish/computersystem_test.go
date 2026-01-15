@@ -88,6 +88,17 @@ var computerSystemBody = `{
 			],
 			"HttpBootUri": "http://localhost/boot.efi"
 		},
+		"BootProgress": {
+			"LastState": "OEM",
+			"LastStateTime": "2026-01-08T23:29:18+00:00",
+			"LastBootTimeSeconds": 45.5,
+			"OemLastState": "Exit Boot Services Service",
+			"Oem": {
+				"VendorName": {
+					"CustomBootProperty": "value"
+				}
+			}
+		},
 		"BiosVersion": "P79 v1.00 (09/20/2013)",
 		"ProcessorSummary": {
 			"Status": {
@@ -372,6 +383,22 @@ func TestComputerSystem(t *testing.T) { //nolint
 	}
 	if result.Boot.AllowableUefiTargetBootSourceOverrideValues[0] != "UsbClass(0xFFFF,0xFFFF,0xFF,0xFF,0xFF)" {
 		t.Errorf("Received invalid AllowableUefiTargetBootSourceOverrideValues: %s", result.Boot.AllowableUefiTargetBootSourceOverrideValues[0])
+	}
+
+	if result.BootProgress.LastState != OEMBootProgressTypes {
+		t.Errorf("Received invalid boot progress last state: %s", result.BootProgress.LastState)
+	}
+	if result.BootProgress.LastStateTime != "2026-01-08T23:29:18+00:00" {
+		t.Errorf("Received invalid boot progress last state time: %s", result.BootProgress.LastStateTime)
+	}
+	if result.BootProgress.LastBootTimeSeconds != 45.5 {
+		t.Errorf("Received invalid boot progress last boot time: %f", result.BootProgress.LastBootTimeSeconds)
+	}
+	if len(result.BootProgress.OEM) == 0 {
+		t.Errorf("Expected BootProgress OEM data to be present")
+	}
+	if result.BootProgress.OEMLastState != "Exit Boot Services Service" {
+		t.Errorf("Received invalid boot progress OEM last state: %s", result.BootProgress.OEMLastState)
 	}
 
 	resetTypes, err := result.GetSupportedResetTypes()
