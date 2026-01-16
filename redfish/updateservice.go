@@ -6,6 +6,8 @@ package redfish
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
 
 	"github.com/stmcginnis/gofish/common"
 )
@@ -270,6 +272,16 @@ func (updateService *UpdateService) RemoveSSHIdentityKeyPair() error {
 	return updateService.Post(updateService.generateSSHIdentityKeyPairTarget, nil)
 }
 
+// SimpleUpdateResponse contains the result of a SimpleUpdate action.
+type SimpleUpdateResponse struct {
+	// TaskURI is the URI from the Location header for tracking the async operation.
+	// Per Redfish spec DSP0266, async operations return HTTP 202 with Location header.
+	TaskURI string
+	// Task is the Task object if returned in the response body.
+	// Some BMCs return task info in the body instead of or in addition to the Location header.
+	Task *Task
+}
+
 // SimpleUpdateParameters contains the parameters for the SimpleUpdate action.
 type SimpleUpdateParameters struct {
 	// ForceUpdate is an indication of whether the service should bypass update policies when
@@ -303,8 +315,38 @@ type SimpleUpdateParameters struct {
 
 // SimpleUpdate will update installed software components using a software image file
 // located at an ImageURI parameter-specified URI.
-func (updateService *UpdateService) SimpleUpdate(parameters *SimpleUpdateParameters) error {
-	return updateService.Post(updateService.simpleUpdateTarget, parameters)
+// It returns a SimpleUpdateResponse containing the task URI for tracking the async operation.
+func (updateService *UpdateService) SimpleUpdate(parameters *SimpleUpdateParameters) (*SimpleUpdateResponse, error) {
+	resp, err := updateService.PostWithResponse(updateService.simpleUpdateTarget, parameters)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	result := &SimpleUpdateResponse{}
+
+	// Extract task URI from Location header
+	if location := resp.Header.Get("Location"); location != "" {
+		result.TaskURI = location
+	}
+
+	// Some BMCs return the Task object in the response body
+	if resp.StatusCode == http.StatusAccepted {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err == nil && len(bodyBytes) > 0 {
+			var task Task
+			if json.Unmarshal(bodyBytes, &task) == nil && task.ODataID != "" {
+				task.SetClient(updateService.GetClient())
+				result.Task = &task
+				// If no Location header, use the task's ODataID as fallback
+				if result.TaskURI == "" {
+					result.TaskURI = task.ODataID
+				}
+			}
+		}
+	}
+
+	return result, nil
 }
 
 // StartUpdate starts updating all images that have been previously invoked using an
