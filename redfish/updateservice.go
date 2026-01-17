@@ -303,8 +303,12 @@ type SimpleUpdateParameters struct {
 
 // SimpleUpdate will update installed software components using a software image file
 // located at an ImageURI parameter-specified URI.
-func (updateService *UpdateService) SimpleUpdate(parameters *SimpleUpdateParameters) error {
-	return updateService.Post(updateService.simpleUpdateTarget, parameters)
+// It returns TaskMonitorInfo for tracking the async operation if the service returns HTTP 202 Accepted.
+func (updateService *UpdateService) SimpleUpdate(parameters *SimpleUpdateParameters) (*TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTask(updateService.GetClient(),
+		updateService.simpleUpdateTarget, parameters, updateService.Headers(), false)
+	defer common.DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
 }
 
 // StartUpdate starts updating all images that have been previously invoked using an
