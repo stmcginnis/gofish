@@ -14,6 +14,15 @@ import (
 	"github.com/stmcginnis/gofish/common"
 )
 
+// makeHTTPResponse creates an HTTP response for testing, ensuring the body can be read multiple times.
+func makeHTTPResponse(statusCode int, headers http.Header, body string) *http.Response {
+	return &http.Response{
+		StatusCode: statusCode,
+		Header:     headers,
+		Body:       io.NopCloser(strings.NewReader(body)),
+	}
+}
+
 var simpleUpdateBody = `{
     "@odata.context": "/redfish/v1/$metadata#UpdateService.UpdateService",
     "@odata.id": "/redfish/v1/UpdateService",
@@ -128,12 +137,8 @@ func TestSimpleUpdateWithLocationHeader(t *testing.T) {
 	}
 
 	// Create response with Location header (standard Redfish async pattern)
-	taskURI := "/redfish/v1/TaskService/Tasks/123"
-	resp := &http.Response{
-		StatusCode: http.StatusAccepted,
-		Header:     http.Header{"Location": []string{taskURI}},
-		Body:       io.NopCloser(strings.NewReader("")),
-	}
+	taskMonitorURI := "/redfish/v1/TaskService/Tasks/123"
+	resp := makeHTTPResponse(http.StatusAccepted, http.Header{"Location": []string{taskMonitorURI}}, "")
 
 	c := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
@@ -149,8 +154,12 @@ func TestSimpleUpdateWithLocationHeader(t *testing.T) {
 		t.Fatalf("SimpleUpdate failed: %s", err)
 	}
 
-	if result.TaskURI != taskURI {
-		t.Errorf("expected TaskURI %q, got %q", taskURI, result.TaskURI)
+	if result == nil {
+		t.Fatal("expected TaskMonitorInfo, got nil")
+	}
+
+	if result.TaskMonitor != taskMonitorURI {
+		t.Errorf("expected TaskMonitor %q, got %q", taskMonitorURI, result.TaskMonitor)
 	}
 }
 
@@ -169,11 +178,7 @@ func TestSimpleUpdateWithTaskInBody(t *testing.T) {
 		"TaskState": "Running",
 		"PercentComplete": 0
 	}`
-	resp := &http.Response{
-		StatusCode: http.StatusAccepted,
-		Header:     http.Header{},
-		Body:       io.NopCloser(strings.NewReader(taskBody)),
-	}
+	resp := makeHTTPResponse(http.StatusAccepted, http.Header{}, taskBody)
 
 	c := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
@@ -189,9 +194,8 @@ func TestSimpleUpdateWithTaskInBody(t *testing.T) {
 		t.Fatalf("SimpleUpdate failed: %s", err)
 	}
 
-	expectedTaskURI := "/redfish/v1/TaskService/Tasks/456"
-	if result.TaskURI != expectedTaskURI {
-		t.Errorf("expected TaskURI %q, got %q", expectedTaskURI, result.TaskURI)
+	if result == nil {
+		t.Fatal("expected TaskMonitorInfo, got nil")
 	}
 
 	if result.Task == nil {
@@ -215,7 +219,6 @@ func TestSimpleUpdateWithLocationHeaderAndTaskInBody(t *testing.T) {
 	}
 
 	// Create response with both Location header and Task in body
-	// Location header should take precedence
 	taskMonitorURI := "/redfish/v1/TaskMonitor/abc"
 	taskBody := `{
 		"@odata.id": "/redfish/v1/TaskService/Tasks/789",
@@ -223,11 +226,7 @@ func TestSimpleUpdateWithLocationHeaderAndTaskInBody(t *testing.T) {
 		"Name": "Firmware Update Task",
 		"TaskState": "Starting"
 	}`
-	resp := &http.Response{
-		StatusCode: http.StatusAccepted,
-		Header:     http.Header{"Location": []string{taskMonitorURI}},
-		Body:       io.NopCloser(strings.NewReader(taskBody)),
-	}
+	resp := makeHTTPResponse(http.StatusAccepted, http.Header{"Location": []string{taskMonitorURI}}, taskBody)
 
 	c := &common.TestClient{
 		CustomReturnForActions: map[string][]interface{}{
@@ -243,9 +242,13 @@ func TestSimpleUpdateWithLocationHeaderAndTaskInBody(t *testing.T) {
 		t.Fatalf("SimpleUpdate failed: %s", err)
 	}
 
-	// Location header should take precedence
-	if result.TaskURI != taskMonitorURI {
-		t.Errorf("expected TaskURI %q (from Location header), got %q", taskMonitorURI, result.TaskURI)
+	if result == nil {
+		t.Fatal("expected TaskMonitorInfo, got nil")
+	}
+
+	// TaskMonitor should be from Location header
+	if result.TaskMonitor != taskMonitorURI {
+		t.Errorf("expected TaskMonitor %q (from Location header), got %q", taskMonitorURI, result.TaskMonitor)
 	}
 
 	// Task object should still be parsed
