@@ -4,6 +4,12 @@
 
 package schema
 
+import (
+	"encoding/json"
+	"os"
+	"strings"
+)
+
 // PackageType represents the Go package category
 type PackageType string
 
@@ -12,6 +18,125 @@ const (
 	PackageRedfish   PackageType = "redfish"
 	PackageSwordfish PackageType = "swordfish"
 )
+
+// SchemaOrigin indicates where a schema comes from (Redfish or Swordfish)
+type SchemaOrigin string
+
+const (
+	OriginRedfish   SchemaOrigin = "redfish"
+	OriginSwordfish SchemaOrigin = "swordfish"
+)
+
+// InfrastructureTypes lists types that must always be in the common package.
+// These are manually maintained base types, not generated from schemas.
+var InfrastructureTypes = map[string]bool{
+	"Entity":              true,
+	"Link":                true,
+	"Links":               true,
+	"Resource":            true,
+	"ReferenceableMember": true,
+	"ResourceCollection":  true,
+}
+
+// CommonSchemas lists schema names whose definitions should be placed in common.
+var CommonSchemas = map[string]bool{
+	"ActionInfo":     true,
+	"Message":        true,
+	"ResolutionStep": true,
+}
+
+// IsInfrastructureType checks if a type is a core infrastructure type.
+// These are manually maintained types that must always be in common.
+func IsInfrastructureType(typeName string) bool {
+	return InfrastructureTypes[typeName]
+}
+
+// IsCommonSchema checks if a schema should be generated in common.
+func IsCommonSchema(schemaName string) bool {
+	return CommonSchemas[schemaName]
+}
+
+// DetermineSchemaOrigin determines if a parsed schema is Redfish or Swordfish origin.
+// It checks owningEntity, $id, and copyright fields.
+func DetermineSchemaOrigin(rawSchema map[string]any) SchemaOrigin {
+	// Check owningEntity
+	if owner, ok := rawSchema["owningEntity"].(string); ok {
+		if owner == "SNIA" {
+			return OriginSwordfish
+		}
+	}
+
+	// Check $id for swordfish
+	if id, ok := rawSchema["$id"].(string); ok {
+		if strings.Contains(strings.ToLower(id), "swordfish") {
+			return OriginSwordfish
+		}
+	}
+
+	// Check copyright for SNIA
+	if copyright, ok := rawSchema["copyright"].(string); ok {
+		if strings.Contains(strings.ToLower(copyright), "snia") {
+			return OriginSwordfish
+		}
+	}
+
+	return OriginRedfish
+}
+
+// ReadAndParseSchema reads a JSON schema file and returns the parsed map.
+// This is a helper to avoid duplicating the file read and unmarshal pattern.
+func ReadAndParseSchema(schemaFile string) (map[string]any, error) {
+	data, err := os.ReadFile(schemaFile)
+	if err != nil {
+		return nil, err
+	}
+
+	var rawSchema map[string]any
+	if err := json.Unmarshal(data, &rawSchema); err != nil {
+		return nil, err
+	}
+
+	return rawSchema, nil
+}
+
+// CompareVersions returns true if version (major, minor, patch) is greater than
+// the current latest version (latestMajor, latestMinor, latestPatch).
+// This is used for finding the latest versioned schema file.
+func CompareVersions(major, minor, patch, latestMajor, latestMinor, latestPatch int) bool {
+	return major > latestMajor ||
+		(major == latestMajor && minor > latestMinor) ||
+		(major == latestMajor && minor == latestMinor && patch > latestPatch)
+}
+
+// ExtractTypeFromRef extracts the type name from a $ref URL.
+// ref looks like "http://redfish.dmtf.org/schemas/v1/ComputerSystem.json#/definitions/ComputerSystem"
+// or "#/definitions/Link" or similar.
+// If stripCollection is true, "Collection" suffix is removed from the type name.
+func ExtractTypeFromRef(ref string, stripCollection bool) string {
+	parts := strings.Split(ref, "/")
+	if len(parts) == 0 {
+		return ""
+	}
+	lastPart := parts[len(parts)-1]
+	if stripCollection && strings.HasSuffix(lastPart, "Collection") {
+		return strings.TrimSuffix(lastPart, "Collection")
+	}
+	return lastPart
+}
+
+// BuildDefinitionMap creates a map for quick definition lookup from a slice.
+// If includeNameAlias is true, definitions are also mapped by their Name field
+// (in addition to OriginalName), which is useful when names may differ.
+func BuildDefinitionMap(defs []*Definition, includeNameAlias bool) map[string]*Definition {
+	defMap := make(map[string]*Definition, len(defs))
+	for _, def := range defs {
+		defMap[def.OriginalName] = def
+		if includeNameAlias && def.Name != def.OriginalName {
+			defMap[def.Name] = def
+		}
+	}
+	return defMap
+}
 
 // Definition represents a complete type definition (struct or enum)
 type Definition struct {
@@ -117,6 +242,8 @@ type ActionParameter struct {
 	AllowableValues []string
 	// Ordinal is the order position of this parameter
 	Ordinal int
+	// OriginalName is the unmodified name of the JSON parameter definition
+	OriginalName string
 }
 
 // Link represents a link to a related resource
@@ -146,7 +273,7 @@ type JSONSchema struct {
 
 // JSONProperty represents a property in the JSON Schema
 type JSONProperty struct {
-	Type                 interface{}              `json:"type"` // can be string or []string
+	Type                 any                      `json:"type"` // can be string or []string
 	Description          string                   `json:"description"`
 	LongDescription      string                   `json:"longDescription"`
 	ReadOnly             bool                     `json:"readonly"`
@@ -162,5 +289,5 @@ type JSONProperty struct {
 	Minimum              *float64                 `json:"minimum"`
 	Pattern              string                   `json:"pattern"`
 	Format               string                   `json:"format"`
-	AdditionalInfo       map[string]interface{}   `json:"Redfish.Revisions"`
+	AdditionalInfo       map[string]any           `json:"Redfish.Revisions"`
 }

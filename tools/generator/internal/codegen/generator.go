@@ -12,7 +12,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/stmcginnis/gofish/tools/generator/internal/parser"
 	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
 )
 
@@ -23,6 +22,7 @@ var sourceTemplate string
 type TemplateData struct {
 	Package      string
 	NeedsReflect bool
+	ImportGroups [][]string
 	Enums        []*EnumData
 	Structs      []*StructData
 	Release      string
@@ -72,11 +72,12 @@ type ActionData struct {
 
 // ActionParameterData represents an action parameter for the template
 type ActionParameterData struct {
-	Name        string
-	Type        string
-	Description string
-	Required    bool
-	Ordinal     int
+	Name         string
+	Type         string
+	Description  string
+	Required     bool
+	Ordinal      int
+	OriginalName string
 }
 
 // LinkData represents a link for the template
@@ -94,6 +95,7 @@ type PropertyData struct {
 	Name         string
 	TypeString   string
 	Description  string
+	JSONName     string
 	JSONTag      string
 	IsPrivate    bool
 	IsLink       bool
@@ -106,8 +108,49 @@ type PropertyData struct {
 
 // Generator handles code generation
 type Generator struct {
-	tmpl        *template.Template
-	packageType schema.PackageType
+	tmpl                 *template.Template
+	packageType          schema.PackageType
+	isSwordfishInCommon  bool // True if this is a Swordfish type being placed in common
+}
+
+// packagePrefix returns the package prefix string (e.g., "redfish.")
+func (g *Generator) packagePrefix() string {
+	return string(g.packageType) + "."
+}
+
+// normalizeTypeForPackage normalizes a type name for the current package context.
+// It strips/adds package prefixes as needed and returns whether the type is external
+// (i.e., a cross-package reference that may need special handling).
+func (g *Generator) normalizeTypeForPackage(typeName string) (normalized string, isExternal bool) {
+	normalized = typeName
+
+	switch g.packageType {
+	case schema.PackageCommon:
+		// Strip common. prefix if present
+		if after, ok := strings.CutPrefix(normalized, "common."); ok {
+			normalized = after
+		} else if strings.Contains(normalized, ".") {
+			// Has a non-common package prefix - this is a cross-package reference
+			isExternal = true
+		} else if !g.isSwordfishInCommon && !schema.IsInfrastructureType(normalized) {
+			// No package prefix and not an infrastructure type
+			// This is a cross-package link from common to redfish/swordfish
+			// (skip when isSwordfishInCommon since referenced types are also in common)
+			isExternal = true
+		}
+
+	case schema.PackageRedfish, schema.PackageSwordfish:
+		// Add common. prefix to infrastructure types without a prefix
+		if schema.IsInfrastructureType(normalized) && !strings.Contains(normalized, ".") {
+			normalized = "common." + normalized
+		}
+		// Strip our own package prefix
+		if after, ok := strings.CutPrefix(normalized, g.packagePrefix()); ok {
+			normalized = after
+		}
+	}
+
+	return normalized, isExternal
 }
 
 // NewGenerator creates a new Generator
@@ -123,8 +166,11 @@ func NewGenerator() (*Generator, error) {
 }
 
 // Generate generates Go source code from definitions
-func (g *Generator) Generate(objectName string, packageType schema.PackageType, definitions []*schema.Definition) (string, error) {
+// isSwordfishInCommon indicates if this is a Swordfish type being placed in common
+// (used to skip generating methods that would create import cycles)
+func (g *Generator) Generate(objectName string, packageType schema.PackageType, definitions []*schema.Definition, isSwordfishInCommon bool) (string, error) {
 	g.packageType = packageType
+	g.isSwordfishInCommon = isSwordfishInCommon
 	data := &TemplateData{
 		Package: string(packageType),
 	}
@@ -176,6 +222,12 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 		}
 	}
 
+	sort.Slice(data.Enums, func(i, j int) bool {
+		return data.Enums[i].Name < data.Enums[j].Name
+	})
+
+	data.ImportGroups = buildImportGroups(data)
+
 	// Execute template
 	var buf strings.Builder
 	if err := g.tmpl.Execute(&buf, data); err != nil {
@@ -194,6 +246,35 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 	return formatted, nil
 }
 
+func buildImportGroups(data *TemplateData) [][]string {
+	needsJSON := false
+	needsCommon := false
+
+	for _, sd := range data.Structs {
+		if (sd.IsEntity && len(sd.ReadWriteProperties) > 0) || sd.HasActions || sd.HasLinks || sd.HasLinkProperties {
+			needsJSON = true
+		}
+		if sd.IsEntity {
+			needsCommon = true
+		}
+		for _, prop := range sd.Properties {
+			if prop.TypeString == "json.RawMessage" {
+				needsJSON = true
+			}
+		}
+	}
+
+	var groups [][]string
+	if needsJSON {
+		groups = append(groups, []string{"encoding/json"})
+	}
+	if needsCommon && data.Package != string(schema.PackageCommon) {
+		groups = append(groups, []string{"github.com/stmcginnis/gofish/common"})
+	}
+
+	return groups
+}
+
 // buildEnumData converts a Definition to EnumData
 func (g *Generator) buildEnumData(def *schema.Definition) *EnumData {
 	ed := &EnumData{
@@ -203,8 +284,11 @@ func (g *Generator) buildEnumData(def *schema.Definition) *EnumData {
 	}
 
 	for _, ev := range def.EnumValues {
+		// Make sure it's public (iSCSI > ISCSI)
+		name := strings.ToUpper(ev.Name[:1]) + ev.Name[1:]
+		name = makeValidIdentifier(name)
 		evd := &EnumValueData{
-			Name:        ev.Name,
+			Name:        name,
 			Value:       ev.Value,
 			Description: ev.Description,
 		}
@@ -212,6 +296,19 @@ func (g *Generator) buildEnumData(def *schema.Definition) *EnumData {
 	}
 
 	return ed
+}
+
+func makeValidIdentifier(name string) string {
+	if name == "" {
+		return "Value"
+	}
+
+	first := name[0]
+	if (first >= 'A' && first <= 'Z') || (first >= 'a' && first <= 'z') || first == '_' {
+		return name
+	}
+
+	return "V" + name
 }
 
 // buildStructData converts a Definition to StructData
@@ -228,52 +325,33 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		ReadWriteProperties: def.ReadWriteProperties,
 	}
 
+	// Build a set of link names to detect duplicates
+	// Properties that duplicate Links should not generate their own getter
+	linkNames := make(map[string]bool)
+	for _, link := range def.Links {
+		linkNames[link.Name] = true
+	}
+
 	for _, prop := range def.Properties {
+		// Skip link properties that duplicate entries in the Links section
+		// The Links getter will handle accessing these resources
+		if prop.IsLink && linkNames[prop.Name] {
+			continue
+		}
+
 		typeStr := g.buildTypeString(prop)
 		linkType := ""
 
 		// Link properties store URIs as strings, but need the target type for getters
 		if prop.IsLink {
-			linkType = prop.Type
+			var isExternal bool
+			linkType, isExternal = g.normalizeTypeForPackage(prop.Type)
 
-			// Determine package prefix for link target
-			skipGetter := false
-			switch g.packageType {
-			case schema.PackageCommon:
-				// Strip common. prefix if present
-				if after, ok := strings.CutPrefix(linkType, "common."); ok {
-					linkType = after
-				} else if !strings.Contains(linkType, ".") {
-					// No package prefix - need to determine where this type lives
-					// Check if it's a known common type
-					if !parser.IsCommonType(linkType) {
-						// Cross-package link from common to redfish/swordfish
-						// Cannot generate typed getter due to circular dependency
-						skipGetter = true
-						prop.IsPrivate = false
-						prop.GetterMethod = ""
-					}
-				} else {
-					// Has a package prefix and it's not common.
-					// This is a cross-package reference - skip getter
-					skipGetter = true
-					prop.IsPrivate = false
-					prop.GetterMethod = ""
-				}
-			case schema.PackageRedfish, schema.PackageSwordfish:
-				// Add common. prefix to common types
-				if parser.IsCommonType(linkType) && !strings.Contains(linkType, ".") {
-					linkType = "common." + linkType
-				}
-				// Strip our own package prefix
-				ownPrefix := string(g.packageType) + "."
-				if after, ok := strings.CutPrefix(linkType, ownPrefix); ok {
-					linkType = after
-				}
-			}
-
-			if skipGetter {
+			// Cross-package references cannot have typed getters due to circular dependencies
+			if isExternal {
 				linkType = ""
+				prop.IsPrivate = false
+				prop.GetterMethod = ""
 			}
 
 			// Link properties are stored as strings
@@ -295,6 +373,7 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 			Name:         fieldName,
 			TypeString:   typeStr,
 			Description:  prop.Description,
+			JSONName:     prop.JSONName,
 			JSONTag:      prop.JSONTag,
 			IsPrivate:    prop.IsPrivate,
 			IsLink:       prop.IsLink,
@@ -334,11 +413,12 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 
 		for _, param := range action.Parameters {
 			pd := &ActionParameterData{
-				Name:        param.Name,
-				Type:        param.Type,
-				Description: param.Description,
-				Required:    param.Required,
-				Ordinal:     param.Ordinal,
+				Name:         param.Name,
+				Type:         param.Type,
+				Description:  param.Description,
+				Required:     param.Required,
+				Ordinal:      param.Ordinal,
+				OriginalName: param.OriginalName,
 			}
 			ad.Parameters = append(ad.Parameters, pd)
 		}
@@ -362,22 +442,9 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		}
 
 		// Handle package prefixes for link types
-		switch g.packageType {
-		case schema.PackageCommon:
-			// Strip common. prefix if present
-			if after, ok := strings.CutPrefix(linkType, "common."); ok {
-				linkType = after
-			}
-		case schema.PackageRedfish, schema.PackageSwordfish:
-			// Add common. prefix to common types
-			if parser.IsCommonType(linkType) && !strings.Contains(linkType, ".") {
-				linkType = "common." + linkType
-			}
-			// Strip our own package prefix if present
-			ownPrefix := string(g.packageType) + "."
-			if after, ok := strings.CutPrefix(linkType, ownPrefix); ok {
-				linkType = after
-			}
+		linkType, isExternal := g.normalizeTypeForPackage(linkType)
+		if isExternal {
+			continue
 		}
 
 		ld := &LinkData{
@@ -427,7 +494,7 @@ func (g *Generator) getReceiverName(typeName string) string {
 	if len(name) > 0 {
 		ret := string(name[0])
 		if ret == "b" {
-			// Byte parameter to unmarshalling is already "b"
+			// Byte parameter to unmarshaling is already "b"
 			ret += string(name[1])
 		}
 		return ret

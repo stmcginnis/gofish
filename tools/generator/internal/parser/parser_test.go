@@ -6,6 +6,7 @@ package parser
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
@@ -181,5 +182,52 @@ func TestParseActionResponse(t *testing.T) {
 
 	if action.ResponseType != "TestActionResponse" {
 		t.Errorf("Expected response type 'TestActionResponse', got '%s'", action.ResponseType)
+	}
+}
+
+func TestResolveLatestVersionNoAnyOf(t *testing.T) {
+	schemaJSON := `{
+  "definitions": {
+    "Example": {
+      "type": "object",
+      "properties": {
+        "Id": { "type": "string" }
+      }
+    }
+  }
+}`
+
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "Example.json")
+	if err := os.WriteFile(tmpFile, []byte(schemaJSON), 0644); err != nil {
+		t.Fatalf("Failed to write test schema: %v", err)
+	}
+
+	versionFile, err := ResolveLatestVersion(tmpFile, tmpDir)
+	if err != nil {
+		t.Fatalf("ResolveLatestVersion failed: %v", err)
+	}
+
+	if versionFile != tmpFile {
+		t.Fatalf("Expected base file, got %s", versionFile)
+	}
+}
+
+func TestParseActionParametersFallbackOrder(t *testing.T) {
+	p := NewParser("/tmp")
+	p.rawSchema = []byte(`{}`)
+
+	paramsMap := map[string]any{
+		"Zeta": map[string]any{"type": "string"},
+		"Alpha": map[string]any{"type": "string"},
+	}
+
+	params := p.parseActionParameters("Missing", paramsMap)
+	if len(params) != 2 {
+		t.Fatalf("Expected 2 params, got %d", len(params))
+	}
+
+	if params[0].OriginalName != "Alpha" || params[1].OriginalName != "Zeta" {
+		t.Fatalf("Expected alphabetical order, got %s then %s", params[0].OriginalName, params[1].OriginalName)
 	}
 }

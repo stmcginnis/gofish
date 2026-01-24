@@ -40,8 +40,8 @@ func main() {
 	var schemaDirs []string
 
 	if localPath != "" {
-		// Use local schemas
-		schemaDirs = []string{localPath}
+		// Use local schemas - support comma-separated paths for multiple directories
+		schemaDirs = strings.Split(localPath, ",")
 		if verbose {
 			log.Printf("Using local schemas from: %s", localPath)
 		}
@@ -167,7 +167,9 @@ func generateSingleObject(objectName, schemaDir, outputBaseDir string, verbose b
 		return fmt.Errorf("failed to create generator: %w", err)
 	}
 
-	code, err := gen.Generate(objectName, pkgType, definitions)
+	// In single-object mode, we don't do full dependency analysis
+	// so we pass false for isSwordfishInCommon
+	code, err := gen.Generate(objectName, pkgType, definitions, false)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}

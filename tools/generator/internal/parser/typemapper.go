@@ -52,8 +52,15 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 		return "string", false, false
 	}
 
+	// Handle type as string or array of strings
+	typeStr, nullable := extractTypeAndNullable(prop.Type)
+
 	// Check if this should be a Link type (lowercase start and not odata)
-	if len(propName) > 0 && propName[0] >= 'a' && propName[0] <= 'z' && !strings.Contains(strings.ToLower(propName), "odata") {
+	if len(propName) > 0 &&
+		typeStr != "string" &&
+		propName[0] >= 'a' &&
+		propName[0] <= 'z' &&
+		!strings.Contains(strings.ToLower(propName), "odata") {
 		return "common.Link", false, false
 	}
 
@@ -67,7 +74,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 			case "count":
 				return "int", false, false
 			case "idRef":
-				return "Entity", false, false
+				return qualifyRefType("Entity", prop.Ref), false, false
 			}
 		}
 
@@ -75,7 +82,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 			return "string", false, false
 		}
 
-		return refType, false, false
+		return qualifyRefType(refType, prop.Ref), false, false
 	}
 
 	// Handle items (arrays)
@@ -89,21 +96,21 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 				case "count":
 					return "int", false, true
 				case "idRef":
-					return "Entity", false, true
+					return qualifyRefType("Entity", prop.Items.Ref), false, true
 				}
 			}
 
 			if slices.Contains(stringTypes, itemType) {
-				return "string", false, false
+				return "string", false, true
 			}
 
-			return itemType, false, true
+			return qualifyRefType(itemType, prop.Items.Ref), false, true
 		}
 		if len(prop.Items.AnyOf) > 0 {
 			for _, anyOfItem := range prop.Items.AnyOf {
 				if ref, ok := anyOfItem["$ref"]; ok {
 					itemType := extractRefType(ref)
-					return itemType, false, true
+					return qualifyRefType(itemType, ref), false, true
 				}
 			}
 		}
@@ -121,7 +128,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 					case "count":
 						return "int", false, false
 					case "idRef":
-						return "Entity", false, false
+						return qualifyRefType("Entity", ref), false, false
 					}
 				}
 
@@ -129,13 +136,10 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 					return "string", false, false
 				}
 
-				return refType, false, false
+				return qualifyRefType(refType, ref), false, false
 			}
 		}
 	}
-
-	// Handle type as string or array of strings
-	typeStr, nullable := extractTypeAndNullable(prop.Type)
 
 	switch typeStr {
 	case "object":
@@ -176,20 +180,52 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 	}
 }
 
-// extractRefType extracts the type name from a $ref URL
-func extractRefType(ref string) string {
-	// Extract last part after /
-	parts := strings.Split(ref, "/")
-	if len(parts) > 0 {
-		lastPart := parts[len(parts)-1]
-		// Handle cases where it ends with "Collection"
-		// Collections should resolve to the element type, not the collection type
-		if strings.HasSuffix(lastPart, "Collection") {
-			return strings.TrimSuffix(lastPart, "Collection")
+func qualifyInfrastructureType(typeName string) string {
+	if schema.IsInfrastructureType(typeName) {
+		return "common." + typeName
+	}
+	return typeName
+}
+
+func qualifyRefType(typeName, ref string) string {
+	if schema.IsInfrastructureType(typeName) {
+		return "common." + typeName
+	}
+	if schema.IsCommonSchema(extractSchemaNameFromRef(ref)) {
+		return "common." + typeName
+	}
+	return typeName
+}
+
+// extractSchemaNameFromRef extracts the schema name from a $ref URL.
+func extractSchemaNameFromRef(ref string) string {
+	if strings.HasPrefix(ref, "#/definitions/") {
+		return ""
+	}
+	if strings.Contains(ref, "#/definitions/") {
+		parts := strings.Split(ref, "#/definitions/")
+		if len(parts) == 2 {
+			return extractSchemaNameFromURL(parts[0])
 		}
-		return lastPart
 	}
 	return ""
+}
+
+// extractSchemaNameFromURL extracts the schema name from a URL.
+func extractSchemaNameFromURL(url string) string {
+	if idx := strings.LastIndex(url, "/"); idx >= 0 {
+		filename := url[idx+1:]
+		if dotIdx := strings.Index(filename, "."); dotIdx >= 0 {
+			return filename[:dotIdx]
+		}
+		return filename
+	}
+	return ""
+}
+
+// extractRefType extracts the type name from a $ref URL
+func extractRefType(ref string) string {
+	return schema.ExtractTypeFromRef(ref, true)
 }
 
 // extractTypeAndNullable handles type which can be a string or array of strings
@@ -238,6 +274,31 @@ func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
 		return true
 	}
 
+	// Check for array items that reference another resource type
+	// These are typically links stored as arrays of URIs
+	if prop.Items != nil && prop.Items.Ref != "" {
+		// Skip odata primitive types
+		if !strings.Contains(prop.Items.Ref, "odata-v4.json") {
+			// If the schema filename matches the definition name, it's a standalone
+			// entity with its own schema file and URIs — references to it are links
+			schemaName := extractSchemaNameFromRef(prop.Items.Ref)
+			typeName := extractRefType(prop.Items.Ref)
+			if schemaName != "" && schemaName == typeName {
+				return true
+			}
+
+			// Check if the description indicates these are links
+			desc := strings.ToLower(prop.Description)
+			longDesc := strings.ToLower(prop.LongDescription)
+			if strings.Contains(longDesc, "links to") ||
+				strings.Contains(longDesc, "array of links") ||
+				strings.Contains(desc, "links to") ||
+				strings.Contains(desc, "array of links") {
+				return true
+			}
+		}
+	}
+
 	// Check if description indicates this is a link to another resource
 	desc := strings.ToLower(prop.Description)
 	longDesc := strings.ToLower(prop.LongDescription)
@@ -247,6 +308,8 @@ func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
 		"link to an instance",
 		"link to a collection",
 		"shall contain a link",
+		"shall contain links",
+		"an array of links",
 	}
 
 	for _, phrase := range linkPhrases {
