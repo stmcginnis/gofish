@@ -37,15 +37,15 @@ func NewParser(schemaDir string) *Parser {
 // ParseSchemaWithBase parses both base and versioned schema files, merging definitions
 func (p *Parser) ParseSchemaWithBase(baseSchemaFile, versionedSchemaFile string) ([]*schema.Definition, error) {
 	// Parse base schema to get base definitions
-	baseDefsMap := make(map[string]*schema.Definition)
+	var baseDefsMap map[string]*schema.Definition
 	if _, err := os.Stat(baseSchemaFile); err == nil {
 		baseDefs, err := p.ParseSchema(baseSchemaFile)
 		if err == nil {
-			// Build map of base definitions
-			for _, def := range baseDefs {
-				baseDefsMap[def.OriginalName] = def
-			}
+			baseDefsMap = schema.BuildDefinitionMap(baseDefs, false)
 		}
+	}
+	if baseDefsMap == nil {
+		baseDefsMap = make(map[string]*schema.Definition)
 	}
 
 	// Parse versioned schema
@@ -55,10 +55,7 @@ func (p *Parser) ParseSchemaWithBase(baseSchemaFile, versionedSchemaFile string)
 	}
 
 	// Build map of versioned definitions
-	versionedDefsMap := make(map[string]*schema.Definition)
-	for _, def := range versionedDefs {
-		versionedDefsMap[def.OriginalName] = def
-	}
+	versionedDefsMap := schema.BuildDefinitionMap(versionedDefs, false)
 
 	// Merge: start with all base definitions, then add/override with versioned
 	result := []*schema.Definition{}
@@ -222,13 +219,13 @@ func (p *Parser) parseEnumDefinition(name string, defMap map[string]any, enumVal
 
 // parseObjectDefinition parses an object type definition
 func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, version string) *schema.Definition {
-	name = cleanIdentifier(name)
+	cleanName := cleanIdentifier(name)
 	def := &schema.Definition{
-		Name:         name,
+		Name:         cleanName,
 		OriginalName: name,
 		IsEnum:       false,
 		Version:      version,
-		Description:  p.formatTypeDescription(name, defMap),
+		Description:  p.formatTypeDescription(cleanName, defMap),
 	}
 
 	// Parse properties
@@ -266,8 +263,8 @@ func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, versi
 			def.Properties = append(def.Properties, prop)
 
 			// Track read-write properties
-			if !prop.IsReadOnly {
-				def.ReadWriteProperties = append(def.ReadWriteProperties, prop.Name)
+			if !prop.IsReadOnly && !slices.Contains(config.ExcludeReadWriteProperties, prop.Name) {
+				def.ReadWriteProperties = append(def.ReadWriteProperties, prop.JSONName)
 			}
 		}
 	}
@@ -335,10 +332,10 @@ func (p *Parser) parseProperty(propName string, propMap map[string]any) *schema.
 
 	// Add version added to description
 	if prop.VersionAdded != "" {
-		prop.Description = fmt.Sprintf(
-			"%s\n\t//\n\t// Version added: %s",
+		prop.Description = appendCommentSection(
 			prop.Description,
-			prop.VersionAdded)
+			fmt.Sprintf("\t// Version added: %s", prop.VersionAdded),
+		)
 	}
 
 	// Add deprecation notice to description
@@ -361,18 +358,15 @@ func (p *Parser) parseProperty(propName string, propMap map[string]any) *schema.
 		}
 
 		// Append to existing description
-		prop.Description = prop.Description + "\n\t//\n" + wrappedDeprecation
+		prop.Description = appendCommentSection(prop.Description, wrappedDeprecation)
 	}
 
-	// Add JSON tag for special properties
-	if strings.Contains(propName, "@") || strings.Contains(propName, "odata") {
-		prop.JSONTag = fmt.Sprintf("`json:\"%s\"`", propName)
-	}
+	prop.JSONTag = makeJSONTag(prop.Name, propName, isPointer)
 
 	// Links and collections should be private with public getter
 	if prop.IsLink || prop.IsCollection {
 		prop.IsPrivate = true
-		prop.GetterMethod = "Get" + prop.Name
+		prop.GetterMethod = prop.Name
 	}
 
 	return prop
@@ -522,6 +516,13 @@ func formatComment(name, description, cutpoint string, isEnum bool, indent strin
 	return strings.Join(lines, "\n")
 }
 
+func appendCommentSection(base, section string) string {
+	if base == "" {
+		return section
+	}
+	return base + "\n\t//\n" + section
+}
+
 func cleanDescription(desc string) string {
 	// Replace backticks with single quotes
 	desc = strings.ReplaceAll(desc, "`", "'")
@@ -536,7 +537,37 @@ func cleanDescription(desc string) string {
 
 func cleanIdentifier(name string) string {
 	// Remove all non-alphanumeric characters
-	return regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(name, "")
+	clean := regexp.MustCompile(`[^a-zA-Z0-9]`).ReplaceAllString(name, "")
+
+	// Replace some common things
+	clean = strings.ReplaceAll(clean, "Http", "HTTP")
+	clean = strings.ReplaceAll(clean, "Json", "JSON")
+	clean = strings.ReplaceAll(clean, "Dns", "DNS")
+	clean = strings.ReplaceAll(clean, "Uri", "URI")
+	if !strings.Contains(clean, "Identif") && !strings.Contains(clean, "Idle") {
+		clean = strings.ReplaceAll(clean, "Id", "ID")
+	}
+
+	return clean
+}
+
+func makeJSONTag(fieldName, jsonName string, isPointer bool) string {
+	if fieldName == jsonName && !isPointer {
+		return ""
+	}
+
+	omit := ""
+	if isPointer {
+		omit = ",omitempty"
+	}
+
+	name := ""
+	if fieldName != jsonName {
+		name = jsonName
+	}
+
+	jsonString := name + omit
+	return fmt.Sprintf("`json:%q`", jsonString)
 }
 
 func extractVersion(filename string) string {
@@ -599,7 +630,7 @@ func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
 	// Look for anyOf with $ref values
 	anyOf, ok := defMap["anyOf"].([]any)
 	if !ok {
-		return "", fmt.Errorf("no anyOf found")
+		return baseFile, nil
 	}
 
 	// Find all version references
@@ -630,8 +661,7 @@ func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
 			minor, _ := strconv.Atoi(matches[2])
 			errata, _ := strconv.Atoi(matches[3])
 
-			if major > maxMajor || (major == maxMajor && minor > maxMinor) ||
-				(major == maxMajor && minor == maxMinor && errata > maxErrata) {
+			if schema.CompareVersions(major, minor, errata, maxMajor, maxMinor, maxErrata) {
 				maxMajor, maxMinor, maxErrata = major, minor, errata
 				// Extract filename from ref
 				parts := strings.Split(ref, "#")
@@ -643,7 +673,7 @@ func ResolveLatestVersion(baseFile, schemaDir string) (string, error) {
 	}
 
 	if versionFile == "" {
-		return "", fmt.Errorf("no version found")
+		return baseFile, nil
 	}
 
 	return versionFile, nil
@@ -692,10 +722,8 @@ func (p *Parser) parseActions(actionsMap map[string]any, defsMap map[string]any)
 			if actionDefData, ok := defsMap[defName]; ok {
 				if actionDefMap, ok := actionDefData.(map[string]any); ok {
 					// Get description
-					if desc, ok := actionDefMap["longDescription"].(string); ok {
-						action.Description = cleanDescription(desc)
-					} else if desc, ok := actionDefMap["description"].(string); ok {
-						action.Description = cleanDescription(desc)
+					if desc := p.getDescription(actionDefMap); desc != "" {
+						action.Description = formatComment("", desc, "", false, "\t")
 					}
 
 					// Parse parameters
@@ -744,11 +772,30 @@ func extractJSONKeyOrder(rawJSON []byte, path string) []string {
 		startIdx := loc[1] - 1 // Position of the opening brace
 		braceCount := 1
 		i := startIdx + 1
+		inString := false
 
 		for i < len(currentJSON) && braceCount > 0 {
-			if currentJSON[i] == '{' {
+			ch := currentJSON[i]
+			if inString {
+				if ch == '\\' {
+					i += 2
+					continue
+				}
+				if ch == '"' {
+					inString = false
+				}
+				i++
+				continue
+			}
+
+			if ch == '"' {
+				inString = true
+				i++
+				continue
+			}
+			if ch == '{' {
 				braceCount++
-			} else if currentJSON[i] == '}' {
+			} else if ch == '}' {
 				braceCount--
 			}
 			i++
@@ -849,6 +896,29 @@ func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[strin
 		ordinalMap[paramName] = i
 	}
 
+	paramNames := make([]string, 0, len(paramsMap))
+	for paramName := range paramsMap {
+		paramNames = append(paramNames, paramName)
+	}
+
+	if len(paramOrder) == 0 {
+		sort.Strings(paramNames)
+		for i, paramName := range paramNames {
+			ordinalMap[paramName] = i
+		}
+	} else {
+		var missing []string
+		for _, paramName := range paramNames {
+			if _, ok := ordinalMap[paramName]; !ok {
+				missing = append(missing, paramName)
+			}
+		}
+		sort.Strings(missing)
+		for i, paramName := range missing {
+			ordinalMap[paramName] = len(paramOrder) + i
+		}
+	}
+
 	for paramName, paramData := range paramsMap {
 		paramMap, ok := paramData.(map[string]any)
 		if !ok {
@@ -856,21 +926,34 @@ func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[strin
 		}
 
 		param := &schema.ActionParameter{
-			Name:    strings.ToLower(paramName[:1]) + paramName[1:],
-			Type:    "string",
-			Ordinal: ordinalMap[paramName], // Set ordinal from the raw JSON key order
+			Name:         strings.ToLower(paramName[:1]) + paramName[1:],
+			Type:         "string",
+			Ordinal:      ordinalMap[paramName], // Set ordinal from the raw JSON key order
+			OriginalName: paramName,
 		}
 
 		// Get description
-		if desc, ok := paramMap["longDescription"].(string); ok {
-			param.Description = formatComment(param.Name+" -", desc, "", false, "\t")
-		} else if desc, ok := paramMap["description"].(string); ok {
+		if desc := p.getDescription(paramMap); desc != "" {
 			param.Description = formatComment(param.Name+" -", desc, "", false, "\t")
 		}
 
 		// Check if required
 		if req, ok := paramMap["required"].(bool); ok {
 			param.Required = req
+		}
+
+		// Parse explicit type
+		if _, ok := paramMap["type"]; ok {
+			// Convert paramMap to JSONProperty so we can use TypeMapper
+			propJSON := mapToJSONProperty(paramMap)
+			goType, isPointer, _ := p.typeMapper.MapType(paramName, propJSON)
+
+			// Handle pointer types
+			if isPointer {
+				param.Type = "*" + goType
+			} else {
+				param.Type = goType
+			}
 		}
 
 		// Parse type from $ref
@@ -924,11 +1007,7 @@ func (p *Parser) parseLinks(linksMap map[string]any) []*schema.Link {
 		}
 
 		// Get description
-		if desc, ok := linkMap["longDescription"].(string); ok {
-			link.Description = cleanDescription(desc)
-		} else if desc, ok := linkMap["description"].(string); ok {
-			link.Description = cleanDescription(desc)
-		}
+		link.Description = p.getDescription(linkMap)
 
 		// Determine if it's an array by checking if it has "items"
 		if _, hasItems := linkMap["items"]; hasItems {
@@ -962,20 +1041,10 @@ func (p *Parser) parseLinks(linksMap map[string]any) []*schema.Link {
 
 // extractTypeFromRef extracts the resource type name from a $ref URL
 func extractTypeFromRef(ref string) string {
-	// ref looks like "http://redfish.dmtf.org/schemas/v1/ComputerSystem.json#/definitions/ComputerSystem"
-	// or "#/definitions/Link" or similar
-	parts := strings.Split(ref, "/")
-	if len(parts) > 0 {
-		lastPart := parts[len(parts)-1]
-		// Handle cases where it ends with "Collection"
-		if strings.HasSuffix(lastPart, "Collection") {
-			return strings.TrimSuffix(lastPart, "Collection")
-		}
-		// Handle generic Link types
-		if lastPart == "Link" || lastPart == "Links" {
-			return ""
-		}
-		return lastPart
+	typeName := schema.ExtractTypeFromRef(ref, true)
+	// Filter out generic Link types
+	if typeName == "Link" || typeName == "Links" {
+		return ""
 	}
-	return ""
+	return typeName
 }
