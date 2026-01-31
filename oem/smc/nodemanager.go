@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type NodeManagerCapabilities struct {
@@ -48,7 +48,7 @@ type NodeManagerPolicy struct {
 // NodeManager is the node manager instance associated with the system.
 // This Redfish API can only be supported on Intel platforms with Intel ME.
 type NodeManager struct {
-	common.Entity
+	schemas.Entity
 	Capabilities       []NodeManagerCapabilities
 	Statistics         []NodeManagerStatistics
 	IntelPsysEnabled   bool
@@ -76,7 +76,7 @@ func (nm *NodeManager) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Actions struct {
-			ClearAllPolicies common.ActionTarget `json:"#SmcNodeManager.ClearAllPolicies"`
+			ClearAllPolicies schemas.ActionTarget `json:"#SmcNodeManager.ClearAllPolicies"`
 		}
 	}
 
@@ -92,8 +92,8 @@ func (nm *NodeManager) UnmarshalJSON(b []byte) error {
 }
 
 // GetNodeManager will get a NodeManager instance from the service.
-func GetNodeManager(c common.Client, uri string) (*NodeManager, error) {
-	return common.GetObject[NodeManager](c, uri)
+func GetNodeManager(c schemas.Client, uri string) (*NodeManager, error) {
+	return schemas.GetObject[NodeManager](c, uri)
 }
 
 // ClearAllPolicies clears the configured policies of the NodeManager.

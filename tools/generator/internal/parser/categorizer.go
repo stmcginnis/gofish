@@ -18,25 +18,8 @@ func GetSchemaOrigin(schemaFile, objectName string) schema.SchemaOrigin {
 	return schema.DetermineSchemaOrigin(rawSchema)
 }
 
-// CategorizeSchema determines the package type for a schema
-// This is a simplified version for single-file mode without full dependency analysis
-// For batch mode, use the analyzer package instead
+// CategorizeSchema determines the package type for a schema.
+// All generated schemas go to the schemas package.
 func CategorizeSchema(schemaFile, objectName string) schema.PackageType {
-	// Check if it's an infrastructure type
-	if schema.IsInfrastructureType(objectName) {
-		return schema.PackageCommon
-	}
-
-	// Schemas explicitly placed in common take precedence.
-	if schema.IsCommonSchema(objectName) {
-		return schema.PackageCommon
-	}
-
-	// Determine origin and use that as the package
-	origin := GetSchemaOrigin(schemaFile, objectName)
-	if origin == schema.OriginSwordfish {
-		return schema.PackageSwordfish
-	}
-
-	return schema.PackageRedfish
+	return schema.PackageSchemas
 }

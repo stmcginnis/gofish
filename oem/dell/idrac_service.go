@@ -8,7 +8,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // iDRACResetType defines the type of reset to perform
@@ -38,7 +38,7 @@ func (m *Manager) ResetiDRAC(resetType iDRACResetType) error {
 	target := "/redfish/v1/Dell/Managers/iDRAC.Embedded.1/DelliDRACCardService/Actions/DelliDRACCardService.iDRACReset"
 
 	resp, err := m.PostWithResponse(target, request)
-	defer common.DeferredCleanupHTTPResponse(resp)
+	defer schemas.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return errors.New("failed to reset iDRAC: " + err.Error())
 	}

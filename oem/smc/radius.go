@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // RADIUS is an instance of a RADIUS object.
 type RADIUS struct {
-	common.Entity
+	schemas.Entity
 
 	Enabled bool   `json:"RadiusEnabled"`
 	Server  string `json:"RadiusServer"`
@@ -72,6 +72,6 @@ func (r *RADIUS) Update() error {
 }
 
 // GetRADIUS will get a RADIUS instance from the service.
-func GetRADIUS(c common.Client, uri string) (*RADIUS, error) {
-	return common.GetObject[RADIUS](c, uri)
+func GetRADIUS(c schemas.Client, uri string) (*RADIUS, error) {
+	return schemas.GetObject[RADIUS](c, uri)
 }

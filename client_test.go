@@ -6,14 +6,13 @@ package gofish
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 const (
@@ -57,20 +56,15 @@ func testError(code int, t *testing.T) {
 	if err == nil {
 		t.Error("Update call should fail")
 	}
-	errStruct, ok := err.(*common.Error)
+	errStruct, ok := err.(*schemas.Error)
 	if !ok {
 		t.Errorf("%d should return known error type: %v", code, err)
 	}
-	if errStruct.HTTPReturnedStatusCode != code {
-		t.Errorf("The error code is different from %d", code)
-	}
-	errBody, err := json.MarshalIndent(errStruct, "  ", "    ")
-	if err != nil {
-		t.Errorf("Marshall error %v got: %s", errStruct, err)
-	}
-	if errMsg != string(errBody) {
-		t.Errorf("Expect:\n%s\nGot:\n%s", errMsg, string(errBody))
-	}
+
+	schemas.AssertEqual(t, code, errStruct.HTTPReturnedStatusCode)
+	schemas.AssertEqual(t, "A general error has occurred. See ExtendedInfo for more information.", errStruct.Message)
+	schemas.AssertEqual(t, 2, len(errStruct.ExtendedInfos))
+	schemas.AssertEqual(t, "Base.1.0.GeneralError", errStruct.Code)
 }
 
 // TestError400 tests the parsing of error reply.
@@ -95,7 +89,7 @@ func TestErrorOther(t *testing.T) {
 	if err == nil {
 		t.Error("connect should fail")
 	}
-	errStruct, ok := err.(*common.Error)
+	errStruct, ok := err.(*schemas.Error)
 	if !ok {
 		t.Errorf("call should return known error type: %v", err)
 	}

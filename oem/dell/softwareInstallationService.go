@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type ApplyUpdate string
@@ -127,7 +127,7 @@ type UpdateListFirmware struct {
 }
 
 type SoftwareInstallationService struct {
-	common.Entity
+	schemas.Entity
 
 	Actions struct {
 		InstallFromRepository struct {
@@ -250,7 +250,7 @@ func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepo
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 	res, err := sis.PostWithResponse(sis.Actions.InstallFromRepository.Target, b)
-	defer common.DeferredCleanupHTTPResponse(res)
+	defer schemas.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
@@ -264,11 +264,11 @@ func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepo
 // To install the firmware, call "InstallFromRepository" again with ApplyUpdate = True
 //
 // On success, returns a struct with the firmware upgrade details
-// On failure to get the catalog OR if all firmware is current, returns a common.Error error with an extended redfish error message.
+// On failure to get the catalog OR if all firmware is current, returns a schemas.Error error with an extended schemas.error message.
 func (sis *SoftwareInstallationService) GetRepoBasedUpdateList() (*UpdateList, error) {
 	var b struct{}
 	res, err := sis.PostWithResponse(sis.Actions.GetRepoBasedUpdateList.Target, b)
-	defer common.DeferredCleanupHTTPResponse(res)
+	defer schemas.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
@@ -298,6 +298,6 @@ func (sis *SoftwareInstallationService) GetRepoBasedUpdateList() (*UpdateList, e
 	return &ul, nil
 }
 
-func GetSoftwareInstallationService(c common.Client, uri string) (*SoftwareInstallationService, error) {
-	return common.GetObject[SoftwareInstallationService](c, uri)
+func GetSoftwareInstallationService(c schemas.Client, uri string) (*SoftwareInstallationService, error) {
+	return schemas.GetObject[SoftwareInstallationService](c, uri)
 }

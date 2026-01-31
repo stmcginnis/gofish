@@ -24,29 +24,31 @@ var CommonDescriptions = map[string]string{
 	"Identifier":     "Identifier shall be unique within the managed ecosystem.",
 }
 
-// CommonTypes maps property names to common Go types
+// CommonTypes maps property names to Go types.
+// These are all in the same schemas package, so no package prefix is needed
+// (except for json.RawMessage which is a stdlib type).
 var CommonTypes = map[string]string{
-	"Condition":         "common.Condition",
-	"ElectricalContext": "common.ElectricalContext",
-	"EventType":         "common.EventType",
-	"Health":            "common.Health",
-	"Identifier":        "common.Identifier",
-	"IndicatorLED":      "common.IndicatorLED",
-	"Location":          "common.Location",
-	"LogicalContext":    "common.LogicalContext",
+	"Condition":         "Condition",
+	"ElectricalContext": "ElectricalContext",
+	"EventType":         "EventType",
+	"Health":            "Health",
+	"Identifier":        "Identifier",
+	"IndicatorLED":      "IndicatorLED",
+	"Location":          "Location",
+	"LogicalContext":    "LogicalContext",
 	"Oem":               "json.RawMessage",
-	"OperationType":     "common.OperationType",
-	"PowerState":        "common.PowerState",
-	"PrivilegeType":     "common.PrivilegeType",
-	"Protocol":          "common.Protocol",
-	"Redundancy":        "common.Redundancy",
-	"RedundantGroup":    "common.RedundantGroup",
-	"ResetType":         "common.ResetType",
-	"Schedule":          "common.Schedule",
-	"Status":            "common.Status",
+	"OperationType":     "OperationType",
+	"PowerState":        "PowerState",
+	"PrivilegeType":     "PrivilegeType",
+	"Protocol":          "Protocol",
+	"Redundancy":        "Redundancy",
+	"RedundantGroup":    "RedundantGroup",
+	"ResetType":         "ResetType",
+	"Schedule":          "Schedule",
+	"Status":            "Status",
 }
 
-// EntityProperties are properties that indicate a type should embed common.Entity
+// EntityProperties are properties that indicate a type should embed Entity
 // These properties should be skipped when generating structs that embed Entity
 var EntityProperties = []string{
 	"Name",
@@ -98,12 +100,6 @@ func GetGoFieldName(jsonName string) string {
 	// Handle properties with dots or hyphens - convert to camelCase
 	if strings.ContainsAny(jsonName, ".-") {
 		return convertToCamelCase(jsonName)
-	}
-
-	if strings.HasSuffix(jsonName, "Id") {
-		// Convert properties ending in "Id" to end with "ID"
-		// Example: "ProcessorId" -> "ProcessorID"
-		return jsonName[:len(jsonName)-1] + "D"
 	}
 
 	return jsonName

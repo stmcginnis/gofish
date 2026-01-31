@@ -8,21 +8,20 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // LLDP is an instance of a LLDP object.
 type LLDP struct {
-	common.Entity
+	schemas.Entity
 
 	// Enabled shall contain the state indicating whether to enable LLDP for a port.
 	// If LLDP is disabled at the adapter level, this property shall be ignored.
 	Enabled bool `json:"LLDPEnabled"`
 	// LLDPReceive shall contain the LLDP data being received on this link.
-	LLDPReceive redfish.LLDPReceive
+	LLDPReceive schemas.LLDPReceive
 	// LLDPTransmit shall contain the LLDP data being transmit on this link.
-	LLDPTransmit redfish.LLDPTransmit
+	LLDPTransmit schemas.LLDPTransmit
 
 	// RawData holds the original serialized JSON so we can compare updates.
 	RawData []byte
@@ -70,6 +69,6 @@ func (i *LLDP) Update() error {
 }
 
 // GetLLDP will get a LLDP instance from the service.
-func GetLLDP(c common.Client, uri string) (*LLDP, error) {
-	return common.GetObject[LLDP](c, uri)
+func GetLLDP(c schemas.Client, uri string) (*LLDP, error) {
+	return schemas.GetObject[LLDP](c, uri)
 }

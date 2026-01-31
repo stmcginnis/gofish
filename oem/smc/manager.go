@@ -8,8 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type ManagerConfigResetOption string
@@ -22,7 +21,7 @@ const (
 
 // Manager is a Supermicro OEM instance of a Manager.
 type Manager struct {
-	redfish.Manager
+	schemas.Manager
 
 	radius           string
 	mouseMode        string
@@ -44,7 +43,7 @@ type Manager struct {
 }
 
 // FromManager converts a standard Manager object to the OEM implementation.
-func FromManager(manager *redfish.Manager) (*Manager, error) {
+func FromManager(manager *schemas.Manager) (*Manager, error) {
 	m := Manager{
 		Manager: *manager,
 	}
@@ -52,26 +51,26 @@ func FromManager(manager *redfish.Manager) (*Manager, error) {
 	var t struct {
 		Oem struct {
 			Supermicro struct {
-				RADIUS           common.Link `json:"RADIUS"`
-				MouseMode        common.Link `json:"MouseMode"`
-				NTP              common.Link `json:"NTP"`
-				IPAccessControl  common.Link `json:"IPAccessControl"`
-				SMCRAKP          common.Link `json:"SMCRAKP"`
-				Syslog           common.Link `json:"Syslog"`
-				SysLockdown      common.Link `json:"SysLockdown"`
-				MemoryPFA        common.Link `json:"MemoryPFA"`
-				MemoryHealthComp common.Link `json:"MemoryHealthComp"`
-				Snooping         common.Link `json:"Snooping"`
-				FanMode          common.Link `json:"FanMode"`
-				IKVM             common.Link `json:"IKVM"`
-				KCSInterface     common.Link `json:"KCSInterface"`
-				LLDP             common.Link `json:"LLDP"`
-				LicenseManager   common.Link `json:"LicenseManager"`
+				RADIUS           schemas.Link `json:"RADIUS"`
+				MouseMode        schemas.Link `json:"MouseMode"`
+				NTP              schemas.Link `json:"NTP"`
+				IPAccessControl  schemas.Link `json:"IPAccessControl"`
+				SMCRAKP          schemas.Link `json:"SMCRAKP"`
+				Syslog           schemas.Link `json:"Syslog"`
+				SysLockdown      schemas.Link `json:"SysLockdown"`
+				MemoryPFA        schemas.Link `json:"MemoryPFA"`
+				MemoryHealthComp schemas.Link `json:"MemoryHealthComp"`
+				Snooping         schemas.Link `json:"Snooping"`
+				FanMode          schemas.Link `json:"FanMode"`
+				IKVM             schemas.Link `json:"IKVM"`
+				KCSInterface     schemas.Link `json:"KCSInterface"`
+				LLDP             schemas.Link `json:"LLDP"`
+				LicenseManager   schemas.Link `json:"LicenseManager"`
 			} `json:"Supermicro"`
 		} `json:"Oem"`
 		Actions struct {
 			Oem struct {
-				ManagerConfigReset common.ActionTarget `json:"#SmcManagerConfig.Reset"`
+				ManagerConfigReset schemas.ActionTarget `json:"#SmcManagerConfig.Reset"`
 			} `json:"Oem"`
 		} `json:"Actions"`
 	}
@@ -179,5 +178,5 @@ func (m *Manager) ManagerConfigReset(option ManagerConfigResetOption) error {
 		return errors.New("manager config reset not supported by this system")
 	}
 
-	return m.Post(m.managerConfigResetTarget, map[string]interface{}{"Option": option})
+	return m.Post(m.managerConfigResetTarget, map[string]any{"Option": option})
 }

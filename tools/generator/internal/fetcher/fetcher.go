@@ -12,8 +12,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
 )
 
 const (
@@ -161,14 +159,3 @@ func extractJSONFiles(html string) []string {
 	return files
 }
 
-// GetSchemaDir returns the appropriate schema directory for a package type
-func (f *Fetcher) GetSchemaDir(packageType schema.PackageType) (string, error) {
-	switch packageType {
-	case schema.PackageRedfish, schema.PackageCommon:
-		return f.FetchRedfish()
-	case schema.PackageSwordfish:
-		return f.FetchSwordfish()
-	default:
-		return "", fmt.Errorf("unknown package type: %s", packageType)
-	}
-}

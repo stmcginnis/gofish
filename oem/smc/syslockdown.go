@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // SysLockdown is an instance of a SysLockdown object.
 type SysLockdown struct {
-	common.Entity
+	schemas.Entity
 
 	Enabled bool `json:"SysLockdownEnabled"`
 
@@ -63,6 +63,6 @@ func (i *SysLockdown) Update() error {
 }
 
 // GetSysLockdown will get a SysLockdown instance from the service.
-func GetSysLockdown(c common.Client, uri string) (*SysLockdown, error) {
-	return common.GetObject[SysLockdown](c, uri)
+func GetSysLockdown(c schemas.Client, uri string) (*SysLockdown, error) {
+	return schemas.GetObject[SysLockdown](c, uri)
 }

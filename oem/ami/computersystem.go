@@ -7,8 +7,7 @@ package ami
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // ManagerBootMode is is the boot mode of the manager.
@@ -33,7 +32,7 @@ type AMIBIOSInventoryCRC struct {
 
 // BiosTableis the root for BiosTable information.
 type BiosTable struct {
-	common.Entity
+	schemas.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -54,7 +53,7 @@ type TableTag struct {
 
 // BiosTableTags is the root for TableTags information.
 type BiosTableTags struct {
-	common.Entity
+	schemas.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -103,7 +102,7 @@ type ManagerBootConfiguration struct {
 
 // ComputerSystem is the update service instance associated with the system.
 type ComputerSystem struct {
-	redfish.ComputerSystem
+	schemas.ComputerSystem
 
 	BIOS                     Bios
 	ManagerBootConfiguration ManagerBootConfiguration
@@ -111,7 +110,7 @@ type ComputerSystem struct {
 }
 
 // FromComputerSystem gets the OEM instance of the ComputerSystemSystem.
-func FromComputerSystem(computerSystem *redfish.ComputerSystem) (*ComputerSystem, error) {
+func FromComputerSystem(computerSystem *schemas.ComputerSystem) (*ComputerSystem, error) {
 	us := ComputerSystem{
 		ComputerSystem: *computerSystem,
 	}

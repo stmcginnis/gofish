@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var accountServiceBody = `{
@@ -40,7 +40,7 @@ var accountServiceBody = `{
 
 // TestAMIAccountService tests the parsing of the AccountService.
 func TestAMIAccountService(t *testing.T) {
-	as := &redfish.AccountService{}
+	as := &schemas.AccountService{}
 	if err := json.Unmarshal([]byte(accountServiceBody), as); err != nil {
 		t.Fatalf("error decoding json: %v", err)
 	}

@@ -5,7 +5,7 @@
 package smc
 
 import (
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // FixedBootOrder is the fixed boot order information associated with the system.
@@ -14,7 +14,7 @@ import (
 // FixedBootOrder.
 // TODO: This is currently read-only in Gofish.
 type FixedBootOrder struct {
-	common.Entity
+	schemas.Entity
 	BootModeSelected           string
 	FixedBootOrder             []string
 	FixedBootOrderDisabledItem []string
@@ -26,6 +26,6 @@ type FixedBootOrder struct {
 }
 
 // GetFixedBootOrder will get a FixedBootOrder instance from the service.
-func GetFixedBootOrder(c common.Client, uri string) (*FixedBootOrder, error) {
-	return common.GetObject[FixedBootOrder](c, uri)
+func GetFixedBootOrder(c schemas.Client, uri string) (*FixedBootOrder, error) {
+	return schemas.GetObject[FixedBootOrder](c, uri)
 }
