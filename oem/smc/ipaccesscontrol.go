@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type FilterRulePolicy string
@@ -20,7 +20,7 @@ const (
 
 // FilterRule represents an individual filter rule.
 type FilterRule struct {
-	common.Entity
+	schemas.Entity
 	Address      string
 	PrefixLength int
 	Policy       FilterRulePolicy
@@ -28,7 +28,7 @@ type FilterRule struct {
 
 // IPAccessControl is an instance of an IPAccessControl object.
 type IPAccessControl struct {
-	common.Entity
+	schemas.Entity
 
 	Enabled     bool `json:"ServiceEnabled"`
 	filterRules string
@@ -42,7 +42,7 @@ func (i *IPAccessControl) UnmarshalJSON(b []byte) error {
 	type temp IPAccessControl
 	var t struct {
 		temp
-		FilterRules common.Link `json:"FilterRules"`
+		FilterRules schemas.Link `json:"FilterRules"`
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -81,10 +81,10 @@ func (i *IPAccessControl) Update() error {
 }
 
 func (i *IPAccessControl) FilterRules() ([]*FilterRule, error) {
-	return common.GetCollectionObjects[FilterRule](i.GetClient(), i.filterRules)
+	return schemas.GetCollectionObjects[FilterRule](i.GetClient(), i.filterRules)
 }
 
 // GetIPAccessControl will get a IPAccessControl instance from the service.
-func GetIPAccessControl(c common.Client, uri string) (*IPAccessControl, error) {
-	return common.GetObject[IPAccessControl](c, uri)
+func GetIPAccessControl(c schemas.Client, uri string) (*IPAccessControl, error) {
+	return schemas.GetObject[IPAccessControl](c, uri)
 }

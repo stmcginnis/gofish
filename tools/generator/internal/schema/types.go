@@ -14,9 +14,7 @@ import (
 type PackageType string
 
 const (
-	PackageCommon    PackageType = "common"
-	PackageRedfish   PackageType = "redfish"
-	PackageSwordfish PackageType = "swordfish"
+	PackageSchemas PackageType = "schemas"
 )
 
 // SchemaOrigin indicates where a schema comes from (Redfish or Swordfish)
@@ -27,7 +25,7 @@ const (
 	OriginSwordfish SchemaOrigin = "swordfish"
 )
 
-// InfrastructureTypes lists types that must always be in the common package.
+// InfrastructureTypes lists core infrastructure types.
 // These are manually maintained base types, not generated from schemas.
 var InfrastructureTypes = map[string]bool{
 	"Entity":              true,
@@ -38,22 +36,47 @@ var InfrastructureTypes = map[string]bool{
 	"ResourceCollection":  true,
 }
 
-// CommonSchemas lists schema names whose definitions should be placed in common.
-var CommonSchemas = map[string]bool{
-	"ActionInfo":     true,
-	"Message":        true,
-	"ResolutionStep": true,
+// ConflictAction defines how to resolve a schema name conflict between Redfish and Swordfish.
+type ConflictAction int
+
+const (
+	// ConflictSkipSwordfish means the Swordfish version is a true duplicate and should be skipped.
+	ConflictSkipSwordfish ConflictAction = iota
+	// ConflictPrefixSwordfish means the Swordfish version gets an "SF" prefix.
+	ConflictPrefixSwordfish
+)
+
+// SchemaConflicts defines how to handle schemas that exist in both Redfish and Swordfish.
+// Note: Volume is SNIA-owned in both bundles (Redfish includes SNIA schemas), so we skip
+// the duplicate. Schedule has different DMTF vs SNIA versions that need SF prefix.
+var SchemaConflicts = map[string]ConflictAction{
+	"EndpointGroup": ConflictSkipSwordfish,
+	"Schedule":      ConflictPrefixSwordfish,
+	"Volume":        ConflictSkipSwordfish, // Both bundles have same SNIA schema
 }
 
 // IsInfrastructureType checks if a type is a core infrastructure type.
-// These are manually maintained types that must always be in common.
+// These are manually maintained base types.
 func IsInfrastructureType(typeName string) bool {
 	return InfrastructureTypes[typeName]
 }
 
-// IsCommonSchema checks if a schema should be generated in common.
-func IsCommonSchema(schemaName string) bool {
-	return CommonSchemas[schemaName]
+// ShouldSkip returns true if this schema/origin combination should be skipped entirely.
+func ShouldSkip(objectName string, origin SchemaOrigin) bool {
+	if origin != OriginSwordfish {
+		return false
+	}
+	action, ok := SchemaConflicts[objectName]
+	return ok && action == ConflictSkipSwordfish
+}
+
+// NeedsSFPrefix returns true if this schema/origin combination needs an "SF" prefix.
+func NeedsSFPrefix(objectName string, origin SchemaOrigin) bool {
+	if origin != OriginSwordfish {
+		return false
+	}
+	action, ok := SchemaConflicts[objectName]
+	return ok && action == ConflictPrefixSwordfish
 }
 
 // DetermineSchemaOrigin determines if a parsed schema is Redfish or Swordfish origin.
@@ -244,6 +267,10 @@ type ActionParameter struct {
 	Ordinal int
 	// OriginalName is the unmodified name of the JSON parameter definition
 	OriginalName string
+	// FieldName is the PascalCase cleaned name for parameter struct fields
+	FieldName string
+	// FieldDescription is the pre-formatted godoc comment for parameter struct fields
+	FieldDescription string
 }
 
 // Link represents a link to a related resource
@@ -258,17 +285,8 @@ type Link struct {
 	Description string
 	// IsArray indicates if this is a link to multiple resources
 	IsArray bool
-}
-
-// JSONSchema represents a parsed JSON Schema structure
-type JSONSchema struct {
-	ID          string                 `json:"$id"`
-	Schema      string                 `json:"$schema"`
-	Title       string                 `json:"title"`
-	Type        string                 `json:"type"`
-	Definitions map[string]*Definition `json:"definitions"`
-	Properties  map[string]*JSONProperty
-	Required    []string
+	// Deprecated indicates if this link is deprecated
+	Deprecated bool
 }
 
 // JSONProperty represents a property in the JSON Schema

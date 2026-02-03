@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/stmcginnis/gofish"
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 const serviceRootBody = `{
@@ -189,7 +189,7 @@ MIIEpAIBAAKCAQEAz
 func TestSmcUpdateService(t *testing.T) {
 	const redfishBaseURL = "/redfish/v1/"
 	var (
-		c              common.Client
+		c              schemas.Client
 		err            error
 		requestCounter int // this counter is used to verify that the received requests are in the expected order
 	)
@@ -244,7 +244,7 @@ func TestSmcUpdateService(t *testing.T) {
 
 	serviceRoot, err := gofish.ServiceRoot(c)
 	if err != nil {
-		t.Errorf("failed to get redfish service root due to: %v", err)
+		t.Errorf("failed to get schemas.service root due to: %v", err)
 	}
 	origUpdateService, err := serviceRoot.UpdateService()
 	if err != nil {

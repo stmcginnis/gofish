@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // LicenseManager is the license manager instance associated with the system.
 type LicenseManager struct {
-	common.Entity
+	schemas.Entity
 
 	queryLicense string
 
@@ -27,10 +27,10 @@ func (lm *LicenseManager) UnmarshalJSON(b []byte) error {
 	var t struct {
 		temp
 		Actions struct {
-			ActivateLicense common.ActionTarget `json:"#LicenseManager.ActivateLicense"`
-			ClearLicense    common.ActionTarget `json:"#LicenseManager.ClearLicense"`
+			ActivateLicense schemas.ActionTarget `json:"#LicenseManager.ActivateLicense"`
+			ClearLicense    schemas.ActionTarget `json:"#LicenseManager.ClearLicense"`
 		}
-		QueryLicense common.Link
+		QueryLicense schemas.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -47,8 +47,8 @@ func (lm *LicenseManager) UnmarshalJSON(b []byte) error {
 }
 
 // GetLicenseManager will get a LicenseManager instance from the service.
-func GetLicenseManager(c common.Client, uri string) (*LicenseManager, error) {
-	return common.GetObject[LicenseManager](c, uri)
+func GetLicenseManager(c schemas.Client, uri string) (*LicenseManager, error) {
+	return schemas.GetObject[LicenseManager](c, uri)
 }
 
 // ActivateLicense performs the ActivateLicense action of the LicenseManager.
@@ -76,11 +76,11 @@ func (lm *LicenseManager) QueryLicense() (*QueryLicense, error) {
 
 // QueryLicense contains license information.
 type QueryLicense struct {
-	common.Entity
+	schemas.Entity
 	Licenses []string
 }
 
 // GetQueryLicense will get the QueryLicense instance from the service.
-func GetQueryLicense(c common.Client, uri string) (*QueryLicense, error) {
-	return common.GetObject[QueryLicense](c, uri)
+func GetQueryLicense(c schemas.Client, uri string) (*QueryLicense, error) {
+	return schemas.GetObject[QueryLicense](c, uri)
 }

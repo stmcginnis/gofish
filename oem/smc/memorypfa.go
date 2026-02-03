@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // MemoryPFA is an instance of a MemoryPFA object.
 type MemoryPFA struct {
-	common.Entity
+	schemas.Entity
 
 	// Init shall contain the current state from Bios HII value.
 	Init string `json:"MemoryPfaInit"`
@@ -69,6 +69,6 @@ func (i *MemoryPFA) Update() error {
 }
 
 // GetMemoryPFA will get a MemoryPFA instance from the service.
-func GetMemoryPFA(c common.Client, uri string) (*MemoryPFA, error) {
-	return common.GetObject[MemoryPFA](c, uri)
+func GetMemoryPFA(c schemas.Client, uri string) (*MemoryPFA, error) {
+	return schemas.GetObject[MemoryPFA](c, uri)
 }

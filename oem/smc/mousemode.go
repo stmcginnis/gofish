@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type MouseModeSetting string
@@ -21,7 +21,7 @@ const (
 
 // MouseMode is an instance of a MouseMode object.
 type MouseMode struct {
-	common.Entity
+	schemas.Entity
 
 	Mode MouseModeSetting `json:"Mode"`
 
@@ -70,6 +70,6 @@ func (r *MouseMode) Update() error {
 }
 
 // GetMouseMode will get a MouseMode instance from the service.
-func GetMouseMode(c common.Client, uri string) (*MouseMode, error) {
-	return common.GetObject[MouseMode](c, uri)
+func GetMouseMode(c schemas.Client, uri string) (*MouseMode, error) {
+	return schemas.GetObject[MouseMode](c, uri)
 }

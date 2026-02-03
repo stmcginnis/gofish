@@ -21,8 +21,8 @@ import (
 )
 {{- end }}
 {{- $pkg := "" }}
-{{- if ne .Package "common" }}
-{{- $pkg = "common." }}
+{{- if eq .Package "gofish" }}
+{{- $pkg = "schemas." }}
 {{- end }}
 {{- range .Enums }}
 
@@ -61,8 +61,8 @@ type {{ .Name }} struct {
 	{{ .FieldName }} {{if .IsArray}}[]string{{else}}string{{end}}
 {{- end }}
 {{- if and .IsEntity (gt (len .ReadWriteProperties) 0) }}
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 {{- end }}
 }
 {{- if or (and .IsEntity (gt (len .ReadWriteProperties) 0)) .HasActions .HasLinks .HasLinkProperties }}
@@ -137,7 +137,7 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 {{- if and .IsEntity (gt (len .ReadWriteProperties) 0) }}
 
 	// This is a read/write object, so we need to save the raw object data for later
-	{{ .ReceiverName }}.rawData = b
+	{{ .ReceiverName }}.RawData = b
 {{- end }}
 
 	return nil
@@ -154,10 +154,10 @@ func ({{ .ReceiverName }} *{{ .Name }}) Update() error {
 {{- end }}
 	}
 
-	return {{ .ReceiverName }}.UpdateFromRawData({{ .ReceiverName }}, {{ .ReceiverName }}.rawData, readWriteFields)
+	return {{ .ReceiverName }}.UpdateFromRawData({{ .ReceiverName }}, {{ .ReceiverName }}.RawData, readWriteFields)
 }
 {{- end }}
-{{- if and .IsMainType .IsEntity }}
+{{- if .IsEntity }}
 
 // Get{{ .Name }} will get a {{ .Name }} instance from the service.
 func Get{{ .Name }}(c {{ $pkg }}Client, uri string) (*{{ .Name }}, error) {
@@ -171,12 +171,28 @@ func ListReferenced{{ .Name }}s(c {{ $pkg }}Client, link string) ([]*{{ .Name }}
 }
 {{- end }}
 {{- range .Actions }}
+{{- if .UseParamStruct }}
+
+// {{ .ParamStructName }} holds the parameters for the {{ .Name }} action.
+type {{ .ParamStructName }} struct {
+{{- range .Parameters }}
+{{ .FieldDescription }}
+	{{ .FieldName }} {{ .Type }} {{ .JSONTag }}
+{{- end }}
+}
+{{- end }}
 
 {{ .Description }}
+{{- if not .UseParamStruct }}
 {{- range $i, $p := .Parameters }}
 {{ $p.Description }}
 {{- end }}
+{{- end }}
 {{- if .ResponseType }}
+{{- if .UseParamStruct }}
+func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}(params *{{ .ParamStructName }}) (*{{ .ResponseType }}, error) {
+	resp, err := {{ $receiverName }}.PostWithResponse({{ $receiverName }}.{{ .TargetField }}, params)
+{{- else }}
 func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .Parameters }}{{- if $i }}, {{ end }}{{ $p.Name }} {{ $p.Type }}{{- end }}) (*{{ .ResponseType }}, error) {
 	payload := make(map[string]any)
 {{- range .Parameters }}
@@ -184,6 +200,7 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .P
 {{- end }}
 
 	resp, err := {{ $receiverName }}.PostWithResponse({{ $receiverName }}.{{ .TargetField }}, payload)
+{{- end }}
 	if err != nil {
 		return nil, err
 	}
@@ -202,30 +219,50 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .P
 	return &result, nil
 }
 {{- else }}
-func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .Parameters }}{{- if $i }}, {{ end }}{{ $p.Name }} {{ $p.Type }}{{- end }}) error {
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+{{- if .UseParamStruct }}
+func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}(params *{{ .ParamStructName }}) (*TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTask({{ $receiverName }}.client,
+		{{ $receiverName }}.{{ .TargetField }}, params, {{ $receiverName }}.Headers(), false)
+{{- else }}
+func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .Parameters }}{{- if $i }}, {{ end }}{{ $p.Name }} {{ $p.Type }}{{- end }}) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 {{- range .Parameters }}
 	payload["{{ .OriginalName }}"] = {{ .Name }}
 {{- end }}
-	return {{ $receiverName }}.Post({{ $receiverName }}.{{ .TargetField }}, payload)
+	resp, taskInfo, err := PostWithTask({{ $receiverName }}.client,
+		{{ $receiverName }}.{{ .TargetField }}, payload, {{ $receiverName }}.Headers(), false)
+{{- end }}
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
 }
+{{- end }}
+{{- end }}
+{{- $client := printf "client %sClient" $pkg }}
+{{- $getClient := "client" }}
+{{- if .IsEntity }}
+{{- $client = "" }}
+{{- $getClient = printf "%s.client" $receiverName }}
+{{- if eq $pkg "schemas." }}
+{{- $getClient = printf "%s.GetClient()" $receiverName }}
 {{- end }}
 {{- end }}
 {{- range .Links }}
 {{- if .IsArray }}
 
 // {{ .Name }} gets the {{ .Name }} linked resources.
-func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}(client {{ $pkg }}Client) ([]*{{ .Type }}, error) {
-	return {{ $pkg }}GetObjects[{{ .Type }}](client, {{ $receiverName }}.{{ .FieldName }})
+func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{ $client }}) ([]*{{ .Type }}, error) {
+	return {{ $pkg }}GetObjects[{{ .Type }}]({{ $getClient }}, {{ $receiverName }}.{{ .FieldName }})
 }
 {{- else }}
 
 // {{ .Name }} gets the {{ .Name }} linked resource.
-func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}(client {{ $pkg }}Client) (*{{ .Type }}, error) {
+func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{ $client }}) (*{{ .Type }}, error) {
 	if {{ $receiverName }}.{{ .FieldName }} == "" {
 		return nil, nil
 	}
-	return {{ $pkg }}GetObject[{{ .Type }}](client, {{ $receiverName }}.{{ .FieldName }})
+	return {{ $pkg }}GetObject[{{ .Type }}]({{ $getClient }}, {{ $receiverName }}.{{ .FieldName }})
 }
 {{- end }}
 {{- end }}
@@ -234,26 +271,26 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}(client {{ $pkg }}Clien
 {{- if .IsCollection }}
 
 // {{ .GetterMethod }} gets the {{ .GetterMethod }} collection.
-func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}(client {{ $pkg }}Client) ([]*{{ .LinkType }}, error) {
+func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}({{ $client }}) ([]*{{ .LinkType }}, error) {
 	if {{ $receiverName }}.{{ .Name }} == "" {
 		return nil, nil
 	}
-	return {{ $pkg }}GetCollectionObjects[{{ .LinkType }}](client, {{ $receiverName }}.{{ .Name }})
+	return {{ $pkg }}GetCollectionObjects[{{ .LinkType }}]({{ $getClient }}, {{ $receiverName }}.{{ .Name }})
 }
 {{- else if .IsArray }}
 
 // {{ .GetterMethod }} gets the {{ .GetterMethod }} linked resources.
-func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}(client {{ $pkg }}Client) ([]*{{ .LinkType }}, error) {
-	return {{ $pkg }}GetObjects[{{ .LinkType }}](client, {{ $receiverName }}.{{ .Name }})
+func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}({{ $client }}) ([]*{{ .LinkType }}, error) {
+	return {{ $pkg }}GetObjects[{{ .LinkType }}]({{ $getClient }}, {{ $receiverName }}.{{ .Name }})
 }
 {{- else }}
 
 // {{ .GetterMethod }} gets the {{ .GetterMethod }} linked resource.
-func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}(client {{ $pkg }}Client) (*{{ .LinkType }}, error) {
+func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}({{ $client }}) (*{{ .LinkType }}, error) {
 	if {{ $receiverName }}.{{ .Name }} == "" {
 		return nil, nil
 	}
-	return {{ $pkg }}GetObject[{{ .LinkType }}](client, {{ $receiverName }}.{{ .Name }})
+	return {{ $pkg }}GetObject[{{ .LinkType }}]({{ $getClient }}, {{ $receiverName }}.{{ .Name }})
 }
 {{- end }}
 {{- end }}

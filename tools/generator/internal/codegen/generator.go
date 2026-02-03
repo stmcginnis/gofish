@@ -21,7 +21,6 @@ var sourceTemplate string
 // TemplateData holds the data for template rendering
 type TemplateData struct {
 	Package      string
-	NeedsReflect bool
 	ImportGroups [][]string
 	Enums        []*EnumData
 	Structs      []*StructData
@@ -31,10 +30,9 @@ type TemplateData struct {
 
 // EnumData represents an enum for the template
 type EnumData struct {
-	Name         string
-	Description  string
-	Values       []*EnumValueData
-	EnumTypeName string
+	Name        string
+	Description string
+	Values      []*EnumValueData
 }
 
 // EnumValueData represents an enum value for the template
@@ -62,22 +60,27 @@ type StructData struct {
 
 // ActionData represents an action for the template
 type ActionData struct {
-	Name         string
-	JSONName     string
-	Description  string
-	TargetField  string
-	Parameters   []*ActionParameterData
-	ResponseType string
+	Name            string
+	JSONName        string
+	Description     string
+	TargetField     string
+	Parameters      []*ActionParameterData
+	ResponseType    string
+	UseParamStruct  bool   // true when action has >3 parameters
+	ParamStructName string // e.g., "CertificateServiceGenerateCSRParameters"
 }
 
 // ActionParameterData represents an action parameter for the template
 type ActionParameterData struct {
-	Name         string
-	Type         string
-	Description  string
-	Required     bool
-	Ordinal      int
-	OriginalName string
+	Name             string
+	Type             string
+	Description      string
+	Required         bool
+	Ordinal          int
+	OriginalName     string
+	FieldName        string // PascalCase Go field name for parameter structs
+	FieldDescription string // Pre-formatted godoc comment for parameter struct fields
+	JSONTag          string // JSON struct tag (with omitempty for optional)
 }
 
 // LinkData represents a link for the template
@@ -108,49 +111,43 @@ type PropertyData struct {
 
 // Generator handles code generation
 type Generator struct {
-	tmpl                 *template.Template
-	packageType          schema.PackageType
-	isSwordfishInCommon  bool // True if this is a Swordfish type being placed in common
+	tmpl        *template.Template
+	packageType schema.PackageType
+	sfPrefix    bool              // True if type names should be prefixed with "SF"
+	typeRenames map[string]string // Map of original type name to new name
 }
 
-// packagePrefix returns the package prefix string (e.g., "redfish.")
-func (g *Generator) packagePrefix() string {
-	return string(g.packageType) + "."
+// applySFPrefix prepends "SF" to a name if sfPrefix is enabled.
+func (g *Generator) applySFPrefix(name string) string {
+	if g.sfPrefix {
+		return "SF" + name
+	}
+	return name
+}
+
+// applyTypeRename applies any configured type renames.
+func (g *Generator) applyTypeRename(name string) string {
+	if g.typeRenames != nil {
+		if newName, ok := g.typeRenames[name]; ok {
+			return newName
+		}
+	}
+	return name
 }
 
 // normalizeTypeForPackage normalizes a type name for the current package context.
-// It strips/adds package prefixes as needed and returns whether the type is external
-// (i.e., a cross-package reference that may need special handling).
-func (g *Generator) normalizeTypeForPackage(typeName string) (normalized string, isExternal bool) {
-	normalized = typeName
-
-	switch g.packageType {
-	case schema.PackageCommon:
-		// Strip common. prefix if present
-		if after, ok := strings.CutPrefix(normalized, "common."); ok {
-			normalized = after
-		} else if strings.Contains(normalized, ".") {
-			// Has a non-common package prefix - this is a cross-package reference
-			isExternal = true
-		} else if !g.isSwordfishInCommon && !schema.IsInfrastructureType(normalized) {
-			// No package prefix and not an infrastructure type
-			// This is a cross-package link from common to redfish/swordfish
-			// (skip when isSwordfishInCommon since referenced types are also in common)
-			isExternal = true
-		}
-
-	case schema.PackageRedfish, schema.PackageSwordfish:
-		// Add common. prefix to infrastructure types without a prefix
-		if schema.IsInfrastructureType(normalized) && !strings.Contains(normalized, ".") {
-			normalized = "common." + normalized
-		}
-		// Strip our own package prefix
-		if after, ok := strings.CutPrefix(normalized, g.packagePrefix()); ok {
-			normalized = after
-		}
+func (g *Generator) normalizeTypeForPackage(typeName string) string {
+	// For gofish package, add schemas. prefix for types
+	if g.packageType == "gofish" && !strings.Contains(typeName, ".") {
+		return "schemas." + typeName
 	}
 
-	return normalized, isExternal
+	// Strip any existing package prefixes for same-package types
+	if after, ok := strings.CutPrefix(typeName, "common."); ok {
+		return after
+	}
+
+	return typeName
 }
 
 // NewGenerator creates a new Generator
@@ -165,12 +162,14 @@ func NewGenerator() (*Generator, error) {
 	}, nil
 }
 
-// Generate generates Go source code from definitions
-// isSwordfishInCommon indicates if this is a Swordfish type being placed in common
-// (used to skip generating methods that would create import cycles)
-func (g *Generator) Generate(objectName string, packageType schema.PackageType, definitions []*schema.Definition, isSwordfishInCommon bool) (string, error) {
+// Generate generates Go source code from definitions.
+// sfPrefix indicates if type/const/function names should be prefixed with "SF"
+// (used for Swordfish schemas that conflict with Redfish names).
+// typeRenames maps original type names to new names (e.g., "ServiceRoot" -> "Service").
+func (g *Generator) Generate(objectName string, packageType schema.PackageType, definitions []*schema.Definition, sfPrefix bool, typeRenames map[string]string) (string, error) {
 	g.packageType = packageType
-	g.isSwordfishInCommon = isSwordfishInCommon
+	g.sfPrefix = sfPrefix
+	g.typeRenames = typeRenames
 	data := &TemplateData{
 		Package: string(packageType),
 	}
@@ -184,10 +183,26 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 		}
 	}
 
-	// Set release and title from main type if available
-	if mainType != nil {
-		data.Release = mainType.Release
-		data.Title = mainType.Title
+	// Set release and title from definitions.
+	// Prefer definitions that have Release set (from versioned schema) since they
+	// have the most current metadata. The main type by objectName may be from the
+	// base schema which lacks release info.
+	for _, def := range definitions {
+		// Prefer definition with Release (indicates it's from versioned schema)
+		if def.Release != "" {
+			data.Release = def.Release
+			data.Title = def.Title
+			break
+		}
+	}
+	// Fall back to any definition with Title if no Release found
+	if data.Title == "" {
+		for _, def := range definitions {
+			if def.Title != "" {
+				data.Title = def.Title
+				break
+			}
+		}
 	}
 
 	// Sort definitions by name for deterministic output
@@ -214,11 +229,6 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 		} else {
 			structData := g.buildStructData(def, def == mainType)
 			data.Structs = append(data.Structs, structData)
-
-			// Check if we need reflect package
-			if len(def.ReadWriteProperties) > 0 && def.IsEntity {
-				data.NeedsReflect = true
-			}
 		}
 	}
 
@@ -248,14 +258,10 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 
 func buildImportGroups(data *TemplateData) [][]string {
 	needsJSON := false
-	needsCommon := false
 
 	for _, sd := range data.Structs {
 		if (sd.IsEntity && len(sd.ReadWriteProperties) > 0) || sd.HasActions || sd.HasLinks || sd.HasLinkProperties {
 			needsJSON = true
-		}
-		if sd.IsEntity {
-			needsCommon = true
 		}
 		for _, prop := range sd.Properties {
 			if prop.TypeString == "json.RawMessage" {
@@ -268,8 +274,9 @@ func buildImportGroups(data *TemplateData) [][]string {
 	if needsJSON {
 		groups = append(groups, []string{"encoding/json"})
 	}
-	if needsCommon && data.Package != string(schema.PackageCommon) {
-		groups = append(groups, []string{"github.com/stmcginnis/gofish/common"})
+	// gofish package needs schemas import for referenced types
+	if data.Package == "gofish" {
+		groups = append(groups, []string{"github.com/stmcginnis/gofish/schemas"})
 	}
 
 	return groups
@@ -277,16 +284,24 @@ func buildImportGroups(data *TemplateData) [][]string {
 
 // buildEnumData converts a Definition to EnumData
 func (g *Generator) buildEnumData(def *schema.Definition) *EnumData {
+	enumName := g.applyTypeRename(g.applySFPrefix(def.Name))
 	ed := &EnumData{
-		Name:         def.Name,
-		Description:  def.Description,
-		EnumTypeName: def.Name,
+		Name:        enumName,
+		Description: def.Description,
 	}
 
 	for _, ev := range def.EnumValues {
 		// Make sure it's public (iSCSI > ISCSI)
 		name := strings.ToUpper(ev.Name[:1]) + ev.Name[1:]
 		name = makeValidIdentifier(name)
+
+		// When SF prefix is applied, constants have the original type name as suffix.
+		// Replace the suffix with the prefixed type name.
+		// e.g., "RAID10RAIDType" -> "RAID10SFRAIDType"
+		if g.sfPrefix && strings.HasSuffix(name, def.Name) {
+			name = strings.TrimSuffix(name, def.Name) + enumName
+		}
+
 		evd := &EnumValueData{
 			Name:        name,
 			Value:       ev.Value,
@@ -311,32 +326,52 @@ func makeValidIdentifier(name string) string {
 	return "V" + name
 }
 
+// goReservedWords is the set of Go language reserved keywords.
+var goReservedWords = map[string]bool{
+	"break": true, "case": true, "chan": true, "const": true, "continue": true,
+	"default": true, "defer": true, "else": true, "fallthrough": true, "for": true,
+	"func": true, "go": true, "goto": true, "if": true, "import": true,
+	"interface": true, "map": true, "package": true, "range": true, "return": true,
+	"select": true, "struct": true, "switch": true, "type": true, "var": true,
+}
+
+// escapeReservedWord adds an underscore suffix if the name is a Go reserved word.
+func escapeReservedWord(name string) string {
+	if goReservedWords[name] {
+		return name + "_"
+	}
+	return name
+}
+
 // buildStructData converts a Definition to StructData
 func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *StructData {
 	// Sort for deterministic output
 	sort.Strings(def.ReadWriteProperties)
 
+	structName := g.applyTypeRename(g.applySFPrefix(def.Name))
 	sd := &StructData{
-		Name:                def.Name,
+		Name:                structName,
 		Description:         def.Description,
 		IsEntity:            def.IsEntity,
 		IsMainType:          isMainType,
-		ReceiverName:        g.getReceiverName(def.Name),
+		ReceiverName:        g.getReceiverName(structName),
 		ReadWriteProperties: def.ReadWriteProperties,
 	}
 
-	// Build a set of link names to detect duplicates
-	// Properties that duplicate Links should not generate their own getter
-	linkNames := make(map[string]bool)
+	// Build a map of link names to their Link objects to detect duplicates
+	// Properties that duplicate non-deprecated Links should not generate their own getter
+	linksByName := make(map[string]*schema.Link)
 	for _, link := range def.Links {
-		linkNames[link.Name] = true
+		linksByName[link.Name] = link
 	}
 
 	for _, prop := range def.Properties {
-		// Skip link properties that duplicate entries in the Links section
-		// The Links getter will handle accessing these resources
-		if prop.IsLink && linkNames[prop.Name] {
-			continue
+		// Skip link properties that duplicate entries in the Links section,
+		// UNLESS the Links version is deprecated (then the property is the current location)
+		if prop.IsLink {
+			if link, exists := linksByName[prop.Name]; exists && !link.Deprecated {
+				continue
+			}
 		}
 
 		typeStr := g.buildTypeString(prop)
@@ -344,15 +379,7 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 
 		// Link properties store URIs as strings, but need the target type for getters
 		if prop.IsLink {
-			var isExternal bool
-			linkType, isExternal = g.normalizeTypeForPackage(prop.Type)
-
-			// Cross-package references cannot have typed getters due to circular dependencies
-			if isExternal {
-				linkType = ""
-				prop.IsPrivate = false
-				prop.GetterMethod = ""
-			}
+			linkType = g.normalizeTypeForPackage(prop.Type)
 
 			// Link properties are stored as strings
 			if prop.IsArray {
@@ -367,6 +394,8 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		// Private fields start with lowercase
 		if prop.IsPrivate {
 			fieldName = strings.ToLower(fieldName[:1]) + fieldName[1:]
+			fieldName = escapeReservedWord(fieldName)
+			prop.JSONTag = ""
 		}
 
 		pd := &PropertyData{
@@ -413,14 +442,28 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 
 		for _, param := range action.Parameters {
 			pd := &ActionParameterData{
-				Name:         param.Name,
-				Type:         param.Type,
-				Description:  param.Description,
-				Required:     param.Required,
-				Ordinal:      param.Ordinal,
-				OriginalName: param.OriginalName,
+				Name:             param.Name,
+				Type:             param.Type,
+				Description:      param.Description,
+				Required:         param.Required,
+				Ordinal:          param.Ordinal,
+				OriginalName:     param.OriginalName,
+				FieldName:        param.FieldName,
+				FieldDescription: param.FieldDescription,
 			}
 			ad.Parameters = append(ad.Parameters, pd)
+		}
+
+		if len(ad.Parameters) > 3 {
+			ad.UseParamStruct = true
+			ad.ParamStructName = structName + action.Name + "Parameters"
+			for _, pd := range ad.Parameters {
+				if pd.Required {
+					pd.JSONTag = fmt.Sprintf("`json:%q`", pd.OriginalName)
+				} else {
+					pd.JSONTag = fmt.Sprintf("`json:%q`", pd.OriginalName+",omitempty")
+				}
+			}
 		}
 
 		sd.Actions = append(sd.Actions, ad)
@@ -432,8 +475,22 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		return def.Links[i].Name < def.Links[j].Name
 	})
 
+	// Build a set of property names that are links, to detect when a
+	// deprecated Links entry has been superseded by a top-level property
+	propLinkNames := make(map[string]bool)
+	for _, prop := range def.Properties {
+		if prop.IsLink {
+			propLinkNames[prop.Name] = true
+		}
+	}
+
 	// Build link data
 	for _, link := range def.Links {
+		// Skip deprecated links that have been superseded by a top-level property
+		if link.Deprecated && propLinkNames[link.Name] {
+			continue
+		}
+
 		linkType := link.Type
 
 		// Map idRef to Entity (generic reference type)
@@ -442,16 +499,16 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		}
 
 		// Handle package prefixes for link types
-		linkType, isExternal := g.normalizeTypeForPackage(linkType)
-		if isExternal {
-			continue
-		}
+		linkType = g.normalizeTypeForPackage(linkType)
+
+		fieldName := strings.ToLower(link.Name[:1]) + link.Name[1:]
+		fieldName = escapeReservedWord(fieldName)
 
 		ld := &LinkData{
 			Name:        link.Name,
 			JSONName:    link.JSONName,
 			Description: link.Description,
-			FieldName:   strings.ToLower(link.Name[:1]) + link.Name[1:],
+			FieldName:   fieldName,
 			Type:        linkType,
 			IsArray:     link.IsArray,
 		}
@@ -465,11 +522,6 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 // buildTypeString builds the type string for a property
 func (g *Generator) buildTypeString(prop *schema.Property) string {
 	typeStr := strings.ReplaceAll(prop.Type, "_", "")
-
-	// If generating for common package, strip "common." prefix from types
-	if g.packageType == schema.PackageCommon && strings.HasPrefix(typeStr, "common.") {
-		typeStr = strings.TrimPrefix(typeStr, "common.")
-	}
 
 	if prop.IsArray {
 		typeStr = "[]" + typeStr

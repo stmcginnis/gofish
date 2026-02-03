@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // Syslog is an instance of a Syslog object.
 type Syslog struct {
-	common.Entity
+	schemas.Entity
 
 	Enabled bool   `json:"EnableSyslog"`
 	Server  string `json:"SyslogServer"`
@@ -69,6 +69,6 @@ func (i *Syslog) Update() error {
 }
 
 // GetSyslog will get a Syslog instance from the service.
-func GetSyslog(c common.Client, uri string) (*Syslog, error) {
-	return common.GetObject[Syslog](c, uri)
+func GetSyslog(c schemas.Client, uri string) (*Syslog, error) {
+	return schemas.GetObject[Syslog](c, uri)
 }

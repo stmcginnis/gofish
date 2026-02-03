@@ -7,12 +7,12 @@ package smc
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // AccountService is a Supermicro OEM instance of an AccountService.
 type AccountService struct {
-	redfish.AccountService
+	schemas.AccountService
 	SMCLDAP struct {
 		StartTLSEnabled bool
 	}
@@ -26,7 +26,7 @@ type AccountService struct {
 }
 
 // FromAccountService converts a standard AccountService object to the OEM implementation.
-func FromAccountService(accountService *redfish.AccountService) (*AccountService, error) {
+func FromAccountService(accountService *schemas.AccountService) (*AccountService, error) {
 	as := AccountService{
 		AccountService: *accountService,
 	}

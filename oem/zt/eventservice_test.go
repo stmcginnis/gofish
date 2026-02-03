@@ -10,8 +10,7 @@ import (
 	"testing"
 
 	"github.com/stmcginnis/gofish"
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 const serviceRootBody = `{
@@ -163,7 +162,7 @@ func TestSubscribeZT(t *testing.T) {
 	const redfishBaseURL = "/redfish/v1/"
 
 	var (
-		c              common.Client
+		c              schemas.Client
 		requestCounter int // this counter is used to verify that the received requests, are in the expected order
 		err            error
 	)
@@ -207,12 +206,12 @@ func TestSubscribeZT(t *testing.T) {
 
 	c, err = gofish.Connect(gofish.ClientConfig{Endpoint: server.URL, HTTPClient: server.Client()})
 	if err != nil {
-		t.Errorf("failed to establish redfish session due to: %v", err)
+		t.Errorf("failed to establish schemas.session due to: %v", err)
 	}
 
 	serviceRoot, err := gofish.ServiceRoot(c)
 	if err != nil {
-		t.Errorf("failed to get redfish service root due to: %v", err)
+		t.Errorf("failed to get schemas.service root due to: %v", err)
 	}
 	eventService, err := serviceRoot.EventService()
 	if err != nil {
@@ -224,7 +223,7 @@ func TestSubscribeZT(t *testing.T) {
 	}
 	url, err := ztEventService.Subscribe(
 		"https://events.receiver/events/",
-		redfish.RedfishEventDestinationProtocol)
+		schemas.RedfishEventDestinationProtocol)
 	if err != nil {
 		t.Errorf("failed to Subscribe() due to: %v", err)
 	}

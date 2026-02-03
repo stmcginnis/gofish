@@ -11,8 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 const eventContext string = "root"
@@ -20,7 +19,7 @@ const eventContext string = "root"
 type SubscriptionZtRequestType struct {
 	Destination string                           `json:"Destination"`
 	HTTPHeaders map[string]string                `json:"HttpHeaders,omitempty"`
-	Protocol    redfish.EventDestinationProtocol `json:"Protocol,omitempty"`
+	Protocol    schemas.EventDestinationProtocol `json:"Protocol,omitempty"`
 	Context     string                           `json:"Context,omitempty"`
 }
 
@@ -38,7 +37,7 @@ type SubscribeResponseType struct {
 	ID                   int    `json:"ID"`
 	Name                 string `json:"Name"`
 	Protocol             string `json:"Protocol"`
-	Status               common.Status
+	Status               schemas.Status
 	SubordinateResources bool   `json:"SubordinateResources"`
 	SubscriptionType     string `json:"SubscriptionType"`
 }
@@ -48,7 +47,7 @@ type eventPayload struct {
 }
 
 type EventService struct {
-	redfish.EventService
+	schemas.EventService
 }
 
 func getSubscriptionURL(ztSubscribeResponse *SubscribeResponseType) string {
@@ -57,18 +56,18 @@ func getSubscriptionURL(ztSubscribeResponse *SubscribeResponseType) string {
 
 // Subscribe to ZT systems redfish
 // eventsReceiverURL is the http/s URL that will accept the events sent from redfish
-// protocol is usually "redfish"
-func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol redfish.EventDestinationProtocol) (string, error) {
+// protocol is usually "schemas.
+func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol schemas.EventDestinationProtocol) (string, error) {
 	z := &SubscriptionZtRequestType{
 		Destination: eventsReceiverURL,
 		Protocol:    protocol,
 		Context:     eventContext,
 	}
 
-	resp, err := eventservice.GetClient().Post(eventservice.Subscriptions, z)
-	defer common.DeferredCleanupHTTPResponse(resp)
+	resp, err := eventservice.GetClient().Post(eventservice.SubscriptionsLink, z)
+	defer schemas.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
-		return "", fmt.Errorf("failed to POST subscribe request to redfish due to %w", err)
+		return "", fmt.Errorf("failed to POST subscribe request to schemas.due to %w", err)
 	}
 
 	var ztSubscribeResponse SubscribeResponseType
@@ -82,7 +81,7 @@ func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol r
 }
 
 // SubmitTestEvent sends event according to msgId and returns error.
-// ZT systems redfish current firmware limits the SubmitTestEvent() request rate.
+// ZT systems schemas.current firmware limits the SubmitTestEvent() request rate.
 // The first request will be OK, but if another request is sent with-in 5-15 sec, it will get a 400 error response.
 // This issue is reported at https://bugzilla.redhat.com/show_bug.cgi?id=2094842
 // To work around this limit, we retry sending the request until we get a good response.
@@ -110,7 +109,7 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 		}
 
 		if resp != nil {
-			_ = common.CleanupHTTPResponse(resp)
+			_ = schemas.CleanupHTTPResponse(resp)
 		}
 
 		time.Sleep(retryInterval)
@@ -119,7 +118,7 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 		return err
 	}
 
-	defer common.DeferredCleanupHTTPResponse(resp)
+	defer schemas.DeferredCleanupHTTPResponse(resp)
 
 	valid := map[int]bool{http.StatusAccepted: true}
 
@@ -131,7 +130,7 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 }
 
 // FromEventService converts a standard EventService object to the OEM implementation.
-func FromEventService(eventservice *redfish.EventService) (*EventService, error) {
+func FromEventService(eventservice *schemas.EventService) (*EventService, error) {
 	es := &EventService{}
 	err := json.Unmarshal(eventservice.RawData, es)
 	if err != nil {

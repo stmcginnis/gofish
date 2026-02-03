@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var hpeThermalBody = `{
@@ -78,7 +78,7 @@ var hpeThermalBody = `{
 
 // TestHpeThermalOem tests the parsing of Thermal objects and support oem field.
 func TestHpeThermalOem(t *testing.T) {
-	var thermal *redfish.Thermal
+	var thermal *schemas.Thermal
 	err := json.NewDecoder(strings.NewReader(hpeThermalBody)).Decode(&thermal)
 
 	if err != nil {

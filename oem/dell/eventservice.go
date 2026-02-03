@@ -8,8 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 const eventContext string = "root"
@@ -18,17 +17,17 @@ type PayloadType struct {
 	Destination string                           `json:"Destination"`
 	EventTypes  string                           `json:"EventTypes"`
 	Context     string                           `json:"Context"`
-	Protocol    redfish.EventDestinationProtocol `json:"Protocol"`
+	Protocol    schemas.EventDestinationProtocol `json:"Protocol"`
 	MessageID   string                           `json:"MessageId"`
 }
 
 // EventService is the Dell-specific handler for the EventService instance.
 type EventService struct {
-	redfish.EventService
+	schemas.EventService
 }
 
 // SubmitTestEvent sends event according to msgId and returns error.
-func (eventservice *EventService) SubmitTestEvent(messageID, eType string, protocol redfish.EventDestinationProtocol) error {
+func (eventservice *EventService) SubmitTestEvent(messageID, eType string, protocol schemas.EventDestinationProtocol) error {
 	payload := PayloadType{
 		Destination: eventservice.SubmitTestEventTarget,
 		EventTypes:  eType,
@@ -38,7 +37,7 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 	}
 
 	resp, err := eventservice.GetClient().Post(eventservice.SubmitTestEventTarget, payload)
-	defer common.DeferredCleanupHTTPResponse(resp)
+	defer schemas.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return fmt.Errorf("failed to post submitTestEvent due to: %w", err)
 	}
@@ -55,7 +54,7 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 }
 
 // FromEventService converts a standard EventService object to the OEM implementation.
-func FromEventService(eventservice *redfish.EventService) (*EventService, error) {
+func FromEventService(eventservice *schemas.EventService) (*EventService, error) {
 	es := &EventService{
 		EventService: *eventservice,
 	}

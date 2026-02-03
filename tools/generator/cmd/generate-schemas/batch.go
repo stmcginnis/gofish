@@ -23,35 +23,26 @@ type BatchProcessor struct {
 	schemaDirs []string
 	outputDir  string
 	verbose    bool
-	gen        *codegen.Generator
 	analyzer   *analyzer.DependencyAnalyzer
 }
 
 // NewBatchProcessor creates a new BatchProcessor
 func NewBatchProcessor(schemaDirs []string, outputDir string, verbose bool) (*BatchProcessor, error) {
-	gen, err := codegen.NewGenerator()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create generator: %w", err)
-	}
-
 	// Ensure output directory exists
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create output directory: %w", err)
 	}
 
-	// Create package subdirectories
-	for _, pkg := range []string{"common", "redfish", "swordfish"} {
-		pkgDir := filepath.Join(outputDir, pkg)
-		if err := os.MkdirAll(pkgDir, 0755); err != nil {
-			return nil, fmt.Errorf("failed to create package directory %s: %w", pkg, err)
-		}
+	// Create schemas subdirectory
+	schemasDir := filepath.Join(outputDir, "schemas")
+	if err := os.MkdirAll(schemasDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create schemas directory: %w", err)
 	}
 
 	return &BatchProcessor{
 		schemaDirs: schemaDirs,
 		outputDir:  outputDir,
 		verbose:    verbose,
-		gen:        gen,
 	}, nil
 }
 
@@ -64,9 +55,9 @@ func (bp *BatchProcessor) ProcessAll(parallel bool) error {
 		log.Printf("Found %d schemas to process across %d directories", len(baseFiles), len(bp.schemaDirs))
 	}
 
-	// PASS 1: Analyze all schemas to determine dependencies
+	// PASS 1: Analyze all schemas to detect conflicts
 	if bp.verbose {
-		log.Printf("Pass 1: Analyzing schema dependencies...")
+		log.Printf("Pass 1: Analyzing schemas for conflicts...")
 	}
 
 	bp.analyzer = analyzer.NewDependencyAnalyzer(bp.verbose)
@@ -79,17 +70,7 @@ func (bp *BatchProcessor) ProcessAll(parallel bool) error {
 		}
 	}
 
-	// Compute which Swordfish types are used by Redfish (transitive closure)
-	bp.analyzer.ComputeDependencies()
-
-	if bp.verbose {
-		// Log which Swordfish definitions will go to common
-		for defName := range bp.analyzer.SwordfishDefsUsedByRedfish {
-			log.Printf("  Swordfish definition %s will be placed in common (used by Redfish)", defName)
-		}
-	}
-
-	// PASS 2: Generate code with proper package assignments
+	// PASS 2: Generate code
 	if bp.verbose {
 		log.Printf("Pass 2: Generating code...")
 	}
@@ -176,7 +157,7 @@ func (bp *BatchProcessor) processParallel(files []string) error {
 		go func(f string) {
 			defer wg.Done()
 
-			semaphore <- struct{}{} // Acquire
+			semaphore <- struct{}{}        // Acquire
 			defer func() { <-semaphore }() // Release
 
 			objectName := strings.TrimSuffix(filepath.Base(f), ".json")
@@ -204,10 +185,32 @@ func (bp *BatchProcessor) processParallel(files []string) error {
 	return nil
 }
 
+// isSwordfishBundle returns true if the file path indicates it's from the Swordfish bundle.
+// This is based on directory path, not content analysis.
+func isSwordfishBundle(filePath string) bool {
+	return strings.Contains(strings.ToLower(filePath), "swordfish")
+}
+
 // processOne processes a single schema
 func (bp *BatchProcessor) processOne(objectName, baseFile string) error {
 	if bp.verbose {
 		log.Printf("Processing %s...", objectName)
+	}
+
+	// Determine the content origin from this specific file
+	contentOrigin := parser.GetSchemaOrigin(baseFile, objectName)
+
+	// For skip decisions, use bundle path (Swordfish directory means skip duplicates)
+	// This handles cases where SNIA schemas are included in the Redfish bundle
+	bundleIsSwordfish := isSwordfishBundle(baseFile)
+	if bundleIsSwordfish {
+		action, hasConflict := schema.SchemaConflicts[objectName]
+		if hasConflict && action == schema.ConflictSkipSwordfish {
+			if bp.verbose {
+				log.Printf("  Skipping %s (Swordfish bundle duplicate)", objectName)
+			}
+			return nil
+		}
 	}
 
 	// The baseFile's directory is the schema directory for this file
@@ -226,12 +229,19 @@ func (bp *BatchProcessor) processOne(objectName, baseFile string) error {
 		return fmt.Errorf("failed to parse schema: %w", err)
 	}
 
-	// Special case: ServiceRoot goes to root with "gofish" package
+	// Each call gets its own Generator to avoid race conditions during parallel processing
+	gen, err := codegen.NewGenerator()
+	if err != nil {
+		return fmt.Errorf("failed to create generator: %w", err)
+	}
+
+	// Special case: ServiceRoot goes to root with "gofish" package, renamed to "Service"
 	if objectName == "ServiceRoot" {
 		for _, def := range definitions {
 			def.Package = "gofish"
 		}
-		code, err := bp.gen.Generate(objectName, "gofish", definitions, false)
+		typeRenames := map[string]string{"ServiceRoot": "Service"}
+		code, err := gen.Generate(objectName, "gofish", definitions, false, typeRenames)
 		if err != nil {
 			return fmt.Errorf("failed to generate code: %w", err)
 		}
@@ -245,21 +255,11 @@ func (bp *BatchProcessor) processOne(objectName, baseFile string) error {
 		return nil
 	}
 
-	// Check if this schema needs split generation (definitions going to different packages)
-	if bp.analyzer != nil && bp.analyzer.NeedsSplitGeneration(objectName) {
-		return bp.processSplitSchema(objectName, definitions)
-	}
+	// Determine if this schema needs SF prefix based on actual file content origin
+	sfPrefix := schema.NeedsSFPrefix(objectName, contentOrigin)
 
-	// Single package generation (normal case)
-	var pkgType schema.PackageType
-	var isSwordfishInCommon bool
-
-	if bp.analyzer != nil {
-		pkgType = bp.analyzer.GetPackageType(objectName)
-		isSwordfishInCommon = bp.analyzer.IsSwordfishTypeInCommon(objectName)
-	} else {
-		pkgType = parser.CategorizeSchema(baseFile, objectName)
-	}
+	// All other schemas go to the schemas package
+	pkgType := schema.PackageSchemas
 
 	// Set package type on all definitions
 	for _, def := range definitions {
@@ -267,125 +267,27 @@ func (bp *BatchProcessor) processOne(objectName, baseFile string) error {
 	}
 
 	// Generate code
-	code, err := bp.gen.Generate(objectName, pkgType, definitions, isSwordfishInCommon)
+	code, err := gen.Generate(objectName, pkgType, definitions, sfPrefix, nil)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}
 
-	// Write output
-	outputDir := filepath.Join(bp.outputDir, string(pkgType))
-	outputFile := filepath.Join(outputDir, strings.ToLower(objectName)+".go")
+	// Write output to schemas/ directory
+	// SF-prefixed schemas use filename sf<name>.go
+	outputDir := filepath.Join(bp.outputDir, "schemas")
+	filename := strings.ToLower(objectName) + ".go"
+	if sfPrefix {
+		filename = "sf" + filename
+	}
+	outputFile := filepath.Join(outputDir, filename)
 
 	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 
 	if bp.verbose {
-		log.Printf("Generated %s/%s", string(pkgType), filepath.Base(outputFile))
+		log.Printf("Generated schemas/%s", filepath.Base(outputFile))
 	}
 
 	return nil
-}
-
-// processSplitSchema handles schemas where definitions go to different packages
-func (bp *BatchProcessor) processSplitSchema(objectName string, allDefinitions []*schema.Definition) error {
-	if bp.verbose {
-		log.Printf("  Schema %s requires split generation", objectName)
-	}
-
-	// Get definitions grouped by target package
-	defsByPackage := bp.analyzer.GetDefinitionsByPackage(objectName)
-
-	// Create a map of definition names for quick lookup
-	defMap := schema.BuildDefinitionMap(allDefinitions, true)
-
-	// Process each package that has definitions
-	for pkgType, defNames := range defsByPackage {
-		// Filter definitions for this package
-		var pkgDefinitions []*schema.Definition
-		for _, defName := range defNames {
-			if def, ok := defMap[defName]; ok {
-				// Clone the definition to avoid modifying the original
-				defCopy := *def
-				defCopy.Package = pkgType
-				pkgDefinitions = append(pkgDefinitions, &defCopy)
-			}
-		}
-
-		if len(pkgDefinitions) == 0 {
-			continue
-		}
-
-		// Determine the main type for this package subset
-		mainTypeName := bp.determineMainType(objectName, pkgDefinitions)
-
-		// Determine if this is a Swordfish type in common
-		isSwordfishInCommon := pkgType == schema.PackageCommon &&
-			bp.analyzer.GetSchemaOrigin(objectName) == schema.OriginSwordfish
-
-		// Generate code for this subset
-		code, err := bp.gen.Generate(mainTypeName, pkgType, pkgDefinitions, isSwordfishInCommon)
-		if err != nil {
-			return fmt.Errorf("failed to generate code for %s in %s: %w", mainTypeName, pkgType, err)
-		}
-
-		// Determine output filename
-		outputDir := filepath.Join(bp.outputDir, string(pkgType))
-		outputFile := filepath.Join(outputDir, strings.ToLower(mainTypeName)+".go")
-
-		if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
-			return fmt.Errorf("failed to write file: %w", err)
-		}
-
-		if bp.verbose {
-			log.Printf("  Generated %s/%s (%d definitions)", string(pkgType), filepath.Base(outputFile), len(pkgDefinitions))
-		}
-	}
-
-	return nil
-}
-
-// determineMainType finds the main type name for a subset of definitions
-// If the subset contains the schema's main type (entity), use the schema name
-// Otherwise, use the most prominent type name (prefer entity types, then largest struct)
-func (bp *BatchProcessor) determineMainType(schemaName string, definitions []*schema.Definition) string {
-	// First check if any definition matches the schema name (is the main entity)
-	for _, def := range definitions {
-		if def.OriginalName == schemaName || def.Name == schemaName {
-			return schemaName
-		}
-	}
-
-	// Find the best candidate among the definitions
-	var bestCandidate *schema.Definition
-	for _, def := range definitions {
-		if def.IsEnum {
-			continue // Skip enums as main type
-		}
-		if def.IsEntity {
-			// Prefer entity types
-			return def.OriginalName
-		}
-		if bestCandidate == nil || len(def.Properties) > len(bestCandidate.Properties) {
-			bestCandidate = def
-		}
-	}
-
-	if bestCandidate != nil {
-		return bestCandidate.OriginalName
-	}
-
-	// Fallback: use first non-enum definition
-	for _, def := range definitions {
-		if !def.IsEnum {
-			return def.OriginalName
-		}
-	}
-
-	// Last resort: use first definition
-	if len(definitions) > 0 {
-		return definitions[0].OriginalName
-	}
-
-	return schemaName
 }

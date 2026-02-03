@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var computerSystemBody = `{
@@ -193,7 +193,7 @@ var computerSystemBody = `{
 
 // TestComputerSystem tests the parsing of ComputerSystem objects.
 func TestComputerSystem(t *testing.T) {
-	var cs redfish.ComputerSystem
+	var cs schemas.ComputerSystem
 	err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&cs)
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)

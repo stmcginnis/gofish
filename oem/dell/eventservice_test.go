@@ -12,8 +12,7 @@ import (
 	"testing"
 
 	"github.com/stmcginnis/gofish"
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 const serviceRootBody = `{
@@ -192,7 +191,7 @@ func TestEventService(t *testing.T) {
 func TestDellSubmitTestEvent(t *testing.T) {
 	const redfishBaseURL = "/redfish/v1/"
 	var (
-		c              common.Client
+		c              schemas.Client
 		err            error
 		requestCounter int // this counter is used to verify that the received requests are in the expected order
 	)
@@ -247,7 +246,7 @@ func TestDellSubmitTestEvent(t *testing.T) {
 
 	serviceRoot, err := gofish.ServiceRoot(c)
 	if err != nil {
-		t.Errorf("failed to get redfish service root due to: %v", err)
+		t.Errorf("failed to get schemas.service root due to: %v", err)
 	}
 	eventService, err := serviceRoot.EventService()
 	if err != nil {
@@ -261,7 +260,7 @@ func TestDellSubmitTestEvent(t *testing.T) {
 	err = dellEventService.SubmitTestEvent(
 		"AMP0300",
 		"Alert",
-		redfish.RedfishEventDestinationProtocol)
+		schemas.RedfishEventDestinationProtocol)
 	if err != nil {
 		t.Errorf("failed to submit test event due to: %v", err)
 	}

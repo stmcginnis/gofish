@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var smcDriveBody = `{
@@ -51,7 +51,7 @@ var smcDriveBody = `{
 
 // TestSmcDriveOem tests the parsing of the Drive oem field
 func TestSmcDriveOem(t *testing.T) {
-	drive := &redfish.Drive{}
+	drive := &schemas.Drive{}
 	if err := json.Unmarshal([]byte(smcDriveBody), drive); err != nil {
 		t.Fatalf("error decoding json: %v", err)
 	}

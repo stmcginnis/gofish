@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // FanMode is an instance of a FanMode object.
 type FanMode struct {
-	common.Entity
+	schemas.Entity
 
 	Mode           string
 	AllowableModes []string `json:"Mode@Redfish.AllowableValues"`
@@ -63,6 +63,6 @@ func (i *FanMode) Update() error {
 }
 
 // GetFanMode will get a FanMode instance from the service.
-func GetFanMode(c common.Client, uri string) (*FanMode, error) {
-	return common.GetObject[FanMode](c, uri)
+func GetFanMode(c schemas.Client, uri string) (*FanMode, error) {
+	return schemas.GetObject[FanMode](c, uri)
 }

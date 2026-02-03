@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 var managerBody = `{
@@ -97,7 +97,7 @@ var managerBody = `{
 
 // TestManager tests the parsing of Manager objects.
 func TestManager(t *testing.T) {
-	var m redfish.Manager
+	var m schemas.Manager
 	err := json.NewDecoder(strings.NewReader(managerBody)).Decode(&m)
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)

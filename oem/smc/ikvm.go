@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 // IKVM is an instance of a IKVM object.
 type IKVM struct {
-	common.Entity
+	schemas.Entity
 
 	CurrentInterface string `json:"Current Interface"`
 	URI              string
@@ -64,6 +64,6 @@ func (i *IKVM) Update() error {
 }
 
 // GetIKVM will get a IKVM instance from the service.
-func GetIKVM(c common.Client, uri string) (*IKVM, error) {
-	return common.GetObject[IKVM](c, uri)
+func GetIKVM(c schemas.Client, uri string) (*IKVM, error) {
+	return schemas.GetObject[IKVM](c, uri)
 }

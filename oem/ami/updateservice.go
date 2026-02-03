@@ -8,8 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type PreserveConfiguration string
@@ -101,7 +100,7 @@ type BIOS struct {
 
 // UpdateService is the update service instance associated with the system.
 type UpdateService struct {
-	redfish.UpdateService
+	schemas.UpdateService
 
 	AMIUpdateService AMIUpdateService
 	BIOS             BIOS
@@ -111,7 +110,7 @@ type UpdateService struct {
 }
 
 // FromUpdateService gets the OEM instance of the UpdateService.
-func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, error) {
+func FromUpdateService(updateService *schemas.UpdateService) (*UpdateService, error) {
 	us := UpdateService{
 		UpdateService: *updateService,
 	}
@@ -119,7 +118,7 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 	var t struct {
 		Actions struct {
 			Oem struct {
-				UploadCABundle common.ActionTarget `json:"#UpdateService.UploadCABundle"`
+				UploadCABundle schemas.ActionTarget `json:"#UpdateService.UploadCABundle"`
 			}
 		}
 		Oem struct {
@@ -144,8 +143,8 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 }
 
 // GetUpdateService will get a UpdateService instance from the service.
-func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri)
+func GetUpdateService(c schemas.Client, uri string) (*UpdateService, error) {
+	return schemas.GetObject[UpdateService](c, uri)
 }
 
 // UploadCABundle uploads CA certificates.
