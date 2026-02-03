@@ -212,6 +212,7 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 	virtualMediaConfig := VirtualMediaInsertMediaParameters{
 		Image:          "https://example.com/image",
 		Inserted:       toRef(true),
+		MediaType:      CDVirtualMediaType,
 		Password:       toRef("test1234"),
 		UserName:       toRef("root"),
 		WriteProtected: toRef(true),
@@ -228,6 +229,9 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 		t.Errorf("Unexpected InsertMedia Image payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "Inserted:true") {
+		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "MediaType:CD") {
 		t.Errorf("Unexpected InsertMedia Inserted payload: %s", calls[0].Payload)
 	}
 	if !strings.Contains(calls[0].Payload, "Password:test1234") {
