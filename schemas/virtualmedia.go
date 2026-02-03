@@ -143,6 +143,8 @@ type VirtualMedia struct {
 	// MediaTypes shall contain an array of the supported media types for this
 	// connection.
 	MediaTypes []VirtualMediaType
+	// MediaType indicates which MediaTypes is used (non-standard)
+	MediaType VirtualMediaType
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -324,6 +326,8 @@ type VirtualMediaInsertMediaParameters struct {
 	// write-protected. If the client does not provide this parameter, the service
 	// shall default this value to 'true'.
 	WriteProtected *bool `json:"WriteProtected,omitempty"`
+	// MediaType is not part of the current schema, but some vendors require it.
+	MediaType VirtualMediaType `json:",omitempty"`
 }
 
 // InsertMediaActionInfo provides the ActionInfo, if supported, for an InsertMedia Action
