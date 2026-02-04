@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/IPAddresses.v1_1_5.json
 // 2018.2 - #IPAddresses.v1_1_5
 
 package schemas

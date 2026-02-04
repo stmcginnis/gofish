@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/SpareResourceSet.v1_0_2.json
 // 1.0.7a - #SpareResourceSet.v1_0_2.SpareResourceSet
 
 package schemas

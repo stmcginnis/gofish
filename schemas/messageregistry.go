@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/MessageRegistry.v1_7_0.json
 // 2025.3 - #MessageRegistry.v1_7_0.MessageRegistry
 
 package schemas

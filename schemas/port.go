@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Port.v1_18_0.json
 // 2025.4 - #Port.v1_18_0.Port
 
 package schemas

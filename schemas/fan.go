@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Fan.v1_6_0.json
 // 2025.3 - #Fan.v1_6_0.Fan
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/TelemetryService.v1_4_1.json
 // 2025.2 - #TelemetryService.v1_4_1.TelemetryService
 
 package schemas

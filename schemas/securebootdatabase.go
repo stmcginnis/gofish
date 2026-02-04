@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/SecureBootDatabase.v1_0_3.json
 // 2020.1 - #SecureBootDatabase.v1_0_3.SecureBootDatabase
 
 package schemas

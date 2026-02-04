@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/DataStorageLineOfService.v1_3_1.json
 // 1.1.0 - #DataStorageLineOfService.v1_3_1.DataStorageLineOfService
 
 package schemas

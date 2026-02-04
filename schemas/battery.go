@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Battery.v1_5_0.json
 // 2025.3 - #Battery.v1_5_0.Battery
 
 package schemas

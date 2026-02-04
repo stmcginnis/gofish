@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/FabricAdapter.v1_5_3.json
 // 2022.3 - #FabricAdapter.v1_5_3.FabricAdapter
 
 package schemas

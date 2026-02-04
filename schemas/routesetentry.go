@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/RouteSetEntry.v1_0_2.json
 // 2019.4 - #RouteSetEntry.v1_0_2.RouteSetEntry
 
 package schemas

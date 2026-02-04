@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/StorageServiceMetrics.v1_1_0.json
 // 1.2.8 - #StorageServiceMetrics.v1_1_0.StorageServiceMetrics
 
 package schemas

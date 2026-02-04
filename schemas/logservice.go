@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/LogService.v1_9_0.json
 // 2025.4 - #LogService.v1_9_0.LogService
 
 package schemas

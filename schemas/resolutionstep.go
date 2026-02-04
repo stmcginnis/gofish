@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ResolutionStep.v1_0_1.json
 // 2023.3 - #ResolutionStep.v1_0_1
 
 package schemas

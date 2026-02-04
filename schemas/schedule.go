@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Schedule.v1_2_5.json
 // 2018.2 - #Schedule.v1_2_5
 
 package schemas

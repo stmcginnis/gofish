@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Thermal.v1_7_3.json
 // 2020.4 - #Thermal.v1_7_3.Thermal
 
 package schemas

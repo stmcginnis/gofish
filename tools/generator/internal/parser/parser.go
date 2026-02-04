@@ -108,6 +108,10 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 	if t, ok := rawSchema["title"].(string); ok {
 		title = t
 	}
+	schemaID := ""
+	if id, ok := rawSchema["$id"].(string); ok {
+		schemaID = id
+	}
 
 	for defName, defData := range defsMap {
 		// Skip excluded definitions
@@ -125,6 +129,7 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 			def := p.parseEnumDefinition(defName, defMap, enumVals, version)
 			def.Release = release
 			def.Title = title
+			def.SchemaID = schemaID
 			definitions = append(definitions, def)
 			continue
 		}
@@ -145,6 +150,7 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 			def := p.parseObjectDefinition(defName, defMap, version)
 			def.Release = release
 			def.Title = title
+			def.SchemaID = schemaID
 			definitions = append(definitions, def)
 		}
 	}

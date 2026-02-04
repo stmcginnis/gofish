@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ResourceBlock.v1_4_3.json
 // 2020.4 - #ResourceBlock.v1_4_3.ResourceBlock
 
 package schemas

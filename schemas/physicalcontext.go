@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/PhysicalContext.json
 // 1.0 - #PhysicalContext
 
 package schemas

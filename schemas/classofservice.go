@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/ClassOfService.v1_2_0.json
 // 1.0.5 - #ClassOfService.v1_2_0.ClassOfService
 
 package schemas

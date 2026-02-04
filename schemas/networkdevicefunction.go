@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/NetworkDeviceFunction.v1_11_1.json
 // 2025.2 - #NetworkDeviceFunction.v1_11_1.NetworkDeviceFunction
 
 package schemas

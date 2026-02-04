@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ManagerNetworkProtocol.v1_12_0.json
 // 2025.2 - #ManagerNetworkProtocol.v1_12_0.ManagerNetworkProtocol
 
 package schemas

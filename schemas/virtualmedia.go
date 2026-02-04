@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/VirtualMedia.v1_6_5.json
 // 2022.3 - #VirtualMedia.v1_6_5.VirtualMedia
 
 package schemas

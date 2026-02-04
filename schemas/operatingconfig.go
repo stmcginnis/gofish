@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/OperatingConfig.v1_0_4.json
 // 2020.2 - #OperatingConfig.v1_0_4.OperatingConfig
 
 package schemas

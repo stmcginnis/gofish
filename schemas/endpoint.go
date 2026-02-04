@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Endpoint.v1_8_2.json
 // 2022.3 - #Endpoint.v1_8_2.Endpoint
 
 package schemas

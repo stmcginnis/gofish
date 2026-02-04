@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Processor.v1_22_0.json
 // 2025.4 - #Processor.v1_22_0.Processor
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/AddressPool.v1_3_0.json
 // 2024.1 - #AddressPool.v1_3_0.AddressPool
 
 package schemas

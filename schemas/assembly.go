@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Assembly.v1_6_1.json
 // 2025.3 - #Assembly.v1_6_1.Assembly
 
 package schemas

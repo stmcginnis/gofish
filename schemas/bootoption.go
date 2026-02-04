@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/BootOption.v1_0_6.json
 // 2017.3 - #BootOption.v1_0_6.BootOption
 
 package schemas

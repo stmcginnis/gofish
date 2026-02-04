@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Task.v1_7_4.json
 // 2022.3 - #Task.v1_7_4.Task
 
 package schemas

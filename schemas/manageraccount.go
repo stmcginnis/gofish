@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ManagerAccount.v1_14_1.json
 // 2025.2 - #ManagerAccount.v1_14_1.ManagerAccount
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/MetricReport.v1_5_2.json
 // 2022.2 - #MetricReport.v1_5_2.MetricReport
 
 package schemas

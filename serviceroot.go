@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ServiceRoot.v1_20_0.json
 // 2025.4 - #ServiceRoot.v1_20_0.ServiceRoot
 
 package gofish

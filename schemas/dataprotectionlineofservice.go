@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/DataProtectionLineOfService.v1_3_0.json
 // 1.2.2 - #DataProtectionLineOfService.v1_3_0.DataProtectionLineOfService
 
 package schemas

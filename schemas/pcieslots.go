@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/PCIeSlots.v1_6_1.json
 // 2023.2 - #PCIeSlots.v1_6_1.PCIeSlots
 
 package schemas

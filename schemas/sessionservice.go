@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/SessionService.v1_2_0.json
 // 2024.4 - #SessionService.v1_2_0.SessionService
 
 package schemas

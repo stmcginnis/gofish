@@ -193,6 +193,8 @@ type Definition struct {
 	Release string
 	// Title is the schema title (e.g., "#CertificateService.v1_0_1.CertificateService")
 	Title string
+	// SchemaID is the schema $id URL
+	SchemaID string
 }
 
 // Property represents a struct field

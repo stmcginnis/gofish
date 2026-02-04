@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/OutletGroup.v1_2_0.json
 // 2024.1 - #OutletGroup.v1_2_0.OutletGroup
 
 package schemas

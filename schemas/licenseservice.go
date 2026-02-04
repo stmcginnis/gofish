@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/LicenseService.v1_1_2.json
 // 2022.3 - #LicenseService.v1_1_2.LicenseService
 
 package schemas

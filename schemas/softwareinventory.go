@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/SoftwareInventory.v1_13_0.json
 // 2025.3 - #SoftwareInventory.v1_13_0.SoftwareInventory
 
 package schemas

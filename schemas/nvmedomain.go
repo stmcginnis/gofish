@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/NVMeDomain.v1_2_0.json
 // 1.2.6 - #NVMeDomain.v1_2_0.NVMeDomain
 
 package schemas

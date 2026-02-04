@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/KeyPolicy.v1_0_1.json
 // 2021.2 - #KeyPolicy.v1_0_1.KeyPolicy
 
 package schemas

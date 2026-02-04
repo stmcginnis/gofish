@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/IOConnectivityLineOfService.v1_2_1.json
 // 1.1.0 - #IOConnectivityLineOfService.v1_2_1.IOConnectivityLineOfService
 
 package schemas

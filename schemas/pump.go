@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Pump.v1_2_0.json
 // 2024.4 - #Pump.v1_2_0.Pump
 
 package schemas

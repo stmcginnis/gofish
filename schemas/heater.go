@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Heater.v1_0_2.json
 // 2022.3 - #Heater.v1_0_2.Heater
 
 package schemas

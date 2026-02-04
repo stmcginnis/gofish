@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Facility.v1_4_2.json
 // 2023.1 - #Facility.v1_4_2.Facility
 
 package schemas

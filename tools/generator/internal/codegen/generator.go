@@ -26,6 +26,7 @@ type TemplateData struct {
 	Structs      []*StructData
 	Release      string
 	Title        string
+	SchemaID     string
 }
 
 // EnumData represents an enum for the template
@@ -192,6 +193,7 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 		if def.Release != "" {
 			data.Release = def.Release
 			data.Title = def.Title
+			data.SchemaID = def.SchemaID
 			break
 		}
 	}

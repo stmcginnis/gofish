@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ExternalAccountProvider.v1_8_2.json
 // 2024.3 - #ExternalAccountProvider.v1_8_2.ExternalAccountProvider
 
 package schemas
