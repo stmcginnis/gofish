@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/NetworkAdapter.v1_14_0.json
 // 2025.4 - #NetworkAdapter.v1_14_0.NetworkAdapter
 
 package schemas

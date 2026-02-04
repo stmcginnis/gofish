@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/AccelerationFunction.v1_0_5.json
 // 2018.3 - #AccelerationFunction.v1_0_5.AccelerationFunction
 
 package schemas

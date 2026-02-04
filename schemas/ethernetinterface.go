@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/EthernetInterface.v1_12_4.json
 // 2023.3 - #EthernetInterface.v1_12_4.EthernetInterface
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/MediaController.v1_3_2.json
 // 2022.1 - #MediaController.v1_3_2.MediaController
 
 package schemas

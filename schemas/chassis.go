@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Chassis.v1_28_0.json
 // 2025.3 - #Chassis.v1_28_0.Chassis
 
 package schemas

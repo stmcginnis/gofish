@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/Volume.v1_10_2.json
 // 1.2.6 - #Volume.v1_10_2.Volume
 
 package schemas

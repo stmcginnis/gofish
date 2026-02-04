@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/CompositionReservation.v1_0_2.json
 // 2021.1 - #CompositionReservation.v1_0_2.CompositionReservation
 
 package schemas

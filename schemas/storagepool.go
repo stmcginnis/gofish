@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/StoragePool.v1_9_2.json
 // 1.2.6 - #StoragePool.v1_9_2.StoragePool
 
 package schemas

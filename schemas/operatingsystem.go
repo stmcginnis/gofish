@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/OperatingSystem.v1_0_2.json
 // 2023.2 - #OperatingSystem.v1_0_2.OperatingSystem
 
 package schemas

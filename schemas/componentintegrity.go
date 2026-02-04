@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ComponentIntegrity.v1_3_2.json
 // 2024.3 - #ComponentIntegrity.v1_3_2.ComponentIntegrity
 
 package schemas

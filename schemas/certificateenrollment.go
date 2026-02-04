@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/CertificateEnrollment.v1_0_1.json
 // 2025.3 - #CertificateEnrollment.v1_0_1.CertificateEnrollment
 
 package schemas

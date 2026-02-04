@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Zone.v1_6_3.json
 // 2020.4 - #Zone.v1_6_3.Zone
 
 package schemas

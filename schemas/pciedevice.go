@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/PCIeDevice.v1_21_0.json
 // 2025.4 - #PCIeDevice.v1_21_0.PCIeDevice
 
 package schemas

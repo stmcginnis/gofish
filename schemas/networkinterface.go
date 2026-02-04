@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/NetworkInterface.v1_2_3.json
 // 2020.3 - #NetworkInterface.v1_2_3.NetworkInterface
 
 package schemas

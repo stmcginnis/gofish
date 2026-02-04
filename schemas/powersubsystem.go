@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/PowerSubsystem.v1_1_3.json
 // 2021.2 - #PowerSubsystem.v1_1_3.PowerSubsystem
 
 package schemas

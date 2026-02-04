@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/MemoryDomain.v1_5_1.json
 // 2022.3 - #MemoryDomain.v1_5_1.MemoryDomain
 
 package schemas

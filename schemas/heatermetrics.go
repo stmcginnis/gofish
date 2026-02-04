@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/HeaterMetrics.v1_0_2.json
 // 2022.3 - #HeaterMetrics.v1_0_2.HeaterMetrics
 
 package schemas

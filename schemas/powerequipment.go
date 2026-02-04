@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/PowerEquipment.v1_2_3.json
 // 2021.3 - #PowerEquipment.v1_2_3.PowerEquipment
 
 package schemas

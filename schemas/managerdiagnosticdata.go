@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ManagerDiagnosticData.v1_2_3.json
 // 2022.3 - #ManagerDiagnosticData.v1_2_3.ManagerDiagnosticData
 
 package schemas

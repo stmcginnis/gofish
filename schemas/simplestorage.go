@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/SimpleStorage.v1_3_2.json
 // 2020.3 - #SimpleStorage.v1_3_2.SimpleStorage
 
 package schemas

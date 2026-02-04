@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/VolumeMetrics.v1_2_0.json
 // 1.2.8 - #VolumeMetrics.v1_2_0.VolumeMetrics
 
 package schemas

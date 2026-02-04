@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/StorageReplicaInfo.v1_4_0.json
 // 1.2.5 - #StorageReplicaInfo.v1_4_0.StorageReplicaInfo
 
 package schemas

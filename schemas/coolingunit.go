@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/CoolingUnit.v1_5_0.json
 // 2025.4 - #CoolingUnit.v1_5_0.CoolingUnit
 
 package schemas

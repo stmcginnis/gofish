@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/USBController.v1_0_1.json
 // 2021.1 - #USBController.v1_0_1.USBController
 
 package schemas

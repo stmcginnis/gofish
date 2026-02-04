@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/CertificateLocations.v1_0_4.json
 // 2018.3 - #CertificateLocations.v1_0_4.CertificateLocations
 
 package schemas

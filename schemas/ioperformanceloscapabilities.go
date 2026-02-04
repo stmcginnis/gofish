@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/IOPerformanceLoSCapabilities.v1_3_0.json
 // 1.2.1c - #IOPerformanceLoSCapabilities.v1_3_0.IOPerformanceLoSCapabilities
 
 package schemas

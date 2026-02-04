@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Aggregate.v1_0_3.json
 // 2020.2 - #Aggregate.v1_0_3.Aggregate
 
 package schemas

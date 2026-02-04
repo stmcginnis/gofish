@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/FileSystem.v1_4_2.json
 // 1.2.6 - #FileSystem.v1_4_2.FileSystem
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/Capacity.v1_2_2.json
 // 1.2.2 - #Capacity.v1_2_2.CapacitySource
 
 package schemas

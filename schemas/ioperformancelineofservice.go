@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/IOPerformanceLineOfService.v1_1_1.json
 // 1.1.0 - #IOPerformanceLineOfService.v1_1_1.IOPerformanceLineOfService
 
 package schemas

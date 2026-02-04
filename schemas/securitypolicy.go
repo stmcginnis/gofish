@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/SecurityPolicy.v1_0_3.json
 // 2022.2 - #SecurityPolicy.v1_0_3.SecurityPolicy
 
 package schemas

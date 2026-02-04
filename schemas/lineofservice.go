@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/LineOfService.v1_1_0.json
 // 1.2.1c - #LineOfService.v1_1_0.LineOfService
 
 package schemas

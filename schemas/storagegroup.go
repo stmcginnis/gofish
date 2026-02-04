@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/StorageGroup.v1_6_0.json
 // 1.2.6 - #StorageGroup.v1_6_0.StorageGroup
 
 package schemas

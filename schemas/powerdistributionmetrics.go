@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/PowerDistributionMetrics.v1_4_0.json
 // 2025.1 - #PowerDistributionMetrics.v1_4_0.PowerDistributionMetrics
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/FeaturesRegistry.v1_2_1.json
 // 1.2.7 - #FeaturesRegistry.v1_2_1.FeaturesRegistry
 
 package schemas

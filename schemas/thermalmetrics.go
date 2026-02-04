@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/ThermalMetrics.v1_3_2.json
 // 2023.2 - #ThermalMetrics.v1_3_2.ThermalMetrics
 
 package schemas

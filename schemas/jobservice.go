@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/JobService.v1_1_0.json
 // 2025.2 - #JobService.v1_1_0.JobService
 
 package schemas

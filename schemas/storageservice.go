@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/StorageService.v1_7_0.json
 // 1.2.6 - #StorageService.v1_7_0.StorageService
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Bios.v1_2_3.json
 // 2021.1 - #Bios.v1_2_3.Bios
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/IOStatistics.v1_0_4.json
 // 1.0.5 - #IOStatistics.v1_0_4
 
 package schemas

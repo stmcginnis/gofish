@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/swordfish/v1/DataStorageLoSCapabilities.v1_2_2.json
 // 1.0.7a - #DataStorageLoSCapabilities.v1_2_2.DataStorageLoSCapabilities
 
 package schemas

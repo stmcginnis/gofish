@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Fabric.v1_4_0.json
 // 2025.2 - #Fabric.v1_4_0.Fabric
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/OutboundConnection.v1_0_2.json
 // 2023.2 - #OutboundConnection.v1_0_2.OutboundConnection
 
 package schemas

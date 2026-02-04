@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/MemoryChunks.v1_6_2.json
 // 2023.2 - #MemoryChunks.v1_6_2.MemoryChunks
 
 package schemas

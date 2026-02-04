@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/CXLLogicalDevice.v1_3_0.json
 // 2025.3 - #CXLLogicalDevice.v1_3_0.CXLLogicalDevice
 
 package schemas

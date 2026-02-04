@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Role.v1_3_3.json
 // 2020.4 - #Role.v1_3_3.Role
 
 package schemas

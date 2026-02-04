@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/PowerDomain.v1_2_2.json
 // 2021.3 - #PowerDomain.v1_2_2.PowerDomain
 
 package schemas

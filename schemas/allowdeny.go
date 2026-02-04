@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/AllowDeny.v1_0_3.json
 // 2021.2 - #AllowDeny.v1_0_3.AllowDeny
 
 package schemas

@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/AccountService.v1_18_1.json
 // 2025.1 - #AccountService.v1_18_1.AccountService
 
 package schemas

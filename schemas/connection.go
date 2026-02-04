@@ -1,6 +1,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+// http://redfish.dmtf.org/schemas/v1/Connection.v1_4_0.json
 // 2024.4 - #Connection.v1_4_0.Connection
 
 package schemas

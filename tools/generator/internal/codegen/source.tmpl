@@ -1,6 +1,10 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //
+
+{{ if .SchemaID }}
+// {{ .SchemaID }}
+{{- end }}
 {{- if and .Release .Title }}
 // {{ .Release }} - {{ .Title }}
 {{- end }}
