@@ -32,15 +32,20 @@ func main() {
 	// Retrieve the service root
 	service := c.Service
 
-	// Query the active sessions using the session token
-	sessions, err := service.Sessions()
+	// Query the session service
+	sessionService, err := service.SessionService()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%+v\n", sessions)
+
+	// Get the active sessions
+	sessions, err := sessionService.Sessions()
+	if err != nil {
+		panic(err)
+	}
 
 	for _, session := range sessions {
-		fmt.Printf("Sessions: %#v\n\n", session)
+		fmt.Printf("Session: %#v\n\n", session)
 	}
 }
 ```
