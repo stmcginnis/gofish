@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	"github.com/stmcginnis/gofish"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 func main() {
@@ -40,18 +40,18 @@ func main() {
 	}
 
 	// Creates a boot override to pxe once
-	bootOverride := redfish.Boot{
-		BootSourceOverrideTarget:  redfish.PxeBootSourceOverrideTarget,
-		BootSourceOverrideEnabled: redfish.OnceBootSourceOverrideEnabled,
+	bootOverride := schemas.Boot{
+		BootSourceOverrideTarget:  schemas.PxeBootSource,
+		BootSourceOverrideEnabled: schemas.OnceBootSourceOverrideEnabled,
 	}
 
 	for _, system := range ss {
 		fmt.Printf("System: %#v\n\n", system)
-		err := system.SetBoot(bootOverride)
+		err := system.SetBoot(&bootOverride)
 		if err != nil {
 			panic(err)
 		}
-		err = system.Reset(redfish.ForceRestartResetType)
+		err = system.Reset(schemas.ForceRestartResetType)
 		if err != nil {
 			panic(err)
 		}
