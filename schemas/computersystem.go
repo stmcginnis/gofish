@@ -1221,7 +1221,7 @@ func (c *ComputerSystem) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 		ResetType ResetType
 	}{ResetType: resetType}
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.removeResourceBlockTarget, t, c.Headers(), false)
+		c.resetTarget, t, c.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
