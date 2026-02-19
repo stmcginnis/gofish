@@ -1644,7 +1644,7 @@ type Boot struct {
 	// UefiTargetBootSourceOverride shall contain the UEFI device path of the
 	// override boot target. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
-	UefiTargetBootSourceOverride                string `json:",omitempty"`
+	UefiTargetBootSourceOverride                string   `json:",omitempty"`
 	AllowableUefiTargetBootSourceOverrideValues []string `json:"UefiTargetBootSourceOverride@Redfish.AllowableValues,omitempty"`
 }
 
