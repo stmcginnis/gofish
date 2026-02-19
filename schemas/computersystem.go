@@ -1551,7 +1551,7 @@ type Boot struct {
 	// to boot from multiple devices that share an alias.
 	//
 	// Version added: v1.6.0
-	AliasBootOrder []BootSource
+	AliasBootOrder []BootSource `json:",omitempty"`
 	// AutomaticRetryAttempts shall contain the number of attempts the system will
 	// automatically retry booting in the event the system enters an error state on
 	// boot.
@@ -1562,7 +1562,7 @@ type Boot struct {
 	// retries booting automatically.
 	//
 	// Version added: v1.11.0
-	AutomaticRetryConfig AutomaticRetryConfig
+	AutomaticRetryConfig AutomaticRetryConfig `json:",omitempty"`
 	// BootNext shall contain the 'BootOptionReference' of the UEFI boot option for
 	// one time boot, as defined by the UEFI Specification. The valid values for
 	// this property are specified in the values of the BootOrder array.
@@ -1571,7 +1571,7 @@ type Boot struct {
 	// defined in UEFI as a one-time boot setting.
 	//
 	// Version added: v1.5.0
-	BootNext string
+	BootNext string `json:",omitempty"`
 	// BootOptions shall contain a link to a resource collection of type
 	// 'BootOptionCollection'.
 	//
@@ -1582,23 +1582,23 @@ type Boot struct {
 	// systems, this is the UEFI Specification-defined UEFI BootOrder.
 	//
 	// Version added: v1.5.0
-	BootOrder []string
+	BootOrder []string `json:",omitempty"`
 	// BootOrderPropertySelection shall indicate which boot order property the
 	// system uses for the persistent boot order.
 	//
 	// Version added: v1.6.0
-	BootOrderPropertySelection BootOrderTypes
+	BootOrderPropertySelection BootOrderTypes `json:",omitempty"`
 	// BootSourceOverrideEnabled shall contain 'Once' for a one-time boot override,
 	// and 'Continuous' for a remain-active-until-cancelled override. If set to
 	// 'Once', the value is reset to 'Disabled' after the
 	// 'BootSourceOverrideTarget' actions have completed successfully. Changes to
 	// this property do not alter the BIOS persistent boot order configuration.
-	BootSourceOverrideEnabled BootSourceOverrideEnabled
+	BootSourceOverrideEnabled BootSourceOverrideEnabled `json:",omitempty"`
 	// BootSourceOverrideMode shall contain the BIOS boot mode to use when the
 	// system boots from the 'BootSourceOverrideTarget' boot source.
 	//
 	// Version added: v1.1.0
-	BootSourceOverrideMode BootSourceOverrideMode
+	BootSourceOverrideMode BootSourceOverrideMode `json:",omitempty"`
 	// BootSourceOverrideTarget shall contain the source to boot the system from,
 	// overriding the normal boot order. The '@Redfish.AllowableValues' annotation
 	// specifies the valid values for this property. 'UefiTarget' indicates to boot
@@ -1608,7 +1608,7 @@ type Boot struct {
 	// physical device. Systems may attempt to boot from multiple devices that
 	// share a target identifier. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
-	BootSourceOverrideTarget                BootSource
+	BootSourceOverrideTarget                BootSource   `json:",omitempty"`
 	AllowableBootSourceOverrideTargetValues []BootSource `json:"BootSourceOverrideTarget@Redfish.AllowableValues,omitempty"`
 	// Certificates shall contain a link to a resource collection of type
 	// 'CertificateCollection'.
@@ -1635,16 +1635,16 @@ type Boot struct {
 	// fault.
 	//
 	// Version added: v1.15.0
-	StopBootOnFault StopBootOnFault
+	StopBootOnFault StopBootOnFault `json:",omitempty"`
 	// TrustedModuleRequiredToBoot shall contain the Trusted Module boot
 	// requirement.
 	//
 	// Version added: v1.14.0
-	TrustedModuleRequiredToBoot TrustedModuleRequiredToBoot
+	TrustedModuleRequiredToBoot TrustedModuleRequiredToBoot `json:",omitempty"`
 	// UefiTargetBootSourceOverride shall contain the UEFI device path of the
 	// override boot target. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
-	UefiTargetBootSourceOverride                string
+	UefiTargetBootSourceOverride                string   `json:",omitempty"`
 	AllowableUefiTargetBootSourceOverrideValues []string `json:"UefiTargetBootSourceOverride@Redfish.AllowableValues,omitempty"`
 }
 
