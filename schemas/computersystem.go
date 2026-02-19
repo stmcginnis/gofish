@@ -1576,7 +1576,7 @@ type Boot struct {
 	// 'BootOptionCollection'.
 	//
 	// Version added: v1.5.0
-	bootOptions string `json:",omitempty"`
+	bootOptions string
 	// BootOrder shall contain an array of 'BootOptionReference' strings that
 	// represent the persistent boot order for this computer system. For UEFI
 	// systems, this is the UEFI Specification-defined UEFI BootOrder.
@@ -1614,7 +1614,7 @@ type Boot struct {
 	// 'CertificateCollection'.
 	//
 	// Version added: v1.7.0
-	certificates string `json:",omitempty"`
+	certificates string
 	// HTTPBootURI shall contain the URI to perform an HTTP or HTTPS boot when
 	// 'BootSourceOverrideTarget' is set to 'UefiHttp'. If this property is not
 	// configured or supported, the URI shall be provided by a DHCP server as
