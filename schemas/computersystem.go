@@ -1608,7 +1608,7 @@ type Boot struct {
 	// physical device. Systems may attempt to boot from multiple devices that
 	// share a target identifier. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
-	BootSourceOverrideTarget                BootSource `json:",omitempty"`
+	BootSourceOverrideTarget                BootSource   `json:",omitempty"`
 	AllowableBootSourceOverrideTargetValues []BootSource `json:"BootSourceOverrideTarget@Redfish.AllowableValues,omitempty"`
 	// Certificates shall contain a link to a resource collection of type
 	// 'CertificateCollection'.
