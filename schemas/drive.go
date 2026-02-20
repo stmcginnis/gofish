@@ -279,7 +279,7 @@ type Drive struct {
 	// Deprecated: v1.4.0
 	// This property has been deprecated in favor of the singular
 	// 'PhysicalLocation' property.
-	Location Location
+	Location []Location
 	// LocationIndicatorActive shall contain the state of the indicator used to
 	// physically identify or locate this resource. A write to this property shall
 	// update the value of 'IndicatorLED' in this resource, if supported, to
