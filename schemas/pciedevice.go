@@ -601,6 +601,26 @@ type PCIeInterface struct {
 	PCIeType PCIeTypes
 }
 
+func (p *PCIeInterface) UnmarshalJSON(b []byte) error {
+	// If it's an empty array, ignore zero value.
+	if string(b) == "[]" {
+		return nil
+	}
+
+	type temp PCIeInterface
+	var t struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return err
+	}
+
+	*p = PCIeInterface(t.temp)
+	return nil
+}
+
 // PCIeMetrics shall contain properties that describe the PCIe metrics
 // associated with this device.
 type PCIeMetrics struct {
