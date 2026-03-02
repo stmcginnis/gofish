@@ -1621,7 +1621,7 @@ type Boot struct {
 	// specified by the UEFI Specification.
 	//
 	// Version added: v1.9.0
-	HTTPBootURI string `json:"HttpBootUri"`
+	HTTPBootURI string `json:"HttpBootUri,omitempty"`
 	// RemainingAutomaticRetryAttempts shall contain the number of attempts
 	// remaining the system will retry booting in the event the system enters an
 	// error state on boot. If '0', the system has no remaining automatic boot
