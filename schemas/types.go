@@ -6,7 +6,9 @@ package schemas
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 )
 
 // DefaultServiceRoot is the default path to the Redfish service endpoint.
@@ -160,6 +162,15 @@ func (e *Error) Error() string {
 		return fmt.Sprintf("%d: %s", e.HTTPReturnedStatusCode, e.rawData)
 	}
 	return string(e.rawData)
+}
+
+// Is412PreconditionFailed checks if the error is a 412 Precondition Failed response.
+func Is412PreconditionFailed(err error) bool {
+	var redfishErr *Error
+	if errors.As(err, &redfishErr) {
+		return redfishErr.HTTPReturnedStatusCode == http.StatusPreconditionFailed
+	}
+	return false
 }
 
 // ErrExtendedInfo is for redfish ExtendedInfo error response
