@@ -123,7 +123,7 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 
 	// if the entity already has an etag, don't override it, but otherwise pull from the HTTP header
 	if etag := resp.Header.Get("Etag"); etag != "" && e.ODataEtag == "" {
-		e.ODataEtag = etag
+		e.ODataEtag = sanitizeETag(etag)
 	}
 	e.SetClient(c)
 
@@ -152,6 +152,15 @@ func (e *Entity) Post(uri string, payload any) error {
 // Callers must close the response body when done.
 func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
 	return e.client.PostWithHeaders(uri, payload, e.Headers())
+}
+
+// sanitizeETag strips the "-gzip" suffix that some servers append to ETags
+// for gzip-compressed responses, which causes If-Match mismatches.
+func sanitizeETag(etag string) string {
+	if strings.HasSuffix(etag, `-gzip"`) {
+		return strings.TrimSuffix(etag, `-gzip"`) + `"`
+	}
+	return etag
 }
 
 // Headers generates the appropriate Headers including etag if configured.
@@ -476,7 +485,7 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 	}
 
 	if etag := resp.Header.Get("Etag"); etag != "" && entity.GetETag() == "" {
-		entity.SetETag(etag)
+		entity.SetETag(sanitizeETag(etag))
 	}
 	entity.SetClient(c)
 	return entity, nil
