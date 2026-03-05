@@ -122,7 +122,7 @@ func (m *MediaController) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.resetTarget, payload, m.Headers(), false)
+		m.resetTarget, payload, m.ActionHeaders(m.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

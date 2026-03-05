@@ -402,7 +402,7 @@ func (u *UpdateService) Activate(targets []string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Targets"] = targets
 	resp, taskInfo, err := PostWithTask(u.client,
-		u.activateTarget, payload, u.Headers(), false)
+		u.activateTarget, payload, u.ActionHeaders(u.activateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -428,7 +428,7 @@ func (u *UpdateService) GenerateSSHIdentityKeyPair(curve ECDSACurveType, keyLeng
 	payload["KeyLength"] = keyLength
 	payload["KeyType"] = keyType
 	resp, taskInfo, err := PostWithTask(u.client,
-		u.generateSSHIdentityKeyPairTarget, payload, u.Headers(), false)
+		u.generateSSHIdentityKeyPairTarget, payload, u.ActionHeaders(u.generateSSHIdentityKeyPairTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -440,7 +440,7 @@ func (u *UpdateService) GenerateSSHIdentityKeyPair(curve ECDSACurveType, keyLeng
 func (u *UpdateService) RemoveSSHIdentityKeyPair() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(u.client,
-		u.removeSSHIdentityKeyPairTarget, payload, u.Headers(), false)
+		u.removeSSHIdentityKeyPairTarget, payload, u.ActionHeaders(u.removeSSHIdentityKeyPairTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -521,7 +521,7 @@ type UpdateServiceSimpleUpdateParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (u *UpdateService) SimpleUpdate(params *UpdateServiceSimpleUpdateParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(u.client,
-		u.simpleUpdateTarget, params, u.Headers(), false)
+		u.simpleUpdateTarget, params, u.ActionHeaders(u.simpleUpdateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -533,7 +533,7 @@ func (u *UpdateService) SimpleUpdate(params *UpdateServiceSimpleUpdateParameters
 func (u *UpdateService) StartUpdate() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(u.client,
-		u.startUpdateTarget, payload, u.Headers(), false)
+		u.startUpdateTarget, payload, u.ActionHeaders(u.startUpdateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

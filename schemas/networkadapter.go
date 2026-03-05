@@ -200,7 +200,7 @@ func (n *NetworkAdapter) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(n.client,
-		n.resetTarget, payload, n.Headers(), false)
+		n.resetTarget, payload, n.ActionHeaders(n.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -212,7 +212,7 @@ func (n *NetworkAdapter) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 func (n *NetworkAdapter) ResetSettingsToDefault() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(n.client,
-		n.resetSettingsToDefaultTarget, payload, n.Headers(), false)
+		n.resetSettingsToDefaultTarget, payload, n.ActionHeaders(n.resetSettingsToDefaultTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

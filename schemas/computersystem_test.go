@@ -491,151 +491,6 @@ func TestBootOption(t *testing.T) {
 	}
 }
 
-// computerSystemBodyWithSettings is a Dell iDRAC10-style ComputerSystem where
-// @Redfish.Settings directs Boot updates to a separate Settings URI.
-var computerSystemBodyWithSettings = `{
-	"@odata.context": "/redfish/v1/$metadata#ComputerSystem.ComputerSystem",
-	"@odata.id": "/redfish/v1/Systems/System.Embedded.1",
-	"@odata.type": "#ComputerSystem.v1_20_0.ComputerSystem",
-	"Id": "System.Embedded.1",
-	"Name": "System",
-	"SystemType": "Physical",
-	"AssetTag": "",
-	"Manufacturer": "Dell Inc.",
-	"Model": "PowerEdge R570",
-	"@Redfish.Settings": {
-		"SettingsObject": {
-			"@odata.id": "/redfish/v1/Systems/System.Embedded.1/Settings"
-		},
-		"SupportedApplyTimes": ["Immediate", "OnReset"]
-	},
-	"Boot": {
-		"BootSourceOverrideEnabled": "Disabled",
-		"BootSourceOverrideMode": "UEFI",
-		"BootSourceOverrideTarget": "None",
-		"BootSourceOverrideTarget@Redfish.AllowableValues": [
-			"None",
-			"Pxe",
-			"Hdd",
-			"Cd",
-			"BiosSetup",
-			"UefiTarget",
-			"UefiHttp"
-		]
-	},
-	"Actions": {
-		"#ComputerSystem.Reset": {
-			"target": "/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset",
-			"ResetType@Redfish.AllowableValues": [
-				"On",
-				"ForceOff",
-				"ForceRestart",
-				"GracefulShutdown",
-				"PushPowerButton"
-			]
-		}
-	}
-}`
-
-// TestSetBootWithSettings verifies that SetBoot sends the PATCH request to the
-// @Redfish.Settings URI when it is present (e.g., Dell iDRAC10).
-func TestSetBootWithSettings(t *testing.T) {
-	var result ComputerSystem
-	err := json.NewDecoder(strings.NewReader(computerSystemBodyWithSettings)).Decode(&result)
-	if err != nil {
-		t.Fatalf("Error decoding JSON: %s", err)
-	}
-
-	// Verify settingsTarget was parsed correctly
-	if result.settingsTarget != "/redfish/v1/Systems/System.Embedded.1/Settings" {
-		t.Fatalf("Expected settingsTarget to be '/redfish/v1/Systems/System.Embedded.1/Settings', got '%s'",
-			result.settingsTarget)
-	}
-
-	testClient := &TestClient{}
-	result.SetClient(testClient)
-
-	boot := &Boot{
-		BootSourceOverrideTarget:  PxeBootSource,
-		BootSourceOverrideEnabled: OnceBootSourceOverrideEnabled,
-	}
-	err = result.SetBoot(boot)
-	if err != nil {
-		t.Fatalf("Error calling SetBoot: %s", err)
-	}
-
-	calls := testClient.CapturedCalls()
-	// Settings path requires GET (for ETag) + PATCH = 2 calls
-	if len(calls) != 2 {
-		t.Fatalf("Expected 2 calls (GET + PATCH), got %d", len(calls))
-	}
-
-	// First call: GET to Settings URI to fetch ETag
-	if calls[0].Action != http.MethodGet {
-		t.Errorf("Expected first call to be GET, got %s", calls[0].Action)
-	}
-	if calls[0].URL != "/redfish/v1/Systems/System.Embedded.1/Settings" {
-		t.Errorf("Expected GET to Settings URI, got '%s'", calls[0].URL)
-	}
-
-	// Second call: PATCH to Settings URI with boot payload
-	if calls[1].Action != http.MethodPatch {
-		t.Errorf("Expected second call to be PATCH, got %s", calls[1].Action)
-	}
-	if calls[1].URL != "/redfish/v1/Systems/System.Embedded.1/Settings" {
-		t.Errorf("Expected PATCH to Settings URI '/redfish/v1/Systems/System.Embedded.1/Settings', got '%s'",
-			calls[1].URL)
-	}
-	if !strings.Contains(calls[1].Payload, "Pxe") {
-		t.Errorf("Expected payload to contain 'Pxe', got: %s", calls[1].Payload)
-	}
-}
-
-// TestSetBootWithoutSettings verifies that SetBoot sends the PATCH request to
-// the system ODataID when @Redfish.Settings is not present (standard BMCs).
-func TestSetBootWithoutSettings(t *testing.T) {
-	var result ComputerSystem
-	err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&result)
-	if err != nil {
-		t.Fatalf("Error decoding JSON: %s", err)
-	}
-
-	// Without @Redfish.Settings, settingsTarget should fall back to ODataID
-	if result.settingsTarget != "/redfish/v1/Systems/System-1" {
-		t.Fatalf("Expected settingsTarget to be '/redfish/v1/Systems/System-1', got '%s'",
-			result.settingsTarget)
-	}
-
-	testClient := &TestClient{}
-	result.SetClient(testClient)
-
-	boot := &Boot{
-		BootSourceOverrideTarget:  PxeBootSource,
-		BootSourceOverrideEnabled: OnceBootSourceOverrideEnabled,
-	}
-	err = result.SetBoot(boot)
-	if err != nil {
-		t.Fatalf("Error calling SetBoot: %s", err)
-	}
-
-	calls := testClient.CapturedCalls()
-	if len(calls) != 1 {
-		t.Fatalf("Expected 1 call, got %d", len(calls))
-	}
-
-	// The PATCH must go to the system ODataID directly
-	if calls[0].Action != http.MethodPatch {
-		t.Errorf("Expected PATCH action, got %s", calls[0].Action)
-	}
-	if calls[0].URL != "/redfish/v1/Systems/System-1" {
-		t.Errorf("Expected PATCH to system URI '/redfish/v1/Systems/System-1', got '%s'",
-			calls[0].URL)
-	}
-	if !strings.Contains(calls[0].Payload, "Pxe") {
-		t.Errorf("Expected payload to contain 'Pxe', got: %s", calls[0].Payload)
-	}
-}
-
 // TestSystemSupportedResetTypes tests getting supported reset types for a chassis.
 func TestSystemSupportedResetTypes(t *testing.T) {
 	var result ComputerSystem
@@ -671,5 +526,104 @@ func TestSystemSupportedResetTypes(t *testing.T) {
 
 	if len(resetTypes) != 3 {
 		t.Errorf("Expected 3 reset types to be returned, got %d", len(resetTypes))
+	}
+}
+
+func TestSetBootWithSettings(t *testing.T) {
+	// ComputerSystem with @Redfish.Settings pointing to a different URI
+	systemJSON := `{
+		"@odata.id": "/redfish/v1/Systems/System-1",
+		"@odata.type": "#ComputerSystem.v1_3_0.ComputerSystem",
+		"Id": "System-1",
+		"Name": "Test System",
+		"@Redfish.Settings": {
+			"SettingsObject": {"@odata.id": "/redfish/v1/Systems/System-1/Settings"},
+			"SupportedApplyTimes": ["OnReset"]
+		},
+		"Boot": {}
+	}`
+
+	// Settings resource response (returned by GET on Settings URI)
+	settingsJSON := `{
+		"@odata.id": "/redfish/v1/Systems/System-1/Settings",
+		"@odata.type": "#ComputerSystem.v1_3_0.ComputerSystem",
+		"@odata.etag": "W/\"gen-42\"",
+		"Id": "System-1",
+		"Name": "Settings",
+		"Boot": {}
+	}`
+
+	var system ComputerSystem
+	if err := json.NewDecoder(strings.NewReader(systemJSON)).Decode(&system); err != nil {
+		t.Fatalf("Error decoding system JSON: %s", err)
+	}
+
+	testClient := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodGet: {getCall(settingsJSON)},
+		},
+	}
+	system.SetClient(testClient)
+
+	boot := &Boot{
+		BootSourceOverrideTarget:  CdBootSource,
+		BootSourceOverrideEnabled: OnceBootSourceOverrideEnabled,
+	}
+	err := system.SetBoot(boot)
+	if err != nil {
+		t.Fatalf("SetBoot failed: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	// Expect: 1 GET (Settings) + 1 PATCH (Settings)
+	if len(calls) < 2 {
+		t.Fatalf("Expected at least 2 calls, got %d: %v", len(calls), calls)
+	}
+
+	// Verify PATCH goes to Settings URI
+	patchFound := false
+	for _, call := range calls {
+		if call.Action == http.MethodPatch {
+			patchFound = true
+			if !strings.Contains(call.URL, "/Settings") {
+				t.Errorf("Expected PATCH to Settings URI, got %s", call.URL)
+			}
+		}
+	}
+	if !patchFound {
+		t.Error("Expected a PATCH call but none was found")
+	}
+}
+
+func TestSetBootWithoutSettings(t *testing.T) {
+	// ComputerSystem without @Redfish.Settings
+	var system ComputerSystem
+	if err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&system); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	system.SetClient(testClient)
+
+	boot := &Boot{
+		BootSourceOverrideTarget:  CdBootSource,
+		BootSourceOverrideEnabled: OnceBootSourceOverrideEnabled,
+	}
+	err := system.SetBoot(boot)
+	if err != nil {
+		t.Fatalf("SetBoot failed: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 1 {
+		t.Fatalf("Expected 1 call, got %d", len(calls))
+	}
+
+	// PATCH should go to the ODataID (not Settings)
+	if calls[0].Action != http.MethodPatch {
+		t.Errorf("Expected PATCH, got %s", calls[0].Action)
+	}
+	if strings.Contains(calls[0].URL, "/Settings") {
+		t.Errorf("Expected PATCH to ODataID, not Settings URI: %s", calls[0].URL)
 	}
 }

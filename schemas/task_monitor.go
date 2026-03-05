@@ -39,20 +39,6 @@ func PostWithTask(c Client, uri string, payload any, headers map[string]string, 
 	} else {
 		resp, err = c.PostWithHeaders(uri, payload, headers)
 	}
-
-	// If 412 Precondition Failed, retry without If-Match header.
-	// Some BMC implementations (e.g., Dell iDRAC10) reject If-Match
-	// on action POST endpoints.
-	if err != nil && Is412PreconditionFailed(err) {
-		DeferredCleanupHTTPResponse(resp)
-		delete(headers, "If-Match")
-		if isMMultipart {
-			resp, err = c.PostMultipartWithHeaders(uri, payload.(map[string]io.Reader), headers)
-		} else {
-			resp, err = c.PostWithHeaders(uri, payload, headers)
-		}
-	}
-
 	if err != nil {
 		defer DeferredCleanupHTTPResponse(resp)
 		return nil, nil, err

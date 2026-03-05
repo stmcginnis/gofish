@@ -127,7 +127,7 @@ func ListReferencedTaskServices(c Client, link string) ([]*TaskService, error) {
 func (t *TaskService) DeleteAllCompletedTasks() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(t.client,
-		t.deleteAllCompletedTasksTarget, payload, t.Headers(), false)
+		t.deleteAllCompletedTasksTarget, payload, t.ActionHeaders(t.deleteAllCompletedTasksTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

@@ -418,6 +418,40 @@ func TestEdgeCases(t *testing.T) {
 		}
 	})
 }
+
+func TestActionHeaders(t *testing.T) {
+	t.Run("same URI includes If-Match", func(t *testing.T) {
+		e := Entity{ODataEtag: `W/"abc"`, ODataID: "/redfish/v1/Systems/1"}
+		headers := e.ActionHeaders("/redfish/v1/Systems/1")
+		if headers["If-Match"] != `W/"abc"` {
+			t.Errorf("Expected If-Match header, got %v", headers)
+		}
+	})
+
+	t.Run("different URI omits If-Match", func(t *testing.T) {
+		e := Entity{ODataEtag: `W/"abc"`, ODataID: "/redfish/v1/Systems/1"}
+		headers := e.ActionHeaders("/redfish/v1/Systems/1/Actions/ComputerSystem.Reset")
+		if _, ok := headers["If-Match"]; ok {
+			t.Errorf("Expected no If-Match header for different URI, got %v", headers)
+		}
+	})
+
+	t.Run("no ETag omits If-Match", func(t *testing.T) {
+		e := Entity{ODataID: "/redfish/v1/Systems/1"}
+		headers := e.ActionHeaders("/redfish/v1/Systems/1")
+		if _, ok := headers["If-Match"]; ok {
+			t.Errorf("Expected no If-Match header when no ETag, got %v", headers)
+		}
+	})
+
+	t.Run("disableEtagMatch omits If-Match", func(t *testing.T) {
+		e := Entity{ODataEtag: `W/"abc"`, ODataID: "/redfish/v1/Systems/1", disableEtagMatch: true}
+		headers := e.ActionHeaders("/redfish/v1/Systems/1")
+		if _, ok := headers["If-Match"]; ok {
+			t.Errorf("Expected no If-Match header when disabled, got %v", headers)
+		}
+	})
+}
 func TestGetPatchPayloadFromUpdate_EdgeCases(t *testing.T) {
 	t.Run("Nil values", func(t *testing.T) {
 		var original *User

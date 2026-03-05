@@ -320,7 +320,7 @@ func ListReferencedControls(c Client, link string) ([]*Control, error) {
 func (c *Control) ResetToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.resetToDefaultsTarget, payload, c.Headers(), false)
+		c.resetToDefaultsTarget, payload, c.ActionHeaders(c.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

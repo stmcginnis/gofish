@@ -139,7 +139,7 @@ type LicenseServiceInstallParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (l *LicenseService) Install(params *LicenseServiceInstallParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(l.client,
-		l.installTarget, params, l.Headers(), false)
+		l.installTarget, params, l.ActionHeaders(l.installTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

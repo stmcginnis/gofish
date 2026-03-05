@@ -662,7 +662,7 @@ func (p *Processor) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.resetTarget, payload, p.Headers(), false)
+		p.resetTarget, payload, p.ActionHeaders(p.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -674,7 +674,7 @@ func (p *Processor) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 func (p *Processor) ResetToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.resetToDefaultsTarget, payload, p.Headers(), false)
+		p.resetToDefaultsTarget, payload, p.ActionHeaders(p.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

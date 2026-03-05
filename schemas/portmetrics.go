@@ -126,7 +126,7 @@ func ListReferencedPortMetricss(c Client, link string) ([]*PortMetrics, error) {
 func (p *PortMetrics) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.resetMetricsTarget, payload, p.Headers(), false)
+		p.resetMetricsTarget, payload, p.ActionHeaders(p.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

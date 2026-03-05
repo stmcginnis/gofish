@@ -313,7 +313,7 @@ func ListReferencedJobs(c Client, link string) ([]*Job, error) {
 func (j *Job) Cancel() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.cancelTarget, payload, j.Headers(), false)
+		j.cancelTarget, payload, j.ActionHeaders(j.cancelTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -325,7 +325,7 @@ func (j *Job) Cancel() (*TaskMonitorInfo, error) {
 func (j *Job) ForceStart() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.forceStartTarget, payload, j.Headers(), false)
+		j.forceStartTarget, payload, j.ActionHeaders(j.forceStartTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -337,7 +337,7 @@ func (j *Job) ForceStart() (*TaskMonitorInfo, error) {
 func (j *Job) Invalidate() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.invalidateTarget, payload, j.Headers(), false)
+		j.invalidateTarget, payload, j.ActionHeaders(j.invalidateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -354,7 +354,7 @@ func (j *Job) Resubmit(startTime string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["StartTime"] = startTime
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.resubmitTarget, payload, j.Headers(), false)
+		j.resubmitTarget, payload, j.ActionHeaders(j.resubmitTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -366,7 +366,7 @@ func (j *Job) Resubmit(startTime string) (*TaskMonitorInfo, error) {
 func (j *Job) Resume() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.resumeTarget, payload, j.Headers(), false)
+		j.resumeTarget, payload, j.ActionHeaders(j.resumeTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -378,7 +378,7 @@ func (j *Job) Resume() (*TaskMonitorInfo, error) {
 func (j *Job) Suspend() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.suspendTarget, payload, j.Headers(), false)
+		j.suspendTarget, payload, j.ActionHeaders(j.suspendTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -391,7 +391,7 @@ func (j *Job) Suspend() (*TaskMonitorInfo, error) {
 func (j *Job) Validate() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.validateTarget, payload, j.Headers(), false)
+		j.validateTarget, payload, j.ActionHeaders(j.validateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

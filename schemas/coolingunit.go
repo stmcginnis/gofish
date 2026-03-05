@@ -276,7 +276,7 @@ type CoolingUnitExportConfigurationParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (c *CoolingUnit) ExportConfiguration(params *CoolingUnitExportConfigurationParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.exportConfigurationTarget, params, c.Headers(), false)
+		c.exportConfigurationTarget, params, c.ActionHeaders(c.exportConfigurationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -290,7 +290,7 @@ func (c *CoolingUnit) SetMode(mode CoolingUnitMode) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Mode"] = mode
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.setModeTarget, payload, c.Headers(), false)
+		c.setModeTarget, payload, c.ActionHeaders(c.setModeTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

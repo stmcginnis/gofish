@@ -101,7 +101,7 @@ func (s *SecureBootDatabase) ResetKeys(resetKeysType SecureBootDatabaseResetKeys
 	payload := make(map[string]any)
 	payload["ResetKeysType"] = resetKeysType
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.resetKeysTarget, payload, s.Headers(), false)
+		s.resetKeysTarget, payload, s.ActionHeaders(s.resetKeysTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

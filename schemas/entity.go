@@ -123,7 +123,7 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 
 	// if the entity already has an etag, don't override it, but otherwise pull from the HTTP header
 	if etag := resp.Header.Get("Etag"); etag != "" && e.ODataEtag == "" {
-		e.ODataEtag = sanitizeETag(etag)
+		e.ODataEtag = etag
 	}
 	e.SetClient(c)
 
@@ -151,22 +151,27 @@ func (e *Entity) Post(uri string, payload any) error {
 // PostWithResponse performs a POST request and returns the full response.
 // Callers must close the response body when done.
 func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
-	return e.client.PostWithHeaders(uri, payload, e.Headers())
-}
-
-// sanitizeETag strips the "-gzip" suffix that some servers append to ETags
-// for gzip-compressed responses, which causes If-Match mismatches.
-func sanitizeETag(etag string) string {
-	if strings.HasSuffix(etag, `-gzip"`) {
-		return strings.TrimSuffix(etag, `-gzip"`) + `"`
-	}
-	return etag
+	return e.client.PostWithHeaders(uri, payload, e.ActionHeaders(uri))
 }
 
 // Headers generates the appropriate Headers including etag if configured.
+// Use this for PUT/PATCH operations where the target URI matches the entity's ODataID.
 func (e *Entity) Headers() map[string]string {
 	header := make(map[string]string)
 	if e.ODataEtag != "" && !e.disableEtagMatch {
+		if e.stripEtagQuotes {
+			e.ODataEtag = strings.Trim(e.ODataEtag, `"`)
+		}
+		header["If-Match"] = e.ODataEtag
+	}
+	return header
+}
+
+// ActionHeaders generates headers for POST operations.
+// If-Match is only included when targetURI matches the entity's ODataID.
+func (e *Entity) ActionHeaders(targetURI string) map[string]string {
+	header := make(map[string]string)
+	if e.ODataEtag != "" && !e.disableEtagMatch && targetURI == e.ODataID {
 		if e.stripEtagQuotes {
 			e.ODataEtag = strings.Trim(e.ODataEtag, `"`)
 		}
@@ -485,7 +490,7 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 	}
 
 	if etag := resp.Header.Get("Etag"); etag != "" && entity.GetETag() == "" {
-		entity.SetETag(sanitizeETag(etag))
+		entity.SetETag(etag)
 	}
 	entity.SetClient(c)
 	return entity, nil
