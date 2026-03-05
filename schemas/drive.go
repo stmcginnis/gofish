@@ -560,7 +560,7 @@ func (d *Drive) FreezePersonality(personality uint) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Personality"] = personality
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.freezePersonalityTarget, payload, d.Headers(), false)
+		d.freezePersonalityTarget, payload, d.ActionHeaders(d.freezePersonalityTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -600,7 +600,7 @@ func (d *Drive) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.resetTarget, payload, d.Headers(), false)
+		d.resetTarget, payload, d.ActionHeaders(d.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -613,7 +613,7 @@ func (d *Drive) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 func (d *Drive) RevertPersonalitiesToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.revertPersonalitiesToDefaultsTarget, payload, d.Headers(), false)
+		d.revertPersonalitiesToDefaultsTarget, payload, d.ActionHeaders(d.revertPersonalitiesToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -631,7 +631,7 @@ func (d *Drive) RevertToOriginalFactoryState(physicalSecureID string) (*TaskMoni
 	payload := make(map[string]any)
 	payload["PhysicalSecureID"] = physicalSecureID
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.revertToOriginalFactoryStateTarget, payload, d.Headers(), false)
+		d.revertToOriginalFactoryStateTarget, payload, d.ActionHeaders(d.revertToOriginalFactoryStateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -654,7 +654,7 @@ func (d *Drive) SecureErase(overwritePasses int, sanitizationType DataSanitizati
 	payload["OverwritePasses"] = overwritePasses
 	payload["SanitizationType"] = sanitizationType
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.secureEraseTarget, payload, d.Headers(), false)
+		d.secureEraseTarget, payload, d.ActionHeaders(d.secureEraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -674,7 +674,7 @@ func (d *Drive) SetPersonalityKey(algorithm NMVePersonalityKeyAlgorithm, key str
 	payload["Algorithm"] = algorithm
 	payload["Key"] = key
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.setPersonalityKeyTarget, payload, d.Headers(), false)
+		d.setPersonalityKeyTarget, payload, d.ActionHeaders(d.setPersonalityKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -709,7 +709,7 @@ type DriveUnfreezePersonalityParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (d *Drive) UnfreezePersonality(params *DriveUnfreezePersonalityParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.unfreezePersonalityTarget, params, d.Headers(), false)
+		d.unfreezePersonalityTarget, params, d.ActionHeaders(d.unfreezePersonalityTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

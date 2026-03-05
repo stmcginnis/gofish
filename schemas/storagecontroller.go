@@ -325,7 +325,7 @@ func (s *StorageController) Reset(resetType ResetType) (*TaskMonitorInfo, error)
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.resetTarget, payload, s.Headers(), false)
+		s.resetTarget, payload, s.ActionHeaders(s.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -390,7 +390,7 @@ func (s *StorageController) SecuritySend(data string, securityProtocol int, secu
 	payload["SecurityProtocol"] = securityProtocol
 	payload["SecurityProtocolSpecific"] = securityProtocolSpecific
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.securitySendTarget, payload, s.Headers(), false)
+		s.securitySendTarget, payload, s.ActionHeaders(s.securitySendTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

@@ -218,7 +218,7 @@ type CertificateServiceReplaceCertificateParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (c *CertificateService) ReplaceCertificate(params *CertificateServiceReplaceCertificateParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.replaceCertificateTarget, params, c.Headers(), false)
+		c.replaceCertificateTarget, params, c.ActionHeaders(c.replaceCertificateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

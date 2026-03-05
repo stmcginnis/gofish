@@ -298,7 +298,7 @@ func (m *ManagerAccount) ChangePassword(newPassword string, sessionAccountPasswo
 	payload["NewPassword"] = newPassword
 	payload["SessionAccountPassword"] = sessionAccountPassword
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.changePasswordTarget, payload, m.Headers(), false)
+		m.changePasswordTarget, payload, m.ActionHeaders(m.changePasswordTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -310,7 +310,7 @@ func (m *ManagerAccount) ChangePassword(newPassword string, sessionAccountPasswo
 func (m *ManagerAccount) ClearSecretKey() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.clearSecretKeyTarget, payload, m.Headers(), false)
+		m.clearSecretKeyTarget, payload, m.ActionHeaders(m.clearSecretKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -352,7 +352,7 @@ func (m *ManagerAccount) VerifyTimeBasedOneTimePassword(timeBasedOneTimePassword
 	payload := make(map[string]any)
 	payload["TimeBasedOneTimePassword"] = timeBasedOneTimePassword
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.verifyTimeBasedOneTimePasswordTarget, payload, m.Headers(), false)
+		m.verifyTimeBasedOneTimePasswordTarget, payload, m.ActionHeaders(m.verifyTimeBasedOneTimePasswordTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

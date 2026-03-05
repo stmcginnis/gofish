@@ -295,7 +295,7 @@ func (v *VirtualMedia) EjectMedia() (*TaskMonitorInfo, error) {
 
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.ejectMedia.Target, payload, v.Headers(), false)
+		v.ejectMedia.Target, payload, v.ActionHeaders(v.ejectMedia.Target), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -348,7 +348,7 @@ func (v *VirtualMedia) InsertMediaActionInfo() (*ActionInfo, error) {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (v *VirtualMedia) InsertMedia(params *VirtualMediaInsertMediaParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.insertMedia.Target, params, v.Headers(), false)
+		v.insertMedia.Target, params, v.ActionHeaders(v.insertMedia.Target), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

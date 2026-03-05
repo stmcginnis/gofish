@@ -172,7 +172,7 @@ func (c *Connection) AddVolumeInfo(accessCapabilities []AccessCapability, lUN in
 	payload["LUN"] = lUN
 	payload["Volume"] = volume
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.addVolumeInfoTarget, payload, c.Headers(), false)
+		c.addVolumeInfoTarget, payload, c.ActionHeaders(c.addVolumeInfoTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -192,7 +192,7 @@ func (c *Connection) RemoveVolumeInfo(lUN int, volume string) (*TaskMonitorInfo,
 	payload["LUN"] = lUN
 	payload["Volume"] = volume
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.removeVolumeInfoTarget, payload, c.Headers(), false)
+		c.removeVolumeInfoTarget, payload, c.ActionHeaders(c.removeVolumeInfoTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

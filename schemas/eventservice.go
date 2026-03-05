@@ -371,7 +371,7 @@ type EventServiceSubmitTestEventParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (e *EventService) SubmitTestEvent(params *EventServiceSubmitTestEventParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(e.client,
-		e.SubmitTestEventTarget, params, e.Headers(), false)
+		e.SubmitTestEventTarget, params, e.ActionHeaders(e.SubmitTestEventTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -403,7 +403,7 @@ func (e *EventService) TestEventSubscription() (*TaskMonitorInfo, error) {
 
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(e.client,
-		e.testEventSubscriptionTarget, payload, e.Headers(), false)
+		e.testEventSubscriptionTarget, payload, e.ActionHeaders(e.testEventSubscriptionTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

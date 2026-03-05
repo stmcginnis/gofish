@@ -271,7 +271,7 @@ func (s *StorageService) SetEncryptionKey(encryptionKey string) (*TaskMonitorInf
 	payload := make(map[string]any)
 	payload["EncryptionKey"] = encryptionKey
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setEncryptionKeyTarget, payload, s.Headers(), false)
+		s.setEncryptionKeyTarget, payload, s.ActionHeaders(s.setEncryptionKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

@@ -168,7 +168,7 @@ func (c *CXLLogicalDevice) DisablePassphrase(passphrase string, passphraseType P
 	payload["Passphrase"] = passphrase
 	payload["PassphraseType"] = passphraseType
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.disablePassphraseTarget, payload, c.Headers(), false)
+		c.disablePassphraseTarget, payload, c.ActionHeaders(c.disablePassphraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -179,7 +179,7 @@ func (c *CXLLogicalDevice) DisablePassphrase(passphrase string, passphraseType P
 func (c *CXLLogicalDevice) FreezeSecurityState() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.freezeSecurityStateTarget, payload, c.Headers(), false)
+		c.freezeSecurityStateTarget, payload, c.ActionHeaders(c.freezeSecurityStateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -197,7 +197,7 @@ func (c *CXLLogicalDevice) PassphraseSecureErase(passphrase string, passphraseTy
 	payload["Passphrase"] = passphrase
 	payload["PassphraseType"] = passphraseType
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.passphraseSecureEraseTarget, payload, c.Headers(), false)
+		c.passphraseSecureEraseTarget, payload, c.ActionHeaders(c.passphraseSecureEraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -217,7 +217,7 @@ func (c *CXLLogicalDevice) SetPassphrase(newPassphrase string, passphrase string
 	payload["Passphrase"] = passphrase
 	payload["PassphraseType"] = passphraseType
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.setPassphraseTarget, payload, c.Headers(), false)
+		c.setPassphraseTarget, payload, c.ActionHeaders(c.setPassphraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -234,7 +234,7 @@ func (c *CXLLogicalDevice) Unlock(passphrase string, passphraseType PassphraseTy
 	payload["Passphrase"] = passphrase
 	payload["PassphraseType"] = passphraseType
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.unlockTarget, payload, c.Headers(), false)
+		c.unlockTarget, payload, c.ActionHeaders(c.unlockTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

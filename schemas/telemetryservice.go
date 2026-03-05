@@ -181,7 +181,7 @@ func ListReferencedTelemetryServices(c Client, link string) ([]*TelemetryService
 func (t *TelemetryService) ClearMetricReports() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(t.client,
-		t.clearMetricReportsTarget, payload, t.Headers(), false)
+		t.clearMetricReportsTarget, payload, t.ActionHeaders(t.clearMetricReportsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -193,7 +193,7 @@ func (t *TelemetryService) ClearMetricReports() (*TaskMonitorInfo, error) {
 func (t *TelemetryService) ClearTelemetryData() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(t.client,
-		t.clearTelemetryDataTarget, payload, t.Headers(), false)
+		t.clearTelemetryDataTarget, payload, t.ActionHeaders(t.clearTelemetryDataTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -243,7 +243,7 @@ func (t *TelemetryService) CollectTelemetryData(oEMTelemetryDataType string, tar
 func (t *TelemetryService) ResetMetricReportDefinitionsToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(t.client,
-		t.resetMetricReportDefinitionsToDefaultsTarget, payload, t.Headers(), false)
+		t.resetMetricReportDefinitionsToDefaultsTarget, payload, t.ActionHeaders(t.resetMetricReportDefinitionsToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -255,7 +255,7 @@ func (t *TelemetryService) ResetMetricReportDefinitionsToDefaults() (*TaskMonito
 func (t *TelemetryService) ResetTriggersToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(t.client,
-		t.resetTriggersToDefaultsTarget, payload, t.Headers(), false)
+		t.resetTriggersToDefaultsTarget, payload, t.ActionHeaders(t.resetTriggersToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -277,7 +277,7 @@ func (t *TelemetryService) SubmitTestMetricReport(generatedMetricReportValues []
 	payload["MetricReportName"] = metricReportName
 	payload["MetricReportValues"] = metricReportValues
 	resp, taskInfo, err := PostWithTask(t.client,
-		t.submitTestMetricReportTarget, payload, t.Headers(), false)
+		t.submitTestMetricReportTarget, payload, t.ActionHeaders(t.submitTestMetricReportTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

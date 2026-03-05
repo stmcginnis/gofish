@@ -699,7 +699,7 @@ func ListReferencedSensors(c Client, link string) ([]*Sensor, error) {
 func (s *Sensor) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.resetMetricsTarget, payload, s.Headers(), false)
+		s.resetMetricsTarget, payload, s.ActionHeaders(s.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -711,7 +711,7 @@ func (s *Sensor) ResetMetrics() (*TaskMonitorInfo, error) {
 func (s *Sensor) ResetToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.resetToDefaultsTarget, payload, s.Headers(), false)
+		s.resetToDefaultsTarget, payload, s.ActionHeaders(s.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

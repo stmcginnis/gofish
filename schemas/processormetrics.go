@@ -204,7 +204,7 @@ func ListReferencedProcessorMetricss(c Client, link string) ([]*ProcessorMetrics
 func (p *ProcessorMetrics) ClearCurrentPeriod() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.clearCurrentPeriodTarget, payload, p.Headers(), false)
+		p.clearCurrentPeriodTarget, payload, p.ActionHeaders(p.clearCurrentPeriodTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

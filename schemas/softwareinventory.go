@@ -237,7 +237,7 @@ func (s *SoftwareInventory) Activate(targets []Entity) (*TaskMonitorInfo, error)
 	payload := make(map[string]any)
 	payload["Targets"] = targets
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.activateTarget, payload, s.Headers(), false)
+		s.activateTarget, payload, s.ActionHeaders(s.activateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

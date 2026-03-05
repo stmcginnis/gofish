@@ -126,7 +126,7 @@ func (d *DataProtectionLineOfService) CreateReplicas(replicaLineOfService string
 	payload["ReplicaLineOfService"] = replicaLineOfService
 	payload["ReplicaRequests"] = replicaRequests
 	resp, taskInfo, err := PostWithTask(d.client,
-		d.createReplicasTarget, payload, d.Headers(), false)
+		d.createReplicasTarget, payload, d.ActionHeaders(d.createReplicasTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

@@ -298,7 +298,7 @@ type PowerDistributionExportConfigurationParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (p *PowerDistribution) ExportConfiguration(params *PowerDistributionExportConfigurationParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.exportConfigurationTarget, params, p.Headers(), false)
+		p.exportConfigurationTarget, params, p.ActionHeaders(p.exportConfigurationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -310,7 +310,7 @@ func (p *PowerDistribution) ExportConfiguration(params *PowerDistributionExportC
 func (p *PowerDistribution) TransferControl() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.transferControlTarget, payload, p.Headers(), false)
+		p.transferControlTarget, payload, p.ActionHeaders(p.transferControlTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

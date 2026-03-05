@@ -574,7 +574,7 @@ func (m *Manager) ForceFailover(newManager string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["NewManager"] = newManager
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.forceFailoverTarget, payload, m.Headers(), false)
+		m.forceFailoverTarget, payload, m.ActionHeaders(m.forceFailoverTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -592,7 +592,7 @@ func (m *Manager) ModifyRedundancySet(add []string, remove []string) (*TaskMonit
 	payload["Add"] = add
 	payload["Remove"] = remove
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.modifyRedundancySetTarget, payload, m.Headers(), false)
+		m.modifyRedundancySetTarget, payload, m.ActionHeaders(m.modifyRedundancySetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -652,13 +652,13 @@ func (m *Manager) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 				ResetType ResetType
 			}{ResetType: resetType}
 			resp, taskInfo, err := PostWithTask(m.client,
-				m.resetTarget, payload, m.Headers(), false)
+				m.resetTarget, payload, m.ActionHeaders(m.resetTarget), false)
 			defer DeferredCleanupHTTPResponse(resp)
 			return taskInfo, err
 		}
 		// reset directly without reset type. HPE server has the behavior
 		resp, taskInfo, err := PostWithTask(m.client,
-			m.resetTarget, struct{}{}, m.Headers(), false)
+			m.resetTarget, struct{}{}, m.ActionHeaders(m.resetTarget), false)
 		defer DeferredCleanupHTTPResponse(resp)
 		return taskInfo, err
 	}
@@ -680,7 +680,7 @@ func (m *Manager) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 		ResetType ResetType
 	}{ResetType: resetType}
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.resetTarget, payload, m.Headers(), false)
+		m.resetTarget, payload, m.ActionHeaders(m.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -730,7 +730,7 @@ func (m *Manager) ResetToDefaults(resetType ResetToDefaultsType) (*TaskMonitorIn
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.resetToDefaultsTarget, payload, m.Headers(), false)
+		m.resetToDefaultsTarget, payload, m.ActionHeaders(m.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -751,7 +751,7 @@ func (m *Manager) UpdateSecurityMode(oEMSecurityMode string, securityMode Securi
 	payload["OEMSecurityMode"] = oEMSecurityMode
 	payload["SecurityMode"] = securityMode
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.updateSecurityModeTarget, payload, m.Headers(), false)
+		m.updateSecurityModeTarget, payload, m.ActionHeaders(m.updateSecurityModeTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

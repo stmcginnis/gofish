@@ -181,7 +181,7 @@ func (p *Power) PowerSupplyReset(memberID string, resetType ResetType) (*TaskMon
 	payload["MemberId"] = memberID
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.powerSupplyResetTarget, payload, p.Headers(), false)
+		p.powerSupplyResetTarget, payload, p.ActionHeaders(p.powerSupplyResetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -347,7 +347,7 @@ func (p *PowerControl) PowerSupplyReset(memberID string, resetType ResetType) (*
 	payload["MemberId"] = memberID
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.powerSupplyResetTarget, payload, p.Headers(), false)
+		p.powerSupplyResetTarget, payload, p.ActionHeaders(p.powerSupplyResetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -608,7 +608,7 @@ func (p *PowerSupply) PowerSupplyReset(memberID string, resetType ResetType) (*T
 	payload["MemberId"] = memberID
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.powerSupplyResetTarget, payload, p.Headers(), false)
+		p.powerSupplyResetTarget, payload, p.ActionHeaders(p.powerSupplyResetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -766,7 +766,7 @@ func (v *Voltage) PowerSupplyReset(memberID string, resetType ResetType) (*TaskM
 	payload["MemberId"] = memberID
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.powerSupplyResetTarget, payload, v.Headers(), false)
+		v.powerSupplyResetTarget, payload, v.ActionHeaders(v.powerSupplyResetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
