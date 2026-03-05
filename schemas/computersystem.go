@@ -1061,37 +1061,12 @@ func ListReferencedComputerSystems(c Client, link string) ([]*ComputerSystem, er
 	return GetCollectionObjects[ComputerSystem](c, link)
 }
 
-// If @Redfish.Settings is present, PATCH goes to the Settings URI with ETag
-// concurrency control. Falls back to ODataID when absent.
+// SetBoot sets a boot object based on a payload request
 func (c *ComputerSystem) SetBoot(b *Boot) error {
 	t := struct {
 		Boot *Boot
 	}{Boot: b}
-
-	// If settingsTarget differs from ODataID, we are targeting a Settings resource
-	// which may require an ETag for concurrency control (e.g., Dell iDRAC10).
-	if c.settingsTarget != c.ODataID {
-		resp, err := c.GetClient().Get(c.settingsTarget)
-		defer DeferredCleanupHTTPResponse(resp)
-		if err != nil {
-			return err
-		}
-
-		var header = make(map[string]string)
-		if resp.Header["Etag"] != nil {
-			header["If-Match"] = sanitizeETag(resp.Header["Etag"][0])
-		}
-
-		resp, err = c.GetClient().PatchWithHeaders(c.settingsTarget, t, header)
-		defer DeferredCleanupHTTPResponse(resp)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	return c.Patch(c.settingsTarget, t)
+	return c.Patch(c.ODataID, t)
 }
 
 // This action shall add a resource block to a system.
