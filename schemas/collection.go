@@ -193,65 +193,129 @@ func CollectResourceCollection[T any, PT interface {
 	wg.Wait()
 }
 
+// extendedInfoToError converts a slice of Message into a *Error.
+func extendedInfoToError(ext []Message) *Error {
+	errE := &Error{}
+	for i := range ext {
+		errE.ExtendedInfos = append(errE.ExtendedInfos, ErrExtendedInfo(ext[i]))
+	}
+	return errE
+}
+
+// collectMemberLinks walks all pages of a typed collection starting at uri,
+// returning the ordered list of member @odata.id links. queryOpts are applied
+// only to the first page; subsequent pages follow MembersNextLink verbatim.
+// Inline-expanded members that carry ExtendedInfo are recorded as errors and
+// excluded from the returned links. Inline-expanded members with a valid Id
+// but no ExtendedInfo are re-fetched individually by GetCollectionObjects to
+// guarantee server-provided ordering; this is an intentional trade-off.
+func collectMemberLinks[T any, PT interface {
+	*T
+	SchemaObject
+}](c Client, uri string, collectionError *CollectionError, queryOpts ...QueryGroupOption) []string {
+	var links []string
+	next := uri
+	firstPage := true
+	for next != "" {
+		var collection *ResourceCollectionGeneric[PT]
+		var err error
+		if firstPage {
+			collection, err = GetResourceCollection[T, PT](c, next, queryOpts...)
+			firstPage = false
+		} else {
+			collection, err = GetResourceCollection[T, PT](c, next)
+		}
+		if err != nil {
+			collectionError.Failures[next] = err
+			break
+		}
+		for _, m := range collection.Members {
+			if m == nil {
+				continue
+			}
+			odataID := m.GetODataID()
+			if odataID == "" {
+				continue
+			}
+			// Inline-expanded member with ExtendedInfo is an error; skip fetch.
+			if m.GetID() != "" {
+				if ext := m.GetExtendedInfo(); len(ext) > 0 {
+					collectionError.Failures[odataID] = extendedInfoToError(ext)
+					continue
+				}
+			}
+			links = append(links, odataID)
+		}
+		next = collection.MembersNextLink
+	}
+	return links
+}
+
+// GetCollectionObjects retrieves all members of a Redfish collection at uri,
+// preserving the server-provided Members order. The returned slice is dense
+// (no nil holes); failed fetches are recorded in the returned CollectionError.
 func GetCollectionObjects[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, uri string, queryOpts ...QueryGroupOption) ([]*T, error) {
-	var result []*T
 	if uri == "" {
-		return result, nil
+		return make([]*T, 0), nil
 	}
 
-	type GetResult struct {
-		Item  *T
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
 	collectionError := NewCollectionError()
-	get := func(entity PT, opts ...QueryGroupOption) {
-		if entity != nil && entity.GetID() != "" {
-			// if the entity has any ExtendedInfo, we assume it's an error
-			var err error
-			extendedInfo := entity.GetExtendedInfo()
-			if len(extendedInfo) > 0 {
-				errE := &Error{}
-				for i := range extendedInfo {
-					errE.ExtendedInfos = append(errE.ExtendedInfos, ErrExtendedInfo(extendedInfo[i]))
-				}
-				err = errE
-			}
+	links := collectMemberLinks[T, PT](c, uri, collectionError, queryOpts...)
 
-			entity.SetClient(c)
+	if len(links) == 0 {
+		if collectionError.Empty() {
+			return make([]*T, 0), nil
+		}
+		return make([]*T, 0), collectionError
+	}
 
-			ch <- GetResult{Item: entity, Link: entity.GetODataID(), Error: err}
-		} else if entity != nil && entity.GetODataID() != "" {
-			link := entity.GetODataID()
-			entity, err := GetObject[T, PT](c, link, opts...)
-			ch <- GetResult{Item: entity, Link: link, Error: err}
+	// Fetch all members concurrently into a preallocated indexed slice.
+	// First occurrence of a duplicate link wins.
+	result := make([]*T, len(links))
+	index := make(map[string]int, len(links))
+	for i, l := range links {
+		if _, exists := index[l]; !exists {
+			index[l] = i
 		}
 	}
 
-	go func() {
-		err := CollectListGeneric(get, c, uri, queryOpts...)
+	var mu sync.Mutex
+	get := func(link string) {
+		entity, err := GetObject[T, PT](c, link, queryOpts...)
+		mu.Lock()
+		defer mu.Unlock()
 		if err != nil {
-			collectionError.Failures[uri] = err
+			collectionError.Failures[link] = err
+			return
 		}
-		close(ch)
-	}()
+		if entity == nil {
+			return
+		}
+		if extInfo := PT(entity).GetExtendedInfo(); len(extInfo) > 0 {
+			collectionError.Failures[link] = extendedInfoToError(extInfo)
+			return
+		}
+		if idx, ok := index[PT(entity).GetODataID()]; ok {
+			result[idx] = entity
+		} else if idx, ok := index[link]; ok {
+			result[idx] = entity
+		}
+	}
+	CollectCollection(get, links)
 
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
+	// Compact to a dense slice preserving relative order.
+	dense := make([]*T, 0, len(result))
+	for _, it := range result {
+		if it != nil {
+			dense = append(dense, it)
 		}
 	}
 
 	if collectionError.Empty() {
-		return result, nil
+		return dense, nil
 	}
-
-	return result, collectionError
+	return dense, collectionError
 }
