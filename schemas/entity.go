@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"sync"
 )
 
 // Entity provides the basis for all Redfish and Swordfish objects.
@@ -492,47 +493,53 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 }
 
 // GetObjects retrieves multiple API objects concurrently from the service.
+// The returned slice is dense (no nil entries) and preserves the caller-supplied
+// URI order — not HTTP response arrival order. Failed fetches are recorded in
+// the returned CollectionError; successful results preserve input order.
 func GetObjects[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, uris []string) ([]*T, error) {
-	var result []*T
 	if len(uris) == 0 {
-		return result, nil
+		return make([]*T, 0), nil
 	}
 
-	type GetResult struct {
-		Item  *T
-		Link  string
-		Error error
+	// Preallocate result slice and build URI-to-index map so concurrent
+	// fetches can write back into the original position, preserving the
+	// caller-supplied order.
+	result := make([]*T, len(uris))
+	index := make(map[string]int, len(uris))
+	for i, u := range uris {
+		index[u] = i
 	}
 
-	ch := make(chan GetResult)
+	var mu sync.Mutex
 	collectionError := NewCollectionError()
 
-	// Worker function to get a single object
 	get := func(link string) {
 		entity, err := GetObject[T, PT](c, link)
-		ch <- GetResult{Item: entity, Link: link, Error: err}
+		mu.Lock()
+		defer mu.Unlock()
+		if err != nil {
+			collectionError.Failures[link] = err
+		} else if idx, ok := index[link]; ok {
+			result[idx] = entity
+		}
 	}
 
-	// Start workers for each URI
-	go func() {
-		CollectCollection(get, uris)
-		close(ch)
-	}()
+	CollectCollection(get, uris)
 
-	// Process results
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
+	// Compact to a dense slice that preserves relative order but contains no
+	// nil holes (callers should not need to nil-check every element).
+	dense := make([]*T, 0, len(result))
+	for _, it := range result {
+		if it != nil {
+			dense = append(dense, it)
 		}
 	}
 
 	if collectionError.Empty() {
-		return result, nil
+		return dense, nil
 	}
-	return result, collectionError
+	return dense, collectionError
 }
