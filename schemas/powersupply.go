@@ -258,7 +258,7 @@ func (p *PowerSupplyUnit) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.resetTarget, payload, p.Headers(), false)
+		p.resetTarget, payload, p.Headers(p.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

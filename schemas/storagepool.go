@@ -353,7 +353,7 @@ func (s *StoragePool) AddDrives(capacitySource string, drives []string) (*TaskMo
 	payload["CapacitySource"] = capacitySource
 	payload["Drives"] = drives
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.addDrivesTarget, payload, s.Headers(), false)
+		s.addDrivesTarget, payload, s.Headers(s.addDrivesTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -371,7 +371,7 @@ func (s *StoragePool) RemoveDrives(drives []string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Drives"] = drives
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.removeDrivesTarget, payload, s.Headers(), false)
+		s.removeDrivesTarget, payload, s.Headers(s.removeDrivesTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -386,7 +386,7 @@ func (s *StoragePool) SetCompressionState(enable bool) (*TaskMonitorInfo, error)
 	payload := make(map[string]any)
 	payload["Enable"] = enable
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setCompressionStateTarget, payload, s.Headers(), false)
+		s.setCompressionStateTarget, payload, s.Headers(s.setCompressionStateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -401,7 +401,7 @@ func (s *StoragePool) SetDeduplicationState(enable bool) (*TaskMonitorInfo, erro
 	payload := make(map[string]any)
 	payload["Enable"] = enable
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setDeduplicationStateTarget, payload, s.Headers(), false)
+		s.setDeduplicationStateTarget, payload, s.Headers(s.setDeduplicationStateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -416,7 +416,7 @@ func (s *StoragePool) SetEncryptionState(enable bool) (*TaskMonitorInfo, error) 
 	payload := make(map[string]any)
 	payload["Enable"] = enable
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setEncryptionStateTarget, payload, s.Headers(), false)
+		s.setEncryptionStateTarget, payload, s.Headers(s.setEncryptionStateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

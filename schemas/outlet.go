@@ -334,7 +334,7 @@ func (o *Outlet) PowerControl(powerState OutletPowerState) (*TaskMonitorInfo, er
 	payload := make(map[string]any)
 	payload["OutletPowerState"] = powerState
 	resp, taskInfo, err := PostWithTask(o.client,
-		o.powerControlTarget, payload, o.Headers(), false)
+		o.powerControlTarget, payload, o.Headers(o.powerControlTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -346,7 +346,7 @@ func (o *Outlet) PowerControl(powerState OutletPowerState) (*TaskMonitorInfo, er
 func (o *Outlet) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(o.client,
-		o.resetMetricsTarget, payload, o.Headers(), false)
+		o.resetMetricsTarget, payload, o.Headers(o.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

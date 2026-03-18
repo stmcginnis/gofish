@@ -180,7 +180,7 @@ func (c *ConsistencyGroup) AssignReplicaTarget(replicaType ReplicaType, replicaU
 	payload["ReplicaUpdateMode"] = replicaUpdateMode
 	payload["TargetConsistencyGroup"] = targetConsistencyGroup
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.assignReplicaTargetTarget, payload, c.Headers(), false)
+		c.assignReplicaTargetTarget, payload, c.Headers(c.assignReplicaTargetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -206,7 +206,7 @@ type ConsistencyGroupCreateReplicaTargetParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (c *ConsistencyGroup) CreateReplicaTarget(params *ConsistencyGroupCreateReplicaTargetParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.createReplicaTargetTarget, params, c.Headers(), false)
+		c.createReplicaTargetTarget, params, c.Headers(c.createReplicaTargetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -226,7 +226,7 @@ func (c *ConsistencyGroup) RemoveReplicaRelationship(deleteTargetConsistencyGrou
 	payload["DeleteTargetConsistencyGroup"] = deleteTargetConsistencyGroup
 	payload["TargetConsistencyGroup"] = targetConsistencyGroup
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.removeReplicaRelationshipTarget, payload, c.Headers(), false)
+		c.removeReplicaRelationshipTarget, payload, c.Headers(c.removeReplicaRelationshipTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -242,7 +242,7 @@ func (c *ConsistencyGroup) ResumeReplication(targetConsistencyGroup string) (*Ta
 	payload := make(map[string]any)
 	payload["TargetConsistencyGroup"] = targetConsistencyGroup
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.resumeReplicationTarget, payload, c.Headers(), false)
+		c.resumeReplicationTarget, payload, c.Headers(c.resumeReplicationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -257,7 +257,7 @@ func (c *ConsistencyGroup) ReverseReplicationRelationship(targetConsistencyGroup
 	payload := make(map[string]any)
 	payload["TargetConsistencyGroup"] = targetConsistencyGroup
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.reverseReplicationRelationshipTarget, payload, c.Headers(), false)
+		c.reverseReplicationRelationshipTarget, payload, c.Headers(c.reverseReplicationRelationshipTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -272,7 +272,7 @@ func (c *ConsistencyGroup) SplitReplication(targetConsistencyGroup string) (*Tas
 	payload := make(map[string]any)
 	payload["TargetConsistencyGroup"] = targetConsistencyGroup
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.splitReplicationTarget, payload, c.Headers(), false)
+		c.splitReplicationTarget, payload, c.Headers(c.splitReplicationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -288,7 +288,7 @@ func (c *ConsistencyGroup) SuspendReplication(targetConsistencyGroup string) (*T
 	payload := make(map[string]any)
 	payload["TargetConsistencyGroup"] = targetConsistencyGroup
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.suspendReplicationTarget, payload, c.Headers(), false)
+		c.suspendReplicationTarget, payload, c.Headers(c.suspendReplicationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

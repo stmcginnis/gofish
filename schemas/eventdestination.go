@@ -536,7 +536,7 @@ func (e *EventDestination) ResumeSubscription(deliverBufferedEventDuration strin
 	payload := make(map[string]any)
 	payload["DeliverBufferedEventDuration"] = deliverBufferedEventDuration
 	resp, taskInfo, err := PostWithTask(e.client,
-		e.resumeSubscriptionTarget, payload, e.Headers(), false)
+		e.resumeSubscriptionTarget, payload, e.Headers(e.resumeSubscriptionTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -551,7 +551,7 @@ func (e *EventDestination) ResumeSubscription(deliverBufferedEventDuration strin
 func (e *EventDestination) SuspendSubscription() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(e.client,
-		e.suspendSubscriptionTarget, payload, e.Headers(), false)
+		e.suspendSubscriptionTarget, payload, e.Headers(e.suspendSubscriptionTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

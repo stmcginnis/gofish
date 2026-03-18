@@ -87,7 +87,7 @@ func ListReferencedHeaterMetricss(c Client, link string) ([]*HeaterMetrics, erro
 func (h *HeaterMetrics) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(h.client,
-		h.resetMetricsTarget, payload, h.Headers(), false)
+		h.resetMetricsTarget, payload, h.Headers(h.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

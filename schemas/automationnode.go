@@ -208,7 +208,7 @@ func ListReferencedAutomationNodes(c Client, link string) ([]*AutomationNode, er
 func (a *AutomationNode) Reset() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.resetTarget, payload, a.Headers(), false)
+		a.resetTarget, payload, a.Headers(a.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -219,7 +219,7 @@ func (a *AutomationNode) Reset() (*TaskMonitorInfo, error) {
 func (a *AutomationNode) SendTrigger() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.sendTriggerTarget, payload, a.Headers(), false)
+		a.sendTriggerTarget, payload, a.Headers(a.sendTriggerTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -232,7 +232,7 @@ func (a *AutomationNode) SendTrigger() (*TaskMonitorInfo, error) {
 func (a *AutomationNode) Start() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.startTarget, payload, a.Headers(), false)
+		a.startTarget, payload, a.Headers(a.startTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -243,7 +243,7 @@ func (a *AutomationNode) Start() (*TaskMonitorInfo, error) {
 func (a *AutomationNode) Stop() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.stopTarget, payload, a.Headers(), false)
+		a.stopTarget, payload, a.Headers(a.stopTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -254,7 +254,7 @@ func (a *AutomationNode) Stop() (*TaskMonitorInfo, error) {
 func (a *AutomationNode) Wait() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.waitTarget, payload, a.Headers(), false)
+		a.waitTarget, payload, a.Headers(a.waitTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

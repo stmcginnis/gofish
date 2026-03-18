@@ -120,7 +120,7 @@ func ListReferencedNetworkDeviceFunctionMetricss(c Client, link string) ([]*Netw
 func (n *NetworkDeviceFunctionMetrics) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(n.client,
-		n.resetMetricsTarget, payload, n.Headers(), false)
+		n.resetMetricsTarget, payload, n.Headers(n.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

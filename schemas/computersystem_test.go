@@ -528,3 +528,102 @@ func TestSystemSupportedResetTypes(t *testing.T) {
 		t.Errorf("Expected 3 reset types to be returned, got %d", len(resetTypes))
 	}
 }
+
+func TestSetBootWithSettings(t *testing.T) {
+	// ComputerSystem with @Redfish.Settings pointing to a different URI
+	systemJSON := `{
+		"@odata.id": "/redfish/v1/Systems/System-1",
+		"@odata.type": "#ComputerSystem.v1_3_0.ComputerSystem",
+		"Id": "System-1",
+		"Name": "Test System",
+		"@Redfish.Settings": {
+			"SettingsObject": {"@odata.id": "/redfish/v1/Systems/System-1/Settings"},
+			"SupportedApplyTimes": ["OnReset"]
+		},
+		"Boot": {}
+	}`
+
+	// Settings resource response (returned by GET on Settings URI)
+	settingsJSON := `{
+		"@odata.id": "/redfish/v1/Systems/System-1/Settings",
+		"@odata.type": "#ComputerSystem.v1_3_0.ComputerSystem",
+		"@odata.etag": "W/\"gen-42\"",
+		"Id": "System-1",
+		"Name": "Settings",
+		"Boot": {}
+	}`
+
+	var system ComputerSystem
+	if err := json.NewDecoder(strings.NewReader(systemJSON)).Decode(&system); err != nil {
+		t.Fatalf("Error decoding system JSON: %s", err)
+	}
+
+	testClient := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodGet: {getCall(settingsJSON)},
+		},
+	}
+	system.SetClient(testClient)
+
+	boot := &Boot{
+		BootSourceOverrideTarget:  CdBootSource,
+		BootSourceOverrideEnabled: OnceBootSourceOverrideEnabled,
+	}
+	err := system.SetBoot(boot)
+	if err != nil {
+		t.Fatalf("SetBoot failed: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	// Expect: 1 GET (Settings) + 1 PATCH (Settings)
+	if len(calls) < 2 {
+		t.Fatalf("Expected at least 2 calls, got %d: %v", len(calls), calls)
+	}
+
+	// Verify PATCH goes to Settings URI
+	patchFound := false
+	for _, call := range calls {
+		if call.Action == http.MethodPatch {
+			patchFound = true
+			if !strings.Contains(call.URL, "/Settings") {
+				t.Errorf("Expected PATCH to Settings URI, got %s", call.URL)
+			}
+		}
+	}
+	if !patchFound {
+		t.Error("Expected a PATCH call but none was found")
+	}
+}
+
+func TestSetBootWithoutSettings(t *testing.T) {
+	// ComputerSystem without @Redfish.Settings
+	var system ComputerSystem
+	if err := json.NewDecoder(strings.NewReader(computerSystemBody)).Decode(&system); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	system.SetClient(testClient)
+
+	boot := &Boot{
+		BootSourceOverrideTarget:  CdBootSource,
+		BootSourceOverrideEnabled: OnceBootSourceOverrideEnabled,
+	}
+	err := system.SetBoot(boot)
+	if err != nil {
+		t.Fatalf("SetBoot failed: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 1 {
+		t.Fatalf("Expected 1 call, got %d", len(calls))
+	}
+
+	// PATCH should go to the ODataID (not Settings)
+	if calls[0].Action != http.MethodPatch {
+		t.Errorf("Expected PATCH, got %s", calls[0].Action)
+	}
+	if strings.Contains(calls[0].URL, "/Settings") {
+		t.Errorf("Expected PATCH to ODataID, not Settings URI: %s", calls[0].URL)
+	}
+}

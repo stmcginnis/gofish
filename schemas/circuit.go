@@ -577,7 +577,7 @@ func (c *Circuit) BreakerControl(powerState PowerState) (*TaskMonitorInfo, error
 	payload := make(map[string]any)
 	payload["PowerState"] = powerState
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.breakerControlTarget, payload, c.Headers(), false)
+		c.breakerControlTarget, payload, c.Headers(c.breakerControlTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -591,7 +591,7 @@ func (c *Circuit) PowerControl(powerState PowerState) (*TaskMonitorInfo, error) 
 	payload := make(map[string]any)
 	payload["PowerState"] = powerState
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.powerControlTarget, payload, c.Headers(), false)
+		c.powerControlTarget, payload, c.Headers(c.powerControlTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -603,7 +603,7 @@ func (c *Circuit) PowerControl(powerState PowerState) (*TaskMonitorInfo, error) 
 func (c *Circuit) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.resetMetricsTarget, payload, c.Headers(), false)
+		c.resetMetricsTarget, payload, c.Headers(c.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

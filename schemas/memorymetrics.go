@@ -130,7 +130,7 @@ func ListReferencedMemoryMetricss(c Client, link string) ([]*MemoryMetrics, erro
 func (m *MemoryMetrics) ClearCurrentPeriod() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.clearCurrentPeriodTarget, payload, m.Headers(), false)
+		m.clearCurrentPeriodTarget, payload, m.Headers(m.clearCurrentPeriodTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

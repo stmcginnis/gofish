@@ -699,7 +699,7 @@ func (m *Memory) DisableMasterPassphrase(passphrase string, regionID string) (*T
 	payload["Passphrase"] = passphrase
 	payload["RegionId"] = regionID
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.disableMasterPassphraseTarget, payload, m.Headers(), false)
+		m.disableMasterPassphraseTarget, payload, m.Headers(m.disableMasterPassphraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -716,7 +716,7 @@ func (m *Memory) DisablePassphrase(passphrase string, regionID string) (*TaskMon
 	payload["Passphrase"] = passphrase
 	payload["RegionId"] = regionID
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.disablePassphraseTarget, payload, m.Headers(), false)
+		m.disablePassphraseTarget, payload, m.Headers(m.disablePassphraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -727,7 +727,7 @@ func (m *Memory) DisablePassphrase(passphrase string, regionID string) (*TaskMon
 func (m *Memory) FreezeSecurityState() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.freezeSecurityStateTarget, payload, m.Headers(), false)
+		m.freezeSecurityStateTarget, payload, m.Headers(m.freezeSecurityStateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -743,7 +743,7 @@ func (m *Memory) InjectPersistentPoison(physicalAddress string) (*TaskMonitorInf
 	payload := make(map[string]any)
 	payload["PhysicalAddress"] = physicalAddress
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.injectPersistentPoisonTarget, payload, m.Headers(), false)
+		m.injectPersistentPoisonTarget, payload, m.Headers(m.injectPersistentPoisonTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -762,7 +762,7 @@ func (m *Memory) OverwriteUnit(passphrase string, regionID string) (*TaskMonitor
 	payload["Passphrase"] = passphrase
 	payload["RegionId"] = regionID
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.overwriteUnitTarget, payload, m.Headers(), false)
+		m.overwriteUnitTarget, payload, m.Headers(m.overwriteUnitTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -777,7 +777,7 @@ func (m *Memory) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.resetTarget, payload, m.Headers(), false)
+		m.resetTarget, payload, m.Headers(m.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -789,7 +789,7 @@ func (m *Memory) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 func (m *Memory) ResetToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.resetToDefaultsTarget, payload, m.Headers(), false)
+		m.resetToDefaultsTarget, payload, m.Headers(m.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -810,7 +810,7 @@ func (m *Memory) ScanMedia(length int, noEventLog bool, physicalAddress string) 
 	payload["NoEventLog"] = noEventLog
 	payload["PhysicalAddress"] = physicalAddress
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.scanMediaTarget, payload, m.Headers(), false)
+		m.scanMediaTarget, payload, m.Headers(m.scanMediaTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -829,7 +829,7 @@ func (m *Memory) SecureEraseUnit(passphrase string, regionID string) (*TaskMonit
 	payload["Passphrase"] = passphrase
 	payload["RegionId"] = regionID
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.secureEraseUnitTarget, payload, m.Headers(), false)
+		m.secureEraseUnitTarget, payload, m.Headers(m.secureEraseUnitTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -846,7 +846,7 @@ func (m *Memory) SetMasterPassphrase(passphrase string, regionID string) (*TaskM
 	payload["Passphrase"] = passphrase
 	payload["RegionId"] = regionID
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.setMasterPassphraseTarget, payload, m.Headers(), false)
+		m.setMasterPassphraseTarget, payload, m.Headers(m.setMasterPassphraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -862,7 +862,7 @@ func (m *Memory) SetPassphrase(passphrase string, regionID string) (*TaskMonitor
 	payload["Passphrase"] = passphrase
 	payload["RegionId"] = regionID
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.setPassphraseTarget, payload, m.Headers(), false)
+		m.setPassphraseTarget, payload, m.Headers(m.setPassphraseTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -880,7 +880,7 @@ func (m *Memory) UnlockUnit(passphrase string, regionID string) (*TaskMonitorInf
 	payload["Passphrase"] = passphrase
 	payload["RegionId"] = regionID
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.unlockUnitTarget, payload, m.Headers(), false)
+		m.unlockUnitTarget, payload, m.Headers(m.unlockUnitTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

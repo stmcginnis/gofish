@@ -127,7 +127,7 @@ func (bi *Bios) ChangePassword(newPassword string, oldPassword string, passwordN
 	payload["OldPassword"] = oldPassword
 	payload["PasswordName"] = passwordName
 	resp, taskInfo, err := PostWithTask(bi.client,
-		bi.changePasswordTarget, payload, bi.Headers(), false)
+		bi.changePasswordTarget, payload, bi.Headers(bi.changePasswordTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -141,7 +141,7 @@ func (bi *Bios) ChangePassword(newPassword string, oldPassword string, passwordN
 func (bi *Bios) ResetBios() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(bi.client,
-		bi.resetBiosTarget, payload, bi.Headers(), false)
+		bi.resetBiosTarget, payload, bi.Headers(bi.resetBiosTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

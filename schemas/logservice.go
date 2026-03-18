@@ -406,7 +406,7 @@ func (l *LogService) ClearLog(logEntriesETag string) (*TaskMonitorInfo, error) {
 		payload["LogEntriesETag"] = logEntriesETag
 	}
 	resp, taskInfo, err := PostWithTask(l.client,
-		l.clearLogTarget, payload, l.Headers(), false)
+		l.clearLogTarget, payload, l.Headers(l.clearLogTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -452,7 +452,7 @@ func (l *LogService) CollectDiagnosticData(params *LogServiceCollectDiagnosticDa
 	}
 
 	resp, taskInfo, err := PostWithTask(l.GetClient(),
-		l.collectDiagnosticDataTarget, params, l.Headers(), false)
+		l.collectDiagnosticDataTarget, params, l.Headers(l.collectDiagnosticDataTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", taskInfo, err
@@ -518,7 +518,7 @@ type LogServicePushDiagnosticDataParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (l *LogService) PushDiagnosticData(params *LogServicePushDiagnosticDataParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(l.client,
-		l.pushDiagnosticDataTarget, params, l.Headers(), false)
+		l.pushDiagnosticDataTarget, params, l.Headers(l.pushDiagnosticDataTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

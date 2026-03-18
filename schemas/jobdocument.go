@@ -131,7 +131,7 @@ type JobDocumentSubmitJobParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (j *JobDocument) SubmitJob(params *JobDocumentSubmitJobParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.submitJobTarget, params, j.Headers(), false)
+		j.submitJobTarget, params, j.Headers(j.submitJobTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

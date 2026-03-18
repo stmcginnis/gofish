@@ -190,7 +190,7 @@ func (z *Zone) AddEndpoint(endpoint string, endpointETag string, zoneETag string
 	payload["EndpointETag"] = endpointETag
 	payload["ZoneETag"] = zoneETag
 	resp, taskInfo, err := PostWithTask(z.client,
-		z.addEndpointTarget, payload, z.Headers(), false)
+		z.addEndpointTarget, payload, z.Headers(z.addEndpointTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -215,7 +215,7 @@ func (z *Zone) RemoveEndpoint(endpoint string, endpointETag string, zoneETag str
 	payload["EndpointETag"] = endpointETag
 	payload["ZoneETag"] = zoneETag
 	resp, taskInfo, err := PostWithTask(z.client,
-		z.removeEndpointTarget, payload, z.Headers(), false)
+		z.removeEndpointTarget, payload, z.Headers(z.removeEndpointTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
