@@ -471,3 +471,34 @@ func TestPowerSensorEdgeCases(t *testing.T) {
 		})
 	}
 }
+
+func TestSensorArrayExcerptUnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		name      string
+		json      string
+		wantValue float64
+	}{
+		{
+			name:      "Reading as number",
+			json:      `{"DataSourceUri": "/redfish/v1/Chassis/1/Sensors/Temp", "Reading": 25.5}`,
+			wantValue: 25.5,
+		},
+		{
+			name:      "Reading as string",
+			json:      `{"DataSourceUri": "/redfish/v1/Chassis/1/Sensors/Temp", "Reading": "25.5"}`,
+			wantValue: 25.5,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var s SensorArrayExcerpt
+			if err := json.Unmarshal([]byte(tt.json), &s); err != nil {
+				t.Fatalf("Failed to unmarshal: %v", err)
+			}
+			if *s.Reading != tt.wantValue {
+				t.Errorf("Got Reading %v, want %v", *s.Reading, tt.wantValue)
+			}
+		})
+	}
+}

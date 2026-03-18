@@ -9,6 +9,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"strconv"
 )
 
 type ElectricalContext string
@@ -748,6 +749,35 @@ type SensorArrayExcerpt struct {
 	// Reading shall contain the sensor value. This property shall not be returned
 	// if the 'Enabled' property is supported and contains 'false'.
 	Reading *float64 `json:",omitempty"`
+}
+
+// UnmarshalJSON unmarshals SensorArrayExcerpt from JSON, handling Reading as either a number or string.
+func (s *SensorArrayExcerpt) UnmarshalJSON(b []byte) error {
+	type temp SensorArrayExcerpt
+	var t temp
+
+	if err := json.Unmarshal(b, &t); err != nil {
+		// Try with Reading as string
+		var stringT struct {
+			temp
+			Reading string `json:",omitempty"`
+		}
+		if err := json.Unmarshal(b, &stringT); err != nil {
+			return err
+		}
+		*s = SensorArrayExcerpt(stringT.temp)
+		if stringT.Reading != "" {
+			f, err := strconv.ParseFloat(stringT.Reading, 64)
+			if err != nil {
+				return err
+			}
+			s.Reading = &f
+		}
+		return nil
+	}
+
+	*s = SensorArrayExcerpt(t)
+	return nil
 }
 
 // SensorCurrentExcerpt shall represent a sensor for a Redfish implementation.
