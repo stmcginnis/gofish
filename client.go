@@ -138,6 +138,10 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 			ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
 			TLSClientConfig:       defaultTransport.TLSClientConfig,
 			TLSHandshakeTimeout:   time.Duration(config.TLSHandshakeTimeout) * time.Second,
+			// Without this, Go disables HTTP/2 negotiation whenever TLSClientConfig
+			// is non-nil. Setting it to true re-enables ALPN-based negotiation so
+			// the protocol is selected during the TLS handshake as usual.
+			ForceAttemptHTTP2: true,
 		}
 
 		config.HTTPClient = &http.Client{Transport: transport}
@@ -159,6 +163,11 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 			}
 			transport.TLSClientConfig.InsecureSkipVerify = config.Insecure
 		}
+
+		// Without this, Go disables HTTP/2 negotiation whenever TLSClientConfig
+		// is non-nil. Setting it to true re-enables ALPN-based negotiation so
+		// the protocol is selected during the TLS handshake as usual.
+		transport.ForceAttemptHTTP2 = true
 
 		if config.ReuseConnections {
 			transport.DisableKeepAlives = false
