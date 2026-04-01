@@ -113,6 +113,76 @@ var attributeRegistryBody = strings.NewReader(
 		}
 	}`)
 
+// TestAttributeRegistryMultiTypeCurrentValue verifies that CurrentValue and
+// DefaultValue unmarshal correctly when the BMC returns string, boolean, or
+// numeric values. Prior to the fix for #514, these fields were *float64 and
+// string values silently failed to parse.
+func TestAttributeRegistryMultiTypeCurrentValue(t *testing.T) {
+	body := `{
+		"@odata.type": "#AttributeRegistry.v1_4_0.AttributeRegistry",
+		"Id": "BiosAttributeRegistry",
+		"Name": "BIOS Attribute Registry",
+		"Language": "en",
+		"OwningEntity": "Dell",
+		"RegistryVersion": "1.0.0",
+		"RegistryEntries": {
+			"Attributes": [
+				{
+					"AttributeName": "BootMode",
+					"CurrentValue": "UEFI",
+					"DefaultValue": "UEFI",
+					"DisplayName": "Boot Mode",
+					"Type": "Enumeration"
+				},
+				{
+					"AttributeName": "NumLock",
+					"CurrentValue": true,
+					"DefaultValue": false,
+					"DisplayName": "NumLock State",
+					"Type": "Boolean"
+				},
+				{
+					"AttributeName": "AcPwrRcvryDelay",
+					"CurrentValue": 30,
+					"DefaultValue": 0,
+					"DisplayName": "AC Power Recovery Delay",
+					"Type": "Integer"
+				},
+				{
+					"AttributeName": "Unset",
+					"CurrentValue": null,
+					"DefaultValue": null,
+					"DisplayName": "Unset Attribute",
+					"Type": "String"
+				}
+			]
+		}
+	}`
+
+	var result AttributeRegistry
+	if err := json.NewDecoder(strings.NewReader(body)).Decode(&result); err != nil {
+		t.Fatalf("Failed to decode AttributeRegistry: %v", err)
+	}
+
+	attrs := result.RegistryEntries.Attributes
+	if len(attrs) != 4 {
+		t.Fatalf("Expected 4 attributes, got %d", len(attrs))
+	}
+
+	if v, ok := attrs[0].CurrentValue.(string); !ok || v != "UEFI" {
+		t.Errorf("BootMode.CurrentValue = %v (%T), want \"UEFI\"", attrs[0].CurrentValue, attrs[0].CurrentValue)
+	}
+	if v, ok := attrs[1].CurrentValue.(bool); !ok || v != true {
+		t.Errorf("NumLock.CurrentValue = %v (%T), want true", attrs[1].CurrentValue, attrs[1].CurrentValue)
+	}
+	if v, ok := attrs[2].CurrentValue.(float64); !ok || v != 30 {
+		t.Errorf("AcPwrRcvryDelay.CurrentValue = %v (%T), want 30", attrs[2].CurrentValue, attrs[2].CurrentValue)
+	}
+	if attrs[3].CurrentValue != nil {
+		t.Errorf("Unset.CurrentValue = %v, want nil", attrs[3].CurrentValue)
+	}
+}
+
 // TestAttributeRegistry tests the parsing of AttributeRegistry objects.
 func TestAttributeRegistry(t *testing.T) {
 	var result AttributeRegistry
