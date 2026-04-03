@@ -182,7 +182,7 @@ func ListReferencedEnvironmentMetricss(c Client, link string) ([]*EnvironmentMet
 func (e *EnvironmentMetrics) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(e.client,
-		e.resetMetricsTarget, payload, e.Headers(), false)
+		e.resetMetricsTarget, payload, e.Headers(e.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -194,7 +194,7 @@ func (e *EnvironmentMetrics) ResetMetrics() (*TaskMonitorInfo, error) {
 func (e *EnvironmentMetrics) ResetToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(e.client,
-		e.resetToDefaultsTarget, payload, e.Headers(), false)
+		e.resetToDefaultsTarget, payload, e.Headers(e.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

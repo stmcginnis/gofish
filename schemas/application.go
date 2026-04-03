@@ -100,7 +100,7 @@ func (a *Application) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.resetTarget, payload, a.Headers(), false)
+		a.resetTarget, payload, a.Headers(a.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

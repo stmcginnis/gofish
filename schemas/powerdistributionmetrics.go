@@ -122,7 +122,7 @@ func ListReferencedPowerDistributionMetricss(c Client, link string) ([]*PowerDis
 func (p *PowerDistributionMetrics) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.resetMetricsTarget, payload, p.Headers(), false)
+		p.resetMetricsTarget, payload, p.Headers(p.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

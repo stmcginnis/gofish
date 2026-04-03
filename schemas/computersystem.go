@@ -1071,18 +1071,12 @@ func (c *ComputerSystem) SetBoot(b *Boot) error {
 	// If settingsTarget differs from ODataID, we are targeting a Settings resource
 	// which may require an ETag for concurrency control (e.g., Dell iDRAC10).
 	if c.settingsTarget != c.ODataID {
-		resp, err := c.GetClient().Get(c.settingsTarget)
-		defer DeferredCleanupHTTPResponse(resp)
+		settings, err := GetObject[ComputerSystem](c.GetClient(), c.settingsTarget)
 		if err != nil {
 			return err
 		}
 
-		var header = make(map[string]string)
-		if resp.Header["Etag"] != nil {
-			header["If-Match"] = sanitizeETag(resp.Header["Etag"][0])
-		}
-
-		resp, err = c.GetClient().PatchWithHeaders(c.settingsTarget, t, header)
+		resp, err := c.GetClient().PatchWithHeaders(c.settingsTarget, t, settings.Headers(c.settingsTarget))
 		defer DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
@@ -1114,7 +1108,7 @@ func (c *ComputerSystem) AddResourceBlock(computerSystemETag string, resourceBlo
 	payload["ResourceBlock"] = resourceBlock
 	payload["ResourceBlockETag"] = resourceBlockETag
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.addResourceBlockTarget, payload, c.Headers(), false)
+		c.addResourceBlockTarget, payload, c.Headers(c.addResourceBlockTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1147,7 +1141,7 @@ type ComputerSystemDecommissionParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (c *ComputerSystem) Decommission(params *ComputerSystemDecommissionParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.decommissionTarget, params, c.Headers(), false)
+		c.decommissionTarget, params, c.Headers(c.decommissionTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1180,7 +1174,7 @@ type ComputerSystemExportConfigurationParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (c *ComputerSystem) ExportConfiguration(params *ComputerSystemExportConfigurationParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.exportConfigurationTarget, params, c.Headers(), false)
+		c.exportConfigurationTarget, params, c.Headers(c.exportConfigurationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1205,7 +1199,7 @@ func (c *ComputerSystem) RemoveResourceBlock(computerSystemETag string, resource
 	payload["ResourceBlock"] = resourceBlock
 	payload["ResourceBlockETag"] = resourceBlockETag
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.removeResourceBlockTarget, payload, c.Headers(), false)
+		c.removeResourceBlockTarget, payload, c.Headers(c.removeResourceBlockTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1246,7 +1240,7 @@ func (c *ComputerSystem) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 		ResetType ResetType
 	}{ResetType: resetType}
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.resetTarget, t, c.Headers(), false)
+		c.resetTarget, t, c.Headers(c.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1306,12 +1300,6 @@ func (c *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, a
 		}
 	}
 
-	resp, err := c.GetClient().Get(c.settingsTarget)
-	defer DeferredCleanupHTTPResponse(resp)
-	if err != nil {
-		return err
-	}
-
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
 	if len(payload) > 0 {
@@ -1320,12 +1308,15 @@ func (c *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, a
 			data["@Redfish.SettingsApplyTime"] = map[string]string{"ApplyTime": string(applyTime)}
 		}
 
-		var header = make(map[string]string)
-		if resp.Header["Etag"] != nil {
-			header["If-Match"] = resp.Header["Etag"][0]
+		// Fetch the Settings resource as an Entity to get its @odata.etag.
+		// Using GetObject ensures ETag is obtained from the JSON body (@odata.etag),
+		// which is not affected by gzip content-encoding, unlike the HTTP Etag header.
+		settings, err := GetObject[ComputerSystem](c.GetClient(), c.settingsTarget)
+		if err != nil {
+			return err
 		}
 
-		resp, err = c.GetClient().PatchWithHeaders(c.settingsTarget, data, header)
+		resp, err := c.GetClient().PatchWithHeaders(c.settingsTarget, data, settings.Headers(c.settingsTarget))
 		defer DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
@@ -1346,7 +1337,7 @@ func (c *ComputerSystem) UpdateBootAttributes(attrs SettingsAttributes) error {
 func (c *ComputerSystem) SetDefaultBootOrder() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.setDefaultBootOrderTarget, payload, c.Headers(), false)
+		c.setDefaultBootOrderTarget, payload, c.Headers(c.setDefaultBootOrderTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

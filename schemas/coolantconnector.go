@@ -331,7 +331,7 @@ func (c *CoolantConnector) ValveControl(valveState ValveState, valveStateReason 
 	payload["ValveState"] = valveState
 	payload["ValveStateReason"] = valveStateReason
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.valveControlTarget, payload, c.Headers(), false)
+		c.valveControlTarget, payload, c.Headers(c.valveControlTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

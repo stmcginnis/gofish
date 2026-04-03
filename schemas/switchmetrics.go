@@ -79,7 +79,7 @@ func ListReferencedSwitchMetricss(c Client, link string) ([]*SwitchMetrics, erro
 func (s *SwitchMetrics) ClearCurrentPeriod() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.clearCurrentPeriodTarget, payload, s.Headers(), false)
+		s.clearCurrentPeriodTarget, payload, s.Headers(s.clearCurrentPeriodTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

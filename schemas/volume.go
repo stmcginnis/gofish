@@ -797,7 +797,7 @@ func (v *Volume) AssignReplicaTarget(replicaType ReplicaType, replicaUpdateMode 
 	payload["ReplicaUpdateMode"] = replicaUpdateMode
 	payload["TargetVolume"] = targetVolume
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.assignReplicaTargetTarget, payload, v.Headers(), false)
+		v.assignReplicaTargetTarget, payload, v.Headers(v.assignReplicaTargetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -826,7 +826,7 @@ type VolumeChangeRAIDLayoutParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (v *Volume) ChangeRAIDLayout(params *VolumeChangeRAIDLayoutParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.changeRAIDLayoutTarget, params, v.Headers(), false)
+		v.changeRAIDLayoutTarget, params, v.Headers(v.changeRAIDLayoutTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -837,7 +837,7 @@ func (v *Volume) ChangeRAIDLayout(params *VolumeChangeRAIDLayoutParameters) (*Ta
 func (v *Volume) CheckConsistency() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.checkConsistencyTarget, payload, v.Headers(), false)
+		v.checkConsistencyTarget, payload, v.Headers(v.checkConsistencyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -863,7 +863,7 @@ type VolumeCreateReplicaTargetParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (v *Volume) CreateReplicaTarget(params *VolumeCreateReplicaTargetParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.createReplicaTargetTarget, params, v.Headers(), false)
+		v.createReplicaTargetTarget, params, v.Headers(v.createReplicaTargetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -875,7 +875,7 @@ func (v *Volume) CreateReplicaTarget(params *VolumeCreateReplicaTargetParameters
 func (v *Volume) ForceEnable() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.forceEnableTarget, payload, v.Headers(), false)
+		v.forceEnableTarget, payload, v.Headers(v.forceEnableTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -893,7 +893,7 @@ func (v *Volume) Initialize(initializeMethod InitializeMethod, initializeType In
 	payload["InitializeMethod"] = initializeMethod
 	payload["InitializeType"] = initializeType
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.initializeTarget, payload, v.Headers(), false)
+		v.initializeTarget, payload, v.Headers(v.initializeTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -913,7 +913,7 @@ func (v *Volume) RemoveReplicaRelationship(deleteTargetVolume bool, targetVolume
 	payload["DeleteTargetVolume"] = deleteTargetVolume
 	payload["TargetVolume"] = targetVolume
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.removeReplicaRelationshipTarget, payload, v.Headers(), false)
+		v.removeReplicaRelationshipTarget, payload, v.Headers(v.removeReplicaRelationshipTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -929,7 +929,7 @@ func (v *Volume) ResumeReplication(targetVolume string) (*TaskMonitorInfo, error
 	payload := make(map[string]any)
 	payload["TargetVolume"] = targetVolume
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.resumeReplicationTarget, payload, v.Headers(), false)
+		v.resumeReplicationTarget, payload, v.Headers(v.resumeReplicationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -944,7 +944,7 @@ func (v *Volume) ReverseReplicationRelationship(targetVolume string) (*TaskMonit
 	payload := make(map[string]any)
 	payload["TargetVolume"] = targetVolume
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.reverseReplicationRelationshipTarget, payload, v.Headers(), false)
+		v.reverseReplicationRelationshipTarget, payload, v.Headers(v.reverseReplicationRelationshipTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -959,7 +959,7 @@ func (v *Volume) SplitReplication(targetVolume string) (*TaskMonitorInfo, error)
 	payload := make(map[string]any)
 	payload["TargetVolume"] = targetVolume
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.splitReplicationTarget, payload, v.Headers(), false)
+		v.splitReplicationTarget, payload, v.Headers(v.splitReplicationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -975,7 +975,7 @@ func (v *Volume) SuspendReplication(targetVolume string) (*TaskMonitorInfo, erro
 	payload := make(map[string]any)
 	payload["TargetVolume"] = targetVolume
 	resp, taskInfo, err := PostWithTask(v.client,
-		v.suspendReplicationTarget, payload, v.Headers(), false)
+		v.suspendReplicationTarget, payload, v.Headers(v.suspendReplicationTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

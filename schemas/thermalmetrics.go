@@ -118,7 +118,7 @@ func ListReferencedThermalMetricss(c Client, link string) ([]*ThermalMetrics, er
 func (t *ThermalMetrics) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(t.client,
-		t.resetMetricsTarget, payload, t.Headers(), false)
+		t.resetMetricsTarget, payload, t.Headers(t.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

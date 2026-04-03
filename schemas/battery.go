@@ -252,7 +252,7 @@ func ListReferencedBatterys(c Client, link string) ([]*Battery, error) {
 func (ba *Battery) Calibrate() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(ba.client,
-		ba.calibrateTarget, payload, ba.Headers(), false)
+		ba.calibrateTarget, payload, ba.Headers(ba.calibrateTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -267,7 +267,7 @@ func (ba *Battery) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(ba.client,
-		ba.resetTarget, payload, ba.Headers(), false)
+		ba.resetTarget, payload, ba.Headers(ba.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -278,7 +278,7 @@ func (ba *Battery) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 func (ba *Battery) SelfTest() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(ba.client,
-		ba.selfTestTarget, payload, ba.Headers(), false)
+		ba.selfTestTarget, payload, ba.Headers(ba.selfTestTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

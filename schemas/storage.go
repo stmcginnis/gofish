@@ -473,7 +473,7 @@ func (s *Storage) FreezePersonality(personality uint) (*TaskMonitorInfo, error) 
 	payload := make(map[string]any)
 	payload["Personality"] = personality
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.freezePersonalityTarget, payload, s.Headers(), false)
+		s.freezePersonalityTarget, payload, s.Headers(s.freezePersonalityTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -523,7 +523,7 @@ func (s *Storage) ImportForeignDrives(controllerPassword string, driveEncryption
 	payload["DriveEncryptionKey"] = driveEncryptionKey
 	payload["DriveEncryptionKeyIdentifier"] = driveEncryptionKeyIdentifier
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.importForeignDrivesTarget, payload, s.Headers(), false)
+		s.importForeignDrivesTarget, payload, s.Headers(s.importForeignDrivesTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -535,7 +535,7 @@ func (s *Storage) ImportForeignDrives(controllerPassword string, driveEncryption
 func (s *Storage) RekeyExternalKey() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.rekeyExternalKeyTarget, payload, s.Headers(), false)
+		s.rekeyExternalKeyTarget, payload, s.Headers(s.rekeyExternalKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -549,7 +549,7 @@ func (s *Storage) ResetToDefaults(resetType ResetToDefaultsType) (*TaskMonitorIn
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.resetToDefaultsTarget, payload, s.Headers(), false)
+		s.resetToDefaultsTarget, payload, s.Headers(s.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -562,7 +562,7 @@ func (s *Storage) ResetToDefaults(resetType ResetToDefaultsType) (*TaskMonitorIn
 func (s *Storage) RevertPersonalitiesToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.revertPersonalitiesToDefaultsTarget, payload, s.Headers(), false)
+		s.revertPersonalitiesToDefaultsTarget, payload, s.Headers(s.revertPersonalitiesToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -585,7 +585,7 @@ func (s *Storage) SetControllerPassword(currentPassword string, newPassword stri
 	payload["NewPassword"] = newPassword
 	payload["SecurityKey"] = securityKey
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setControllerPasswordTarget, payload, s.Headers(), false)
+		s.setControllerPasswordTarget, payload, s.Headers(s.setControllerPasswordTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -607,7 +607,7 @@ func (s *Storage) SetEncryptionKey(currentEncryptionKey string, encryptionKey st
 	payload["EncryptionKey"] = encryptionKey
 	payload["EncryptionKeyIdentifier"] = encryptionKeyIdentifier
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setEncryptionKeyTarget, payload, s.Headers(), false)
+		s.setEncryptionKeyTarget, payload, s.Headers(s.setEncryptionKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -627,7 +627,7 @@ func (s *Storage) SetPersonalityKey(algorithm NMVePersonalityKeyAlgorithm, key s
 	payload["Algorithm"] = algorithm
 	payload["Key"] = key
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setPersonalityKeyTarget, payload, s.Headers(), false)
+		s.setPersonalityKeyTarget, payload, s.Headers(s.setPersonalityKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -662,7 +662,7 @@ type StorageUnfreezePersonalityParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (s *Storage) UnfreezePersonality(params *StorageUnfreezePersonalityParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.unfreezePersonalityTarget, params, s.Headers(), false)
+		s.unfreezePersonalityTarget, params, s.Headers(s.unfreezePersonalityTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1212,7 +1212,7 @@ func (s *StorageStorageController) FreezePersonality(personality uint) (*TaskMon
 	payload := make(map[string]any)
 	payload["Personality"] = personality
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.freezePersonalityTarget, payload, s.Headers(), false)
+		s.freezePersonalityTarget, payload, s.Headers(s.freezePersonalityTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1262,7 +1262,7 @@ func (s *StorageStorageController) ImportForeignDrives(controllerPassword string
 	payload["DriveEncryptionKey"] = driveEncryptionKey
 	payload["DriveEncryptionKeyIdentifier"] = driveEncryptionKeyIdentifier
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.importForeignDrivesTarget, payload, s.Headers(), false)
+		s.importForeignDrivesTarget, payload, s.Headers(s.importForeignDrivesTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1274,7 +1274,7 @@ func (s *StorageStorageController) ImportForeignDrives(controllerPassword string
 func (s *StorageStorageController) RekeyExternalKey() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.rekeyExternalKeyTarget, payload, s.Headers(), false)
+		s.rekeyExternalKeyTarget, payload, s.Headers(s.rekeyExternalKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1288,7 +1288,7 @@ func (s *StorageStorageController) ResetToDefaults(resetType ResetToDefaultsType
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.resetToDefaultsTarget, payload, s.Headers(), false)
+		s.resetToDefaultsTarget, payload, s.Headers(s.resetToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1301,7 +1301,7 @@ func (s *StorageStorageController) ResetToDefaults(resetType ResetToDefaultsType
 func (s *StorageStorageController) RevertPersonalitiesToDefaults() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.revertPersonalitiesToDefaultsTarget, payload, s.Headers(), false)
+		s.revertPersonalitiesToDefaultsTarget, payload, s.Headers(s.revertPersonalitiesToDefaultsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1324,7 +1324,7 @@ func (s *StorageStorageController) SetControllerPassword(currentPassword string,
 	payload["NewPassword"] = newPassword
 	payload["SecurityKey"] = securityKey
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setControllerPasswordTarget, payload, s.Headers(), false)
+		s.setControllerPasswordTarget, payload, s.Headers(s.setControllerPasswordTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1346,7 +1346,7 @@ func (s *StorageStorageController) SetEncryptionKey(currentEncryptionKey string,
 	payload["EncryptionKey"] = encryptionKey
 	payload["EncryptionKeyIdentifier"] = encryptionKeyIdentifier
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setEncryptionKeyTarget, payload, s.Headers(), false)
+		s.setEncryptionKeyTarget, payload, s.Headers(s.setEncryptionKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1366,7 +1366,7 @@ func (s *StorageStorageController) SetPersonalityKey(algorithm NMVePersonalityKe
 	payload["Algorithm"] = algorithm
 	payload["Key"] = key
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.setPersonalityKeyTarget, payload, s.Headers(), false)
+		s.setPersonalityKeyTarget, payload, s.Headers(s.setPersonalityKeyTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1401,7 +1401,7 @@ type StorageStorageControllerUnfreezePersonalityParameters struct {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (s *StorageStorageController) UnfreezePersonality(params *StorageStorageControllerUnfreezePersonalityParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.unfreezePersonalityTarget, params, s.Headers(), false)
+		s.unfreezePersonalityTarget, params, s.Headers(s.unfreezePersonalityTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

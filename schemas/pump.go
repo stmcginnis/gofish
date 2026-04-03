@@ -184,7 +184,7 @@ func (p *Pump) SetMode(mode PumpMode) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Mode"] = mode
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.setModeTarget, payload, p.Headers(), false)
+		p.setModeTarget, payload, p.Headers(p.setModeTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

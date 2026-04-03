@@ -684,7 +684,7 @@ func (p *Port) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.resetTarget, payload, p.Headers(), false)
+		p.resetTarget, payload, p.Headers(p.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -695,7 +695,7 @@ func (p *Port) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 func (p *Port) ResetPPB() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(p.client,
-		p.resetPPBTarget, payload, p.Headers(), false)
+		p.resetPPBTarget, payload, p.Headers(p.resetPPBTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

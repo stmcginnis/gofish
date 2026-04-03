@@ -91,7 +91,7 @@ func (a *Aggregate) AddElements(elements []string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Elements"] = elements
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.addElementsTarget, payload, a.Headers(), false)
+		a.addElementsTarget, payload, a.Headers(a.addElementsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -107,7 +107,7 @@ func (a *Aggregate) RemoveElements(elements []string) (*TaskMonitorInfo, error) 
 	payload := make(map[string]any)
 	payload["Elements"] = elements
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.removeElementsTarget, payload, a.Headers(), false)
+		a.removeElementsTarget, payload, a.Headers(a.removeElementsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -128,7 +128,7 @@ func (a *Aggregate) Reset(batchSize uint, delayBetweenBatchesInSeconds uint, res
 	payload["DelayBetweenBatchesInSeconds"] = delayBetweenBatchesInSeconds
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.resetTarget, payload, a.Headers(), false)
+		a.resetTarget, payload, a.Headers(a.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -140,7 +140,7 @@ func (a *Aggregate) Reset(batchSize uint, delayBetweenBatchesInSeconds uint, res
 func (a *Aggregate) SetDefaultBootOrder() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.setDefaultBootOrderTarget, payload, a.Headers(), false)
+		a.setDefaultBootOrderTarget, payload, a.Headers(a.setDefaultBootOrderTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

@@ -101,7 +101,7 @@ func (c *Container) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.resetTarget, payload, c.Headers(), false)
+		c.resetTarget, payload, c.Headers(c.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

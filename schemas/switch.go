@@ -254,7 +254,7 @@ func (s *Switch) Reset(resetType ResetType) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ResetType"] = resetType
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.resetTarget, payload, s.Headers(), false)
+		s.resetTarget, payload, s.Headers(s.resetTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

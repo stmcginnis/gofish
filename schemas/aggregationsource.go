@@ -182,7 +182,7 @@ func (a *AggregationSource) GenerateSSHIdentityKeyPair(curve ECDSACurveType, key
 	payload["KeyLength"] = keyLength
 	payload["KeyType"] = keyType
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.generateSSHIdentityKeyPairTarget, payload, a.Headers(), false)
+		a.generateSSHIdentityKeyPairTarget, payload, a.Headers(a.generateSSHIdentityKeyPairTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -194,7 +194,7 @@ func (a *AggregationSource) GenerateSSHIdentityKeyPair(curve ECDSACurveType, key
 func (a *AggregationSource) RemoveSSHIdentityKeyPair() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(a.client,
-		a.removeSSHIdentityKeyPairTarget, payload, a.Headers(), false)
+		a.removeSSHIdentityKeyPairTarget, payload, a.Headers(a.removeSSHIdentityKeyPairTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

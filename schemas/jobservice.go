@@ -141,7 +141,7 @@ func ListReferencedJobServices(c Client, link string) ([]*JobService, error) {
 func (j *JobService) CancelAllJobs() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(j.client,
-		j.cancelAllJobsTarget, payload, j.Headers(), false)
+		j.cancelAllJobsTarget, payload, j.Headers(j.cancelAllJobsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

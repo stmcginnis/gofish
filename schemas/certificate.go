@@ -295,7 +295,7 @@ func ListReferencedCertificates(c Client, link string) ([]*Certificate, error) {
 func (c *Certificate) ForceAutomaticRenew() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(c.client,
-		c.forceAutomaticRenewTarget, payload, c.Headers(), false)
+		c.forceAutomaticRenewTarget, payload, c.Headers(c.forceAutomaticRenewTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

@@ -95,7 +95,7 @@ func ListReferencedManagerDiagnosticDatas(c Client, link string) ([]*ManagerDiag
 func (m *ManagerDiagnosticData) ResetMetrics() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(m.client,
-		m.resetMetricsTarget, payload, m.Headers(), false)
+		m.resetMetricsTarget, payload, m.Headers(m.resetMetricsTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

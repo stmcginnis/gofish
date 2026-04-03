@@ -212,7 +212,7 @@ func ListReferencedStorageGroups(c Client, link string) ([]*StorageGroup, error)
 func (s *StorageGroup) ExposeVolumes() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.exposeVolumesTarget, payload, s.Headers(), false)
+		s.exposeVolumesTarget, payload, s.Headers(s.exposeVolumesTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -225,7 +225,7 @@ func (s *StorageGroup) ExposeVolumes() (*TaskMonitorInfo, error) {
 func (s *StorageGroup) HideVolumes() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(s.client,
-		s.hideVolumesTarget, payload, s.Headers(), false)
+		s.hideVolumesTarget, payload, s.Headers(s.hideVolumesTarget), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

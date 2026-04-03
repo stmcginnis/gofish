@@ -123,7 +123,7 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 
 	// if the entity already has an etag, don't override it, but otherwise pull from the HTTP header
 	if etag := resp.Header.Get("Etag"); etag != "" && e.ODataEtag == "" {
-		e.ODataEtag = sanitizeETag(etag)
+		e.ODataEtag = etag
 	}
 	e.SetClient(c)
 
@@ -132,7 +132,7 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 
 // Patch performs a PATCH request against the Redfish service with etag headers.
 func (e *Entity) Patch(uri string, payload any) error {
-	resp, err := e.client.PatchWithHeaders(uri, payload, e.Headers())
+	resp, err := e.client.PatchWithHeaders(uri, payload, e.Headers(uri))
 	if err != nil {
 		return err
 	}
@@ -151,22 +151,13 @@ func (e *Entity) Post(uri string, payload any) error {
 // PostWithResponse performs a POST request and returns the full response.
 // Callers must close the response body when done.
 func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
-	return e.client.PostWithHeaders(uri, payload, e.Headers())
+	return e.client.PostWithHeaders(uri, payload, e.Headers(uri))
 }
 
-// sanitizeETag strips the "-gzip" suffix that some servers append to ETags
-// for gzip-compressed responses, which causes If-Match mismatches.
-func sanitizeETag(etag string) string {
-	if strings.HasSuffix(etag, `-gzip"`) {
-		return strings.TrimSuffix(etag, `-gzip"`) + `"`
-	}
-	return etag
-}
-
-// Headers generates the appropriate Headers including etag if configured.
-func (e *Entity) Headers() map[string]string {
+// Headers generates headers, including If-Match only when targetURI matches the entity's ODataID.
+func (e *Entity) Headers(targetURI string) map[string]string {
 	header := make(map[string]string)
-	if e.ODataEtag != "" && !e.disableEtagMatch {
+	if e.ODataEtag != "" && !e.disableEtagMatch && targetURI == e.ODataID {
 		if e.stripEtagQuotes {
 			e.ODataEtag = strings.Trim(e.ODataEtag, `"`)
 		}
@@ -485,7 +476,7 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 	}
 
 	if etag := resp.Header.Get("Etag"); etag != "" && entity.GetETag() == "" {
-		entity.SetETag(sanitizeETag(etag))
+		entity.SetETag(etag)
 	}
 	entity.SetClient(c)
 	return entity, nil
