@@ -70,6 +70,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 	// Check if this should be a Link type (lowercase start and not odata)
 	if len(propName) > 0 &&
 		typeStr != "string" &&
+		typeStr != "any" &&
 		propName[0] >= 'a' &&
 		propName[0] <= 'z' &&
 		!strings.Contains(strings.ToLower(propName), "odata") {
@@ -154,6 +155,9 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 	}
 
 	switch typeStr {
+	case "any":
+		return "any", false, false
+
 	case "object":
 		// Custom type
 		return cleanIdentifier(propName), false, false
@@ -227,25 +231,39 @@ func extractRefType(ref string) string {
 	return schema.ExtractTypeFromRef(ref, true)
 }
 
-// extractTypeAndNullable handles type which can be a string or array of strings
+// extractTypeAndNullable handles type which can be a string or array of strings.
+// When multiple distinct non-null types are present (e.g. ["string", "boolean", "number", "null"]),
+// it returns "any" to avoid silently picking one type and losing data at unmarshal time.
 func extractTypeAndNullable(typeVal any) (string, bool) {
 	switch t := typeVal.(type) {
 	case string:
 		return t, false
 	case []any:
-		// Array of types, check for null
 		nullable := false
-		actualType := "string"
+		var firstType string
+		multiType := false
 		for _, item := range t {
-			if str, ok := item.(string); ok {
-				if str == "null" {
-					nullable = true
-				} else {
-					actualType = str
-				}
+			str, ok := item.(string)
+			if !ok {
+				continue
+			}
+			if str == "null" {
+				nullable = true
+				continue
+			}
+			if firstType == "" {
+				firstType = str
+			} else if str != firstType {
+				multiType = true
 			}
 		}
-		return actualType, nullable
+		if multiType {
+			return "any", nullable
+		}
+		if firstType != "" {
+			return firstType, nullable
+		}
+		return "string", nullable
 	default:
 		return "string", false
 	}

@@ -199,9 +199,9 @@ type Attributes struct {
 	// CurrentValue shall contain the placeholder of the current value for the
 	// attribute, to aid in evaluating dependencies. The evaluation results of the
 	// 'Dependencies' array may affect the current attribute value.
-	CurrentValue *float64 `json:",omitempty"`
+	CurrentValue any
 	// DefaultValue shall contain the default value for the attribute.
-	DefaultValue *float64 `json:",omitempty"`
+	DefaultValue any
 	// DisplayName shall contain the user-readable display string for the attribute
 	// in the defined language.
 	DisplayName string
