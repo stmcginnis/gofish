@@ -1061,20 +1061,26 @@ func ListReferencedComputerSystems(c Client, link string) ([]*ComputerSystem, er
 	return GetCollectionObjects[ComputerSystem](c, link)
 }
 
-// If @Redfish.Settings is present, PATCH goes to the Settings URI with ETag
-// concurrency control. Falls back to ODataID when absent.
+// If @Redfish.Settings is present, PATCH goes to the System resource first.
+// Falls back to the Settings URI with ETag concurrency control only if the
+// direct PATCH fails (e.g., Dell iDRAC10 returns read-only).
 func (c *ComputerSystem) SetBoot(b *Boot) error {
 	t := struct {
 		Boot *Boot
 	}{Boot: b}
 
-	// If settingsTarget differs from ODataID, we are targeting a Settings resource
-	// which may require an ETag for concurrency control (e.g., Dell iDRAC10).
+	// Try the main System resource first.
+	err := c.Patch(c.ODataID, t)
+	if err == nil {
+		return nil
+	}
+
+	// Fall back to the Settings resource with ETag concurrency control.
 	if c.settingsTarget != c.ODataID {
-		resp, err := c.GetClient().Get(c.settingsTarget)
+		resp, getErr := c.GetClient().Get(c.settingsTarget)
 		defer DeferredCleanupHTTPResponse(resp)
-		if err != nil {
-			return err
+		if getErr != nil {
+			return fmt.Errorf("system resource: %w, settings resource: %w", err, getErr)
 		}
 
 		var header = make(map[string]string)
@@ -1082,16 +1088,16 @@ func (c *ComputerSystem) SetBoot(b *Boot) error {
 			header["If-Match"] = sanitizeETag(resp.Header["Etag"][0])
 		}
 
-		resp, err = c.GetClient().PatchWithHeaders(c.settingsTarget, t, header)
+		resp, patchErr := c.GetClient().PatchWithHeaders(c.settingsTarget, t, header)
 		defer DeferredCleanupHTTPResponse(resp)
-		if err != nil {
-			return err
+		if patchErr != nil {
+			return fmt.Errorf("system resource: %w, settings resource: %w", err, patchErr)
 		}
 
 		return nil
 	}
 
-	return c.Patch(c.settingsTarget, t)
+	return err
 }
 
 // This action shall add a resource block to a system.

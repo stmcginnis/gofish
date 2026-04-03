@@ -6,6 +6,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -537,8 +538,9 @@ var computerSystemBodyWithSettings = `{
 	}
 }`
 
-// TestSetBootWithSettings verifies that SetBoot sends the PATCH request to the
-// @Redfish.Settings URI when it is present (e.g., Dell iDRAC10).
+// TestSetBootWithSettings verifies that SetBoot tries the main System resource
+// first, and falls back to the @Redfish.Settings URI when the main resource
+// rejects the PATCH (e.g., Dell iDRAC 10 returns "read-only property").
 func TestSetBootWithSettings(t *testing.T) {
 	var result ComputerSystem
 	err := json.NewDecoder(strings.NewReader(computerSystemBodyWithSettings)).Decode(&result)
@@ -550,6 +552,77 @@ func TestSetBootWithSettings(t *testing.T) {
 	if result.settingsTarget != "/redfish/v1/Systems/System.Embedded.1/Settings" {
 		t.Fatalf("Expected settingsTarget to be '/redfish/v1/Systems/System.Embedded.1/Settings', got '%s'",
 			result.settingsTarget)
+	}
+
+	// Simulate iDRAC 10: first PATCH (to main resource) returns 400 "read-only",
+	// then GET (for ETag) succeeds, then PATCH to Settings succeeds.
+	testClient := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodPatch: {
+				// First PATCH → main resource → 400 error (read-only)
+				&http.Response{
+					StatusCode: 400,
+					Body: io.NopCloser(strings.NewReader(
+						`{"error":{"code":"Base.1.0.GeneralError","message":"Boot is a read-only property"}}`)),
+				},
+				// Second PATCH → Settings resource → 200 OK
+				nil,
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	boot := &Boot{
+		BootSourceOverrideTarget:  PxeBootSource,
+		BootSourceOverrideEnabled: OnceBootSourceOverrideEnabled,
+	}
+	err = result.SetBoot(boot)
+	if err != nil {
+		t.Fatalf("Error calling SetBoot: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	// Expect: PATCH (main, fails) + GET (Settings ETag) + PATCH (Settings) = 3 calls
+	if len(calls) != 3 {
+		t.Fatalf("Expected 3 calls (PATCH main + GET Settings + PATCH Settings), got %d", len(calls))
+	}
+
+	// First call: PATCH to main System resource (rejected)
+	if calls[0].Action != http.MethodPatch {
+		t.Errorf("Expected first call to be PATCH, got %s", calls[0].Action)
+	}
+	if calls[0].URL != "/redfish/v1/Systems/System.Embedded.1" {
+		t.Errorf("Expected first PATCH to main System URI, got '%s'", calls[0].URL)
+	}
+
+	// Second call: GET to Settings URI to fetch ETag
+	if calls[1].Action != http.MethodGet {
+		t.Errorf("Expected second call to be GET, got %s", calls[1].Action)
+	}
+	if calls[1].URL != "/redfish/v1/Systems/System.Embedded.1/Settings" {
+		t.Errorf("Expected GET to Settings URI, got '%s'", calls[1].URL)
+	}
+
+	// Third call: PATCH to Settings URI with boot payload
+	if calls[2].Action != http.MethodPatch {
+		t.Errorf("Expected third call to be PATCH, got %s", calls[2].Action)
+	}
+	if calls[2].URL != "/redfish/v1/Systems/System.Embedded.1/Settings" {
+		t.Errorf("Expected PATCH to Settings URI, got '%s'", calls[2].URL)
+	}
+	if !strings.Contains(calls[2].Payload, "Pxe") {
+		t.Errorf("Expected payload to contain 'Pxe', got: %s", calls[2].Payload)
+	}
+}
+
+// TestSetBootWithSettingsMainResourceSucceeds verifies that when @Redfish.Settings
+// is present but the main System resource accepts the PATCH (iDRAC 7.x-9.x),
+// SetBoot does NOT fall back to the Settings resource.
+func TestSetBootWithSettingsMainResourceSucceeds(t *testing.T) {
+	var result ComputerSystem
+	err := json.NewDecoder(strings.NewReader(computerSystemBodyWithSettings)).Decode(&result)
+	if err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
 	}
 
 	testClient := &TestClient{}
@@ -565,29 +638,19 @@ func TestSetBootWithSettings(t *testing.T) {
 	}
 
 	calls := testClient.CapturedCalls()
-	// Settings path requires GET (for ETag) + PATCH = 2 calls
-	if len(calls) != 2 {
-		t.Fatalf("Expected 2 calls (GET + PATCH), got %d", len(calls))
+	// Main resource succeeds → only 1 PATCH call, no fallback
+	if len(calls) != 1 {
+		t.Fatalf("Expected 1 call (PATCH main), got %d", len(calls))
 	}
 
-	// First call: GET to Settings URI to fetch ETag
-	if calls[0].Action != http.MethodGet {
-		t.Errorf("Expected first call to be GET, got %s", calls[0].Action)
+	if calls[0].Action != http.MethodPatch {
+		t.Errorf("Expected PATCH action, got %s", calls[0].Action)
 	}
-	if calls[0].URL != "/redfish/v1/Systems/System.Embedded.1/Settings" {
-		t.Errorf("Expected GET to Settings URI, got '%s'", calls[0].URL)
+	if calls[0].URL != "/redfish/v1/Systems/System.Embedded.1" {
+		t.Errorf("Expected PATCH to main System URI, got '%s'", calls[0].URL)
 	}
-
-	// Second call: PATCH to Settings URI with boot payload
-	if calls[1].Action != http.MethodPatch {
-		t.Errorf("Expected second call to be PATCH, got %s", calls[1].Action)
-	}
-	if calls[1].URL != "/redfish/v1/Systems/System.Embedded.1/Settings" {
-		t.Errorf("Expected PATCH to Settings URI '/redfish/v1/Systems/System.Embedded.1/Settings', got '%s'",
-			calls[1].URL)
-	}
-	if !strings.Contains(calls[1].Payload, "Pxe") {
-		t.Errorf("Expected payload to contain 'Pxe', got: %s", calls[1].Payload)
+	if !strings.Contains(calls[0].Payload, "Pxe") {
+		t.Errorf("Expected payload to contain 'Pxe', got: %s", calls[0].Payload)
 	}
 }
 
