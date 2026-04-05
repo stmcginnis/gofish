@@ -202,3 +202,79 @@ func TestAttributeRegistry(t *testing.T) {
 	assertEquals(t, "EmbeddedSata", result.RegistryEntries.Dependencies[0].DependencyFor)
 	assertEquals(t, "System Options", result.RegistryEntries.Menus[1].DisplayName)
 }
+
+var attributeRegistryUpperBoundBody = strings.NewReader(
+	`{
+		"@odata.type": "#AttributeRegistry.v1_3_7.AttributeRegistry",
+		"Id": "BiosAttributeRegistryDell",
+		"Language": "en",
+		"Name": "Dell BIOS Attribute Registry",
+		"OwningEntity": "Dell",
+		"RegistryVersion": "1.0.0",
+		"RegistryEntries": {
+			"Attributes": [
+				{
+					"AttributeName": "SystemModelName",
+					"DisplayName": "System Model Name",
+					"Type": "String",
+					"LowerBound": 0,
+					"UpperBound": 18446744073709551615,
+					"MaxLength": 40,
+					"MinLength": 0,
+					"ReadOnly": true,
+					"Hidden": false
+				},
+				{
+					"AttributeName": "ProcCores",
+					"DisplayName": "Number of Cores per Processor",
+					"Type": "Integer",
+					"LowerBound": 1,
+					"UpperBound": 128,
+					"ReadOnly": false,
+					"Hidden": false
+				}
+			]
+		}
+	}`)
+
+// TestAttributeRegistryUpperBound tests that UpperBound correctly handles
+// math.MaxUint64 values (18446744073709551615) as returned by Dell iDRAC
+// for string-type BIOS attributes.
+func TestAttributeRegistryUpperBound(t *testing.T) {
+	var result AttributeRegistry
+	err := json.NewDecoder(attributeRegistryUpperBoundBody).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	assertEquals(t, "BiosAttributeRegistryDell", result.ID)
+
+	if len(result.RegistryEntries.Attributes) != 2 {
+		t.Fatalf("Expected 2 attributes, got %d", len(result.RegistryEntries.Attributes))
+	}
+
+	strAttr := result.RegistryEntries.Attributes[0]
+	assertEquals(t, "SystemModelName", strAttr.AttributeName)
+	if strAttr.UpperBound == nil {
+		t.Fatal("Expected UpperBound to be set for SystemModelName")
+	}
+	if *strAttr.UpperBound != 18446744073709551615 {
+		t.Errorf("Expected UpperBound 18446744073709551615, got %d", *strAttr.UpperBound)
+	}
+	if strAttr.LowerBound == nil {
+		t.Fatal("Expected LowerBound to be set for SystemModelName")
+	}
+	if *strAttr.LowerBound != 0 {
+		t.Errorf("Expected LowerBound 0, got %d", *strAttr.LowerBound)
+	}
+
+	intAttr := result.RegistryEntries.Attributes[1]
+	assertEquals(t, "ProcCores", intAttr.AttributeName)
+	if intAttr.UpperBound == nil {
+		t.Fatal("Expected UpperBound to be set for ProcCores")
+	}
+	if *intAttr.UpperBound != 128 {
+		t.Errorf("Expected UpperBound 128, got %d", *intAttr.UpperBound)
+	}
+}
