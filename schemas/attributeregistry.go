@@ -226,7 +226,7 @@ type Attributes struct {
 	IsSystemUniqueProperty bool
 	// LowerBound shall contain a number indicating the lower limit for an integer
 	// attribute.
-	LowerBound *int `json:",omitempty"`
+	LowerBound *uint64 `json:",omitempty"`
 	// MaxLength shall contain the maximum character length of an attribute of the
 	// String type.
 	MaxLength *int `json:",omitempty"`
@@ -285,7 +285,7 @@ type Attributes struct {
 	UefiNamespaceID string `json:"UefiNamespaceId"`
 	// UpperBound shall contain a number indicating the upper limit for an integer
 	// attribute.
-	UpperBound *int `json:",omitempty"`
+	UpperBound *uint64 `json:",omitempty"`
 	// Value shall contain an array containing the possible values of an attribute
 	// of the 'Enumeration' type.
 	Value []AttributeValue
