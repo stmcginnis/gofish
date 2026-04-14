@@ -104,7 +104,8 @@ func Example_querySystemInventory() {
 
 	systems, err := c.Service.Systems()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	for _, system := range systems {
@@ -150,7 +151,8 @@ func Example_queryThermal() {
 
 	chassis, err := c.Service.Chassis()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	for _, ch := range chassis {
@@ -162,14 +164,16 @@ func Example_queryThermal() {
 
 		fmt.Printf("Chassis: %s\n", ch.Name)
 
-		for _, temp := range thermal.Temperatures {
+		for i := range thermal.Temperatures {
+			temp := &thermal.Temperatures[i]
 			if temp.ReadingCelsius == nil {
 				continue
 			}
 			fmt.Printf("  Temp: %-30s  %.1f °C\n", temp.Name, *temp.ReadingCelsius)
 		}
 
-		for _, fan := range thermal.Fans {
+		for i := range thermal.Fans {
+			fan := &thermal.Fans[i]
 			if fan.Reading == nil {
 				continue
 			}
@@ -194,7 +198,8 @@ func Example_queryManagers() {
 
 	managers, err := c.Service.Managers()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	for _, mgr := range managers {
@@ -226,12 +231,14 @@ func Example_firmwareInventory() {
 
 	updateService, err := c.Service.UpdateService()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	inventory, err := updateService.FirmwareInventory()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	for _, item := range inventory {
@@ -257,7 +264,8 @@ func Example_firmwareUpdate() {
 
 	updateService, err := c.Service.UpdateService()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	taskInfo, err := updateService.SimpleUpdate(&schemas.UpdateServiceSimpleUpdateParameters{
@@ -265,7 +273,8 @@ func Example_firmwareUpdate() {
 		TransferProtocol: schemas.HTTPSTransferProtocolType,
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	if taskInfo != nil {
@@ -289,7 +298,8 @@ func Example_readEventLog() {
 
 	managers, err := c.Service.Managers()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	for _, mgr := range managers {
@@ -330,29 +340,31 @@ func Example_subscribeEvents() {
 
 	eventService, err := c.Service.EventService()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	// Subscribe using registry prefixes (Redfish v1.5+).
 	subscriptionURI, err := eventService.CreateEventSubscriptionInstance(
 		"https://my-event-receiver/redfish/events", // destination
-		[]string{"Alert", "ResourceEvent"},          // registry prefixes
-		[]string{},                                   // all resource types
-		nil,                                          // no custom HTTP headers
+		[]string{"Alert", "ResourceEvent"},         // registry prefixes
+		[]string{},                                 // all resource types
+		nil,                                        // no custom HTTP headers
 		schemas.RedfishEventDestinationProtocol,
 		"my-monitoring-service", // client-supplied context string
 		schemas.RetryForeverDeliveryRetryPolicy,
 		nil, // no OEM data
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	fmt.Printf("Subscription created: %s\n", subscriptionURI)
 
 	// Delete the subscription when no longer needed.
 	if err := eventService.DeleteEventSubscription(subscriptionURI); err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
 
@@ -373,7 +385,8 @@ func Example_updateBiosAttributes() {
 
 	systems, err := c.Service.Systems()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	for _, system := range systems {
@@ -415,7 +428,8 @@ func Example_mountVirtualMedia() {
 
 	managers, err := c.Service.Managers()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
 	for _, mgr := range managers {
