@@ -51,7 +51,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		err = system.Reset(schemas.ForceRestartResetType)
+		_, err = system.Reset(schemas.ForceRestartResetType)
 		if err != nil {
 			panic(err)
 		}
