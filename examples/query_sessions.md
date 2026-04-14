@@ -45,7 +45,8 @@ func main() {
 	}
 
 	for _, session := range sessions {
-		fmt.Printf("Session: %#v\n\n", session)
+		fmt.Printf("Session: %s  user=%s  type=%s\n",
+			session.Name, session.UserName, session.SessionType)
 	}
 }
 ```

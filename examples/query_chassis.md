@@ -37,8 +37,12 @@ func main() {
 		panic(err)
 	}
 
-	for _, chass := range chassis {
-		fmt.Printf("Chassis: %#v\n\n", chass)
+	for _, ch := range chassis {
+		fmt.Printf("Chassis: %s\n", ch.Name)
+		fmt.Printf("\tType:         %s\n", ch.ChassisType)
+		fmt.Printf("\tManufacturer: %s\n", ch.Manufacturer)
+		fmt.Printf("\tSerial:       %s\n", ch.SerialNumber)
+		fmt.Printf("\tPower state:  %s\n", ch.PowerState)
 	}
 }
 ```
