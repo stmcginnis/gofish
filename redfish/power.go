@@ -11,7 +11,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // InputType is the type of power input.

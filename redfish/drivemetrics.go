@@ -5,7 +5,7 @@
 package redfish
 
 import (
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // DriveMetrics shall contain the usage and health statistics for a drive in a Redfish implementation.

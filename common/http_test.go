@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 func TestParseRetryAfter(t *testing.T) {

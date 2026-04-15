@@ -7,7 +7,7 @@ package smc
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/redfish"
 )
 
 // Chassis is a Supermicro OEM instance of a Chassis.

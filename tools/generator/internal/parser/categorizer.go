@@ -5,7 +5,7 @@
 package parser
 
 import (
-	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
+	"github.com/coreweave/gofish/tools/generator/internal/schema"
 )
 
 // GetSchemaOrigin determines if a schema is Redfish or Swordfish origin

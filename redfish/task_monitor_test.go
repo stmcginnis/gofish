@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/common"
+	"github.com/coreweave/gofish/redfish"
 )
 
 func TestPostWithTask(t *testing.T) { //nolint: funlen

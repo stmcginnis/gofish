@@ -7,7 +7,7 @@ package redfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // FabricAdapter shall represent a physical fabric adapter capable of connecting to an interconnect fabric.

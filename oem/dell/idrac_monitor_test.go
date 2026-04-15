@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/redfish"
 )
 
 func TestIDRACReset(t *testing.T) {
