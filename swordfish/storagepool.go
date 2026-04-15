@@ -9,8 +9,8 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/common"
+	"github.com/coreweave/gofish/redfish"
 )
 
 // EndGrpLifetime This contains properties for the Endurance Group Lifetime attributes.

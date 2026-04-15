@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/redfish"
 )
 
 const computerSystemBody = `{

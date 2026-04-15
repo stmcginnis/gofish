@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // makeHTTPResponse creates an HTTP response for testing, ensuring the body can be read multiple times.

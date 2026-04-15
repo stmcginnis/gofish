@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // EventFormatType is

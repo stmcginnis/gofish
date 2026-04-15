@@ -5,7 +5,7 @@
 package smc
 
 import (
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // Snooping is an instance of a Snooping object.
