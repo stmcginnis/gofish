@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // ProvisioningPolicy is used to specify space provisioning policy.

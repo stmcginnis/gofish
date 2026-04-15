@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
+	"github.com/coreweave/gofish/tools/generator/internal/schema"
 )
 
 // SchemaInfo holds metadata about a parsed schema

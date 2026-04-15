@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // PowerDistributionMetrics shall be used to represent

@@ -7,7 +7,7 @@ package redfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // Fabric shall represent a simple switchable fabric for a Redfish implementation.

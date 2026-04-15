@@ -8,8 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stmcginnis/gofish/tools/generator/internal/config"
-	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
+	"github.com/coreweave/gofish/tools/generator/internal/config"
+	"github.com/coreweave/gofish/tools/generator/internal/schema"
 )
 
 // TypeMapper handles conversion from JSON Schema types to Go types

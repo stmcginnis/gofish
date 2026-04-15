@@ -7,7 +7,7 @@ package redfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // AggregationService shall represent an aggregation service for a Redfish implementation.

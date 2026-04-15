@@ -7,7 +7,7 @@ package redfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // Aggregate shall represent an aggregation service grouping method for a Redfish implementation.

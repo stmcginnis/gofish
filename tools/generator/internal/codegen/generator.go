@@ -12,7 +12,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
+	"github.com/coreweave/gofish/tools/generator/internal/schema"
 )
 
 //go:embed source.tmpl
@@ -269,7 +269,7 @@ func buildImportGroups(data *TemplateData) [][]string {
 		groups = append(groups, []string{"encoding/json"})
 	}
 	if needsCommon && data.Package != string(schema.PackageCommon) {
-		groups = append(groups, []string{"github.com/stmcginnis/gofish/common"})
+		groups = append(groups, []string{"github.com/coreweave/gofish/common"})
 	}
 
 	return groups

@@ -7,7 +7,7 @@ package redfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // Filter shall represent the management properties for monitoring and management of filters for a Redfish

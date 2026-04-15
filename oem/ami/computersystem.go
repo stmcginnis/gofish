@@ -7,8 +7,8 @@ package ami
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/common"
+	"github.com/coreweave/gofish/redfish"
 )
 
 // ManagerBootMode is is the boot mode of the manager.

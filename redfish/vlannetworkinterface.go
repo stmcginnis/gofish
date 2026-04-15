@@ -7,7 +7,7 @@ package redfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // VLAN shall contain any attributes of a Virtual LAN.

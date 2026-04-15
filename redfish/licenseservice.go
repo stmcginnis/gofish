@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // LicenseService shall represent a license service and the properties that affect the service itself for a Redfish

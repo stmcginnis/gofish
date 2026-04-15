@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // CommandConnectTypesSupported is the command connection type.

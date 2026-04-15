@@ -5,7 +5,7 @@
 package redfish
 
 import (
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // EGCriticalWarningSummary shall contain the NVMe-defined 'Endurance Group Critical Warning Summary'.

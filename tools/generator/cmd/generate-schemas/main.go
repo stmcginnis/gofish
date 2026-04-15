@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/stmcginnis/gofish/tools/generator/internal/codegen"
-	"github.com/stmcginnis/gofish/tools/generator/internal/fetcher"
-	"github.com/stmcginnis/gofish/tools/generator/internal/parser"
+	"github.com/coreweave/gofish/tools/generator/internal/codegen"
+	"github.com/coreweave/gofish/tools/generator/internal/fetcher"
+	"github.com/coreweave/gofish/tools/generator/internal/parser"
 )
 
 func main() {

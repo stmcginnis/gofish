@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // Container shall represent an instance of a container that is running on a computer system.

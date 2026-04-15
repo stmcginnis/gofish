@@ -7,7 +7,7 @@ package swordfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // NVMeDeviceType is the type of NVMe device.

@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // DomainContents shall contain properties that define the contents of the domain.

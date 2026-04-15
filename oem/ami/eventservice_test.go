@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/redfish"
 )
 
 var eventServiceBody = `{

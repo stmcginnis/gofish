@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // powerBody contains a complete Power resource example for testing.

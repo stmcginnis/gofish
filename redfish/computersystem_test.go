@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 var computerSystemResetActionInfoTarget = "/redfish/v1/Systems/System-1/ResetActionInfo"

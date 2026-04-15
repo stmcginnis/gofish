@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
+	"github.com/coreweave/gofish/tools/generator/internal/schema"
 )
 
 const (

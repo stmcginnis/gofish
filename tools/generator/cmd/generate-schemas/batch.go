@@ -12,10 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/stmcginnis/gofish/tools/generator/internal/analyzer"
-	"github.com/stmcginnis/gofish/tools/generator/internal/codegen"
-	"github.com/stmcginnis/gofish/tools/generator/internal/parser"
-	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
+	"github.com/coreweave/gofish/tools/generator/internal/analyzer"
+	"github.com/coreweave/gofish/tools/generator/internal/codegen"
+	"github.com/coreweave/gofish/tools/generator/internal/parser"
+	"github.com/coreweave/gofish/tools/generator/internal/schema"
 )
 
 // BatchProcessor handles batch generation of multiple schemas

@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // ChassisType is a physical form of the chassis

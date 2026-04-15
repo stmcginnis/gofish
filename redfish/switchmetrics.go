@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // SwitchMetricCurrentPeriod shall describe the memory metrics since the last reset or ClearCurrentPeriod action for a switch.

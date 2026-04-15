@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // iDRACMonitor monitors iDRAC responsiveness and can trigger resets

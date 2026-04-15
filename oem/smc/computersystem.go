@@ -7,8 +7,8 @@ package smc
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
-	"github.com/stmcginnis/gofish/redfish"
+	"github.com/coreweave/gofish/common"
+	"github.com/coreweave/gofish/redfish"
 )
 
 // USBCDBootSourceOverrideTarget is a Supermicro-specific boot target that is not

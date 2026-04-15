@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // IOPerformanceLineOfService is used to define a service option related

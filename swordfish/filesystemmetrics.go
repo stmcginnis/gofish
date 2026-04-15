@@ -7,7 +7,7 @@ package swordfish
 import (
 	"encoding/json"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // FileSystemMetrics shall contain the usage and health statistics for a file system in a Redfish implementation.

@@ -5,7 +5,7 @@
 package dell
 
 import (
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 type Job struct {

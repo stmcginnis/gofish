@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // JobServiceCapabilities shall contain properties that describe the

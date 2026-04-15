@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 var logServiceBodyTmpl = `{

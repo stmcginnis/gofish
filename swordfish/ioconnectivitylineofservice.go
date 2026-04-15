@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // IOConnectivityLineOfService is used to specify the characteristics of

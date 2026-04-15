@@ -7,7 +7,7 @@ package redfish
 import (
 	"fmt"
 
-	"github.com/stmcginnis/gofish/common"
+	"github.com/coreweave/gofish/common"
 )
 
 // ActionInfoDataTypes is the datatype for an ActionInfo value.
