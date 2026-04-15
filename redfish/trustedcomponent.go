@@ -75,8 +75,6 @@ type TrustedComponent struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Certificates shall contain a link to a resource collection of type CertificateCollection that contains device
@@ -194,10 +192,10 @@ func (trustedcomponent *TrustedComponent) Certificates() ([]*Certificate, error)
 // TPMGetEventLog gets the event log for TPM 2.0 devices.
 func (trustedcomponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
 	resp, err := trustedcomponent.PostWithResponse(trustedcomponent.tpmGetEventLogTarget, nil)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	var tpmGetEventLogResponse TPMGetEventLogResponse
 	err = json.NewDecoder(resp.Body).Decode(&tpmGetEventLogResponse)

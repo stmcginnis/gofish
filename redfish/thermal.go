@@ -45,8 +45,6 @@ type ThermalFan struct {
 	MinReadingRange *int `json:"MinReadingRange,omitempty"`
 	// Model contains the manufacturer-defined model information for the fan.
 	Model string `json:"Model,omitempty"`
-	// Name contains the name of the fan.
-	Name string `json:"Name,omitempty"`
 	// OEM contains OEM extensions (vendor-specific properties).
 	OEM json.RawMessage `json:"Oem,omitempty"`
 	// PartNumber contains the manufacturer-defined part number for the fan.
@@ -150,8 +148,6 @@ type Temperature struct {
 	MinAllowableOperatingValue *float32 `json:"MinAllowableOperatingValue,omitempty"`
 	// MinReadingRangeTemp indicates the lowest possible temperature reading.
 	MinReadingRangeTemp *float32 `json:"MinReadingRangeTemp,omitempty"`
-	// Name contains the name of the temperature sensor.
-	Name string `json:"Name,omitempty"`
 	// OEM contains OEM extensions (vendor-specific properties).
 	OEM json.RawMessage `json:"Oem,omitempty"`
 	// PhysicalContext describes the device or region to which this temperature applies.

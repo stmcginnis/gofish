@@ -24,9 +24,12 @@ type Entity struct {
 	// client is the REST client interface to the system
 	client Client
 
-	// etag contains the etag header when fetching the object to control updates
-	// and prevent conflicts between concurrent modifications
-	etag string
+	// ODataEtag contains either the entity's declared ETag or the ETag header
+	// when fetching the object to control updates and prevent conflicts between
+	// concurrent modifications
+	ODataEtag string `json:"@odata.etag,omitempty"`
+
+	ExtendedInfo []MessageExtendedInfo `json:"@Message.ExtendedInfo,omitempty"`
 
 	// stripEtagQuotes removes surrounding quotes of etag used in If-Match header
 	// Only use for vendor implementations where If-Match only matches unquoted etag
@@ -37,6 +40,18 @@ type Entity struct {
 	disableEtagMatch bool
 }
 
+func (e *Entity) GetID() string {
+	return e.ID
+}
+
+func (e *Entity) GetODataID() string {
+	return e.ODataID
+}
+
+func (e *Entity) GetExtendedInfo() []MessageExtendedInfo {
+	return e.ExtendedInfo
+}
+
 // SetClient sets the API client connection for accessing this entity.
 func (e *Entity) SetClient(c Client) {
 	e.client = c
@@ -44,7 +59,11 @@ func (e *Entity) SetClient(c Client) {
 
 // SetETag sets the etag value of this API object.
 func (e *Entity) SetETag(tag string) {
-	e.etag = tag
+	e.ODataEtag = tag
+}
+
+func (e *Entity) GetETag() string {
+	return e.ODataEtag
 }
 
 // GetClient returns the API client connection for this entity.
@@ -97,17 +116,18 @@ func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpda
 // Get performs a GET request against the Redfish service and saves the etag.
 func (e *Entity) Get(c Client, uri string, payload any) error {
 	resp, err := c.Get(uri)
+	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(payload); err != nil {
 		return err
 	}
 
-	if etag := resp.Header.Get("Etag"); etag != "" {
-		e.etag = etag
+	// if the entity already has an etag, don't override it, but otherwise pull from the HTTP header
+	if etag := resp.Header.Get("Etag"); etag != "" && e.ODataEtag == "" {
+		e.ODataEtag = etag
 	}
 	e.SetClient(c)
 
@@ -116,11 +136,11 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 
 // Patch performs a PATCH request against the Redfish service with etag headers.
 func (e *Entity) Patch(uri string, payload any) error {
-	resp, err := e.client.PatchWithHeaders(uri, payload, e.headers())
+	resp, err := e.client.PatchWithHeaders(uri, payload, e.Headers())
 	if err != nil {
 		return err
 	}
-	return resp.Body.Close()
+	return CleanupHTTPResponse(resp)
 }
 
 // Post performs a POST request against the Redfish service with etag headers.
@@ -129,23 +149,23 @@ func (e *Entity) Post(uri string, payload any) error {
 	if err != nil {
 		return err
 	}
-	return resp.Body.Close()
+	return CleanupHTTPResponse(resp)
 }
 
 // PostWithResponse performs a POST request and returns the full response.
 // Callers must close the response body when done.
 func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
-	return e.client.PostWithHeaders(uri, payload, e.headers())
+	return e.client.PostWithHeaders(uri, payload, e.Headers())
 }
 
-// headers generates the appropriate headers including etag if configured.
-func (e *Entity) headers() map[string]string {
+// Headers generates the appropriate Headers including etag if configured.
+func (e *Entity) Headers() map[string]string {
 	header := make(map[string]string)
-	if e.etag != "" && !e.disableEtagMatch {
+	if e.ODataEtag != "" && !e.disableEtagMatch {
 		if e.stripEtagQuotes {
-			e.etag = strings.Trim(e.etag, `"`)
+			e.ODataEtag = strings.Trim(e.ODataEtag, `"`)
 		}
-		header["If-Match"] = e.etag
+		header["If-Match"] = e.ODataEtag
 	}
 	return header
 }
@@ -312,6 +332,11 @@ func compareStructFields(original, updated reflect.Value) map[string]any {
 		}
 
 		fieldName := getFieldName(&field)
+		// TODO: if we ever support deep patch, reconsider this decision
+		if fieldName == "@odata.etag" {
+			continue
+		}
+
 		originalField := original.Field(i)
 		updatedField := updated.Field(i)
 
@@ -418,30 +443,42 @@ func handleSimpleField(payload map[string]any, fieldName string, original, updat
 // SchemaObject defines the minimum interface required for API objects.
 type SchemaObject interface {
 	SetClient(Client)
+	GetETag() string
 	SetETag(string)
+	GetID() string
+	GetODataID() string
+	GetExtendedInfo() []MessageExtendedInfo
+}
+
+type GenericSchemaObjectPointer[T any] interface {
+	*T
+	SchemaObject
 }
 
 // GetObject retrieves a single API object from the service.
-func GetObject[T any, PT interface {
-	*T
-	SchemaObject
-}](c Client, uri string) (*T, error) {
+func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string, opts ...QueryGroupOption) (*T, error) {
+	uri = BuildQuery(c, uri, false, opts...)
+
 	resp, err := c.Get(uri)
+	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
+	return DecodeGenericEntity[T, PT](c, resp)
+}
+
+// DecodeGenericEntity attempts to decode an HTTP response into an Entity struct
+func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp *http.Response) (*T, error) {
 	entity := PT(new(T))
 	if err := json.NewDecoder(resp.Body).Decode(entity); err != nil {
 		return nil, err
 	}
 
-	if etag := resp.Header.Get("Etag"); etag != "" {
+	if etag := resp.Header.Get("Etag"); etag != "" && entity.GetETag() == "" {
 		entity.SetETag(etag)
 	}
 	entity.SetClient(c)
-
 	return entity, nil
 }
 

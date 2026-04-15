@@ -77,8 +77,6 @@ type Service struct {
 
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataID is the odata identifier.
-	ODataID string `json:"@odata.id"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// AccountService shall only contain a reference to a resource that complies
@@ -285,10 +283,10 @@ func (serviceroot *Service) UnmarshalJSON(b []byte) error {
 // ServiceRoot will get a Service instance from the service.
 func ServiceRoot(c common.Client) (*Service, error) {
 	resp, err := c.Get(common.DefaultServiceRoot)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	var serviceroot Service
 	err = json.NewDecoder(resp.Body).Decode(&serviceroot)

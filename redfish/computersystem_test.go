@@ -6,11 +6,14 @@ package redfish
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stmcginnis/gofish/common"
 )
+
+var computerSystemResetActionInfoTarget = "/redfish/v1/Systems/System-1/ResetActionInfo"
 
 var computerSystemBody = `{
 		"@odata.context": "/redfish/v1/$metadata#ComputerSystem.ComputerSystem",
@@ -79,7 +82,22 @@ var computerSystemBody = `{
 				"Boot0002"
 				],
 			"UefiTargetBootSourceOverride": "uefi device path",
+			"UefiTargetBootSourceOverride@Redfish.AllowableValues": [
+				"UsbClass(0xFFFF,0xFFFF,0xFF,0xFF,0xFF)",
+				"PciRoot(0x1)/Pci(0x1,0x0)/Pci(0x0,0x3)/MAC(00CDE21FAC3D,0x1)/IPv4(0.0.0.0)"
+			],
 			"HttpBootUri": "http://localhost/boot.efi"
+		},
+		"BootProgress": {
+			"LastState": "OEM",
+			"LastStateTime": "2026-01-08T23:29:18+00:00",
+			"LastBootTimeSeconds": 45.5,
+			"OemLastState": "Exit Boot Services Service",
+			"Oem": {
+				"VendorName": {
+					"CustomBootProperty": "value"
+				}
+			}
 		},
 		"BiosVersion": "P79 v1.00 (09/20/2013)",
 		"ProcessorSummary": {
@@ -174,6 +192,41 @@ var computerSystemBody = `{
 			}
 		}
 	}`
+
+var computerSystemResetBody = `{
+		"@odata.context": "/redfish/v1/$metadata#ComputerSystem.ComputerSystem",
+		"@odata.id": "/redfish/v1/Systems/System-1",
+		"@odata.type": "#ComputerSystem.v1_3_0.ComputerSystem",
+		"Id": "System-1",
+		"Actions": {
+			"#ComputerSystem.Reset": {
+				"target": "/redfish/v1/Systems/System-1/Actions/ComputerSystem.Reset",
+				"@Redfish.ActionInfo": "/redfish/v1/Systems/System-1/ResetActionInfo"
+			},
+			"#ComputerSystem.SetDefaultBootOrder": {
+				"target": "/redfish/v1/Systems/System-1/Actions/ComputerSystem.SetDefaultBootOrder"
+			}
+		}
+	}`
+
+var computerSystemBodyResetActionInfo = `{
+  "@odata.id": "/redfish/v1/Systems/System-1/ResetActionInfo",
+  "@odata.type": "#ActionInfo.v1_1_2.ActionInfo",
+  "Id": "ResetActionInfo",
+  "Name": "Reset Action Info",
+  "Parameters": [
+    {
+      "AllowableValues": [
+        "On",
+        "ForceOn",
+        "ForceOff"
+      ],
+      "DataType": "String",
+      "Name": "ResetType",
+      "Required": true
+    }
+  ]
+}`
 
 // TestComputerSystem tests the parsing of ComputerSystem objects.
 func TestComputerSystem(t *testing.T) { //nolint
@@ -325,6 +378,37 @@ func TestComputerSystem(t *testing.T) { //nolint
 	if result.operatingSystem != "/redfish/v1/Systems/1/OperatingSystem" {
 		t.Errorf("Received invalid OperatingSystem reference: %s", result.operatingSystem)
 	}
+	if result.Boot.AllowableBootSourceOverrideTargetValues[0] != NoneBootSourceOverrideTarget {
+		t.Errorf("Received invalid AllowablebootSourceOverrideTargetValue: %s", result.Boot.AllowableBootSourceOverrideTargetValues[0])
+	}
+	if result.Boot.AllowableUefiTargetBootSourceOverrideValues[0] != "UsbClass(0xFFFF,0xFFFF,0xFF,0xFF,0xFF)" {
+		t.Errorf("Received invalid AllowableUefiTargetBootSourceOverrideValues: %s", result.Boot.AllowableUefiTargetBootSourceOverrideValues[0])
+	}
+
+	if result.BootProgress.LastState != OEMBootProgressTypes {
+		t.Errorf("Received invalid boot progress last state: %s", result.BootProgress.LastState)
+	}
+	if result.BootProgress.LastStateTime != "2026-01-08T23:29:18+00:00" {
+		t.Errorf("Received invalid boot progress last state time: %s", result.BootProgress.LastStateTime)
+	}
+	if result.BootProgress.LastBootTimeSeconds != 45.5 {
+		t.Errorf("Received invalid boot progress last boot time: %f", result.BootProgress.LastBootTimeSeconds)
+	}
+	if len(result.BootProgress.OEM) == 0 {
+		t.Errorf("Expected BootProgress OEM data to be present")
+	}
+	if result.BootProgress.OEMLastState != "Exit Boot Services Service" {
+		t.Errorf("Received invalid boot progress OEM last state: %s", result.BootProgress.OEMLastState)
+	}
+
+	resetTypes, err := result.GetSupportedResetTypes()
+	if err != nil {
+		t.Errorf("failed to get supported reset types")
+	}
+	if len(resetTypes) != 6 {
+		t.Errorf("Invalid allowable reset actions, expected 6, got %d",
+			len(resetTypes))
+	}
 }
 
 // TestComputerSystemUpdate tests the Update call.
@@ -406,5 +490,43 @@ func TestBootOption(t *testing.T) {
 
 	if result.UefiDevicePath != "IPv4(0.0.0.0)/Uri(http://assets.example.com/ipxe.efi)" {
 		t.Errorf("Received invalid uefidevicepath: %s", result.UefiDevicePath)
+	}
+}
+
+// TestSystemSupportedResetTypes tests getting supported reset types for a chassis.
+func TestSystemSupportedResetTypes(t *testing.T) {
+	var result ComputerSystem
+	err := json.NewDecoder(strings.NewReader(computerSystemResetBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.resetActionInfoTarget != computerSystemResetActionInfoTarget {
+		t.Errorf("Invalid reset action info target: %s, expecting %s", result.resetActionInfoTarget, computerSystemResetActionInfoTarget)
+	}
+
+	testClient := &common.TestClient{
+		CustomReturnForActions: map[string][]interface{}{
+			http.MethodGet: {
+				getCall(computerSystemBodyResetActionInfo),
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	resetTypes, err := result.GetSupportedResetTypes()
+	if err != nil {
+		t.Errorf("Error getting reset types: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+
+	if len(calls) != 1 {
+		t.Errorf("Expected 1 call to be made, captured: %v", calls)
+	}
+
+	if len(resetTypes) != 3 {
+		t.Errorf("Expected 3 reset types to be returned, got %d", len(resetTypes))
 	}
 }

@@ -6,6 +6,7 @@ package redfish
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -510,7 +511,8 @@ type Boot struct {
 	// boot from the UEFI BootOptionReference found in BootNext. Changes to
 	// this property do not alter the BIOS persistent boot order
 	// configuration.
-	BootSourceOverrideTarget BootSourceOverrideTarget `json:",omitempty"`
+	BootSourceOverrideTarget                BootSourceOverrideTarget   `json:",omitempty"`
+	AllowableBootSourceOverrideTargetValues []BootSourceOverrideTarget `json:"BootSourceOverrideTarget@Redfish.AllowableValues,omitempty"`
 	// The link to a collection of certificates used for booting through HTTPS by this computer system.
 	certificates string
 	// The URI to boot from when BootSourceOverrideTarget is set to UefiHttp.
@@ -531,7 +533,8 @@ type Boot struct {
 	// for UEFI Boot Source Override as this setting is defined in UEFI as a
 	// one time boot only. Changes to this property do not alter the BIOS
 	// persistent boot order configuration.
-	UefiTargetBootSourceOverride string `json:",omitempty"`
+	UefiTargetBootSourceOverride                string   `json:",omitempty"`
+	AllowableUefiTargetBootSourceOverrideValues []string `json:"UefiTargetBootSourceOverride@Redfish.AllowableValues,omitempty"`
 }
 
 // UnmarshalJSON unmarshals a Boot object from the raw JSON.
@@ -568,6 +571,12 @@ type BootProgress struct {
 	LastState BootProgressTypes
 	// LastStateTime shall contain the date and time when the last boot state was updated.
 	LastStateTime string
+	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
+	// Redfish Specification-described requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// OemLastState shall represent the OEM-specific 'LastState' of the 'BootProgress'. This property shall only be
+	// present if 'LastState' is 'OEM'.
+	OEMLastState string `json:"OemLastState,omitempty"`
 }
 
 // Composition shall contain information about the composition capabilities and state of a computer system.
@@ -929,6 +938,8 @@ type ComputerSystem struct {
 	removeResourceBlockTarget string
 	// resetTarget is the internal URL to send reset targets to.
 	resetTarget string
+	// resetActionInfoTarget is the URL to check what values are supported
+	resetActionInfoTarget string
 	// setDefaultBootOrderTarget is the URL to send SetDefaultBootOrder actions to.
 	setDefaultBootOrderTarget string
 	settingsTarget            string
@@ -943,8 +954,8 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 		Decommission        common.ActionTarget `json:"#ComputerSystem.Decommission"`
 		RemoveResourceBlock common.ActionTarget `json:"#ComputerSystem.RemoveResourceBlock"`
 		Reset               struct {
+			common.ActionTarget
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
-			Target            string
 		} `json:"#ComputerSystem.Reset"`
 		SetDefaultBootOrder common.ActionTarget `json:"#ComputerSystem.SetDefaultBootOrder"`
 	}
@@ -1008,6 +1019,7 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 	computersystem.decommissionTarget = t.Actions.Decommission.Target
 	computersystem.removeResourceBlockTarget = t.Actions.RemoveResourceBlock.Target
 	computersystem.resetTarget = t.Actions.Reset.Target
+	computersystem.resetActionInfoTarget = t.Actions.Reset.ActionInfoTarget
 	computersystem.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
 	computersystem.setDefaultBootOrderTarget = t.Actions.SetDefaultBootOrder.Target
 
@@ -1092,8 +1104,8 @@ func (computersystem *ComputerSystem) ManagedBy() ([]*Manager, error) {
 }
 
 // Memory gets this system's memory.
-func (computersystem *ComputerSystem) Memory() ([]*Memory, error) {
-	return ListReferencedMemorys(computersystem.GetClient(), computersystem.memory)
+func (computersystem *ComputerSystem) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return ListReferencedMemorys(computersystem.GetClient(), computersystem.memory, queryOpts...)
 }
 
 // MemoryDomains gets this system's memory domains.
@@ -1176,8 +1188,44 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 	return computersystem.Post(computersystem.resetTarget, t)
 }
 
+// GetSupportedResetTypes returns any reset types that the ComputerSystem declares as supported
+// via either ActionInfo or AllowableValues.
+func (computersystem *ComputerSystem) GetSupportedResetTypes() ([]ResetType, error) {
+	if len(computersystem.SupportedResetTypes) > 0 {
+		return computersystem.SupportedResetTypes, nil
+	}
+
+	// if we don't have ResetTypes, try to get from ActionInfo
+	if computersystem.resetActionInfoTarget != "" {
+		resetActionInfo, err := computersystem.ResetActionInfo()
+		if err != nil {
+			return nil, err
+		}
+
+		vals, err := resetActionInfo.GetParamValues("ResetType", StringActionInfoDataTypes)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, val := range vals {
+			computersystem.SupportedResetTypes = append(computersystem.SupportedResetTypes, ResetType(val))
+		}
+	}
+
+	return computersystem.SupportedResetTypes, nil
+}
+
+// ResetActionInfo returns the ActionInfo for the ComputerSystem reset action if supported
+func (computersystem *ComputerSystem) ResetActionInfo() (*ActionInfo, error) {
+	if computersystem.resetActionInfoTarget == "" {
+		return nil, errors.New("ComputerSystem Reset ActionInfo not supported")
+	}
+
+	return common.GetObject[ActionInfo](computersystem.GetClient(), computersystem.resetActionInfoTarget)
+}
+
 // UpdateBootAttributesApplyAt is used to update attribute values and set apply time together
-func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error { //nolint:dupl
+func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error {
 	payload := make(map[string]interface{})
 
 	// Get a representation of the object's original state so we can find what
@@ -1196,10 +1244,10 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 	}
 
 	resp, err := computersystem.GetClient().Get(computersystem.settingsTarget)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	// If there are any allowed updates, try to send updates to the system and
 	// return the result.
@@ -1215,10 +1263,10 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 		}
 
 		resp, err = computersystem.GetClient().PatchWithHeaders(computersystem.settingsTarget, data, header)
+		defer common.DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
 		}
-		defer resp.Body.Close()
 	}
 
 	return nil
@@ -1233,7 +1281,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributes(attrs SettingsAttribu
 func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 	// This action wasn't added until 1.5.0, make sure this is supported.
 	if computersystem.setDefaultBootOrderTarget == "" {
-		return fmt.Errorf("SetDefaultBootOrder is not supported by this system") //nolint:golint
+		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
 	}
 
 	return computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)

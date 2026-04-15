@@ -15,8 +15,6 @@ type ThermalSubsystem struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// CoolantConnectorRedundancy shall contain redundancy information for the set of coolant connectors attached to
@@ -31,6 +29,8 @@ type ThermalSubsystem struct {
 	FanRedundancy []RedundantGroup
 	// Fans shall contain a link to a resource collection of type FanCollection.
 	fans string
+	// filters shall contain a link to a resource collection of type Filter
+	filters string
 	// Heaters shall contain a link to a resource collection of type HeaterCollection.
 	heaters string
 	// LeakDetection shall contain a link to a resource collection of type LeakDetection.
@@ -58,6 +58,7 @@ func (thermalsubsystem *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 		LeakDetection     common.Link
 		Pumps             common.Link
 		ThermalMetrics    common.Link
+		Filters           common.Link
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -74,6 +75,7 @@ func (thermalsubsystem *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 	thermalsubsystem.leakDetection = t.LeakDetection.String()
 	thermalsubsystem.pumps = t.Pumps.String()
 	thermalsubsystem.thermalMetrics = t.ThermalMetrics.String()
+	thermalsubsystem.filters = t.Filters.String()
 
 	return nil
 }
@@ -93,7 +95,8 @@ func (thermalsubsystem *ThermalSubsystem) Heaters() ([]*Heater, error) {
 	return ListReferencedHeaters(thermalsubsystem.GetClient(), thermalsubsystem.heaters)
 }
 
-// LeakDetection gets the leak detection system within this chassis.
+// LeakDetection gets the leak detection system within the ThermalSubsystem.
+// This property has been deprecated in favor of LeakDetectors under the Chassis resource.
 func (thermalsubsystem *ThermalSubsystem) LeakDetection() (*LeakDetection, error) {
 	if thermalsubsystem.leakDetection == "" {
 		return nil, nil
@@ -105,6 +108,11 @@ func (thermalsubsystem *ThermalSubsystem) LeakDetection() (*LeakDetection, error
 // Pumps gets the pumps for this equipment.
 func (thermalsubsystem *ThermalSubsystem) Pumps() ([]*Pump, error) {
 	return ListReferencedPumps(thermalsubsystem.GetClient(), thermalsubsystem.pumps)
+}
+
+// Filters gets the filters within this subsystem.
+func (thermalsubsystem *ThermalSubsystem) Filters() ([]*Filter, error) {
+	return ListReferencedFilters(thermalsubsystem.GetClient(), thermalsubsystem.filters)
 }
 
 // ThermalMetrics gets the summary of thermal metrics for this subsystem.

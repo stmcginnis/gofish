@@ -171,10 +171,10 @@ func ListReferencedCompositionServices(c common.Client, link string) ([]*Composi
 // Compose performs a set of operations specified by a manifest.
 func (compositionservice *CompositionService) Compose(request *ComposeRequest) (*ComposeResponse, error) {
 	resp, err := compositionservice.PostWithResponse(compositionservice.composeTarget, request)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	var response ComposeResponse
 	err = json.NewDecoder(resp.Body).Decode(&response)

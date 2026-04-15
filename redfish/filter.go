@@ -16,12 +16,12 @@ type Filter struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Assembly shall contain a link to a resource of type Assembly.
 	assembly string
+	// DeltaLiquidPressurekPa indicates the differential pressure in kilopascals across the liquid filter.
+	DeltaLiquidPressurekPa SensorExcerpt
 	// Description provides a description of this resource.
 	Description string
 	// HotPluggable shall indicate whether the device can be inserted or removed while the underlying equipment

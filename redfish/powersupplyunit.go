@@ -152,8 +152,8 @@ type PowerSupplyUnit struct {
 	// It is vendor responsibility to parse this field accordingly
 	OemActions json.RawMessage
 
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerSupplyUnit object from the raw JSON.
@@ -201,7 +201,7 @@ func (powerSupplyUnit *PowerSupplyUnit) UnmarshalJSON(b []byte) error {
 	powerSupplyUnit.OemActions = t.Actions.Oem
 
 	// This is a read/write object, so we need to save the raw object data for later
-	powerSupplyUnit.rawData = b
+	powerSupplyUnit.RawData = b
 
 	return nil
 }
@@ -214,7 +214,7 @@ func (powerSupplyUnit *PowerSupplyUnit) Update() error {
 		"LocationIndicatorActive",
 	}
 
-	return powerSupplyUnit.UpdateFromRawData(powerSupplyUnit, powerSupplyUnit.rawData, readWriteFields)
+	return powerSupplyUnit.UpdateFromRawData(powerSupplyUnit, powerSupplyUnit.RawData, readWriteFields)
 }
 
 // GetPowerSupplyUnit will get a PowerSupplyUnit instance from the Redfish service.
@@ -232,7 +232,7 @@ func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSuppl
 // but shall not affect the power output. A ForceRestart ResetType can affect the power supply output.
 func (powerSupplyUnit *PowerSupplyUnit) Reset(resetType ResetType) error {
 	if powerSupplyUnit.resetTarget == "" {
-		return errors.New("Reset is not supported") //nolint:golint
+		return errors.New("Reset is not supported")
 	}
 
 	t := struct {
@@ -275,8 +275,4 @@ func (powerSupplyUnit *PowerSupplyUnit) PowerOutlets() ([]*Outlet, error) {
 // PoweringChassis gets the collection of the chassis directly powered by this power supply.
 func (powerSupplyUnit *PowerSupplyUnit) PoweringChassis() ([]*Chassis, error) {
 	return common.GetObjects[Chassis](powerSupplyUnit.GetClient(), powerSupplyUnit.poweringChassis)
-}
-
-func (powerSupplyUnit *PowerSupplyUnit) RawData() []byte {
-	return powerSupplyUnit.rawData
 }

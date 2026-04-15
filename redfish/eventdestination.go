@@ -352,7 +352,24 @@ func (eventdestination *EventDestination) UnmarshalJSON(b []byte) error {
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		// Workaround for the OriginResources actually being an idref
+		var x struct {
+			temp
+			OriginResources    common.Links
+			Certificates       common.Link
+			ClientCertificates common.Link
+		}
+
+		err2 := json.Unmarshal(b, &x)
+		if err2 != nil {
+			// That didn't work either, just return the original error
+			return err
+		}
+
+		t.temp = x.temp
+		t.Certificates = x.Certificates
+		t.ClientCertificates = x.ClientCertificates
+		t.OriginResources = x.OriginResources.ToStrings()
 	}
 
 	// Extract the links to other entities for later
@@ -570,10 +587,10 @@ func sendCreateEventDestinationRequest(
 	}
 
 	resp, err := c.Post(uri, s)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
 
 	// return subscription link from returned location
 	subscriptionLink := resp.Header.Get("Location")
@@ -593,9 +610,7 @@ func DeleteEventDestination(c common.Client, uri string) error {
 	}
 
 	resp, err := c.Delete(uri)
-	if err == nil {
-		defer resp.Body.Close()
-	}
+	defer common.DeferredCleanupHTTPResponse(resp)
 
 	return err
 }

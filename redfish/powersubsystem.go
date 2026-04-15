@@ -24,8 +24,6 @@ type PowerSubsystem struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// Allocation shall contain the set of properties describing the allocation of power for this subsystem.
@@ -46,6 +44,8 @@ type PowerSubsystem struct {
 	PowerSupplyRedundancy []RedundantGroup
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// RawData holds the original serialized JSON.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a PowerSubsystem object from the raw JSON.
@@ -82,6 +82,8 @@ func (powersubsystem *PowerSubsystem) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	powersubsystem.batteries = t.Batteries.String()
 	powersubsystem.powerSupplies = t.PowerSupplies.String()
+
+	powersubsystem.RawData = b
 
 	return nil
 }

@@ -15,8 +15,6 @@ type VolumeMetrics struct {
 	common.Entity
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
-	// ODataEtag is the odata etag.
-	ODataEtag string `json:"@odata.etag"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
 	// ConsistencyCheckCount shall contain the number of consistency checks completed over the lifetime of the volume.
