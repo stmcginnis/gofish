@@ -70,6 +70,7 @@ func TestManagerAccountUpdate(t *testing.T) {
 	testClient := &common.TestClient{}
 	result.SetClient(testClient)
 
+	result.ODataEtag = "aaa" // etag might come from the HTTP header as something different
 	result.Enabled = false
 	result.Locked = false
 	result.Password = "Test"
@@ -81,6 +82,10 @@ func TestManagerAccountUpdate(t *testing.T) {
 	}
 
 	calls := testClient.CapturedCalls()
+
+	if strings.Contains(calls[0].Payload, "@odata.etag") {
+		t.Errorf("Unexpected etag payload: %s", calls[0].Payload)
+	}
 
 	if !strings.Contains(calls[0].Payload, "Enabled:false") {
 		t.Errorf("Unexpected Enabled update payload: %s", calls[0].Payload)

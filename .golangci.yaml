@@ -2,7 +2,8 @@ version: "2"
 linters:
   default: none
   enable:
-    - bodyclose
+    # - bodyclose
+    # https://github.com/timakin/bodyclose/issues/10
     - depguard
     - dogsled
     - dupl
@@ -79,6 +80,14 @@ linters:
       require-explanation: false
       require-specific: false
       allow-unused: false
+    revive:
+      rules:
+        - name: var-naming
+          severity: error
+          arguments:
+            - [] # AllowList
+            - [] # DenyList
+            - - skip-package-name-checks: true
   exclusions:
     generated: lax
     presets:
@@ -111,6 +120,11 @@ formatters:
     goimports:
       local-prefixes:
         - github.com/stmcginnis
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
   exclusions:
     generated: lax
     paths:

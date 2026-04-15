@@ -39,6 +39,7 @@ type TestClient struct {
 	// For each key it is possible to define a list of
 	// returns (in the order they should be returned).
 	CustomReturnForActions map[string][]interface{}
+	Settings               ClientSettings
 }
 
 // CapturedCalls gets all calls that were made through this instance
@@ -133,11 +134,11 @@ func (c *TestClient) performAction(action, url string, payload interface{}, cust
 
 	resp := customReturnForAction.(*http.Response)
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
+		defer DeferredCleanupHTTPResponse(resp)
 		payload, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
 		return nil, ConstructError(resp.StatusCode, payload)
 	}
 	return resp, nil
@@ -201,4 +202,8 @@ func (c *TestClient) Delete(url string) (*http.Response, error) {
 // DeleteWithHeaders performs a Delete request against the Redfish service.
 func (c *TestClient) DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
 	return c.performAction(http.MethodDelete, url, nil, customHeaders)
+}
+
+func (c *TestClient) GetSettings() ClientSettings {
+	return c.Settings
 }

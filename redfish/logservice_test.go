@@ -167,7 +167,7 @@ func TestLogServiceCollectDiagnosticsDataSuccess(t *testing.T) {
 			},
 		}}
 
-	location, err := logSvc.CollectDiagnosticData(&CollectDiagnosticDataParameters{
+	location, _, err := logSvc.CollectDiagnosticData(&CollectDiagnosticDataParameters{
 		DiagnosticDataType: ManagerLogDiagnosticDataTypes,
 	})
 	if err != nil {

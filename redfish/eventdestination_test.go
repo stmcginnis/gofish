@@ -31,6 +31,11 @@ var eventDestinationBody = `{
 		],
 		"HttpHeaders": [],
 		"MessageIds": ["One", "Two"],
+		"OriginResources": [
+			{
+				"@odata.id": "/redfish/v1/Chassis/1/Power#/PowerSupplies/0"
+			}
+		],
 		"Protocol": "Redfish",
 		"RegistryPrefixes": ["ONE_", "TWO_"],
 		"ResourceTypes": ["one", "two"],
@@ -90,6 +95,14 @@ func TestEventDestination(t *testing.T) {
 		if !et.IsValidEventType() {
 			t.Errorf("invalid event type: %s", et)
 		}
+	}
+
+	if len(result.OriginResources) != 1 {
+		t.Error("Expected 1 OriginDestinations")
+	}
+
+	if result.OriginResources[0] != "/redfish/v1/Chassis/1/Power#/PowerSupplies/0" {
+		t.Errorf("Expected OriginResources '/redfish/v1/Chassis/1/Power#/PowerSupplies/0', got %q", result.OriginResources[0])
 	}
 }
 

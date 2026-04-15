@@ -5,10 +5,10 @@
 package dell
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/stmcginnis/gofish/common"
 	"github.com/stmcginnis/gofish/redfish"
 )
 
@@ -38,10 +38,10 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 	}
 
 	resp, err := eventservice.GetClient().Post(eventservice.SubmitTestEventTarget, payload)
+	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return fmt.Errorf("failed to post submitTestEvent due to: %w", err)
 	}
-	defer resp.Body.Close()
 
 	valid := map[int]bool{
 		http.StatusNoContent: true,
@@ -56,11 +56,12 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 
 // FromEventService converts a standard EventService object to the OEM implementation.
 func FromEventService(eventservice *redfish.EventService) (*EventService, error) {
-	es := &EventService{}
-	err := json.Unmarshal(eventservice.RawData, es)
-	if err != nil {
-		return nil, err
+	es := &EventService{
+		EventService: *eventservice,
 	}
+
+	// Extract any OEM-specific data from the raw JSON if needed
+	// For now, Dell EventService doesn't have additional OEM fields beyond the standard ones
 
 	es.SetClient(eventservice.GetClient())
 	return es, nil
