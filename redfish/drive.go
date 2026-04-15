@@ -237,7 +237,7 @@ type Drive struct {
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource. A write to this property shall update the value of IndicatorLED in this resource, if supported, to
 	// reflect the implementation of the locating function.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// Manufacturer shall be the name of the organization responsible for
 	// producing the drive. This organization might be the entity from whom the
 	// drive is purchased, but this is not necessarily true.
