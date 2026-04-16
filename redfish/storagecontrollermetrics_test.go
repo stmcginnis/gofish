@@ -73,15 +73,19 @@ func TestStorageControllerMetrics(t *testing.T) {
 	assertEquals(t, "Metrics", result.ID)
 	assertEquals(t, "Storage Controller Metrics for NVMe IO Controller", result.Name)
 
-	if !result.NVMeSMART.CriticalWarnings.OverallSubsystemDegraded {
+	if result.NVMeSMART == nil {
+		t.Fatal("Expected NVMeSMART to be present")
+	}
+
+	if result.NVMeSMART.CriticalWarnings == nil || !result.NVMeSMART.CriticalWarnings.OverallSubsystemDegraded {
 		t.Error("Expected NVMeSMART.CriticalWarnings.OverallSubsystemDegraded to be true")
 	}
 
-	if result.NVMeSMART.PercentageUsed != 50 {
-		t.Errorf("Unexpected NVMeSMART.PercentageUsed value: %.2f", result.NVMeSMART.PercentageUsed)
+	if result.NVMeSMART.PercentageUsed == nil || *result.NVMeSMART.PercentageUsed != 50 {
+		t.Errorf("Unexpected NVMeSMART.PercentageUsed value: %v", result.NVMeSMART.PercentageUsed)
 	}
 
-	if result.NVMeSMART.PowerCycles != 49 {
-		t.Errorf("Unexpected NVMeSMART.PowerCycles value: %d", result.NVMeSMART.PowerCycles)
+	if result.NVMeSMART.PowerCycles == nil || *result.NVMeSMART.PowerCycles != 49 {
+		t.Errorf("Unexpected NVMeSMART.PowerCycles value: %v", result.NVMeSMART.PowerCycles)
 	}
 }
