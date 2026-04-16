@@ -103,15 +103,19 @@ func TestDriveMetrics(t *testing.T) {
 		t.Errorf("Unexpected PowerOnHours, %.2f", result.PowerOnHours)
 	}
 
-	if result.NVMeSMART.CriticalWarnings.PMRUnreliable {
+	if result.NVMeSMART == nil {
+		t.Fatal("Expected NVMeSMART to be present")
+	}
+
+	if result.NVMeSMART.CriticalWarnings != nil && result.NVMeSMART.CriticalWarnings.PMRUnreliable {
 		t.Errorf("Unexpected NVMeSMART.CriticalWarnings.PMRUnreliable, %t", result.NVMeSMART.CriticalWarnings.PMRUnreliable)
 	}
 
-	if result.NVMeSMART.EGCriticalWarningSummary.ReliabilityDegraded {
+	if result.NVMeSMART.EGCriticalWarningSummary != nil && result.NVMeSMART.EGCriticalWarningSummary.ReliabilityDegraded {
 		t.Errorf("Unexpected NVMeSMART.EGCriticalWarningSummary.ReliabilityDegraded, %t", result.NVMeSMART.EGCriticalWarningSummary.ReliabilityDegraded)
 	}
 
-	if result.NVMeSMART.CompositeTemperatureCelsius != 34 {
-		t.Errorf("Unexpected NVMeSMART.CompositeTemperatureCelsius, %.2f", result.NVMeSMART.CompositeTemperatureCelsius)
+	if result.NVMeSMART.CompositeTemperatureCelsius == nil || *result.NVMeSMART.CompositeTemperatureCelsius != 34 {
+		t.Errorf("Unexpected NVMeSMART.CompositeTemperatureCelsius, %v", result.NVMeSMART.CompositeTemperatureCelsius)
 	}
 }

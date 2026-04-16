@@ -26,7 +26,7 @@ type DriveMetrics struct {
 	// NVMeSMART shall contain the NVMe SMART metrics for the drive as defined by the NVMe SMART/Health Information log
 	// page. This property shall not be present if the service represents NVMe controllers in the drive as
 	// StorageController resources.
-	NVMeSMART NVMeSMARTMetrics
+	NVMeSMART *NVMeSMARTMetrics
 	// NativeCommandQueueDepth shall contain the current depth of the Native Command Queue as defined by the SATA
 	// Specification.
 	NativeCommandQueueDepth int
