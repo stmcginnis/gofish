@@ -388,6 +388,8 @@ type PowerSupply struct {
 	SparePartNumber string `json:"SparePartNumber,omitempty"`
 	// Status contains status and health properties of this resource.
 	Status common.Status `json:"Status,omitempty"`
+	// The hardware version of this power supply.
+	Version string
 
 	rawData          []byte
 	assembly         string
