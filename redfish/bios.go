@@ -107,6 +107,12 @@ func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
 	return common.GetCollectionObjects[Bios](c, link)
 }
 
+// ChangePasswordTarget returns the action target URL for #Bios.ChangePassword,
+// or an empty string if the BIOS resource does not advertise that action.
+func (bios *Bios) ChangePasswordTarget() string {
+	return bios.changePasswordTarget
+}
+
 // ChangePassword shall change the selected BIOS password.
 func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) error {
 	if passwordName == "" {
