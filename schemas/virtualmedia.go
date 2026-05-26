@@ -290,7 +290,13 @@ func (v *VirtualMedia) EjectMediaActionInfo() (*ActionInfo, error) {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (v *VirtualMedia) EjectMedia() (*TaskMonitorInfo, error) {
 	if !v.SupportsMediaEject {
-		return nil, errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
+		// Some implementations (e.g. Lenovo XCC) do not expose the standard
+		// VirtualMedia.EjectMedia action; fall back to PATCHing the resource.
+		payload := struct {
+			Inserted       bool
+			WriteProtected bool
+		}{}
+		return nil, v.Patch(v.ODataID, payload)
 	}
 
 	payload := make(map[string]any)
@@ -347,6 +353,12 @@ func (v *VirtualMedia) InsertMediaActionInfo() (*ActionInfo, error) {
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (v *VirtualMedia) InsertMedia(params *VirtualMediaInsertMediaParameters) (*TaskMonitorInfo, error) {
+	if !v.SupportsMediaInsert {
+		// Some implementations (e.g. Lenovo XCC) do not expose the standard
+		// VirtualMedia.InsertMedia action; fall back to PATCHing the resource.
+		return nil, v.Patch(v.ODataID, params)
+	}
+
 	resp, taskInfo, err := PostWithTask(v.client,
 		v.insertMedia.Target, params, v.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)

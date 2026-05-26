@@ -245,6 +245,96 @@ func TestVirtualMediaInsertConfig(t *testing.T) {
 	}
 }
 
+// vmBodyNoActions is a VirtualMedia JSON response without Actions, as seen on
+// Lenovo XCC implementations that use PATCH instead of POST actions.
+var vmBodyNoActions = `{
+	"@odata.context": "/redfish/v1/$metadata#VirtualMedia.VirtualMedia",
+	"@odata.etag": "W/\"\"",
+	"@odata.id": "/redfish/v1/Systems/1/VirtualMedia/1",
+	"@odata.type": "#VirtualMedia.v1_2_0.VirtualMedia",
+	"Id": "1",
+	"ConnectedVia": "NotConnected",
+	"Description": "Virtual Removable Media",
+	"Image": "",
+	"Inserted": false,
+	"MediaTypes": ["CD", "DVD"],
+	"Name": "VirtualMedia",
+	"WriteProtected": true
+}`
+
+// TestVirtualMediaInsertPatchFallback tests that InsertMedia falls back to PATCH
+// when no InsertMedia action target is present.
+func TestVirtualMediaInsertPatchFallback(t *testing.T) {
+	var result VirtualMedia
+	if err := json.NewDecoder(strings.NewReader(vmBodyNoActions)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	result.SetClient(testClient)
+
+	_, err := result.InsertMedia(&VirtualMediaInsertMediaParameters{
+		Image:          "https://example.com/os.iso",
+		Inserted:       toRef(true),
+		WriteProtected: toRef(true),
+		UserName:       toRef("admin"),
+		Password:       toRef("secret"),
+	})
+	if err != nil {
+		t.Fatalf("InsertMedia PATCH fallback returned error: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) == 0 {
+		t.Fatal("No calls were captured")
+	}
+
+	if calls[0].Action != "PATCH" {
+		t.Errorf("Expected PATCH, got %s", calls[0].Action)
+	}
+	if !strings.Contains(calls[0].Payload, "Image:https://example.com/os.iso") {
+		t.Errorf("Missing Image in payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "Inserted:true") {
+		t.Errorf("Missing Inserted in payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "WriteProtected:true") {
+		t.Errorf("Missing WriteProtected in payload: %s", calls[0].Payload)
+	}
+}
+
+// TestVirtualMediaEjectPatchFallback tests that EjectMedia falls back to PATCH
+// when no EjectMedia action target is present.
+func TestVirtualMediaEjectPatchFallback(t *testing.T) {
+	var result VirtualMedia
+	if err := json.NewDecoder(strings.NewReader(vmBodyNoActions)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	result.SetClient(testClient)
+
+	_, err := result.EjectMedia()
+	if err != nil {
+		t.Fatalf("EjectMedia PATCH fallback returned error: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) == 0 {
+		t.Fatal("No calls were captured")
+	}
+
+	if calls[0].Action != "PATCH" {
+		t.Errorf("Expected PATCH, got %s", calls[0].Action)
+	}
+	if !strings.Contains(calls[0].Payload, "Inserted:false") {
+		t.Errorf("Missing Inserted:false in payload: %s", calls[0].Payload)
+	}
+	if !strings.Contains(calls[0].Payload, "WriteProtected:false") {
+		t.Errorf("Missing WriteProtected:false in payload: %s", calls[0].Payload)
+	}
+}
+
 // TestVirtualMediaActionInfo tests the ActionInfo call.
 func TestVirtualMediaActionInfo(t *testing.T) {
 	var result VirtualMedia
