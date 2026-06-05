@@ -38,6 +38,9 @@ var coolingLoopBody = `{
 	  "Rack #3 CDU",
 	  "Rack #4 CDU"
 	],
+	"PrimaryCoolantConnectors": {
+	  "@odata.id": "/redfish/v1/ThermalEquipment/CoolingLoops/BuildingChiller/PrimaryCoolantConnectors"
+	},
 	"@odata.id": "/redfish/v1/ThermalEquipment/CoolingLoops/BuildingChiller"
   }`
 
@@ -59,6 +62,7 @@ func TestCoolingLoop(t *testing.T) {
 	assertEquals(t, "OK", string(result.CoolantQuality))
 	assertEquals(t, "Chiller", result.SupplyEquipmentNames[0])
 	assertEquals(t, "Rack #3 CDU", result.ConsumingEquipmentNames[2])
+	assertEquals(t, "/redfish/v1/ThermalEquipment/CoolingLoops/BuildingChiller/PrimaryCoolantConnectors", result.primaryCoolantConnectors)
 
 	if *result.CoolantLevelPercent.Reading != 95 {
 		t.Errorf("Unexpected CoolantLevelPercent, got %.2f", *result.CoolantLevelPercent.Reading)

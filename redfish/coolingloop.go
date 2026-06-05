@@ -78,7 +78,7 @@ type CoolingLoop struct {
 	LocationIndicatorActive bool
 	// PrimaryCoolantConnectors shall contain a link to a resource collection of type CoolantConnectorCollection that
 	// contains the primary coolant connectors for this equipment.
-	PrimaryCoolantConnectors string
+	primaryCoolantConnectors string
 	// RatedFlowLitersPerMinute shall contain the rated liquid flow, in liters per minute units, for this cooling loop.
 	RatedFlowLitersPerMinute float64
 	// RatedPressurekPa shall contain the rated maximum pressure, in kilopascal units, for this cooling loop.
@@ -121,6 +121,7 @@ func (coolingloop *CoolingLoop) UnmarshalJSON(b []byte) error {
 	}
 	var t struct {
 		temp
+		PrimaryCoolantConnectors   common.Link
 		SecondaryCoolantConnectors common.Link
 		Links                      Links
 	}
@@ -133,6 +134,7 @@ func (coolingloop *CoolingLoop) UnmarshalJSON(b []byte) error {
 	*coolingloop = CoolingLoop(t.temp)
 
 	// Extract the links to other entities for later
+	coolingloop.primaryCoolantConnectors = t.PrimaryCoolantConnectors.String()
 	coolingloop.secondaryCoolantConnectors = t.SecondaryCoolantConnectors.String()
 	coolingloop.chassis = t.Links.Chassis.String()
 	coolingloop.facility = t.Links.Facility.String()
@@ -167,6 +169,11 @@ func GetCoolingLoop(c common.Client, uri string) (*CoolingLoop, error) {
 // a provided reference.
 func ListReferencedCoolingLoops(c common.Client, link string) ([]*CoolingLoop, error) {
 	return common.GetCollectionObjects[CoolingLoop](c, link)
+}
+
+// PrimaryCoolantConnectors gets the primary coolant connectors for this equipment.
+func (coolingloop *CoolingLoop) PrimaryCoolantConnectors() ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(coolingloop.GetClient(), coolingloop.primaryCoolantConnectors)
 }
 
 // SecondaryCoolantConnectors gets the secondary coolant connectors for this equipment.
