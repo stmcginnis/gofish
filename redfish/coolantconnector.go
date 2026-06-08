@@ -171,6 +171,7 @@ func (coolantconnector *CoolantConnector) Update() error {
 		"LocationIndicatorActive",
 		"ReturnTemperatureControlCelsius",
 		"SupplyTemperatureControlCelsius",
+		"ValvePositionControlPercent",
 	}
 
 	return coolantconnector.UpdateFromRawData(coolantconnector, coolantconnector.rawData, readWriteFields)
