@@ -62,6 +62,10 @@ func (l Link) String() string {
 	return string(l)
 }
 
+func (l Link) IsZero() bool {
+	return l == ""
+}
+
 // Links are a collection of Link references
 type Links []Link
 

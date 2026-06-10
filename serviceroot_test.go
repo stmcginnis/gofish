@@ -103,7 +103,6 @@ var serviceRootBody = strings.NewReader(
 func TestServiceRoot(t *testing.T) {
 	var result Service
 	err := json.NewDecoder(serviceRootBody).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
@@ -116,84 +115,84 @@ func TestServiceRoot(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.accountService != "/redfish/v1/Accounts" {
-		t.Errorf("Invalid AccountService link: %s", result.accountService)
+	if result.AccountServiceLink != "/redfish/v1/Accounts" {
+		t.Errorf("Invalid AccountService link: %s", result.AccountServiceLink)
 	}
 
-	if result.certificateService != "/redfish/v1/Certificates" {
-		t.Errorf("Invalid CertificateService link: %s", result.certificateService)
+	if result.CertificateServiceLink != "/redfish/v1/Certificates" {
+		t.Errorf("Invalid CertificateService link: %s", result.CertificateServiceLink)
 	}
 
-	if result.chassis != "/redfish/v1/Chassis" {
-		t.Errorf("Invalid Chassis link: %s", result.chassis)
+	if result.ChassisLink != "/redfish/v1/Chassis" {
+		t.Errorf("Invalid Chassis link: %s", result.ChassisLink)
 	}
 
-	if result.compositionService != "/redfish/v1/Compositions" {
-		t.Errorf("Invalid CompositionService link: %s", result.compositionService)
+	if result.CompositionServiceLink != "/redfish/v1/Compositions" {
+		t.Errorf("Invalid CompositionService link: %s", result.CompositionServiceLink)
 	}
 
-	if result.eventService != "/redfish/v1/Events" {
-		t.Errorf("Invalid EventService link: %s", result.eventService)
+	if result.EventServiceLink != "/redfish/v1/Events" {
+		t.Errorf("Invalid EventService link: %s", result.EventServiceLink)
 	}
 
-	if result.fabrics != "/redfish/v1/Fabrics" {
-		t.Errorf("Invalid Fabrics link: %s", result.fabrics)
+	if result.FabricsLink != "/redfish/v1/Fabrics" {
+		t.Errorf("Invalid Fabrics link: %s", result.FabricsLink)
 	}
 
-	if result.jobService != "/redfish/v1/Jobs" {
-		t.Errorf("Invalid JobService link: %s", result.jobService)
+	if result.JobServiceLink != "/redfish/v1/Jobs" {
+		t.Errorf("Invalid JobService link: %s", result.JobServiceLink)
 	}
 
-	if result.jsonSchemas != "/redfish/v1/JsonSchemas" {
-		t.Errorf("Invalid JsonSchemas link: %s", result.jsonSchemas)
+	if result.JSONSchemasLink != "/redfish/v1/JsonSchemas" {
+		t.Errorf("Invalid JsonSchemas link: %s", result.JSONSchemasLink)
 	}
 
-	if result.sessions != "/redfish/v1/Sessions" {
-		t.Errorf("Invalid Sessions link: %s", result.sessions)
+	if result.Links.Sessions != "/redfish/v1/Sessions" {
+		t.Errorf("Invalid Sessions link: %s", result.Links.Sessions)
 	}
 
-	if result.managers != "/redfish/v1/Managers" {
-		t.Errorf("Invalid Managers link: %s", result.managers)
+	if result.ManagersLink != "/redfish/v1/Managers" {
+		t.Errorf("Invalid Managers link: %s", result.ManagersLink)
 	}
 
 	if !result.ProtocolFeaturesSupported.ExcerptQuery {
 		t.Error("ExcerptQuery should be true")
 	}
 
-	if result.registries != "/redfish/v1/Registries" {
-		t.Errorf("Invalid Registries link: %s", result.registries)
+	if result.RegistriesLink != "/redfish/v1/Registries" {
+		t.Errorf("Invalid Registries link: %s", result.RegistriesLink)
 	}
 
-	if result.resourceBlocks != "/redfish/v1/ResourceBlocks" {
-		t.Errorf("Invalid ResourceBlocks link: %s", result.resourceBlocks)
+	if result.ResourceBlocksLink != "/redfish/v1/ResourceBlocks" {
+		t.Errorf("Invalid ResourceBlocks link: %s", result.ResourceBlocksLink)
 	}
 
-	if result.sessionService != "/redfish/v1/SessionService" {
-		t.Errorf("Invalid SessionService link: %s", result.sessionService)
+	if result.SessionServiceLink != "/redfish/v1/SessionService" {
+		t.Errorf("Invalid SessionService link: %s", result.SessionServiceLink)
 	}
 
-	if result.storageServices != "/redfish/v1/StorageServices" {
-		t.Errorf("Invalid StorageServices link: %s", result.storageServices)
+	if result.StorageServicesLink != "/redfish/v1/StorageServices" {
+		t.Errorf("Invalid StorageServices link: %s", result.StorageServicesLink)
 	}
 
-	if result.storageSystems != "/redfish/v1/StorageSystems" {
-		t.Errorf("Invalid StorageSystems link: %s", result.storageSystems)
+	if result.StorageSystemsLink != "/redfish/v1/StorageSystems" {
+		t.Errorf("Invalid StorageSystems link: %s", result.StorageSystemsLink)
 	}
 
-	if result.systems != "/redfish/v1/Systems" {
-		t.Errorf("Invalid Systems link: %s", result.systems)
+	if result.SystemsLink != "/redfish/v1/Systems" {
+		t.Errorf("Invalid Systems link: %s", result.SystemsLink)
 	}
 
-	if result.tasks != "/redfish/v1/Tasks" {
-		t.Errorf("Invalid Tasks link: %s", result.tasks)
+	if result.TasksLink != "/redfish/v1/Tasks" {
+		t.Errorf("Invalid Tasks link: %s", result.TasksLink)
 	}
 
-	if result.telemetryService != "/redfish/v1/TelemetryService" {
-		t.Errorf("Invalid TelemetryService link: %s", result.telemetryService)
+	if result.TelemetryServiceLink != "/redfish/v1/TelemetryService" {
+		t.Errorf("Invalid TelemetryService link: %s", result.TelemetryServiceLink)
 	}
 
-	if result.updateService != "/redfish/v1/UpdateService" {
-		t.Errorf("Invalid UpdateService link: %s", result.updateService)
+	if result.UpdateServiceLink != "/redfish/v1/UpdateService" {
+		t.Errorf("Invalid UpdateService link: %s", result.UpdateServiceLink)
 	}
 }
 
@@ -222,7 +221,6 @@ var serviceRootBodyOEM = strings.NewReader(
 func TestServiceRootOEM(t *testing.T) {
 	var result Service
 	err := json.NewDecoder(serviceRootBodyOEM).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}

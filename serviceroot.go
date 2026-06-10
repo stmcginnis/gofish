@@ -6,11 +6,14 @@ package gofish
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/coreweave/gofish/common"
 	"github.com/coreweave/gofish/redfish"
 	"github.com/coreweave/gofish/swordfish"
 )
+
+var ErrSessionNotSupported = fmt.Errorf("session functionality is not supported")
 
 // DeepOperations shall contain information about deep operations that the service supports.
 type DeepOperations struct {
@@ -81,51 +84,51 @@ type Service struct {
 	ODataType string `json:"@odata.type"`
 	// AccountService shall only contain a reference to a resource that complies
 	// to the AccountService schema.
-	accountService string
+	AccountServiceLink common.Link `json:"AccountService"`
 	// AggregationService shall contain a link to a resource of type AggregationService.
-	aggregationService string
+	AggregationServiceLink common.Link `json:"AggregationService"`
 	// Cables shall contain a link to a resource collection of type CableCollection.
-	cables string
+	CablesLink common.Link `json:"Cables"`
 	// CertificateService shall be a link to the CertificateService.
-	certificateService string
+	CertificateServiceLink common.Link `json:"CertificateService"`
 	// Chassis shall only contain a reference to a collection of resources that
 	// comply to the Chassis schema.
-	chassis string
+	ChassisLink common.Link `json:"Chassis"`
 	// ComponentIntegrity shall contain a link to a resource collection of type ComponentIntegrityCollection.
-	componentIntegrity string
+	ComponentIntegrityLink common.Link `json:"ComponentIntegrity"`
 	// CompositionService shall only contain a reference to a resource that
 	// complies to the CompositionService schema.
-	compositionService string
+	CompositionServiceLink common.Link `json:"CompositionService"`
 	// Description provides a description of this resource.
 	Description string
 	// EventService shall contain a link to a resource of type EventService.
-	eventService string
+	EventServiceLink common.Link `json:"EventService"`
 	// Fabrics shall contain references to all Fabric instances.
-	fabrics string
+	FabricsLink common.Link `json:"Fabrics"`
 	// Facilities shall contain a link to a resource collection of type FacilityCollection.
-	facilities string
+	FacilitiesLink common.Link `json:"Facilities"`
 	// JobService shall only contain a reference to a resource that conforms to
 	// the JobService schema.
-	jobService string
+	JobServiceLink common.Link `json:"JobService"`
 	// JsonSchemas shall only contain a reference to a collection of resources
 	// that comply to the SchemaFile schema where the files are Json-Schema
 	// files.
-	jsonSchemas string
+	JSONSchemasLink common.Link `json:"JSONSchemas"`
 	// KeyService shall contain a link to a resource of type KeyService.
-	keyService string
+	KeyServiceLink common.Link `json:"KeyService"`
 	// LicenseService shall contain a link to a resource of type LicenseService.
-	licenseService string
+	LicenseServiceLink common.Link `json:"LicenseService"`
 	// Managers shall only contain a reference to a collection of resources that
 	// comply to the Managers schema.
-	managers string
+	ManagersLink common.Link `json:"Managers"`
 	// NVMeDomains shall contain a link to a resource collection of type NVMeDomainCollection.
-	nvmeDomains string
+	NvmeDomainsLink common.Link `json:"NVMeDomains"`
 	// Oem contains all the vendor specific actions. It is vendor responsibility to parse
 	// this field accordingly
 	Oem json.RawMessage
 	// (v1.6+) PowerEquipment shall only contain a reference to a collection of resources that
 	// comply to the PowerEquipment schema.
-	powerEquipment string
+	PowerEquipmentLink common.Link `json:"PowerEquipment"`
 	// Product shall include the name of the product represented by this Redfish
 	// service.
 	Product string
@@ -138,13 +141,13 @@ type Service struct {
 	// section of the Redfish specification.
 	RedfishVersion string
 	// RegisteredClients shall contain a link to a resource collection of type RegisteredClientCollection.
-	registeredClients string
+	RegisteredClientsLink common.Link `json:"RegisteredClients"`
 	// Registries shall contain a reference to Message Registry.
-	registries string
+	RegistriesLink common.Link `json:"Registries"`
 	// ResourceBlocks shall contain references to all Resource Block instances.
-	resourceBlocks string
+	ResourceBlocksLink common.Link `json:"ResourceBlocks"`
 	// ServiceConditions shall contain a link to a resource of type ServiceConditions.
-	serviceConditions string
+	ServiceConditionsLink common.Link `json:"ServiceConditions"`
 	// ServiceIdentification shall contain a vendor-provided or user-provided value that identifies and associates a
 	// discovered Redfish service with a particular product instance. The value of the property shall contain the value
 	// of the ServiceIdentification property in the Manager resource providing the Redfish service root resource. The
@@ -154,25 +157,25 @@ type Service struct {
 	ServiceIdentification string
 	// SessionService shall only contain a reference to a resource that complies
 	// to the SessionService schema.
-	sessionService string
+	SessionServiceLink common.Link `json:"SessionService"`
 	// Storage shall contain a link to a resource collection of type StorageCollection.
-	storage string
+	StorageLink common.Link `json:"Storage"`
 	// StorageServices shall contain references to all StorageService instances.
-	storageServices string
+	StorageServicesLink common.Link `json:"StorageServices"`
 	// StorageSystems shall contain computer systems that act as storage
 	// servers. The HostingRoles attribute of each such computer system shall
 	// have an entry for StorageServer.
-	storageSystems string
+	StorageSystemsLink common.Link `json:"StorageSystems"`
 	// Systems shall only contain a reference to a collection of resources that
 	// comply to the Systems schema.
-	systems string
+	SystemsLink common.Link `json:"Systems"`
 	// Tasks shall only contain a reference to a resource that complies to the
 	// TaskService schema.
-	tasks string
+	TasksLink common.Link `json:"Tasks"`
 	// TelemetryService shall be a link to the TelemetryService.
-	telemetryService string
+	TelemetryServiceLink common.Link `json:"TelemetryService"`
 	// ThermalEquipment shall contain a link to a resource of type ThermalEquipment.
-	thermalEquipment string
+	ThermalEquipmentLink common.Link `json:"ThermalEquipment"`
 	// UUID shall be an exact match of the UUID value returned in a 200OK from
 	// an SSDP M-SEARCH request during discovery. RFC4122 describes methods that
 	// can be used to create a UUID value. The value should be considered to be
@@ -182,102 +185,20 @@ type Service struct {
 	UUID string
 	// UpdateService shall only contain a reference to a resource that complies
 	// to the UpdateService schema.
-	updateService string
+	UpdateServiceLink common.Link `json:"UpdateService"`
 	// Vendor shall include the name of the manufacturer or vendor represented
 	// by this Redfish service. If this property is supported, the vendor name
 	// shall not be included in the value of the Product property.
 	Vendor string
 
-	// Sessions shall contain the link to a collection of Sessions.
-	sessions string
-	// ManagerProvidingService shall contain a link to a resource of type Manager that represents the manager providing
-	// this Redfish service.
-	managerProvidingService string
-}
+	Links struct {
+		// ManagerProvidingService shall contain a link to a resource of type Manager that represents the manager providing
+		// this Redfish service.
 
-// UnmarshalJSON unmarshals a Service object from the raw JSON.
-func (serviceroot *Service) UnmarshalJSON(b []byte) error {
-	type temp Service
-	var t struct {
-		temp
-		AccountService     common.Link
-		AggregationService common.Link
-		Cables             common.Link
-		CertificateService common.Link
-		Chassis            common.Link
-		ComponentIntegrity common.Link
-		CompositionService common.Link
-		EventService       common.Link
-		Fabrics            common.Link
-		Facilities         common.Link
-		JobService         common.Link
-		JSONSchemas        common.Link
-		KeyService         common.Link
-		LicenseService     common.Link
-		Managers           common.Link
-		NVMeDomains        common.Link
-		PowerEquipment     common.Link
-		Registries         common.Link
-		RegisteredClients  common.Link
-		ResourceBlocks     common.Link
-		ServiceConditions  common.Link
-		SessionService     common.Link
-		Storage            common.Link
-		StorageServices    common.Link
-		StorageSystems     common.Link
-		Systems            common.Link
-		Tasks              common.Link
-		TelemetryService   common.Link
-		ThermalEquipment   common.Link
-		UpdateService      common.Link
-		Links              struct {
-			ManagerProvidingService common.Link
-			Sessions                common.Link
-		}
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	// Extract the links to other entities for later
-	*serviceroot = Service(t.temp)
-	serviceroot.accountService = t.AccountService.String()
-	serviceroot.aggregationService = t.AggregationService.String()
-	serviceroot.cables = t.Cables.String()
-	serviceroot.certificateService = t.CertificateService.String()
-	serviceroot.chassis = t.Chassis.String()
-	serviceroot.componentIntegrity = t.ComponentIntegrity.String()
-	serviceroot.compositionService = t.CompositionService.String()
-	serviceroot.eventService = t.EventService.String()
-	serviceroot.fabrics = t.Fabrics.String()
-	serviceroot.facilities = t.Facilities.String()
-	serviceroot.jobService = t.JobService.String()
-	serviceroot.jsonSchemas = t.JSONSchemas.String()
-	serviceroot.keyService = t.KeyService.String()
-	serviceroot.licenseService = t.LicenseService.String()
-	serviceroot.managers = t.Managers.String()
-	serviceroot.nvmeDomains = t.NVMeDomains.String()
-	serviceroot.powerEquipment = t.PowerEquipment.String()
-	serviceroot.registeredClients = t.RegisteredClients.String()
-	serviceroot.registries = t.Registries.String()
-	serviceroot.resourceBlocks = t.ResourceBlocks.String()
-	serviceroot.serviceConditions = t.ServiceConditions.String()
-	serviceroot.sessionService = t.SessionService.String()
-	serviceroot.storage = t.Storage.String()
-	serviceroot.storageServices = t.StorageServices.String()
-	serviceroot.storageSystems = t.StorageSystems.String()
-	serviceroot.systems = t.Systems.String()
-	serviceroot.tasks = t.Tasks.String()
-	serviceroot.telemetryService = t.TelemetryService.String()
-	serviceroot.thermalEquipment = t.ThermalEquipment.String()
-	serviceroot.updateService = t.UpdateService.String()
-
-	serviceroot.sessions = t.Links.Sessions.String()
-	serviceroot.managerProvidingService = t.Links.ManagerProvidingService.String()
-
-	return nil
+		ManagerProvidingService common.Link `json:"ManagerProvidingService"`
+		// Sessions shall contain the link to a collection of Sessions.
+		Sessions common.Link `json:"Sessions"`
+	} `json:"Links"`
 }
 
 // ServiceRoot will get a Service instance from the service.
@@ -300,87 +221,114 @@ func ServiceRoot(c common.Client) (*Service, error) {
 
 // AccountService gets the Redfish AccountService
 func (serviceroot *Service) AccountService() (*redfish.AccountService, error) {
-	return redfish.GetAccountService(serviceroot.GetClient(), serviceroot.accountService)
+	if serviceroot.AccountServiceLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetAccountService(serviceroot.GetClient(), serviceroot.AccountServiceLink.String())
 }
 
 // AggregationService gets the aggregation service.
 func (serviceroot *Service) AggregationService() (*redfish.AggregationService, error) {
-	if serviceroot.aggregationService == "" {
+	if serviceroot.AggregationServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetAggregationService(serviceroot.GetClient(), serviceroot.aggregationService)
+	return redfish.GetAggregationService(serviceroot.GetClient(), serviceroot.AggregationServiceLink.String())
 }
 
 // Cables gets a collection of cables.
 func (serviceroot *Service) Cables() ([]*redfish.Cable, error) {
-	return redfish.ListReferencedCables(serviceroot.GetClient(), serviceroot.cables)
+	if serviceroot.CablesLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedCables(serviceroot.GetClient(), serviceroot.CablesLink.String())
 }
 
 // CertificateService gets the certificate service.
 func (serviceroot *Service) CertificateService() (*redfish.CertificateService, error) {
-	if serviceroot.certificateService == "" {
+	if serviceroot.CertificateServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetCertificateService(serviceroot.GetClient(), serviceroot.certificateService)
+	return redfish.GetCertificateService(serviceroot.GetClient(), serviceroot.CertificateServiceLink.String())
 }
 
 // Chassis gets the chassis instances managed by this service.
 func (serviceroot *Service) Chassis() ([]*redfish.Chassis, error) {
-	return redfish.ListReferencedChassis(serviceroot.GetClient(), serviceroot.chassis)
+	if serviceroot.ChassisLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedChassis(serviceroot.GetClient(), serviceroot.ChassisLink.String())
 }
 
 // ComponentIntegrity gets a collection of cables.
 func (serviceroot *Service) ComponentIntegrity() ([]*redfish.ComponentIntegrity, error) {
-	return redfish.ListReferencedComponentIntegritys(serviceroot.GetClient(), serviceroot.componentIntegrity)
+	if serviceroot.ComponentIntegrityLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedComponentIntegritys(serviceroot.GetClient(), serviceroot.ComponentIntegrityLink.String())
 }
 
 // CompositionService gets the composition service.
 func (serviceroot *Service) CompositionService() (*redfish.CompositionService, error) {
-	if serviceroot.compositionService == "" {
+	if serviceroot.CompositionServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetCompositionService(serviceroot.GetClient(), serviceroot.compositionService)
+	return redfish.GetCompositionService(serviceroot.GetClient(), serviceroot.CompositionServiceLink.String())
 }
 
 // EventService gets the Redfish EventService
 func (serviceroot *Service) EventService() (*redfish.EventService, error) {
-	return redfish.GetEventService(serviceroot.GetClient(), serviceroot.eventService)
+	if serviceroot.EventServiceLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetEventService(serviceroot.GetClient(), serviceroot.EventServiceLink.String())
 }
 
 // Fabrics gets a collection of fabrics.
 func (serviceroot *Service) Fabrics() ([]*redfish.Fabric, error) {
-	return redfish.ListReferencedFabrics(serviceroot.GetClient(), serviceroot.fabrics)
+	if serviceroot.FabricsLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedFabrics(serviceroot.GetClient(), serviceroot.FabricsLink.String())
 }
 
 // Facilities gets a collection of facilities.
 func (serviceroot *Service) Facilities() ([]*redfish.Facility, error) {
-	return redfish.ListReferencedFacilities(serviceroot.GetClient(), serviceroot.facilities)
+	if serviceroot.FacilitiesLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedFacilities(serviceroot.GetClient(), serviceroot.FacilitiesLink.String())
 }
 
 // JobService gets the job service instance
 func (serviceroot *Service) JobService() (*redfish.JobService, error) {
-	return redfish.GetJobService(serviceroot.GetClient(), serviceroot.jobService)
+	if serviceroot.JobServiceLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetJobService(serviceroot.GetClient(), serviceroot.JobServiceLink.String())
 }
 
 // KeyService gets the key service.
 func (serviceroot *Service) KeyService() (*redfish.KeyService, error) {
-	if serviceroot.keyService == "" {
+	if serviceroot.KeyServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetKeyService(serviceroot.GetClient(), serviceroot.keyService)
+	return redfish.GetKeyService(serviceroot.GetClient(), serviceroot.KeyServiceLink.String())
 }
 
 // LicenseService gets the license service.
 func (serviceroot *Service) LicenseService() (*redfish.LicenseService, error) {
-	if serviceroot.licenseService == "" {
+	if serviceroot.LicenseServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetLicenseService(serviceroot.GetClient(), serviceroot.licenseService)
+	return redfish.GetLicenseService(serviceroot.GetClient(), serviceroot.LicenseServiceLink.String())
 }
 
 // Managers gets the manager instances of this service.
 func (serviceroot *Service) Managers() ([]*redfish.Manager, error) {
-	return redfish.ListReferencedManagers(serviceroot.GetClient(), serviceroot.managers)
+	if serviceroot.ManagersLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedManagers(serviceroot.GetClient(), serviceroot.ManagersLink.String())
 }
 
 // // NVMeDomains gets a collection of Swordfish NVMe domains.
@@ -406,53 +354,74 @@ func (serviceroot *Service) Managers() ([]*redfish.Manager, error) {
 
 // RegisteredClients gets a collection of registered clients.
 func (serviceroot *Service) RegisteredClients() ([]*redfish.RegisteredClient, error) {
-	return redfish.ListReferencedRegisteredClients(serviceroot.GetClient(), serviceroot.registeredClients)
+	if serviceroot.RegisteredClientsLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedRegisteredClients(serviceroot.GetClient(), serviceroot.RegisteredClientsLink.String())
 }
 
 // Registries gets the Redfish Registries
 func (serviceroot *Service) Registries() ([]*redfish.MessageRegistryFile, error) {
-	return redfish.ListReferencedMessageRegistryFiles(serviceroot.GetClient(), serviceroot.registries)
+	if serviceroot.RegistriesLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedMessageRegistryFiles(serviceroot.GetClient(), serviceroot.RegistriesLink.String())
 }
 
 // ResourceBlocks gets a collection of resource blocks.
 func (serviceroot *Service) ResourceBlocks() ([]*redfish.ResourceBlock, error) {
-	return redfish.ListReferencedResourceBlocks(serviceroot.GetClient(), serviceroot.resourceBlocks)
+	if serviceroot.ResourceBlocksLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedResourceBlocks(serviceroot.GetClient(), serviceroot.ResourceBlocksLink.String())
 }
 
 // ServiceConditions gets the service conditions.
 func (serviceroot *Service) ServiceConditions() (*redfish.ServiceConditions, error) {
-	if serviceroot.serviceConditions == "" {
+	if serviceroot.ServiceConditionsLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetServiceConditions(serviceroot.GetClient(), serviceroot.serviceConditions)
+	return redfish.GetServiceConditions(serviceroot.GetClient(), serviceroot.ServiceConditionsLink.String())
 }
 
 // SessionService gets the session service.
 func (serviceroot *Service) SessionService() (*redfish.SessionService, error) {
-	if serviceroot.sessionService == "" {
+	if serviceroot.SessionServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetSessionService(serviceroot.GetClient(), serviceroot.sessionService)
+	return redfish.GetSessionService(serviceroot.GetClient(), serviceroot.SessionServiceLink.String())
 }
 
 // Storage gets a collection of storage objects.
 func (serviceroot *Service) Storage() ([]*redfish.Storage, error) {
-	return redfish.ListReferencedStorages(serviceroot.GetClient(), serviceroot.storage)
+	if serviceroot.StorageLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedStorages(serviceroot.GetClient(), serviceroot.StorageLink.String())
 }
 
 // StorageServices gets the Swordfish storage services
 func (serviceroot *Service) StorageServices() ([]*swordfish.StorageService, error) {
-	return swordfish.ListReferencedStorageServices(serviceroot.GetClient(), serviceroot.storageServices)
+	if serviceroot.StorageServicesLink.IsZero() {
+		return nil, nil
+	}
+	return swordfish.ListReferencedStorageServices(serviceroot.GetClient(), serviceroot.StorageServicesLink.String())
 }
 
 // StorageSystems gets the storage system instances managed by this service.
 func (serviceroot *Service) StorageSystems() ([]*swordfish.StorageSystem, error) {
-	return swordfish.ListReferencedStorageSystems(serviceroot.GetClient(), serviceroot.storageSystems)
+	if serviceroot.StorageSystemsLink.IsZero() {
+		return nil, nil
+	}
+	return swordfish.ListReferencedStorageSystems(serviceroot.GetClient(), serviceroot.StorageSystemsLink.String())
 }
 
 // Tasks gets the system's tasks
 func (serviceroot *Service) Tasks() ([]*redfish.Task, error) {
-	ts, err := redfish.GetTaskService(serviceroot.GetClient(), serviceroot.tasks)
+	if serviceroot.TasksLink.IsZero() {
+		return nil, nil
+	}
+	ts, err := redfish.GetTaskService(serviceroot.GetClient(), serviceroot.TasksLink.String())
 	if err != nil {
 		return nil, err
 	}
@@ -462,30 +431,43 @@ func (serviceroot *Service) Tasks() ([]*redfish.Task, error) {
 
 // TaskService gets the task service instance
 func (serviceroot *Service) TaskService() (*redfish.TaskService, error) {
-	return redfish.GetTaskService(serviceroot.GetClient(), serviceroot.tasks)
+	if serviceroot.TasksLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetTaskService(serviceroot.GetClient(), serviceroot.TasksLink.String())
 }
 
 // CreateSession creates a new session and returns the token and id
 func (serviceroot *Service) CreateSession(username, password string) (*redfish.AuthToken, error) {
-	return redfish.CreateSession(serviceroot.GetClient(), serviceroot.sessions, username, password)
+	if serviceroot.Links.Sessions.IsZero() {
+		return nil, ErrSessionNotSupported
+	}
+
+	return redfish.CreateSession(serviceroot.GetClient(), serviceroot.Links.Sessions.String(), username, password)
 }
 
 // ManagerProvidingService gets the manager for this Redfish service.
 func (serviceroot *Service) ManagerProvidingService() (*redfish.Manager, error) {
-	if serviceroot.managerProvidingService == "" {
+	if serviceroot.Links.ManagerProvidingService.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetManager(serviceroot.GetClient(), serviceroot.managerProvidingService)
+	return redfish.GetManager(serviceroot.GetClient(), serviceroot.Links.ManagerProvidingService.String())
 }
 
 // PowerEquipment gets the powerEquipment instances of this service.
 func (serviceroot *Service) PowerEquipment() (*redfish.PowerEquipment, error) {
-	return redfish.GetPowerEquipment(serviceroot.GetClient(), serviceroot.powerEquipment)
+	if serviceroot.PowerEquipmentLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetPowerEquipment(serviceroot.GetClient(), serviceroot.PowerEquipmentLink.String())
 }
 
 // Sessions gets the system's active sessions
 func (serviceroot *Service) Sessions() ([]*redfish.Session, error) {
-	return redfish.ListReferencedSessions(serviceroot.GetClient(), serviceroot.sessions)
+	if serviceroot.Links.Sessions.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedSessions(serviceroot.GetClient(), serviceroot.Links.Sessions.String())
 }
 
 // DeleteSession logout the specified session
@@ -495,7 +477,10 @@ func (serviceroot *Service) DeleteSession(url string) error {
 
 // MessageRegistries gets all the available message registries in all languages
 func (serviceroot *Service) MessageRegistries() ([]*redfish.MessageRegistry, error) {
-	return redfish.ListReferencedMessageRegistries(serviceroot.GetClient(), serviceroot.registries)
+	if serviceroot.RegistriesLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedMessageRegistries(serviceroot.GetClient(), serviceroot.RegistriesLink.String())
 }
 
 // MessageRegistry gets a specific message registry.
@@ -507,7 +492,10 @@ func (serviceroot *Service) MessageRegistry(uri string) (*redfish.MessageRegistr
 // MessageRegistriesByLanguage gets the message registries by language.
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageRegistriesByLanguage(language string) ([]*redfish.MessageRegistry, error) {
-	return redfish.ListReferencedMessageRegistriesByLanguage(serviceroot.GetClient(), serviceroot.registries, language)
+	if serviceroot.RegistriesLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedMessageRegistriesByLanguage(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), language)
 }
 
 // MessageRegistryByLanguage gets a specific message registry by language.
@@ -516,7 +504,10 @@ func (serviceroot *Service) MessageRegistriesByLanguage(language string) ([]*red
 // by the Redfish Specification, for example: "Alert.1.0.0".
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageRegistryByLanguage(registry, language string) (*redfish.MessageRegistry, error) {
-	return redfish.GetMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.registries, registry, language)
+	if serviceroot.RegistriesLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), registry, language)
 }
 
 // MessageByLanguage tries to find and get the message in the correct language from the informed messageID.
@@ -529,25 +520,40 @@ func (serviceroot *Service) MessageRegistryByLanguage(registry, language string)
 //
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageByLanguage(messageID, language string) (*redfish.MessageRegistryMessage, error) {
-	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.registries, messageID, language)
+	if serviceroot.RegistriesLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), messageID, language)
 }
 
 // Systems get the system instances from the service
 func (serviceroot *Service) Systems() ([]*redfish.ComputerSystem, error) {
-	return redfish.ListReferencedComputerSystems(serviceroot.GetClient(), serviceroot.systems)
+	if serviceroot.SystemsLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.ListReferencedComputerSystems(serviceroot.GetClient(), serviceroot.SystemsLink.String())
 }
 
 // TelemetryService gets the telemetry service instance.
 func (serviceroot *Service) TelemetryService() (*redfish.TelemetryService, error) {
-	return redfish.GetTelemetryService(serviceroot.GetClient(), serviceroot.telemetryService)
+	if serviceroot.TelemetryServiceLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetTelemetryService(serviceroot.GetClient(), serviceroot.TelemetryServiceLink.String())
 }
 
 // ThermalEquipment gets the thermal equipment instance.
 func (serviceroot *Service) ThermalEquipment() (*redfish.ThermalEquipment, error) {
-	return redfish.GetThermalEquipment(serviceroot.GetClient(), serviceroot.thermalEquipment)
+	if serviceroot.ThermalEquipmentLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetThermalEquipment(serviceroot.GetClient(), serviceroot.ThermalEquipmentLink.String())
 }
 
 // UpdateService gets the update service instance
 func (serviceroot *Service) UpdateService() (*redfish.UpdateService, error) {
-	return redfish.GetUpdateService(serviceroot.GetClient(), serviceroot.updateService)
+	if serviceroot.UpdateServiceLink.IsZero() {
+		return nil, nil
+	}
+	return redfish.GetUpdateService(serviceroot.GetClient(), serviceroot.UpdateServiceLink.String())
 }
