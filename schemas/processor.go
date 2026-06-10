@@ -587,6 +587,7 @@ func (p *Processor) UnmarshalJSON(b []byte) error {
 		SubProcessors          Link `json:"SubProcessors"`
 
 		MaxSpeedMHz any
+		Socket      any // ZTE bug
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -620,6 +621,7 @@ func (p *Processor) UnmarshalJSON(b []byte) error {
 	p.subProcessors = tmp.SubProcessors.String()
 
 	p.MaxSpeedMHz = toInt(tmp.MaxSpeedMHz)
+	p.Socket = parseString(tmp.Socket)
 
 	// This is a read/write object, so we need to save the raw object data for later
 	p.RawData = b

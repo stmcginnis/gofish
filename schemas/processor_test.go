@@ -362,6 +362,24 @@ var invalidProcessorBody = strings.NewReader(
 		"TotalThreads": 32
 	  }`)
 
+var processorBodyWithSocketInt = strings.NewReader(
+	`{
+		"@odata.context":"/redfish/v1/$metadata#Processor.Processor",
+		"@odata.id":"/redfish/v1/Systems/System.Embedded.1/Processors/CPU.Socket.2",
+		"@odata.type":"#Processor.v1_3_1.Processor",
+		"Description":"Represents the properties of a Processor attached to this System",
+		"Id":"CPU.Socket.2",
+		"InstructionSet":"x86-64",
+		"Manufacturer":"Intel",
+		"MaxSpeedMHz":"4000",
+		"Model":"Intel(R) Xeon(R) Gold 6136 CPU @ 3.00GHz",
+		"Name":"CPU 2",
+		"ProcessorType":"CPU",
+		"Socket":2,
+		"TotalCores":12,
+		"TotalThreads":24
+	 }`)
+
 // TestProcessor tests the parsing of Processor objects.
 func TestProcessor(t *testing.T) {
 	var result Processor
@@ -435,6 +453,20 @@ func TestMaxSpeedMHzString(t *testing.T) {
 
 	if *result.MaxSpeedMHz != 4000 {
 		t.Errorf("Expected MaxSpeedMhz to be 4000 but got %d", *result.MaxSpeedMHz)
+	}
+}
+
+// TestSocketInt tests the parsing of Processor object ZTE bug workaround.
+func TestSocketInt(t *testing.T) {
+	var result Processor
+	err := json.NewDecoder(processorBodyWithSocketInt).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if result.Socket != "2" {
+		t.Errorf("Received invalid socket: %s", result.ID)
 	}
 }
 
