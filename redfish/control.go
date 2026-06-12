@@ -330,5 +330,5 @@ type ControlSingleExcerpt struct {
 	// SetPoint shall contain the desired set point control value. The units shall follow the value of SetPointUnits.
 	// If the DefaultSetPoint property is not supported and if a user-defined set point is not configured, the property
 	// may contain 'null' in responses.
-	SetPoint float64
+	SetPoint *float64
 }

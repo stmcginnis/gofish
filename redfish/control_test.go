@@ -65,3 +65,51 @@ func TestControl(t *testing.T) {
 		t.Errorf("Unexpected sensor reading, got %.2f", *result.Sensor.Reading)
 	}
 }
+
+func TestControlSingleExcerptSetPointPresence(t *testing.T) {
+	tests := []struct {
+		name        string
+		body        string
+		wantPresent bool
+		wantValue   float64
+	}{
+		{
+			name:        "explicit zero",
+			body:        `{"SetPoint":0}`,
+			wantPresent: true,
+			wantValue:   0,
+		},
+		{
+			name:        "explicit value",
+			body:        `{"SetPoint":100}`,
+			wantPresent: true,
+			wantValue:   100,
+		},
+		{
+			name:        "omitted",
+			body:        `{}`,
+			wantPresent: false,
+		},
+		{
+			name:        "null",
+			body:        `{"SetPoint":null}`,
+			wantPresent: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var result ControlSingleExcerpt
+			if err := json.NewDecoder(strings.NewReader(tt.body)).Decode(&result); err != nil {
+				t.Fatalf("Error decoding JSON: %s", err)
+			}
+
+			if gotPresent := result.SetPoint != nil; gotPresent != tt.wantPresent {
+				t.Fatalf("SetPoint presence = %t, want %t", gotPresent, tt.wantPresent)
+			}
+			if result.SetPoint != nil && *result.SetPoint != tt.wantValue {
+				t.Fatalf("SetPoint = %.2f, want %.2f", *result.SetPoint, tt.wantValue)
+			}
+		})
+	}
+}
