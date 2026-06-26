@@ -34,7 +34,6 @@ var tcBody = `{
 func TestTrustedComponent(t *testing.T) {
 	var result TrustedComponent
 	err := json.NewDecoder(strings.NewReader(tcBody)).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
@@ -47,7 +46,7 @@ func TestTrustedComponent(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.certificates != "/redfish/v1/Chassis/System.Embedded.1/TrustedComponents/TPM/Certificates" {
-		t.Errorf("Invalid fan name: %s", result.certificates)
+	if result.CertificatesLink != "/redfish/v1/Chassis/System.Embedded.1/TrustedComponents/TPM/Certificates" {
+		t.Errorf("Invalid fan name: %s", result.CertificatesLink)
 	}
 }

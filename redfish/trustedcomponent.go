@@ -20,9 +20,9 @@ const (
 	IntegratedTrustedComponentType TrustedComponentType = "Integrated"
 )
 
-// trustedComponentLinks shall contain links to resources that are related to but are not contained by, or subordinate to, this
+// TrustedComponentLinks shall contain links to resources that are related to but are not contained by, or subordinate to, this
 // resource.
-type trustedComponentLinks struct {
+type TrustedComponentLinks struct {
 	// ActiveSoftwareImage shall contain a link to a resource of type SoftwareInventory that represents the active
 	// firmware image for this trusted component.
 	ActiveSoftwareImage common.Link
@@ -70,6 +70,11 @@ type TPMGetEventLogResponse struct {
 	OEM json.RawMessage `json:"Oem"`
 }
 
+type TPMActions struct {
+	TPMClear       common.ActionTarget `json:"#TrustedComponent.TPMClear"`
+	TPMGetEventLog common.ActionTarget `json:"#TrustedComponent.TPMGetEventLog"`
+}
+
 // TrustedComponent shall represent a trusted component in a Redfish implementation.
 type TrustedComponent struct {
 	common.Entity
@@ -77,9 +82,6 @@ type TrustedComponent struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
-	// Certificates shall contain a link to a resource collection of type CertificateCollection that contains device
-	// identity certificates of the trusted component.
-	certificates string
 	// Description provides a description of this resource.
 	Description string
 	// FirmwareVersion shall contain a version number associated with the active software image on the trusted
@@ -110,88 +112,50 @@ type TrustedComponent struct {
 	// UUID shall contain a universally unique identifier number for the trusted component.
 	UUID string
 
-	tpmGetEventLogTarget string
-
-	activeSoftwareImage string
-	componentIntegrity  []string
-	// ComponentIntegrityCount is the number of trusted component integrity links.
-	ComponentIntegrityCount int
-	componentsProtected     []string
-	// ComponentsProtectedCount is the number of protected components.
-	ComponentsProtectedCount int
-	integratedInto           string
-	owner                    string
-	softwareImages           []string
-	// SoftwareImagesCount is the number of images associated with this trusted component.
-	SoftwareImagesCount int
-}
-
-// UnmarshalJSON unmarshals a TrustedComponent object from the raw JSON.
-func (trustedcomponent *TrustedComponent) UnmarshalJSON(b []byte) error {
-	type temp TrustedComponent
-	var t struct {
-		temp
-		Certificates common.Link
-		Links        trustedComponentLinks
-		Actions      struct {
-			TPMGetEventLog struct {
-				Target string
-			} `json:"#TrustedComponent.TPMGetEventLog"`
-		}
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
-	// Extract the links to other entities for later
-	*trustedcomponent = TrustedComponent(t.temp)
-	trustedcomponent.tpmGetEventLogTarget = t.Actions.TPMGetEventLog.Target
-
-	trustedcomponent.certificates = t.Certificates.String()
-
-	trustedcomponent.activeSoftwareImage = t.Links.ActiveSoftwareImage.String()
-	trustedcomponent.componentIntegrity = t.Links.ComponentIntegrity.ToStrings()
-	trustedcomponent.ComponentIntegrityCount = t.Links.ComponentIntegrityCount
-	trustedcomponent.softwareImages = t.Links.SoftwareImages.ToStrings()
-	trustedcomponent.SoftwareImagesCount = t.Links.SoftwareImagesCount
-
-	// TODO: Implement accessors for linked objects
-	trustedcomponent.componentsProtected = t.Links.ComponentsProtected.ToStrings()
-	trustedcomponent.ComponentsProtectedCount = t.Links.ComponentsProtectedCount
-	trustedcomponent.integratedInto = t.Links.IntegratedInto.String()
-	trustedcomponent.owner = t.Links.Owner.String()
-
-	return nil
+	Actions          TPMActions  `json:"Actions"`
+	CertificatesLink common.Link `json:"Certificates"`
+	Links            TrustedComponentLinks
 }
 
 // ActiveSoftwareImage gets the active firmware image for this trusted component.
-func (trustedcomponent *TrustedComponent) ActiveSoftwareImage() (*SoftwareInventory, error) {
-	if trustedcomponent.activeSoftwareImage == "" {
+func (trustedComponent *TrustedComponent) ActiveSoftwareImage() (*SoftwareInventory, error) {
+	if trustedComponent.Links.ActiveSoftwareImage.IsZero() {
 		return nil, nil
 	}
-	return GetSoftwareInventory(trustedcomponent.GetClient(), trustedcomponent.activeSoftwareImage)
+	return GetSoftwareInventory(trustedComponent.GetClient(), trustedComponent.Links.ActiveSoftwareImage.String())
 }
 
 // ComponentIntegrity gets the resources for which the trusted component is responsible.
-func (trustedcomponent *TrustedComponent) ComponentIntegrity() ([]*ComponentIntegrity, error) {
-	return common.GetObjects[ComponentIntegrity](trustedcomponent.GetClient(), trustedcomponent.componentIntegrity)
+func (trustedComponent *TrustedComponent) ComponentIntegrity() ([]*ComponentIntegrity, error) {
+	if len(trustedComponent.Links.ComponentIntegrity) == 0 {
+		return nil, nil
+	}
+	return common.GetObjects[ComponentIntegrity](trustedComponent.GetClient(), trustedComponent.Links.ComponentIntegrity.ToStrings())
 }
 
 // SoftwareImages gets the firmware images that apply to this trusted component.
-func (trustedcomponent *TrustedComponent) SoftwareImages() ([]*SoftwareInventory, error) {
-	return common.GetObjects[SoftwareInventory](trustedcomponent.GetClient(), trustedcomponent.softwareImages)
+func (trustedComponent *TrustedComponent) SoftwareImages() ([]*SoftwareInventory, error) {
+	if len(trustedComponent.Links.SoftwareImages) == 0 {
+		return nil, nil
+	}
+	return common.GetObjects[SoftwareInventory](trustedComponent.GetClient(), trustedComponent.Links.SoftwareImages.ToStrings())
 }
 
 // Certificates gets the certificates associated with this trusted component.
-func (trustedcomponent *TrustedComponent) Certificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(trustedcomponent.GetClient(), trustedcomponent.certificates)
+func (trustedComponent *TrustedComponent) Certificates() ([]*Certificate, error) {
+	if trustedComponent.CertificatesLink.IsZero() {
+		return nil, nil
+	}
+	return ListReferencedCertificates(trustedComponent.GetClient(), trustedComponent.CertificatesLink.String())
 }
 
 // TPMGetEventLog gets the event log for TPM 2.0 devices.
-func (trustedcomponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
-	resp, err := trustedcomponent.PostWithResponse(trustedcomponent.tpmGetEventLogTarget, nil)
+func (trustedComponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
+	if trustedComponent.Actions.TPMGetEventLog.Target == "" {
+		return nil, ErrActionNotSupported
+	}
+
+	resp, err := trustedComponent.PostWithResponse(trustedComponent.Actions.TPMGetEventLog.Target, nil)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
