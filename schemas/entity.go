@@ -518,7 +518,7 @@ func GetObjects[T any, PT interface {
 
 	// Start workers for each URI
 	go func() {
-		CollectCollection(get, uris)
+		CollectCollection(get, uris, c.GetSettings().DefaultQueryOptions...)
 		close(ch)
 	}()
 

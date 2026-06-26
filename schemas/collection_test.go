@@ -8,7 +8,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
 var collectionBody = strings.NewReader(
@@ -54,4 +56,57 @@ func TestCollection(t *testing.T) {
 			t.Errorf("Expected link to '%s', got '%s'", endpoint, item)
 		}
 	}
+}
+
+func TestCollectResourceCollectionDefaultConcurrency(t *testing.T) {
+	resources := testCollectionResources(6)
+	maxActive := collectResourceCollectionMaxActive(resources)
+
+	if maxActive != defaultCollectionRequestConcurrency {
+		t.Errorf("Expected default concurrency %d, got %d", defaultCollectionRequestConcurrency, maxActive)
+	}
+}
+
+func TestCollectResourceCollectionConfiguredConcurrency(t *testing.T) {
+	resources := testCollectionResources(8)
+	concurrency := 5
+	maxActive := collectResourceCollectionMaxActive(
+		resources,
+		WithCollectionQueryOpts(WithCollectionRequestConcurrency(concurrency)),
+	)
+
+	if maxActive != concurrency {
+		t.Errorf("Expected configured concurrency %d, got %d", concurrency, maxActive)
+	}
+}
+
+func testCollectionResources(count int) []*Resource {
+	resources := make([]*Resource, 0, count)
+	for i := 0; i < count; i++ {
+		resources = append(resources, &Resource{Entity: Entity{ODataID: fmt.Sprintf("/redfish/v1/Systems/%d", i)}})
+	}
+	return resources
+}
+
+func collectResourceCollectionMaxActive(resources []*Resource, queryOpts ...QueryGroupOption) int {
+	var mu sync.Mutex
+	active := 0
+	maxActive := 0
+
+	CollectResourceCollection(func(_ *Resource, _ ...QueryGroupOption) {
+		mu.Lock()
+		active++
+		if active > maxActive {
+			maxActive = active
+		}
+		mu.Unlock()
+
+		time.Sleep(20 * time.Millisecond)
+
+		mu.Lock()
+		active--
+		mu.Unlock()
+	}, resources, queryOpts...)
+
+	return maxActive
 }

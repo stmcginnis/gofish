@@ -151,9 +151,10 @@ func CollectListGeneric[T any, PT interface {
 		}
 	}
 
-	CollectResourceCollection(get, collection.Members, queryOpts...)
+	collectionQuery := BuildQueryGroup(c, queryOpts...).QueryCollection
+	collectResourceCollection(get, collection.Members, collectionQuery.collectionRequestConcurrency, queryOpts...)
 	if collection.MembersNextLink != "" {
-		err := CollectListGeneric(get, c, collection.MembersNextLink)
+		err := CollectListGeneric(get, c, collection.MembersNextLink, queryOpts...)
 		if err != nil {
 			return err
 		}
@@ -163,22 +164,36 @@ func CollectListGeneric[T any, PT interface {
 
 // CollectCollection will retrieve a collection of entities from the Redfish service
 // when you already have the set of individual links in the collection.
-func CollectCollection(get func(string), links []string) {
+func CollectCollection(get func(string), links []string, queryOpts ...QueryGroupOption) {
 	linkEntities := []*Resource{}
 
 	for _, link := range links {
 		linkEntities = append(linkEntities, &Resource{Entity: Entity{ODataID: link}})
 	}
 
-	CollectResourceCollection(func(resource *Resource, _ ...QueryGroupOption) { get(resource.ODataID) }, linkEntities)
+	CollectResourceCollection(func(resource *Resource, _ ...QueryGroupOption) { get(resource.ODataID) }, linkEntities, queryOpts...)
 }
 
 func CollectResourceCollection[T any, PT interface {
 	*T
 	SchemaObject
 }](get func(PT, ...QueryGroupOption), entities []PT, queryOpts ...QueryGroupOption) {
-	// Only allow three concurrent requests to avoid overwhelming the service
-	limiter := make(chan struct{}, 3)
+	collectionQuery := QueryGroup{}
+	for _, opt := range queryOpts {
+		opt(&collectionQuery)
+	}
+	collectResourceCollection(get, entities, collectionQuery.QueryCollection.collectionRequestConcurrency, queryOpts...)
+}
+
+func collectResourceCollection[T any, PT interface {
+	*T
+	SchemaObject
+}](get func(PT, ...QueryGroupOption), entities []PT, concurrency int, queryOpts ...QueryGroupOption) {
+	if concurrency <= 0 {
+		concurrency = defaultCollectionRequestConcurrency
+	}
+
+	limiter := make(chan struct{}, concurrency)
 	var wg sync.WaitGroup
 
 	for _, itemLink := range entities {
