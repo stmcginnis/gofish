@@ -7,9 +7,10 @@ package schemas
 import "fmt"
 
 type Query struct {
-	expand         ExpandOption
-	expandLevel    int
-	expandFallback bool
+	expand                       ExpandOption
+	expandLevel                  int
+	expandFallback               bool
+	collectionRequestConcurrency int
 }
 
 type QueryGroup struct {
@@ -45,6 +46,12 @@ func WithExpandFallback(enable bool) func(*Query) {
 func WithExpandLevel(expandLevel int) func(*Query) {
 	return func(q *Query) {
 		q.expandLevel = expandLevel
+	}
+}
+
+func WithCollectionRequestConcurrency(concurrency int) func(*Query) {
+	return func(q *Query) {
+		q.collectionRequestConcurrency = concurrency
 	}
 }
 

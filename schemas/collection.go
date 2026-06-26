@@ -10,6 +10,8 @@ import (
 	"sync"
 )
 
+const defaultCollectionRequestConcurrency = 3
+
 // Collection represents a collection of entity references.
 type Collection struct {
 	Name            string `json:"Name"`
