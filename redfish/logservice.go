@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/coreweave/gofish/common"
@@ -144,6 +145,8 @@ type LogService struct {
 	collectDiagnosticDataTarget string
 	// collectDiagnosticInfoTarget is the URL to get ActionInfo about the CollectDiagnosticData action.
 	collectDiagnosticInfoTarget string
+	// downloadRawLogTarget is the URL to send DownloadRawLog actions to.
+	downloadRawLogTarget string
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
@@ -152,6 +155,7 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	type Actions struct {
 		ClearLog              common.ActionTarget `json:"#LogService.ClearLog"`
 		CollectDiagnosticData common.ActionTarget `json:"#LogService.CollectDiagnosticData"`
+		DownloadRawLog        common.ActionTarget `json:"#LogService.DownloadRawLog"`
 	}
 	var t struct {
 		temp
@@ -170,6 +174,7 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	logservice.clearLogTarget = t.Actions.ClearLog.Target
 	logservice.collectDiagnosticDataTarget = t.Actions.CollectDiagnosticData.Target
 	logservice.collectDiagnosticInfoTarget = t.Actions.CollectDiagnosticData.ActionInfoTarget
+	logservice.downloadRawLogTarget = t.Actions.DownloadRawLog.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
 	logservice.rawData = b
@@ -319,4 +324,56 @@ func (logservice *LogService) CollectDiagnosticDataActionInfo() (*ActionInfo, er
 	}
 
 	return common.GetObject[ActionInfo](logservice.GetClient(), logservice.collectDiagnosticInfoTarget)
+}
+
+// SupportsDownloadRawLog indicates if the DownloadRawLog action is supported.
+func (logservice *LogService) SupportsDownloadRawLog() bool {
+	return logservice.downloadRawLogTarget != ""
+}
+
+// RawLogResult holds the outcome of a DownloadRawLog action.
+type RawLogResult struct {
+	// DownloadURI, when set, is a direct URI to GET the raw log archive.
+	DownloadURI string
+	// LogEntryURI, when set, points to a LogEntry whose AdditionalDataURI holds
+	// the archive (synchronous responses that return a Location header).
+	LogEntryURI string
+	// Task, when set, is an async task monitor to poll; on completion its
+	// Location header yields the LogEntry URI.
+	Task *TaskMonitorInfo
+}
+
+// DownloadRawLog triggers generation of the raw log archive.
+func (logservice *LogService) DownloadRawLog() (*RawLogResult, error) {
+	if !logservice.SupportsDownloadRawLog() {
+		return nil, errors.New("DownloadRawLog not supported by this service")
+	}
+
+	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
+		logservice.downloadRawLogTarget, struct{}{}, logservice.Headers(), false)
+	defer common.DeferredCleanupHTTPResponse(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	if taskInfo != nil {
+		return &RawLogResult{Task: taskInfo}, nil
+	}
+
+	if location := resp.Header["Location"]; len(location) > 0 && location[0] != "" {
+		return &RawLogResult{LogEntryURI: location[0]}, nil
+	}
+
+	// Some BMCs return the archive location synchronously in the body, e.g.
+	// {"DownloadURI": "/redfish/v1/Systems/System_0/LogServices/HostLogger/file"}.
+	var payload struct {
+		DownloadURI string `json:"DownloadURI"`
+	}
+	if body, rerr := io.ReadAll(resp.Body); rerr == nil && len(body) > 0 {
+		if json.Unmarshal(body, &payload) == nil && payload.DownloadURI != "" {
+			return &RawLogResult{DownloadURI: payload.DownloadURI}, nil
+		}
+	}
+
+	return &RawLogResult{}, nil
 }

@@ -209,3 +209,91 @@ func TestLogServiceCollectDiagnosticsActionInfo(t *testing.T) {
 
 	// not thoroughly testing the ActionInfo parsing - that will be handled in its own unit test
 }
+
+var logServiceBodyRawLog = fmt.Sprintf(logServiceBodyTmpl, `
+	, "#LogService.DownloadRawLog": {
+		"target": "/redfish/v1/Systems/System_0/LogServices/HostLogger/Actions/LogService.DownloadRawLog"
+	}
+`)
+
+// TestLogServiceDownloadRawLogParsing tests that the DownloadRawLog action target is parsed.
+func TestLogServiceDownloadRawLogParsing(t *testing.T) {
+	result, _ := initLogServiceClient(t, logServiceBodyRawLog)
+
+	if !result.SupportsDownloadRawLog() {
+		t.Error("Log service should support DownloadRawLog")
+	}
+
+	if result.downloadRawLogTarget != "/redfish/v1/Systems/System_0/LogServices/HostLogger/Actions/LogService.DownloadRawLog" {
+		t.Errorf("Invalid DownloadRawLog target: %s", result.downloadRawLogTarget)
+	}
+}
+
+// TestLogServiceDownloadRawLogUnsupported tests detection when the action is absent.
+func TestLogServiceDownloadRawLogUnsupported(t *testing.T) {
+	logSvc, _ := initLogServiceClient(t, logServiceBodyNoDiag)
+
+	if logSvc.SupportsDownloadRawLog() {
+		t.Error("log service unexpectedly supports DownloadRawLog")
+	}
+
+	if _, err := logSvc.DownloadRawLog(); err == nil {
+		t.Error("expected error invoking DownloadRawLog on unsupported service")
+	}
+}
+
+// TestLogServiceDownloadRawLogSuccess tests that DownloadRawLog returns the LogEntry location from a
+// synchronous action response (Location header, no task monitor).
+func TestLogServiceDownloadRawLogSuccess(t *testing.T) {
+	logSvc, testClient := initLogServiceClient(t, logServiceBodyRawLog)
+
+	logEntryLocation := "/redfish/v1/Systems/System_0/LogServices/HostLogger/Entries/1"
+
+	testClient.CustomReturnForActions = map[string][]interface{}{
+		http.MethodPost: {
+			&http.Response{
+				StatusCode: http.StatusCreated,
+				Header: http.Header{
+					"Location": []string{logEntryLocation},
+				},
+				Body: io.NopCloser(strings.NewReader(`{}`)),
+			},
+		}}
+
+	result, err := logSvc.DownloadRawLog()
+	if err != nil {
+		t.Errorf("Error invoking DownloadRawLog: %s", err)
+	}
+	if result.Task != nil {
+		t.Errorf("expected no task monitor for synchronous response, got %v", result.Task)
+	}
+
+	assertEquals(t, logEntryLocation, result.LogEntryURI)
+}
+
+// TestLogServiceDownloadRawLogDownloadURI tests the synchronous body variant
+// where the service returns {"DownloadURI": "..."} with HTTP 200 and no Location.
+func TestLogServiceDownloadRawLogDownloadURI(t *testing.T) {
+	logSvc, testClient := initLogServiceClient(t, logServiceBodyRawLog)
+
+	downloadURI := "/redfish/v1/Systems/System_0/LogServices/HostLogger/file"
+
+	testClient.CustomReturnForActions = map[string][]interface{}{
+		http.MethodPost: {
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{},
+				Body:       io.NopCloser(strings.NewReader(`{"DownloadURI": "` + downloadURI + `"}`)),
+			},
+		}}
+
+	result, err := logSvc.DownloadRawLog()
+	if err != nil {
+		t.Errorf("Error invoking DownloadRawLog: %s", err)
+	}
+	if result.Task != nil || result.LogEntryURI != "" {
+		t.Errorf("expected only DownloadURI set, got %+v", result)
+	}
+
+	assertEquals(t, downloadURI, result.DownloadURI)
+}
