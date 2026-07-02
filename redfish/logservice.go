@@ -135,32 +135,25 @@ type LogService struct {
 	// SyslogFilters shall describe all desired syslog messages to be logged locally. If this property contains an
 	// empty array, all messages shall be logged.
 	SyslogFilters []SyslogFilter
+	// Actions lists the actions available on this log service and their targets.
+	Actions LogServiceActions
 	// rawData holds the original serialized JSON so we can compare updates.
 	rawData []byte
+}
 
-	// clearLogTarget is the URL to send ClearLog actions to.
-	clearLogTarget string
-
-	// collectDiagnosticDataTarget is the URL to send CollectDiagnosticData actions to. (v1.2+)
-	collectDiagnosticDataTarget string
-	// collectDiagnosticInfoTarget is the URL to get ActionInfo about the CollectDiagnosticData action.
-	collectDiagnosticInfoTarget string
-	// downloadRawLogTarget is the URL to send DownloadRawLog actions to.
-	downloadRawLogTarget string
+// LogServiceActions lists the actions a LogService exposes and their targets.
+type LogServiceActions struct {
+	ClearLog              common.ActionTarget `json:"#LogService.ClearLog"`
+	CollectDiagnosticData common.ActionTarget `json:"#LogService.CollectDiagnosticData"`
+	DownloadRawLog        common.ActionTarget `json:"#LogService.DownloadRawLog"`
 }
 
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
 func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	type temp LogService
-	type Actions struct {
-		ClearLog              common.ActionTarget `json:"#LogService.ClearLog"`
-		CollectDiagnosticData common.ActionTarget `json:"#LogService.CollectDiagnosticData"`
-		DownloadRawLog        common.ActionTarget `json:"#LogService.DownloadRawLog"`
-	}
 	var t struct {
 		temp
 		Entries common.Link
-		Actions Actions
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -171,10 +164,6 @@ func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	*logservice = LogService(t.temp)
 	logservice.entries = t.Entries.String()
-	logservice.clearLogTarget = t.Actions.ClearLog.Target
-	logservice.collectDiagnosticDataTarget = t.Actions.CollectDiagnosticData.Target
-	logservice.collectDiagnosticInfoTarget = t.Actions.CollectDiagnosticData.ActionInfoTarget
-	logservice.downloadRawLogTarget = t.Actions.DownloadRawLog.Target
 
 	// This is a read/write object, so we need to save the raw object data for later
 	logservice.rawData = b
@@ -218,14 +207,14 @@ func (logservice *LogService) FilteredEntries(options ...common.FilterOption) ([
 
 // SupportsClearLog indicates if the ClearLog action is supported.
 func (logservice *LogService) SupportsClearLog() bool {
-	return logservice.clearLogTarget != ""
+	return logservice.Actions.ClearLog.Target != ""
 }
 
 // ClearLog shall delete all entries found in the Entries collection for this
 // Log Service.
 func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
-		logservice.clearLogTarget, struct{}{}, logservice.Headers(), false)
+		logservice.Actions.ClearLog.Target, struct{}{}, logservice.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err == nil {
 		return taskInfo, nil
@@ -243,7 +232,7 @@ func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
 		}{LogEntriesETag: strings.Trim(entryCollection.ETag, "\"")}
 
 		resp, taskInfo, retryErr = PostWithTask(logservice.GetClient(),
-			logservice.clearLogTarget, payload, logservice.Headers(), false)
+			logservice.Actions.ClearLog.Target, payload, logservice.Headers(), false)
 		defer common.DeferredCleanupHTTPResponse(resp)
 		if retryErr == nil {
 			return taskInfo, nil
@@ -258,7 +247,7 @@ func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
 	}
 
 	resp, taskInfo, err = PostWithTask(logservice.GetClient(),
-		logservice.clearLogTarget, t, logservice.Headers(), false)
+		logservice.Actions.ClearLog.Target, t, logservice.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -283,7 +272,7 @@ type CollectDiagnosticDataParameters struct {
 
 // SupportsCollectDiagnosticData indicates if the CollectDiagnosticData action is supported.
 func (logservice *LogService) SupportsCollectDiagnosticData() bool {
-	return logservice.collectDiagnosticDataTarget != ""
+	return logservice.Actions.CollectDiagnosticData.Target != ""
 }
 
 // For Redfish v1.2+
@@ -296,7 +285,7 @@ func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosti
 	}
 
 	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
-		logservice.collectDiagnosticDataTarget, parameters, logservice.Headers(), false)
+		logservice.Actions.CollectDiagnosticData.Target, parameters, logservice.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", taskInfo, err
@@ -319,16 +308,16 @@ func (logservice *LogService) CollectDiagnosticData(parameters *CollectDiagnosti
 // For Redfish v1.2+
 // CollectDiagnosticDataActionInfo, if supported, provides the ActionInfo for a CollectDiagnosticData action.
 func (logservice *LogService) CollectDiagnosticDataActionInfo() (*ActionInfo, error) {
-	if logservice.collectDiagnosticInfoTarget == "" {
+	if logservice.Actions.CollectDiagnosticData.ActionInfoTarget == "" {
 		return nil, errors.New("CollectDiagnosticData ActionInfo not supported by this service")
 	}
 
-	return common.GetObject[ActionInfo](logservice.GetClient(), logservice.collectDiagnosticInfoTarget)
+	return common.GetObject[ActionInfo](logservice.GetClient(), logservice.Actions.CollectDiagnosticData.ActionInfoTarget)
 }
 
 // SupportsDownloadRawLog indicates if the DownloadRawLog action is supported.
 func (logservice *LogService) SupportsDownloadRawLog() bool {
-	return logservice.downloadRawLogTarget != ""
+	return logservice.Actions.DownloadRawLog.Target != ""
 }
 
 // RawLogResult holds outcome of DownloadRawLog action
@@ -344,7 +333,7 @@ func (logservice *LogService) DownloadRawLog() (*RawLogResult, *TaskMonitorInfo,
 	}
 
 	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
-		logservice.downloadRawLogTarget, struct{}{}, logservice.Headers(), false)
+		logservice.Actions.DownloadRawLog.Target, struct{}{}, logservice.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil || taskInfo != nil {
 		return nil, taskInfo, err

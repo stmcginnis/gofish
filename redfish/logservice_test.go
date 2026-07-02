@@ -86,16 +86,16 @@ func TestLogService(t *testing.T) {
 		t.Error("Service should be enabled")
 	}
 
-	if result.clearLogTarget != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog" {
-		t.Errorf("Invalid ClearLog target: %s", result.clearLogTarget)
+	if result.Actions.ClearLog.Target != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.ClearLog" {
+		t.Errorf("Invalid ClearLog target: %s", result.Actions.ClearLog.Target)
 	}
 
-	if result.collectDiagnosticDataTarget != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.CollectDiagnosticData" {
-		t.Errorf("Invalid CollectDiagnosticData target: %s", result.collectDiagnosticDataTarget)
+	if result.Actions.CollectDiagnosticData.Target != "/redfish/v1/Managers/BMC/LogServices/Log/Actions/LogService.CollectDiagnosticData" {
+		t.Errorf("Invalid CollectDiagnosticData target: %s", result.Actions.CollectDiagnosticData.Target)
 	}
 
-	if result.collectDiagnosticInfoTarget != "/redfish/v1/Managers/BMC/LogServices/Log/CollectDiagnosticDataActionInfo" {
-		t.Errorf("Invalid CollectDiagnosticData ActionInfo target: %s", result.collectDiagnosticInfoTarget)
+	if result.Actions.CollectDiagnosticData.ActionInfoTarget != "/redfish/v1/Managers/BMC/LogServices/Log/CollectDiagnosticDataActionInfo" {
+		t.Errorf("Invalid CollectDiagnosticData ActionInfo target: %s", result.Actions.CollectDiagnosticData.ActionInfoTarget)
 	}
 }
 
@@ -224,8 +224,8 @@ func TestLogServiceDownloadRawLogParsing(t *testing.T) {
 		t.Error("Log service should support DownloadRawLog")
 	}
 
-	if result.downloadRawLogTarget != "/redfish/v1/Systems/System_0/LogServices/HostLogger/Actions/LogService.DownloadRawLog" {
-		t.Errorf("Invalid DownloadRawLog target: %s", result.downloadRawLogTarget)
+	if result.Actions.DownloadRawLog.Target != "/redfish/v1/Systems/System_0/LogServices/HostLogger/Actions/LogService.DownloadRawLog" {
+		t.Errorf("Invalid DownloadRawLog target: %s", result.Actions.DownloadRawLog.Target)
 	}
 }
 
