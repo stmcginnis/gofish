@@ -8,8 +8,11 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -26,8 +29,12 @@ import (
 	"github.com/coreweave/gofish/redfish"
 )
 
-const userAgent = "gofish/1.0"
-const applicationJSON = "application/json"
+const (
+	userAgent       = "gofish/1.0"
+	applicationJSON = "application/json"
+)
+
+var ErrClientCertChanged = errors.New("client cert unexpectedly changed")
 
 // APIClient represents a connection to a Redfish/Swordfish enabled service
 // or device.
@@ -57,6 +64,9 @@ type APIClient struct {
 	keepAlive bool
 
 	Settings common.ClientSettings
+
+	certHashMonitoring bool
+	CertHash           string
 }
 
 // Session holds the session ID and auth token needed to identify an
@@ -109,6 +119,9 @@ type ClientConfig struct {
 
 	// AutoExpand enables $expand if supported and automatically falls back if $expand fails.
 	AutoExpand bool
+
+	// EnableTLSHashMonitoring if set monitors the TLS peer signature on every response. If it changes between responses, an error is returned.
+	EnableTLSHashMonitoring bool
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -118,9 +131,10 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 	}
 
 	client := &APIClient{
-		endpoint:   config.Endpoint,
-		dumpWriter: config.DumpWriter,
-		ctx:        ctx,
+		endpoint:           config.Endpoint,
+		dumpWriter:         config.DumpWriter,
+		ctx:                ctx,
+		certHashMonitoring: config.EnableTLSHashMonitoring,
 	}
 
 	if config.MaxConcurrentRequests <= 0 {
@@ -176,11 +190,16 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		client.keepAlive = true
 	}
 
-	// Fetch the service root
-	client.Service, err = ServiceRoot(client)
+	// Fetch the service root and TLS cert
+	var tlsCert *x509.Certificate
+	client.Service, tlsCert, err = ServiceRootWithCert(client)
 	if err != nil {
 		return nil, err
 	}
+
+	// CertHash is populated once when the client is initialized.
+	// After that, it should never change. If monitoring is enabled and it changes, an error is thrown
+	client.CertHash = tlsCertHash(tlsCert)
 
 	// Init default settings
 	if config.AutoExpand && client.Service != nil {
@@ -524,6 +543,26 @@ func (c *APIClient) releaseSemaphore() {
 	<-c.sem
 }
 
+func tlsCertHash(cert *x509.Certificate) string {
+	if cert == nil {
+		return ""
+	}
+
+	// this is not actually a cert hash but it's good enough for now
+	return hex.EncodeToString(cert.Signature)
+}
+
+func (c *APIClient) checkCertHashMismatch(resp *http.Response) (*http.Response, error) {
+	if c.certHashMonitoring && c.CertHash != "" && resp != nil && resp.TLS != nil && len(resp.TLS.PeerCertificates) > 0 {
+		peerCertHash := tlsCertHash(resp.TLS.PeerCertificates[0])
+		if c.CertHash != peerCertHash {
+			defer common.DeferredCleanupHTTPResponse(resp)
+			return nil, ErrClientCertChanged
+		}
+	}
+	return resp, nil
+}
+
 // runRawRequestWithHeaders actually performs the REST calls but allowing custom headers
 func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer io.ReadSeeker, contentType string, customHeaders map[string]string) (*http.Response, error) {
 	if url == "" {
@@ -594,6 +633,10 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 	resp, err := c.HTTPClient.Do(req)
 	c.releaseSemaphore()
 	if err != nil {
+		return nil, err
+	}
+
+	if resp, err = c.checkCertHashMismatch(resp); err != nil {
 		return nil, err
 	}
 

@@ -5,6 +5,7 @@
 package gofish
 
 import (
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 
@@ -201,22 +202,34 @@ type Service struct {
 	} `json:"Links"`
 }
 
-// ServiceRoot will get a Service instance from the service.
-func ServiceRoot(c common.Client) (*Service, error) {
+// ServiceRootWithCert returns both the Service instance and the TLS cert presented by the BMC
+func ServiceRootWithCert(c common.Client) (*Service, *x509.Certificate, error) {
 	resp, err := c.Get(common.DefaultServiceRoot)
 	defer common.DeferredCleanupHTTPResponse(resp)
-	if err != nil {
-		return nil, err
+
+	var cert *x509.Certificate
+	if resp != nil && resp.TLS != nil && len(resp.TLS.PeerCertificates) > 0 {
+		cert = resp.TLS.PeerCertificates[0]
 	}
 
-	var serviceroot Service
-	err = json.NewDecoder(resp.Body).Decode(&serviceroot)
 	if err != nil {
-		return nil, err
+		return nil, cert, err
 	}
 
-	serviceroot.SetClient(c)
-	return &serviceroot, nil
+	var serviceRoot Service
+	err = json.NewDecoder(resp.Body).Decode(&serviceRoot)
+	if err != nil {
+		return nil, cert, err
+	}
+
+	serviceRoot.SetClient(c)
+	return &serviceRoot, cert, nil
+}
+
+// ServiceRoot will get a Service instance from the service.
+func ServiceRoot(c common.Client) (*Service, error) {
+	svc, _, err := ServiceRootWithCert(c)
+	return svc, err
 }
 
 // AccountService gets the Redfish AccountService

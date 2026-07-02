@@ -2,15 +2,35 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-package redfish
+package redfish_test
 
 import (
 	"encoding/json"
+	"io"
+	"math"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/coreweave/gofish"
 	"github.com/coreweave/gofish/common"
+	"github.com/coreweave/gofish/redfish"
 )
+
+func testClient(t *testing.T, handler http.HandlerFunc) common.Client {
+	server := httptest.NewServer(handler)
+	t.Cleanup(func() {
+		server.Close()
+	})
+
+	client, err := gofish.Connect(gofish.ClientConfig{Endpoint: server.URL, HTTPClient: server.Client()})
+	if err != nil {
+		t.Fatalf("failed to get client: %v", err)
+	}
+
+	return client
+}
 
 var thermalBody = `{
 	"@odata.type": "#Thermal.v1_6_0.Thermal",
@@ -568,9 +588,8 @@ var thermalBody = `{
 
 // TestThermal tests the parsing of Thermal objects.
 func TestThermal(t *testing.T) {
-	var result Thermal
+	var result redfish.Thermal
 	err := json.NewDecoder(strings.NewReader(thermalBody)).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
@@ -589,7 +608,7 @@ func TestThermal(t *testing.T) {
 }
 
 func TestThermalFanParsing(t *testing.T) {
-	var fan ThermalFan
+	var fan redfish.ThermalFan
 	err := json.NewDecoder(strings.NewReader(`{
 		"@odata.id": "/redfish/v1/Chassis/1/Thermal/Fans/1",
 		"Name": "FAN1",
@@ -604,7 +623,6 @@ func TestThermalFanParsing(t *testing.T) {
 			"Health": "OK"
 		}
 	}`)).Decode(&fan)
-
 	if err != nil {
 		t.Fatalf("Error decoding fan JSON: %v", err)
 	}
@@ -635,7 +653,7 @@ func TestThermalFanParsing(t *testing.T) {
 }
 
 func TestTemperatureParsing(t *testing.T) {
-	var temp Temperature
+	var temp redfish.Temperature
 	err := json.NewDecoder(strings.NewReader(`{
 		"@odata.id": "/redfish/v1/Chassis/1/Thermal/Temperatures/0",
 		"Name": "CPU Temp",
@@ -651,7 +669,6 @@ func TestTemperatureParsing(t *testing.T) {
 			{"@odata.id": "/redfish/v1/Systems/1/Processors/1"}
 		]
 	}`)).Decode(&temp)
-
 	if err != nil {
 		t.Fatalf("Error decoding temperature JSON: %v", err)
 	}
@@ -668,19 +685,18 @@ func TestTemperatureParsing(t *testing.T) {
 		t.Errorf("Expected physical context 'CPU', got %v", temp.PhysicalContext)
 	}
 
-	if len(temp.relatedItem) != 1 || temp.relatedItem[0] != "/redfish/v1/Systems/1/Processors/1" {
-		t.Errorf("Expected related item to processor, got %v", temp.relatedItem)
+	if len(temp.RelatedItems) != 1 || temp.RelatedItems[0] != "/redfish/v1/Systems/1/Processors/1" {
+		t.Errorf("Expected related item to processor, got %v", temp.RelatedItems)
 	}
 }
 
 func TestThermalFanUpdate(t *testing.T) {
-	var fan ThermalFan
+	var fan redfish.ThermalFan
 	err := json.NewDecoder(strings.NewReader(`{
 		"@odata.id": "/redfish/v1/Chassis/1/Thermal/Fans/1",
 		"IndicatorLED": "Off",
 		"Reading": 10780
 	}`)).Decode(&fan)
-
 	if err != nil {
 		t.Fatalf("Error decoding fan JSON: %v", err)
 	}
@@ -690,11 +706,22 @@ func TestThermalFanUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error marshaling fan: %v", err)
 	}
-	fan.rawData = originalJSON
+	fan.RawData = originalJSON
 
 	// Change LED state
 	newLED := common.BlinkingIndicatorLED
 	fan.IndicatorLED = &newLED
+
+	var patchContent string
+	client := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "PATCH" {
+			patchContentBytes, _ := io.ReadAll(r.Body)
+			patchContent = string(patchContentBytes)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`)) //nolint
+	})
+	fan.SetClient(client)
 
 	// Test update
 	err = fan.Update()
@@ -706,16 +733,19 @@ func TestThermalFanUpdate(t *testing.T) {
 	if *fan.IndicatorLED != common.BlinkingIndicatorLED {
 		t.Errorf("IndicatorLED not updated, still %v", *fan.IndicatorLED)
 	}
+
+	if patchContent != `{"IndicatorLED":"Blinking"}` {
+		t.Errorf("Received invalid patch: %v", patchContent)
+	}
 }
 
 func TestTemperatureUpdate(t *testing.T) {
-	var temp Temperature
+	var temp redfish.Temperature
 	err := json.NewDecoder(strings.NewReader(`{
 		"@odata.id": "/redfish/v1/Chassis/1/Thermal/Temperatures/0",
 		"LowerThresholdUser": 30.0,
 		"UpperThresholdUser": 80.0
 	}`)).Decode(&temp)
-
 	if err != nil {
 		t.Fatalf("Error decoding temperature JSON: %v", err)
 	}
@@ -725,13 +755,24 @@ func TestTemperatureUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error marshaling temperature: %v", err)
 	}
-	temp.rawData = originalJSON
+	temp.RawData = originalJSON
 
 	// Change thresholds
 	newLower := float32(35.0)
 	newUpper := float32(75.0)
 	temp.LowerThresholdUser = &newLower
 	temp.UpperThresholdUser = &newUpper
+
+	var patchContent string
+	client := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "PATCH" {
+			patchContentBytes, _ := io.ReadAll(r.Body)
+			patchContent = string(patchContentBytes)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`)) //nolint
+	})
+	temp.SetClient(client)
 
 	// Test update
 	err = temp.Update()
@@ -746,10 +787,24 @@ func TestTemperatureUpdate(t *testing.T) {
 	if *temp.UpperThresholdUser != 75.0 {
 		t.Errorf("UpperThresholdUser not updated, still %v", *temp.UpperThresholdUser)
 	}
+
+	receivedPatch := make(map[string]any)
+	err = json.Unmarshal([]byte(patchContent), &receivedPatch)
+	if err != nil {
+		t.Errorf("failed to unmarshal patch content: %v", err)
+	}
+
+	if math.Abs(receivedPatch["LowerThresholdUser"].(float64)-35.0) > 0.01 {
+		t.Errorf("invalid LowerThresholdUser patch")
+	}
+
+	if math.Abs(receivedPatch["UpperThresholdUser"].(float64)-75.0) > 0.01 {
+		t.Errorf("invalid UpperThresholdUser patch")
+	}
 }
 
 func TestServerThermalParsing(t *testing.T) {
-	var thermal Thermal
+	var thermal redfish.Thermal
 	err := json.NewDecoder(strings.NewReader(serverThermalBody)).Decode(&thermal)
 	if err != nil {
 		t.Fatalf("Error decoding thermal JSON: %v", err)
@@ -805,7 +860,7 @@ func TestServerThermalParsing(t *testing.T) {
 }
 
 func TestServerFanOemParsing(t *testing.T) {
-	var thermal Thermal
+	var thermal redfish.Thermal
 	err := json.NewDecoder(strings.NewReader(serverThermalBody)).Decode(&thermal)
 	if err != nil {
 		t.Fatalf("Error decoding thermal JSON: %v", err)
@@ -841,7 +896,7 @@ func TestServerFanOemParsing(t *testing.T) {
 }
 
 func TestServerTemperatureThresholds(t *testing.T) {
-	var thermal Thermal
+	var thermal redfish.Thermal
 	err := json.NewDecoder(strings.NewReader(serverThermalBody)).Decode(&thermal)
 	if err != nil {
 		t.Fatalf("Error decoding thermal JSON: %v", err)
