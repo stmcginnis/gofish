@@ -99,8 +99,9 @@ type LogService struct {
 	Description string
 	// DiagnosticDataDetails provides information about the supported CollectDiagnosticData requests
 	DiagnosticDataDetails []DiagnosticDataDetail
-	// Entries shall reference a collection of resources of type LogEntry.
-	entries string
+	// EntriesLink references a collection of resources of type LogEntry. Use
+	// the Entries or FilteredEntries methods to fetch the collection itself.
+	EntriesLink common.Link `json:"Entries"`
 	// LogEntryType shall represent the
 	// EntryType of all LogEntry resources contained in the Entries
 	// collection. If a single EntryType for all LogEntry resources cannot
@@ -151,19 +152,14 @@ type LogServiceActions struct {
 // UnmarshalJSON unmarshals a LogService object from the raw JSON.
 func (logservice *LogService) UnmarshalJSON(b []byte) error {
 	type temp LogService
-	var t struct {
-		temp
-		Entries common.Link
-	}
+	var t temp
 
 	err := json.Unmarshal(b, &t)
 	if err != nil {
 		return err
 	}
 
-	// Extract the links to other entities for later
-	*logservice = LogService(t.temp)
-	logservice.entries = t.Entries.String()
+	*logservice = LogService(t)
 
 	// This is a read/write object, so we need to save the raw object data for later
 	logservice.rawData = b
@@ -195,14 +191,14 @@ func ListReferencedLogServices(c common.Client, link string) ([]*LogService, err
 
 // Entries gets the log entries of this service.
 func (logservice *LogService) Entries() ([]*LogEntry, error) {
-	return ListReferencedLogEntrys(logservice.GetClient(), logservice.entries)
+	return ListReferencedLogEntrys(logservice.GetClient(), logservice.EntriesLink.String())
 }
 
 // FilteredEntries gets the log entries of this service with filtering applied (e.g. skip, top).
 func (logservice *LogService) FilteredEntries(options ...common.FilterOption) ([]*LogEntry, error) {
 	var filter common.Filter
 	filter.SetFilter(options...)
-	return ListReferencedLogEntrys(logservice.GetClient(), fmt.Sprintf("%s%s", logservice.entries, filter))
+	return ListReferencedLogEntrys(logservice.GetClient(), fmt.Sprintf("%s%s", logservice.EntriesLink, filter))
 }
 
 // SupportsClearLog indicates if the ClearLog action is supported.
@@ -225,7 +221,7 @@ func (logservice *LogService) ClearLog() (*TaskMonitorInfo, error) {
 		ETag string `json:"@odata.etag"`
 	}{}
 
-	retryErr := logservice.Get(logservice.GetClient(), logservice.entries, entryCollection)
+	retryErr := logservice.Get(logservice.GetClient(), logservice.EntriesLink.String(), entryCollection)
 	if retryErr == nil {
 		payload := struct {
 			LogEntriesETag string

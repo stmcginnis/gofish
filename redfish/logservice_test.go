@@ -66,8 +66,8 @@ func TestLogService(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.entries != "/redfish/v1/LogEntryCollection" {
-		t.Errorf("Received invalid log entry collection: %s", result.entries)
+	if result.EntriesLink != "/redfish/v1/LogEntryCollection" {
+		t.Errorf("Received invalid log entry collection: %s", result.EntriesLink)
 	}
 
 	if result.LogEntryType != EventLogEntryTypes {
