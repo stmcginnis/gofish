@@ -331,37 +331,17 @@ func (logservice *LogService) SupportsDownloadRawLog() bool {
 	return logservice.downloadRawLogTarget != ""
 }
 
-// RawLogResult holds the outcome of a DownloadRawLog action.
-type RawLogResult struct {
-	// DownloadURI, when set, is a direct URI to GET the raw log archive.
-	DownloadURI string
-	// LogEntryURI, when set, points to a LogEntry whose AdditionalDataURI holds
-	// the archive (synchronous responses that return a Location header).
-	LogEntryURI string
-	// Task, when set, is an async task monitor to poll; on completion its
-	// Location header yields the LogEntry URI.
-	Task *TaskMonitorInfo
-}
-
 // DownloadRawLog triggers generation of the raw log archive.
-func (logservice *LogService) DownloadRawLog() (*RawLogResult, error) {
+func (logservice *LogService) DownloadRawLog() (string, *TaskMonitorInfo, error) {
 	if !logservice.SupportsDownloadRawLog() {
-		return nil, errors.New("DownloadRawLog not supported by this service")
+		return "", nil, errors.New("DownloadRawLog not supported by this service")
 	}
 
 	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
 		logservice.downloadRawLogTarget, struct{}{}, logservice.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if taskInfo != nil {
-		return &RawLogResult{Task: taskInfo}, nil
-	}
-
-	if location := resp.Header["Location"]; len(location) > 0 && location[0] != "" {
-		return &RawLogResult{LogEntryURI: location[0]}, nil
+	if err != nil || taskInfo != nil {
+		return "", taskInfo, err
 	}
 
 	// Some BMCs return the archive location synchronously in the body, e.g.
@@ -371,9 +351,9 @@ func (logservice *LogService) DownloadRawLog() (*RawLogResult, error) {
 	}
 	if body, rerr := io.ReadAll(resp.Body); rerr == nil && len(body) > 0 {
 		if json.Unmarshal(body, &payload) == nil && payload.DownloadURI != "" {
-			return &RawLogResult{DownloadURI: payload.DownloadURI}, nil
+			return payload.DownloadURI, nil, nil
 		}
 	}
 
-	return &RawLogResult{}, nil
+	return "", nil, nil
 }

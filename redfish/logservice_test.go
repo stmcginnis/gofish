@@ -237,38 +237,35 @@ func TestLogServiceDownloadRawLogUnsupported(t *testing.T) {
 		t.Error("log service unexpectedly supports DownloadRawLog")
 	}
 
-	if _, err := logSvc.DownloadRawLog(); err == nil {
+	if _, _, err := logSvc.DownloadRawLog(); err == nil {
 		t.Error("expected error invoking DownloadRawLog on unsupported service")
 	}
 }
 
-// TestLogServiceDownloadRawLogSuccess tests that DownloadRawLog returns the LogEntry location from a
-// synchronous action response (Location header, no task monitor).
+// TestLogServiceDownloadRawLogSuccess tests that a synchronous action response
+// with neither a DownloadURI body nor a task monitor returns empty values.
 func TestLogServiceDownloadRawLogSuccess(t *testing.T) {
 	logSvc, testClient := initLogServiceClient(t, logServiceBodyRawLog)
-
-	logEntryLocation := "/redfish/v1/Systems/System_0/LogServices/HostLogger/Entries/1"
 
 	testClient.CustomReturnForActions = map[string][]interface{}{
 		http.MethodPost: {
 			&http.Response{
 				StatusCode: http.StatusCreated,
-				Header: http.Header{
-					"Location": []string{logEntryLocation},
-				},
-				Body: io.NopCloser(strings.NewReader(`{}`)),
+				Header:     http.Header{},
+				Body:       io.NopCloser(strings.NewReader(`{}`)),
 			},
 		}}
 
-	result, err := logSvc.DownloadRawLog()
+	downloadURI, task, err := logSvc.DownloadRawLog()
 	if err != nil {
 		t.Errorf("Error invoking DownloadRawLog: %s", err)
 	}
-	if result.Task != nil {
-		t.Errorf("expected no task monitor for synchronous response, got %v", result.Task)
+	if task != nil {
+		t.Errorf("expected no task monitor for synchronous response, got %v", task)
 	}
-
-	assertEquals(t, logEntryLocation, result.LogEntryURI)
+	if downloadURI != "" {
+		t.Errorf("expected no download URI, got %q", downloadURI)
+	}
 }
 
 // TestLogServiceDownloadRawLogDownloadURI tests the synchronous body variant
@@ -287,13 +284,13 @@ func TestLogServiceDownloadRawLogDownloadURI(t *testing.T) {
 			},
 		}}
 
-	result, err := logSvc.DownloadRawLog()
+	gotURI, task, err := logSvc.DownloadRawLog()
 	if err != nil {
 		t.Errorf("Error invoking DownloadRawLog: %s", err)
 	}
-	if result.Task != nil || result.LogEntryURI != "" {
-		t.Errorf("expected only DownloadURI set, got %+v", result)
+	if task != nil {
+		t.Errorf("expected no task monitor, got %v", task)
 	}
 
-	assertEquals(t, downloadURI, result.DownloadURI)
+	assertEquals(t, downloadURI, gotURI)
 }
