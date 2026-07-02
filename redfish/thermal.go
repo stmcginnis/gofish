@@ -72,16 +72,16 @@ type ThermalFan struct {
 
 	// Links to related objects (unmarshaled separately)
 	// Assembly contains a link to a resource of type Assembly.
-	assembly    string
-	redundancy  []string
-	relatedItem []string
+	assembly     string
+	redundancy   []string
+	RelatedItems []string
 
 	// Counters for related objects
 	RedundancyCount  int `json:"Redundancy@odata.count,omitempty"`
 	RelatedItemCount int `json:"RelatedItem@odata.count,omitempty"`
 
-	// rawData holds original JSON for comparison during updates.
-	rawData []byte
+	// RawData holds original JSON for comparison during updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a ThermalFan object from the raw JSON.
@@ -104,10 +104,10 @@ func (fan *ThermalFan) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	fan.assembly = t.Assembly.String()
 	fan.redundancy = t.Redundancy.ToStrings()
-	fan.relatedItem = t.RelatedItem.ToStrings()
+	fan.RelatedItems = t.RelatedItem.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	fan.rawData = b
+	fan.RawData = b
 
 	return nil
 }
@@ -116,7 +116,7 @@ func (fan *ThermalFan) UnmarshalJSON(b []byte) error {
 func (fan *ThermalFan) Update() error {
 	readWriteFields := []string{"IndicatorLED"}
 
-	return fan.UpdateFromRawData(fan, fan.rawData, readWriteFields)
+	return fan.UpdateFromRawData(fan, fan.RawData, readWriteFields)
 }
 
 // Temperature represents a temperature sensor in a Redfish system.
@@ -168,13 +168,13 @@ type Temperature struct {
 	UpperThresholdUser *float32 `json:"UpperThresholdUser,omitempty"`
 
 	// Links to related items (unmarshaled separately)
-	relatedItem []string
+	RelatedItems []string
 
 	// Counter for related items
 	RelatedItemCount int `json:"RelatedItem@odata.count,omitempty"`
 
-	// rawData holds original JSON for comparison during updates.
-	rawData []byte
+	// RawData holds original JSON for comparison during updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a Temperature object from the raw JSON.
@@ -193,20 +193,22 @@ func (temperature *Temperature) UnmarshalJSON(b []byte) error {
 	*temperature = Temperature(t.temp)
 
 	// Extract the links to other entities for later
-	temperature.relatedItem = t.RelatedItem.ToStrings()
+	temperature.RelatedItems = t.RelatedItem.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
-	temperature.rawData = b
+	temperature.RawData = b
 
 	return nil
 }
 
 // Update commits updates to this object's properties to the running system.
 func (temperature *Temperature) Update() error {
-	readWriteFields := []string{"LowerThresholdUser",
-		"UpperThresholdUser"}
+	readWriteFields := []string{
+		"LowerThresholdUser",
+		"UpperThresholdUser",
+	}
 
-	return temperature.UpdateFromRawData(temperature, temperature.rawData, readWriteFields)
+	return temperature.UpdateFromRawData(temperature, temperature.RawData, readWriteFields)
 }
 
 // Thermal represents thermal management data in a Redfish system.
@@ -261,8 +263,10 @@ func (thermal *Thermal) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (thermal *Thermal) Update() error {
-	readWriteFields := []string{"Fans",
-		"Temperatures"}
+	readWriteFields := []string{
+		"Fans",
+		"Temperatures",
+	}
 
 	return thermal.UpdateFromRawData(thermal, thermal.rawData, readWriteFields)
 }

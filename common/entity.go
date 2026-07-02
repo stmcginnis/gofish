@@ -6,6 +6,7 @@ package common
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -209,7 +210,7 @@ func (e *Filter) ClearFilter() {
 
 // UpdateFromRawData provides a generic update implementation for resources
 // that store their original JSON data in a RawData field.
-func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates []string) error {
+func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates []string) (retErr error) {
 	if e == nil {
 		return fmt.Errorf("entity is nil")
 	}
@@ -267,7 +268,7 @@ func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates 
 	// Recover from any panics during update
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("recovered from panic in Update: %v\n", r)
+			retErr = errors.Join(retErr, fmt.Errorf("recovered from panic in Update: %v", r))
 		}
 	}()
 
