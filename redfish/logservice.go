@@ -331,29 +331,33 @@ func (logservice *LogService) SupportsDownloadRawLog() bool {
 	return logservice.downloadRawLogTarget != ""
 }
 
+// RawLogResult holds outcome of DownloadRawLog action
+type RawLogResult struct {
+	// direct URI to GET raw log archive
+	DownloadURI string
+}
+
 // DownloadRawLog triggers generation of the raw log archive.
-func (logservice *LogService) DownloadRawLog() (string, *TaskMonitorInfo, error) {
+func (logservice *LogService) DownloadRawLog() (*RawLogResult, *TaskMonitorInfo, error) {
 	if !logservice.SupportsDownloadRawLog() {
-		return "", nil, errors.New("DownloadRawLog not supported by this service")
+		return nil, nil, errors.New("DownloadRawLog not supported by this service")
 	}
 
 	resp, taskInfo, err := PostWithTask(logservice.GetClient(),
 		logservice.downloadRawLogTarget, struct{}{}, logservice.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil || taskInfo != nil {
-		return "", taskInfo, err
+		return nil, taskInfo, err
 	}
 
 	// Some BMCs return the archive location synchronously in the body, e.g.
 	// {"DownloadURI": "/redfish/v1/Systems/System_0/LogServices/HostLogger/file"}.
-	var payload struct {
-		DownloadURI string `json:"DownloadURI"`
-	}
+	var result RawLogResult
 	if body, rerr := io.ReadAll(resp.Body); rerr == nil && len(body) > 0 {
-		if json.Unmarshal(body, &payload) == nil && payload.DownloadURI != "" {
-			return payload.DownloadURI, nil, nil
+		if json.Unmarshal(body, &result) == nil && result.DownloadURI != "" {
+			return &result, nil, nil
 		}
 	}
 
-	return "", nil, nil
+	return nil, nil, nil
 }

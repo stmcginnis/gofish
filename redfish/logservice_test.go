@@ -256,15 +256,15 @@ func TestLogServiceDownloadRawLogSuccess(t *testing.T) {
 			},
 		}}
 
-	downloadURI, task, err := logSvc.DownloadRawLog()
+	result, task, err := logSvc.DownloadRawLog()
 	if err != nil {
 		t.Errorf("Error invoking DownloadRawLog: %s", err)
 	}
 	if task != nil {
 		t.Errorf("expected no task monitor for synchronous response, got %v", task)
 	}
-	if downloadURI != "" {
-		t.Errorf("expected no download URI, got %q", downloadURI)
+	if result != nil {
+		t.Errorf("expected no RawLogResult, got %+v", result)
 	}
 }
 
@@ -284,13 +284,16 @@ func TestLogServiceDownloadRawLogDownloadURI(t *testing.T) {
 			},
 		}}
 
-	gotURI, task, err := logSvc.DownloadRawLog()
+	result, task, err := logSvc.DownloadRawLog()
 	if err != nil {
 		t.Errorf("Error invoking DownloadRawLog: %s", err)
 	}
 	if task != nil {
 		t.Errorf("expected no task monitor, got %v", task)
 	}
+	if result == nil {
+		t.Fatal("expected a RawLogResult, got nil")
+	}
 
-	assertEquals(t, downloadURI, gotURI)
+	assertEquals(t, downloadURI, result.DownloadURI)
 }
