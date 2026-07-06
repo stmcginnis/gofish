@@ -314,7 +314,7 @@ type Chassis struct {
 	// functional view of this chassis, such as a 'ComputerSystem' resource.
 	//
 	// Version added: v1.14.0
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool `json:",omitempty"`
 	// LogServices shall contain a link to a resource collection of type
 	// 'LogServiceCollection'.
 	logServices string
