@@ -286,7 +286,7 @@ type Drive struct {
 	// reflect the implementation of the locating function.
 	//
 	// Version added: v1.11.0
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool `json:",omitempty"`
 	// Manufacturer shall contain the name of the organization responsible for
 	// producing the drive. This organization may be the entity from whom the drive
 	// is purchased, but this is not necessarily true.

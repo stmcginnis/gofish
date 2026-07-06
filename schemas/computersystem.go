@@ -669,7 +669,7 @@ type ComputerSystem struct {
 	// resource.
 	//
 	// Version added: v1.13.0
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool `json:",omitempty"`
 	// LogServices shall contain a link to a resource collection of type
 	// 'LogServiceCollection'.
 	logServices string

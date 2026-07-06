@@ -80,7 +80,7 @@ type Switch struct {
 	// reflect the implementation of the locating function.
 	//
 	// Version added: v1.4.0
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool `json:",omitempty"`
 	// LogServices shall contain a link to a resource collection of type
 	// 'LogServiceCollection'.
 	logServices string
