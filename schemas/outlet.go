@@ -135,7 +135,7 @@ type Outlet struct {
 	// reflect the implementation of the locating function.
 	//
 	// Version added: v1.1.0
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool `json:",omitempty"`
 	// NominalVoltage shall contain the nominal voltage for this outlet, in volt
 	// units.
 	NominalVoltage NominalVoltageType

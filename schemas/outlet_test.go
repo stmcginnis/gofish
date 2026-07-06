@@ -99,7 +99,7 @@ func TestOutlet(t *testing.T) {
 	assertEquals(t, "/redfish/v1/PowerEquipment/RackPDUs/1/Sensors/VoltageA1", result.PolyPhaseVoltage.Line1ToNeutral.DataSourceURI)
 	assertEquals(t, "/redfish/v1/PowerEquipment/RackPDUs/1/Branches/A", result.branchCircuit)
 
-	if !result.LocationIndicatorActive {
+	if !*result.LocationIndicatorActive {
 		t.Error("Expected location indicator to be active")
 	}
 
