@@ -49,6 +49,7 @@ linters:
     goconst:
       min-len: 2
       min-occurrences: 5
+      ignore-tests: true
     gocritic:
       disabled-checks:
         - deprecatedComment
@@ -107,6 +108,12 @@ linters:
         text: '`(C|c)ancell.*` is a misspelling'
       - path: (.+)\.go$
         text: Error return value of `original.UnmarshalJSON` is not checked
+      # Schema and OEM files list Redfish property names as string literals in
+      # their writable-property allow-lists; these are spec data, not magic
+      # constants worth extracting.
+      - linters:
+          - goconst
+        path: (schemas|oem)/
     paths:
       - examples
       - tools

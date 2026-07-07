@@ -230,7 +230,7 @@ func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates 
 		return fmt.Errorf("resource type is nil")
 	}
 
-	if resourceType.Kind() == reflect.Ptr {
+	if resourceType.Kind() == reflect.Pointer {
 		resourceType = resourceType.Elem()
 	}
 
@@ -258,10 +258,10 @@ func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates 
 		return fmt.Errorf("invalid current value")
 	}
 
-	if originalValue.Kind() == reflect.Ptr {
+	if originalValue.Kind() == reflect.Pointer {
 		originalValue = originalValue.Elem()
 	}
-	if currentValue.Kind() == reflect.Ptr {
+	if currentValue.Kind() == reflect.Pointer {
 		currentValue = currentValue.Elem()
 	}
 
@@ -310,10 +310,10 @@ func derefPointers(original, updated reflect.Value) (derefOriginal, derefUpdated
 	derefOriginal = original
 	derefUpdated = updated
 
-	if original.Kind() == reflect.Ptr {
+	if original.Kind() == reflect.Pointer {
 		derefOriginal = original.Elem()
 	}
-	if updated.Kind() == reflect.Ptr {
+	if updated.Kind() == reflect.Pointer {
 		derefUpdated = updated.Elem()
 	}
 	return
@@ -404,7 +404,7 @@ func compareField(payload map[string]any, fieldName string, original, updated re
 	switch original.Kind() {
 	case reflect.Struct:
 		handleStructField(payload, fieldName, original, updated)
-	case reflect.Ptr:
+	case reflect.Pointer:
 		handlePointerField(payload, fieldName, original, updated)
 	case reflect.Slice, reflect.Map:
 		handleCompositeField(payload, fieldName, original, updated)
