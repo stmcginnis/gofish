@@ -5,8 +5,10 @@
 package gofish_test
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/schemas"
@@ -180,6 +182,98 @@ func Example_queryThermal() {
 			fmt.Printf("  Fan:  %-30s  %d %s\n", fan.Name, *fan.Reading, fan.ReadingUnits)
 		}
 	}
+}
+
+// Example_pollThermalConditionally shows how to poll a resource efficiently with
+// a conditional GET. schemas.Refresh re-fetches the object using its own ETag as
+// If-None-Match; when the service reports no change it returns
+// schemas.ErrNotModified and the existing object stays valid, avoiding the JSON
+// parse and most of the bytes on the wire. This is the intended pattern for
+// polling fleets of BMCs for resources that change infrequently.
+func Example_pollThermalConditionally() {
+	c, err := gofish.Connect(gofish.ClientConfig{
+		Endpoint: "https://bmc-ip",
+		Username: "my-username",
+		Password: "my-password",
+		Insecure: true,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer c.Logout()
+
+	chassis, err := c.Service.Chassis()
+	if err != nil || len(chassis) == 0 {
+		log.Print(err)
+		return
+	}
+
+	// Initial fetch captures the resource and its ETag.
+	thermal, err := chassis[0].Thermal()
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	// Poll on an interval; only re-parse when the BMC reports a change.
+	for range time.Tick(30 * time.Second) {
+		refreshed, err := schemas.Refresh(thermal)
+		switch {
+		case errors.Is(err, schemas.ErrNotModified):
+			continue // unchanged since last poll; keep using the cached object
+		case err != nil:
+			log.Printf("error refreshing thermal: %v", err)
+			continue
+		}
+
+		thermal = refreshed
+		for i := range thermal.Temperatures {
+			if temp := &thermal.Temperatures[i]; temp.ReadingCelsius != nil {
+				fmt.Printf("%s: %.1f °C\n", temp.Name, *temp.ReadingCelsius)
+			}
+		}
+	}
+}
+
+// Example_conditionalReload shows schemas.Reload, the general form of a
+// conditional GET where the caller supplies the request headers directly. Use it
+// when you cache ETags outside the object, or when a vendor requires an unquoted
+// ETag in If-None-Match. schemas.Refresh is the convenience wrapper over this.
+func Example_conditionalReload() {
+	c, err := gofish.Connect(gofish.ClientConfig{
+		Endpoint: "https://bmc-ip",
+		Username: "my-username",
+		Password: "my-password",
+		Insecure: true,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer c.Logout()
+
+	chassis, err := c.Service.Chassis()
+	if err != nil || len(chassis) == 0 {
+		log.Print(err)
+		return
+	}
+
+	power, err := chassis[0].Power()
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	power, err = schemas.Reload(power, map[string]string{"If-None-Match": power.GetETag()})
+	if errors.Is(err, schemas.ErrNotModified) {
+		fmt.Println("power metrics unchanged")
+		return
+	}
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	fmt.Printf("refreshed power resource: %s\n", power.Name)
 }
 
 // Example_queryManagers shows how to list BMC/management controller details,
