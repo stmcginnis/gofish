@@ -735,13 +735,13 @@ func ConstructError(statusCode int, b []byte) error {
 		err.Error.Message = string(b)
 	}
 	err.Error.HTTPReturnedStatusCode = statusCode
-	err.Error.rawData = b
+	err.Error.RawData = b
 	return err.Error
 }
 
 // Error is redfish error response object for HTTP status codes different from 200, 201 and 204
 type Error struct {
-	rawData []byte
+	RawData []byte `json:"-"`
 	// An integer that represents the status code returned by the API
 	HTTPReturnedStatusCode int `json:"-"`
 	// A string indicating a specific MessageId from the message registry.
@@ -754,9 +754,9 @@ type Error struct {
 
 func (e *Error) Error() string {
 	if e.HTTPReturnedStatusCode != 0 {
-		return fmt.Sprintf("%d: %s", e.HTTPReturnedStatusCode, e.rawData)
+		return fmt.Sprintf("%d: %s", e.HTTPReturnedStatusCode, e.RawData)
 	}
-	return string(e.rawData)
+	return string(e.RawData)
 }
 
 // ErrExtendedInfo is for redfish ExtendedInfo error response
