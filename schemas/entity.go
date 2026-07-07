@@ -452,6 +452,7 @@ func handleSimpleField(payload map[string]any, fieldName string, original, updat
 // SchemaObject defines the minimum interface required for API objects.
 type SchemaObject interface {
 	SetClient(Client)
+	GetClient() Client
 	GetETag() string
 	SetETag(string)
 	GetID() string
@@ -475,6 +476,48 @@ func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string, op
 	}
 
 	return DecodeGenericEntity[T, PT](c, resp)
+}
+
+// Reload re-fetches obj from its own @odata.id using obj's client and the given
+// headers, returning a freshly decoded instance. It is the building block for
+// conditional GETs: pass an "If-None-Match" header and, when the service replies
+// 304 Not Modified, Reload returns the original obj unchanged together with
+// ErrNotModified (check with errors.Is(err, ErrNotModified)). On any other error
+// the original obj is likewise returned so callers can safely write
+// obj, err = Reload(obj, ...) without nil-ing out a still-valid value.
+func Reload[T any, PT GenericSchemaObjectPointer[T]](obj PT, headers map[string]string, opts ...QueryGroupOption) (PT, error) {
+	c := obj.GetClient()
+	if c == nil {
+		return obj, fmt.Errorf("cannot reload %T: no client is set on the object", obj)
+	}
+
+	uri := obj.GetODataID()
+	if uri == "" {
+		return obj, fmt.Errorf("cannot reload %T: object has no @odata.id", obj)
+	}
+
+	resp, err := c.GetWithHeaders(BuildQuery(c, uri, false, opts...), headers)
+	defer DeferredCleanupHTTPResponse(resp)
+	if err != nil {
+		return obj, err
+	}
+
+	return DecodeGenericEntity[T, PT](c, resp)
+}
+
+// Refresh performs a conditional GET for obj keyed on its current ETag, the
+// common case for polling resources that change infrequently. When the service
+// reports the resource is unchanged it returns the original obj together with
+// ErrNotModified; otherwise it returns the updated resource. If obj has no ETag
+// there is nothing to condition on, so Refresh falls back to an unconditional
+// reload. Vendors needing the stripEtagQuotes workaround should call Reload with
+// a hand-built If-None-Match header instead.
+func Refresh[T any, PT GenericSchemaObjectPointer[T]](obj PT) (PT, error) {
+	var headers map[string]string
+	if etag := obj.GetETag(); etag != "" {
+		headers = map[string]string{"If-None-Match": etag}
+	}
+	return Reload[T, PT](obj, headers)
 }
 
 // DecodeGenericEntity attempts to decode an HTTP response into an Entity struct

@@ -135,6 +135,11 @@ func (c *TestClient) performAction(action, url string, payload any, customHeader
 	}
 
 	resp := customReturnForAction.(*http.Response)
+	// Mirror the real client: a 304 is a successful conditional-GET response
+	// returned intact alongside the ErrNotModified sentinel.
+	if resp.StatusCode == http.StatusNotModified {
+		return resp, ErrNotModified
+	}
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
 		defer DeferredCleanupHTTPResponse(resp)
 		payload, err := io.ReadAll(resp.Body)
