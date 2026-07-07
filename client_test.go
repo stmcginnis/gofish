@@ -182,6 +182,47 @@ func TestConnectDefaultContextCancel(t *testing.T) {
 	}
 }
 
+// TestGetWithHeadersNotModified verifies that a 304 Not Modified response to a
+// conditional GET is reported as schemas.ErrNotModified with the response left
+// intact so the caller can read the Etag for cache bookkeeping.
+func TestGetWithHeadersNotModified(t *testing.T) {
+	const etag = `"abc123"`
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("If-None-Match") != etag {
+			t.Errorf("expected If-None-Match %q, got %q", etag, r.Header.Get("If-None-Match"))
+		}
+		w.Header().Set("Etag", etag)
+		w.WriteHeader(http.StatusNotModified)
+	}))
+	defer ts.Close()
+
+	client := &APIClient{
+		ctx:        context.Background(),
+		endpoint:   ts.URL,
+		HTTPClient: ts.Client(),
+		sem:        make(chan bool, 1),
+	}
+
+	resp, err := client.GetWithHeaders("/redfish/v1/Chassis/1/Thermal",
+		map[string]string{"If-None-Match": etag})
+	if resp != nil {
+		defer schemas.DeferredCleanupHTTPResponse(resp)
+	}
+
+	if !errors.Is(err, schemas.ErrNotModified) {
+		t.Fatalf("expected schemas.ErrNotModified, got %v", err)
+	}
+	if resp == nil {
+		t.Fatal("expected the response to be returned intact on 304, got nil")
+	}
+	if got := resp.Header.Get("Etag"); got != etag {
+		t.Errorf("expected Etag %q on 304 response, got %q", etag, got)
+	}
+	if resp.StatusCode != http.StatusNotModified {
+		t.Errorf("expected status %d, got %d", http.StatusNotModified, resp.StatusCode)
+	}
+}
+
 func TestClientRunRawRequestNoURL(t *testing.T) {
 	client := APIClient{sem: make(chan bool, 1)}
 

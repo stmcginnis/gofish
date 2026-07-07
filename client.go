@@ -613,6 +613,15 @@ func (c *APIClient) runRawRequestWithHeaders(method, url string, payloadBuffer i
 		}
 	}
 
+	// A 304 Not Modified is the successful outcome of a conditional GET: the
+	// caller sent If-None-Match and their cached representation is still valid.
+	// Return the response intact (so the caller can read the Etag header) along
+	// with a sentinel so it can be told apart from a real error. Backward
+	// compatible: callers that don't send If-None-Match never receive a 304.
+	if resp.StatusCode == http.StatusNotModified {
+		return resp, schemas.ErrNotModified
+	}
+
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 202 && resp.StatusCode != 204 {
 		defer schemas.DeferredCleanupHTTPResponse(resp)
 		payload, err := io.ReadAll(resp.Body)
