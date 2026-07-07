@@ -16,6 +16,13 @@ import (
 var (
 	ErrIsEmpty    = errors.New("value is empty")
 	ErrIsNegative = errors.New("value is negative")
+
+	// ErrNotModified is returned for a conditional GET (If-None-Match) when the
+	// service responds with 304 Not Modified, indicating the caller's cached
+	// representation is still current. The HTTP response is returned intact
+	// alongside this sentinel so callers can read the Etag header for cache
+	// bookkeeping. Detect it with errors.Is(err, schemas.ErrNotModified).
+	ErrNotModified = errors.New("gofish: resource not modified")
 )
 
 // CleanupHTTPResponse MUST be called for any HTTP response to ensure that it is properly closed.
