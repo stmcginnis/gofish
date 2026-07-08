@@ -302,4 +302,18 @@ func TestDellManager(t *testing.T) {
 	if result.importSystemConfigTarget != "/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration" {
 		t.Errorf("Invalid ImportSystemConfig link: %s", result.importSystemConfigTarget)
 	}
+
+	expectedAttributes := []string{
+		"/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1",
+		"/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/System.Embedded.1",
+		"/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/LifecycleController.Embedded.1",
+	}
+	if len(result.DellServiceLinks) != len(expectedAttributes) {
+		t.Fatalf("Expected %d DellServiceLinks, got %d", len(expectedAttributes), len(result.DellServiceLinks))
+	}
+	for i, want := range expectedAttributes {
+		if got := result.DellServiceLinks[i]; got != want {
+			t.Errorf("DellServiceLinks[%d]: expected %s, got %s", i, want, got)
+		}
+	}
 }

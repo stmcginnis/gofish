@@ -16,6 +16,10 @@ type Manager struct {
 	schemas.Manager
 
 	importSystemConfigTarget string
+
+	// DellServiceLinks are the links to the Dell attribute resources found under
+	// Links.Oem.Dell.DellAttributes of the manager.
+	DellServiceLinks []string
 }
 
 type ISCExecutionMode string
@@ -112,6 +116,19 @@ func FromManager(manager *schemas.Manager) (*Manager, error) {
 	}
 
 	m.importSystemConfigTarget = tmp.Actions.Oem.ImportSystemConfiguration.Target
+
+	type oemLinks struct {
+		Dell struct {
+			DellAttributes schemas.Links `json:"DellAttributes"`
+		} `json:"Dell"`
+	}
+	var links oemLinks
+	if len(manager.OEMLinks) > 0 {
+		if err := json.Unmarshal(manager.OEMLinks, &links); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Dell OEM manager links: %w", err)
+		}
+	}
+	m.DellServiceLinks = links.Dell.DellAttributes.ToStrings()
 
 	return &m, nil
 }
