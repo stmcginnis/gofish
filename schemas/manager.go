@@ -269,6 +269,8 @@ type Manager struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// OEMLinks are all OEM data under the 'Links' section.
+	OEMLinks json.RawMessage
 	// OEMSecurityMode shall the OEM-specific security compliance mode(s) that the
 	// manager is currently configured to enforce. This property shall only be
 	// present if 'SecurityMode' contains 'OEM'.
@@ -458,16 +460,17 @@ func (m *Manager) UnmarshalJSON(b []byte) error {
 		UpdateSecurityMode ActionTarget `json:"#Manager.UpdateSecurityMode"`
 	}
 	type mLinks struct {
-		ActiveSoftwareImage Link  `json:"ActiveSoftwareImage"`
-		ManagedBy           Links `json:"ManagedBy"`
-		ManagerForChassis   Links `json:"ManagerForChassis"`
-		ManagerForFabrics   Links `json:"ManagerForFabrics"`
-		ManagerForManagers  Links `json:"ManagerForManagers"`
-		ManagerForServers   Links `json:"ManagerForServers"`
-		ManagerForSwitches  Links `json:"ManagerForSwitches"`
-		ManagerInChassis    Link  `json:"ManagerInChassis"`
-		SelectedNetworkPort Link  `json:"SelectedNetworkPort"`
-		SoftwareImages      Links `json:"SoftwareImages"`
+		ActiveSoftwareImage Link            `json:"ActiveSoftwareImage"`
+		ManagedBy           Links           `json:"ManagedBy"`
+		ManagerForChassis   Links           `json:"ManagerForChassis"`
+		ManagerForFabrics   Links           `json:"ManagerForFabrics"`
+		ManagerForManagers  Links           `json:"ManagerForManagers"`
+		ManagerForServers   Links           `json:"ManagerForServers"`
+		ManagerForSwitches  Links           `json:"ManagerForSwitches"`
+		ManagerInChassis    Link            `json:"ManagerInChassis"`
+		SelectedNetworkPort Link            `json:"SelectedNetworkPort"`
+		SoftwareImages      Links           `json:"SoftwareImages"`
+		OEM                 json.RawMessage `json:"Oem"`
 	}
 	var tmp struct {
 		temp
@@ -516,6 +519,7 @@ func (m *Manager) UnmarshalJSON(b []byte) error {
 	m.managerInChassis = tmp.Links.ManagerInChassis.String()
 	m.selectedNetworkPort = tmp.Links.SelectedNetworkPort.String()
 	m.softwareImages = tmp.Links.SoftwareImages.ToStrings()
+	m.OEMLinks = tmp.Links.OEM
 	m.certificates = tmp.Certificates.String()
 	m.dedicatedNetworkPorts = tmp.DedicatedNetworkPorts.String()
 	m.ethernetInterfaces = tmp.EthernetInterfaces.String()
