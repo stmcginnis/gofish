@@ -92,7 +92,7 @@ type SoftwareInventory struct {
 	OEM json.RawMessage
 	// RelatedItem shall contain an array of IDs for pointers consistent with JSON Pointer syntax to the Resource that
 	// is associated with this software inventory item.
-	relatedItem []string
+	RelatedItem common.Links
 	// RelatedItemCount is the number of related items.
 	RelatedItemCount int `json:"RelatedItem@odata.count"`
 	// ReleaseDate is the date of release or
@@ -121,8 +121,8 @@ type SoftwareInventory struct {
 	// image can be overwritten, where a value `true` shall indicate that the
 	// software cannot be altered or overwritten.
 	WriteProtected bool
-	// rawData holds the original serialized JSON so we can compare updates.
-	rawData []byte
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
 }
 
 // UnmarshalJSON unmarshals a SoftwareInventory object from the raw JSON.
@@ -130,7 +130,6 @@ func (softwareinventory *SoftwareInventory) UnmarshalJSON(b []byte) error {
 	type temp SoftwareInventory
 	var t struct {
 		temp
-		RelatedItem common.Links
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -140,11 +139,8 @@ func (softwareinventory *SoftwareInventory) UnmarshalJSON(b []byte) error {
 
 	*softwareinventory = SoftwareInventory(t.temp)
 
-	// Extract the links to other entities for later
-	softwareinventory.relatedItem = t.RelatedItem.ToStrings()
-
 	// This is a read/write object, so we need to save the raw object data for later
-	softwareinventory.rawData = b
+	softwareinventory.RawData = b
 
 	return nil
 }
@@ -153,7 +149,7 @@ func (softwareinventory *SoftwareInventory) UnmarshalJSON(b []byte) error {
 func (softwareinventory *SoftwareInventory) Update() error {
 	readWriteFields := []string{"WriteProtected"}
 
-	return softwareinventory.UpdateFromRawData(softwareinventory, softwareinventory.rawData, readWriteFields)
+	return softwareinventory.UpdateFromRawData(softwareinventory, softwareinventory.RawData, readWriteFields)
 }
 
 // GetSoftwareInventory will get a SoftwareInventory instance from the service.

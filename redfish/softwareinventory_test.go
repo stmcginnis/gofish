@@ -65,8 +65,8 @@ func TestSoftwareInventory(t *testing.T) {
 		t.Errorf("Manufacturer is wrong")
 	}
 
-	if len(result.relatedItem) != 1 || result.relatedItem[0] != "/redfish/v1/Managers/1" {
-		t.Errorf("Unexpected related items: %#v", result.relatedItem)
+	if len(result.RelatedItem) != 1 || result.RelatedItem[0] != "/redfish/v1/Managers/1" {
+		t.Errorf("Unexpected related items: %#v", result.RelatedItem)
 	}
 
 	if result.ReleaseDate != "1/1/2020" {
