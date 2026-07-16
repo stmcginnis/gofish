@@ -104,7 +104,7 @@ func FromManager(manager *redfish.Manager) (*Manager, error) {
 		} `json:"#OemManager.ImportSystemConfiguration,omitempty"`
 	}
 
-	err := json.Unmarshal(manager.OemActions, &t)
+	err := json.Unmarshal(manager.Actions.Oem, &t)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal Dell OEM manager actions: %w", err)
 	}

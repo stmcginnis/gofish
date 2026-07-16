@@ -34,6 +34,7 @@ var oemLinksBody = `
 				}
 			}
 `
+
 var oemDataBody = `
 		{
 			"Dell": {
@@ -183,6 +184,7 @@ var oemActions = `
 	}
 }
 `
+
 var managerBody = `{
 		"@Redfish.Copyright": "Copyright 2014-2019 DMTF. All rights reserved.",
 		"@odata.context": "/redfish/v1/$metadata#Manager.Manager",
@@ -312,8 +314,9 @@ var managerResetBody = `{
 		}
 }`
 
-var managerResetActionInfoTarget = "/redfish/v1/Managers/BMC-1/ResetActionInfo"
-var managerResetActionInfo = `{
+var (
+	managerResetActionInfoTarget = "/redfish/v1/Managers/BMC-1/ResetActionInfo"
+	managerResetActionInfo       = `{
   "@odata.id": "/redfish/v1/Managers/BMC-1/ResetActionInfo",
   "@odata.type": "#ActionInfo.v1_1_2.ActionInfo",
   "Id": "ResetActionInfo",
@@ -331,9 +334,11 @@ var managerResetActionInfo = `{
     }
   ]
 }`
+)
 
-var managerResetToDefaultsActionInfoTarget = "/redfish/v1/Managers/BMC-1/ResetToDefaultsActionInfo"
-var managerResetToDefaultsActionInfo = `{
+var (
+	managerResetToDefaultsActionInfoTarget = "/redfish/v1/Managers/BMC-1/ResetToDefaultsActionInfo"
+	managerResetToDefaultsActionInfo       = `{
   "@odata.id": "/redfish/v1/Managers/BMC-1/ResetToDefaultsActionInfo",
   "@odata.type": "#ActionInfo.v1_1_2.ActionInfo",
   "Id": "ResetActionInfo",
@@ -349,6 +354,7 @@ var managerResetToDefaultsActionInfo = `{
     }
   ]
 }`
+)
 
 // TestManager tests the parsing of Manager objects.
 func TestManager(t *testing.T) {
@@ -389,16 +395,16 @@ func TestManager(t *testing.T) {
 				len(result.SerialConsole.ConnectTypesSupported))
 		}
 
-		if result.managerForServers[0] != "/redfish/v1/Systems/System-1" {
-			t.Errorf("Received manager for servers: %s", result.managerForServers)
+		if result.Links.ManagerForServers[0] != "/redfish/v1/Systems/System-1" {
+			t.Errorf("Received manager for servers: %v", result.Links.ManagerForServers)
 		}
 
-		if result.resetTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset" {
-			t.Errorf("Invalid Reset target: %s", result.resetTarget)
+		if result.Actions.Reset.Target != "/redfish/v1/Managers/BMC-1/Actions/Manager.Reset" {
+			t.Errorf("Invalid Reset target: %s", result.Actions.Reset.Target)
 		}
 
-		if result.resetToDefaultsTarget != "/redfish/v1/Managers/BMC-1/Actions/Manager.ResetToDefaults" {
-			t.Errorf("Invalid ResetToDefaults target: %s", result.resetToDefaultsTarget)
+		if result.Actions.ResetToDefaults.Target != "/redfish/v1/Managers/BMC-1/Actions/Manager.ResetToDefaults" {
+			t.Errorf("Invalid ResetToDefaults target: %s", result.Actions.ResetToDefaults.Target)
 		}
 
 		var expectedOEM map[string]interface{}
@@ -412,10 +418,10 @@ func TestManager(t *testing.T) {
 		if len(result.Oem) == 0 {
 			t.Errorf("Oem field empty, expected not empty")
 		}
-		if len(result.OemLinks) == 0 {
+		if len(result.Links.OEM) == 0 {
 			t.Errorf("OemLinks field empty, expected not empty")
 		}
-		if len(result.OemActions) == 0 {
+		if len(result.Actions.Oem) == 0 {
 			t.Errorf("OemActions field empty, expected not empty")
 		}
 
@@ -443,7 +449,6 @@ func TestManager(t *testing.T) {
 func TestManagerUpdate(t *testing.T) {
 	var result Manager
 	err := json.NewDecoder(strings.NewReader(managerBody)).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
@@ -454,7 +459,6 @@ func TestManagerUpdate(t *testing.T) {
 	result.AutoDSTEnabled = false
 	result.DateTimeLocalOffset = "+05:00"
 	err = result.Update()
-
 	if err != nil {
 		t.Errorf("Error making Update call: %s", err)
 	}
@@ -473,7 +477,6 @@ func TestManagerUpdate(t *testing.T) {
 func TestManagerReset(t *testing.T) {
 	var result Manager
 	err := json.NewDecoder(strings.NewReader(managerBody)).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
@@ -482,7 +485,7 @@ func TestManagerReset(t *testing.T) {
 	result.SetClient(testClient)
 
 	// happy path
-	result.SupportedResetTypes = []ResetType{GracefulRestartResetType}
+	result.Actions.Reset.AllowedResetTypes = []ResetType{GracefulRestartResetType}
 	err = result.Reset(GracefulRestartResetType)
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
@@ -495,14 +498,14 @@ func TestManagerReset(t *testing.T) {
 	}
 
 	// expect error when use non-supported reset type
-	result.SupportedResetTypes = []ResetType{GracefulRestartResetType}
+	result.Actions.Reset.AllowedResetTypes = []ResetType{GracefulRestartResetType}
 	err = result.Reset(ForceRestartResetType)
 	if err == nil {
 		t.Errorf("No error when expected on Reset call: %s", err)
 	}
 
 	// expect empty payload when no allowed reset types
-	result.SupportedResetTypes = []ResetType{}
+	result.Actions.Reset.AllowedResetTypes = []ResetType{}
 	err = result.Reset(GracefulRestartResetType)
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
@@ -519,13 +522,13 @@ func TestManagerReset(t *testing.T) {
 func TestManagerResetTypes(t *testing.T) {
 	var result Manager
 	err := json.NewDecoder(strings.NewReader(managerResetBody)).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	if result.actionInfo != managerResetActionInfoTarget {
-		t.Errorf("Invalid reset action info target: %s, expecting %s", result.actionInfo, managerResetActionInfoTarget)
+	if result.Actions.Reset.ActionInfoTarget != managerResetActionInfoTarget {
+		t.Errorf("Invalid reset action info target: %s, expecting %s",
+			result.Actions.Reset.ActionInfoTarget, managerResetActionInfoTarget)
 	}
 
 	testClient := &common.TestClient{
@@ -557,13 +560,12 @@ func TestManagerResetTypes(t *testing.T) {
 func TestManagerResetToDefaultsTypes(t *testing.T) {
 	var result Manager
 	err := json.NewDecoder(strings.NewReader(managerResetBody)).Decode(&result)
-
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 
-	if result.resetToDefaultsActionInfoTarget != managerResetToDefaultsActionInfoTarget {
-		t.Errorf("Invalid reset to defaults action info target: %s, expecting %s", result.resetToDefaultsActionInfoTarget, managerResetToDefaultsActionInfoTarget)
+	if result.Actions.ResetToDefaults.ActionInfoTarget != managerResetToDefaultsActionInfoTarget {
+		t.Errorf("Invalid reset to defaults action info target: %s, expecting %s", result.Actions.ResetToDefaults.ActionInfoTarget, managerResetToDefaultsActionInfoTarget)
 	}
 
 	testClient := &common.TestClient{

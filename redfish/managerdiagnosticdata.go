@@ -13,30 +13,34 @@ import (
 // BootTimeStatistics shall contain the boot-time statistics of a manager.
 type BootTimeStatistics struct {
 	// FirmwareTimeSeconds shall contain the number of seconds the manager spent in the firmware stage.
-	FirmwareTimeSeconds float64
+	FirmwareTimeSeconds *float64
 	// InitrdTimeSeconds shall contain the number of seconds the manager spent in the initrd boot stage.
-	InitrdTimeSeconds float64
+	InitrdTimeSeconds *float64
 	// KernelTimeSeconds shall contain the number of seconds the manager spent in the kernel stage.
-	KernelTimeSeconds float64
+	KernelTimeSeconds *float64
 	// LoaderTimeSeconds shall contain the number of seconds the manager spent in the loader stage.
-	LoaderTimeSeconds float64
+	LoaderTimeSeconds *float64
 	// UserSpaceTimeSeconds shall contain the number of seconds the manager spent in the user space boot stage.
-	UserSpaceTimeSeconds float64
+	UserSpaceTimeSeconds *float64
 }
 
 // I2CBusStatistics shall contain statistics of an I2C bus.
 type I2CBusStatistics struct {
 	// BusErrorCount shall contain the number of bus errors on this I2C bus. Bus errors include, but are not limited
 	// to, an SDA rising or falling edge while SCL is high or a stuck bus signal.
-	BusErrorCount int
+	BusErrorCount *int
 	// I2CBusName shall contain the name of the I2C bus.
 	I2CBusName string
 	// NACKCount shall contain the number of NACKs on this I2C bus.
-	NACKCount int
+	NACKCount *int
 	// TotalTransactionCount shall contain the total number of transactions on this I2C bus. The count shall include
 	// the number of I2C transactions initiated by the manager and the number of I2C transactions where the manager is
 	// the target device.
-	TotalTransactionCount int
+	TotalTransactionCount *int
+}
+
+type ManagerDiagnosticDataActions struct {
+	ResetMetrics common.ActionTarget `json:"#ManagerDiagnosticData.ResetMetrics"`
 }
 
 // ManagerDiagnosticData shall represent internal diagnostic data for a manager for a Redfish implementation.
@@ -44,6 +48,9 @@ type I2CBusStatistics struct {
 // information in this resource.
 type ManagerDiagnosticData struct {
 	common.Entity
+
+	Actions ManagerDiagnosticDataActions
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -53,7 +60,7 @@ type ManagerDiagnosticData struct {
 	// Description provides a description of this resource.
 	Description string
 	// FreeStorageSpaceKiB shall contain the available storage space on this manager in kibibytes (KiB).
-	FreeStorageSpaceKiB int
+	FreeStorageSpaceKiB *int
 	// I2CBuses shall contain the statistics of the I2C buses. Services may subdivide a physical bus into multiple
 	// entries in this property based on how the manager tracks bus segments, virtual buses from a controller, and
 	// other segmentation capabilities.
@@ -69,40 +76,31 @@ type ManagerDiagnosticData struct {
 	ProcessorStatistics ProcessorStatistics
 	// ServiceRootUptimeSeconds shall contain the wall-clock time the service root hosted by this manager has been
 	// running in seconds.
-	ServiceRootUptimeSeconds float64
+	ServiceRootUptimeSeconds *float64
 	// TopProcesses shall contain the statistics of the top processes of this manager.
 	TopProcesses []ProcessStatistics
-
-	resetMetricsTarget string
 }
 
 // UnmarshalJSON unmarshals a ManagerDiagnosticData object from the raw JSON.
-func (managerdiagnosticdata *ManagerDiagnosticData) UnmarshalJSON(b []byte) error {
+func (mdd *ManagerDiagnosticData) UnmarshalJSON(b []byte) error {
 	type temp ManagerDiagnosticData
-	type Actions struct {
-		ResetMetrics common.ActionTarget `json:"#ManagerDiagnosticData.ResetMetrics"`
-	}
-	var t struct {
-		temp
-		Actions Actions
-	}
 
+	var t temp
 	err := json.Unmarshal(b, &t)
 	if err != nil {
 		return err
 	}
 
-	*managerdiagnosticdata = ManagerDiagnosticData(t.temp)
-
-	// Extract the links to other entities for later
-	managerdiagnosticdata.resetMetricsTarget = t.Actions.ResetMetrics.Target
-
+	*mdd = ManagerDiagnosticData(t)
 	return nil
 }
 
 // ResetMetrics resets time intervals or counted values of the diagnostic data for this manager.
-func (manager *Manager) ResetMetrics() error {
-	return manager.Post(manager.resetToDefaultsTarget, nil)
+func (mdd *ManagerDiagnosticData) ResetMetrics() error {
+	if mdd.Actions.ResetMetrics.Target == "" {
+		return ErrActionNotSupported
+	}
+	return mdd.Post(mdd.Actions.ResetMetrics.Target, nil)
 }
 
 // GetManagerDiagnosticData will get a ManagerDiagnosticData instance from the service.
@@ -119,28 +117,28 @@ func ListReferencedManagerDiagnosticDatas(c common.Client, link string) ([]*Mana
 // MemoryECCStatistics shall contain the memory ECC statistics of a manager.
 type MemoryECCStatistics struct {
 	// CorrectableECCErrorCount shall contain the number of correctable errors since reset.
-	CorrectableECCErrorCount int
+	CorrectableECCErrorCount *int
 	// UncorrectableECCErrorCount shall contain the number of uncorrectable errors since reset.
-	UncorrectableECCErrorCount int
+	UncorrectableECCErrorCount *int
 }
 
 // MemoryStatistics shall contain the memory statistics of a manager.
 type MemoryStatistics struct {
 	// AvailableBytes shall contain the amount of memory available in bytes for starting new processes without
 	// swapping. This includes free memory and reclaimable cache and buffers.
-	AvailableBytes int
+	AvailableBytes *int
 	// BuffersAndCacheBytes shall contain the amount of memory used in bytes by kernel buffers, page caches, and slabs.
-	BuffersAndCacheBytes int
+	BuffersAndCacheBytes *int
 	// FreeBytes shall contain the amount of free memory in bytes.
-	FreeBytes int
+	FreeBytes *int
 	// SharedBytes shall contain the amount of shared memory in bytes. This includes things such as memory consumed by
 	// temporary file systems.
-	SharedBytes int
+	SharedBytes *int
 	// TotalBytes shall contain the total amount of memory in bytes.
-	TotalBytes int
+	TotalBytes *int
 	// UsedBytes shall contain the amount of used memory in bytes. This value is calculated as TotalBytes minus
 	// FreeBytes minus BuffersAndCacheBytes.
-	UsedBytes int
+	UsedBytes *int
 }
 
 // ProcessStatistics shall contain the statistics of a process running on a manager.
@@ -148,26 +146,26 @@ type ProcessStatistics struct {
 	// CommandLine shall contain the command line with parameters of this process.
 	CommandLine string
 	// KernelTimeSeconds shall contain the number of seconds this process executed in kernel space.
-	KernelTimeSeconds float64
+	KernelTimeSeconds *float64
 	// ResidentSetSizeBytes shall contain the resident set size of this process in bytes, which is the amount of memory
 	// allocated to the process and is in RAM.
-	ResidentSetSizeBytes int
+	ResidentSetSizeBytes *int
 	// RestartAfterFailureCount shall contain the number of times this process has restarted unexpectedly, such as due
 	// to unintentional failures, restarts, or shutdowns, with the same command line including arguments.
-	RestartAfterFailureCount int
+	RestartAfterFailureCount *int
 	// RestartCount shall contain the number of times this process has restarted with the same command line including
 	// arguments.
-	RestartCount int
+	RestartCount *int
 	// UptimeSeconds shall contain the wall-clock time this process has been running in seconds.
-	UptimeSeconds float64
+	UptimeSeconds *float64
 	// UserTimeSeconds shall contain the number of seconds this process executed in user space.
-	UserTimeSeconds float64
+	UserTimeSeconds *float64
 }
 
 // ProcessorStatistics shall contain the processor statistics of a manager.
 type ProcessorStatistics struct {
 	// KernelPercent shall contain the percentage of CPU time, '0' to '100', spent in kernel mode.
-	KernelPercent float64
+	KernelPercent *float64
 	// UserPercent shall contain the percentage of CPU time, '0' to '100', spent in user mode.
-	UserPercent float64
+	UserPercent *float64
 }

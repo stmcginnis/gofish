@@ -304,8 +304,8 @@ type Chassis struct {
 	// the organization that is responsible for producing or manufacturing
 	// the chassis.
 	PartNumber string
-	// PCIeDevices shall contain a link to a resource collection of type PCIeDeviceCollection.
-	pcieDevices string
+	// PCIeDevicesLink shall contain a link to a resource collection of type PCIeDeviceCollection.
+	PCIeDevicesLink common.Link `json:"PCIeDevices"`
 	// PhysicalSecurity shall contain the sensor state of
 	// the physical security.
 	PhysicalSecurity PhysicalSecurity
@@ -485,7 +485,6 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 		Memory             common.Link
 		MemoryDomains      common.Link
 		NetworkAdapters    common.Link
-		PCIeDevices        common.Link
 		PCIeSlots          common.Link
 		Power              common.Link
 		PowerSubsystem     common.Link
@@ -517,7 +516,6 @@ func (chassis *Chassis) UnmarshalJSON(b []byte) error {
 	chassis.memory = t.Memory.String()
 	chassis.memoryDomains = t.MemoryDomains.String()
 	chassis.networkAdapters = t.NetworkAdapters.String()
-	chassis.pcieDevices = t.PCIeDevices.String()
 	chassis.pcieSlots = t.PCIeSlots.String()
 	chassis.power = t.Power.String()
 	chassis.powerSubsystem = t.PowerSubsystem.String()
@@ -684,7 +682,10 @@ func (chassis *Chassis) ThermalSubsystem() (*ThermalSubsystem, error) {
 
 // PCIeDevices gets the PCIe devices in the chassis
 func (chassis *Chassis) PCIeDevices() ([]*PCIeDevice, error) {
-	return ListReferencedPCIeDevices(chassis.GetClient(), chassis.pcieDevices)
+	if chassis.PCIeDevicesLink.IsZero() {
+		return nil, nil
+	}
+	return ListReferencedPCIeDevices(chassis.GetClient(), chassis.PCIeDevicesLink.String())
 }
 
 // PCIeSlots gets the PCIe slots properties for the chassis.
