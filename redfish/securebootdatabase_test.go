@@ -45,13 +45,13 @@ func TestSecureBootDatabase(t *testing.T) {
 	assertEquals(t, "PK", result.ID)
 	assertEquals(t, "PK - Platform Key", result.Name)
 	assertEquals(t, "PK", result.DatabaseID)
-	assertEquals(t, "/redfish/v1/Systems/1/SecureBoot/SecureBootDatabases/PK/Certificates/", result.certificates)
+	assertEquals(t, "/redfish/v1/Systems/1/SecureBoot/SecureBootDatabases/PK/Certificates/", result.CertificatesLink.String())
 }
 
 // TestSecureBootDatabaseResetKeys tests the SecureBootDatabase ResetKeys call.
 func TestSecureBootDatabaseResetKeys(t *testing.T) {
 	var result SecureBootDatabase
-	err := json.NewDecoder(strings.NewReader(applicationBody)).Decode(&result)
+	err := json.NewDecoder(strings.NewReader(secureBootDatabaseBody)).Decode(&result)
 
 	if err != nil {
 		t.Errorf("Error decoding JSON: %s", err)
