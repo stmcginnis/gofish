@@ -295,6 +295,64 @@ func TestAccountService(t *testing.T) {
 	}
 }
 
+func TestAccountServiceNumericODataEtag(t *testing.T) {
+	body := strings.Replace(
+		accountServiceBody,
+		`"@odata.etag": "\"126793801710\""`,
+		`"@odata.etag": 87422082150`,
+		1,
+	)
+
+	var result AccountService
+	err := json.Unmarshal([]byte(body), &result)
+	if err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	if result.ODataEtag != "87422082150" {
+		t.Errorf("Received invalid OData ETag: %s", result.ODataEtag)
+	}
+
+	if result.ID != "RemoteAccountService" {
+		t.Errorf("Received invalid ID: %s", result.ID)
+	}
+
+	if result.accounts != "/redfish/v1/AccountService/Accounts" {
+		t.Errorf("Received invalid Accounts: %s", result.accounts)
+	}
+}
+
+func TestAccountServiceODataEtagTypes(t *testing.T) {
+	tests := []struct {
+		name     string
+		body     string
+		wantEtag string
+		wantErr  bool
+	}{
+		{name: "string", body: `{"@odata.etag":"W/\"123\""}`, wantEtag: `W/"123"`},
+		{name: "number", body: `{"@odata.etag":87422082150}`, wantEtag: "87422082150"},
+		{name: "null", body: `{"@odata.etag":null}`},
+		{name: "missing", body: `{}`},
+		{name: "boolean", body: `{"@odata.etag":true}`, wantErr: true},
+		{name: "object", body: `{"@odata.etag":{}}`, wantErr: true},
+		{name: "array", body: `{"@odata.etag":[]}`, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var result AccountService
+			err := json.Unmarshal([]byte(tt.body), &result)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if result.ODataEtag != tt.wantEtag {
+				t.Errorf("ODataEtag = %q, want %q", result.ODataEtag, tt.wantEtag)
+			}
+		})
+	}
+}
+
 // TestAccountServiceUpdate tests the Update call for the account service.
 func TestAccountServiceUpdate(t *testing.T) {
 	var result AccountService

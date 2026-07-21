@@ -8,6 +8,7 @@
 package schemas
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -400,15 +401,44 @@ type AccountService struct {
 	RawData []byte
 }
 
+type accountServiceODataEtag string
+
+func (e *accountServiceODataEtag) UnmarshalJSON(b []byte) error {
+	b = bytes.TrimSpace(b)
+	if bytes.Equal(b, []byte("null")) {
+		*e = ""
+		return nil
+	}
+
+	if len(b) > 0 && b[0] == '"' {
+		var value string
+		if err := json.Unmarshal(b, &value); err != nil {
+			return fmt.Errorf("invalid AccountService @odata.etag: %w", err)
+		}
+
+		*e = accountServiceODataEtag(value)
+		return nil
+	}
+
+	var value json.Number
+	if err := json.Unmarshal(b, &value); err != nil {
+		return fmt.Errorf("AccountService @odata.etag must be a string, number, or null: %w", err)
+	}
+
+	*e = accountServiceODataEtag(value.String())
+	return nil
+}
+
 // UnmarshalJSON unmarshals a AccountService object from the raw JSON.
 func (a *AccountService) UnmarshalJSON(b []byte) error {
 	type temp AccountService
 	var tmp struct {
 		temp
-		Accounts                           Link `json:"Accounts"`
-		AdditionalExternalAccountProviders Link `json:"AdditionalExternalAccountProviders"`
-		PrivilegeMap                       Link `json:"PrivilegeMap"`
-		Roles                              Link `json:"Roles"`
+		ODataEtag                          accountServiceODataEtag `json:"@odata.etag"`
+		Accounts                           Link                    `json:"Accounts"`
+		AdditionalExternalAccountProviders Link                    `json:"AdditionalExternalAccountProviders"`
+		PrivilegeMap                       Link                    `json:"PrivilegeMap"`
+		Roles                              Link                    `json:"Roles"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -417,6 +447,7 @@ func (a *AccountService) UnmarshalJSON(b []byte) error {
 	}
 
 	*a = AccountService(tmp.temp)
+	a.ODataEtag = string(tmp.ODataEtag)
 
 	// Extract the links to other entities for later
 	a.accounts = tmp.Accounts.String()
