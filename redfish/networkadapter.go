@@ -211,7 +211,6 @@ type DataCenterBridging struct {
 // NPIV shall contain N_Port ID Virtualization (NPIV) capabilities for a
 // controller.
 type NPIV struct {
-
 	// MaxDeviceLogins shall be the maximum number of N_Port ID Virtualization
 	// (NPIV) logins allowed simultaneously from all ports on this controller.
 	MaxDeviceLogins int
@@ -355,6 +354,9 @@ func (networkadapter *NetworkAdapter) Assembly() (*Assembly, error) {
 
 // Certificatea gets the certificates for device identity and attestation.
 func (networkadapter *NetworkAdapter) Certificates() ([]*Certificate, error) {
+	if networkadapter.certificates == "" {
+		return nil, nil
+	}
 	return ListReferencedCertificates(networkadapter.GetClient(), networkadapter.certificates)
 }
 
@@ -368,21 +370,33 @@ func (networkadapter *NetworkAdapter) EnvironmentMetrics() (*EnvironmentMetrics,
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network adapter
 func (networkadapter *NetworkAdapter) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
+	if networkadapter.networkDeviceFunctions == "" {
+		return nil, nil
+	}
 	return ListReferencedNetworkDeviceFunctions(networkadapter.GetClient(), networkadapter.networkDeviceFunctions)
 }
 
 // NetworkPorts gets the collection of NetworkPorts for this network adapter
 func (networkadapter *NetworkAdapter) NetworkPorts() ([]*NetworkPort, error) {
+	if networkadapter.networkPorts == "" {
+		return nil, nil
+	}
 	return ListReferencedNetworkPorts(networkadapter.GetClient(), networkadapter.networkPorts)
 }
 
 // Ports gets the ports associated with this network adapter.
 func (networkadapter *NetworkAdapter) Ports() ([]*Port, error) {
+	if networkadapter.ports == "" {
+		return nil, nil
+	}
 	return ListReferencedPorts(networkadapter.GetClient(), networkadapter.ports)
 }
 
 // Processors gets the offload processors contained in this network adapter.
 func (networkadapter *NetworkAdapter) Processors() ([]*Processor, error) {
+	if networkadapter.processors == "" {
+		return nil, nil
+	}
 	return ListReferencedProcessors(networkadapter.GetClient(), networkadapter.processors)
 }
 

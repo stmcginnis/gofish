@@ -231,21 +231,33 @@ func (pciefunction *PCIeFunction) CXLLogicalDevice() (*CXLLogicalDevice, error) 
 
 // Drives gets the PCIe function's drives.
 func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
+	if len(pciefunction.drives) == 0 {
+		return nil, nil
+	}
 	return common.GetObjects[Drive](pciefunction.GetClient(), pciefunction.drives)
 }
 
 // EthernetInterfaces gets the PCIe function's ethernet interfaces.
 func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, error) {
+	if len(pciefunction.ethernetInterfaces) == 0 {
+		return nil, nil
+	}
 	return common.GetObjects[EthernetInterface](pciefunction.GetClient(), pciefunction.ethernetInterfaces)
 }
 
 // MemoryDomains gets the memory domains associated with this PCIe function.
 func (pciefunction *PCIeFunction) MemoryDomains() ([]*MemoryDomain, error) {
+	if len(pciefunction.memoryDomains) == 0 {
+		return nil, nil
+	}
 	return common.GetObjects[MemoryDomain](pciefunction.GetClient(), pciefunction.memoryDomains)
 }
 
 // NetworkDeviceFunctions gets the PCIe function's ethernet interfaces.
 func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
+	if len(pciefunction.networkDeviceFunctions) == 0 {
+		return nil, nil
+	}
 	return common.GetObjects[NetworkDeviceFunction](pciefunction.GetClient(), pciefunction.networkDeviceFunctions)
 }
 
@@ -267,5 +279,8 @@ func (pciefunction *PCIeFunction) Processor() (*Processor, error) {
 
 // StorageControllers gets the associated storage controllers.
 func (pciefunction *PCIeFunction) StorageControllers() ([]*StorageController, error) {
+	if len(pciefunction.storageControllers) == 0 {
+		return nil, nil
+	}
 	return common.GetObjects[StorageController](pciefunction.GetClient(), pciefunction.storageControllers)
 }

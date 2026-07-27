@@ -191,6 +191,10 @@ const (
 	// UpdatingState indicates the element is updating and may be unavailable
 	// or degraded.
 	UpdatingState State = "Updating"
+	// DegradedState shall indicate the resource is enabled but operating in a degraded mode.
+	DegradedState State = "Degraded"
+	// QualifiedState indicates that the element is within the acceptable range of operation (deprecated in v1.19)
+	QualifiedState State = "Qualified"
 )
 
 type Severity string

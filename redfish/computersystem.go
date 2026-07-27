@@ -588,12 +588,8 @@ type Composition struct {
 // BootOption represents the properties of a bootable device available in the
 // system.
 type BootOption struct {
-	common.Entity
+	common.Resource
 
-	// ODataContext is the odata context.
-	ODataContext string `json:"@odata.context"`
-	// ODataType is the odata type.
-	ODataType string `json:"@odata.type"`
 	// Alias is the alias of this boot source if one exists.
 	Alias BootSourceOverrideTarget
 	// BootOptionEnabled is an indication of whether the boot option is
@@ -610,6 +606,7 @@ type BootOption struct {
 	// UefiDevicePath is the UEFI device path to access this UEFI boot
 	// option.
 	UefiDevicePath string
+	RelatedItem    common.Links
 }
 
 // GetBootOption will get a BootOption instance from the service.
@@ -1257,7 +1254,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 			data["@Redfish.SettingsApplyTime"] = map[string]string{"ApplyTime": string(applyTime)}
 		}
 
-		var header = make(map[string]string)
+		header := make(map[string]string)
 		if resp.Header["Etag"] != nil {
 			header["If-Match"] = resp.Header["Etag"][0]
 		}
