@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-//nolint:dupl
 package schemas
 
 import (
@@ -15,8 +14,8 @@ import (
 	"time"
 )
 
-func TestPostWithTask(t *testing.T) { //nolint: funlen
-	tests := map[string]struct {
+func TestPostWithTask(t *testing.T) { //nolint:funlen
+	tests := map[string]struct { //nolint:dupl // parallels TestPatchWithTask; the two mutating helpers are intentionally symmetric
 		response         http.Response
 		expectedTask     *TaskMonitorInfo
 		expectedResponse bool
@@ -41,7 +40,7 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 				TaskMonitor: "/TaskMonitor/1",
 			},
 		},
-		"post with task monitor location and retry after seconds": {
+		"post with task monitor location and retry after date": {
 			response: http.Response{
 				StatusCode: http.StatusAccepted,
 				Header: http.Header{
@@ -209,8 +208,8 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 	}
 }
 
-func TestPatchWithTask(t *testing.T) { //nolint: funlen
-	tests := map[string]struct {
+func TestPatchWithTask(t *testing.T) { //nolint:funlen
+	tests := map[string]struct { //nolint:dupl // parallels TestPostWithTask; the two mutating helpers are intentionally symmetric
 		response         http.Response
 		expectedTask     *TaskMonitorInfo
 		expectedResponse bool
@@ -235,7 +234,7 @@ func TestPatchWithTask(t *testing.T) { //nolint: funlen
 				TaskMonitor: "/TaskMonitor/1",
 			},
 		},
-		"patch with task monitor location and retry after seconds": {
+		"patch with task monitor location and retry after date": {
 			response: http.Response{
 				StatusCode: http.StatusAccepted,
 				Header: http.Header{
