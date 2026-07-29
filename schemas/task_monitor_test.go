@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
+//nolint:dupl
 package schemas
 
 import (
@@ -206,6 +207,227 @@ func TestPostWithTask(t *testing.T) { //nolint: funlen
 			}
 		})
 	}
+}
+
+func TestPatchWithTask(t *testing.T) { //nolint: funlen
+	tests := map[string]struct {
+		response         http.Response
+		expectedTask     *TaskMonitorInfo
+		expectedResponse bool
+		expectedErr      string
+	}{
+		"patch with sync response": {
+			response: http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(bytes.NewBufferString("{}")),
+			},
+			expectedResponse: true,
+		},
+		"patch with task monitor location": {
+			response: http.Response{
+				StatusCode: http.StatusAccepted,
+				Header: http.Header{
+					"Location": []string{"/TaskMonitor/1"},
+				},
+				Body: io.NopCloser(bytes.NewBufferString("garbage")),
+			},
+			expectedTask: &TaskMonitorInfo{
+				TaskMonitor: "/TaskMonitor/1",
+			},
+		},
+		"patch with task monitor location and retry after seconds": {
+			response: http.Response{
+				StatusCode: http.StatusAccepted,
+				Header: http.Header{
+					"Location": []string{"/TaskMonitor/1"},
+					// Retry-After is tested separately, use an absolute time to avoid delta diffs
+					"Retry-After": []string{"Wed, 21 Oct 2015 07:28:00 GMT"},
+				},
+				Body: io.NopCloser(bytes.NewBufferString("garbage")),
+			},
+			expectedTask: &TaskMonitorInfo{
+				TaskMonitor: "/TaskMonitor/1",
+				RetryAfter:  time.Date(2015, 10, 21, 7, 28, 0, 0, time.UTC),
+			},
+		},
+		"patch with task monitor location, retry after and task body": {
+			response: http.Response{
+				StatusCode: http.StatusAccepted,
+				Header: http.Header{
+					"Location": []string{"/TaskMonitor/1"},
+					// Retry-After is tested separately, use an absolute time to avoid delta diffs
+					"Retry-After": []string{"Wed, 21 Oct 2015 07:28:00 GMT"},
+				},
+				Body: io.NopCloser(
+					bytes.NewBufferString(
+						`{"@odata.id": "/TaskService/Tasks/1", "@odata.type": "Task"}`,
+					),
+				),
+			},
+			expectedTask: &TaskMonitorInfo{
+				TaskMonitor: "/TaskMonitor/1",
+				RetryAfter:  time.Date(2015, 10, 21, 7, 28, 0, 0, time.UTC),
+				Task: &Task{
+					Entity: Entity{
+						ODataID: "/TaskService/Tasks/1",
+					},
+					ODataType: "Task", // not actually the spec string
+				},
+			},
+		},
+		"patch with error response": {
+			response: http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       io.NopCloser(bytes.NewBufferString("{}")),
+			},
+			expectedErr: "500: {}",
+		},
+	}
+
+	// Additional tests for 412 Precondition Failed fallback
+	t.Run("patch succeeds on first try without fallback", func(t *testing.T) {
+		c := &TestClient{
+			CustomReturnForActions: map[string][]any{
+				http.MethodPatch: {
+					&http.Response{
+						StatusCode: http.StatusOK,
+						Body:       io.NopCloser(bytes.NewBufferString("{}")),
+					},
+				},
+			},
+		}
+		res, _, err := PatchWithTask(c, "/redfish/v1/Systems/1", map[string]string{}, map[string]string{"If-Match": `W/"gen-1"`})
+		RequireNoError(t, err)
+		if res == nil {
+			t.Fatal("expected response, got nil")
+		}
+		calls := c.CapturedCalls()
+		if len(calls) != 1 {
+			t.Fatalf("expected 1 call (no fallback), got %d", len(calls))
+		}
+	})
+
+	t.Run("patch retries without If-Match on 412", func(t *testing.T) {
+		c := &TestClient{
+			CustomReturnForActions: map[string][]any{
+				http.MethodPatch: {
+					&http.Response{
+						StatusCode: http.StatusPreconditionFailed,
+						Body:       io.NopCloser(bytes.NewBufferString(`{"error":{"code":"Base.1.18.PreconditionFailed","message":"ETag mismatch"}}`)),
+					},
+					&http.Response{
+						StatusCode: http.StatusOK,
+						Body:       io.NopCloser(bytes.NewBufferString("{}")),
+					},
+				},
+			},
+		}
+		headers := map[string]string{"If-Match": `W/"gen-1"`}
+		res, _, err := PatchWithTask(c, "/redfish/v1/Systems/1", map[string]string{}, headers)
+		RequireNoError(t, err)
+		if res == nil {
+			t.Fatal("expected response, got nil")
+		}
+		calls := c.CapturedCalls()
+		if len(calls) != 2 {
+			t.Fatalf("expected 2 calls (412 + retry), got %d", len(calls))
+		}
+		// Verify If-Match was removed on retry
+		if _, ok := headers["If-Match"]; ok {
+			t.Error("expected If-Match to be removed from headers after 412 fallback")
+		}
+	})
+
+	t.Run("patch 412 fallback still fails with different error", func(t *testing.T) {
+		c := &TestClient{
+			CustomReturnForActions: map[string][]any{
+				http.MethodPatch: {
+					&http.Response{
+						StatusCode: http.StatusPreconditionFailed,
+						Body:       io.NopCloser(bytes.NewBufferString(`{"error":{"code":"Base.1.18.PreconditionFailed","message":"ETag mismatch"}}`)),
+					},
+					&http.Response{
+						StatusCode: http.StatusBadRequest,
+						Body:       io.NopCloser(bytes.NewBufferString(`{"error":{"code":"Base.1.18.GeneralError","message":"Bad request"}}`)),
+					},
+				},
+			},
+		}
+		_, _, err := PatchWithTask(c, "/redfish/v1/Systems/1", map[string]string{}, map[string]string{"If-Match": `W/"gen-1"`})
+		RequireErrorContains(t, err, "400")
+		calls := c.CapturedCalls()
+		if len(calls) != 2 {
+			t.Fatalf("expected 2 calls (412 + retry), got %d", len(calls))
+		}
+	})
+
+	testURI := "/redfish/v1/Systems/1"
+	testPayload := map[string]string{}
+	var testHeaders map[string]string
+
+	for name, test := range tests {
+		test := test // to support older go
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			c := &TestClient{
+				CustomReturnForActions: map[string][]any{
+					http.MethodPatch: {&test.response},
+				},
+			}
+
+			res, taskMonitorInfo, err := PatchWithTask(c, testURI, testPayload, testHeaders)
+			if test.expectedErr != "" {
+				RequireErrorContains(t, err, test.expectedErr)
+			} else {
+				RequireNoError(t, err)
+			}
+
+			if test.expectedTask != nil && test.expectedTask.Task != nil {
+				test.expectedTask.Task.SetClient(c)
+			}
+
+			if test.expectedResponse {
+				AssertEqual(t, &test.response, res)
+			} else if test.expectedTask != nil {
+				AssertEqualMsg(t, test.expectedTask.TaskMonitor, taskMonitorInfo.TaskMonitor,
+					"expected task monitor %q, actual %q",
+					test.expectedTask.TaskMonitor, taskMonitorInfo.TaskMonitor)
+				if test.expectedTask.Task != nil {
+					AssertEqualMsg(t, test.expectedTask.Task.ID, taskMonitorInfo.Task.ID,
+						"expected task ID [%q], actual [%q]",
+						test.expectedTask.Task.ID, taskMonitorInfo.Task.ID)
+				}
+			}
+		})
+	}
+}
+
+func TestPatchObject(t *testing.T) {
+	raw := `{"PowerState": "On"}`
+	c := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodPatch: {
+				&http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(bytes.NewBufferString(raw)),
+				},
+			},
+		},
+	}
+
+	expected := &ComputerSystem{
+		PowerState: "On",
+		RawData:    []byte(raw),
+	}
+	expected.SetClient(c)
+
+	object, taskMonitor, err := PatchObject[ComputerSystem](c, "/redfish/v1/Systems/1", map[string]string{}, nil)
+	RequireNoError(t, err)
+	if taskMonitor != nil {
+		t.Fatalf("expected no task monitor, got %v", taskMonitor)
+	}
+	AssertEqual(t, expected, object)
 }
 
 func TestWaitForTaskMonitor(t *testing.T) { //nolint: funlen

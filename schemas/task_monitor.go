@@ -79,6 +79,50 @@ func postObjectWithTask[T any,
 	return entity, nil, err
 }
 
+func PatchObject[T any,
+	PT GenericSchemaObjectPointer[T],
+](c Client, uri string, payload any, headers map[string]string) (*T, *TaskMonitorInfo, error) {
+	return patchObjectWithTask[T, PT](c, uri, payload, headers)
+}
+
+func PatchWithTask(c Client, uri string, payload any, headers map[string]string) (*http.Response, *TaskMonitorInfo, error) {
+	resp, err := c.PatchWithHeaders(uri, payload, headers)
+
+	// If 412 Precondition Failed, retry without If-Match header.
+	// Some BMC implementations (e.g., Dell iDRAC10) reject If-Match
+	// on PATCH endpoints.
+	if err != nil && Is412PreconditionFailed(err) {
+		DeferredCleanupHTTPResponse(resp)
+		delete(headers, "If-Match")
+		resp, err = c.PatchWithHeaders(uri, payload, headers)
+	}
+
+	if err != nil {
+		defer DeferredCleanupHTTPResponse(resp)
+		return nil, nil, err
+	}
+
+	if resp.StatusCode == http.StatusAccepted {
+		defer DeferredCleanupHTTPResponse(resp)
+		taskMonitorInfo := ParseTaskMonitorInfo(c, resp)
+		return nil, taskMonitorInfo, nil
+	}
+	return resp, nil, nil
+}
+
+func patchObjectWithTask[T any,
+	PT GenericSchemaObjectPointer[T],
+](c Client, uri string, payload any, headers map[string]string) (*T, *TaskMonitorInfo, error) {
+	resp, taskMonitor, err := PatchWithTask(c, uri, payload, headers)
+	defer DeferredCleanupHTTPResponse(resp)
+	if taskMonitor != nil {
+		return nil, taskMonitor, err
+	}
+
+	entity, err := DecodeGenericEntity[T, PT](c, resp)
+	return entity, nil, err
+}
+
 func ParseTaskMonitorInfo(c Client, resp *http.Response) *TaskMonitorInfo {
 	// https://www.dmtf.org/sites/default/files/standards/documents/DSP0266_1.23.0.html#asynchronous-operations
 	// When a client issues a request that results in a long-running operation,
