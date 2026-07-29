@@ -176,6 +176,13 @@ func (bi *Bios) AllowedAttributeUpdateApplyTimes() []SettingsApplyTime {
 
 // UpdateBiosAttributesApplyAt is used to update attribute values and set apply time together
 func (bi *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime SettingsApplyTime) error {
+	_, err := bi.UpdateBiosAttributesApplyAtWithTask(attrs, applyTime)
+	return err
+}
+
+// UpdateBiosAttributesApplyAtWithTask is used to update attribute values and set apply time
+// together. It returns a TaskMonitorInfo when the service processes the update asynchronously.
+func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, applyTime SettingsApplyTime) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 
 	// Get a representation of the object's original state so we can find what
@@ -183,7 +190,7 @@ func (bi *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime 
 	original := new(Bios)
 	err := original.UnmarshalJSON(bi.rawData)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for key := range attrs {
@@ -196,30 +203,27 @@ func (bi *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime 
 	resp, err := bi.GetClient().Get(bi.settingsTarget)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// If there are any allowed updates, try to send updates to the system and
-	// return the result.
-	if len(payload) > 0 {
-		data := map[string]any{"Attributes": payload}
-		if applyTime != "" {
-			data["@Redfish.SettingsApplyTime"] = map[string]string{"ApplyTime": string(applyTime)}
-		}
-
-		var header = make(map[string]string)
-		if resp.Header["Etag"] != nil {
-			header["If-Match"] = resp.Header["Etag"][0]
-		}
-
-		resp, err = bi.GetClient().PatchWithHeaders(bi.settingsTarget, data, header)
-		defer DeferredCleanupHTTPResponse(resp)
-		if err != nil {
-			return err
-		}
+	// If there are no allowed updates, there is nothing to send.
+	if len(payload) == 0 {
+		return nil, nil
 	}
 
-	return nil
+	data := map[string]any{"Attributes": payload}
+	if applyTime != "" {
+		data["@Redfish.SettingsApplyTime"] = map[string]string{"ApplyTime": string(applyTime)}
+	}
+
+	header := make(map[string]string)
+	if resp.Header["Etag"] != nil {
+		header["If-Match"] = resp.Header["Etag"][0]
+	}
+
+	patchResp, taskInfo, err := PatchWithTask(bi.client, bi.settingsTarget, data, header)
+	defer DeferredCleanupHTTPResponse(patchResp)
+	return taskInfo, err
 }
 
 // UpdateBiosAttributes is used to update attribute values.
