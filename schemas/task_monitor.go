@@ -25,32 +25,34 @@ func PostObject[T any,
 	return postObjectWithTask[T, PT](c, uri, payload, headers, false)
 }
 
-func PostObjecMultipart[T any,
+func PostObjectMultipart[T any,
 	PT GenericSchemaObjectPointer[T],
 ](c Client, uri string, payload map[string]io.Reader, headers map[string]string) (*T, *TaskMonitorInfo, error) {
 	return postObjectWithTask[T, PT](c, uri, payload, headers, true)
 }
 
-func PostWithTask(c Client, uri string, payload any, headers map[string]string, isMMultipart bool) (*http.Response, *TaskMonitorInfo, error) {
-	var resp *http.Response
-	var err error
-	if isMMultipart {
-		resp, err = c.PostMultipartWithHeaders(uri, payload.(map[string]io.Reader), headers)
-	} else {
-		resp, err = c.PostWithHeaders(uri, payload, headers)
-	}
+func PostWithTask(c Client, uri string, payload any, headers map[string]string, isMultipart bool) (*http.Response, *TaskMonitorInfo, error) {
+	return sendWithTask(c, headers, func() (*http.Response, error) {
+		if isMultipart {
+			return c.PostMultipartWithHeaders(uri, payload.(map[string]io.Reader), headers)
+		}
+		return c.PostWithHeaders(uri, payload, headers)
+	})
+}
 
-	// If 412 Precondition Failed, retry without If-Match header.
-	// Some BMC implementations (e.g., Dell iDRAC10) reject If-Match
-	// on action POST endpoints.
+// sendWithTask runs a mutating request via send and interprets the result as a
+// possibly-asynchronous operation. On a 412 Precondition Failed it drops the
+// If-Match header and retries once; some BMC implementations (e.g. Dell
+// iDRAC10) reject If-Match on these endpoints. A 202 Accepted response is
+// returned as a TaskMonitorInfo; any other success is returned as the raw
+// response for the caller to decode.
+func sendWithTask(c Client, headers map[string]string, send func() (*http.Response, error)) (*http.Response, *TaskMonitorInfo, error) {
+	resp, err := send()
+
 	if err != nil && Is412PreconditionFailed(err) {
 		DeferredCleanupHTTPResponse(resp)
 		delete(headers, "If-Match")
-		if isMMultipart {
-			resp, err = c.PostMultipartWithHeaders(uri, payload.(map[string]io.Reader), headers)
-		} else {
-			resp, err = c.PostWithHeaders(uri, payload, headers)
-		}
+		resp, err = send()
 	}
 
 	if err != nil {
@@ -60,16 +62,15 @@ func PostWithTask(c Client, uri string, payload any, headers map[string]string, 
 
 	if resp.StatusCode == http.StatusAccepted {
 		defer DeferredCleanupHTTPResponse(resp)
-		taskMonitorInfo := ParseTaskMonitorInfo(c, resp)
-		return nil, taskMonitorInfo, nil
+		return nil, ParseTaskMonitorInfo(c, resp), nil
 	}
 	return resp, nil, nil
 }
 
 func postObjectWithTask[T any,
 	PT GenericSchemaObjectPointer[T],
-](c Client, uri string, payload any, headers map[string]string, isMMultipart bool) (*T, *TaskMonitorInfo, error) {
-	resp, taskMonitor, err := PostWithTask(c, uri, payload, headers, isMMultipart)
+](c Client, uri string, payload any, headers map[string]string, isMultipart bool) (*T, *TaskMonitorInfo, error) {
+	resp, taskMonitor, err := PostWithTask(c, uri, payload, headers, isMultipart)
 	defer DeferredCleanupHTTPResponse(resp)
 	if taskMonitor != nil {
 		return nil, taskMonitor, err
@@ -86,28 +87,9 @@ func PatchObject[T any,
 }
 
 func PatchWithTask(c Client, uri string, payload any, headers map[string]string) (*http.Response, *TaskMonitorInfo, error) {
-	resp, err := c.PatchWithHeaders(uri, payload, headers)
-
-	// If 412 Precondition Failed, retry without If-Match header.
-	// Some BMC implementations (e.g., Dell iDRAC10) reject If-Match
-	// on PATCH endpoints.
-	if err != nil && Is412PreconditionFailed(err) {
-		DeferredCleanupHTTPResponse(resp)
-		delete(headers, "If-Match")
-		resp, err = c.PatchWithHeaders(uri, payload, headers)
-	}
-
-	if err != nil {
-		defer DeferredCleanupHTTPResponse(resp)
-		return nil, nil, err
-	}
-
-	if resp.StatusCode == http.StatusAccepted {
-		defer DeferredCleanupHTTPResponse(resp)
-		taskMonitorInfo := ParseTaskMonitorInfo(c, resp)
-		return nil, taskMonitorInfo, nil
-	}
-	return resp, nil, nil
+	return sendWithTask(c, headers, func() (*http.Response, error) {
+		return c.PatchWithHeaders(uri, payload, headers)
+	})
 }
 
 func patchObjectWithTask[T any,

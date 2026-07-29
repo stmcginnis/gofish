@@ -200,7 +200,7 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 		}
 	}
 
-	resp, err := bi.GetClient().Get(bi.settingsTarget)
+	resp, err := bi.client.Get(bi.settingsTarget)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
