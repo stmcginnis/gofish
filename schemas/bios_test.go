@@ -5,7 +5,10 @@
 package schemas
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -248,5 +251,77 @@ func TestUpdateBiosAttributesApplyAt(t *testing.T) {
 
 	if !strings.Contains(calls[1].Payload, "@Redfish.SettingsApplyTime") {
 		t.Error("Expected 'SettingsApplyTime' to be present")
+	}
+}
+
+// TestUpdateBiosAttributesApplyAtWithTask tests that UpdateBiosAttributesApplyAtWithTask
+// returns a TaskMonitorInfo when the service processes the update asynchronously.
+func TestUpdateBiosAttributesApplyAtWithTask(t *testing.T) {
+	var result Bios
+	err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodPatch: {
+				&http.Response{
+					StatusCode: http.StatusAccepted,
+					Header:     http.Header{"Location": []string{"/redfish/v1/TaskService/Tasks/1"}},
+					Body:       io.NopCloser(bytes.NewBufferString("")),
+				},
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	update := SettingsAttributes{"AssetTag": "test"}
+	taskInfo, err := result.UpdateBiosAttributesApplyAtWithTask(update, AtMaintenanceWindowStartSettingsApplyTime)
+	if err != nil {
+		t.Errorf("Error making UpdateBiosAttributesApplyAtWithTask call: %s", err)
+	}
+
+	if taskInfo == nil {
+		t.Fatal("Expected a TaskMonitorInfo to be returned, got nil")
+	}
+	if taskInfo.TaskMonitor != "/redfish/v1/TaskService/Tasks/1" {
+		t.Errorf("Unexpected task monitor URI: %s", taskInfo.TaskMonitor)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 2 {
+		t.Errorf("Expected two calls to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[1].Payload, "AssetTag") {
+		t.Errorf("Unexpected update payload: %s", calls[1].Payload)
+	}
+
+	if !strings.Contains(calls[1].Payload, "@Redfish.SettingsApplyTime") {
+		t.Error("Expected 'SettingsApplyTime' to be present")
+	}
+}
+
+// TestUpdateBiosAttributesApplyAtWithTaskSync tests that UpdateBiosAttributesApplyAtWithTask
+// returns a nil TaskMonitorInfo when the service applies the update synchronously.
+func TestUpdateBiosAttributesApplyAtWithTaskSync(t *testing.T) {
+	var result Bios
+	err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	result.SetClient(testClient)
+
+	update := SettingsAttributes{"AssetTag": "test"}
+	taskInfo, err := result.UpdateBiosAttributesApplyAtWithTask(update, AtMaintenanceWindowStartSettingsApplyTime)
+	if err != nil {
+		t.Errorf("Error making UpdateBiosAttributesApplyAtWithTask call: %s", err)
+	}
+
+	if taskInfo != nil {
+		t.Errorf("Expected no TaskMonitorInfo for a synchronous update, got: %v", taskInfo)
 	}
 }
