@@ -175,18 +175,16 @@ func CollectResourceCollection[T any, PT interface {
 	*T
 	SchemaObject
 }](get func(PT, ...QueryGroupOption), entities []PT, queryOpts ...QueryGroupOption) {
-	// Only allow three concurrent requests to avoid overwhelming the service
-	limiter := make(chan struct{}, 3)
+	// Concurrency is bounded at the HTTP layer by the client's
+	// MaxConcurrentRequests setting, so no additional cap is applied here.
 	var wg sync.WaitGroup
 
 	for _, itemLink := range entities {
 		wg.Add(1)
-		limiter <- struct{}{}
 
 		go func(itemLink PT, _ ...QueryGroupOption) {
 			defer wg.Done()
 			get(itemLink)
-			<-limiter
 		}(itemLink, queryOpts...)
 	}
 
@@ -197,55 +195,48 @@ func GetCollectionObjects[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, uri string, queryOpts ...QueryGroupOption) ([]*T, error) {
-	var result []*T
 	if uri == "" {
-		return result, nil
+		return nil, nil
 	}
 
-	type GetResult struct {
-		Item  *T
-		Link  string
-		Error error
-	}
-
-	ch := make(chan GetResult)
 	collectionError := NewCollectionError()
-	get := func(entity PT, opts ...QueryGroupOption) {
-		if entity != nil && entity.GetID() != "" {
-			// if the entity has any ExtendedInfo, we assume it's an error
-			var err error
-			extendedInfo := entity.GetExtendedInfo()
-			if len(extendedInfo) > 0 {
-				errE := &Error{}
-				for i := range extendedInfo {
-					errE.ExtendedInfos = append(errE.ExtendedInfos, ErrExtendedInfo(extendedInfo[i]))
-				}
-				err = errE
-			}
 
-			entity.SetClient(c)
-
-			ch <- GetResult{Item: entity, Link: entity.GetODataID(), Error: err}
-		} else if entity != nil && entity.GetODataID() != "" {
-			link := entity.GetODataID()
-			entity, err := GetObject[T, PT](c, link, opts...)
-			ch <- GetResult{Item: entity, Link: link, Error: err}
-		}
+	// Gather the member entities in the order the service returned them, then
+	// resolve each concurrently into a slice indexed by that position so the
+	// result preserves the service's ordering regardless of fetch completion
+	// order.
+	members, err := collectMembers[T, PT](c, uri, queryOpts...)
+	if err != nil {
+		collectionError.Failures[uri] = err
 	}
 
-	go func() {
-		err := CollectListGeneric(get, c, uri, queryOpts...)
-		if err != nil {
-			collectionError.Failures[uri] = err
-		}
-		close(ch)
-	}()
+	type memberResult struct {
+		item *T
+		link string
+		err  error
+	}
 
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
-		} else {
-			result = append(result, r.Item)
+	// One goroutine per member, gated at the HTTP layer by the client
+	// semaphore (MaxConcurrentRequests).
+	results := make([]memberResult, len(members))
+	var wg sync.WaitGroup
+	for i, entity := range members {
+		wg.Add(1)
+		go func(i int, entity PT) {
+			defer wg.Done()
+			item, link, err := resolveMember[T, PT](c, entity, queryOpts...)
+			results[i] = memberResult{item: item, link: link, err: err}
+		}(i, entity)
+	}
+	wg.Wait()
+
+	var result []*T
+	for _, r := range results {
+		switch {
+		case r.err != nil:
+			collectionError.Failures[r.link] = r.err
+		case r.item != nil:
+			result = append(result, r.item)
 		}
 	}
 
@@ -254,4 +245,76 @@ func GetCollectionObjects[T any, PT interface {
 	}
 
 	return result, collectionError
+}
+
+// collectMembers gathers all member entities of a collection in the order the
+// service returned them, following pagination and falling back from $expand to
+// a plain query if the expanded request fails.
+func collectMembers[T any, PT interface {
+	*T
+	SchemaObject
+}](c Client, link string, queryOpts ...QueryGroupOption) ([]PT, error) {
+	collection, err := GetResourceCollection[T, PT](c, link, queryOpts...)
+	if err != nil {
+		// allow for auto-fallback from $expand to regular
+		// this will only run on the first query, not future pages
+		builtOpts := BuildQueryGroup(c, queryOpts...).QueryCollection
+		if builtOpts.expand != ExpandNone && builtOpts.expandFallback {
+			queryWithoutExpand := queryOpts
+			queryWithoutExpand = append(queryWithoutExpand,
+				WithCollectionQueryOpts(WithExpand(ExpandNone)))
+			collection, err = GetResourceCollection[T, PT](c, link, queryWithoutExpand...)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	}
+
+	members := collection.Members
+	if collection.MembersNextLink != "" {
+		next, err := collectMembers[T, PT](c, collection.MembersNextLink)
+		members = append(members, next...)
+		if err != nil {
+			return members, err
+		}
+	}
+	return members, nil
+}
+
+// resolveMember turns a collection member entity into a fully populated object.
+// A member returned inline (already carrying an ID) is used as-is; otherwise it
+// is fetched from its @odata.id. It returns the resolved object, the member
+// link (for error reporting), and any error.
+func resolveMember[T any, PT interface {
+	*T
+	SchemaObject
+}](c Client, entity PT, opts ...QueryGroupOption) (item *T, link string, err error) {
+	if entity == nil {
+		return nil, "", nil
+	}
+
+	if entity.GetID() != "" {
+		// if the entity has any ExtendedInfo, we assume it's an error
+		extendedInfo := entity.GetExtendedInfo()
+		if len(extendedInfo) > 0 {
+			errE := &Error{}
+			for i := range extendedInfo {
+				errE.ExtendedInfos = append(errE.ExtendedInfos, ErrExtendedInfo(extendedInfo[i]))
+			}
+			err = errE
+		}
+
+		entity.SetClient(c)
+		return entity, entity.GetODataID(), err
+	}
+
+	if entity.GetODataID() != "" {
+		link = entity.GetODataID()
+		item, err = GetObject[T, PT](c, link, opts...)
+		return item, link, err
+	}
+
+	return nil, "", nil
 }

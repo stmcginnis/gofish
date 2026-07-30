@@ -7,6 +7,8 @@ package schemas
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -52,6 +54,50 @@ func TestCollection(t *testing.T) {
 		endpoint := fmt.Sprintf(linkRoot, i+1)
 		if item != endpoint {
 			t.Errorf("Expected link to '%s', got '%s'", endpoint, item)
+		}
+	}
+}
+
+// TestGetCollectionObjectsOrder verifies that GetCollectionObjects returns
+// members in the order the service returned them, even though each member is
+// resolved concurrently.
+func TestGetCollectionObjectsOrder(t *testing.T) {
+	const count = 25
+
+	var members strings.Builder
+	for i := 1; i <= count; i++ {
+		if i > 1 {
+			members.WriteString(",")
+		}
+		fmt.Fprintf(&members,
+			`{"@odata.id":"/redfish/v1/Systems/System-%d","Id":"%d"}`, i, i)
+	}
+	body := fmt.Sprintf(
+		`{"@odata.id":"/redfish/v1/Systems","Members@odata.count":%d,"Members":[%s]}`,
+		count, members.String())
+
+	client := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodGet: {
+				&http.Response{
+					StatusCode: 200,
+					Body:       io.NopCloser(strings.NewReader(body)),
+				},
+			},
+		},
+	}
+
+	systems, err := GetCollectionObjects[ComputerSystem](client, "/redfish/v1/Systems")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(systems) != count {
+		t.Fatalf("expected %d members, got %d", count, len(systems))
+	}
+	for i, s := range systems {
+		want := fmt.Sprintf("%d", i+1)
+		if s.ID != want {
+			t.Errorf("member %d out of order: expected Id %q, got %q", i, want, s.ID)
 		}
 	}
 }
