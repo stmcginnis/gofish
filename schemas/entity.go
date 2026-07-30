@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"sync"
 )
 
 // Entity provides the basis for all Redfish and Swordfish objects.
@@ -535,42 +536,37 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 }
 
 // GetObjects retrieves multiple API objects concurrently from the service.
+// Results are returned in the same order as uris; failures are collected in
+// the returned CollectionError. Concurrency is bounded by the client's
+// MaxConcurrentRequests setting (enforced at the HTTP layer).
 func GetObjects[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, uris []string) ([]*T, error) {
-	var result []*T
 	if len(uris) == 0 {
-		return result, nil
+		return nil, nil
 	}
 
-	type GetResult struct {
-		Item  *T
-		Link  string
-		Error error
+	// One goroutine per uri, gated at the HTTP layer by the client semaphore.
+	items := make([]*T, len(uris))
+	errs := make([]error, len(uris))
+	var wg sync.WaitGroup
+	for i, link := range uris {
+		wg.Add(1)
+		go func(i int, link string) {
+			defer wg.Done()
+			items[i], errs[i] = GetObject[T, PT](c, link)
+		}(i, link)
 	}
+	wg.Wait()
 
-	ch := make(chan GetResult)
+	var result []*T
 	collectionError := NewCollectionError()
-
-	// Worker function to get a single object
-	get := func(link string) {
-		entity, err := GetObject[T, PT](c, link)
-		ch <- GetResult{Item: entity, Link: link, Error: err}
-	}
-
-	// Start workers for each URI
-	go func() {
-		CollectCollection(get, uris)
-		close(ch)
-	}()
-
-	// Process results
-	for r := range ch {
-		if r.Error != nil {
-			collectionError.Failures[r.Link] = r.Error
+	for i, link := range uris {
+		if errs[i] != nil {
+			collectionError.Failures[link] = errs[i]
 		} else {
-			result = append(result, r.Item)
+			result = append(result, items[i])
 		}
 	}
 
