@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -114,32 +115,58 @@ func (reservoir *Reservoir) UnmarshalJSON(b []byte) error {
 
 // Assembly gets the containing assembly for this reservoir.
 func (reservoir *Reservoir) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return reservoir.AssemblyWithContext(common.ContextOf(reservoir.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets the containing assembly for this reservoir.
+func (reservoir *Reservoir) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if reservoir.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(reservoir.GetClient(), reservoir.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, reservoir.GetClient(), reservoir.assembly, queryOpts...)
 }
 
 // Filters gets a collection of filters.
 func (reservoir *Reservoir) Filters(queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
-	return common.GetObjects[Filter](reservoir.GetClient(), reservoir.filters, queryOpts...)
+	return reservoir.FiltersWithContext(common.ContextOf(reservoir.GetClient()), queryOpts...)
+}
+
+// FiltersWithContext gets a collection of filters.
+func (reservoir *Reservoir) FiltersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return common.GetObjectsWithContext[Filter](ctx, reservoir.GetClient(), reservoir.filters, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (reservoir *Reservoir) Update() error {
+	return reservoir.UpdateWithContext(common.ContextOf(reservoir.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (reservoir *Reservoir) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"LocationIndicatorActive",
 		"UserLabel"}
 
-	return reservoir.UpdateFromRawData(reservoir, reservoir.rawData, readWriteFields)
+	return reservoir.UpdateFromRawDataWithContext(ctx, reservoir, reservoir.rawData, readWriteFields)
 }
 
 // GetReservoir will get a Reservoir instance from the service.
 func GetReservoir(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Reservoir, error) {
-	return common.GetObject[Reservoir](c, uri, queryOpts...)
+	return GetReservoirWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetReservoirWithContext will get a Reservoir instance from the service.
+func GetReservoirWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Reservoir, error) {
+	return common.GetObjectWithContext[Reservoir](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedReservoirs gets the collection of Reservoir from
 // a provided reference.
 func ListReferencedReservoirs(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Reservoir, error) {
-	return common.GetCollectionObjects[Reservoir](c, link, queryOpts...)
+	return ListReferencedReservoirsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedReservoirsWithContext gets the collection of Reservoir from
+// a provided reference.
+func ListReferencedReservoirsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Reservoir, error) {
+	return common.GetCollectionObjectsWithContext[Reservoir](ctx, c, link, queryOpts...)
 }

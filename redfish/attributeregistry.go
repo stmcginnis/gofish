@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"math/big"
 
@@ -306,5 +307,11 @@ type AttributeRegistry struct {
 // GetAttributeRegistry will get an AttributeRegistry instance from the Redfish service,
 // e.g. BiosAttributeRegistry
 func GetAttributeRegistry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AttributeRegistry, error) {
-	return common.GetObject[AttributeRegistry](c, uri, queryOpts...)
+	return GetAttributeRegistryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAttributeRegistryWithContext will get an AttributeRegistry instance from the Redfish service,
+// e.g. BiosAttributeRegistry
+func GetAttributeRegistryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AttributeRegistry, error) {
+	return common.GetObjectWithContext[AttributeRegistry](ctx, c, uri, queryOpts...)
 }

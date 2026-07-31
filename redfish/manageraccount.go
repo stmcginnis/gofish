@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -162,20 +163,35 @@ func (manageraccount *ManagerAccount) UnmarshalJSON(b []byte) error {
 
 // Role gets the role of this ManagerAccount.
 func (manageraccount *ManagerAccount) Role(queryOpts ...common.QueryGroupOption) (*Role, error) {
+	return manageraccount.RoleWithContext(common.ContextOf(manageraccount.GetClient()), queryOpts...)
+}
+
+// RoleWithContext gets the role of this ManagerAccount.
+func (manageraccount *ManagerAccount) RoleWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Role, error) {
 	if manageraccount.role == "" {
 		return nil, nil
 	}
-	return GetRole(manageraccount.GetClient(), manageraccount.role, queryOpts...)
+	return GetRoleWithContext(ctx, manageraccount.GetClient(), manageraccount.role, queryOpts...)
 }
 
 // Certificates gets the user identity certificates for this account.
 func (manageraccount *ManagerAccount) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return common.GetObjects[Certificate](manageraccount.GetClient(), manageraccount.certificates, queryOpts...)
+	return manageraccount.CertificatesWithContext(common.ContextOf(manageraccount.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets the user identity certificates for this account.
+func (manageraccount *ManagerAccount) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjectsWithContext[Certificate](ctx, manageraccount.GetClient(), manageraccount.certificates, queryOpts...)
 }
 
 // Keys gets the keys that can be used to authenticate this account.
 func (manageraccount *ManagerAccount) Keys(queryOpts ...common.QueryGroupOption) ([]*Key, error) {
-	return common.GetObjects[Key](manageraccount.GetClient(), manageraccount.keys, queryOpts...)
+	return manageraccount.KeysWithContext(common.ContextOf(manageraccount.GetClient()), queryOpts...)
+}
+
+// KeysWithContext gets the keys that can be used to authenticate this account.
+func (manageraccount *ManagerAccount) KeysWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Key, error) {
+	return common.GetObjectsWithContext[Key](ctx, manageraccount.GetClient(), manageraccount.keys, queryOpts...)
 }
 
 // ChangePassword changes the account password while requiring password for the current session.
@@ -186,6 +202,17 @@ func (manageraccount *ManagerAccount) Keys(queryOpts ...common.QueryGroupOption)
 // with HTTP Basic authentication, this parameter shall contain the same password encoded in the
 // `Authorization` header.
 func (manageraccount *ManagerAccount) ChangePassword(newPassword, sessionAccountPassword string) error {
+	return manageraccount.ChangePasswordWithContext(common.ContextOf(manageraccount.GetClient()), newPassword, sessionAccountPassword)
+}
+
+// ChangePasswordWithContext changes the account password while requiring password for the current session.
+// `newPassword` is the new password.
+// `sessionAccountPassword` is the current session's account. A user changing their own password shall
+// provide their current password for this parameter. An administrator changing the password for a
+// different user shall provide their own password for this parameter. If the request is performed
+// with HTTP Basic authentication, this parameter shall contain the same password encoded in the
+// `Authorization` header.
+func (manageraccount *ManagerAccount) ChangePasswordWithContext(ctx context.Context, newPassword, sessionAccountPassword string) error {
 	if manageraccount.changePasswordTarget == "" {
 		return errors.New("ChangePassword is not supported by this service") //nolint:error-strings
 	}
@@ -196,11 +223,16 @@ func (manageraccount *ManagerAccount) ChangePassword(newPassword, sessionAccount
 		NewPassword:            newPassword,
 		SessionAccountPassword: sessionAccountPassword,
 	}
-	return manageraccount.Post(manageraccount.changePasswordTarget, parameters)
+	return manageraccount.PostWithContext(ctx, manageraccount.changePasswordTarget, parameters)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (manageraccount *ManagerAccount) Update() error {
+	return manageraccount.UpdateWithContext(common.ContextOf(manageraccount.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (manageraccount *ManagerAccount) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AccountExpiration",
 		"AccountTypes",
@@ -218,18 +250,29 @@ func (manageraccount *ManagerAccount) Update() error {
 		"UserName",
 	}
 
-	return manageraccount.UpdateFromRawData(manageraccount, manageraccount.rawData, readWriteFields)
+	return manageraccount.UpdateFromRawDataWithContext(ctx, manageraccount, manageraccount.rawData, readWriteFields)
 }
 
 // GetManagerAccount will get a ManagerAccount instance from the service.
 func GetManagerAccount(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ManagerAccount, error) {
-	return common.GetObject[ManagerAccount](c, uri, queryOpts...)
+	return GetManagerAccountWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetManagerAccountWithContext will get a ManagerAccount instance from the service.
+func GetManagerAccountWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ManagerAccount, error) {
+	return common.GetObjectWithContext[ManagerAccount](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedManagerAccounts gets the collection of ManagerAccount from
 // a provided reference.
 func ListReferencedManagerAccounts(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ManagerAccount, error) {
-	return common.GetCollectionObjects[ManagerAccount](c, link, queryOpts...)
+	return ListReferencedManagerAccountsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedManagerAccountsWithContext gets the collection of ManagerAccount from
+// a provided reference.
+func ListReferencedManagerAccountsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ManagerAccount, error) {
+	return common.GetCollectionObjectsWithContext[ManagerAccount](ctx, c, link, queryOpts...)
 }
 
 // SNMPUserInfo is shall contain the SNMP settings for an account.

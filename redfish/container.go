@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -74,40 +75,66 @@ func (container *Container) UnmarshalJSON(b []byte) error {
 
 // GetContainer will get a Container instance from the service.
 func GetContainer(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Container, error) {
-	return common.GetObject[Container](c, uri, queryOpts...)
+	return GetContainerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetContainerWithContext will get a Container instance from the service.
+func GetContainerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Container, error) {
+	return common.GetObjectWithContext[Container](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedContainers gets the collection of Container from
 // a provided reference.
 func ListReferencedContainers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Container, error) {
-	return common.GetCollectionObjects[Container](c, link, queryOpts...)
+	return ListReferencedContainersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedContainersWithContext gets the collection of Container from
+// a provided reference.
+func ListReferencedContainersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Container, error) {
+	return common.GetCollectionObjectsWithContext[Container](ctx, c, link, queryOpts...)
 }
 
 // Reset resets the container.
 func (container *Container) Reset() error {
+	return container.ResetWithContext(common.ContextOf(container.GetClient()))
+}
+
+// ResetWithContext resets the container.
+func (container *Container) ResetWithContext(ctx context.Context) error {
 	if container.resetTarget == "" {
 		return fmt.Errorf("Reset is not supported by this system")
 	}
 
-	return container.Post(container.resetTarget, nil)
+	return container.PostWithContext(ctx, container.resetTarget, nil)
 }
 
 // EthernetIntefaces gets the ethernet interfaces associated with this container.
 func (container *Container) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return container.EthernetInterfacesWithContext(common.ContextOf(container.GetClient()), queryOpts...)
+}
+
+// EthernetIntefaces gets the ethernet interfaces associated with this container.
+func (container *Container) EthernetInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
 	if container.ethernetInterfaces == "" {
 		return nil, nil
 	}
 
-	return ListReferencedEthernetInterfaces(container.GetClient(), container.ethernetInterfaces, queryOpts...)
+	return ListReferencedEthernetInterfacesWithContext(ctx, container.GetClient(), container.ethernetInterfaces, queryOpts...)
 }
 
 // ContainerImage gets the image used by this container.
 func (container *Container) ContainerImage(queryOpts ...common.QueryGroupOption) (*ContainerImage, error) {
+	return container.ContainerImageWithContext(common.ContextOf(container.GetClient()), queryOpts...)
+}
+
+// ContainerImageWithContext gets the image used by this container.
+func (container *Container) ContainerImageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ContainerImage, error) {
 	if container.containerImage == "" {
 		return nil, nil
 	}
 
-	return GetContainerImage(container.GetClient(), container.containerImage, queryOpts...)
+	return GetContainerImageWithContext(ctx, container.GetClient(), container.containerImage, queryOpts...)
 }
 
 // Limits shall contain the resource limits allocated to a container.

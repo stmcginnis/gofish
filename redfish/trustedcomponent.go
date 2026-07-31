@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -119,43 +120,68 @@ type TrustedComponent struct {
 
 // ActiveSoftwareImage gets the active firmware image for this trusted component.
 func (trustedComponent *TrustedComponent) ActiveSoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return trustedComponent.ActiveSoftwareImageWithContext(common.ContextOf(trustedComponent.GetClient()), queryOpts...)
+}
+
+// ActiveSoftwareImageWithContext gets the active firmware image for this trusted component.
+func (trustedComponent *TrustedComponent) ActiveSoftwareImageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if trustedComponent.Links.ActiveSoftwareImage.IsZero() {
 		return nil, nil
 	}
-	return GetSoftwareInventory(trustedComponent.GetClient(), trustedComponent.Links.ActiveSoftwareImage.String(), queryOpts...)
+	return GetSoftwareInventoryWithContext(ctx, trustedComponent.GetClient(), trustedComponent.Links.ActiveSoftwareImage.String(), queryOpts...)
 }
 
 // ComponentIntegrity gets the resources for which the trusted component is responsible.
 func (trustedComponent *TrustedComponent) ComponentIntegrity(queryOpts ...common.QueryGroupOption) ([]*ComponentIntegrity, error) {
+	return trustedComponent.ComponentIntegrityWithContext(common.ContextOf(trustedComponent.GetClient()), queryOpts...)
+}
+
+// ComponentIntegrityWithContext gets the resources for which the trusted component is responsible.
+func (trustedComponent *TrustedComponent) ComponentIntegrityWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ComponentIntegrity, error) {
 	if len(trustedComponent.Links.ComponentIntegrity) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[ComponentIntegrity](trustedComponent.GetClient(), trustedComponent.Links.ComponentIntegrity.ToStrings(), queryOpts...)
+	return common.GetObjectsWithContext[ComponentIntegrity](ctx, trustedComponent.GetClient(), trustedComponent.Links.ComponentIntegrity.ToStrings(), queryOpts...)
 }
 
 // SoftwareImages gets the firmware images that apply to this trusted component.
 func (trustedComponent *TrustedComponent) SoftwareImages(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return trustedComponent.SoftwareImagesWithContext(common.ContextOf(trustedComponent.GetClient()), queryOpts...)
+}
+
+// SoftwareImagesWithContext gets the firmware images that apply to this trusted component.
+func (trustedComponent *TrustedComponent) SoftwareImagesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
 	if len(trustedComponent.Links.SoftwareImages) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[SoftwareInventory](trustedComponent.GetClient(), trustedComponent.Links.SoftwareImages.ToStrings(), queryOpts...)
+	return common.GetObjectsWithContext[SoftwareInventory](ctx, trustedComponent.GetClient(), trustedComponent.Links.SoftwareImages.ToStrings(), queryOpts...)
 }
 
 // Certificates gets the certificates associated with this trusted component.
 func (trustedComponent *TrustedComponent) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return trustedComponent.CertificatesWithContext(common.ContextOf(trustedComponent.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets the certificates associated with this trusted component.
+func (trustedComponent *TrustedComponent) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if trustedComponent.CertificatesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedCertificates(trustedComponent.GetClient(), trustedComponent.CertificatesLink.String(), queryOpts...)
+	return ListReferencedCertificatesWithContext(ctx, trustedComponent.GetClient(), trustedComponent.CertificatesLink.String(), queryOpts...)
 }
 
 // TPMGetEventLog gets the event log for TPM 2.0 devices.
 func (trustedComponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
+	return trustedComponent.TPMGetEventLogWithContext(common.ContextOf(trustedComponent.GetClient()))
+}
+
+// TPMGetEventLogWithContext gets the event log for TPM 2.0 devices.
+func (trustedComponent *TrustedComponent) TPMGetEventLogWithContext(ctx context.Context) (*TPMGetEventLogResponse, error) {
 	if trustedComponent.Actions.TPMGetEventLog.Target == "" {
 		return nil, ErrActionNotSupported
 	}
 
-	resp, err := trustedComponent.PostWithResponse(trustedComponent.Actions.TPMGetEventLog.Target, nil)
+	resp, err := trustedComponent.PostWithResponseWithContext(ctx, trustedComponent.Actions.TPMGetEventLog.Target, nil)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
@@ -172,11 +198,22 @@ func (trustedComponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogRespo
 
 // GetTrustedComponent will get a TrustedComponent instance from the service.
 func GetTrustedComponent(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*TrustedComponent, error) {
-	return common.GetObject[TrustedComponent](c, uri, queryOpts...)
+	return GetTrustedComponentWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetTrustedComponentWithContext will get a TrustedComponent instance from the service.
+func GetTrustedComponentWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*TrustedComponent, error) {
+	return common.GetObjectWithContext[TrustedComponent](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedTrustedComponents gets the collection of TrustedComponent from
 // a provided reference.
 func ListReferencedTrustedComponents(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*TrustedComponent, error) {
-	return common.GetCollectionObjects[TrustedComponent](c, link, queryOpts...)
+	return ListReferencedTrustedComponentsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedTrustedComponentsWithContext gets the collection of TrustedComponent from
+// a provided reference.
+func ListReferencedTrustedComponentsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*TrustedComponent, error) {
+	return common.GetCollectionObjectsWithContext[TrustedComponent](ctx, c, link, queryOpts...)
 }

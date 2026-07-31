@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -149,28 +150,49 @@ func (compositionservice *CompositionService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (compositionservice *CompositionService) Update() error {
+	return compositionservice.UpdateWithContext(common.ContextOf(compositionservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (compositionservice *CompositionService) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AllowOverprovisioning",
 		"ServiceEnabled",
 	}
 
-	return compositionservice.UpdateFromRawData(compositionservice, compositionservice.rawData, readWriteFields)
+	return compositionservice.UpdateFromRawDataWithContext(ctx, compositionservice, compositionservice.rawData, readWriteFields)
 }
 
 // GetCompositionService will get a CompositionService instance from the service.
 func GetCompositionService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CompositionService, error) {
-	return common.GetObject[CompositionService](c, uri, queryOpts...)
+	return GetCompositionServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCompositionServiceWithContext will get a CompositionService instance from the service.
+func GetCompositionServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CompositionService, error) {
+	return common.GetObjectWithContext[CompositionService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCompositionServices gets the collection of CompositionService from
 // a provided reference.
 func ListReferencedCompositionServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CompositionService, error) {
-	return common.GetCollectionObjects[CompositionService](c, link, queryOpts...)
+	return ListReferencedCompositionServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCompositionServicesWithContext gets the collection of CompositionService from
+// a provided reference.
+func ListReferencedCompositionServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CompositionService, error) {
+	return common.GetCollectionObjectsWithContext[CompositionService](ctx, c, link, queryOpts...)
 }
 
 // Compose performs a set of operations specified by a manifest.
 func (compositionservice *CompositionService) Compose(request *ComposeRequest) (*ComposeResponse, error) {
-	resp, err := compositionservice.PostWithResponse(compositionservice.composeTarget, request)
+	return compositionservice.ComposeWithContext(common.ContextOf(compositionservice.GetClient()), request)
+}
+
+// ComposeWithContext performs a set of operations specified by a manifest.
+func (compositionservice *CompositionService) ComposeWithContext(ctx context.Context, request *ComposeRequest) (*ComposeResponse, error) {
+	resp, err := compositionservice.PostWithResponseWithContext(ctx, compositionservice.composeTarget, request)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
@@ -187,28 +209,44 @@ func (compositionservice *CompositionService) Compose(request *ComposeRequest) (
 
 // ActivePool gets a resource collection whose members represent the resource blocks in the active pool.
 func (compositionservice *CompositionService) ActivePool(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return compositionservice.ActivePoolWithContext(common.ContextOf(compositionservice.GetClient()), queryOpts...)
+}
+
+// ActivePoolWithContext gets a resource collection whose members represent the resource blocks in the active pool.
+func (compositionservice *CompositionService) ActivePoolWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
 	if compositionservice.activePool == "" {
 		return nil, nil
 	}
 
-	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.activePool, queryOpts...)
+	return ListReferencedResourceBlocksWithContext(ctx, compositionservice.GetClient(), compositionservice.activePool, queryOpts...)
 }
 
 // CompositionReservations gets a resource collection whose members represent the reserved resource blocks and the
 // related document that caused the reservations.
 func (compositionservice *CompositionService) CompositionReservations(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return compositionservice.CompositionReservationsWithContext(common.ContextOf(compositionservice.GetClient()), queryOpts...)
+}
+
+// CompositionReservationsWithContext gets a resource collection whose members represent the reserved resource blocks and the
+// related document that caused the reservations.
+func (compositionservice *CompositionService) CompositionReservationsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
 	if compositionservice.compositionReservations == "" {
 		return nil, nil
 	}
 
-	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.compositionReservations, queryOpts...)
+	return ListReferencedResourceBlocksWithContext(ctx, compositionservice.GetClient(), compositionservice.compositionReservations, queryOpts...)
 }
 
 // FreePool gets a resource collection whose members represent the reserved resource blocks in the free pool.
 func (compositionservice *CompositionService) FreePool(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return compositionservice.FreePoolWithContext(common.ContextOf(compositionservice.GetClient()), queryOpts...)
+}
+
+// FreePoolWithContext gets a resource collection whose members represent the reserved resource blocks in the free pool.
+func (compositionservice *CompositionService) FreePoolWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
 	if compositionservice.freePool == "" {
 		return nil, nil
 	}
 
-	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.freePool, queryOpts...)
+	return ListReferencedResourceBlocksWithContext(ctx, compositionservice.GetClient(), compositionservice.freePool, queryOpts...)
 }

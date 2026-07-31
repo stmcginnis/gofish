@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -180,6 +181,13 @@ func (power *Power) UnmarshalJSON(b []byte) error {
 // memberID identifies the power supply in the PowerSupplies array.
 // resetType specifies the type of reset to perform.
 func (power *Power) PowerSupplyReset(memberID string, resetType ResetType) error {
+	return power.PowerSupplyResetWithContext(common.ContextOf(power.GetClient()), memberID, resetType)
+}
+
+// PowerSupplyResetWithContext resets the specified power supply.
+// memberID identifies the power supply in the PowerSupplies array.
+// resetType specifies the type of reset to perform.
+func (power *Power) PowerSupplyResetWithContext(ctx context.Context, memberID string, resetType ResetType) error {
 	t := struct {
 		MemberID  string    `json:"MemberId"`
 		ResetType ResetType `json:"ResetType"`
@@ -187,7 +195,7 @@ func (power *Power) PowerSupplyReset(memberID string, resetType ResetType) error
 		MemberID:  memberID,
 		ResetType: resetType,
 	}
-	return power.Post(power.powerSupplyResetTarget, t)
+	return power.PostWithContext(ctx, power.powerSupplyResetTarget, t)
 }
 
 // RedundancySet returns the power supplies in the specified redundancy group.
@@ -208,12 +216,22 @@ func (power *Power) RedundancySet(memberID int) []PowerSupply {
 
 // GetPower retrieves a Power instance from the service.
 func GetPower(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Power, error) {
-	return common.GetObject[Power](c, uri, queryOpts...)
+	return GetPowerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPowerWithContext retrieves a Power instance from the service.
+func GetPowerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Power, error) {
+	return common.GetObjectWithContext[Power](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedPowers retrieves a collection of Power from a reference.
 func ListReferencedPowers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Power, error) {
-	return common.GetCollectionObjects[Power](c, link, queryOpts...)
+	return ListReferencedPowersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedPowersWithContext retrieves a collection of Power from a reference.
+func ListReferencedPowersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Power, error) {
+	return common.GetCollectionObjectsWithContext[Power](ctx, c, link, queryOpts...)
 }
 
 // PowerControl represents power control functions for a chassis or system.
@@ -448,40 +466,72 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 
 // Assembly gets the containing assembly.
 func (powersupply *PowerSupply) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return powersupply.AssemblyWithContext(common.ContextOf(powersupply.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets the containing assembly.
+func (powersupply *PowerSupply) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if powersupply.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(powersupply.GetClient(), powersupply.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, powersupply.GetClient(), powersupply.assembly, queryOpts...)
 }
 
 // Metrics gets the metrics associated with this power supply.
 func (powersupply *PowerSupply) Metrics(queryOpts ...common.QueryGroupOption) (*PowerSupplyUnitMetrics, error) {
+	return powersupply.MetricsWithContext(common.ContextOf(powersupply.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the metrics associated with this power supply.
+func (powersupply *PowerSupply) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*PowerSupplyUnitMetrics, error) {
 	if powersupply.metrics == "" {
 		return nil, nil
 	}
-	return GetPowerSupplyUnitMetrics(powersupply.GetClient(), powersupply.metrics, queryOpts...)
+	return GetPowerSupplyUnitMetricsWithContext(ctx, powersupply.GetClient(), powersupply.metrics, queryOpts...)
 }
 
 // Redundancy gets the endpoints at the other end of the link.
 func (powersupply *PowerSupply) Redundancy(queryOpts ...common.QueryGroupOption) ([]*Redundancy, error) {
-	return common.GetObjects[Redundancy](powersupply.GetClient(), powersupply.redundancyLinks, queryOpts...)
+	return powersupply.RedundancyWithContext(common.ContextOf(powersupply.GetClient()), queryOpts...)
+}
+
+// RedundancyWithContext gets the endpoints at the other end of the link.
+func (powersupply *PowerSupply) RedundancyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Redundancy, error) {
+	return common.GetObjectsWithContext[Redundancy](ctx, powersupply.GetClient(), powersupply.redundancyLinks, queryOpts...)
 }
 
 // GetPowerSupply retrieves a PowerSupply instance from the service.
 func GetPowerSupply(c common.Client, uri string) (*PowerSupply, error) {
+	return GetPowerSupplyWithContext(common.ContextOf(c), c, uri)
+}
+
+// GetPowerSupplyWithContext retrieves a PowerSupply instance from the service.
+func GetPowerSupplyWithContext(ctx context.Context, c common.Client, uri string) (*PowerSupply, error) {
 	var powerSupply PowerSupply
-	return &powerSupply, powerSupply.Get(c, uri, &powerSupply)
+	return &powerSupply, powerSupply.GetWithContext(ctx, c, uri, &powerSupply)
 }
 
 // ListReferencedPowerSupplies retrieves a collection of PowerSupplies from a reference.
 func ListReferencedPowerSupplies(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
-	return common.GetCollectionObjects[PowerSupply](c, link, queryOpts...)
+	return ListReferencedPowerSuppliesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedPowerSuppliesWithContext retrieves a collection of PowerSupplies from a reference.
+func ListReferencedPowerSuppliesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
+	return common.GetCollectionObjectsWithContext[PowerSupply](ctx, c, link, queryOpts...)
 }
 
 // Reset is an action that resets a power supply. A GracefulRestart ResetType
 // shall reset the power supply but shall not affect the power output. A
 // ForceRestart ResetType can affect the power supply output.
 func (powersupply *PowerSupply) Reset(resetType ResetType) error {
+	return powersupply.ResetWithContext(common.ContextOf(powersupply.GetClient()), resetType)
+}
+
+// ResetWithContext is an action that resets a power supply. A GracefulRestart ResetType
+// shall reset the power supply but shall not affect the power output. A
+// ForceRestart ResetType can affect the power supply output.
+func (powersupply *PowerSupply) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	if powersupply.resetTarget == "" {
 		return errors.New("reset is not supported")
 	}
@@ -490,14 +540,19 @@ func (powersupply *PowerSupply) Reset(resetType ResetType) error {
 		ResetType ResetType
 	}{ResetType: resetType}
 
-	return powersupply.Post(powersupply.resetTarget, t)
+	return powersupply.PostWithContext(ctx, powersupply.resetTarget, t)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (powersupply *PowerSupply) Update() error {
+	return powersupply.UpdateWithContext(common.ContextOf(powersupply.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (powersupply *PowerSupply) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"IndicatorLED"}
 
-	return powersupply.UpdateFromRawData(powersupply, powersupply.rawData, readWriteFields)
+	return powersupply.UpdateFromRawDataWithContext(ctx, powersupply, powersupply.rawData, readWriteFields)
 }
 
 // Voltage represents a voltage sensor for a chassis.

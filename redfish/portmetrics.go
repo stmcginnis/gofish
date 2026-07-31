@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -219,13 +220,24 @@ type PortMetrics struct {
 
 // GetPortMetrics will get a PortMetrics instance from the service.
 func GetPortMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PortMetrics, error) {
-	return common.GetObject[PortMetrics](c, uri, queryOpts...)
+	return GetPortMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPortMetricsWithContext will get a PortMetrics instance from the service.
+func GetPortMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PortMetrics, error) {
+	return common.GetObjectWithContext[PortMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedPortMetricss gets the collection of PortMetrics from
 // a provided reference.
 func ListReferencedPortMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PortMetrics, error) {
-	return common.GetCollectionObjects[PortMetrics](c, link, queryOpts...)
+	return ListReferencedPortMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedPortMetricssWithContext gets the collection of PortMetrics from
+// a provided reference.
+func ListReferencedPortMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PortMetrics, error) {
+	return common.GetCollectionObjectsWithContext[PortMetrics](ctx, c, link, queryOpts...)
 }
 
 // SASPortMetrics shall describe physical (phy) related metrics for Serial Attached SCSI (SAS).

@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -106,6 +107,11 @@ func (endpointgroup *EndpointGroup) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (endpointgroup *EndpointGroup) Update() error {
+	return endpointgroup.UpdateWithContext(common.ContextOf(endpointgroup.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (endpointgroup *EndpointGroup) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(EndpointGroup)
@@ -125,21 +131,37 @@ func (endpointgroup *EndpointGroup) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(endpointgroup).Elem()
 
-	return endpointgroup.Entity.Update(originalElement, currentElement, readWriteFields)
+	return endpointgroup.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetEndpointGroup will get a EndpointGroup instance from the service.
 func GetEndpointGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EndpointGroup, error) {
-	return common.GetObject[EndpointGroup](c, uri, queryOpts...)
+	return GetEndpointGroupWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetEndpointGroupWithContext will get a EndpointGroup instance from the service.
+func GetEndpointGroupWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EndpointGroup, error) {
+	return common.GetObjectWithContext[EndpointGroup](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedEndpointGroups gets the collection of EndpointGroup from
 // a provided reference.
 func ListReferencedEndpointGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
-	return common.GetCollectionObjects[EndpointGroup](c, link, queryOpts...)
+	return ListReferencedEndpointGroupsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedEndpointGroupsWithContext gets the collection of EndpointGroup from
+// a provided reference.
+func ListReferencedEndpointGroupsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return common.GetCollectionObjectsWithContext[EndpointGroup](ctx, c, link, queryOpts...)
 }
 
 // Endpoints gets the group's endpoints.
 func (endpointgroup *EndpointGroup) Endpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
-	return redfish.ListReferencedEndpoints(endpointgroup.GetClient(), endpointgroup.endpoints, queryOpts...)
+	return endpointgroup.EndpointsWithContext(common.ContextOf(endpointgroup.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the group's endpoints.
+func (endpointgroup *EndpointGroup) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return redfish.ListReferencedEndpointsWithContext(ctx, endpointgroup.GetClient(), endpointgroup.endpoints, queryOpts...)
 }

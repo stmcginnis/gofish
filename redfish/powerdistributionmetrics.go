@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -83,14 +84,24 @@ func (metrics *PowerDistributionMetrics) UnmarshalJSON(b []byte) error {
 
 // GetPowerDistributionMetrics will get a PowerDistributionMetrics instance from the Redfish service.
 func GetPowerDistributionMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerDistributionMetrics, error) {
-	return common.GetObject[PowerDistributionMetrics](c, uri, queryOpts...)
+	return GetPowerDistributionMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPowerDistributionMetricsWithContext will get a PowerDistributionMetrics instance from the Redfish service.
+func GetPowerDistributionMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerDistributionMetrics, error) {
+	return common.GetObjectWithContext[PowerDistributionMetrics](ctx, c, uri, queryOpts...)
 }
 
 // This action shall reset any time intervals or counted values for this equipment.
 func (metrics *PowerDistributionMetrics) ResetMetrics() error {
+	return metrics.ResetMetricsWithContext(common.ContextOf(metrics.GetClient()))
+}
+
+// This action shall reset any time intervals or counted values for this equipment.
+func (metrics *PowerDistributionMetrics) ResetMetricsWithContext(ctx context.Context) error {
 	if metrics.resetMetricsTarget == "" {
 		return fmt.Errorf("ResetMetrics is not supported")
 	}
 
-	return metrics.Post(metrics.resetMetricsTarget, nil)
+	return metrics.PostWithContext(ctx, metrics.resetMetricsTarget, nil)
 }

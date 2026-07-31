@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -123,14 +124,24 @@ func (externalaccountprovider *ExternalAccountProvider) UnmarshalJSON(b []byte) 
 
 // Certificates returns certificates in this external account provider.
 func (externalaccountprovider *ExternalAccountProvider) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return externalaccountprovider.CertificatesWithContext(common.ContextOf(externalaccountprovider.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext returns certificates in this external account provider.
+func (externalaccountprovider *ExternalAccountProvider) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if externalaccountprovider.certificates == "" {
 		return []*Certificate{}, nil
 	}
-	return ListReferencedCertificates(externalaccountprovider.GetClient(), externalaccountprovider.certificates, queryOpts...)
+	return ListReferencedCertificatesWithContext(ctx, externalaccountprovider.GetClient(), externalaccountprovider.certificates, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (externalaccountprovider *ExternalAccountProvider) Update() error {
+	return externalaccountprovider.UpdateWithContext(common.ContextOf(externalaccountprovider.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (externalaccountprovider *ExternalAccountProvider) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Priority",
 		"Retries",
@@ -139,18 +150,29 @@ func (externalaccountprovider *ExternalAccountProvider) Update() error {
 		"TimeoutSeconds",
 	}
 
-	return externalaccountprovider.UpdateFromRawData(externalaccountprovider, externalaccountprovider.rawData, readWriteFields)
+	return externalaccountprovider.UpdateFromRawDataWithContext(ctx, externalaccountprovider, externalaccountprovider.rawData, readWriteFields)
 }
 
 // GetExternalAccountProvider will get a ExternalAccountProvider instance from the service.
 func GetExternalAccountProvider(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ExternalAccountProvider, error) {
-	return common.GetObject[ExternalAccountProvider](c, uri, queryOpts...)
+	return GetExternalAccountProviderWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetExternalAccountProviderWithContext will get a ExternalAccountProvider instance from the service.
+func GetExternalAccountProviderWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ExternalAccountProvider, error) {
+	return common.GetObjectWithContext[ExternalAccountProvider](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedExternalAccountProviders gets the collection of ExternalAccountProvider from
 // a provided reference.
 func ListReferencedExternalAccountProviders(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ExternalAccountProvider, error) {
-	return common.GetCollectionObjects[ExternalAccountProvider](c, link, queryOpts...)
+	return ListReferencedExternalAccountProvidersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedExternalAccountProvidersWithContext gets the collection of ExternalAccountProvider from
+// a provided reference.
+func ListReferencedExternalAccountProvidersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ExternalAccountProvider, error) {
+	return common.GetCollectionObjectsWithContext[ExternalAccountProvider](ctx, c, link, queryOpts...)
 }
 
 // LDAPSearchSettings shall contain all required settings to search a generic LDAP service.

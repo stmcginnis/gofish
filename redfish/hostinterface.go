@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -186,55 +187,98 @@ func (hostinterface *HostInterface) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (hostinterface *HostInterface) Update() error {
+	return hostinterface.UpdateWithContext(common.ContextOf(hostinterface.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (hostinterface *HostInterface) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AuthNoneRoleId",
 		"AuthenticationModes",
 		"InterfaceEnabled",
 	}
 
-	return hostinterface.UpdateFromRawData(hostinterface, hostinterface.rawData, readWriteFields)
+	return hostinterface.UpdateFromRawDataWithContext(ctx, hostinterface, hostinterface.rawData, readWriteFields)
 }
 
 // GetHostInterface will get a HostInterface instance from the service.
 func GetHostInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*HostInterface, error) {
-	return common.GetObject[HostInterface](c, uri, queryOpts...)
+	return GetHostInterfaceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetHostInterfaceWithContext will get a HostInterface instance from the service.
+func GetHostInterfaceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*HostInterface, error) {
+	return common.GetObjectWithContext[HostInterface](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
 func ListReferencedHostInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*HostInterface, error) {
-	return common.GetCollectionObjects[HostInterface](c, link, queryOpts...)
+	return ListReferencedHostInterfacesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedHostInterfacesWithContext gets the collection of HostInterface from
+// a provided reference.
+func ListReferencedHostInterfacesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*HostInterface, error) {
+	return common.GetCollectionObjectsWithContext[HostInterface](ctx, c, link, queryOpts...)
 }
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.
 func (hostinterface *HostInterface) ComputerSystems(queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
-	return common.GetObjects[ComputerSystem](hostinterface.GetClient(), hostinterface.computerSystems, queryOpts...)
+	return hostinterface.ComputerSystemsWithContext(common.ContextOf(hostinterface.GetClient()), queryOpts...)
+}
+
+// ComputerSystemsWithContext references the ComputerSystems that this host interface is associated with.
+func (hostinterface *HostInterface) ComputerSystemsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetObjectsWithContext[ComputerSystem](ctx, hostinterface.GetClient(), hostinterface.computerSystems, queryOpts...)
 }
 
 // HostEthernetInterfaces gets the network interface controllers or cards (NICs)
 // that a Computer System uses to communicate with this Host Interface.
 func (hostinterface *HostInterface) HostEthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.hostEthernetInterfaces, queryOpts...)
+	return hostinterface.HostEthernetInterfacesWithContext(common.ContextOf(hostinterface.GetClient()), queryOpts...)
+}
+
+// HostEthernetInterfacesWithContext gets the network interface controllers or cards (NICs)
+// that a Computer System uses to communicate with this Host Interface.
+func (hostinterface *HostInterface) HostEthernetInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfacesWithContext(ctx, hostinterface.GetClient(), hostinterface.hostEthernetInterfaces, queryOpts...)
 }
 
 // ManagerNetworkInterfaces gets the network interface controllers or cards
 // (NIC) that this Manager uses for network communication with this Host Interface.
 func (hostinterface *HostInterface) ManagerNetworkInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.managerEthernetInterface, queryOpts...)
+	return hostinterface.ManagerNetworkInterfacesWithContext(common.ContextOf(hostinterface.GetClient()), queryOpts...)
+}
+
+// ManagerNetworkInterfacesWithContext gets the network interface controllers or cards
+// (NIC) that this Manager uses for network communication with this Host Interface.
+func (hostinterface *HostInterface) ManagerNetworkInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfacesWithContext(ctx, hostinterface.GetClient(), hostinterface.managerEthernetInterface, queryOpts...)
 }
 
 // AuthRoleNone gets the role that contains the privileges on this host interface when no authentication is performed.
 func (hostinterface *HostInterface) AuthNoneRole(queryOpts ...common.QueryGroupOption) (*Role, error) {
+	return hostinterface.AuthNoneRoleWithContext(common.ContextOf(hostinterface.GetClient()), queryOpts...)
+}
+
+// AuthRoleNone gets the role that contains the privileges on this host interface when no authentication is performed.
+func (hostinterface *HostInterface) AuthNoneRoleWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Role, error) {
 	if hostinterface.authNoneRole == "" {
 		return nil, nil
 	}
-	return GetRole(hostinterface.GetClient(), hostinterface.authNoneRole, queryOpts...)
+	return GetRoleWithContext(ctx, hostinterface.GetClient(), hostinterface.authNoneRole, queryOpts...)
 }
 
 // CredentialBootstrappingRole gets the role that contains the privileges for the bootstrap account created for this interface.
 func (hostinterface *HostInterface) CredentialBootstrappingRole(queryOpts ...common.QueryGroupOption) (*Role, error) {
+	return hostinterface.CredentialBootstrappingRoleWithContext(common.ContextOf(hostinterface.GetClient()), queryOpts...)
+}
+
+// CredentialBootstrappingRoleWithContext gets the role that contains the privileges for the bootstrap account created for this interface.
+func (hostinterface *HostInterface) CredentialBootstrappingRoleWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Role, error) {
 	if hostinterface.credentialBootstrappingRole == "" {
 		return nil, nil
 	}
-	return GetRole(hostinterface.GetClient(), hostinterface.credentialBootstrappingRole, queryOpts...)
+	return GetRoleWithContext(ctx, hostinterface.GetClient(), hostinterface.credentialBootstrappingRole, queryOpts...)
 }

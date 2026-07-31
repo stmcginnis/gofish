@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -76,13 +77,24 @@ type Manifest struct {
 
 // GetManifest will get a Manifest instance from the service.
 func GetManifest(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Manifest, error) {
-	return common.GetObject[Manifest](c, uri, queryOpts...)
+	return GetManifestWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetManifestWithContext will get a Manifest instance from the service.
+func GetManifestWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Manifest, error) {
+	return common.GetObjectWithContext[Manifest](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedManifests gets the collection of Manifest from
 // a provided reference.
 func ListReferencedManifests(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Manifest, error) {
-	return common.GetCollectionObjects[Manifest](c, link, queryOpts...)
+	return ListReferencedManifestsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedManifestsWithContext gets the collection of Manifest from
+// a provided reference.
+func ListReferencedManifestsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Manifest, error) {
+	return common.GetCollectionObjectsWithContext[Manifest](ctx, c, link, queryOpts...)
 }
 
 // Stanza shall contain properties that describe a request to be fulfilled within a manifest.

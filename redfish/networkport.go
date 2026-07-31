@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -249,6 +250,11 @@ func (networkport *NetworkPort) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (networkport *NetworkPort) Update() error {
+	return networkport.UpdateWithContext(common.ContextOf(networkport.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (networkport *NetworkPort) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"ActiveLinkTechnology",
 		"CurrentLinkSpeedMbps",
@@ -257,18 +263,29 @@ func (networkport *NetworkPort) Update() error {
 		"WakeOnLANEnabled",
 	}
 
-	return networkport.UpdateFromRawData(networkport, networkport.rawData, readWriteFields)
+	return networkport.UpdateFromRawDataWithContext(ctx, networkport, networkport.rawData, readWriteFields)
 }
 
 // GetNetworkPort will get a NetworkPort instance from the service.
 func GetNetworkPort(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkPort, error) {
-	return common.GetObject[NetworkPort](c, uri, queryOpts...)
+	return GetNetworkPortWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetNetworkPortWithContext will get a NetworkPort instance from the service.
+func GetNetworkPortWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkPort, error) {
+	return common.GetObjectWithContext[NetworkPort](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkPorts gets the collection of NetworkPort from
 // a provided reference.
 func ListReferencedNetworkPorts(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
-	return common.GetCollectionObjects[NetworkPort](c, link, queryOpts...)
+	return ListReferencedNetworkPortsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedNetworkPortsWithContext gets the collection of NetworkPort from
+// a provided reference.
+func ListReferencedNetworkPortsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
+	return common.GetCollectionObjectsWithContext[NetworkPort](ctx, c, link, queryOpts...)
 }
 
 // SupportedLinkCapabilities shall describe the static capabilities of an

@@ -5,6 +5,8 @@
 package swordfish
 
 import (
+	"context"
+
 	"github.com/coreweave/gofish/common"
 )
 
@@ -199,11 +201,22 @@ type DataSecurityLoSCapabilities struct {
 
 // GetDataSecurityLoSCapabilities will get a DataSecurityLoSCapabilities instance from the service.
 func GetDataSecurityLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataSecurityLoSCapabilities, error) {
-	return common.GetObject[DataSecurityLoSCapabilities](c, uri, queryOpts...)
+	return GetDataSecurityLoSCapabilitiesWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDataSecurityLoSCapabilitiesWithContext will get a DataSecurityLoSCapabilities instance from the service.
+func GetDataSecurityLoSCapabilitiesWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataSecurityLoSCapabilities, error) {
+	return common.GetObjectWithContext[DataSecurityLoSCapabilities](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedDataSecurityLoSCapabilities gets the collection of DataSecurityLoSCapabilities from
 // a provided reference.
 func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataSecurityLoSCapabilities, error) {
-	return common.GetCollectionObjects[DataSecurityLoSCapabilities](c, link, queryOpts...)
+	return ListReferencedDataSecurityLoSCapabilitiesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedDataSecurityLoSCapabilitiesWithContext gets the collection of DataSecurityLoSCapabilities from
+// a provided reference.
+func ListReferencedDataSecurityLoSCapabilitiesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataSecurityLoSCapabilities, error) {
+	return common.GetCollectionObjectsWithContext[DataSecurityLoSCapabilities](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -50,7 +51,10 @@ func (r *MouseMode) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (r *MouseMode) Update() error {
+func (r *MouseMode) Update() error { return r.UpdateWithContext(common.ContextOf(r.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (r *MouseMode) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	rad := new(MouseMode)
@@ -66,10 +70,15 @@ func (r *MouseMode) Update() error {
 	originalElement := reflect.ValueOf(rad).Elem()
 	currentElement := reflect.ValueOf(r).Elem()
 
-	return r.Entity.Update(originalElement, currentElement, readWriteFields)
+	return r.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetMouseMode will get a MouseMode instance from the service.
 func GetMouseMode(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MouseMode, error) {
-	return common.GetObject[MouseMode](c, uri, queryOpts...)
+	return GetMouseModeWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMouseModeWithContext will get a MouseMode instance from the service.
+func GetMouseModeWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MouseMode, error) {
+	return common.GetObjectWithContext[MouseMode](ctx, c, uri, queryOpts...)
 }

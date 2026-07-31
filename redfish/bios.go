@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -99,12 +100,22 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 
 // GetBios will get a Bios instance from the service.
 func GetBios(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Bios, error) {
-	return common.GetObject[Bios](c, uri, queryOpts...)
+	return GetBiosWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetBiosWithContext will get a Bios instance from the service.
+func GetBiosWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Bios, error) {
+	return common.GetObjectWithContext[Bios](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedBioss gets the collection of Bios from a provided reference.
 func ListReferencedBioss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Bios, error) {
-	return common.GetCollectionObjects[Bios](c, link, queryOpts...)
+	return ListReferencedBiossWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedBiossWithContext gets the collection of Bios from a provided reference.
+func ListReferencedBiossWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Bios, error) {
+	return common.GetCollectionObjectsWithContext[Bios](ctx, c, link, queryOpts...)
 }
 
 // ChangePasswordTarget returns the action target URL for #Bios.ChangePassword,
@@ -115,6 +126,11 @@ func (bios *Bios) ChangePasswordTarget() string {
 
 // ChangePassword shall change the selected BIOS password.
 func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) error {
+	return bios.ChangePasswordWithContext(common.ContextOf(bios.GetClient()), passwordName, oldPassword, newPassword)
+}
+
+// ChangePasswordWithContext shall change the selected BIOS password.
+func (bios *Bios) ChangePasswordWithContext(ctx context.Context, passwordName, oldPassword, newPassword string) error {
 	if passwordName == "" {
 		return fmt.Errorf("password name must be supplied")
 	}
@@ -128,15 +144,22 @@ func (bios *Bios) ChangePassword(passwordName, oldPassword, newPassword string) 
 		OldPassword:  oldPassword,
 		NewPassword:  newPassword,
 	}
-	return bios.Post(bios.changePasswordTarget, t)
+	return bios.PostWithContext(ctx, bios.changePasswordTarget, t)
 }
 
 // ResetBios shall perform a reset of the BIOS attributes to their default values.
 // A system reset may be required for the default values to be applied. This
 // action may impact other resources.
 func (bios *Bios) ResetBios() error {
+	return bios.ResetBiosWithContext(common.ContextOf(bios.GetClient()))
+}
+
+// ResetBiosWithContext shall perform a reset of the BIOS attributes to their default values.
+// A system reset may be required for the default values to be applied. This
+// action may impact other resources.
+func (bios *Bios) ResetBiosWithContext(ctx context.Context) error {
 	payload := make(map[string]interface{})
-	return bios.Post(bios.resetBiosTarget, payload)
+	return bios.PostWithContext(ctx, bios.resetBiosTarget, payload)
 }
 
 // AllowedAttributeUpdateApplyTimes returns the set of allowed apply times to request when
@@ -156,6 +179,11 @@ func (bios *Bios) AllowedAttributeUpdateApplyTimes() []common.ApplyTime {
 
 // UpdateBiosAttributesApplyAt is used to update attribute values and set apply time together
 func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error {
+	return bios.UpdateBiosAttributesApplyAtWithContext(common.ContextOf(bios.GetClient()), attrs, applyTime)
+}
+
+// UpdateBiosAttributesApplyAtWithContext is used to update attribute values and set apply time together
+func (bios *Bios) UpdateBiosAttributesApplyAtWithContext(ctx context.Context, attrs SettingsAttributes, applyTime common.ApplyTime) error {
 	payload := make(map[string]interface{})
 
 	// Get a representation of the object's original state so we can find what
@@ -173,7 +201,7 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTim
 		}
 	}
 
-	resp, err := bios.GetClient().Get(bios.settingsTarget)
+	resp, err := bios.GetClient().GetWithContext(ctx, bios.settingsTarget)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
@@ -192,7 +220,7 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTim
 			header["If-Match"] = resp.Header["Etag"][0]
 		}
 
-		resp, err = bios.GetClient().PatchWithHeaders(bios.settingsTarget, data, header)
+		resp, err = bios.GetClient().PatchWithHeadersWithContext(ctx, bios.settingsTarget, data, header)
 		defer common.DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
@@ -204,15 +232,26 @@ func (bios *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTim
 
 // UpdateBiosAttributes is used to update attribute values.
 func (bios *Bios) UpdateBiosAttributes(attrs SettingsAttributes) error {
-	return bios.UpdateBiosAttributesApplyAt(attrs, "")
+	return bios.UpdateBiosAttributesWithContext(common.ContextOf(bios.GetClient()), attrs)
+}
+
+// UpdateBiosAttributesWithContext is used to update attribute values.
+func (bios *Bios) UpdateBiosAttributesWithContext(ctx context.Context, attrs SettingsAttributes) error {
+	return bios.UpdateBiosAttributesApplyAtWithContext(ctx, attrs, "")
 }
 
 // GetActiveSoftwareImage gets the SoftwareInventory which represents the
 // active BIOS firmware image.
 func (bios *Bios) GetActiveSoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return bios.GetActiveSoftwareImageWithContext(common.ContextOf(bios.GetClient()), queryOpts...)
+}
+
+// GetActiveSoftwareImageWithContext gets the SoftwareInventory which represents the
+// active BIOS firmware image.
+func (bios *Bios) GetActiveSoftwareImageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if bios.activeSoftwareImage == "" {
 		return nil, nil
 	}
 
-	return GetSoftwareInventory(bios.GetClient(), bios.activeSoftwareImage, queryOpts...)
+	return GetSoftwareInventoryWithContext(ctx, bios.GetClient(), bios.activeSoftwareImage, queryOpts...)
 }

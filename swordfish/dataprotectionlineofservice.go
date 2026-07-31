@@ -5,6 +5,8 @@
 package swordfish
 
 import (
+	"context"
+
 	"github.com/coreweave/gofish/common"
 )
 
@@ -59,13 +61,24 @@ type DataProtectionLineOfService struct {
 
 // GetDataProtectionLineOfService will get a DataProtectionLineOfService instance from the service.
 func GetDataProtectionLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataProtectionLineOfService, error) {
-	return common.GetObject[DataProtectionLineOfService](c, uri, queryOpts...)
+	return GetDataProtectionLineOfServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDataProtectionLineOfServiceWithContext will get a DataProtectionLineOfService instance from the service.
+func GetDataProtectionLineOfServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataProtectionLineOfService, error) {
+	return common.GetObjectWithContext[DataProtectionLineOfService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedDataProtectionLineOfServices gets the collection of DataProtectionLineOfService from
 // a provided reference.
 func ListReferencedDataProtectionLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
-	return common.GetCollectionObjects[DataProtectionLineOfService](c, link, queryOpts...)
+	return ListReferencedDataProtectionLineOfServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedDataProtectionLineOfServicesWithContext gets the collection of DataProtectionLineOfService from
+// a provided reference.
+func ListReferencedDataProtectionLineOfServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
+	return common.GetCollectionObjectsWithContext[DataProtectionLineOfService](ctx, c, link, queryOpts...)
 }
 
 // ReplicaRequest is a request for a replica.

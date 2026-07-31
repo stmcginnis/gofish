@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -227,26 +228,51 @@ func (cable *Cable) UnmarshalJSON(b []byte) error {
 
 // DownstreamChassis gets the physical downstream containers connected to this cable.
 func (cable *Cable) DownstreamChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
-	return common.GetObjects[Chassis](cable.GetClient(), cable.downstreamChassis, queryOpts...)
+	return cable.DownstreamChassisWithContext(common.ContextOf(cable.GetClient()), queryOpts...)
+}
+
+// DownstreamChassisWithContext gets the physical downstream containers connected to this cable.
+func (cable *Cable) DownstreamChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjectsWithContext[Chassis](ctx, cable.GetClient(), cable.downstreamChassis, queryOpts...)
 }
 
 // DownstreamPorts gets the physical downstream connections connected to this cable.
 func (cable *Cable) DownstreamPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return common.GetObjects[Port](cable.GetClient(), cable.downstreamPorts, queryOpts...)
+	return cable.DownstreamPortsWithContext(common.ContextOf(cable.GetClient()), queryOpts...)
+}
+
+// DownstreamPortsWithContext gets the physical downstream connections connected to this cable.
+func (cable *Cable) DownstreamPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjectsWithContext[Port](ctx, cable.GetClient(), cable.downstreamPorts, queryOpts...)
 }
 
 // UpstreamChassis gets the physical upstream containers connected to this cable.
 func (cable *Cable) UpstreamChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
-	return common.GetObjects[Chassis](cable.GetClient(), cable.upstreamChassis, queryOpts...)
+	return cable.UpstreamChassisWithContext(common.ContextOf(cable.GetClient()), queryOpts...)
+}
+
+// UpstreamChassisWithContext gets the physical upstream containers connected to this cable.
+func (cable *Cable) UpstreamChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjectsWithContext[Chassis](ctx, cable.GetClient(), cable.upstreamChassis, queryOpts...)
 }
 
 // UpstreamPorts gets the physical upstream connections connected to this cable.
 func (cable *Cable) UptreamPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return common.GetObjects[Port](cable.GetClient(), cable.upstreamPorts, queryOpts...)
+	return cable.UptreamPortsWithContext(common.ContextOf(cable.GetClient()), queryOpts...)
+}
+
+// UpstreamPorts gets the physical upstream connections connected to this cable.
+func (cable *Cable) UptreamPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjectsWithContext[Port](ctx, cable.GetClient(), cable.upstreamPorts, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (cable *Cable) Update() error {
+	return cable.UpdateWithContext(common.ContextOf(cable.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (cable *Cable) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AssetTag",
 		"CableClass",
@@ -267,16 +293,27 @@ func (cable *Cable) Update() error {
 		"Vendor",
 	}
 
-	return cable.UpdateFromRawData(cable, cable.rawData, readWriteFields)
+	return cable.UpdateFromRawDataWithContext(ctx, cable, cable.rawData, readWriteFields)
 }
 
 // GetCable will get a Cable instance from the service.
 func GetCable(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Cable, error) {
-	return common.GetObject[Cable](c, uri, queryOpts...)
+	return GetCableWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCableWithContext will get a Cable instance from the service.
+func GetCableWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Cable, error) {
+	return common.GetObjectWithContext[Cable](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCables gets the collection of Cable from
 // a provided reference.
 func ListReferencedCables(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Cable, error) {
-	return common.GetCollectionObjects[Cable](c, link, queryOpts...)
+	return ListReferencedCablesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCablesWithContext gets the collection of Cable from
+// a provided reference.
+func ListReferencedCablesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Cable, error) {
+	return common.GetCollectionObjectsWithContext[Cable](ctx, c, link, queryOpts...)
 }

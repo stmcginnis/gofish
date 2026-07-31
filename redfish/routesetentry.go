@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -58,21 +59,37 @@ func (routesetentry *RouteSetEntry) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (routesetentry *RouteSetEntry) Update() error {
+	return routesetentry.UpdateWithContext(common.ContextOf(routesetentry.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (routesetentry *RouteSetEntry) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"EgressIdentifier",
 		"HopCount",
 		"VCAction",
 		"Valid"}
 
-	return routesetentry.UpdateFromRawData(routesetentry, routesetentry.rawData, readWriteFields)
+	return routesetentry.UpdateFromRawDataWithContext(ctx, routesetentry, routesetentry.rawData, readWriteFields)
 }
 
 // GetRouteSetEntry will get a RouteSetEntry instance from the service.
 func GetRouteSetEntry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RouteSetEntry, error) {
-	return common.GetObject[RouteSetEntry](c, uri, queryOpts...)
+	return GetRouteSetEntryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetRouteSetEntryWithContext will get a RouteSetEntry instance from the service.
+func GetRouteSetEntryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RouteSetEntry, error) {
+	return common.GetObjectWithContext[RouteSetEntry](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedRouteSetEntrys gets the collection of RouteSetEntry from
 // a provided reference.
 func ListReferencedRouteSetEntrys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*RouteSetEntry, error) {
-	return common.GetCollectionObjects[RouteSetEntry](c, link, queryOpts...)
+	return ListReferencedRouteSetEntrysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedRouteSetEntrysWithContext gets the collection of RouteSetEntry from
+// a provided reference.
+func ListReferencedRouteSetEntrysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*RouteSetEntry, error) {
+	return common.GetCollectionObjectsWithContext[RouteSetEntry](ctx, c, link, queryOpts...)
 }

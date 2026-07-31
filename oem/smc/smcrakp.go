@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -49,7 +50,10 @@ func (i *SMCRAKP) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *SMCRAKP) Update() error {
+func (i *SMCRAKP) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *SMCRAKP) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(SMCRAKP)
@@ -65,10 +69,15 @@ func (i *SMCRAKP) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetSMCRAKP will get a SMCRAKP instance from the service.
 func GetSMCRAKP(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SMCRAKP, error) {
-	return common.GetObject[SMCRAKP](c, uri, queryOpts...)
+	return GetSMCRAKPWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSMCRAKPWithContext will get a SMCRAKP instance from the service.
+func GetSMCRAKPWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SMCRAKP, error) {
+	return common.GetObjectWithContext[SMCRAKP](ctx, c, uri, queryOpts...)
 }

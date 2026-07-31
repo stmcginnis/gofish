@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -45,7 +46,10 @@ func (r *RADIUS) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (r *RADIUS) Update() error {
+func (r *RADIUS) Update() error { return r.UpdateWithContext(common.ContextOf(r.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (r *RADIUS) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	rad := new(RADIUS)
@@ -68,10 +72,15 @@ func (r *RADIUS) Update() error {
 	originalElement := reflect.ValueOf(rad).Elem()
 	currentElement := reflect.ValueOf(r).Elem()
 
-	return r.Entity.Update(originalElement, currentElement, readWriteFields)
+	return r.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetRADIUS will get a RADIUS instance from the service.
 func GetRADIUS(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RADIUS, error) {
-	return common.GetObject[RADIUS](c, uri, queryOpts...)
+	return GetRADIUSWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetRADIUSWithContext will get a RADIUS instance from the service.
+func GetRADIUSWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RADIUS, error) {
+	return common.GetObjectWithContext[RADIUS](ctx, c, uri, queryOpts...)
 }

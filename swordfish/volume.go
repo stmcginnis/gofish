@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -758,6 +759,11 @@ func (volume *Volume) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (volume *Volume) Update() error {
+	return volume.UpdateWithContext(common.ContextOf(volume.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (volume *Volume) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Volume)
@@ -790,146 +796,257 @@ func (volume *Volume) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(volume).Elem()
 
-	return volume.Entity.Update(originalElement, currentElement, readWriteFields)
+	return volume.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetVolume will get a Volume instance from the service.
 func GetVolume(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Volume, error) {
-	return common.GetObject[Volume](c, uri, queryOpts...)
+	return GetVolumeWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetVolumeWithContext will get a Volume instance from the service.
+func GetVolumeWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Volume, error) {
+	return common.GetObjectWithContext[Volume](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedVolumes gets the collection of Volume from a provided reference.
 func ListReferencedVolumes(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
-	return common.GetCollectionObjects[Volume](c, link, queryOpts...)
+	return ListReferencedVolumesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedVolumesWithContext gets the collection of Volume from a provided reference.
+func ListReferencedVolumesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetCollectionObjectsWithContext[Volume](ctx, c, link, queryOpts...)
 }
 
 // CacheDataVolumes gets the data volumes this volume serves as a cache volume.
 func (volume *Volume) CacheDataVolumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
-	return common.GetObjects[Volume](volume.GetClient(), volume.cacheDataVolumes, queryOpts...)
+	return volume.CacheDataVolumesWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// CacheDataVolumesWithContext gets the data volumes this volume serves as a cache volume.
+func (volume *Volume) CacheDataVolumesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetObjectsWithContext[Volume](ctx, volume.GetClient(), volume.cacheDataVolumes, queryOpts...)
 }
 
 // CacheVolumeSources gets the cache volume source for this volume.
 func (volume *Volume) CacheVolumeSource(queryOpts ...common.QueryGroupOption) (*Volume, error) {
+	return volume.CacheVolumeSourceWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// CacheVolumeSources gets the cache volume source for this volume.
+func (volume *Volume) CacheVolumeSourceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Volume, error) {
 	if volume.cacheVolumeSource == "" {
 		return nil, nil
 	}
 
-	return GetVolume(volume.GetClient(), volume.cacheVolumeSource, queryOpts...)
+	return GetVolumeWithContext(ctx, volume.GetClient(), volume.cacheVolumeSource, queryOpts...)
 }
 
 // ClassOfService gets the class of service that this storage volume conforms to.
 func (volume *Volume) ClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return volume.ClassOfServiceWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// ClassOfServiceWithContext gets the class of service that this storage volume conforms to.
+func (volume *Volume) ClassOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if volume.classOfService == "" {
 		return nil, nil
 	}
 
-	return GetClassOfService(volume.GetClient(), volume.classOfService, queryOpts...)
+	return GetClassOfServiceWithContext(ctx, volume.GetClient(), volume.classOfService, queryOpts...)
 }
 
 // ClientEndpoints gets the client Endpoints associated with this volume.
 func (volume *Volume) ClientEndpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
-	return common.GetObjects[redfish.Endpoint](volume.GetClient(), volume.clientEndpoints, queryOpts...)
+	return volume.ClientEndpointsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// ClientEndpointsWithContext gets the client Endpoints associated with this volume.
+func (volume *Volume) ClientEndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return common.GetObjectsWithContext[redfish.Endpoint](ctx, volume.GetClient(), volume.clientEndpoints, queryOpts...)
 }
 
 // ConsistencyGroups gets the ConsistencyGroups associated with this volume.
 func (volume *Volume) ConsistencyGroups(queryOpts ...common.QueryGroupOption) ([]*ConsistencyGroup, error) {
-	return common.GetObjects[ConsistencyGroup](volume.GetClient(), volume.consistencyGroups, queryOpts...)
+	return volume.ConsistencyGroupsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// ConsistencyGroupsWithContext gets the ConsistencyGroups associated with this volume.
+func (volume *Volume) ConsistencyGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ConsistencyGroup, error) {
+	return common.GetObjectsWithContext[ConsistencyGroup](ctx, volume.GetClient(), volume.consistencyGroups, queryOpts...)
 }
 
 // Controllers gets the controllers (of type StorageController) associated with
 // this volume. When the volume is of type NVMe, these may be both the physical
 // and logical controller representations.
 func (volume *Volume) Controllers(queryOpts ...common.QueryGroupOption) ([]*redfish.StorageController, error) {
-	return common.GetObjects[redfish.StorageController](volume.GetClient(), volume.controllers, queryOpts...)
+	return volume.ControllersWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
 }
 
-// getDrives gets a set of referenced drives.
-func (volume *Volume) getDrives(links []string, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
-	return common.GetObjects[redfish.Drive](volume.GetClient(), links, queryOpts...)
+// ControllersWithContext gets the controllers (of type StorageController) associated with
+// this volume. When the volume is of type NVMe, these may be both the physical
+// and logical controller representations.
+func (volume *Volume) ControllersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.StorageController, error) {
+	return common.GetObjectsWithContext[redfish.StorageController](ctx, volume.GetClient(), volume.controllers, queryOpts...)
+}
+
+// getDrivesWithContext gets a set of referenced drives.
+func (volume *Volume) getDrivesWithContext(ctx context.Context, links []string, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return common.GetObjectsWithContext[redfish.Drive](ctx, volume.GetClient(), links, queryOpts...)
 }
 
 // DedicatedSpareDrives references the Drives that are dedicated spares for this
 // volume.
 func (volume *Volume) DedicatedSpareDrives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
-	return volume.getDrives(volume.dedicatedSpareDrives, queryOpts...)
+	return volume.DedicatedSpareDrivesWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// DedicatedSpareDrivesWithContext references the Drives that are dedicated spares for this
+// volume.
+func (volume *Volume) DedicatedSpareDrivesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return volume.getDrivesWithContext(ctx, volume.dedicatedSpareDrives, queryOpts...)
 }
 
 // Drives references the Drives that are associated with this volume.
 func (volume *Volume) Drives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
-	return volume.getDrives(volume.drives, queryOpts...)
+	return volume.DrivesWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// DrivesWithContext references the Drives that are associated with this volume.
+func (volume *Volume) DrivesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return volume.getDrivesWithContext(ctx, volume.drives, queryOpts...)
 }
 
 // OwningStorageResource gets the Storage resource that owns or contains this volume.
 func (volume *Volume) OwningStorageResource(queryOpts ...common.QueryGroupOption) (*redfish.Storage, error) {
+	return volume.OwningStorageResourceWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// OwningStorageResourceWithContext gets the Storage resource that owns or contains this volume.
+func (volume *Volume) OwningStorageResourceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.Storage, error) {
 	if volume.owningStorageResource == "" {
 		return nil, nil
 	}
 
-	return redfish.GetStorage(volume.GetClient(), volume.owningStorageResource, queryOpts...)
+	return redfish.GetStorageWithContext(ctx, volume.GetClient(), volume.owningStorageResource, queryOpts...)
 }
 
 // OwningStorageService gets the StorageService that owns or contains this volume.
 func (volume *Volume) OwningStorageService(queryOpts ...common.QueryGroupOption) (*StorageService, error) {
+	return volume.OwningStorageServiceWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// OwningStorageServiceWithContext gets the StorageService that owns or contains this volume.
+func (volume *Volume) OwningStorageServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*StorageService, error) {
 	if volume.owningStorageService == "" {
 		return nil, nil
 	}
 
-	return GetStorageService(volume.GetClient(), volume.owningStorageService, queryOpts...)
+	return GetStorageServiceWithContext(ctx, volume.GetClient(), volume.owningStorageService, queryOpts...)
 }
 
 // ProvidingStoragePool gets the StoragePool resource that provides this volume resource.
 func (volume *Volume) ProvidingStoragePool(queryOpts ...common.QueryGroupOption) (*StoragePool, error) {
+	return volume.ProvidingStoragePoolWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// ProvidingStoragePoolWithContext gets the StoragePool resource that provides this volume resource.
+func (volume *Volume) ProvidingStoragePoolWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*StoragePool, error) {
 	if volume.providingStoragePool == "" {
 		return nil, nil
 	}
 
-	return GetStoragePool(volume.GetClient(), volume.providingStoragePool, queryOpts...)
+	return GetStoragePoolWithContext(ctx, volume.GetClient(), volume.providingStoragePool, queryOpts...)
 }
 
 // ServerEndpoints gets the server Endpoints associated with this volume.
 func (volume *Volume) ServerEndpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
-	return common.GetObjects[redfish.Endpoint](volume.GetClient(), volume.serverEndpoints, queryOpts...)
+	return volume.ServerEndpointsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// ServerEndpointsWithContext gets the server Endpoints associated with this volume.
+func (volume *Volume) ServerEndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return common.GetObjectsWithContext[redfish.Endpoint](ctx, volume.GetClient(), volume.serverEndpoints, queryOpts...)
 }
 
 // SpareResourceSets gets the spare resources that can be used for this volume.
 func (volume *Volume) SpareResourceSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](volume.GetClient(), volume.spareResourceSets, queryOpts...)
+	return volume.SpareResourceSetsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// SpareResourceSetsWithContext gets the spare resources that can be used for this volume.
+func (volume *Volume) SpareResourceSetsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetObjectsWithContext[SpareResourceSet](ctx, volume.GetClient(), volume.spareResourceSets, queryOpts...)
 }
 
 // StorageGroups gets the storage groups that associated with this volume.
 // This property is deprecated in favor of the Connections property.
 func (volume *Volume) StorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
-	return common.GetObjects[StorageGroup](volume.GetClient(), volume.storageGroups, queryOpts...)
+	return volume.StorageGroupsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// StorageGroupsWithContext gets the storage groups that associated with this volume.
+// This property is deprecated in favor of the Connections property.
+func (volume *Volume) StorageGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetObjectsWithContext[StorageGroup](ctx, volume.GetClient(), volume.storageGroups, queryOpts...)
 }
 
 // AllocatedPools gets the storage pools that associated with this volume.
 func (volume *Volume) AllocatedPools(queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
-	return common.GetObjects[StoragePool](volume.GetClient(), volume.allocatedPools, queryOpts...)
+	return volume.AllocatedPoolsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// AllocatedPoolsWithContext gets the storage pools that associated with this volume.
+func (volume *Volume) AllocatedPoolsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
+	return common.GetObjectsWithContext[StoragePool](ctx, volume.GetClient(), volume.allocatedPools, queryOpts...)
 }
 
 // CapacitySources gets the space allocations to this volume.
 func (volume *Volume) CapacitySources(queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
-	return common.GetObjects[CapacitySource](volume.GetClient(), volume.capacitySources, queryOpts...)
+	return volume.CapacitySourcesWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// CapacitySourcesWithContext gets the space allocations to this volume.
+func (volume *Volume) CapacitySourcesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
+	return common.GetObjectsWithContext[CapacitySource](ctx, volume.GetClient(), volume.capacitySources, queryOpts...)
 }
 
 // Connections gets the connections that include this volume.
 func (volume *Volume) Connections(queryOpts ...common.QueryGroupOption) ([]*redfish.Connection, error) {
-	return common.GetObjects[redfish.Connection](volume.GetClient(), volume.connections, queryOpts...)
+	return volume.ConnectionsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// ConnectionsWithContext gets the connections that include this volume.
+func (volume *Volume) ConnectionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Connection, error) {
+	return common.GetObjectsWithContext[redfish.Connection](ctx, volume.GetClient(), volume.connections, queryOpts...)
 }
 
 // Metrics gets the metrics for this volume. IO metrics are reported in the IOStatistics property.
 func (volume *Volume) Metrics(queryOpts ...common.QueryGroupOption) (*VolumeMetrics, error) {
+	return volume.MetricsWithContext(common.ContextOf(volume.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the metrics for this volume. IO metrics are reported in the IOStatistics property.
+func (volume *Volume) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*VolumeMetrics, error) {
 	if volume.metrics == "" {
 		return nil, nil
 	}
 
-	return GetVolumeMetrics(volume.GetClient(), volume.metrics, queryOpts...)
+	return GetVolumeMetricsWithContext(ctx, volume.GetClient(), volume.metrics, queryOpts...)
 }
 
 // AssignReplicaTarget is used to establish a replication relationship by
 // assigning an existing volume to serve as a target replica for an existing
 // source volume.
 func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) error {
+	return volume.AssignReplicaTargetWithContext(common.ContextOf(volume.GetClient()), replicaType, updateMode, targetVolumeODataID)
+}
+
+// AssignReplicaTargetWithContext is used to establish a replication relationship by
+// assigning an existing volume to serve as a target replica for an existing
+// source volume.
+func (volume *Volume) AssignReplicaTargetWithContext(ctx context.Context, replicaType ReplicaType, updateMode ReplicaUpdateMode, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.assignReplicaTargetTarget == "" {
 		return fmt.Errorf("AssignReplicaTarget action is not supported by this system")
@@ -947,21 +1064,32 @@ func (volume *Volume) AssignReplicaTarget(replicaType ReplicaType, updateMode Re
 		TargetVolume:      targetVolumeODataID,
 	}
 
-	return volume.Post(volume.assignReplicaTargetTarget, t)
+	return volume.PostWithContext(ctx, volume.assignReplicaTargetTarget, t)
 }
 
 // CheckConsistency is used to force a check of the Volume's parity or redundant
 // data to ensure it matches calculated values.
 func (volume *Volume) CheckConsistency() error {
+	return volume.CheckConsistencyWithContext(common.ContextOf(volume.GetClient()))
+}
+
+// CheckConsistencyWithContext is used to force a check of the Volume's parity or redundant
+// data to ensure it matches calculated values.
+func (volume *Volume) CheckConsistencyWithContext(ctx context.Context) error {
 	if volume.checkConsistencyTarget == "" {
 		return fmt.Errorf("CheckConsistency action is not supported by this system")
 	}
 
-	return volume.Post(volume.checkConsistencyTarget, nil)
+	return volume.PostWithContext(ctx, volume.checkConsistencyTarget, nil)
 }
 
 // Initialize is used to prepare the contents of the volume for use by the system.
 func (volume *Volume) Initialize(initType InitializeType) error {
+	return volume.InitializeWithContext(common.ContextOf(volume.GetClient()), initType)
+}
+
+// InitializeWithContext is used to prepare the contents of the volume for use by the system.
+func (volume *Volume) InitializeWithContext(ctx context.Context, initType InitializeType) error {
 	if volume.initializeTarget == "" {
 		return fmt.Errorf("initialize action is not supported by this system")
 	}
@@ -972,13 +1100,20 @@ func (volume *Volume) Initialize(initType InitializeType) error {
 		InitializeType InitializeType
 	}{InitializeType: initType}
 
-	return volume.Post(volume.initializeTarget, t)
+	return volume.PostWithContext(ctx, volume.initializeTarget, t)
 }
 
 // RemoveReplicaRelationship is used to disable data synchronization between a
 // source and target volume, remove the replication relationship, and optionally
 // delete the target volume.
 func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeODataID string) error {
+	return volume.RemoveReplicaRelationshipWithContext(common.ContextOf(volume.GetClient()), deleteTarget, targetVolumeODataID)
+}
+
+// RemoveReplicaRelationshipWithContext is used to disable data synchronization between a
+// source and target volume, remove the replication relationship, and optionally
+// delete the target volume.
+func (volume *Volume) RemoveReplicaRelationshipWithContext(ctx context.Context, deleteTarget bool, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.removeReplicaRelationshipTarget == "" {
 		return fmt.Errorf("RemoveReplicaRelationship action is not supported by this system")
@@ -994,13 +1129,20 @@ func (volume *Volume) RemoveReplicaRelationship(deleteTarget bool, targetVolumeO
 		TargetVolume:       targetVolumeODataID,
 	}
 
-	return volume.Post(volume.removeReplicaRelationshipTarget, t)
+	return volume.PostWithContext(ctx, volume.removeReplicaRelationshipTarget, t)
 }
 
 // ResumeReplication is used to resume the active data synchronization between a
 // source and target volume, without otherwise altering the replication
 // relationship.
 func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
+	return volume.ResumeReplicationWithContext(common.ContextOf(volume.GetClient()), targetVolumeODataID)
+}
+
+// ResumeReplicationWithContext is used to resume the active data synchronization between a
+// source and target volume, without otherwise altering the replication
+// relationship.
+func (volume *Volume) ResumeReplicationWithContext(ctx context.Context, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.resumeReplicationTarget == "" {
 		return fmt.Errorf("ResumeReplication action is not supported by this system")
@@ -1012,12 +1154,18 @@ func (volume *Volume) ResumeReplication(targetVolumeODataID string) error {
 		TargetVolume string
 	}{TargetVolume: targetVolumeODataID}
 
-	return volume.Post(volume.resumeReplicationTarget, t)
+	return volume.PostWithContext(ctx, volume.resumeReplicationTarget, t)
 }
 
 // ReverseReplicationRelationship is used to reverse the replication
 // relationship between a source and target volume.
 func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string) error {
+	return volume.ReverseReplicationRelationshipWithContext(common.ContextOf(volume.GetClient()), targetVolumeODataID)
+}
+
+// ReverseReplicationRelationshipWithContext is used to reverse the replication
+// relationship between a source and target volume.
+func (volume *Volume) ReverseReplicationRelationshipWithContext(ctx context.Context, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.reverseReplicationRelationshipTarget == "" {
 		return fmt.Errorf("ReverseReplicationRelationship action is not supported by this system")
@@ -1029,12 +1177,18 @@ func (volume *Volume) ReverseReplicationRelationship(targetVolumeODataID string)
 		TargetVolume string
 	}{TargetVolume: targetVolumeODataID}
 
-	return volume.Post(volume.reverseReplicationRelationshipTarget, t)
+	return volume.PostWithContext(ctx, volume.reverseReplicationRelationshipTarget, t)
 }
 
 // SplitReplication is used to split the replication relationship and suspend
 // data synchronization between a source and target volume.
 func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
+	return volume.SplitReplicationWithContext(common.ContextOf(volume.GetClient()), targetVolumeODataID)
+}
+
+// SplitReplicationWithContext is used to split the replication relationship and suspend
+// data synchronization between a source and target volume.
+func (volume *Volume) SplitReplicationWithContext(ctx context.Context, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.splitReplicationTarget == "" {
 		return fmt.Errorf("SplitReplication action is not supported by this system")
@@ -1046,13 +1200,20 @@ func (volume *Volume) SplitReplication(targetVolumeODataID string) error {
 		TargetVolume string
 	}{TargetVolume: targetVolumeODataID}
 
-	return volume.Post(volume.splitReplicationTarget, t)
+	return volume.PostWithContext(ctx, volume.splitReplicationTarget, t)
 }
 
 // SuspendReplication is used to suspend active data synchronization between a
 // source and target volume, without otherwise altering the replication
 // relationship.
 func (volume *Volume) SuspendReplication(targetVolumeODataID string) error {
+	return volume.SuspendReplicationWithContext(common.ContextOf(volume.GetClient()), targetVolumeODataID)
+}
+
+// SuspendReplicationWithContext is used to suspend active data synchronization between a
+// source and target volume, without otherwise altering the replication
+// relationship.
+func (volume *Volume) SuspendReplicationWithContext(ctx context.Context, targetVolumeODataID string) error {
 	// This action wasn't added until later revisions
 	if volume.suspendReplicationTarget == "" {
 		return fmt.Errorf("SuspendReplication action is not supported by this system")
@@ -1064,5 +1225,5 @@ func (volume *Volume) SuspendReplication(targetVolumeODataID string) error {
 		TargetVolume string
 	}{TargetVolume: targetVolumeODataID}
 
-	return volume.Post(volume.suspendReplicationTarget, t)
+	return volume.PostWithContext(ctx, volume.suspendReplicationTarget, t)
 }

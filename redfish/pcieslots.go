@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -100,12 +101,22 @@ func (slot *PCIeSlot) UnmarshalJSON(b []byte) error {
 
 // PCIeDevices gets the PCIe devices contained in this slot.
 func (slot *PCIeSlot) PCIeDevice(c common.Client, queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
-	return common.GetObjects[PCIeDevice](c, slot.pcieDevice, queryOpts...)
+	return slot.PCIeDeviceWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// PCIeDevices gets the PCIe devices contained in this slot.
+func (slot *PCIeSlot) PCIeDeviceWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
+	return common.GetObjectsWithContext[PCIeDevice](ctx, c, slot.pcieDevice, queryOpts...)
 }
 
 // Processors gets the processors that are directly connected or directly bridged to this PCIe slot.
 func (slot *PCIeSlot) Processors(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetObjects[Processor](c, slot.processors, queryOpts...)
+	return slot.ProcessorsWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// ProcessorsWithContext gets the processors that are directly connected or directly bridged to this PCIe slot.
+func (slot *PCIeSlot) ProcessorsWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjectsWithContext[Processor](ctx, c, slot.processors, queryOpts...)
 }
 
 // PCIeSlots is used to represent a PCIeSlots resource for a Redfish implementation.
@@ -153,5 +164,10 @@ func (pcieSlots *PCIeSlots) UnmarshalJSON(b []byte) error {
 
 // GetPCIeSlots will get a PCIeSlots instance from the chassis.
 func GetPCIeSlots(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PCIeSlots, error) {
-	return common.GetObject[PCIeSlots](c, uri, queryOpts...)
+	return GetPCIeSlotsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPCIeSlotsWithContext will get a PCIeSlots instance from the chassis.
+func GetPCIeSlotsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PCIeSlots, error) {
+	return common.GetObjectWithContext[PCIeSlots](ctx, c, uri, queryOpts...)
 }

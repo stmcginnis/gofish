@@ -76,7 +76,7 @@ func (im *iDRACMonitor) ExecuteWithRetry(ctx context.Context, operation func() e
 			if attempt == im.maxRetries {
 				if im.resetOnTimeout {
 					// Try to reset iDRAC before giving up
-					resetErr := im.manager.ResetiDRAC(GracefuliDRACReset)
+					resetErr := im.manager.ResetiDRACWithContext(ctx, GracefuliDRACReset)
 					if resetErr != nil {
 						return fmt.Errorf("iDRAC unresponsive after %d attempts, reset also failed: %w", im.maxRetries+1, resetErr)
 					}

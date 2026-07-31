@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -64,24 +65,45 @@ func (sessionservice *SessionService) UnmarshalJSON(b []byte) error {
 
 // Sessions gets a collection of sessions.
 func (sessionservice *SessionService) Sessions(queryOpts ...common.QueryGroupOption) ([]*Session, error) {
-	return ListReferencedSessions(sessionservice.GetClient(), sessionservice.sessions, queryOpts...)
+	return sessionservice.SessionsWithContext(common.ContextOf(sessionservice.GetClient()), queryOpts...)
+}
+
+// SessionsWithContext gets a collection of sessions.
+func (sessionservice *SessionService) SessionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Session, error) {
+	return ListReferencedSessionsWithContext(ctx, sessionservice.GetClient(), sessionservice.sessions, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (sessionservice *SessionService) Update() error {
+	return sessionservice.UpdateWithContext(common.ContextOf(sessionservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (sessionservice *SessionService) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"ServiceEnabled",
 		"SessionTimeout"}
 
-	return sessionservice.UpdateFromRawData(sessionservice, sessionservice.rawData, readWriteFields)
+	return sessionservice.UpdateFromRawDataWithContext(ctx, sessionservice, sessionservice.rawData, readWriteFields)
 }
 
 // GetSessionService will get a SessionService instance from the service.
 func GetSessionService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SessionService, error) {
-	return common.GetObject[SessionService](c, uri, queryOpts...)
+	return GetSessionServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSessionServiceWithContext will get a SessionService instance from the service.
+func GetSessionServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SessionService, error) {
+	return common.GetObjectWithContext[SessionService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSessionServices gets the collection of SessionService from
 // a provided reference.
 func ListReferencedSessionServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SessionService, error) {
-	return common.GetCollectionObjects[SessionService](c, link, queryOpts...)
+	return ListReferencedSessionServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSessionServicesWithContext gets the collection of SessionService from
+// a provided reference.
+func ListReferencedSessionServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SessionService, error) {
+	return common.GetCollectionObjectsWithContext[SessionService](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -106,14 +107,24 @@ func (metrics *PowerSupplyUnitMetrics) UnmarshalJSON(b []byte) error {
 
 // GetPowerSupplyUnitMetrics will get a PowerSupplyMetrics instance from the Redfish service.
 func GetPowerSupplyUnitMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerSupplyUnitMetrics, error) {
-	return common.GetObject[PowerSupplyUnitMetrics](c, uri, queryOpts...)
+	return GetPowerSupplyUnitMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPowerSupplyUnitMetricsWithContext will get a PowerSupplyMetrics instance from the Redfish service.
+func GetPowerSupplyUnitMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerSupplyUnitMetrics, error) {
+	return common.GetObjectWithContext[PowerSupplyUnitMetrics](ctx, c, uri, queryOpts...)
 }
 
 // This action resets the summary metrics related to this equipment.
 func (metrics *PowerSupplyUnitMetrics) ResetMetrics() error {
+	return metrics.ResetMetricsWithContext(common.ContextOf(metrics.GetClient()))
+}
+
+// This action resets the summary metrics related to this equipment.
+func (metrics *PowerSupplyUnitMetrics) ResetMetricsWithContext(ctx context.Context) error {
 	if metrics.resetMetricsTarget == "" {
 		return fmt.Errorf("ResetMetrics is not supported")
 	}
 
-	return metrics.Post(metrics.resetMetricsTarget, nil)
+	return metrics.PostWithContext(ctx, metrics.resetMetricsTarget, nil)
 }

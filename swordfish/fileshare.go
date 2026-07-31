@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -139,6 +140,11 @@ func (fileshare *FileShare) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (fileshare *FileShare) Update() error {
+	return fileshare.UpdateWithContext(common.ContextOf(fileshare.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (fileshare *FileShare) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(FileShare)
@@ -158,39 +164,65 @@ func (fileshare *FileShare) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(fileshare).Elem()
 
-	return fileshare.Entity.Update(originalElement, currentElement, readWriteFields)
+	return fileshare.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetFileShare will get a FileShare instance from the service.
 func GetFileShare(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FileShare, error) {
-	return common.GetObject[FileShare](c, uri, queryOpts...)
+	return GetFileShareWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetFileShareWithContext will get a FileShare instance from the service.
+func GetFileShareWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FileShare, error) {
+	return common.GetObjectWithContext[FileShare](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedFileShares gets the collection of FileShare from a provided
 // reference.
 func ListReferencedFileShares(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*FileShare, error) {
-	return common.GetCollectionObjects[FileShare](c, link, queryOpts...)
+	return ListReferencedFileSharesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedFileSharesWithContext gets the collection of FileShare from a provided
+// reference.
+func ListReferencedFileSharesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*FileShare, error) {
+	return common.GetCollectionObjectsWithContext[FileShare](ctx, c, link, queryOpts...)
 }
 
 // ClassOfService gets the file share's class of service.
 func (fileshare *FileShare) ClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return fileshare.ClassOfServiceWithContext(common.ContextOf(fileshare.GetClient()), queryOpts...)
+}
+
+// ClassOfServiceWithContext gets the file share's class of service.
+func (fileshare *FileShare) ClassOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	var result *ClassOfService
 	if fileshare.classOfService == "" {
 		return result, nil
 	}
-	return GetClassOfService(fileshare.GetClient(), fileshare.classOfService, queryOpts...)
+	return GetClassOfServiceWithContext(ctx, fileshare.GetClient(), fileshare.classOfService, queryOpts...)
 }
 
 // FileSystem gets the file share's associated file system.
 func (fileshare *FileShare) FileSystem(queryOpts ...common.QueryGroupOption) (*FileSystem, error) {
+	return fileshare.FileSystemWithContext(common.ContextOf(fileshare.GetClient()), queryOpts...)
+}
+
+// FileSystemWithContext gets the file share's associated file system.
+func (fileshare *FileShare) FileSystemWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*FileSystem, error) {
 	var result *FileSystem
 	if fileshare.fileSystem == "" {
 		return result, nil
 	}
-	return GetFileSystem(fileshare.GetClient(), fileshare.fileSystem, queryOpts...)
+	return GetFileSystemWithContext(ctx, fileshare.GetClient(), fileshare.fileSystem, queryOpts...)
 }
 
 // EthernetInterfaces gets the EthernetInterfaces associated with this share.
 func (fileshare *FileShare) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*redfish.EthernetInterface, error) {
-	return redfish.ListReferencedEthernetInterfaces(fileshare.GetClient(), fileshare.ethernetInterfaces, queryOpts...)
+	return fileshare.EthernetInterfacesWithContext(common.ContextOf(fileshare.GetClient()), queryOpts...)
+}
+
+// EthernetInterfacesWithContext gets the EthernetInterfaces associated with this share.
+func (fileshare *FileShare) EthernetInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.EthernetInterface, error) {
+	return redfish.ListReferencedEthernetInterfacesWithContext(ctx, fileshare.GetClient(), fileshare.ethernetInterfaces, queryOpts...)
 }

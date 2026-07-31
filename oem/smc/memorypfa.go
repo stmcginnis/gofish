@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -47,7 +48,10 @@ func (i *MemoryPFA) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *MemoryPFA) Update() error {
+func (i *MemoryPFA) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *MemoryPFA) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(MemoryPFA)
@@ -65,10 +69,15 @@ func (i *MemoryPFA) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetMemoryPFA will get a MemoryPFA instance from the service.
 func GetMemoryPFA(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryPFA, error) {
-	return common.GetObject[MemoryPFA](c, uri, queryOpts...)
+	return GetMemoryPFAWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMemoryPFAWithContext will get a MemoryPFA instance from the service.
+func GetMemoryPFAWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryPFA, error) {
+	return common.GetObjectWithContext[MemoryPFA](ctx, c, uri, queryOpts...)
 }

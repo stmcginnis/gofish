@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -186,77 +187,137 @@ func (coolingunit *CoolingUnit) UnmarshalJSON(b []byte) error {
 }
 
 func (coolingunit *CoolingUnit) SetMode(mode CoolingUnitMode) error {
+	return coolingunit.SetModeWithContext(common.ContextOf(coolingunit.GetClient()), mode)
+}
+
+func (coolingunit *CoolingUnit) SetModeWithContext(ctx context.Context, mode CoolingUnitMode) error {
 	// TODO: check if mode is in Allowable values
 	properties := map[string]interface{}{
 		"Mode": mode,
 	}
 
-	return coolingunit.Post(coolingunit.setMode, properties)
+	return coolingunit.PostWithContext(ctx, coolingunit.setMode, properties)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (coolingunit *CoolingUnit) Update() error {
+	return coolingunit.UpdateWithContext(common.ContextOf(coolingunit.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (coolingunit *CoolingUnit) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AssetTag",
 		"UserLabel",
 	}
 
-	return coolingunit.UpdateFromRawData(coolingunit, coolingunit.rawData, readWriteFields)
+	return coolingunit.UpdateFromRawDataWithContext(ctx, coolingunit, coolingunit.rawData, readWriteFields)
 }
 
 // GetCoolingUnit will get a CoolingUnit instance from the service.
 func GetCoolingUnit(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolingUnit, error) {
-	return common.GetObject[CoolingUnit](c, uri, queryOpts...)
+	return GetCoolingUnitWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCoolingUnitWithContext will get a CoolingUnit instance from the service.
+func GetCoolingUnitWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolingUnit, error) {
+	return common.GetObjectWithContext[CoolingUnit](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCoolingUnits gets the collection of CoolingUnit from
 // a provided reference.
 func ListReferencedCoolingUnits(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
-	return common.GetCollectionObjects[CoolingUnit](c, link, queryOpts...)
+	return ListReferencedCoolingUnitsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCoolingUnitsWithContext gets the collection of CoolingUnit from
+// a provided reference.
+func ListReferencedCoolingUnitsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return common.GetCollectionObjectsWithContext[CoolingUnit](ctx, c, link, queryOpts...)
 }
 
 // Assembly gets a collection of assemblies.
 func (coolingunit *CoolingUnit) Assembly(queryOpts ...common.QueryGroupOption) ([]*Assembly, error) {
-	return ListReferencedAssemblys(coolingunit.GetClient(), coolingunit.assembly, queryOpts...)
+	return coolingunit.AssemblyWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets a collection of assemblies.
+func (coolingunit *CoolingUnit) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Assembly, error) {
+	return ListReferencedAssemblysWithContext(ctx, coolingunit.GetClient(), coolingunit.assembly, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this cooling unit.
 func (coolingunit *CoolingUnit) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return coolingunit.EnvironmentMetricsWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// EnvironmentMetricsWithContext gets the environment metrics for this cooling unit.
+func (coolingunit *CoolingUnit) EnvironmentMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if coolingunit.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(coolingunit.GetClient(), coolingunit.environmentMetrics, queryOpts...)
+	return GetEnvironmentMetricsWithContext(ctx, coolingunit.GetClient(), coolingunit.environmentMetrics, queryOpts...)
 }
 
 // Filters gets a collection of filters.
 func (coolingunit *CoolingUnit) Filters(queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
-	return ListReferencedFilters(coolingunit.GetClient(), coolingunit.filters, queryOpts...)
+	return coolingunit.FiltersWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// FiltersWithContext gets a collection of filters.
+func (coolingunit *CoolingUnit) FiltersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return ListReferencedFiltersWithContext(ctx, coolingunit.GetClient(), coolingunit.filters, queryOpts...)
 }
 
 // LeakDetection gets the of leak detection of this cooling unit.
 func (coolingunit *CoolingUnit) LeakDetection(queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
+	return coolingunit.LeakDetectionWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// LeakDetectionWithContext gets the of leak detection of this cooling unit.
+func (coolingunit *CoolingUnit) LeakDetectionWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
 	if coolingunit.leakDetection == "" {
 		return nil, nil
 	}
-	return GetLeakDetection(coolingunit.GetClient(), coolingunit.leakDetection, queryOpts...)
+	return GetLeakDetectionWithContext(ctx, coolingunit.GetClient(), coolingunit.leakDetection, queryOpts...)
 }
 
 // PrimaryCoolantConnectors gets a collection of primary coolant connectors.
 func (coolingunit *CoolingUnit) PrimaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.primaryCoolantConnectors, queryOpts...)
+	return coolingunit.PrimaryCoolantConnectorsWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// PrimaryCoolantConnectorsWithContext gets a collection of primary coolant connectors.
+func (coolingunit *CoolingUnit) PrimaryCoolantConnectorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectorsWithContext(ctx, coolingunit.GetClient(), coolingunit.primaryCoolantConnectors, queryOpts...)
 }
 
 // Pumps gets a collection of pumps.
 func (coolingunit *CoolingUnit) Pumps(queryOpts ...common.QueryGroupOption) ([]*Pump, error) {
-	return ListReferencedPumps(coolingunit.GetClient(), coolingunit.pumps, queryOpts...)
+	return coolingunit.PumpsWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// PumpsWithContext gets a collection of pumps.
+func (coolingunit *CoolingUnit) PumpsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Pump, error) {
+	return ListReferencedPumpsWithContext(ctx, coolingunit.GetClient(), coolingunit.pumps, queryOpts...)
 }
 
 // Reservoirs gets a collection of reservoirs.
 func (coolingunit *CoolingUnit) Reservoirs(queryOpts ...common.QueryGroupOption) ([]*Reservoir, error) {
-	return ListReferencedReservoirs(coolingunit.GetClient(), coolingunit.reservoirs, queryOpts...)
+	return coolingunit.ReservoirsWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// ReservoirsWithContext gets a collection of reservoirs.
+func (coolingunit *CoolingUnit) ReservoirsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Reservoir, error) {
+	return ListReferencedReservoirsWithContext(ctx, coolingunit.GetClient(), coolingunit.reservoirs, queryOpts...)
 }
 
 // SecondaryCoolantConnectors gets a collection of secondary coolant connectors.
 func (coolingunit *CoolingUnit) SecondaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.secondaryCoolantConnectors, queryOpts...)
+	return coolingunit.SecondaryCoolantConnectorsWithContext(common.ContextOf(coolingunit.GetClient()), queryOpts...)
+}
+
+// SecondaryCoolantConnectorsWithContext gets a collection of secondary coolant connectors.
+func (coolingunit *CoolingUnit) SecondaryCoolantConnectorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectorsWithContext(ctx, coolingunit.GetClient(), coolingunit.secondaryCoolantConnectors, queryOpts...)
 }

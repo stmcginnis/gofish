@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -105,46 +106,92 @@ func (powerdomain *PowerDomain) UnmarshalJSON(b []byte) error {
 
 // ElectricalBuses gets the electrical buses in this power domain.
 func (powerdomain *PowerDomain) ElectricalBuses(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.electricalBuses, queryOpts...)
+	return powerdomain.ElectricalBusesWithContext(common.ContextOf(powerdomain.GetClient()), queryOpts...)
+}
+
+// ElectricalBusesWithContext gets the electrical buses in this power domain.
+func (powerdomain *PowerDomain) ElectricalBusesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, powerdomain.GetClient(), powerdomain.electricalBuses, queryOpts...)
 }
 
 // FloorPDUs gets the floor power distribution units in this power domain.
 func (powerdomain *PowerDomain) FloorPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.floorPDUs, queryOpts...)
+	return powerdomain.FloorPDUsWithContext(common.ContextOf(powerdomain.GetClient()), queryOpts...)
+}
+
+// FloorPDUsWithContext gets the floor power distribution units in this power domain.
+func (powerdomain *PowerDomain) FloorPDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, powerdomain.GetClient(), powerdomain.floorPDUs, queryOpts...)
 }
 
 // ManagedBy gets the managers that manage this power domain.
 func (powerdomain *PowerDomain) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](powerdomain.GetClient(), powerdomain.managedBy, queryOpts...)
+	return powerdomain.ManagedByWithContext(common.ContextOf(powerdomain.GetClient()), queryOpts...)
+}
+
+// ManagedByWithContext gets the managers that manage this power domain.
+func (powerdomain *PowerDomain) ManagedByWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, powerdomain.GetClient(), powerdomain.managedBy, queryOpts...)
 }
 
 // PowerShelves gets the power shelves in this power domain.
 func (powerdomain *PowerDomain) PowerShelves(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.powerShelves, queryOpts...)
+	return powerdomain.PowerShelvesWithContext(common.ContextOf(powerdomain.GetClient()), queryOpts...)
+}
+
+// PowerShelvesWithContext gets the power shelves in this power domain.
+func (powerdomain *PowerDomain) PowerShelvesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, powerdomain.GetClient(), powerdomain.powerShelves, queryOpts...)
 }
 
 // RackPDUs gets the rack-level power distribution units in this power domain.
 func (powerdomain *PowerDomain) RackPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.rackPDUs, queryOpts...)
+	return powerdomain.RackPDUsWithContext(common.ContextOf(powerdomain.GetClient()), queryOpts...)
+}
+
+// RackPDUsWithContext gets the rack-level power distribution units in this power domain.
+func (powerdomain *PowerDomain) RackPDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, powerdomain.GetClient(), powerdomain.rackPDUs, queryOpts...)
 }
 
 // Switchgear gets the switchgear in this power domain.
 func (powerdomain *PowerDomain) Switchgear(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.switchgear, queryOpts...)
+	return powerdomain.SwitchgearWithContext(common.ContextOf(powerdomain.GetClient()), queryOpts...)
+}
+
+// SwitchgearWithContext gets the switchgear in this power domain.
+func (powerdomain *PowerDomain) SwitchgearWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, powerdomain.GetClient(), powerdomain.switchgear, queryOpts...)
 }
 
 // TransferSwitches gets the transfer switches in this power domain.
 func (powerdomain *PowerDomain) TransferSwitches(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.transferSwitches, queryOpts...)
+	return powerdomain.TransferSwitchesWithContext(common.ContextOf(powerdomain.GetClient()), queryOpts...)
+}
+
+// TransferSwitchesWithContext gets the transfer switches in this power domain.
+func (powerdomain *PowerDomain) TransferSwitchesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, powerdomain.GetClient(), powerdomain.transferSwitches, queryOpts...)
 }
 
 // GetPowerDomain will get a PowerDomain instance from the service.
 func GetPowerDomain(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerDomain, error) {
-	return common.GetObject[PowerDomain](c, uri, queryOpts...)
+	return GetPowerDomainWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPowerDomainWithContext will get a PowerDomain instance from the service.
+func GetPowerDomainWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerDomain, error) {
+	return common.GetObjectWithContext[PowerDomain](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedPowerDomains gets the collection of PowerDomain from
 // a provided reference.
 func ListReferencedPowerDomains(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerDomain, error) {
-	return common.GetCollectionObjects[PowerDomain](c, link, queryOpts...)
+	return ListReferencedPowerDomainsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedPowerDomainsWithContext gets the collection of PowerDomain from
+// a provided reference.
+func ListReferencedPowerDomainsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerDomain, error) {
+	return common.GetCollectionObjectsWithContext[PowerDomain](ctx, c, link, queryOpts...)
 }

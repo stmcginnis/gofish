@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -43,7 +44,10 @@ func (i *KCSInterface) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *KCSInterface) Update() error {
+func (i *KCSInterface) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *KCSInterface) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(KCSInterface)
@@ -59,10 +63,15 @@ func (i *KCSInterface) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetKCSInterface will get a KCSInterface instance from the service.
 func GetKCSInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KCSInterface, error) {
-	return common.GetObject[KCSInterface](c, uri, queryOpts...)
+	return GetKCSInterfaceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetKCSInterfaceWithContext will get a KCSInterface instance from the service.
+func GetKCSInterfaceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KCSInterface, error) {
+	return common.GetObjectWithContext[KCSInterface](ctx, c, uri, queryOpts...)
 }

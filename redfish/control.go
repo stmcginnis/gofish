@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -204,6 +205,11 @@ func (control *Control) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (control *Control) Update() error {
+	return control.UpdateWithContext(common.ContextOf(control.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (control *Control) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"ControlDelaySeconds",
 		"ControlMode",
@@ -213,27 +219,43 @@ func (control *Control) Update() error {
 		"SettingMin",
 	}
 
-	return control.UpdateFromRawData(control, control.rawData, readWriteFields)
+	return control.UpdateFromRawDataWithContext(ctx, control, control.rawData, readWriteFields)
 }
 
 // GetControl will get a Control instance from the service.
 func GetControl(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Control, error) {
-	return common.GetObject[Control](c, uri, queryOpts...)
+	return GetControlWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetControlWithContext will get a Control instance from the service.
+func GetControlWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Control, error) {
+	return common.GetObjectWithContext[Control](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedControls gets the collection of Control from
 // a provided reference.
 func ListReferencedControls(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Control, error) {
-	return common.GetCollectionObjects[Control](c, link, queryOpts...)
+	return ListReferencedControlsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedControlsWithContext gets the collection of Control from
+// a provided reference.
+func ListReferencedControlsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Control, error) {
+	return common.GetCollectionObjectsWithContext[Control](ctx, c, link, queryOpts...)
 }
 
 // ResetToDefault resets the values of writable properties to factory defaults.
 func (control *Control) ResetToDefault() error {
+	return control.ResetToDefaultWithContext(common.ContextOf(control.GetClient()))
+}
+
+// ResetToDefaultWithContext resets the values of writable properties to factory defaults.
+func (control *Control) ResetToDefaultWithContext(ctx context.Context) error {
 	if control.resetToDefaultsTarget == "" {
 		return fmt.Errorf("ResetToDefault is not supported by this system")
 	}
 
-	return control.Post(control.resetToDefaultsTarget, nil)
+	return control.PostWithContext(ctx, control.resetToDefaultsTarget, nil)
 }
 
 // ControlExcerpt shall represent a control point for a Redfish implementation.

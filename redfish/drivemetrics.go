@@ -5,6 +5,8 @@
 package redfish
 
 import (
+	"context"
+
 	"github.com/coreweave/gofish/common"
 )
 
@@ -46,11 +48,22 @@ type DriveMetrics struct {
 
 // GetDriveMetrics will get a DriveMetrics instance from the service.
 func GetDriveMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DriveMetrics, error) {
-	return common.GetObject[DriveMetrics](c, uri, queryOpts...)
+	return GetDriveMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDriveMetricsWithContext will get a DriveMetrics instance from the service.
+func GetDriveMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DriveMetrics, error) {
+	return common.GetObjectWithContext[DriveMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedDriveMetricss gets the collection of DriveMetrics from
 // a provided reference.
 func ListReferencedDriveMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DriveMetrics, error) {
-	return common.GetCollectionObjects[DriveMetrics](c, link, queryOpts...)
+	return ListReferencedDriveMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedDriveMetricssWithContext gets the collection of DriveMetrics from
+// a provided reference.
+func ListReferencedDriveMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DriveMetrics, error) {
+	return common.GetCollectionObjectsWithContext[DriveMetrics](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -100,12 +101,22 @@ func (spdmpolicy *SPDMPolicy) UnmarshalJSON(b []byte) error {
 
 // RevokedCertificates gets the set of revoked SPDM device certificates.
 func (spdmpolicy *SPDMPolicy) RevokedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, spdmpolicy.revokedCertificates, queryOpts...)
+	return spdmpolicy.RevokedCertificatesWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// RevokedCertificatesWithContext gets the set of revoked SPDM device certificates.
+func (spdmpolicy *SPDMPolicy) RevokedCertificatesWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, c, spdmpolicy.revokedCertificates, queryOpts...)
 }
 
 // TrustedCertificates gets the set of trusted SPDM device certificates.
 func (spdmpolicy *SPDMPolicy) TrustedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, spdmpolicy.trustedCertificates, queryOpts...)
+	return spdmpolicy.TrustedCertificatesWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// TrustedCertificatesWithContext gets the set of trusted SPDM device certificates.
+func (spdmpolicy *SPDMPolicy) TrustedCertificatesWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, c, spdmpolicy.trustedCertificates, queryOpts...)
 }
 
 // SecurityPolicy shall represent configurable security-related policies managed by a manager. All security
@@ -161,20 +172,36 @@ func (securitypolicy *SecurityPolicy) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (securitypolicy *SecurityPolicy) Update() error {
+	return securitypolicy.UpdateWithContext(common.ContextOf(securitypolicy.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (securitypolicy *SecurityPolicy) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"OverrideParentManager"}
 
-	return securitypolicy.UpdateFromRawData(securitypolicy, securitypolicy.rawData, readWriteFields)
+	return securitypolicy.UpdateFromRawDataWithContext(ctx, securitypolicy, securitypolicy.rawData, readWriteFields)
 }
 
 // GetSecurityPolicy will get a SecurityPolicy instance from the service.
 func GetSecurityPolicy(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SecurityPolicy, error) {
-	return common.GetObject[SecurityPolicy](c, uri, queryOpts...)
+	return GetSecurityPolicyWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSecurityPolicyWithContext will get a SecurityPolicy instance from the service.
+func GetSecurityPolicyWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SecurityPolicy, error) {
+	return common.GetObjectWithContext[SecurityPolicy](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSecurityPolicys gets the collection of SecurityPolicy from
 // a provided reference.
 func ListReferencedSecurityPolicys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SecurityPolicy, error) {
-	return common.GetCollectionObjects[SecurityPolicy](c, link, queryOpts...)
+	return ListReferencedSecurityPolicysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSecurityPolicysWithContext gets the collection of SecurityPolicy from
+// a provided reference.
+func ListReferencedSecurityPolicysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SecurityPolicy, error) {
+	return common.GetCollectionObjectsWithContext[SecurityPolicy](ctx, c, link, queryOpts...)
 }
 
 // TLSAlgorithmSet shall contain TLS algorithm settings.
@@ -272,10 +299,20 @@ func (tlspolicy *TLSPolicy) UnmarshalJSON(b []byte) error {
 
 // RevokedCertificates gets the set of revoked TLS certificates.
 func (tlspolicy *TLSPolicy) RevokedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, tlspolicy.revokedCertificates, queryOpts...)
+	return tlspolicy.RevokedCertificatesWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// RevokedCertificatesWithContext gets the set of revoked TLS certificates.
+func (tlspolicy *TLSPolicy) RevokedCertificatesWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, c, tlspolicy.revokedCertificates, queryOpts...)
 }
 
 // TrustedCertificates gets the set of trusted TLS certificates.
 func (tlspolicy *TLSPolicy) TrustedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, tlspolicy.trustedCertificates, queryOpts...)
+	return tlspolicy.TrustedCertificatesWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// TrustedCertificatesWithContext gets the set of trusted TLS certificates.
+func (tlspolicy *TLSPolicy) TrustedCertificatesWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, c, tlspolicy.trustedCertificates, queryOpts...)
 }

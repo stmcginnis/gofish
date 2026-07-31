@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 
@@ -376,10 +377,15 @@ func (memorysummary *ProcessorMemorySummary) UnmarshalJSON(b []byte) error {
 
 // Metrics gets the memory metrics for this processor memory summary.
 func (memorysummary *ProcessorMemorySummary) Metrics(c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
+	return memorysummary.MetricsWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// MetricsWithContext gets the memory metrics for this processor memory summary.
+func (memorysummary *ProcessorMemorySummary) MetricsWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
 	if memorysummary.metrics == "" {
 		return nil, nil
 	}
-	return GetMemoryMetrics(c, memorysummary.metrics, queryOpts...)
+	return GetMemoryMetricsWithContext(ctx, c, memorysummary.metrics, queryOpts...)
 }
 
 // Processor is used to represent a single processor contained within a
@@ -697,6 +703,11 @@ func (processor *Processor) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (processor *Processor) Update() error {
+	return processor.UpdateWithContext(common.ContextOf(processor.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (processor *Processor) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"AppliedOperatingConfig",
 		"Enabled",
 		"LocationIndicatorActive",
@@ -704,153 +715,270 @@ func (processor *Processor) Update() error {
 		"SpeedLimitMHz",
 		"SpeedLocked"}
 
-	return processor.UpdateFromRawData(processor, processor.rawData, readWriteFields)
+	return processor.UpdateFromRawDataWithContext(ctx, processor, processor.rawData, readWriteFields)
 }
 
 // Reset resets the processor.
 func (processor *Processor) Reset(resetType ResetType) error {
+	return processor.ResetWithContext(common.ContextOf(processor.GetClient()), resetType)
+}
+
+// ResetWithContext resets the processor.
+func (processor *Processor) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	t := struct {
 		ResetType ResetType
 	}{
 		ResetType: resetType,
 	}
-	return processor.Post(processor.resetTarget, t)
+	return processor.PostWithContext(ctx, processor.resetTarget, t)
 }
 
 // ResetToDefaults resets the values of writable properties to factory defaults.
 func (processor *Processor) ResetToDefaults() error {
-	return processor.Post(processor.resetToDefaultsTarget, nil)
+	return processor.ResetToDefaultsWithContext(common.ContextOf(processor.GetClient()))
+}
+
+// ResetToDefaultsWithContext resets the values of writable properties to factory defaults.
+func (processor *Processor) ResetToDefaultsWithContext(ctx context.Context) error {
+	return processor.PostWithContext(ctx, processor.resetToDefaultsTarget, nil)
 }
 
 // AccelerationFunctions gets acceleration functions associated with this processor.
 func (processor *Processor) AcclerationFunctions(queryOpts ...common.QueryGroupOption) ([]*AccelerationFunction, error) {
-	return common.GetObjects[AccelerationFunction](processor.GetClient(), processor.accelerationFunctions, queryOpts...)
+	return processor.AcclerationFunctionsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// AccelerationFunctions gets acceleration functions associated with this processor.
+func (processor *Processor) AcclerationFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*AccelerationFunction, error) {
+	return common.GetObjectsWithContext[AccelerationFunction](ctx, processor.GetClient(), processor.accelerationFunctions, queryOpts...)
 }
 
 // AppliedOperatingConfig gets the operating configuration that is applied to this processor.
 func (processor *Processor) AppliedOperatingConfig(queryOpts ...common.QueryGroupOption) (*OperatingConfig, error) {
+	return processor.AppliedOperatingConfigWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// AppliedOperatingConfigWithContext gets the operating configuration that is applied to this processor.
+func (processor *Processor) AppliedOperatingConfigWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*OperatingConfig, error) {
 	if processor.appliedOperatingConfig == "" {
 		return nil, nil
 	}
-	return GetOperatingConfig(processor.GetClient(), processor.appliedOperatingConfig, queryOpts...)
+	return GetOperatingConfigWithContext(ctx, processor.GetClient(), processor.appliedOperatingConfig, queryOpts...)
 }
 
 // Assembly gets the containing assembly for this processor.
 func (processor *Processor) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return processor.AssemblyWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets the containing assembly for this processor.
+func (processor *Processor) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if processor.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(processor.GetClient(), processor.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, processor.GetClient(), processor.assembly, queryOpts...)
 }
 
 func (processor *Processor) CacheMemory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return processor.CacheMemoryWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+func (processor *Processor) CacheMemoryWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
 	if processor.cacheMemory == "" {
 		return nil, nil
 	}
-	return ListReferencedMemorys(processor.GetClient(), processor.cacheMemory, queryOpts...)
+	return ListReferencedMemorysWithContext(ctx, processor.GetClient(), processor.cacheMemory, queryOpts...)
 }
 
 // Certificates gets the certificates for device identity and attestation.
 func (processor *Processor) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return common.GetObjects[Certificate](processor.GetClient(), processor.certificates, queryOpts...)
+	return processor.CertificatesWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets the certificates for device identity and attestation.
+func (processor *Processor) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjectsWithContext[Certificate](ctx, processor.GetClient(), processor.certificates, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this processor.
 func (processor *Processor) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return processor.EnvironmentMetricsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// EnvironmentMetricsWithContext gets the environment metrics for this processor.
+func (processor *Processor) EnvironmentMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if processor.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(processor.GetClient(), processor.environmentMetrics, queryOpts...)
+	return GetEnvironmentMetricsWithContext(ctx, processor.GetClient(), processor.environmentMetrics, queryOpts...)
 }
 
 // Metrics gets the metrics associated with this processor.
 func (processor *Processor) Metrics(queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
+	return processor.MetricsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the metrics associated with this processor.
+func (processor *Processor) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
 	if processor.metrics == "" {
 		return nil, nil
 	}
-	return GetProcessorMetrics(processor.GetClient(), processor.metrics, queryOpts...)
+	return GetProcessorMetricsWithContext(ctx, processor.GetClient(), processor.metrics, queryOpts...)
 }
 
 // OperatingConfigs gets acceleration functions associated with this processor.
 func (processor *Processor) OperatingConfigs(queryOpts ...common.QueryGroupOption) ([]*OperatingConfig, error) {
-	return common.GetObjects[OperatingConfig](processor.GetClient(), processor.operatingConfigs, queryOpts...)
+	return processor.OperatingConfigsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// OperatingConfigsWithContext gets acceleration functions associated with this processor.
+func (processor *Processor) OperatingConfigsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*OperatingConfig, error) {
+	return common.GetObjectsWithContext[OperatingConfig](ctx, processor.GetClient(), processor.operatingConfigs, queryOpts...)
 }
 
 // Ports gets the interconnect and fabric ports of this processor. It shall not
 // contain ports for GraphicsController resources, USBController resources, or
 // other local adapter-related types of resources.
 func (processor *Processor) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return ListReferencedPorts(processor.GetClient(), processor.ports, queryOpts...)
+	return processor.PortsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// PortsWithContext gets the interconnect and fabric ports of this processor. It shall not
+// contain ports for GraphicsController resources, USBController resources, or
+// other local adapter-related types of resources.
+func (processor *Processor) PortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPortsWithContext(ctx, processor.GetClient(), processor.ports, queryOpts...)
 }
 
 // SubProcessors gets the sub-processors associated with this processor, such as
 // cores or threads, that are part of a processor.
 func (processor *Processor) SubProcessors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetObjects[Processor](processor.GetClient(), processor.subProcessors, queryOpts...)
+	return processor.SubProcessorsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// SubProcessorsWithContext gets the sub-processors associated with this processor, such as
+// cores or threads, that are part of a processor.
+func (processor *Processor) SubProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjectsWithContext[Processor](ctx, processor.GetClient(), processor.subProcessors, queryOpts...)
 }
 
 // Chassis gets the physical container associated with this processor.
 func (processor *Processor) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
+	return processor.ChassisWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// ChassisWithContext gets the physical container associated with this processor.
+func (processor *Processor) ChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if processor.chassis == "" {
 		return nil, nil
 	}
-	return GetChassis(processor.GetClient(), processor.chassis, queryOpts...)
+	return GetChassisWithContext(ctx, processor.GetClient(), processor.chassis, queryOpts...)
 }
 
 // ConnectedProcessors gets the processors that are directly connected to this processor.
 func (processor *Processor) ConnectedProcessors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetObjects[Processor](processor.GetClient(), processor.connectedProcessors, queryOpts...)
+	return processor.ConnectedProcessorsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// ConnectedProcessorsWithContext gets the processors that are directly connected to this processor.
+func (processor *Processor) ConnectedProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjectsWithContext[Processor](ctx, processor.GetClient(), processor.connectedProcessors, queryOpts...)
 }
 
 // Endpoints gets the endpoints associated with this processor.
 func (processor *Processor) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](processor.GetClient(), processor.endpoints, queryOpts...)
+	return processor.EndpointsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the endpoints associated with this processor.
+func (processor *Processor) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, processor.GetClient(), processor.endpoints, queryOpts...)
 }
 
 // FabricAdapters gets the fabric adapters that present this processor to a fabric.
 func (processor *Processor) FabricAdapters(queryOpts ...common.QueryGroupOption) ([]*FabricAdapter, error) {
-	return common.GetObjects[FabricAdapter](processor.GetClient(), processor.fabricAdapters, queryOpts...)
+	return processor.FabricAdaptersWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// FabricAdaptersWithContext gets the fabric adapters that present this processor to a fabric.
+func (processor *Processor) FabricAdaptersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*FabricAdapter, error) {
+	return common.GetObjectsWithContext[FabricAdapter](ctx, processor.GetClient(), processor.fabricAdapters, queryOpts...)
 }
 
 // GraphicsController gets a graphics controller associated with this processor.
 func (processor *Processor) GraphicsController(queryOpts ...common.QueryGroupOption) (*GraphicsController, error) {
+	return processor.GraphicsControllerWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// GraphicsControllerWithContext gets a graphics controller associated with this processor.
+func (processor *Processor) GraphicsControllerWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*GraphicsController, error) {
 	if processor.graphicsController == "" {
 		return nil, nil
 	}
-	return GetGraphicsController(processor.GetClient(), processor.graphicsController, queryOpts...)
+	return GetGraphicsControllerWithContext(ctx, processor.GetClient(), processor.graphicsController, queryOpts...)
 }
 
 // Memory gets the memory objects that are associated with this processor.
 func (processor *Processor) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
-	return common.GetObjects[Memory](processor.GetClient(), processor.memory, queryOpts...)
+	return processor.MemoryWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// MemoryWithContext gets the memory objects that are associated with this processor.
+func (processor *Processor) MemoryWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetObjectsWithContext[Memory](ctx, processor.GetClient(), processor.memory, queryOpts...)
 }
 
 // NetworkDeviceFunctions gets the memory objects that are associated with this processor.
 func (processor *Processor) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](processor.GetClient(), processor.networkDeviceFunctions, queryOpts...)
+	return processor.NetworkDeviceFunctionsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// NetworkDeviceFunctionsWithContext gets the memory objects that are associated with this processor.
+func (processor *Processor) NetworkDeviceFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjectsWithContext[NetworkDeviceFunction](ctx, processor.GetClient(), processor.networkDeviceFunctions, queryOpts...)
 }
 
 // PCIeDevice gets the PCIe device associated with this processor.
 func (processor *Processor) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
+	return processor.PCIeDeviceWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// PCIeDeviceWithContext gets the PCIe device associated with this processor.
+func (processor *Processor) PCIeDeviceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
 	if processor.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(processor.GetClient(), processor.pcieDevice, queryOpts...)
+	return GetPCIeDeviceWithContext(ctx, processor.GetClient(), processor.pcieDevice, queryOpts...)
 }
 
 // PCIeFunctions gets the PCIeFunctions associated with this processor.
 func (processor *Processor) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](processor.GetClient(), processor.pcieFunctions, queryOpts...)
+	return processor.PCIeFunctionsWithContext(common.ContextOf(processor.GetClient()), queryOpts...)
+}
+
+// PCIeFunctionsWithContext gets the PCIeFunctions associated with this processor.
+func (processor *Processor) PCIeFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjectsWithContext[PCIeFunction](ctx, processor.GetClient(), processor.pcieFunctions, queryOpts...)
 }
 
 // GetProcessor will get a Processor instance from the system
 func GetProcessor(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Processor, error) {
-	return common.GetObject[Processor](c, uri, queryOpts...)
+	return GetProcessorWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetProcessorWithContext will get a Processor instance from the system
+func GetProcessorWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Processor, error) {
+	return common.GetObjectWithContext[Processor](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedProcessors gets the collection of Processor from a provided reference.
 func ListReferencedProcessors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetCollectionObjects[Processor](c, link, queryOpts...)
+	return ListReferencedProcessorsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedProcessorsWithContext gets the collection of Processor from a provided reference.
+func ListReferencedProcessorsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetCollectionObjectsWithContext[Processor](ctx, c, link, queryOpts...)
 }
 
 // ProcessorID shall contain identification information for a processor.

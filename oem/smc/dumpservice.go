@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -22,13 +23,24 @@ type Dump struct {
 
 // GetDump will get a Dump instance from the service.
 func GetDump(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Dump, error) {
-	return common.GetObject[Dump](c, uri, queryOpts...)
+	return GetDumpWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDumpWithContext will get a Dump instance from the service.
+func GetDumpWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Dump, error) {
+	return common.GetObjectWithContext[Dump](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedDumps gets the collection of Dumps from
 // a provided reference.
 func ListReferencedDumps(c common.Client, uri string, queryOpts ...common.QueryGroupOption) ([]*Dump, error) {
-	return common.GetCollectionObjects[Dump](c, uri, queryOpts...)
+	return ListReferencedDumpsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// ListReferencedDumpsWithContext gets the collection of Dumps from
+// a provided reference.
+func ListReferencedDumpsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) ([]*Dump, error) {
+	return common.GetCollectionObjectsWithContext[Dump](ctx, c, uri, queryOpts...)
 }
 
 // DumpService is the dump service instance associated with the system.
@@ -74,44 +86,72 @@ func (ds *DumpService) UnmarshalJSON(b []byte) error {
 
 // GetDefaultDumpService will get the default DumpService instance from the service.
 func GetDefaultDumpService(c common.Client, queryOpts ...common.QueryGroupOption) (*DumpService, error) {
-	return common.GetObject[DumpService](c, "/redfish/v1/Oem/Supermicro/DumpService/", queryOpts...)
+	return GetDefaultDumpServiceWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// GetDefaultDumpServiceWithContext will get the default DumpService instance from the service.
+func GetDefaultDumpServiceWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*DumpService, error) {
+	return common.GetObjectWithContext[DumpService](ctx, c, "/redfish/v1/Oem/Supermicro/DumpService/", queryOpts...)
 }
 
 // GetDumpService will get a DumpService instance from the service.
 func GetDumpService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DumpService, error) {
-	return common.GetObject[DumpService](c, uri, queryOpts...)
+	return GetDumpServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDumpServiceWithContext will get a DumpService instance from the service.
+func GetDumpServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DumpService, error) {
+	return common.GetObjectWithContext[DumpService](ctx, c, uri, queryOpts...)
 }
 
 // CreateDump creates a new dump. Allowable dumpType is usually only
 // "Host Dump".
 func (ds *DumpService) CreateDump(dumpType string) error {
+	return ds.CreateDumpWithContext(common.ContextOf(ds.GetClient()), dumpType)
+}
+
+// CreateDumpWithContext creates a new dump. Allowable dumpType is usually only
+// "Host Dump".
+func (ds *DumpService) CreateDumpWithContext(ctx context.Context, dumpType string) error {
 	if ds.createDumpTarget == "" {
 		return errors.New("create dump is not supported by this system")
 	}
 
-	return ds.Post(ds.createDumpTarget, map[string]any{
+	return ds.PostWithContext(ctx, ds.createDumpTarget, map[string]any{
 		"DumpType": dumpType,
 	})
 }
 
 // DeleteAll deletes all dumps.
 func (ds *DumpService) DeleteAll() error {
+	return ds.DeleteAllWithContext(common.ContextOf(ds.GetClient()))
+}
+
+// DeleteAllWithContext deletes all dumps.
+func (ds *DumpService) DeleteAllWithContext(ctx context.Context) error {
 	if ds.deleteAllTarget == "" {
 		return errors.New("delete all is not supported by this system")
 	}
 
-	return ds.Post(ds.deleteAllTarget, nil)
+	return ds.PostWithContext(ctx, ds.deleteAllTarget, nil)
 }
 
 // Collect collects a dump.
 // dumptType is usually only "HGXLogDump".
 // actionType is usually one of "Create", "Delete", "Download", or "Query".
 func (ds *DumpService) Collect(dumpType, actionType string) error {
+	return ds.CollectWithContext(common.ContextOf(ds.GetClient()), dumpType, actionType)
+}
+
+// CollectWithContext collects a dump.
+// dumptType is usually only "HGXLogDump".
+// actionType is usually one of "Create", "Delete", "Download", or "Query".
+func (ds *DumpService) CollectWithContext(ctx context.Context, dumpType, actionType string) error {
 	if ds.collectTarget == "" {
 		return errors.New("collect is not supported by this system")
 	}
 
-	return ds.Post(ds.collectTarget, map[string]any{
+	return ds.PostWithContext(ctx, ds.collectTarget, map[string]any{
 		"DumpType":   dumpType,
 		"ActionType": actionType,
 	})
@@ -119,5 +159,10 @@ func (ds *DumpService) Collect(dumpType, actionType string) error {
 
 // Dumps will get the Dumps from the service.
 func (ds *DumpService) Dumps(queryOpts ...common.QueryGroupOption) ([]*Dump, error) {
-	return ListReferencedDumps(ds.GetClient(), ds.dumps, queryOpts...)
+	return ds.DumpsWithContext(common.ContextOf(ds.GetClient()), queryOpts...)
+}
+
+// DumpsWithContext will get the Dumps from the service.
+func (ds *DumpService) DumpsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Dump, error) {
+	return ListReferencedDumpsWithContext(ctx, ds.GetClient(), ds.dumps, queryOpts...)
 }

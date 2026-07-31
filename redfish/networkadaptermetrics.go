@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -61,11 +62,22 @@ type NetworkAdapterMetrics struct {
 
 // GetNetworkAdapterMetrics will get a NetworkAdapterMetrics instance from the service.
 func GetNetworkAdapterMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkAdapterMetrics, error) {
-	return common.GetObject[NetworkAdapterMetrics](c, uri, queryOpts...)
+	return GetNetworkAdapterMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetNetworkAdapterMetricsWithContext will get a NetworkAdapterMetrics instance from the service.
+func GetNetworkAdapterMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkAdapterMetrics, error) {
+	return common.GetObjectWithContext[NetworkAdapterMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkAdapterMetrics gets the collection of NetworkAdapterMetrics from
 // a provided reference.
 func ListReferencedNetworkAdapterMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkAdapterMetrics, error) {
-	return common.GetCollectionObjects[NetworkAdapterMetrics](c, link, queryOpts...)
+	return ListReferencedNetworkAdapterMetricsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedNetworkAdapterMetricsWithContext gets the collection of NetworkAdapterMetrics from
+// a provided reference.
+func ListReferencedNetworkAdapterMetricsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkAdapterMetrics, error) {
+	return common.GetCollectionObjectsWithContext[NetworkAdapterMetrics](ctx, c, link, queryOpts...)
 }

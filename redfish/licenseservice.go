@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -99,34 +100,60 @@ type InstallLicenseParameters struct {
 
 // Install will install one or more licenses from a remote file. The service may update an existing License resource.
 func (licenseservice *LicenseService) Install(parameters *InstallLicenseParameters) error {
+	return licenseservice.InstallWithContext(common.ContextOf(licenseservice.GetClient()), parameters)
+}
+
+// InstallWithContext will install one or more licenses from a remote file. The service may update an existing License resource.
+func (licenseservice *LicenseService) InstallWithContext(ctx context.Context, parameters *InstallLicenseParameters) error {
 	if licenseservice.installTarget == "" {
 		return errors.New("license install not supported by this service")
 	}
-	return licenseservice.Post(licenseservice.installTarget, parameters)
+	return licenseservice.PostWithContext(ctx, licenseservice.installTarget, parameters)
 }
 
 // Licenses gets the set of installed licenses.
 func (licenseservice *LicenseService) Licenses(queryOpts ...common.QueryGroupOption) ([]*License, error) {
-	return ListReferencedLicenses(licenseservice.GetClient(), licenseservice.licenses, queryOpts...)
+	return licenseservice.LicensesWithContext(common.ContextOf(licenseservice.GetClient()), queryOpts...)
+}
+
+// LicensesWithContext gets the set of installed licenses.
+func (licenseservice *LicenseService) LicensesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*License, error) {
+	return ListReferencedLicensesWithContext(ctx, licenseservice.GetClient(), licenseservice.licenses, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (licenseservice *LicenseService) Update() error {
+	return licenseservice.UpdateWithContext(common.ContextOf(licenseservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (licenseservice *LicenseService) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"LicenseExpirationWarningDays",
 		"ServiceEnabled",
 	}
 
-	return licenseservice.UpdateFromRawData(licenseservice, licenseservice.rawData, readWriteFields)
+	return licenseservice.UpdateFromRawDataWithContext(ctx, licenseservice, licenseservice.rawData, readWriteFields)
 }
 
 // GetLicenseService will get a LicenseService instance from the service.
 func GetLicenseService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LicenseService, error) {
-	return common.GetObject[LicenseService](c, uri, queryOpts...)
+	return GetLicenseServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetLicenseServiceWithContext will get a LicenseService instance from the service.
+func GetLicenseServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LicenseService, error) {
+	return common.GetObjectWithContext[LicenseService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedLicenseServices gets the collection of LicenseService from
 // a provided reference.
 func ListReferencedLicenseServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LicenseService, error) {
-	return common.GetCollectionObjects[LicenseService](c, link, queryOpts...)
+	return ListReferencedLicenseServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedLicenseServicesWithContext gets the collection of LicenseService from
+// a provided reference.
+func ListReferencedLicenseServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LicenseService, error) {
+	return common.GetCollectionObjectsWithContext[LicenseService](ctx, c, link, queryOpts...)
 }

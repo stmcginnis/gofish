@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -69,6 +70,11 @@ func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) UnmarshalJSO
 
 // Update commits updates to this object's properties to the running system.
 func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) Update() error {
+	return ioconnectivityloscapabilities.UpdateWithContext(common.ContextOf(ioconnectivityloscapabilities.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(IOConnectivityLoSCapabilities)
@@ -87,17 +93,29 @@ func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) Update() err
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(ioconnectivityloscapabilities).Elem()
 
-	return ioconnectivityloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
+	return ioconnectivityloscapabilities.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetIOConnectivityLoSCapabilities will get a IOConnectivityLoSCapabilities
 // instance from the service.
 func GetIOConnectivityLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOConnectivityLoSCapabilities, error) {
-	return common.GetObject[IOConnectivityLoSCapabilities](c, uri, queryOpts...)
+	return GetIOConnectivityLoSCapabilitiesWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetIOConnectivityLoSCapabilitiesWithContext will get a IOConnectivityLoSCapabilities
+// instance from the service.
+func GetIOConnectivityLoSCapabilitiesWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOConnectivityLoSCapabilities, error) {
+	return common.GetObjectWithContext[IOConnectivityLoSCapabilities](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedIOConnectivityLoSCapabilitiess gets the collection of
 // IOConnectivityLoSCapabilities from a provided reference.
 func ListReferencedIOConnectivityLoSCapabilitiess(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLoSCapabilities, error) {
-	return common.GetCollectionObjects[IOConnectivityLoSCapabilities](c, link, queryOpts...)
+	return ListReferencedIOConnectivityLoSCapabilitiessWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedIOConnectivityLoSCapabilitiessWithContext gets the collection of
+// IOConnectivityLoSCapabilities from a provided reference.
+func ListReferencedIOConnectivityLoSCapabilitiessWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLoSCapabilities, error) {
+	return common.GetCollectionObjectsWithContext[IOConnectivityLoSCapabilities](ctx, c, link, queryOpts...)
 }

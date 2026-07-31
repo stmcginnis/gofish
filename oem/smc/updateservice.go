@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -49,11 +50,22 @@ func (cert *SSLCert) UnmarshalJSON(b []byte) error {
 // GetSSLCert will get the SSLCert instance from the Redfish
 // service.
 func GetSSLCert(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SSLCert, error) {
-	return common.GetObject[SSLCert](c, uri, queryOpts...)
+	return GetSSLCertWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSSLCertWithContext will get the SSLCert instance from the Redfish
+// service.
+func GetSSLCertWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SSLCert, error) {
+	return common.GetObjectWithContext[SSLCert](ctx, c, uri, queryOpts...)
 }
 
 // Upload will update the SSL certificate on the BMC with the provided certificate and key.
 func (cert *SSLCert) Upload(certFile, keyFile io.Reader) error {
+	return cert.UploadWithContext(common.ContextOf(cert.GetClient()), certFile, keyFile)
+}
+
+// UploadWithContext will update the SSL certificate on the BMC with the provided certificate and key.
+func (cert *SSLCert) UploadWithContext(ctx context.Context, certFile, keyFile io.Reader) error {
 	if cert.uploadTarget == "" {
 		return errors.New("upload is not supported by this system")
 	}
@@ -62,7 +74,7 @@ func (cert *SSLCert) Upload(certFile, keyFile io.Reader) error {
 	payload["cert_file"] = certFile
 	payload["key_file"] = keyFile
 
-	resp, err := cert.GetClient().PostMultipart(cert.uploadTarget, payload)
+	resp, err := cert.GetClient().PostMultipartWithContext(ctx, cert.uploadTarget, payload)
 	if err != nil {
 		return err
 	}
@@ -103,7 +115,13 @@ func (ipmi *IPMIConfig) UnmarshalJSON(b []byte) error {
 // GetIPMIConfig will get the IPMIConfig instance from the Redfish
 // service.
 func GetIPMIConfig(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IPMIConfig, error) {
-	return common.GetObject[IPMIConfig](c, uri, queryOpts...)
+	return GetIPMIConfigWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetIPMIConfigWithContext will get the IPMIConfig instance from the Redfish
+// service.
+func GetIPMIConfigWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IPMIConfig, error) {
+	return common.GetObjectWithContext[IPMIConfig](ctx, c, uri, queryOpts...)
 }
 
 // Upload restores a saved IPMI configuration.
@@ -111,11 +129,19 @@ func GetIPMIConfig(c common.Client, uri string, queryOpts ...common.QueryGroupOp
 // include any parameters for this action. That seems very unlikely, so expect
 // this to fail.
 func (ipmi *IPMIConfig) Upload() error {
+	return ipmi.UploadWithContext(common.ContextOf(ipmi.GetClient()))
+}
+
+// UploadWithContext restores a saved IPMI configuration.
+// NOTE: This is probably not correct. The jsonschema reported by SMC does not
+// include any parameters for this action. That seems very unlikely, so expect
+// this to fail.
+func (ipmi *IPMIConfig) UploadWithContext(ctx context.Context) error {
 	if ipmi.uploadTarget == "" {
 		return errors.New("upload is not supported by this system")
 	}
 
-	return ipmi.Post(ipmi.uploadTarget, nil)
+	return ipmi.PostWithContext(ctx, ipmi.uploadTarget, nil)
 }
 
 // Download saves the current IPMI configuration.
@@ -123,11 +149,19 @@ func (ipmi *IPMIConfig) Upload() error {
 // include any parameters for this action. That seems very unlikely, so expect
 // this to fail.
 func (ipmi *IPMIConfig) Download() error {
+	return ipmi.DownloadWithContext(common.ContextOf(ipmi.GetClient()))
+}
+
+// DownloadWithContext saves the current IPMI configuration.
+// NOTE: This is probably not correct. The jsonschema reported by SMC does not
+// include any parameters for this action. That seems very unlikely, so expect
+// this to fail.
+func (ipmi *IPMIConfig) DownloadWithContext(ctx context.Context) error {
 	if ipmi.downloadTarget == "" {
 		return errors.New("download is not supported by this system")
 	}
 
-	return ipmi.Post(ipmi.downloadTarget, nil)
+	return ipmi.PostWithContext(ctx, ipmi.downloadTarget, nil)
 }
 
 // UpdateService is the update service instance associated with the system.
@@ -175,16 +209,26 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 
 // GetUpdateService will get a UpdateService instance from the service.
 func GetUpdateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri, queryOpts...)
+	return GetUpdateServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetUpdateServiceWithContext will get a UpdateService instance from the service.
+func GetUpdateServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
+	return common.GetObjectWithContext[UpdateService](ctx, c, uri, queryOpts...)
 }
 
 // Install performs the installation of an update.
 func (us *UpdateService) Install(targets, installOptions []string) error {
+	return us.InstallWithContext(common.ContextOf(us.GetClient()), targets, installOptions)
+}
+
+// InstallWithContext performs the installation of an update.
+func (us *UpdateService) InstallWithContext(ctx context.Context, targets, installOptions []string) error {
 	if us.installTarget == "" {
 		return errors.New("install is not supported by this system")
 	}
 
-	return us.Post(us.installTarget, map[string]any{
+	return us.PostWithContext(ctx, us.installTarget, map[string]any{
 		"Targets":        targets,
 		"InstallOptions": installOptions,
 	})
@@ -192,10 +236,20 @@ func (us *UpdateService) Install(targets, installOptions []string) error {
 
 // SSLCert will get the SSLCert information from the service.
 func (us *UpdateService) SSLCert(queryOpts ...common.QueryGroupOption) (*SSLCert, error) {
-	return GetSSLCert(us.GetClient(), us.sslCert, queryOpts...)
+	return us.SSLCertWithContext(common.ContextOf(us.GetClient()), queryOpts...)
+}
+
+// SSLCertWithContext will get the SSLCert information from the service.
+func (us *UpdateService) SSLCertWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SSLCert, error) {
+	return GetSSLCertWithContext(ctx, us.GetClient(), us.sslCert, queryOpts...)
 }
 
 // IPMIConfig will get the IPMIConfig information from the service.
 func (us *UpdateService) IPMIConfig(queryOpts ...common.QueryGroupOption) (*IPMIConfig, error) {
-	return GetIPMIConfig(us.GetClient(), us.ipmiConfig, queryOpts...)
+	return us.IPMIConfigWithContext(common.ContextOf(us.GetClient()), queryOpts...)
+}
+
+// IPMIConfigWithContext will get the IPMIConfig information from the service.
+func (us *UpdateService) IPMIConfigWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*IPMIConfig, error) {
+	return GetIPMIConfigWithContext(ctx, us.GetClient(), us.ipmiConfig, queryOpts...)
 }

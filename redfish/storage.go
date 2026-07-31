@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -253,7 +254,12 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 
 // Connection gets the connections that this storage subsystem contains.
 func (storage *Storage) Connections(queryOpts ...common.QueryGroupOption) ([]*Connection, error) {
-	return ListReferencedConnections(storage.GetClient(), storage.connections, queryOpts...)
+	return storage.ConnectionsWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// Connection gets the connections that this storage subsystem contains.
+func (storage *Storage) ConnectionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Connection, error) {
+	return ListReferencedConnectionsWithContext(ctx, storage.GetClient(), storage.connections, queryOpts...)
 }
 
 // ConsistencyGroups gets groups of volumes that are treated as a single resource
@@ -264,19 +270,36 @@ func (storage *Storage) Connections(queryOpts ...common.QueryGroupOption) ([]*Co
 
 // Controllers gets the set of storage controllers allocated to this storage subsystem.
 func (storage *Storage) Controllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
-	return ListReferencedStorageControllers(storage.GetClient(), storage.controllers, queryOpts...)
+	return storage.ControllersWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// ControllersWithContext gets the set of storage controllers allocated to this storage subsystem.
+func (storage *Storage) ControllersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return ListReferencedStorageControllersWithContext(ctx, storage.GetClient(), storage.controllers, queryOpts...)
 }
 
 // Drives gets the drives attached to the storage controllers that this
 // resource represents.
 func (storage *Storage) Drives(queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
-	return common.GetObjects[Drive](storage.GetClient(), storage.drives, queryOpts...)
+	return storage.DrivesWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// DrivesWithContext gets the drives attached to the storage controllers that this
+// resource represents.
+func (storage *Storage) DrivesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
+	return common.GetObjectsWithContext[Drive](ctx, storage.GetClient(), storage.drives, queryOpts...)
 }
 
 // EndpointGroups gets the set of endpoints that are used for a common purpose such as an ACL
 // or logical identification, that belong to this storage subsystem.
 func (storage *Storage) EndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(storage.GetClient(), storage.endpointGroups, queryOpts...)
+	return storage.EndpointGroupsWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// EndpointGroupsWithContext gets the set of endpoints that are used for a common purpose such as an ACL
+// or logical identification, that belong to this storage subsystem.
+func (storage *Storage) EndpointGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return ListReferencedEndpointGroupsWithContext(ctx, storage.GetClient(), storage.endpointGroups, queryOpts...)
 }
 
 // FileSystems gets the file systems that are allocated by this storage subsystem.
@@ -286,30 +309,55 @@ func (storage *Storage) EndpointGroups(queryOpts ...common.QueryGroupOption) ([]
 
 // Volumes gets the volumes associated with this storage subsystem.
 func (storage *Storage) Volumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
-	return ListReferencedVolumes(storage.GetClient(), storage.volumes, queryOpts...)
+	return storage.VolumesWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// VolumesWithContext gets the volumes associated with this storage subsystem.
+func (storage *Storage) VolumesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return ListReferencedVolumesWithContext(ctx, storage.GetClient(), storage.volumes, queryOpts...)
 }
 
 // Enclosures gets the physical containers attached to this resource.
 func (storage *Storage) Enclosures(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
-	return common.GetObjects[Chassis](storage.GetClient(), storage.enclosures, queryOpts...)
+	return storage.EnclosuresWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// EnclosuresWithContext gets the physical containers attached to this resource.
+func (storage *Storage) EnclosuresWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjectsWithContext[Chassis](ctx, storage.GetClient(), storage.enclosures, queryOpts...)
 }
 
 // HostingStorageSystems gets the storage systems that host this storage subsystem.
 func (storage *Storage) HostingStorageSystems(queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
-	return common.GetObjects[ComputerSystem](storage.GetClient(), storage.hostingStorageSystems, queryOpts...)
+	return storage.HostingStorageSystemsWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// HostingStorageSystemsWithContext gets the storage systems that host this storage subsystem.
+func (storage *Storage) HostingStorageSystemsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetObjectsWithContext[ComputerSystem](ctx, storage.GetClient(), storage.hostingStorageSystems, queryOpts...)
 }
 
 // NVMeoFDiscoverySubsystems gets the discovery subsystems that discovered this subsystem in an NVMe-oF environment.
 func (storage *Storage) NVMeoFDiscoverySubsystems(queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
-	return common.GetObjects[Storage](storage.GetClient(), storage.nvmeoFDiscoverySubsystems, queryOpts...)
+	return storage.NVMeoFDiscoverySubsystemsWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// NVMeoFDiscoverySubsystemsWithContext gets the discovery subsystems that discovered this subsystem in an NVMe-oF environment.
+func (storage *Storage) NVMeoFDiscoverySubsystemsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return common.GetObjectsWithContext[Storage](ctx, storage.GetClient(), storage.nvmeoFDiscoverySubsystems, queryOpts...)
 }
 
 // SimpleStorage gets the simple storage instance that corresponds to this storage.
 func (storage *Storage) SimpleStorage(queryOpts ...common.QueryGroupOption) (*SimpleStorage, error) {
+	return storage.SimpleStorageWithContext(common.ContextOf(storage.GetClient()), queryOpts...)
+}
+
+// SimpleStorageWithContext gets the simple storage instance that corresponds to this storage.
+func (storage *Storage) SimpleStorageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SimpleStorage, error) {
 	if storage.simpleStorage == "" {
 		return nil, nil
 	}
-	return GetSimpleStorage(storage.GetClient(), storage.simpleStorage, queryOpts...)
+	return GetSimpleStorageWithContext(ctx, storage.GetClient(), storage.simpleStorage, queryOpts...)
 }
 
 // // StorageServices gets the storage services that connect to this storage subsystem.
@@ -319,11 +367,16 @@ func (storage *Storage) SimpleStorage(queryOpts ...common.QueryGroupOption) (*Si
 
 // ResetToDefaults resets the storage device to factory defaults. This can cause the loss of data.
 func (storage *Storage) ResetToDefaults(resetType StorageResetToDefaultsType) error {
+	return storage.ResetToDefaultsWithContext(common.ContextOf(storage.GetClient()), resetType)
+}
+
+// ResetToDefaultsWithContext resets the storage device to factory defaults. This can cause the loss of data.
+func (storage *Storage) ResetToDefaultsWithContext(ctx context.Context, resetType StorageResetToDefaultsType) error {
 	t := struct {
 		ResetType StorageResetToDefaultsType
 	}{ResetType: resetType}
 
-	return storage.Post(storage.resetToDefaultsTarget, t)
+	return storage.PostWithContext(ctx, storage.resetToDefaultsTarget, t)
 }
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
@@ -336,6 +389,19 @@ func (storage *Storage) ResetToDefaults(resetType StorageResetToDefaultsType) er
 //
 // `encryptionKeyIdentifier` (optional) is the local encryption key identifier used by the storage subsystem.
 func (storage *Storage) SetEncryptionKey(key, currentEncryptionKey, encryptionKeyIdentifier string) error {
+	return storage.SetEncryptionKeyWithContext(common.ContextOf(storage.GetClient()), key, currentEncryptionKey, encryptionKeyIdentifier)
+}
+
+// SetEncryptionKeyWithContext shall set the encryption key for the storage subsystem.
+//
+// `key` is the local encryption key to set on the storage subsystem.
+//
+// `currentEncryptionKey` (optional since v1.14.0) is the current local encryption key
+// on the storage subsystem.
+// Services may reject the action request if this parameter is not provided.
+//
+// `encryptionKeyIdentifier` (optional) is the local encryption key identifier used by the storage subsystem.
+func (storage *Storage) SetEncryptionKeyWithContext(ctx context.Context, key, currentEncryptionKey, encryptionKeyIdentifier string) error {
 	t := struct {
 		CurrentEncryptionKey    string `json:",omitempty"`
 		EncryptionKey           string
@@ -346,30 +412,51 @@ func (storage *Storage) SetEncryptionKey(key, currentEncryptionKey, encryptionKe
 		EncryptionKeyIdentifier: encryptionKeyIdentifier,
 	}
 
-	return storage.Post(storage.setEncryptionKeyTarget, t)
+	return storage.PostWithContext(ctx, storage.setEncryptionKeyTarget, t)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (storage *Storage) Update() error {
+	return storage.UpdateWithContext(common.ContextOf(storage.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (storage *Storage) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"AutoVolumeCreate",
 		"EncryptionMode",
 		"HotspareActivationPolicy"}
 
-	return storage.UpdateFromRawData(storage, storage.rawData, readWriteFields)
+	return storage.UpdateFromRawDataWithContext(ctx, storage, storage.rawData, readWriteFields)
 }
 
 // GetStorage will get a Storage instance from the service.
 func GetStorage(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Storage, error) {
-	return common.GetObject[Storage](c, uri, queryOpts...)
+	return GetStorageWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetStorageWithContext will get a Storage instance from the service.
+func GetStorageWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Storage, error) {
+	return common.GetObjectWithContext[Storage](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedStorages gets the collection of Storage from a provided
 // reference.
 func ListReferencedStorages(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
-	return common.GetCollectionObjects[Storage](c, link, queryOpts...)
+	return ListReferencedStoragesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedStoragesWithContext gets the collection of Storage from a provided
+// reference.
+func ListReferencedStoragesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return common.GetCollectionObjectsWithContext[Storage](ctx, c, link, queryOpts...)
 }
 
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage
 func (storage *Storage) GetOperationApplyTimeValues() ([]common.OperationApplyTime, error) {
-	return AllowedVolumesUpdateApplyTimes(storage.GetClient(), storage.volumes)
+	return storage.GetOperationApplyTimeValuesWithContext(common.ContextOf(storage.GetClient()))
+}
+
+// GetOperationApplyTimeValuesWithContext returns the OperationApplyTime values applicable for this storage
+func (storage *Storage) GetOperationApplyTimeValuesWithContext(ctx context.Context) ([]common.OperationApplyTime, error) {
+	return AllowedVolumesUpdateApplyTimesWithContext(ctx, storage.GetClient(), storage.volumes)
 }

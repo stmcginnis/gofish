@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -105,79 +106,154 @@ func FromManager(manager *redfish.Manager) (*Manager, error) {
 
 // RADIUS gets the RADIUS instance associated with this manager.
 func (m *Manager) RADIUS(queryOpts ...common.QueryGroupOption) (*RADIUS, error) {
-	return GetRADIUS(m.GetClient(), m.radius, queryOpts...)
+	return m.RADIUSWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// RADIUSWithContext gets the RADIUS instance associated with this manager.
+func (m *Manager) RADIUSWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*RADIUS, error) {
+	return GetRADIUSWithContext(ctx, m.GetClient(), m.radius, queryOpts...)
 }
 
 // MouseMode gets the MouseMode instance associated with this manager.
 func (m *Manager) MouseMode(queryOpts ...common.QueryGroupOption) (*MouseMode, error) {
-	return GetMouseMode(m.GetClient(), m.mouseMode, queryOpts...)
+	return m.MouseModeWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// MouseModeWithContext gets the MouseMode instance associated with this manager.
+func (m *Manager) MouseModeWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*MouseMode, error) {
+	return GetMouseModeWithContext(ctx, m.GetClient(), m.mouseMode, queryOpts...)
 }
 
 // NTP gets the NTP instance associated with this manager.
 func (m *Manager) NTP(queryOpts ...common.QueryGroupOption) (*NTP, error) {
-	return GetNTP(m.GetClient(), m.ntp, queryOpts...)
+	return m.NTPWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// NTPWithContext gets the NTP instance associated with this manager.
+func (m *Manager) NTPWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*NTP, error) {
+	return GetNTPWithContext(ctx, m.GetClient(), m.ntp, queryOpts...)
 }
 
 // SMCRAKP gets the SMCRAKP instance associated with this manager.
 func (m *Manager) SMCRAKP(queryOpts ...common.QueryGroupOption) (*SMCRAKP, error) {
-	return GetSMCRAKP(m.GetClient(), m.smcRAKP, queryOpts...)
+	return m.SMCRAKPWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// SMCRAKPWithContext gets the SMCRAKP instance associated with this manager.
+func (m *Manager) SMCRAKPWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SMCRAKP, error) {
+	return GetSMCRAKPWithContext(ctx, m.GetClient(), m.smcRAKP, queryOpts...)
 }
 
 // Syslog gets the Syslog instance associated with this manager.
 func (m *Manager) Syslog(queryOpts ...common.QueryGroupOption) (*Syslog, error) {
-	return GetSyslog(m.GetClient(), m.syslog, queryOpts...)
+	return m.SyslogWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// SyslogWithContext gets the Syslog instance associated with this manager.
+func (m *Manager) SyslogWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Syslog, error) {
+	return GetSyslogWithContext(ctx, m.GetClient(), m.syslog, queryOpts...)
 }
 
 // SysLockdown gets the SysLockdown instance associated with this manager.
 func (m *Manager) SysLockdown(queryOpts ...common.QueryGroupOption) (*SysLockdown, error) {
-	return GetSysLockdown(m.GetClient(), m.sysLockdown, queryOpts...)
+	return m.SysLockdownWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// SysLockdownWithContext gets the SysLockdown instance associated with this manager.
+func (m *Manager) SysLockdownWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SysLockdown, error) {
+	return GetSysLockdownWithContext(ctx, m.GetClient(), m.sysLockdown, queryOpts...)
 }
 
 // MemoryPFA gets the MemoryPFA instance associated with this manager.
 func (m *Manager) MemoryPFA(queryOpts ...common.QueryGroupOption) (*MemoryPFA, error) {
-	return GetMemoryPFA(m.GetClient(), m.memoryPFA, queryOpts...)
+	return m.MemoryPFAWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// MemoryPFAWithContext gets the MemoryPFA instance associated with this manager.
+func (m *Manager) MemoryPFAWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*MemoryPFA, error) {
+	return GetMemoryPFAWithContext(ctx, m.GetClient(), m.memoryPFA, queryOpts...)
 }
 
 // MemoryHealthComp gets the MemoryHealthComp instance associated with this manager.
 func (m *Manager) MemoryHealthComp(queryOpts ...common.QueryGroupOption) (*MemoryHealthComp, error) {
-	return GetMemoryHealthComp(m.GetClient(), m.memoryHealthComp, queryOpts...)
+	return m.MemoryHealthCompWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// MemoryHealthCompWithContext gets the MemoryHealthComp instance associated with this manager.
+func (m *Manager) MemoryHealthCompWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*MemoryHealthComp, error) {
+	return GetMemoryHealthCompWithContext(ctx, m.GetClient(), m.memoryHealthComp, queryOpts...)
 }
 
 // Snooping gets the Snooping instance associated with this manager.
 func (m *Manager) Snooping(queryOpts ...common.QueryGroupOption) (*Snooping, error) {
-	return GetSnooping(m.GetClient(), m.snooping, queryOpts...)
+	return m.SnoopingWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// SnoopingWithContext gets the Snooping instance associated with this manager.
+func (m *Manager) SnoopingWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Snooping, error) {
+	return GetSnoopingWithContext(ctx, m.GetClient(), m.snooping, queryOpts...)
 }
 
 // FanMode gets the FanMode instance associated with this manager.
 func (m *Manager) FanMode(queryOpts ...common.QueryGroupOption) (*FanMode, error) {
-	return GetFanMode(m.GetClient(), m.fanMode, queryOpts...)
+	return m.FanModeWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// FanModeWithContext gets the FanMode instance associated with this manager.
+func (m *Manager) FanModeWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*FanMode, error) {
+	return GetFanModeWithContext(ctx, m.GetClient(), m.fanMode, queryOpts...)
 }
 
 // IKVM gets the IKVM instance associated with this manager.
 func (m *Manager) IKVM(queryOpts ...common.QueryGroupOption) (*IKVM, error) {
-	return GetIKVM(m.GetClient(), m.iKVM, queryOpts...)
+	return m.IKVMWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// IKVMWithContext gets the IKVM instance associated with this manager.
+func (m *Manager) IKVMWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*IKVM, error) {
+	return GetIKVMWithContext(ctx, m.GetClient(), m.iKVM, queryOpts...)
 }
 
 // KCSInterface gets the KCSInterface instance associated with this manager.
 func (m *Manager) KCSInterface(queryOpts ...common.QueryGroupOption) (*KCSInterface, error) {
-	return GetKCSInterface(m.GetClient(), m.kcsInterface, queryOpts...)
+	return m.KCSInterfaceWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// KCSInterfaceWithContext gets the KCSInterface instance associated with this manager.
+func (m *Manager) KCSInterfaceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*KCSInterface, error) {
+	return GetKCSInterfaceWithContext(ctx, m.GetClient(), m.kcsInterface, queryOpts...)
 }
 
 // LLDP gets the LLDP instance associated with this manager.
 func (m *Manager) LLDP(queryOpts ...common.QueryGroupOption) (*LLDP, error) {
-	return GetLLDP(m.GetClient(), m.lldp, queryOpts...)
+	return m.LLDPWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// LLDPWithContext gets the LLDP instance associated with this manager.
+func (m *Manager) LLDPWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*LLDP, error) {
+	return GetLLDPWithContext(ctx, m.GetClient(), m.lldp, queryOpts...)
 }
 
 // LicenseManager gets the LicenseManager instance associated with this manager.
 func (m *Manager) LicenseManager(queryOpts ...common.QueryGroupOption) (*LicenseManager, error) {
-	return GetLicenseManager(m.GetClient(), m.licenseManager, queryOpts...)
+	return m.LicenseManagerWithContext(common.ContextOf(m.GetClient()), queryOpts...)
+}
+
+// LicenseManagerWithContext gets the LicenseManager instance associated with this manager.
+func (m *Manager) LicenseManagerWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*LicenseManager, error) {
+	return GetLicenseManagerWithContext(ctx, m.GetClient(), m.licenseManager, queryOpts...)
 }
 
 // ManagerConfigReset resets the BMC to factory defaults.
 func (m *Manager) ManagerConfigReset(option ManagerConfigResetOption) error {
+	return m.ManagerConfigResetWithContext(common.ContextOf(m.GetClient()), option)
+}
+
+// ManagerConfigResetWithContext resets the BMC to factory defaults.
+func (m *Manager) ManagerConfigResetWithContext(ctx context.Context, option ManagerConfigResetOption) error {
 	if m.managerConfigResetTarget == "" {
 		return errors.New("manager config reset not supported by this system")
 	}
 
-	return m.Post(m.managerConfigResetTarget, map[string]interface{}{"Option": option})
+	return m.PostWithContext(ctx, m.managerConfigResetTarget, map[string]interface{}{"Option": option})
 }

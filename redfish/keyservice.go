@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -57,21 +58,42 @@ func (keyservice *KeyService) UnmarshalJSON(b []byte) error {
 
 // NVMeoFKeyPolicies gets the NVMe-oF key policies maintained by this service.
 func (keyservice *KeyService) NVMeoFKeyPolicies(queryOpts ...common.QueryGroupOption) ([]*KeyPolicy, error) {
-	return ListReferencedKeyPolicys(keyservice.GetClient(), keyservice.nvmeoFKeyPolicies, queryOpts...)
+	return keyservice.NVMeoFKeyPoliciesWithContext(common.ContextOf(keyservice.GetClient()), queryOpts...)
+}
+
+// NVMeoFKeyPoliciesWithContext gets the NVMe-oF key policies maintained by this service.
+func (keyservice *KeyService) NVMeoFKeyPoliciesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*KeyPolicy, error) {
+	return ListReferencedKeyPolicysWithContext(ctx, keyservice.GetClient(), keyservice.nvmeoFKeyPolicies, queryOpts...)
 }
 
 // NVMeofSecrets gets the NVMe-oF keys maintained by this service.
 func (keyservice *KeyService) NVMeoFSecrets(queryOpts ...common.QueryGroupOption) ([]*Key, error) {
-	return ListReferencedKeys(keyservice.GetClient(), keyservice.nvmeoFSecrets, queryOpts...)
+	return keyservice.NVMeoFSecretsWithContext(common.ContextOf(keyservice.GetClient()), queryOpts...)
+}
+
+// NVMeofSecrets gets the NVMe-oF keys maintained by this service.
+func (keyservice *KeyService) NVMeoFSecretsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Key, error) {
+	return ListReferencedKeysWithContext(ctx, keyservice.GetClient(), keyservice.nvmeoFSecrets, queryOpts...)
 }
 
 // GetKeyService will get a KeyService instance from the service.
 func GetKeyService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KeyService, error) {
-	return common.GetObject[KeyService](c, uri, queryOpts...)
+	return GetKeyServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetKeyServiceWithContext will get a KeyService instance from the service.
+func GetKeyServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KeyService, error) {
+	return common.GetObjectWithContext[KeyService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedKeyServices gets the collection of KeyService from
 // a provided reference.
 func ListReferencedKeyServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*KeyService, error) {
-	return common.GetCollectionObjects[KeyService](c, link, queryOpts...)
+	return ListReferencedKeyServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedKeyServicesWithContext gets the collection of KeyService from
+// a provided reference.
+func ListReferencedKeyServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*KeyService, error) {
+	return common.GetCollectionObjectsWithContext[KeyService](ctx, c, link, queryOpts...)
 }

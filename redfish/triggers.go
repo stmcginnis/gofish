@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -99,11 +100,16 @@ func (discretetrigger *DiscreteTrigger) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (discretetrigger *DiscreteTrigger) Update() error {
+	return discretetrigger.UpdateWithContext(common.ContextOf(discretetrigger.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (discretetrigger *DiscreteTrigger) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"DwellTime",
 		"Severity",
 		"Value"}
 
-	return discretetrigger.UpdateFromRawData(discretetrigger, discretetrigger.rawData, readWriteFields)
+	return discretetrigger.UpdateFromRawDataWithContext(ctx, discretetrigger, discretetrigger.rawData, readWriteFields)
 }
 
 // Triggers shall contain a trigger that applies to metrics.
@@ -207,27 +213,49 @@ func (triggers *Triggers) UnmarshalJSON(b []byte) error {
 // MetricReportDefinitions gets the metric report definitions that generate new metric
 // reports when a trigger condition is met and when the TriggerActions property contains 'RedfishMetricReport'.
 func (triggers *Triggers) MetricReportDefinitions(queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
-	return common.GetObjects[MetricReportDefinition](triggers.GetClient(), triggers.metricReportDefinitions, queryOpts...)
+	return triggers.MetricReportDefinitionsWithContext(common.ContextOf(triggers.GetClient()), queryOpts...)
+}
+
+// MetricReportDefinitionsWithContext gets the metric report definitions that generate new metric
+// reports when a trigger condition is met and when the TriggerActions property contains 'RedfishMetricReport'.
+func (triggers *Triggers) MetricReportDefinitionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
+	return common.GetObjectsWithContext[MetricReportDefinition](ctx, triggers.GetClient(), triggers.metricReportDefinitions, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (triggers *Triggers) Update() error {
+	return triggers.UpdateWithContext(common.ContextOf(triggers.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (triggers *Triggers) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"EventTriggers",
 		"HysteresisDuration",
 		"HysteresisReading",
 		"MetricIds",
 		"MetricProperties"}
 
-	return triggers.UpdateFromRawData(triggers, triggers.rawData, readWriteFields)
+	return triggers.UpdateFromRawDataWithContext(ctx, triggers, triggers.rawData, readWriteFields)
 }
 
 // GetTriggers will get a Triggers instance from the service.
 func GetTriggers(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Triggers, error) {
-	return common.GetObject[Triggers](c, uri, queryOpts...)
+	return GetTriggersWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetTriggersWithContext will get a Triggers instance from the service.
+func GetTriggersWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Triggers, error) {
+	return common.GetObjectWithContext[Triggers](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedTriggerss gets the collection of Triggers from
 // a provided reference.
 func ListReferencedTriggerss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
-	return common.GetCollectionObjects[Triggers](c, link, queryOpts...)
+	return ListReferencedTriggerssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedTriggerssWithContext gets the collection of Triggers from
+// a provided reference.
+func ListReferencedTriggerssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
+	return common.GetCollectionObjectsWithContext[Triggers](ctx, c, link, queryOpts...)
 }

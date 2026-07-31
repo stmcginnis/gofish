@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -60,20 +61,38 @@ func (compositionreservation *CompositionReservation) UnmarshalJSON(b []byte) er
 
 // GetCompositionReservation will get a CompositionReservation instance from the service.
 func GetCompositionReservation(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CompositionReservation, error) {
-	return common.GetObject[CompositionReservation](c, uri, queryOpts...)
+	return GetCompositionReservationWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCompositionReservationWithContext will get a CompositionReservation instance from the service.
+func GetCompositionReservationWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CompositionReservation, error) {
+	return common.GetObjectWithContext[CompositionReservation](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCompositionReservations gets the collection of CompositionReservation from
 // a provided reference.
 func ListReferencedCompositionReservations(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CompositionReservation, error) {
-	return common.GetCollectionObjects[CompositionReservation](c, link, queryOpts...)
+	return ListReferencedCompositionReservationsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCompositionReservationsWithContext gets the collection of CompositionReservation from
+// a provided reference.
+func ListReferencedCompositionReservationsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CompositionReservation, error) {
+	return common.GetCollectionObjectsWithContext[CompositionReservation](ctx, c, link, queryOpts...)
 }
 
 // ReservedResourceBlocks gets reserved resource blocks for this reservation.
 // Upon deletion of the reservation or when the reservation is applied, the
 // Reserved property in the referenced resource blocks shall change to 'false'.
 func (compositionreservation *CompositionReservation) ReservedResourceBlocks(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
-	return common.GetObjects[ResourceBlock](
+	return compositionreservation.ReservedResourceBlocksWithContext(common.ContextOf(compositionreservation.GetClient()), queryOpts...)
+}
+
+// ReservedResourceBlocksWithContext gets reserved resource blocks for this reservation.
+// Upon deletion of the reservation or when the reservation is applied, the
+// Reserved property in the referenced resource blocks shall change to 'false'.
+func (compositionreservation *CompositionReservation) ReservedResourceBlocksWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return common.GetObjectsWithContext[ResourceBlock](ctx,
 		compositionreservation.GetClient(),
 		compositionreservation.reservedResourceBlocks, queryOpts...)
 }

@@ -5,6 +5,8 @@
 package smc
 
 import (
+	"context"
+
 	"github.com/coreweave/gofish/common"
 )
 
@@ -17,5 +19,10 @@ type Snooping struct {
 
 // GetSnooping will get a Snooping instance from the service.
 func GetSnooping(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Snooping, error) {
-	return common.GetObject[Snooping](c, uri, queryOpts...)
+	return GetSnoopingWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSnoopingWithContext will get a Snooping instance from the service.
+func GetSnoopingWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Snooping, error) {
+	return common.GetObjectWithContext[Snooping](ctx, c, uri, queryOpts...)
 }

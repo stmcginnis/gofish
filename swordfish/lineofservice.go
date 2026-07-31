@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -27,11 +28,22 @@ type LineOfService struct {
 
 // GetLineOfService will get a LineOfService instance from the service.
 func GetLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LineOfService, error) {
-	return common.GetObject[LineOfService](c, uri, queryOpts...)
+	return GetLineOfServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetLineOfServiceWithContext will get a LineOfService instance from the service.
+func GetLineOfServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LineOfService, error) {
+	return common.GetObjectWithContext[LineOfService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedLineOfServices gets the collection of LineOfService from
 // a provided reference.
 func ListReferencedLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LineOfService, error) {
-	return common.GetCollectionObjects[LineOfService](c, link, queryOpts...)
+	return ListReferencedLineOfServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedLineOfServicesWithContext gets the collection of LineOfService from
+// a provided reference.
+func ListReferencedLineOfServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LineOfService, error) {
+	return common.GetCollectionObjectsWithContext[LineOfService](ctx, c, link, queryOpts...)
 }

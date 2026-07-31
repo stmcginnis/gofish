@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -149,6 +150,11 @@ func (coolingloop *CoolingLoop) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (coolingloop *CoolingLoop) Update() error {
+	return coolingloop.UpdateWithContext(common.ContextOf(coolingloop.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (coolingloop *CoolingLoop) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"ConsumingEquipmentNames",
 		"CoolingManagerURI",
@@ -157,41 +163,77 @@ func (coolingloop *CoolingLoop) Update() error {
 		"UserLabel",
 	}
 
-	return coolingloop.UpdateFromRawData(coolingloop, coolingloop.rawData, readWriteFields)
+	return coolingloop.UpdateFromRawDataWithContext(ctx, coolingloop, coolingloop.rawData, readWriteFields)
 }
 
 // GetCoolingLoop will get a CoolingLoop instance from the service.
 func GetCoolingLoop(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolingLoop, error) {
-	return common.GetObject[CoolingLoop](c, uri, queryOpts...)
+	return GetCoolingLoopWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCoolingLoopWithContext will get a CoolingLoop instance from the service.
+func GetCoolingLoopWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolingLoop, error) {
+	return common.GetObjectWithContext[CoolingLoop](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCoolingLoops gets the collection of CoolingLoop from
 // a provided reference.
 func ListReferencedCoolingLoops(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
-	return common.GetCollectionObjects[CoolingLoop](c, link, queryOpts...)
+	return ListReferencedCoolingLoopsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCoolingLoopsWithContext gets the collection of CoolingLoop from
+// a provided reference.
+func ListReferencedCoolingLoopsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
+	return common.GetCollectionObjectsWithContext[CoolingLoop](ctx, c, link, queryOpts...)
 }
 
 // PrimaryCoolantConnectors gets the primary coolant connectors for this equipment.
 func (coolingloop *CoolingLoop) PrimaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingloop.GetClient(), coolingloop.primaryCoolantConnectors, queryOpts...)
+	return coolingloop.PrimaryCoolantConnectorsWithContext(common.ContextOf(coolingloop.GetClient()), queryOpts...)
+}
+
+// PrimaryCoolantConnectorsWithContext gets the primary coolant connectors for this equipment.
+func (coolingloop *CoolingLoop) PrimaryCoolantConnectorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectorsWithContext(ctx, coolingloop.GetClient(), coolingloop.primaryCoolantConnectors, queryOpts...)
 }
 
 // SecondaryCoolantConnectors gets the secondary coolant connectors for this equipment.
 func (coolingloop *CoolingLoop) SecondaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingloop.GetClient(), coolingloop.secondaryCoolantConnectors, queryOpts...)
+	return coolingloop.SecondaryCoolantConnectorsWithContext(common.ContextOf(coolingloop.GetClient()), queryOpts...)
+}
+
+// SecondaryCoolantConnectorsWithContext gets the secondary coolant connectors for this equipment.
+func (coolingloop *CoolingLoop) SecondaryCoolantConnectorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectorsWithContext(ctx, coolingloop.GetClient(), coolingloop.secondaryCoolantConnectors, queryOpts...)
 }
 
 // Chassis gets the physical container that contains this resource.
 func (coolingloop *CoolingLoop) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
-	return GetChassis(coolingloop.GetClient(), coolingloop.chassis, queryOpts...)
+	return coolingloop.ChassisWithContext(common.ContextOf(coolingloop.GetClient()), queryOpts...)
+}
+
+// ChassisWithContext gets the physical container that contains this resource.
+func (coolingloop *CoolingLoop) ChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Chassis, error) {
+	return GetChassisWithContext(ctx, coolingloop.GetClient(), coolingloop.chassis, queryOpts...)
 }
 
 // Facility gets the physical container that contains this resource.
 func (coolingloop *CoolingLoop) Facility(queryOpts ...common.QueryGroupOption) (*Facility, error) {
-	return GetFacility(coolingloop.GetClient(), coolingloop.chassis, queryOpts...)
+	return coolingloop.FacilityWithContext(common.ContextOf(coolingloop.GetClient()), queryOpts...)
+}
+
+// FacilityWithContext gets the physical container that contains this resource.
+func (coolingloop *CoolingLoop) FacilityWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Facility, error) {
+	return GetFacilityWithContext(ctx, coolingloop.GetClient(), coolingloop.chassis, queryOpts...)
 }
 
 // ManagedBy gets the collection of managers of this equipment.
 func (coolingloop *CoolingLoop) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](coolingloop.GetClient(), coolingloop.managedBy, queryOpts...)
+	return coolingloop.ManagedByWithContext(common.ContextOf(coolingloop.GetClient()), queryOpts...)
+}
+
+// ManagedByWithContext gets the collection of managers of this equipment.
+func (coolingloop *CoolingLoop) ManagedByWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, coolingloop.GetClient(), coolingloop.managedBy, queryOpts...)
 }

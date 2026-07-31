@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -93,23 +94,39 @@ func (redundancy *Redundancy) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (redundancy *Redundancy) Update() error {
+	return redundancy.UpdateWithContext(common.ContextOf(redundancy.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (redundancy *Redundancy) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Mode",
 		"RedundancyEnabled",
 	}
 
-	return redundancy.UpdateFromRawData(redundancy, redundancy.rawData, readWriteFields)
+	return redundancy.UpdateFromRawDataWithContext(ctx, redundancy, redundancy.rawData, readWriteFields)
 }
 
 // GetRedundancy will get a Redundancy instance from the service.
 func GetRedundancy(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Redundancy, error) {
-	return common.GetObject[Redundancy](c, uri, queryOpts...)
+	return GetRedundancyWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetRedundancyWithContext will get a Redundancy instance from the service.
+func GetRedundancyWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Redundancy, error) {
+	return common.GetObjectWithContext[Redundancy](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedRedundancies gets the collection of Redundancy from
 // a provided reference.
 func ListReferencedRedundancies(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Redundancy, error) {
-	return common.GetCollectionObjects[Redundancy](c, link, queryOpts...)
+	return ListReferencedRedundanciesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedRedundanciesWithContext gets the collection of Redundancy from
+// a provided reference.
+func ListReferencedRedundanciesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Redundancy, error) {
+	return common.GetCollectionObjectsWithContext[Redundancy](ctx, c, link, queryOpts...)
 }
 
 // The redundancy mode of the group.

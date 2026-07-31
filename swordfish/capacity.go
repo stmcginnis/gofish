@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -118,42 +119,79 @@ func (capacitysource *CapacitySource) UnmarshalJSON(b []byte) error {
 
 // GetCapacitySource will get a CapacitySource instance from the service.
 func GetCapacitySource(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CapacitySource, error) {
-	return common.GetObject[CapacitySource](c, uri, queryOpts...)
+	return GetCapacitySourceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCapacitySourceWithContext will get a CapacitySource instance from the service.
+func GetCapacitySourceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CapacitySource, error) {
+	return common.GetObjectWithContext[CapacitySource](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCapacitySources gets the collection of CapacitySources from
 // a provided reference.
 func ListReferencedCapacitySources(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
-	return common.GetCollectionObjects[CapacitySource](c, link, queryOpts...)
+	return ListReferencedCapacitySourcesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCapacitySourcesWithContext gets the collection of CapacitySources from
+// a provided reference.
+func ListReferencedCapacitySourcesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
+	return common.GetCollectionObjectsWithContext[CapacitySource](ctx, c, link, queryOpts...)
 }
 
 // ProvidedClassOfService gets the ClassOfService from the ProvidingDrives,
 // ProvidingVolumes, ProvidingMemoryChunks, ProvidingMemory or ProvidingPools.
 func (capacitysource *CapacitySource) ProvidedClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return capacitysource.ProvidedClassOfServiceWithContext(common.ContextOf(capacitysource.GetClient()), queryOpts...)
+}
+
+// ProvidedClassOfServiceWithContext gets the ClassOfService from the ProvidingDrives,
+// ProvidingVolumes, ProvidingMemoryChunks, ProvidingMemory or ProvidingPools.
+func (capacitysource *CapacitySource) ProvidedClassOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if capacitysource.providedClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(capacitysource.GetClient(), capacitysource.providedClassOfService, queryOpts...)
+	return GetClassOfServiceWithContext(ctx, capacitysource.GetClient(), capacitysource.providedClassOfService, queryOpts...)
 }
 
 // ProvidingDrives gets contributing drives.
 func (capacitysource *CapacitySource) ProvidingDrives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
-	return redfish.ListReferencedDrives(capacitysource.GetClient(), capacitysource.providingDrives, queryOpts...)
+	return capacitysource.ProvidingDrivesWithContext(common.ContextOf(capacitysource.GetClient()), queryOpts...)
+}
+
+// ProvidingDrivesWithContext gets contributing drives.
+func (capacitysource *CapacitySource) ProvidingDrivesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return redfish.ListReferencedDrivesWithContext(ctx, capacitysource.GetClient(), capacitysource.providingDrives, queryOpts...)
 }
 
 // ProvidingMemory gets contributing memory.
 func (capacitysource *CapacitySource) ProvidingMemory(queryOpts ...common.QueryGroupOption) ([]*redfish.Memory, error) {
-	return redfish.ListReferencedMemorys(capacitysource.GetClient(), capacitysource.providingMemory, queryOpts...)
+	return capacitysource.ProvidingMemoryWithContext(common.ContextOf(capacitysource.GetClient()), queryOpts...)
+}
+
+// ProvidingMemoryWithContext gets contributing memory.
+func (capacitysource *CapacitySource) ProvidingMemoryWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Memory, error) {
+	return redfish.ListReferencedMemorysWithContext(ctx, capacitysource.GetClient(), capacitysource.providingMemory, queryOpts...)
 }
 
 // TODO: Add memory chunks
 
 // ProvidingPools gets contributing pools.
 func (capacitysource *CapacitySource) ProvidingPools(queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
-	return ListReferencedStoragePools(capacitysource.GetClient(), capacitysource.providingPools, queryOpts...)
+	return capacitysource.ProvidingPoolsWithContext(common.ContextOf(capacitysource.GetClient()), queryOpts...)
+}
+
+// ProvidingPoolsWithContext gets contributing pools.
+func (capacitysource *CapacitySource) ProvidingPoolsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
+	return ListReferencedStoragePoolsWithContext(ctx, capacitysource.GetClient(), capacitysource.providingPools, queryOpts...)
 }
 
 // ProvidingVolumes gets contributing volumes.
 func (capacitysource *CapacitySource) ProvidingVolumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
-	return ListReferencedVolumes(capacitysource.GetClient(), capacitysource.providingVolumes, queryOpts...)
+	return capacitysource.ProvidingVolumesWithContext(common.ContextOf(capacitysource.GetClient()), queryOpts...)
+}
+
+// ProvidingVolumesWithContext gets contributing volumes.
+func (capacitysource *CapacitySource) ProvidingVolumesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return ListReferencedVolumesWithContext(ctx, capacitysource.GetClient(), capacitysource.providingVolumes, queryOpts...)
 }

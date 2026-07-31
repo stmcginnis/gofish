@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -45,7 +46,10 @@ func (r *NTP) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (r *NTP) Update() error {
+func (r *NTP) Update() error { return r.UpdateWithContext(common.ContextOf(r.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (r *NTP) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	rad := new(NTP)
@@ -67,10 +71,15 @@ func (r *NTP) Update() error {
 	originalElement := reflect.ValueOf(rad).Elem()
 	currentElement := reflect.ValueOf(r).Elem()
 
-	return r.Entity.Update(originalElement, currentElement, readWriteFields)
+	return r.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetNTP will get a NTP instance from the service.
 func GetNTP(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NTP, error) {
-	return common.GetObject[NTP](c, uri, queryOpts...)
+	return GetNTPWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetNTPWithContext will get a NTP instance from the service.
+func GetNTPWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NTP, error) {
+	return common.GetObjectWithContext[NTP](ctx, c, uri, queryOpts...)
 }

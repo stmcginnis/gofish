@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -87,41 +88,82 @@ func (classofservice *ClassOfService) UnmarshalJSON(b []byte) error {
 
 // GetClassOfService will get a ClassOfService instance from the service.
 func GetClassOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
-	return common.GetObject[ClassOfService](c, uri, queryOpts...)
+	return GetClassOfServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetClassOfServiceWithContext will get a ClassOfService instance from the service.
+func GetClassOfServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return common.GetObjectWithContext[ClassOfService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedClassOfServices gets the collection of ClassOfService from
 // a provided reference.
 func ListReferencedClassOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
-	return common.GetCollectionObjects[ClassOfService](c, link, queryOpts...)
+	return ListReferencedClassOfServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedClassOfServicesWithContext gets the collection of ClassOfService from
+// a provided reference.
+func ListReferencedClassOfServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
+	return common.GetCollectionObjectsWithContext[ClassOfService](ctx, c, link, queryOpts...)
 }
 
 // DataProtectionLinesOfServices gets the DataProtectionLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) DataProtectionLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
-	return common.GetObjects[DataProtectionLineOfService](classofservice.GetClient(), classofservice.dataProtectionLinesOfService, queryOpts...)
+	return classofservice.DataProtectionLinesOfServicesWithContext(common.ContextOf(classofservice.GetClient()), queryOpts...)
+}
+
+// DataProtectionLinesOfServicesWithContext gets the DataProtectionLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) DataProtectionLinesOfServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
+	return common.GetObjectsWithContext[DataProtectionLineOfService](ctx, classofservice.GetClient(), classofservice.dataProtectionLinesOfService, queryOpts...)
 }
 
 // DataSecurityLinesOfServices gets the DataSecurityLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) DataSecurityLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*DataSecurityLineOfService, error) {
-	return common.GetObjects[DataSecurityLineOfService](classofservice.GetClient(), classofservice.dataSecurityLinesOfService, queryOpts...)
+	return classofservice.DataSecurityLinesOfServicesWithContext(common.ContextOf(classofservice.GetClient()), queryOpts...)
+}
+
+// DataSecurityLinesOfServicesWithContext gets the DataSecurityLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) DataSecurityLinesOfServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*DataSecurityLineOfService, error) {
+	return common.GetObjectsWithContext[DataSecurityLineOfService](ctx, classofservice.GetClient(), classofservice.dataSecurityLinesOfService, queryOpts...)
 }
 
 // DataStorageLinesOfServices gets the DataStorageLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) DataStorageLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*DataStorageLineOfService, error) {
-	return common.GetObjects[DataStorageLineOfService](classofservice.GetClient(), classofservice.dataStorageLinesOfService, queryOpts...)
+	return classofservice.DataStorageLinesOfServicesWithContext(common.ContextOf(classofservice.GetClient()), queryOpts...)
+}
+
+// DataStorageLinesOfServicesWithContext gets the DataStorageLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) DataStorageLinesOfServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*DataStorageLineOfService, error) {
+	return common.GetObjectsWithContext[DataStorageLineOfService](ctx, classofservice.GetClient(), classofservice.dataStorageLinesOfService, queryOpts...)
 }
 
 // IOConnectivityLinesOfServices gets the IOConnectivityLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) IOConnectivityLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLineOfService, error) {
-	return common.GetObjects[IOConnectivityLineOfService](classofservice.GetClient(), classofservice.ioConnectivityLinesOfService, queryOpts...)
+	return classofservice.IOConnectivityLinesOfServicesWithContext(common.ContextOf(classofservice.GetClient()), queryOpts...)
+}
+
+// IOConnectivityLinesOfServicesWithContext gets the IOConnectivityLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) IOConnectivityLinesOfServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLineOfService, error) {
+	return common.GetObjectsWithContext[IOConnectivityLineOfService](ctx, classofservice.GetClient(), classofservice.ioConnectivityLinesOfService, queryOpts...)
 }
 
 // IOPerformanceLinesOfServices gets the IOPerformanceLinesOfService that are
 // part of this ClassOfService.
 func (classofservice *ClassOfService) IOPerformanceLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLineOfService, error) {
-	return common.GetObjects[IOPerformanceLineOfService](classofservice.GetClient(), classofservice.ioPerformanceLinesOfService, queryOpts...)
+	return classofservice.IOPerformanceLinesOfServicesWithContext(common.ContextOf(classofservice.GetClient()), queryOpts...)
+}
+
+// IOPerformanceLinesOfServicesWithContext gets the IOPerformanceLinesOfService that are
+// part of this ClassOfService.
+func (classofservice *ClassOfService) IOPerformanceLinesOfServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLineOfService, error) {
+	return common.GetObjectsWithContext[IOPerformanceLineOfService](ctx, classofservice.GetClient(), classofservice.ioPerformanceLinesOfService, queryOpts...)
 }

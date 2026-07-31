@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -73,6 +74,11 @@ func (datastoragelineofservice *DataStorageLineOfService) UnmarshalJSON(b []byte
 
 // Update commits updates to this object's properties to the running system.
 func (datastoragelineofservice *DataStorageLineOfService) Update() error {
+	return datastoragelineofservice.UpdateWithContext(common.ContextOf(datastoragelineofservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (datastoragelineofservice *DataStorageLineOfService) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(DataStorageLineOfService)
@@ -89,16 +95,27 @@ func (datastoragelineofservice *DataStorageLineOfService) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(datastoragelineofservice).Elem()
 
-	return datastoragelineofservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return datastoragelineofservice.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetDataStorageLineOfService will get a DataStorageLineOfService instance from the service.
 func GetDataStorageLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataStorageLineOfService, error) {
-	return common.GetObject[DataStorageLineOfService](c, uri, queryOpts...)
+	return GetDataStorageLineOfServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDataStorageLineOfServiceWithContext will get a DataStorageLineOfService instance from the service.
+func GetDataStorageLineOfServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataStorageLineOfService, error) {
+	return common.GetObjectWithContext[DataStorageLineOfService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedDataStorageLineOfServices gets the collection of DataStorageLineOfService from
 // a provided reference.
 func ListReferencedDataStorageLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataStorageLineOfService, error) {
-	return common.GetCollectionObjects[DataStorageLineOfService](c, link, queryOpts...)
+	return ListReferencedDataStorageLineOfServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedDataStorageLineOfServicesWithContext gets the collection of DataStorageLineOfService from
+// a provided reference.
+func ListReferencedDataStorageLineOfServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataStorageLineOfService, error) {
+	return common.GetCollectionObjectsWithContext[DataStorageLineOfService](ctx, c, link, queryOpts...)
 }

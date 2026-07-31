@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -219,16 +220,32 @@ func (processormetrics *ProcessorMetrics) UnmarshalJSON(b []byte) error {
 
 // ClearCurrentPeriod sets the CurrentPeriod property's values to 0.
 func (processormetrics *ProcessorMetrics) ClearCurrentPeriod() error {
-	return processormetrics.Post(processormetrics.clearCurrentPeriodTarget, nil)
+	return processormetrics.ClearCurrentPeriodWithContext(common.ContextOf(processormetrics.GetClient()))
+}
+
+// ClearCurrentPeriodWithContext sets the CurrentPeriod property's values to 0.
+func (processormetrics *ProcessorMetrics) ClearCurrentPeriodWithContext(ctx context.Context) error {
+	return processormetrics.PostWithContext(ctx, processormetrics.clearCurrentPeriodTarget, nil)
 }
 
 // GetProcessorMetrics will get a ProcessorMetrics instance from the service.
 func GetProcessorMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
-	return common.GetObject[ProcessorMetrics](c, uri, queryOpts...)
+	return GetProcessorMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetProcessorMetricsWithContext will get a ProcessorMetrics instance from the service.
+func GetProcessorMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
+	return common.GetObjectWithContext[ProcessorMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedProcessorMetricss gets the collection of ProcessorMetrics from
 // a provided reference.
 func ListReferencedProcessorMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ProcessorMetrics, error) {
-	return common.GetCollectionObjects[ProcessorMetrics](c, link, queryOpts...)
+	return ListReferencedProcessorMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedProcessorMetricssWithContext gets the collection of ProcessorMetrics from
+// a provided reference.
+func ListReferencedProcessorMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ProcessorMetrics, error) {
+	return common.GetCollectionObjectsWithContext[ProcessorMetrics](ctx, c, link, queryOpts...)
 }

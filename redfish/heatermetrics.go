@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -69,20 +70,36 @@ func (heatermetrics *HeaterMetrics) UnmarshalJSON(b []byte) error {
 
 // This action shall reset any time intervals or counted values for this circuit.
 func (heatermetrics *HeaterMetrics) ResetMetrics() error {
+	return heatermetrics.ResetMetricsWithContext(common.ContextOf(heatermetrics.GetClient()))
+}
+
+// This action shall reset any time intervals or counted values for this circuit.
+func (heatermetrics *HeaterMetrics) ResetMetricsWithContext(ctx context.Context) error {
 	if heatermetrics.resetMetricsTarget == "" {
 		return errors.New("ResetMetrics is not supported")
 	}
 
-	return heatermetrics.Post(heatermetrics.resetMetricsTarget, nil)
+	return heatermetrics.PostWithContext(ctx, heatermetrics.resetMetricsTarget, nil)
 }
 
 // GetHeaterMetrics will get a HeaterMetrics instance from the service.
 func GetHeaterMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*HeaterMetrics, error) {
-	return common.GetObject[HeaterMetrics](c, uri, queryOpts...)
+	return GetHeaterMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetHeaterMetricsWithContext will get a HeaterMetrics instance from the service.
+func GetHeaterMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*HeaterMetrics, error) {
+	return common.GetObjectWithContext[HeaterMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedHeaterMetrics gets the collection of HeaterMetrics from
 // a provided reference.
 func ListReferencedHeaterMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*HeaterMetrics, error) {
-	return common.GetCollectionObjects[HeaterMetrics](c, link, queryOpts...)
+	return ListReferencedHeaterMetricsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedHeaterMetricsWithContext gets the collection of HeaterMetrics from
+// a provided reference.
+func ListReferencedHeaterMetricsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*HeaterMetrics, error) {
+	return common.GetCollectionObjectsWithContext[HeaterMetrics](ctx, c, link, queryOpts...)
 }

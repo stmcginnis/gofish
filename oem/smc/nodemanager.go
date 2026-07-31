@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -93,14 +94,24 @@ func (nm *NodeManager) UnmarshalJSON(b []byte) error {
 
 // GetNodeManager will get a NodeManager instance from the service.
 func GetNodeManager(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NodeManager, error) {
-	return common.GetObject[NodeManager](c, uri, queryOpts...)
+	return GetNodeManagerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetNodeManagerWithContext will get a NodeManager instance from the service.
+func GetNodeManagerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NodeManager, error) {
+	return common.GetObjectWithContext[NodeManager](ctx, c, uri, queryOpts...)
 }
 
 // ClearAllPolicies clears the configured policies of the NodeManager.
 func (nm *NodeManager) ClearAllPolicies() error {
+	return nm.ClearAllPoliciesWithContext(common.ContextOf(nm.GetClient()))
+}
+
+// ClearAllPoliciesWithContext clears the configured policies of the NodeManager.
+func (nm *NodeManager) ClearAllPoliciesWithContext(ctx context.Context) error {
 	if nm.clearAllPoliciesTarget == "" {
 		return errors.New("ClearAllPolicies is not supported by this system")
 	}
 
-	return nm.Post(nm.clearAllPoliciesTarget, nil)
+	return nm.PostWithContext(ctx, nm.clearAllPoliciesTarget, nil)
 }

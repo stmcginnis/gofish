@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -193,16 +194,31 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 
 // Certificates gets the server certificates for the server referenced by the Image property.
 func (virtualmedia *VirtualMedia) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.certificates, queryOpts...)
+	return virtualmedia.CertificatesWithContext(common.ContextOf(virtualmedia.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets the server certificates for the server referenced by the Image property.
+func (virtualmedia *VirtualMedia) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjectsWithContext[Certificate](ctx, virtualmedia.GetClient(), virtualmedia.certificates, queryOpts...)
 }
 
 // ClientCertificates gets the client identity certificates.
 func (virtualmedia *VirtualMedia) ClientCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.clientCertificates, queryOpts...)
+	return virtualmedia.ClientCertificatesWithContext(common.ContextOf(virtualmedia.GetClient()), queryOpts...)
+}
+
+// ClientCertificatesWithContext gets the client identity certificates.
+func (virtualmedia *VirtualMedia) ClientCertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjectsWithContext[Certificate](ctx, virtualmedia.GetClient(), virtualmedia.clientCertificates, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (virtualmedia *VirtualMedia) Update() error {
+	return virtualmedia.UpdateWithContext(common.ContextOf(virtualmedia.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (virtualmedia *VirtualMedia) UpdateWithContext(ctx context.Context) error {
 	original := new(VirtualMedia)
 	if err := original.UnmarshalJSON(virtualmedia.rawData); err != nil {
 		return err
@@ -222,25 +238,35 @@ func (virtualmedia *VirtualMedia) Update() error {
 		"WriteProtected",
 	}
 
-	return virtualmedia.UpdateFromRawData(virtualmedia, virtualmedia.rawData, readWriteFields)
+	return virtualmedia.UpdateFromRawDataWithContext(ctx, virtualmedia, virtualmedia.rawData, readWriteFields)
 }
 
 // EjectMediaActionInfo provides the ActionInfo, if supported, for an EjectMedia Action
 func (virtualmedia *VirtualMedia) EjectMediaActionInfo() (*ActionInfo, error) {
+	return virtualmedia.EjectMediaActionInfoWithContext(common.ContextOf(virtualmedia.GetClient()))
+}
+
+// EjectMediaActionInfoWithContext provides the ActionInfo, if supported, for an EjectMedia Action
+func (virtualmedia *VirtualMedia) EjectMediaActionInfoWithContext(ctx context.Context) (*ActionInfo, error) {
 	if virtualmedia.insertMedia.ActionInfoTarget == "" {
 		return nil, errors.New("VirtualMedia EjectMedia ActionInfo not supported by this service")
 	}
 
-	return common.GetObject[ActionInfo](virtualmedia.GetClient(), virtualmedia.insertMedia.ActionInfoTarget)
+	return common.GetObjectWithContext[ActionInfo](ctx, virtualmedia.GetClient(), virtualmedia.insertMedia.ActionInfoTarget)
 }
 
 // EjectMedia sends a request to eject the media.
 func (virtualmedia *VirtualMedia) EjectMedia() error {
+	return virtualmedia.EjectMediaWithContext(common.ContextOf(virtualmedia.GetClient()))
+}
+
+// EjectMediaWithContext sends a request to eject the media.
+func (virtualmedia *VirtualMedia) EjectMediaWithContext(ctx context.Context) error {
 	if !virtualmedia.SupportsMediaEject {
 		return errors.New("redfish service does not support VirtualMedia.EjectMedia calls")
 	}
 
-	return virtualmedia.Post(virtualmedia.ejectMedia.Target, nil)
+	return virtualmedia.PostWithContext(ctx, virtualmedia.ejectMedia.Target, nil)
 }
 
 // VirtualMediaConfig is used to pass config data when inserting media.
@@ -257,16 +283,26 @@ type VirtualMediaConfig struct {
 
 // InsertMediaActionInfo provides the ActionInfo, if supported, for an InsertMedia Action
 func (virtualmedia *VirtualMedia) InsertMediaActionInfo() (*ActionInfo, error) {
+	return virtualmedia.InsertMediaActionInfoWithContext(common.ContextOf(virtualmedia.GetClient()))
+}
+
+// InsertMediaActionInfoWithContext provides the ActionInfo, if supported, for an InsertMedia Action
+func (virtualmedia *VirtualMedia) InsertMediaActionInfoWithContext(ctx context.Context) (*ActionInfo, error) {
 	if virtualmedia.insertMedia.ActionInfoTarget == "" {
 		return nil, errors.New("VirtualMedia InsertMedia ActionInfo not supported by this service")
 	}
 
-	return common.GetObject[ActionInfo](virtualmedia.GetClient(), virtualmedia.insertMedia.ActionInfoTarget)
+	return common.GetObjectWithContext[ActionInfo](ctx, virtualmedia.GetClient(), virtualmedia.insertMedia.ActionInfoTarget)
 }
 
 // InsertMedia sends a request to insert virtual media.
 func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProtected bool) (*Task, error) {
-	return virtualmedia.InsertMediaConfig(VirtualMediaConfig{
+	return virtualmedia.InsertMediaWithContext(common.ContextOf(virtualmedia.GetClient()), image, inserted, writeProtected)
+}
+
+// InsertMediaWithContext sends a request to insert virtual media.
+func (virtualmedia *VirtualMedia) InsertMediaWithContext(ctx context.Context, image string, inserted, writeProtected bool) (*Task, error) {
+	return virtualmedia.InsertMediaConfigWithContext(ctx, VirtualMediaConfig{
 		Image:          image,
 		Inserted:       &inserted,
 		WriteProtected: &writeProtected,
@@ -275,11 +311,16 @@ func (virtualmedia *VirtualMedia) InsertMedia(image string, inserted, writeProte
 
 // InsertMediaConfig sends a request to insert virtual media using the VirtualMediaConfig struct.
 func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (*Task, error) {
+	return virtualmedia.InsertMediaConfigWithContext(common.ContextOf(virtualmedia.GetClient()), config)
+}
+
+// InsertMediaConfigWithContext sends a request to insert virtual media using the VirtualMediaConfig struct.
+func (virtualmedia *VirtualMedia) InsertMediaConfigWithContext(ctx context.Context, config VirtualMediaConfig) (*Task, error) {
 	if !virtualmedia.SupportsMediaInsert {
 		return nil, errors.New("redfish service does not support VirtualMedia.InsertMedia calls")
 	}
 
-	resp, err := virtualmedia.PostWithResponse(virtualmedia.insertMedia.Target, config)
+	resp, err := virtualmedia.PostWithResponseWithContext(ctx, virtualmedia.insertMedia.Target, config)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
@@ -290,7 +331,7 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (
 	}
 
 	if location := resp.Header["Location"]; len(location) > 0 {
-		return GetTask(virtualmedia.GetClient(), location[0])
+		return GetTaskWithContext(ctx, virtualmedia.GetClient(), location[0])
 	}
 
 	return nil, nil
@@ -298,10 +339,20 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (
 
 // GetVirtualMedia will get a VirtualMedia instance from the service.
 func GetVirtualMedia(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VirtualMedia, error) {
-	return common.GetObject[VirtualMedia](c, uri, queryOpts...)
+	return GetVirtualMediaWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetVirtualMediaWithContext will get a VirtualMedia instance from the service.
+func GetVirtualMediaWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VirtualMedia, error) {
+	return common.GetObjectWithContext[VirtualMedia](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedVirtualMedias gets the collection of VirtualMedia from a provided reference.
 func ListReferencedVirtualMedias(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
-	return common.GetCollectionObjects[VirtualMedia](c, link, queryOpts...)
+	return ListReferencedVirtualMediasWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedVirtualMediasWithContext gets the collection of VirtualMedia from a provided reference.
+func ListReferencedVirtualMediasWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
+	return common.GetCollectionObjectsWithContext[VirtualMedia](ctx, c, link, queryOpts...)
 }

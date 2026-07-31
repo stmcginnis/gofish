@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -111,16 +112,32 @@ func (thermalmetrics *ThermalMetrics) UnmarshalJSON(b []byte) error {
 
 // ResetMetrics resets the summary metrics related to this equipment.
 func (thermalmetrics *ThermalMetrics) ResetMetrics() error {
-	return thermalmetrics.Post(thermalmetrics.resetMetricsTarget, nil)
+	return thermalmetrics.ResetMetricsWithContext(common.ContextOf(thermalmetrics.GetClient()))
+}
+
+// ResetMetricsWithContext resets the summary metrics related to this equipment.
+func (thermalmetrics *ThermalMetrics) ResetMetricsWithContext(ctx context.Context) error {
+	return thermalmetrics.PostWithContext(ctx, thermalmetrics.resetMetricsTarget, nil)
 }
 
 // GetThermalMetrics will get a ThermalMetrics instance from the service.
 func GetThermalMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalMetrics, error) {
-	return common.GetObject[ThermalMetrics](c, uri, queryOpts...)
+	return GetThermalMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetThermalMetricsWithContext will get a ThermalMetrics instance from the service.
+func GetThermalMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalMetrics, error) {
+	return common.GetObjectWithContext[ThermalMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedThermalMetricss gets the collection of ThermalMetrics from
 // a provided reference.
 func ListReferencedThermalMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalMetrics, error) {
-	return common.GetCollectionObjects[ThermalMetrics](c, link, queryOpts...)
+	return ListReferencedThermalMetricsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedThermalMetricss gets the collection of ThermalMetrics from
+// a provided reference.
+func ListReferencedThermalMetricsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalMetrics, error) {
+	return common.GetCollectionObjectsWithContext[ThermalMetrics](ctx, c, link, queryOpts...)
 }

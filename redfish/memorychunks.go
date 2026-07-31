@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -81,10 +82,15 @@ func (interleaveset *InterleaveSet) UnmarshalJSON(b []byte) error {
 
 // Memory gets the associated memory device.
 func (interleaveset *InterleaveSet) Memory(c common.Client, queryOpts ...common.QueryGroupOption) (*Memory, error) {
+	return interleaveset.MemoryWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// MemoryWithContext gets the associated memory device.
+func (interleaveset *InterleaveSet) MemoryWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*Memory, error) {
 	if interleaveset.memory == "" {
 		return nil, nil
 	}
-	return GetMemory(c, interleaveset.memory, queryOpts...)
+	return GetMemoryWithContext(ctx, c, interleaveset.memory, queryOpts...)
 }
 
 // MemoryChunks shall represent memory chunks and interleave sets in a Redfish implementation.
@@ -175,22 +181,38 @@ func (memorychunks *MemoryChunks) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (memorychunks *MemoryChunks) Update() error {
+	return memorychunks.UpdateWithContext(common.ContextOf(memorychunks.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (memorychunks *MemoryChunks) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"DisplayName",
 		"MediaLocation",
 		"RequestedOperationalState",
 	}
 
-	return memorychunks.UpdateFromRawData(memorychunks, memorychunks.rawData, readWriteFields)
+	return memorychunks.UpdateFromRawDataWithContext(ctx, memorychunks, memorychunks.rawData, readWriteFields)
 }
 
 // GetMemoryChunks will get a MemoryChunks instance from the service.
 func GetMemoryChunks(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryChunks, error) {
-	return common.GetObject[MemoryChunks](c, uri, queryOpts...)
+	return GetMemoryChunksWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMemoryChunksWithContext will get a MemoryChunks instance from the service.
+func GetMemoryChunksWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryChunks, error) {
+	return common.GetObjectWithContext[MemoryChunks](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMemoryChunks gets the collection of MemoryChunks from
 // a provided reference.
 func ListReferencedMemoryChunks(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryChunks, error) {
-	return common.GetCollectionObjects[MemoryChunks](c, link, queryOpts...)
+	return ListReferencedMemoryChunksWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMemoryChunksWithContext gets the collection of MemoryChunks from
+// a provided reference.
+func ListReferencedMemoryChunksWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryChunks, error) {
+	return common.GetCollectionObjectsWithContext[MemoryChunks](ctx, c, link, queryOpts...)
 }

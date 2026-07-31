@@ -5,6 +5,8 @@
 package dell
 
 import (
+	"context"
+
 	"github.com/coreweave/gofish/common"
 )
 
@@ -33,5 +35,10 @@ type Job struct {
 
 // GetJob will get a Job instance from the service.
 func GetJob(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Job, error) {
-	return common.GetObject[Job](c, uri, queryOpts...)
+	return GetJobWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetJobWithContext will get a Job instance from the service.
+func GetJobWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Job, error) {
+	return common.GetObjectWithContext[Job](ctx, c, uri, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -49,7 +50,10 @@ func (i *LLDP) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *LLDP) Update() error {
+func (i *LLDP) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *LLDP) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(LLDP)
@@ -66,10 +70,15 @@ func (i *LLDP) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetLLDP will get a LLDP instance from the service.
 func GetLLDP(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LLDP, error) {
-	return common.GetObject[LLDP](c, uri, queryOpts...)
+	return GetLLDPWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetLLDPWithContext will get a LLDP instance from the service.
+func GetLLDPWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LLDP, error) {
+	return common.GetObjectWithContext[LLDP](ctx, c, uri, queryOpts...)
 }

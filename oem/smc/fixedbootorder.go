@@ -5,6 +5,8 @@
 package smc
 
 import (
+	"context"
+
 	"github.com/coreweave/gofish/common"
 )
 
@@ -27,5 +29,10 @@ type FixedBootOrder struct {
 
 // GetFixedBootOrder will get a FixedBootOrder instance from the service.
 func GetFixedBootOrder(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FixedBootOrder, error) {
-	return common.GetObject[FixedBootOrder](c, uri, queryOpts...)
+	return GetFixedBootOrderWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetFixedBootOrderWithContext will get a FixedBootOrder instance from the service.
+func GetFixedBootOrderWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FixedBootOrder, error) {
+	return common.GetObjectWithContext[FixedBootOrder](ctx, c, uri, queryOpts...)
 }

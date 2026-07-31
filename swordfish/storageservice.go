@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -184,6 +185,11 @@ func (storageservice *StorageService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (storageservice *StorageService) Update() error {
+	return storageservice.UpdateWithContext(common.ContextOf(storageservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (storageservice *StorageService) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(StorageService)
@@ -208,135 +214,240 @@ func (storageservice *StorageService) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(storageservice).Elem()
 
-	return storageservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return storageservice.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetStorageService will get a StorageService instance from the service.
 func GetStorageService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageService, error) {
-	return common.GetObject[StorageService](c, uri, queryOpts...)
+	return GetStorageServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetStorageServiceWithContext will get a StorageService instance from the service.
+func GetStorageServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageService, error) {
+	return common.GetObjectWithContext[StorageService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedStorageServices gets the collection of StorageService from
 // a provided reference.
 func ListReferencedStorageServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageService, error) {
-	return common.GetCollectionObjects[StorageService](c, link, queryOpts...)
+	return ListReferencedStorageServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedStorageServicesWithContext gets the collection of StorageService from
+// a provided reference.
+func ListReferencedStorageServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageService, error) {
+	return common.GetCollectionObjectsWithContext[StorageService](ctx, c, link, queryOpts...)
 }
 
 // ClassesOfService gets the storage service's classes of service.
 func (storageservice *StorageService) ClassesOfService(queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
-	return ListReferencedClassOfServices(storageservice.GetClient(), storageservice.classesOfService, queryOpts...)
+	return storageservice.ClassesOfServiceWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// ClassesOfServiceWithContext gets the storage service's classes of service.
+func (storageservice *StorageService) ClassesOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
+	return ListReferencedClassOfServicesWithContext(ctx, storageservice.GetClient(), storageservice.classesOfService, queryOpts...)
 }
 
 // DataProtectionLoSCapabilities gets the storage service's data protection
 // capabilities.
 func (storageservice *StorageService) DataProtectionLoSCapabilities(queryOpts ...common.QueryGroupOption) (*DataProtectionLoSCapabilities, error) {
+	return storageservice.DataProtectionLoSCapabilitiesWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// DataProtectionLoSCapabilitiesWithContext gets the storage service's data protection
+// capabilities.
+func (storageservice *StorageService) DataProtectionLoSCapabilitiesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*DataProtectionLoSCapabilities, error) {
 	if storageservice.dataProtectionLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataProtectionLoSCapabilities(storageservice.GetClient(), storageservice.dataProtectionLoSCapabilities, queryOpts...)
+	return GetDataProtectionLoSCapabilitiesWithContext(ctx, storageservice.GetClient(), storageservice.dataProtectionLoSCapabilities, queryOpts...)
 }
 
 // DataSecurityLoSCapabilities gets the storage service's data security
 // capabilities.
 func (storageservice *StorageService) DataSecurityLoSCapabilities(queryOpts ...common.QueryGroupOption) (*DataSecurityLoSCapabilities, error) {
+	return storageservice.DataSecurityLoSCapabilitiesWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// DataSecurityLoSCapabilitiesWithContext gets the storage service's data security
+// capabilities.
+func (storageservice *StorageService) DataSecurityLoSCapabilitiesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*DataSecurityLoSCapabilities, error) {
 	if storageservice.dataSecurityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataSecurityLoSCapabilities(storageservice.GetClient(), storageservice.dataSecurityLoSCapabilities, queryOpts...)
+	return GetDataSecurityLoSCapabilitiesWithContext(ctx, storageservice.GetClient(), storageservice.dataSecurityLoSCapabilities, queryOpts...)
 }
 
 // DataStorageLoSCapabilities references the data storage capabilities of this service.
 func (storageservice *StorageService) DataStorageLoSCapabilities(queryOpts ...common.QueryGroupOption) (*DataStorageLoSCapabilities, error) {
+	return storageservice.DataStorageLoSCapabilitiesWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// DataStorageLoSCapabilitiesWithContext references the data storage capabilities of this service.
+func (storageservice *StorageService) DataStorageLoSCapabilitiesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*DataStorageLoSCapabilities, error) {
 	if storageservice.dataStorageLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataStorageLoSCapabilities(storageservice.GetClient(), storageservice.dataStorageLoSCapabilities, queryOpts...)
+	return GetDataStorageLoSCapabilitiesWithContext(ctx, storageservice.GetClient(), storageservice.dataStorageLoSCapabilities, queryOpts...)
 }
 
 // DefaultClassOfService references the default class of service for entities
 // allocated by this storage service.
 func (storageservice *StorageService) DefaultClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return storageservice.DefaultClassOfServiceWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// DefaultClassOfServiceWithContext references the default class of service for entities
+// allocated by this storage service.
+func (storageservice *StorageService) DefaultClassOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if storageservice.defaultClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storageservice.GetClient(), storageservice.defaultClassOfService, queryOpts...)
+	return GetClassOfServiceWithContext(ctx, storageservice.GetClient(), storageservice.defaultClassOfService, queryOpts...)
 }
 
 // Drives gets the storage service's drives.
 func (storageservice *StorageService) Drives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
-	return redfish.ListReferencedDrives(storageservice.GetClient(), storageservice.drives, queryOpts...)
+	return storageservice.DrivesWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// DrivesWithContext gets the storage service's drives.
+func (storageservice *StorageService) DrivesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return redfish.ListReferencedDrivesWithContext(ctx, storageservice.GetClient(), storageservice.drives, queryOpts...)
 }
 
 // EndpointGroups gets the storage service's endpoint groups.
 func (storageservice *StorageService) EndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(storageservice.GetClient(), storageservice.endpointGroups, queryOpts...)
+	return storageservice.EndpointGroupsWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// EndpointGroupsWithContext gets the storage service's endpoint groups.
+func (storageservice *StorageService) EndpointGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return ListReferencedEndpointGroupsWithContext(ctx, storageservice.GetClient(), storageservice.endpointGroups, queryOpts...)
 }
 
 // Endpoints gets the storage service's endpoints.
 func (storageservice *StorageService) Endpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
-	return redfish.ListReferencedEndpoints(storageservice.GetClient(), storageservice.endpoints, queryOpts...)
+	return storageservice.EndpointsWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the storage service's endpoints.
+func (storageservice *StorageService) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return redfish.ListReferencedEndpointsWithContext(ctx, storageservice.GetClient(), storageservice.endpoints, queryOpts...)
 }
 
 // FileSystems gets all filesystems available through this storage service.
 func (storageservice *StorageService) FileSystems(queryOpts ...common.QueryGroupOption) ([]*FileSystem, error) {
-	return ListReferencedFileSystems(storageservice.GetClient(), storageservice.fileSystems, queryOpts...)
+	return storageservice.FileSystemsWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// FileSystemsWithContext gets all filesystems available through this storage service.
+func (storageservice *StorageService) FileSystemsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*FileSystem, error) {
+	return ListReferencedFileSystemsWithContext(ctx, storageservice.GetClient(), storageservice.fileSystems, queryOpts...)
 }
 
 // IOConnectivityLoSCapabilities references the IO connectivity capabilities of this service.
 func (storageservice *StorageService) IOConnectivityLoSCapabilities(queryOpts ...common.QueryGroupOption) (*IOConnectivityLoSCapabilities, error) {
+	return storageservice.IOConnectivityLoSCapabilitiesWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// IOConnectivityLoSCapabilitiesWithContext references the IO connectivity capabilities of this service.
+func (storageservice *StorageService) IOConnectivityLoSCapabilitiesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*IOConnectivityLoSCapabilities, error) {
 	if storageservice.ioConnectivityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetIOConnectivityLoSCapabilities(storageservice.GetClient(), storageservice.ioConnectivityLoSCapabilities, queryOpts...)
+	return GetIOConnectivityLoSCapabilitiesWithContext(ctx, storageservice.GetClient(), storageservice.ioConnectivityLoSCapabilities, queryOpts...)
 }
 
 // IOPerformanceLoSCapabilities references the IO performance capabilities of this service.
 func (storageservice *StorageService) IOPerformanceLoSCapabilities(queryOpts ...common.QueryGroupOption) (*IOPerformanceLoSCapabilities, error) {
+	return storageservice.IOPerformanceLoSCapabilitiesWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// IOPerformanceLoSCapabilitiesWithContext references the IO performance capabilities of this service.
+func (storageservice *StorageService) IOPerformanceLoSCapabilitiesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*IOPerformanceLoSCapabilities, error) {
 	if storageservice.ioConnectivityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetIOPerformanceLoSCapabilities(storageservice.GetClient(), storageservice.ioPerformanceLoSCapabilities, queryOpts...)
+	return GetIOPerformanceLoSCapabilitiesWithContext(ctx, storageservice.GetClient(), storageservice.ioPerformanceLoSCapabilities, queryOpts...)
 }
 
 // Redundancy gets the redundancy information for the storage subsystem.
 func (storageservice *StorageService) Redundancy(queryOpts ...common.QueryGroupOption) ([]*redfish.Redundancy, error) {
-	return common.GetObjects[redfish.Redundancy](storageservice.GetClient(), storageservice.redundancy, queryOpts...)
+	return storageservice.RedundancyWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// RedundancyWithContext gets the redundancy information for the storage subsystem.
+func (storageservice *StorageService) RedundancyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Redundancy, error) {
+	return common.GetObjectsWithContext[redfish.Redundancy](ctx, storageservice.GetClient(), storageservice.redundancy, queryOpts...)
 }
 
 // LinesOfService gets lines of service for this service.
 func (storageservice *StorageService) LinesOfService(queryOpts ...common.QueryGroupOption) ([]*LineOfService, error) {
-	return common.GetObjects[LineOfService](storageservice.GetClient(), storageservice.linesOfService, queryOpts...)
+	return storageservice.LinesOfServiceWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// LinesOfServiceWithContext gets lines of service for this service.
+func (storageservice *StorageService) LinesOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*LineOfService, error) {
+	return common.GetObjectsWithContext[LineOfService](ctx, storageservice.GetClient(), storageservice.linesOfService, queryOpts...)
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
 func (storageservice *StorageService) SpareResourceSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](storageservice.GetClient(), storageservice.spareResourceSets, queryOpts...)
+	return storageservice.SpareResourceSetsWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// SpareResourceSetsWithContext gets resources that may be utilized to replace the capacity
+// provided by a failed resource having a compatible type.
+func (storageservice *StorageService) SpareResourceSetsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetObjectsWithContext[SpareResourceSet](ctx, storageservice.GetClient(), storageservice.spareResourceSets, queryOpts...)
 }
 
 // StorageGroups gets the storage groups that are a part of this storage service.
 func (storageservice *StorageService) StorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
-	return common.GetCollectionObjects[StorageGroup](storageservice.GetClient(), storageservice.storageGroups, queryOpts...)
+	return storageservice.StorageGroupsWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// StorageGroupsWithContext gets the storage groups that are a part of this storage service.
+func (storageservice *StorageService) StorageGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetCollectionObjectsWithContext[StorageGroup](ctx, storageservice.GetClient(), storageservice.storageGroups, queryOpts...)
 }
 
 // Volumes gets the volumes that are a part of this storage service.
 func (storageservice *StorageService) Volumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
-	return ListReferencedVolumes(storageservice.GetClient(), storageservice.volumes, queryOpts...)
+	return storageservice.VolumesWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// VolumesWithContext gets the volumes that are a part of this storage service.
+func (storageservice *StorageService) VolumesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return ListReferencedVolumesWithContext(ctx, storageservice.GetClient(), storageservice.volumes, queryOpts...)
 }
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
 func (storageservice *StorageService) SetEncryptionKey(key string) error {
+	return storageservice.SetEncryptionKeyWithContext(common.ContextOf(storageservice.GetClient()), key)
+}
+
+// SetEncryptionKeyWithContext shall set the encryption key for the storage subsystem.
+func (storageservice *StorageService) SetEncryptionKeyWithContext(ctx context.Context, key string) error {
 	t := struct {
 		EncryptionKey string
 	}{EncryptionKey: key}
 
-	return storageservice.Post(storageservice.setEncryptionKeyTarget, t)
+	return storageservice.PostWithContext(ctx, storageservice.setEncryptionKeyTarget, t)
 }
 
 // Metrics gets the metrics for this storage pool.
 func (storageservice *StorageService) Metrics(queryOpts ...common.QueryGroupOption) (*StorageServiceMetrics, error) {
+	return storageservice.MetricsWithContext(common.ContextOf(storageservice.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the metrics for this storage pool.
+func (storageservice *StorageService) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*StorageServiceMetrics, error) {
 	if storageservice.metrics == "" {
 		return nil, nil
 	}
-	return GetStorageServiceMetrics(storageservice.GetClient(), storageservice.metrics, queryOpts...)
+	return GetStorageServiceMetricsWithContext(ctx, storageservice.GetClient(), storageservice.metrics, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -97,21 +98,37 @@ func (mdd *ManagerDiagnosticData) UnmarshalJSON(b []byte) error {
 
 // ResetMetrics resets time intervals or counted values of the diagnostic data for this manager.
 func (mdd *ManagerDiagnosticData) ResetMetrics() error {
+	return mdd.ResetMetricsWithContext(common.ContextOf(mdd.GetClient()))
+}
+
+// ResetMetricsWithContext resets time intervals or counted values of the diagnostic data for this manager.
+func (mdd *ManagerDiagnosticData) ResetMetricsWithContext(ctx context.Context) error {
 	if mdd.Actions.ResetMetrics.Target == "" {
 		return ErrActionNotSupported
 	}
-	return mdd.Post(mdd.Actions.ResetMetrics.Target, nil)
+	return mdd.PostWithContext(ctx, mdd.Actions.ResetMetrics.Target, nil)
 }
 
 // GetManagerDiagnosticData will get a ManagerDiagnosticData instance from the service.
 func GetManagerDiagnosticData(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ManagerDiagnosticData, error) {
-	return common.GetObject[ManagerDiagnosticData](c, uri, queryOpts...)
+	return GetManagerDiagnosticDataWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetManagerDiagnosticDataWithContext will get a ManagerDiagnosticData instance from the service.
+func GetManagerDiagnosticDataWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ManagerDiagnosticData, error) {
+	return common.GetObjectWithContext[ManagerDiagnosticData](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedManagerDiagnosticDatas gets the collection of ManagerDiagnosticData from
 // a provided reference.
 func ListReferencedManagerDiagnosticDatas(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ManagerDiagnosticData, error) {
-	return common.GetCollectionObjects[ManagerDiagnosticData](c, link, queryOpts...)
+	return ListReferencedManagerDiagnosticDatasWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedManagerDiagnosticDatasWithContext gets the collection of ManagerDiagnosticData from
+// a provided reference.
+func ListReferencedManagerDiagnosticDatasWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ManagerDiagnosticData, error) {
+	return common.GetCollectionObjectsWithContext[ManagerDiagnosticData](ctx, c, link, queryOpts...)
 }
 
 // MemoryECCStatistics shall contain the memory ECC statistics of a manager.

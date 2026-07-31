@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -109,11 +110,22 @@ type NetworkDeviceFunctionMetrics struct {
 
 // GetNetworkDeviceFunctionMetrics will get a NetworkDeviceFunctionMetrics instance from the service.
 func GetNetworkDeviceFunctionMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkDeviceFunctionMetrics, error) {
-	return common.GetObject[NetworkDeviceFunctionMetrics](c, uri, queryOpts...)
+	return GetNetworkDeviceFunctionMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetNetworkDeviceFunctionMetricsWithContext will get a NetworkDeviceFunctionMetrics instance from the service.
+func GetNetworkDeviceFunctionMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkDeviceFunctionMetrics, error) {
+	return common.GetObjectWithContext[NetworkDeviceFunctionMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkDeviceFunctionMetricss gets the collection of NetworkDeviceFunctionMetrics from
 // a provided reference.
 func ListReferencedNetworkDeviceFunctionMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunctionMetrics, error) {
-	return common.GetCollectionObjects[NetworkDeviceFunctionMetrics](c, link, queryOpts...)
+	return ListReferencedNetworkDeviceFunctionMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedNetworkDeviceFunctionMetricssWithContext gets the collection of NetworkDeviceFunctionMetrics from
+// a provided reference.
+func ListReferencedNetworkDeviceFunctionMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunctionMetrics, error) {
+	return common.GetCollectionObjectsWithContext[NetworkDeviceFunctionMetrics](ctx, c, link, queryOpts...)
 }

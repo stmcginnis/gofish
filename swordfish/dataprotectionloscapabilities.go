@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -151,6 +152,11 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) UnmarshalJSO
 
 // Update commits updates to this object's properties to the running system.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) Update() error {
+	return dataprotectionloscapabilities.UpdateWithContext(common.ContextOf(dataprotectionloscapabilities.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(DataProtectionLoSCapabilities)
@@ -172,30 +178,51 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) Update() err
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(dataprotectionloscapabilities).Elem()
 
-	return dataprotectionloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
+	return dataprotectionloscapabilities.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetDataProtectionLoSCapabilities will get a DataProtectionLoSCapabilities instance from the service.
 func GetDataProtectionLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataProtectionLoSCapabilities, error) {
-	return common.GetObject[DataProtectionLoSCapabilities](c, uri, queryOpts...)
+	return GetDataProtectionLoSCapabilitiesWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDataProtectionLoSCapabilitiesWithContext will get a DataProtectionLoSCapabilities instance from the service.
+func GetDataProtectionLoSCapabilitiesWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataProtectionLoSCapabilities, error) {
+	return common.GetObjectWithContext[DataProtectionLoSCapabilities](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from
 // a provided reference.
 func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataProtectionLoSCapabilities, error) {
-	return common.GetCollectionObjects[DataProtectionLoSCapabilities](c, link, queryOpts...)
+	return ListReferencedDataProtectionLoSCapabilitiesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedDataProtectionLoSCapabilitiesWithContext gets the collection of DataProtectionLoSCapabilities from
+// a provided reference.
+func ListReferencedDataProtectionLoSCapabilitiesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataProtectionLoSCapabilities, error) {
+	return common.GetCollectionObjectsWithContext[DataProtectionLoSCapabilities](ctx, c, link, queryOpts...)
 }
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptions(queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
-	return common.GetObjects[ClassOfService](
+	return dataprotectionloscapabilities.SupportedReplicaOptionsWithContext(common.ContextOf(dataprotectionloscapabilities.GetClient()), queryOpts...)
+}
+
+// SupportedReplicaOptionsWithContext gets the support replica ClassesOfService.
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
+	return common.GetObjectsWithContext[ClassOfService](ctx,
 		dataprotectionloscapabilities.GetClient(),
 		dataprotectionloscapabilities.supportedReplicaOptions, queryOpts...)
 }
 
 // SupportedLinesOfService gets the supported lines of service.
 func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLinesOfService(queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
-	return common.GetObjects[DataProtectionLineOfService](
+	return dataprotectionloscapabilities.SupportedLinesOfServiceWithContext(common.ContextOf(dataprotectionloscapabilities.GetClient()), queryOpts...)
+}
+
+// SupportedLinesOfServiceWithContext gets the supported lines of service.
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLinesOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
+	return common.GetObjectsWithContext[DataProtectionLineOfService](ctx,
 		dataprotectionloscapabilities.GetClient(),
 		dataprotectionloscapabilities.supportedLinesOfService, queryOpts...)
 }

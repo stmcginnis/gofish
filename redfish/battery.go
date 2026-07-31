@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -168,66 +169,117 @@ func (battery *Battery) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (battery *Battery) Update() error {
+	return battery.UpdateWithContext(common.ContextOf(battery.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (battery *Battery) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"LocationIndicatorActive",
 	}
 
-	return battery.UpdateFromRawData(battery, battery.rawData, readWriteFields)
+	return battery.UpdateFromRawDataWithContext(ctx, battery, battery.rawData, readWriteFields)
 }
 
 // GetBattery will get a Battery instance from the service.
 func GetBattery(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Battery, error) {
-	return common.GetObject[Battery](c, uri, queryOpts...)
+	return GetBatteryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetBatteryWithContext will get a Battery instance from the service.
+func GetBatteryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Battery, error) {
+	return common.GetObjectWithContext[Battery](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedBatterys gets the collection of Battery from
 // a provided reference.
 func ListReferencedBatterys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
-	return common.GetCollectionObjects[Battery](c, link, queryOpts...)
+	return ListReferencedBatterysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedBatterysWithContext gets the collection of Battery from
+// a provided reference.
+func ListReferencedBatterysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return common.GetCollectionObjectsWithContext[Battery](ctx, c, link, queryOpts...)
 }
 
 // Assembly get the containing assembly of this battery.
 func (battery *Battery) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return battery.AssemblyWithContext(common.ContextOf(battery.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext get the containing assembly of this battery.
+func (battery *Battery) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if battery.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(battery.GetClient(), battery.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, battery.GetClient(), battery.assembly, queryOpts...)
 }
 
 // BatteryMetrics get the metrics for this battery.
 func (battery *Battery) BatteryMetrics(queryOpts ...common.QueryGroupOption) (*BatteryMetrics, error) {
+	return battery.BatteryMetricsWithContext(common.ContextOf(battery.GetClient()), queryOpts...)
+}
+
+// BatteryMetricsWithContext get the metrics for this battery.
+func (battery *Battery) BatteryMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*BatteryMetrics, error) {
 	if battery.metrics == "" {
 		return nil, nil
 	}
-	return GetBatteryMetrics(battery.GetClient(), battery.metrics, queryOpts...)
+	return GetBatteryMetricsWithContext(ctx, battery.GetClient(), battery.metrics, queryOpts...)
 }
 
 // Memory returns a collection of Memory devices associated with this Battery.
 func (battery *Battery) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
-	return common.GetObjects[Memory](battery.GetClient(), battery.memory, queryOpts...)
+	return battery.MemoryWithContext(common.ContextOf(battery.GetClient()), queryOpts...)
+}
+
+// MemoryWithContext returns a collection of Memory devices associated with this Battery.
+func (battery *Battery) MemoryWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetObjectsWithContext[Memory](ctx, battery.GetClient(), battery.memory, queryOpts...)
 }
 
 // StorageControllers returns a collection of StorageControllers associated with this Battery.
 func (battery *Battery) StorageControllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
-	return common.GetObjects[StorageController](battery.GetClient(), battery.storageControllers, queryOpts...)
+	return battery.StorageControllersWithContext(common.ContextOf(battery.GetClient()), queryOpts...)
+}
+
+// StorageControllersWithContext returns a collection of StorageControllers associated with this Battery.
+func (battery *Battery) StorageControllersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return common.GetObjectsWithContext[StorageController](ctx, battery.GetClient(), battery.storageControllers, queryOpts...)
 }
 
 // Calibrate performs a self-calibration, or learn cycle, of the battery.
 func (battery *Battery) Calibrate() error {
+	return battery.CalibrateWithContext(common.ContextOf(battery.GetClient()))
+}
+
+// CalibrateWithContext performs a self-calibration, or learn cycle, of the battery.
+func (battery *Battery) CalibrateWithContext(ctx context.Context) error {
 	payload := struct{}{}
-	return battery.Post(battery.calibrateTarget, payload)
+	return battery.PostWithContext(ctx, battery.calibrateTarget, payload)
 }
 
 // Reset resets the battery.
 func (battery *Battery) Reset(resetType ResetType) error {
+	return battery.ResetWithContext(common.ContextOf(battery.GetClient()), resetType)
+}
+
+// ResetWithContext resets the battery.
+func (battery *Battery) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	t := struct {
 		ResetType ResetType
 	}{ResetType: resetType}
-	return battery.Post(battery.resetTarget, t)
+	return battery.PostWithContext(ctx, battery.resetTarget, t)
 }
 
 // SelfTest performs a self-test of the battery.
 func (battery *Battery) SelfTest() error {
+	return battery.SelfTestWithContext(common.ContextOf(battery.GetClient()))
+}
+
+// SelfTestWithContext performs a self-test of the battery.
+func (battery *Battery) SelfTestWithContext(ctx context.Context) error {
 	payload := struct{}{}
-	return battery.Post(battery.selfTestTarget, payload)
+	return battery.PostWithContext(ctx, battery.selfTestTarget, payload)
 }

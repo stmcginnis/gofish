@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -168,35 +169,65 @@ func (controllers *Controllers) UnmarshalJSON(b []byte) error {
 
 // ActiveSoftwareImage gets the active firmware image for this network controller.
 func (controllers *Controllers) ActiveSoftwareImage(c common.Client, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return controllers.ActiveSoftwareImageWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// ActiveSoftwareImageWithContext gets the active firmware image for this network controller.
+func (controllers *Controllers) ActiveSoftwareImageWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if controllers.activeSoftwareImage == "" {
 		return nil, nil
 	}
-	return GetSoftwareInventory(c, controllers.activeSoftwareImage, queryOpts...)
+	return GetSoftwareInventoryWithContext(ctx, c, controllers.activeSoftwareImage, queryOpts...)
 }
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network controller.
 func (controllers *Controllers) NetworkDeviceFunctions(c common.Client, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](c, controllers.networkDeviceFunctions, queryOpts...)
+	return controllers.NetworkDeviceFunctionsWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// NetworkDeviceFunctionsWithContext gets the collection of NetworkDeviceFunctions of this network controller.
+func (controllers *Controllers) NetworkDeviceFunctionsWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjectsWithContext[NetworkDeviceFunction](ctx, c, controllers.networkDeviceFunctions, queryOpts...)
 }
 
 // NetworkPorts gets the collection of NetworkPorts for this network controller.
 func (controllers *Controllers) NetworkPorts(c common.Client, queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
-	return common.GetObjects[NetworkPort](c, controllers.networkPorts, queryOpts...)
+	return controllers.NetworkPortsWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// NetworkPortsWithContext gets the collection of NetworkPorts for this network controller.
+func (controllers *Controllers) NetworkPortsWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
+	return common.GetObjectsWithContext[NetworkPort](ctx, c, controllers.networkPorts, queryOpts...)
 }
 
 // PCIeDevices gets the PCIe devices associated with this network controller.
 func (controllers *Controllers) PCIeDevices(c common.Client, queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
-	return common.GetObjects[PCIeDevice](c, controllers.pcieDevices, queryOpts...)
+	return controllers.PCIeDevicesWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// PCIeDevicesWithContext gets the PCIe devices associated with this network controller.
+func (controllers *Controllers) PCIeDevicesWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
+	return common.GetObjectsWithContext[PCIeDevice](ctx, c, controllers.pcieDevices, queryOpts...)
 }
 
 // Ports gets the ports associated with this network controller.
 func (controllers *Controllers) Ports(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return common.GetObjects[Port](c, controllers.ports, queryOpts...)
+	return controllers.PortsWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// PortsWithContext gets the ports associated with this network controller.
+func (controllers *Controllers) PortsWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjectsWithContext[Port](ctx, c, controllers.ports, queryOpts...)
 }
 
 // SoftwareImages gets the firmware images that apply to this controller.
 func (controllers *Controllers) SoftwareImages(c common.Client, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
-	return common.GetObjects[SoftwareInventory](c, controllers.softwareImages, queryOpts...)
+	return controllers.SoftwareImagesWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// SoftwareImagesWithContext gets the firmware images that apply to this controller.
+func (controllers *Controllers) SoftwareImagesWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return common.GetObjectsWithContext[SoftwareInventory](ctx, c, controllers.softwareImages, queryOpts...)
 }
 
 // DataCenterBridging shall describe the capability, status,
@@ -327,81 +358,137 @@ func (networkadapter *NetworkAdapter) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (networkadapter *NetworkAdapter) Update() error {
+	return networkadapter.UpdateWithContext(common.ContextOf(networkadapter.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (networkadapter *NetworkAdapter) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"LLDPEnabled",
 	}
 
-	return networkadapter.UpdateFromRawData(networkadapter, networkadapter.rawData, readWriteFields)
+	return networkadapter.UpdateFromRawDataWithContext(ctx, networkadapter, networkadapter.rawData, readWriteFields)
 }
 
 // GetNetworkAdapter will get a NetworkAdapter instance from the Redfish service.
 func GetNetworkAdapter(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkAdapter, error) {
-	return common.GetObject[NetworkAdapter](c, uri, queryOpts...)
+	return GetNetworkAdapterWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetNetworkAdapterWithContext will get a NetworkAdapter instance from the Redfish service.
+func GetNetworkAdapterWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkAdapter, error) {
+	return common.GetObjectWithContext[NetworkAdapter](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkAdapter gets the collection of Chassis from a provided reference.
 func ListReferencedNetworkAdapter(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkAdapter, error) {
-	return common.GetCollectionObjects[NetworkAdapter](c, link, queryOpts...)
+	return ListReferencedNetworkAdapterWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedNetworkAdapterWithContext gets the collection of Chassis from a provided reference.
+func ListReferencedNetworkAdapterWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkAdapter, error) {
+	return common.GetCollectionObjectsWithContext[NetworkAdapter](ctx, c, link, queryOpts...)
 }
 
 // Assembly gets this adapter's assembly.
 func (networkadapter *NetworkAdapter) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return networkadapter.AssemblyWithContext(common.ContextOf(networkadapter.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets this adapter's assembly.
+func (networkadapter *NetworkAdapter) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if networkadapter.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(networkadapter.GetClient(), networkadapter.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, networkadapter.GetClient(), networkadapter.assembly, queryOpts...)
 }
 
 // Certificatea gets the certificates for device identity and attestation.
 func (networkadapter *NetworkAdapter) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return networkadapter.CertificatesWithContext(common.ContextOf(networkadapter.GetClient()), queryOpts...)
+}
+
+// Certificatea gets the certificates for device identity and attestation.
+func (networkadapter *NetworkAdapter) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if networkadapter.certificates == "" {
 		return nil, nil
 	}
-	return ListReferencedCertificates(networkadapter.GetClient(), networkadapter.certificates, queryOpts...)
+	return ListReferencedCertificatesWithContext(ctx, networkadapter.GetClient(), networkadapter.certificates, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this network adapter.
 func (networkadapter *NetworkAdapter) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return networkadapter.EnvironmentMetricsWithContext(common.ContextOf(networkadapter.GetClient()), queryOpts...)
+}
+
+// EnvironmentMetricsWithContext gets the environment metrics for this network adapter.
+func (networkadapter *NetworkAdapter) EnvironmentMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if networkadapter.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(networkadapter.GetClient(), networkadapter.environmentMetrics, queryOpts...)
+	return GetEnvironmentMetricsWithContext(ctx, networkadapter.GetClient(), networkadapter.environmentMetrics, queryOpts...)
 }
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network adapter
 func (networkadapter *NetworkAdapter) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return networkadapter.NetworkDeviceFunctionsWithContext(common.ContextOf(networkadapter.GetClient()), queryOpts...)
+}
+
+// NetworkDeviceFunctionsWithContext gets the collection of NetworkDeviceFunctions of this network adapter
+func (networkadapter *NetworkAdapter) NetworkDeviceFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
 	if networkadapter.networkDeviceFunctions == "" {
 		return nil, nil
 	}
-	return ListReferencedNetworkDeviceFunctions(networkadapter.GetClient(), networkadapter.networkDeviceFunctions, queryOpts...)
+	return ListReferencedNetworkDeviceFunctionsWithContext(ctx, networkadapter.GetClient(), networkadapter.networkDeviceFunctions, queryOpts...)
 }
 
 // NetworkPorts gets the collection of NetworkPorts for this network adapter
 func (networkadapter *NetworkAdapter) NetworkPorts(queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
+	return networkadapter.NetworkPortsWithContext(common.ContextOf(networkadapter.GetClient()), queryOpts...)
+}
+
+// NetworkPortsWithContext gets the collection of NetworkPorts for this network adapter
+func (networkadapter *NetworkAdapter) NetworkPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
 	if networkadapter.networkPorts == "" {
 		return nil, nil
 	}
-	return ListReferencedNetworkPorts(networkadapter.GetClient(), networkadapter.networkPorts, queryOpts...)
+	return ListReferencedNetworkPortsWithContext(ctx, networkadapter.GetClient(), networkadapter.networkPorts, queryOpts...)
 }
 
 // Ports gets the ports associated with this network adapter.
 func (networkadapter *NetworkAdapter) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return networkadapter.PortsWithContext(common.ContextOf(networkadapter.GetClient()), queryOpts...)
+}
+
+// PortsWithContext gets the ports associated with this network adapter.
+func (networkadapter *NetworkAdapter) PortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
 	if networkadapter.ports == "" {
 		return nil, nil
 	}
-	return ListReferencedPorts(networkadapter.GetClient(), networkadapter.ports, queryOpts...)
+	return ListReferencedPortsWithContext(ctx, networkadapter.GetClient(), networkadapter.ports, queryOpts...)
 }
 
 // Processors gets the offload processors contained in this network adapter.
 func (networkadapter *NetworkAdapter) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return networkadapter.ProcessorsWithContext(common.ContextOf(networkadapter.GetClient()), queryOpts...)
+}
+
+// ProcessorsWithContext gets the offload processors contained in this network adapter.
+func (networkadapter *NetworkAdapter) ProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
 	if networkadapter.processors == "" {
 		return nil, nil
 	}
-	return ListReferencedProcessors(networkadapter.GetClient(), networkadapter.processors, queryOpts...)
+	return ListReferencedProcessorsWithContext(ctx, networkadapter.GetClient(), networkadapter.processors, queryOpts...)
 }
 
 // ResetSettingsToDefault shall perform a reset of all active and pending
 // settings back to factory default settings upon reset of the network adapter.
 func (networkadapter *NetworkAdapter) ResetSettingsToDefault() error {
-	return networkadapter.Post(networkadapter.resetSettingsToDefaultTarget, nil)
+	return networkadapter.ResetSettingsToDefaultWithContext(common.ContextOf(networkadapter.GetClient()))
+}
+
+// ResetSettingsToDefaultWithContext shall perform a reset of all active and pending
+// settings back to factory default settings upon reset of the network adapter.
+func (networkadapter *NetworkAdapter) ResetSettingsToDefaultWithContext(ctx context.Context) error {
+	return networkadapter.PostWithContext(ctx, networkadapter.resetSettingsToDefaultTarget, nil)
 }

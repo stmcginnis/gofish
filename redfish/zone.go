@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -178,6 +179,19 @@ func (zone *Zone) UnmarshalJSON(b []byte) error {
 // match the current ETag of the zone, the service shall return the HTTP 428
 // (Precondition Required) status code to reject the request.
 func (zone *Zone) AddEndpoint(endpointURI, endpointETag, zoneETag string) error {
+	return zone.AddEndpointWithContext(common.ContextOf(zone.GetClient()), endpointURI, endpointETag, zoneETag)
+}
+
+// AddEndpointWithContext adds an endpoint to a zone.
+//
+// `endpointURI` is the URI for the endpoint to add to the zone.
+//
+// `endpointETag` is the current ETag of the endpoint to add to the zone.
+//
+// `zoneETag` is the current ETag of the zone. If the client-provided ETag does not
+// match the current ETag of the zone, the service shall return the HTTP 428
+// (Precondition Required) status code to reject the request.
+func (zone *Zone) AddEndpointWithContext(ctx context.Context, endpointURI, endpointETag, zoneETag string) error {
 	if zone.addEndpointTarget == "" {
 		return errors.New("addEndpoint not supported by this zone")
 	}
@@ -191,7 +205,7 @@ func (zone *Zone) AddEndpoint(endpointURI, endpointETag, zoneETag string) error 
 		EndpointETag: endpointETag,
 		ZoneETag:     zoneETag,
 	}
-	return zone.Post(zone.addEndpointTarget, t)
+	return zone.PostWithContext(ctx, zone.addEndpointTarget, t)
 }
 
 // RemoveEndpoint removes an endpoint from a zone.
@@ -204,6 +218,19 @@ func (zone *Zone) AddEndpoint(endpointURI, endpointETag, zoneETag string) error 
 // match the current ETag of the zone, the service shall return the HTTP 428
 // (Precondition Required) status code to reject the request.
 func (zone *Zone) RemoveEndpoint(endpointURI, endpointETag, zoneETag string) error {
+	return zone.RemoveEndpointWithContext(common.ContextOf(zone.GetClient()), endpointURI, endpointETag, zoneETag)
+}
+
+// RemoveEndpointWithContext removes an endpoint from a zone.
+//
+// `endpointURI` is the URI for the endpoint to remove from the zone.
+//
+// `endpointETag` is the current ETag of the endpoint to remove from the zone.
+//
+// `zoneETag` is the current ETag of the zone. If the client-provided ETag does not
+// match the current ETag of the zone, the service shall return the HTTP 428
+// (Precondition Required) status code to reject the request.
+func (zone *Zone) RemoveEndpointWithContext(ctx context.Context, endpointURI, endpointETag, zoneETag string) error {
 	if zone.removeEndpointTarget == "" {
 		return errors.New("removeEndpoint not supported by this zone")
 	}
@@ -217,56 +244,100 @@ func (zone *Zone) RemoveEndpoint(endpointURI, endpointETag, zoneETag string) err
 		EndpointETag: endpointETag,
 		ZoneETag:     zoneETag,
 	}
-	return zone.Post(zone.removeEndpointTarget, t)
+	return zone.PostWithContext(ctx, zone.removeEndpointTarget, t)
 }
 
 // AddressPools gets the address pools associated with this zone.
 func (zone *Zone) AddressPools(queryOpts ...common.QueryGroupOption) ([]*AddressPool, error) {
-	return common.GetObjects[AddressPool](zone.GetClient(), zone.addressPools, queryOpts...)
+	return zone.AddressPoolsWithContext(common.ContextOf(zone.GetClient()), queryOpts...)
+}
+
+// AddressPoolsWithContext gets the address pools associated with this zone.
+func (zone *Zone) AddressPoolsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*AddressPool, error) {
+	return common.GetObjectsWithContext[AddressPool](ctx, zone.GetClient(), zone.addressPools, queryOpts...)
 }
 
 // ContainedByZones gets the zone that contain this zone.
 func (zone *Zone) ContainedByZones(queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
-	return common.GetObjects[Zone](zone.GetClient(), zone.containedByZones, queryOpts...)
+	return zone.ContainedByZonesWithContext(common.ContextOf(zone.GetClient()), queryOpts...)
+}
+
+// ContainedByZonesWithContext gets the zone that contain this zone.
+func (zone *Zone) ContainedByZonesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetObjectsWithContext[Zone](ctx, zone.GetClient(), zone.containedByZones, queryOpts...)
 }
 
 // ContainsZones gets the zones that are contained by this zone.
 func (zone *Zone) ContainsZones(queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
-	return common.GetObjects[Zone](zone.GetClient(), zone.containsZones, queryOpts...)
+	return zone.ContainsZonesWithContext(common.ContextOf(zone.GetClient()), queryOpts...)
+}
+
+// ContainsZonesWithContext gets the zones that are contained by this zone.
+func (zone *Zone) ContainsZonesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetObjectsWithContext[Zone](ctx, zone.GetClient(), zone.containsZones, queryOpts...)
 }
 
 // Endpoints gets the endpoints that this zone contains.
 func (zone *Zone) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](zone.GetClient(), zone.endpoints, queryOpts...)
+	return zone.EndpointsWithContext(common.ContextOf(zone.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the endpoints that this zone contains.
+func (zone *Zone) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, zone.GetClient(), zone.endpoints, queryOpts...)
 }
 
 // InvolvedSwitches gets the switches in this zone.
 func (zone *Zone) InvolvedSwitches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
-	return common.GetObjects[Switch](zone.GetClient(), zone.involvedSwitches, queryOpts...)
+	return zone.InvolvedSwitchesWithContext(common.ContextOf(zone.GetClient()), queryOpts...)
+}
+
+// InvolvedSwitchesWithContext gets the switches in this zone.
+func (zone *Zone) InvolvedSwitchesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetObjectsWithContext[Switch](ctx, zone.GetClient(), zone.involvedSwitches, queryOpts...)
 }
 
 // ResourceBlocks gets the resource blocks with which this zone is associated.
 func (zone *Zone) ResourceBlocks(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
-	return common.GetObjects[ResourceBlock](zone.GetClient(), zone.resourceBlocks, queryOpts...)
+	return zone.ResourceBlocksWithContext(common.ContextOf(zone.GetClient()), queryOpts...)
+}
+
+// ResourceBlocksWithContext gets the resource blocks with which this zone is associated.
+func (zone *Zone) ResourceBlocksWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return common.GetObjectsWithContext[ResourceBlock](ctx, zone.GetClient(), zone.resourceBlocks, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
-func (zone *Zone) Update() error {
+func (zone *Zone) Update() error { return zone.UpdateWithContext(common.ContextOf(zone.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (zone *Zone) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"DefaultRoutingEnabled",
 		"ExternalAccessibility",
 		"ZoneType",
 	}
 
-	return zone.UpdateFromRawData(zone, zone.rawData, readWriteFields)
+	return zone.UpdateFromRawDataWithContext(ctx, zone, zone.rawData, readWriteFields)
 }
 
 // GetZone will get a Zone instance from the service.
 func GetZone(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Zone, error) {
-	return common.GetObject[Zone](c, uri, queryOpts...)
+	return GetZoneWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetZoneWithContext will get a Zone instance from the service.
+func GetZoneWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Zone, error) {
+	return common.GetObjectWithContext[Zone](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedZones gets the collection of Zone from
 // a provided reference.
 func ListReferencedZones(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
-	return common.GetCollectionObjects[Zone](c, link, queryOpts...)
+	return ListReferencedZonesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedZonesWithContext gets the collection of Zone from
+// a provided reference.
+func ListReferencedZonesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetCollectionObjectsWithContext[Zone](ctx, c, link, queryOpts...)
 }

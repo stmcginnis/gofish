@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -102,22 +103,36 @@ func (role *Role) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (role *Role) Update() error {
+func (role *Role) Update() error { return role.UpdateWithContext(common.ContextOf(role.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (role *Role) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AssignedPrivileges",
 		"OemPrivileges",
 	}
 
-	return role.UpdateFromRawData(role, role.rawData, readWriteFields)
+	return role.UpdateFromRawDataWithContext(ctx, role, role.rawData, readWriteFields)
 }
 
 // GetRole will get a Role instance from the service.
 func GetRole(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Role, error) {
-	return common.GetObject[Role](c, uri, queryOpts...)
+	return GetRoleWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetRoleWithContext will get a Role instance from the service.
+func GetRoleWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Role, error) {
+	return common.GetObjectWithContext[Role](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedRoles gets the collection of Role from
 // a provided reference.
 func ListReferencedRoles(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Role, error) {
-	return common.GetCollectionObjects[Role](c, link, queryOpts...)
+	return ListReferencedRolesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedRolesWithContext gets the collection of Role from
+// a provided reference.
+func ListReferencedRolesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Role, error) {
+	return common.GetCollectionObjectsWithContext[Role](ctx, c, link, queryOpts...)
 }

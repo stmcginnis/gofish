@@ -54,6 +54,10 @@ linters:
         - deprecatedComment
         - dupImport
         - ifElseChain
+        # Upstream resource files predate the "context" import that the
+        # WithContext transformation adds; params named context are kept
+        # verbatim to avoid diverging from upstream.
+        - importShadow
         - octalLiteral
         - whyNoLint
         - wrapperFunc

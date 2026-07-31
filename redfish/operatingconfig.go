@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -53,13 +54,24 @@ type OperatingConfig struct {
 
 // GetOperatingConfig will get a OperatingConfig instance from the service.
 func GetOperatingConfig(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OperatingConfig, error) {
-	return common.GetObject[OperatingConfig](c, uri, queryOpts...)
+	return GetOperatingConfigWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetOperatingConfigWithContext will get a OperatingConfig instance from the service.
+func GetOperatingConfigWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OperatingConfig, error) {
+	return common.GetObjectWithContext[OperatingConfig](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedOperatingConfigs gets the collection of OperatingConfig from
 // a provided reference.
 func ListReferencedOperatingConfigs(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OperatingConfig, error) {
-	return common.GetCollectionObjects[OperatingConfig](c, link, queryOpts...)
+	return ListReferencedOperatingConfigsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedOperatingConfigsWithContext gets the collection of OperatingConfig from
+// a provided reference.
+func ListReferencedOperatingConfigsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OperatingConfig, error) {
+	return common.GetCollectionObjectsWithContext[OperatingConfig](ctx, c, link, queryOpts...)
 }
 
 // TurboProfileDatapoint shall specify the turbo profile for a set of active cores.

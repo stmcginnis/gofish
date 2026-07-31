@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -100,14 +101,24 @@ func (filter *Filter) UnmarshalJSON(b []byte) error {
 
 // Assembly gets the assembly for this filter.
 func (filter *Filter) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return filter.AssemblyWithContext(common.ContextOf(filter.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets the assembly for this filter.
+func (filter *Filter) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if filter.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(filter.GetClient(), filter.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, filter.GetClient(), filter.assembly, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (filter *Filter) Update() error {
+	return filter.UpdateWithContext(common.ContextOf(filter.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (filter *Filter) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"LocationIndicatorActive",
 		"ServiceHours",
@@ -115,16 +126,27 @@ func (filter *Filter) Update() error {
 		"UserLabel",
 	}
 
-	return filter.UpdateFromRawData(filter, filter.rawData, readWriteFields)
+	return filter.UpdateFromRawDataWithContext(ctx, filter, filter.rawData, readWriteFields)
 }
 
 // GetFilter will get a Filter instance from the service.
 func GetFilter(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Filter, error) {
-	return common.GetObject[Filter](c, uri, queryOpts...)
+	return GetFilterWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetFilterWithContext will get a Filter instance from the service.
+func GetFilterWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Filter, error) {
+	return common.GetObjectWithContext[Filter](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedFilters gets the collection of Filter from
 // a provided reference.
 func ListReferencedFilters(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
-	return common.GetCollectionObjects[Filter](c, link, queryOpts...)
+	return ListReferencedFiltersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedFiltersWithContext gets the collection of Filter from
+// a provided reference.
+func ListReferencedFiltersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return common.GetCollectionObjectsWithContext[Filter](ctx, c, link, queryOpts...)
 }

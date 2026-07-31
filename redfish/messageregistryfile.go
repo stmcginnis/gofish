@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -59,10 +60,21 @@ type MessageRegistryFile struct {
 // GetMessageRegistryFile will get a MessageRegistryFile
 // instance from the Redfish service.
 func GetMessageRegistryFile(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MessageRegistryFile, error) {
-	return common.GetObject[MessageRegistryFile](c, uri, queryOpts...)
+	return GetMessageRegistryFileWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMessageRegistryFileWithContext will get a MessageRegistryFile
+// instance from the Redfish service.
+func GetMessageRegistryFileWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MessageRegistryFile, error) {
+	return common.GetObjectWithContext[MessageRegistryFile](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMessageRegistryFiles gets the collection of MessageRegistryFile.
 func ListReferencedMessageRegistryFiles(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistryFile, error) {
-	return common.GetCollectionObjects[MessageRegistryFile](c, link, queryOpts...)
+	return ListReferencedMessageRegistryFilesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMessageRegistryFilesWithContext gets the collection of MessageRegistryFile.
+func ListReferencedMessageRegistryFilesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistryFile, error) {
+	return common.GetCollectionObjectsWithContext[MessageRegistryFile](ctx, c, link, queryOpts...)
 }

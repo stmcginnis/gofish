@@ -5,6 +5,7 @@
 package dell
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
@@ -30,6 +31,13 @@ type iDRACResetRequest struct {
 //
 // resetType specifies whether to perform a graceful or forced reset
 func (m *Manager) ResetiDRAC(resetType iDRACResetType) error {
+	return m.ResetiDRACWithContext(common.ContextOf(m.GetClient()), resetType)
+}
+
+// ResetiDRACWithContext performs a reset of the iDRAC card
+//
+// resetType specifies whether to perform a graceful or forced reset
+func (m *Manager) ResetiDRACWithContext(ctx context.Context, resetType iDRACResetType) error {
 	request := iDRACResetRequest{
 		Force: resetType,
 	}
@@ -37,7 +45,7 @@ func (m *Manager) ResetiDRAC(resetType iDRACResetType) error {
 	// Use the standard action target for iDRAC reset as documented
 	target := "/redfish/v1/Dell/Managers/iDRAC.Embedded.1/DelliDRACCardService/Actions/DelliDRACCardService.iDRACReset"
 
-	resp, err := m.PostWithResponse(target, request)
+	resp, err := m.PostWithResponseWithContext(ctx, target, request)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return errors.New("failed to reset iDRAC: " + err.Error())

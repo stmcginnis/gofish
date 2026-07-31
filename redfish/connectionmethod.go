@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -90,16 +91,32 @@ func (connectionmethod *ConnectionMethod) UnmarshalJSON(b []byte) error {
 
 // GetConnectionMethod will get a ConnectionMethod instance from the service.
 func GetConnectionMethod(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ConnectionMethod, error) {
-	return common.GetObject[ConnectionMethod](c, uri, queryOpts...)
+	return GetConnectionMethodWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetConnectionMethodWithContext will get a ConnectionMethod instance from the service.
+func GetConnectionMethodWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ConnectionMethod, error) {
+	return common.GetObjectWithContext[ConnectionMethod](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedConnectionMethods gets the collection of ConnectionMethod from
 // a provided reference.
 func ListReferencedConnectionMethods(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ConnectionMethod, error) {
-	return common.GetCollectionObjects[ConnectionMethod](c, link, queryOpts...)
+	return ListReferencedConnectionMethodsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedConnectionMethodsWithContext gets the collection of ConnectionMethod from
+// a provided reference.
+func ListReferencedConnectionMethodsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ConnectionMethod, error) {
+	return common.GetCollectionObjectsWithContext[ConnectionMethod](ctx, c, link, queryOpts...)
 }
 
 // AggregationSources gets the access points using this connection method.
 func (connectionmethod *ConnectionMethod) AggregationSources(queryOpts ...common.QueryGroupOption) ([]*AggregationSource, error) {
-	return common.GetObjects[AggregationSource](connectionmethod.GetClient(), connectionmethod.aggregationSources, queryOpts...)
+	return connectionmethod.AggregationSourcesWithContext(common.ContextOf(connectionmethod.GetClient()), queryOpts...)
+}
+
+// AggregationSourcesWithContext gets the access points using this connection method.
+func (connectionmethod *ConnectionMethod) AggregationSourcesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*AggregationSource, error) {
+	return common.GetObjectsWithContext[AggregationSource](ctx, connectionmethod.GetClient(), connectionmethod.aggregationSources, queryOpts...)
 }

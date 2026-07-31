@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -345,36 +346,61 @@ func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 
 // Assembly gets the storage controller's assembly.
 func (storagecontroller *StorageController) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return storagecontroller.AssemblyWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets the storage controller's assembly.
+func (storagecontroller *StorageController) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if storagecontroller.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(storagecontroller.GetClient(), storagecontroller.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, storagecontroller.GetClient(), storagecontroller.assembly, queryOpts...)
 }
 
 // Certificates gets the storage controller's certificates.
 func (storagecontroller *StorageController) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(storagecontroller.GetClient(), storagecontroller.certificates, queryOpts...)
+	return storagecontroller.CertificatesWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets the storage controller's certificates.
+func (storagecontroller *StorageController) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, storagecontroller.GetClient(), storagecontroller.certificates, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this storage controller.
 func (storagecontroller *StorageController) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return storagecontroller.EnvironmentMetricsWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// EnvironmentMetricsWithContext gets the environment metrics for this storage controller.
+func (storagecontroller *StorageController) EnvironmentMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if storagecontroller.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(storagecontroller.GetClient(), storagecontroller.environmentMetrics, queryOpts...)
+	return GetEnvironmentMetricsWithContext(ctx, storagecontroller.GetClient(), storagecontroller.environmentMetrics, queryOpts...)
 }
 
 // Metrics gets the metrics associated with this storage controller.
 func (storagecontroller *StorageController) Metrics(queryOpts ...common.QueryGroupOption) (*StorageControllerMetrics, error) {
+	return storagecontroller.MetricsWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the metrics associated with this storage controller.
+func (storagecontroller *StorageController) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*StorageControllerMetrics, error) {
 	if storagecontroller.metrics == "" {
 		return nil, nil
 	}
-	return GetStorageControllerMetrics(storagecontroller.GetClient(), storagecontroller.metrics, queryOpts...)
+	return GetStorageControllerMetricsWithContext(ctx, storagecontroller.GetClient(), storagecontroller.metrics, queryOpts...)
 }
 
 // Ports gets the ports that exist on the storage controller.
 func (storagecontroller *StorageController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return ListReferencedPorts(storagecontroller.GetClient(), storagecontroller.ports, queryOpts...)
+	return storagecontroller.PortsWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// PortsWithContext gets the ports that exist on the storage controller.
+func (storagecontroller *StorageController) PortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPortsWithContext(ctx, storagecontroller.GetClient(), storagecontroller.ports, queryOpts...)
 }
 
 // // AttachedVolumes gets the volumes that are attached to this instance of storage controller.
@@ -386,47 +412,92 @@ func (storagecontroller *StorageController) Ports(queryOpts ...common.QueryGroup
 // such as with battery-backed RAID controllers. This property shall not be present if the batteries
 // power the containing chassis as a whole rather than the individual storage controller.
 func (storagecontroller *StorageController) Batteries(queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
-	return common.GetObjects[Battery](storagecontroller.GetClient(), storagecontroller.batteries, queryOpts...)
+	return storagecontroller.BatteriesWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// BatteriesWithContext gets the batteries that provide power to this storage controller during a power-loss event,
+// such as with battery-backed RAID controllers. This property shall not be present if the batteries
+// power the containing chassis as a whole rather than the individual storage controller.
+func (storagecontroller *StorageController) BatteriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return common.GetObjectsWithContext[Battery](ctx, storagecontroller.GetClient(), storagecontroller.batteries, queryOpts...)
 }
 
 // Endpoints gets the storage controller's endpoints.
 func (storagecontroller *StorageController) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](storagecontroller.GetClient(), storagecontroller.endpoints, queryOpts...)
+	return storagecontroller.EndpointsWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the storage controller's endpoints.
+func (storagecontroller *StorageController) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, storagecontroller.GetClient(), storagecontroller.endpoints, queryOpts...)
 }
 
 // NVMeDiscoveredSubsystems gets the storage that represent the NVMe subsystems discovered by
 // this discovery controller. This property shall only be present if ControllerType in
 // NVMeControllerProperties contains 'Discovery'.
 func (storagecontroller *StorageController) NVMeDiscoveredSubsystems(queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
-	return common.GetObjects[Storage](storagecontroller.GetClient(), storagecontroller.nvmeDiscoveredSubsystems, queryOpts...)
+	return storagecontroller.NVMeDiscoveredSubsystemsWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// NVMeDiscoveredSubsystemsWithContext gets the storage that represent the NVMe subsystems discovered by
+// this discovery controller. This property shall only be present if ControllerType in
+// NVMeControllerProperties contains 'Discovery'.
+func (storagecontroller *StorageController) NVMeDiscoveredSubsystemsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return common.GetObjectsWithContext[Storage](ctx, storagecontroller.GetClient(), storagecontroller.nvmeDiscoveredSubsystems, queryOpts...)
 }
 
 // NetworkDeviceFunctions the network device functions that provide connectivity to this controller.
 func (storagecontroller *StorageController) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](storagecontroller.GetClient(), storagecontroller.networkDeviceFunctions, queryOpts...)
+	return storagecontroller.NetworkDeviceFunctionsWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// NetworkDeviceFunctionsWithContext the network device functions that provide connectivity to this controller.
+func (storagecontroller *StorageController) NetworkDeviceFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjectsWithContext[NetworkDeviceFunction](ctx, storagecontroller.GetClient(), storagecontroller.networkDeviceFunctions, queryOpts...)
 }
 
 // PCIeFunctions gets the the PCIe functions that the storage controller produces.
 func (storagecontroller *StorageController) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](storagecontroller.GetClient(), storagecontroller.pcieFunctions, queryOpts...)
+	return storagecontroller.PCIeFunctionsWithContext(common.ContextOf(storagecontroller.GetClient()), queryOpts...)
+}
+
+// PCIeFunctionsWithContext gets the the PCIe functions that the storage controller produces.
+func (storagecontroller *StorageController) PCIeFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjectsWithContext[PCIeFunction](ctx, storagecontroller.GetClient(), storagecontroller.pcieFunctions, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (storagecontroller *StorageController) Update() error {
+	return storagecontroller.UpdateWithContext(common.ContextOf(storagecontroller.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (storagecontroller *StorageController) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AssetTag",
 	}
 
-	return storagecontroller.UpdateFromRawData(storagecontroller, storagecontroller.rawData, readWriteFields)
+	return storagecontroller.UpdateFromRawDataWithContext(ctx, storagecontroller, storagecontroller.rawData, readWriteFields)
 }
 
 // GetStorageController will get a Storage controller instance from the service.
 func GetStorageController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageController, error) {
-	return common.GetObject[StorageController](c, uri, queryOpts...)
+	return GetStorageControllerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetStorageControllerWithContext will get a Storage controller instance from the service.
+func GetStorageControllerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageController, error) {
+	return common.GetObjectWithContext[StorageController](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedStorageControllers gets the collection of StorageControllers
 // from a provided reference.
 func ListReferencedStorageControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
-	return common.GetCollectionObjects[StorageController](c, link, queryOpts...)
+	return ListReferencedStorageControllersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedStorageControllersWithContext gets the collection of StorageControllers
+// from a provided reference.
+func ListReferencedStorageControllersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return common.GetCollectionObjectsWithContext[StorageController](ctx, c, link, queryOpts...)
 }

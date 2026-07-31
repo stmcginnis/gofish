@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -52,22 +53,38 @@ func (assembly *Assembly) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (assembly *Assembly) Update() error {
+	return assembly.UpdateWithContext(common.ContextOf(assembly.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (assembly *Assembly) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Assemblies",
 	}
 
-	return assembly.UpdateFromRawData(assembly, assembly.rawData, readWriteFields)
+	return assembly.UpdateFromRawDataWithContext(ctx, assembly, assembly.rawData, readWriteFields)
 }
 
 // GetAssembly will get a Assembly instance from the service.
 func GetAssembly(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
-	return common.GetObject[Assembly](c, uri, queryOpts...)
+	return GetAssemblyWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAssemblyWithContext will get a Assembly instance from the service.
+func GetAssemblyWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return common.GetObjectWithContext[Assembly](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedAssemblys gets the collection of Assembly from
 // a provided reference.
 func ListReferencedAssemblys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Assembly, error) {
-	return common.GetCollectionObjects[Assembly](c, link, queryOpts...)
+	return ListReferencedAssemblysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedAssemblysWithContext gets the collection of Assembly from
+// a provided reference.
+func ListReferencedAssemblysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Assembly, error) {
+	return common.GetCollectionObjectsWithContext[Assembly](ctx, c, link, queryOpts...)
 }
 
 // AssemblyData is information about an assembly.

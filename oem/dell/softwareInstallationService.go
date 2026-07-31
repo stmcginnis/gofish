@@ -5,6 +5,7 @@
 package dell
 
 import (
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -246,16 +247,23 @@ func validateInstallFromRepoBody(b *InstallFromRepoBody) error {
 //
 // Returns a Dell OEM Job
 func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepoBody) (*Job, error) {
+	return sis.InstallFromRepositoryWithContext(common.ContextOf(sis.GetClient()), b)
+}
+
+// Simple way to upgrade server firmware packages. Uses a Dell update catalog to compare FW versions and get download links for each package.
+//
+// Returns a Dell OEM Job
+func (sis *SoftwareInstallationService) InstallFromRepositoryWithContext(ctx context.Context, b *InstallFromRepoBody) (*Job, error) {
 	if err := validateInstallFromRepoBody(b); err != nil {
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
-	res, err := sis.PostWithResponse(sis.Actions.InstallFromRepository.Target, b)
+	res, err := sis.PostWithResponseWithContext(ctx, sis.Actions.InstallFromRepository.Target, b)
 	defer common.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
 
-	return GetJob(sis.GetClient(), res.Header.Get("Location"))
+	return GetJobWithContext(ctx, sis.GetClient(), res.Header.Get("Location"))
 }
 
 // Queries BMC for package list of available updates
@@ -266,8 +274,19 @@ func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepo
 // On success, returns a struct with the firmware upgrade details
 // On failure to get the catalog OR if all firmware is current, returns a common.Error error with an extended redfish error message.
 func (sis *SoftwareInstallationService) GetRepoBasedUpdateList() (*UpdateList, error) {
+	return sis.GetRepoBasedUpdateListWithContext(common.ContextOf(sis.GetClient()))
+}
+
+// Queries BMC for package list of available updates
+//
+// Must be called after "InstallFromRepository" with ApplyUpdate = False.
+// To install the firmware, call "InstallFromRepository" again with ApplyUpdate = True
+//
+// On success, returns a struct with the firmware upgrade details
+// On failure to get the catalog OR if all firmware is current, returns a common.Error error with an extended redfish error message.
+func (sis *SoftwareInstallationService) GetRepoBasedUpdateListWithContext(ctx context.Context) (*UpdateList, error) {
 	var b struct{}
-	res, err := sis.PostWithResponse(sis.Actions.GetRepoBasedUpdateList.Target, b)
+	res, err := sis.PostWithResponseWithContext(ctx, sis.Actions.GetRepoBasedUpdateList.Target, b)
 	defer common.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
@@ -299,5 +318,9 @@ func (sis *SoftwareInstallationService) GetRepoBasedUpdateList() (*UpdateList, e
 }
 
 func GetSoftwareInstallationService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SoftwareInstallationService, error) {
-	return common.GetObject[SoftwareInstallationService](c, uri, queryOpts...)
+	return GetSoftwareInstallationServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+func GetSoftwareInstallationServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SoftwareInstallationService, error) {
+	return common.GetObjectWithContext[SoftwareInstallationService](ctx, c, uri, queryOpts...)
 }

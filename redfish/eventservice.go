@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -227,41 +228,67 @@ func (eventservice *EventService) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (eventservice *EventService) Update() error {
+	return eventservice.UpdateWithContext(common.ContextOf(eventservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (eventservice *EventService) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"DeliveryRetryAttempts",
 		"DeliveryRetryIntervalSeconds",
 		"ServiceEnabled",
 	}
 
-	return eventservice.UpdateFromRawData(eventservice, eventservice.RawData, readWriteFields)
+	return eventservice.UpdateFromRawDataWithContext(ctx, eventservice, eventservice.RawData, readWriteFields)
 }
 
 // GetEventService will get a EventService instance from the service.
 func GetEventService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EventService, error) {
-	return common.GetObject[EventService](c, uri, queryOpts...)
+	return GetEventServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetEventServiceWithContext will get a EventService instance from the service.
+func GetEventServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EventService, error) {
+	return common.GetObjectWithContext[EventService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedEventServices gets the collection of EventService from
 // a provided reference.
 func ListReferencedEventServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EventService, error) {
-	return common.GetCollectionObjects[EventService](c, link, queryOpts...)
+	return ListReferencedEventServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedEventServicesWithContext gets the collection of EventService from
+// a provided reference.
+func ListReferencedEventServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EventService, error) {
+	return common.GetCollectionObjectsWithContext[EventService](ctx, c, link, queryOpts...)
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.
 func (eventservice *EventService) GetEventSubscriptions() ([]*EventDestination, error) {
+	return eventservice.GetEventSubscriptionsWithContext(common.ContextOf(eventservice.GetClient()))
+}
+
+// GetEventSubscriptionsWithContext gets all the subscriptions using the event service.
+func (eventservice *EventService) GetEventSubscriptionsWithContext(ctx context.Context) ([]*EventDestination, error) {
 	if strings.TrimSpace(eventservice.Subscriptions) == "" {
 		return nil, errors.New("empty subscription link in the event service")
 	}
 
-	return ListReferencedEventDestinations(eventservice.GetClient(), eventservice.Subscriptions)
+	return ListReferencedEventDestinationsWithContext(ctx, eventservice.GetClient(), eventservice.Subscriptions)
 }
 
 // GetEventSubscription gets a specific subscription using the event service.
 func (eventservice *EventService) GetEventSubscription(uri string) (*EventDestination, error) {
+	return eventservice.GetEventSubscriptionWithContext(common.ContextOf(eventservice.GetClient()), uri)
+}
+
+// GetEventSubscriptionWithContext gets a specific subscription using the event service.
+func (eventservice *EventService) GetEventSubscriptionWithContext(ctx context.Context, uri string) (*EventDestination, error) {
 	if uri == "" {
 		return nil, errors.New("uri should not be empty")
 	}
-	return GetEventDestination(eventservice.GetClient(), uri)
+	return GetEventDestinationWithContext(ctx, eventservice.GetClient(), uri)
 }
 
 // CreateEventSubscription creates the subscription using the event service.
@@ -287,11 +314,24 @@ func (eventservice *EventService) CreateEventSubscription(
 	context string,
 	oem interface{},
 ) (string, error) {
+	return eventservice.CreateEventSubscriptionWithContext(common.ContextOf(eventservice.GetClient()), destination, eventTypes, httpHeaders, protocol, context, oem)
+}
+
+// Deprecated: (v1.5) EventType-based eventing is DEPRECATED in the Redfish schema
+// in favor of using RegistryPrefix and ResourceTypes
+func (eventservice *EventService) CreateEventSubscriptionWithContext(ctx context.Context,
+	destination string,
+	eventTypes []EventType,
+	httpHeaders map[string]string,
+	protocol EventDestinationProtocol,
+	context string,
+	oem interface{},
+) (string, error) {
 	if strings.TrimSpace(eventservice.Subscriptions) == "" {
 		return "", errors.New("empty subscription link in the event service")
 	}
 
-	return CreateEventDestination(
+	return CreateEventDestinationWithContext(ctx,
 		eventservice.GetClient(),
 		eventservice.Subscriptions,
 		destination,
@@ -332,11 +372,43 @@ func (eventservice *EventService) CreateEventSubscriptionInstance(
 	deliveryRetryPolicy DeliveryRetryPolicy,
 	oem interface{},
 ) (string, error) {
+	return eventservice.CreateEventSubscriptionInstanceWithContext(common.ContextOf(eventservice.GetClient()), destination, registryPrefixes, resourceTypes, httpHeaders, protocol, context, deliveryRetryPolicy, oem)
+}
+
+// For Redfish v1.5+
+// CreateEventSubscription creates the subscription using the event service.
+// Destination should contain the URL of the destination for events to be sent.
+// RegistryPrefixes is the list of the prefixes for the Message Registries
+// that contain the MessageIds that are sent to this event destination.
+// If RegistryPrefixes is empty on subscription, the client is subscribing to all Message Registries.
+// ResourceTypes is the list of Resource Type values (Schema names) that correspond to the OriginOfCondition,
+// the version and full namespace should not be specified.
+// If ResourceTypes is empty on subscription, the client is subscribing to receive events regardless of ResourceType.
+// HttpHeaders is optional and gives the opportunity to specify any arbitrary
+// HTTP headers required for the event POST operation.
+// Protocol should be the communication protocol of the event endpoint, usually RedfishEventDestinationProtocol.
+// Context is a required client-supplied string that is sent with the event notifications.
+// DeliveryRetryPolicy is optional, it should contain the subscription delivery retry policy for events,
+// where the subscription type is RedfishEvent.
+// Oem is optional and gives the opportunity to specify any OEM specific properties,
+// it should contain the vendor specific struct that goes inside the Oem session.
+// It returns the new subscription URI if the event subscription is created
+// with success or any error encountered.
+func (eventservice *EventService) CreateEventSubscriptionInstanceWithContext(ctx context.Context,
+	destination string,
+	registryPrefixes []string,
+	resourceTypes []string,
+	httpHeaders map[string]string,
+	protocol EventDestinationProtocol,
+	context string,
+	deliveryRetryPolicy DeliveryRetryPolicy,
+	oem interface{},
+) (string, error) {
 	if strings.TrimSpace(eventservice.Subscriptions) == "" {
 		return "", errors.New("empty subscription link in the event service")
 	}
 
-	return CreateEventDestinationInstance(
+	return CreateEventDestinationInstanceWithContext(ctx,
 		eventservice.GetClient(),
 		eventservice.Subscriptions,
 		destination,
@@ -352,13 +424,25 @@ func (eventservice *EventService) CreateEventSubscriptionInstance(
 
 // DeleteEventSubscription deletes a specific subscription using the event service.
 func (eventservice *EventService) DeleteEventSubscription(uri string) error {
-	return DeleteEventDestination(eventservice.GetClient(), uri)
+	return eventservice.DeleteEventSubscriptionWithContext(common.ContextOf(eventservice.GetClient()), uri)
+}
+
+// DeleteEventSubscriptionWithContext deletes a specific subscription using the event service.
+func (eventservice *EventService) DeleteEventSubscriptionWithContext(ctx context.Context, uri string) error {
+	return DeleteEventDestinationWithContext(ctx, eventservice.GetClient(), uri)
 }
 
 // SubmitTestEvent shall add a test event to the event service with the event
 // data specified in the action parameters. This message should then be sent to
 // any appropriate ListenerDestination targets.
 func (eventservice *EventService) SubmitTestEvent(message string) error {
+	return eventservice.SubmitTestEventWithContext(common.ContextOf(eventservice.GetClient()), message)
+}
+
+// SubmitTestEventWithContext shall add a test event to the event service with the event
+// data specified in the action parameters. This message should then be sent to
+// any appropriate ListenerDestination targets.
+func (eventservice *EventService) SubmitTestEventWithContext(ctx context.Context, message string) error {
 	type temp struct {
 		EventGroupID      string `json:"EventGroupId"`
 		EventID           string `json:"EventId"`
@@ -381,18 +465,24 @@ func (eventservice *EventService) SubmitTestEvent(message string) error {
 		Severity:          "Informational",
 	}
 
-	return eventservice.Post(eventservice.SubmitTestEventTarget, t)
+	return eventservice.PostWithContext(ctx, eventservice.SubmitTestEventTarget, t)
 }
 
 // TestEventSubscription will send an event containing the TestMessage message from the
 // Resource Event Message Registry to all appropriate event destinations.
 func (eventservice *EventService) TestEventSubscription() error {
+	return eventservice.TestEventSubscriptionWithContext(common.ContextOf(eventservice.GetClient()))
+}
+
+// TestEventSubscriptionWithContext will send an event containing the TestMessage message from the
+// Resource Event Message Registry to all appropriate event destinations.
+func (eventservice *EventService) TestEventSubscriptionWithContext(ctx context.Context) error {
 	if eventservice.testEventSubscriptionTarget == "" {
 		return errors.New("TestEventSubsciption not supported by this service") //nolint:error-strings
 	}
 
 	var payload struct{}
-	return eventservice.Post(eventservice.testEventSubscriptionTarget, payload)
+	return eventservice.PostWithContext(ctx, eventservice.testEventSubscriptionTarget, payload)
 }
 
 // SSEFilterPropertiesSupported shall contain a set of properties that indicate

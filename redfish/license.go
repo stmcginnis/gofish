@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -176,16 +177,33 @@ func (license *License) UnmarshalJSON(b []byte) error {
 // TargetServices gets a set of Manager objects that represent the services where
 // the license is installed, such as remote Redfish services.
 func (license *License) TargetServices(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](license.GetClient(), license.targetServices, queryOpts...)
+	return license.TargetServicesWithContext(common.ContextOf(license.GetClient()), queryOpts...)
+}
+
+// TargetServicesWithContext gets a set of Manager objects that represent the services where
+// the license is installed, such as remote Redfish services.
+func (license *License) TargetServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, license.GetClient(), license.targetServices, queryOpts...)
 }
 
 // GetLicense will get a License instance from the service.
 func GetLicense(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*License, error) {
-	return common.GetObject[License](c, uri, queryOpts...)
+	return GetLicenseWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetLicenseWithContext will get a License instance from the service.
+func GetLicenseWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*License, error) {
+	return common.GetObjectWithContext[License](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedLicenses gets the collection of License from
 // a provided reference.
 func ListReferencedLicenses(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*License, error) {
-	return common.GetCollectionObjects[License](c, link, queryOpts...)
+	return ListReferencedLicensesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedLicensesWithContext gets the collection of License from
+// a provided reference.
+func ListReferencedLicensesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*License, error) {
+	return common.GetCollectionObjectsWithContext[License](ctx, c, link, queryOpts...)
 }

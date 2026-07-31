@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -132,61 +133,112 @@ func (heater *Heater) UnmarshalJSON(b []byte) error {
 
 // Assembly gets the assembly for this heater.
 func (heater *Heater) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return heater.AssemblyWithContext(common.ContextOf(heater.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets the assembly for this heater.
+func (heater *Heater) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if heater.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(heater.GetClient(), heater.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, heater.GetClient(), heater.assembly, queryOpts...)
 }
 
 // Managers gets the managers for this heater.
 func (heater *Heater) Managers(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](heater.GetClient(), heater.managers, queryOpts...)
+	return heater.ManagersWithContext(common.ContextOf(heater.GetClient()), queryOpts...)
+}
+
+// ManagersWithContext gets the managers for this heater.
+func (heater *Heater) ManagersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, heater.GetClient(), heater.managers, queryOpts...)
 }
 
 // Memory gets the memory associated with this heater.
 func (heater *Heater) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
-	return common.GetObjects[Memory](heater.GetClient(), heater.memory, queryOpts...)
+	return heater.MemoryWithContext(common.ContextOf(heater.GetClient()), queryOpts...)
+}
+
+// MemoryWithContext gets the memory associated with this heater.
+func (heater *Heater) MemoryWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetObjectsWithContext[Memory](ctx, heater.GetClient(), heater.memory, queryOpts...)
 }
 
 // NetworkAdapters gets the network adapters associated with this heater.
 func (heater *Heater) NetworkAdapters(queryOpts ...common.QueryGroupOption) ([]*NetworkAdapter, error) {
-	return common.GetObjects[NetworkAdapter](heater.GetClient(), heater.networkAdapters, queryOpts...)
+	return heater.NetworkAdaptersWithContext(common.ContextOf(heater.GetClient()), queryOpts...)
+}
+
+// NetworkAdaptersWithContext gets the network adapters associated with this heater.
+func (heater *Heater) NetworkAdaptersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*NetworkAdapter, error) {
+	return common.GetObjectsWithContext[NetworkAdapter](ctx, heater.GetClient(), heater.networkAdapters, queryOpts...)
 }
 
 // Processors gets this heater's processors.
 func (heater *Heater) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetObjects[Processor](heater.GetClient(), heater.processors, queryOpts...)
+	return heater.ProcessorsWithContext(common.ContextOf(heater.GetClient()), queryOpts...)
+}
+
+// ProcessorsWithContext gets this heater's processors.
+func (heater *Heater) ProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjectsWithContext[Processor](ctx, heater.GetClient(), heater.processors, queryOpts...)
 }
 
 // StorageControllers gets the storage controllers associated with this heater.
 func (heater *Heater) StorageControllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
-	return common.GetObjects[StorageController](heater.GetClient(), heater.storageControllers, queryOpts...)
+	return heater.StorageControllersWithContext(common.ContextOf(heater.GetClient()), queryOpts...)
+}
+
+// StorageControllersWithContext gets the storage controllers associated with this heater.
+func (heater *Heater) StorageControllersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return common.GetObjectsWithContext[StorageController](ctx, heater.GetClient(), heater.storageControllers, queryOpts...)
 }
 
 // Metrics gets the heater metrics for this heater.
 func (heater *Heater) Metrics(queryOpts ...common.QueryGroupOption) (*HeaterMetrics, error) {
+	return heater.MetricsWithContext(common.ContextOf(heater.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the heater metrics for this heater.
+func (heater *Heater) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*HeaterMetrics, error) {
 	if heater.metrics == "" {
 		return nil, nil
 	}
-	return GetHeaterMetrics(heater.GetClient(), heater.metrics, queryOpts...)
+	return GetHeaterMetricsWithContext(ctx, heater.GetClient(), heater.metrics, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (heater *Heater) Update() error {
+	return heater.UpdateWithContext(common.ContextOf(heater.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (heater *Heater) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"LocationIndicatorActive",
 	}
 
-	return heater.UpdateFromRawData(heater, heater.rawData, readWriteFields)
+	return heater.UpdateFromRawDataWithContext(ctx, heater, heater.rawData, readWriteFields)
 }
 
 // GetHeater will get a Heater instance from the service.
 func GetHeater(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Heater, error) {
-	return common.GetObject[Heater](c, uri, queryOpts...)
+	return GetHeaterWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetHeaterWithContext will get a Heater instance from the service.
+func GetHeaterWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Heater, error) {
+	return common.GetObjectWithContext[Heater](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedHeaters gets the collection of Heater from
 // a provided reference.
 func ListReferencedHeaters(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Heater, error) {
-	return common.GetCollectionObjects[Heater](c, link, queryOpts...)
+	return ListReferencedHeatersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedHeatersWithContext gets the collection of Heater from
+// a provided reference.
+func ListReferencedHeatersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Heater, error) {
+	return common.GetCollectionObjectsWithContext[Heater](ctx, c, link, queryOpts...)
 }

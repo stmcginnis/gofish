@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -56,20 +57,36 @@ func (vcatentry *VCATEntry) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (vcatentry *VCATEntry) Update() error {
+	return vcatentry.UpdateWithContext(common.ContextOf(vcatentry.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (vcatentry *VCATEntry) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"RawEntryHex"}
 
-	return vcatentry.UpdateFromRawData(vcatentry, vcatentry.rawData, readWriteFields)
+	return vcatentry.UpdateFromRawDataWithContext(ctx, vcatentry, vcatentry.rawData, readWriteFields)
 }
 
 // GetVCATEntry will get a VCATEntry instance from the service.
 func GetVCATEntry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VCATEntry, error) {
-	return common.GetObject[VCATEntry](c, uri, queryOpts...)
+	return GetVCATEntryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetVCATEntryWithContext will get a VCATEntry instance from the service.
+func GetVCATEntryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VCATEntry, error) {
+	return common.GetObjectWithContext[VCATEntry](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedVCATEntries gets the collection of VCATEntry from
 // a provided reference.
 func ListReferencedVCATEntries(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VCATEntry, error) {
-	return common.GetCollectionObjects[VCATEntry](c, link, queryOpts...)
+	return ListReferencedVCATEntriesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedVCATEntriesWithContext gets the collection of VCATEntry from
+// a provided reference.
+func ListReferencedVCATEntriesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VCATEntry, error) {
+	return common.GetCollectionObjectsWithContext[VCATEntry](ctx, c, link, queryOpts...)
 }
 
 // VCATableEntry shall contain a Virtual Channel entry definition that describes a specific Virtual Channel.

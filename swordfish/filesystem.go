@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -232,15 +233,25 @@ func (filesystem *FileSystem) UnmarshalJSON(b []byte) error {
 
 // Metrics gets the filesystem metrics.
 func (filesystem *FileSystem) Metrics(queryOpts ...common.QueryGroupOption) (*FileSystemMetrics, error) {
+	return filesystem.MetricsWithContext(common.ContextOf(filesystem.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the filesystem metrics.
+func (filesystem *FileSystem) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*FileSystemMetrics, error) {
 	if filesystem.metrics == "" {
 		return nil, nil
 	}
 
-	return GetFileSystemMetrics(filesystem.GetClient(), filesystem.metrics, queryOpts...)
+	return GetFileSystemMetricsWithContext(ctx, filesystem.GetClient(), filesystem.metrics, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (filesystem *FileSystem) Update() error {
+	return filesystem.UpdateWithContext(common.ContextOf(filesystem.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (filesystem *FileSystem) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(FileSystem)
@@ -266,35 +277,61 @@ func (filesystem *FileSystem) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(filesystem).Elem()
 
-	return filesystem.Entity.Update(originalElement, currentElement, readWriteFields)
+	return filesystem.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetFileSystem will get a FileSystem instance from the service.
 func GetFileSystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FileSystem, error) {
-	return common.GetObject[FileSystem](c, uri, queryOpts...)
+	return GetFileSystemWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetFileSystemWithContext will get a FileSystem instance from the service.
+func GetFileSystemWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FileSystem, error) {
+	return common.GetObjectWithContext[FileSystem](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedFileSystems gets the collection of FileSystem from
 // a provided reference.
 func ListReferencedFileSystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*FileSystem, error) {
-	return common.GetCollectionObjects[FileSystem](c, link, queryOpts...)
+	return ListReferencedFileSystemsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedFileSystemsWithContext gets the collection of FileSystem from
+// a provided reference.
+func ListReferencedFileSystemsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*FileSystem, error) {
+	return common.GetCollectionObjectsWithContext[FileSystem](ctx, c, link, queryOpts...)
 }
 
 // ExportedShares gets the exported file shares for this file system.
 func (filesystem *FileSystem) ExportedShares(queryOpts ...common.QueryGroupOption) ([]*FileShare, error) {
-	return ListReferencedFileShares(filesystem.GetClient(), filesystem.exportedShares, queryOpts...)
+	return filesystem.ExportedSharesWithContext(common.ContextOf(filesystem.GetClient()), queryOpts...)
+}
+
+// ExportedSharesWithContext gets the exported file shares for this file system.
+func (filesystem *FileSystem) ExportedSharesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*FileShare, error) {
+	return ListReferencedFileSharesWithContext(ctx, filesystem.GetClient(), filesystem.exportedShares, queryOpts...)
 }
 
 // ClassOfService gets the filesystem's class of service.
 func (filesystem *FileSystem) ClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return filesystem.ClassOfServiceWithContext(common.ContextOf(filesystem.GetClient()), queryOpts...)
+}
+
+// ClassOfServiceWithContext gets the filesystem's class of service.
+func (filesystem *FileSystem) ClassOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	var result *ClassOfService
 	if filesystem.classOfService == "" {
 		return result, nil
 	}
-	return GetClassOfService(filesystem.GetClient(), filesystem.classOfService, queryOpts...)
+	return GetClassOfServiceWithContext(ctx, filesystem.GetClient(), filesystem.classOfService, queryOpts...)
 }
 
 // SpareResourceSets gets the spare resource sets used for this filesystem.
 func (filesystem *FileSystem) SpareResourceSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](filesystem.GetClient(), filesystem.spareResourceSets, queryOpts...)
+	return filesystem.SpareResourceSetsWithContext(common.ContextOf(filesystem.GetClient()), queryOpts...)
+}
+
+// SpareResourceSetsWithContext gets the spare resource sets used for this filesystem.
+func (filesystem *FileSystem) SpareResourceSetsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetObjectsWithContext[SpareResourceSet](ctx, filesystem.GetClient(), filesystem.spareResourceSets, queryOpts...)
 }

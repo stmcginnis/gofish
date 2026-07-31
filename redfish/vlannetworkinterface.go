@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -66,22 +67,38 @@ func (vlannetworkinterface *VLanNetworkInterface) UnmarshalJSON(b []byte) error 
 
 // Update commits updates to this object's properties to the running system.
 func (vlannetworkinterface *VLanNetworkInterface) Update() error {
+	return vlannetworkinterface.UpdateWithContext(common.ContextOf(vlannetworkinterface.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (vlannetworkinterface *VLanNetworkInterface) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"VLANEnable",
 		"VLANId",
 		"VLANPriority",
 	}
 
-	return vlannetworkinterface.UpdateFromRawData(vlannetworkinterface, vlannetworkinterface.rawData, readWriteFields)
+	return vlannetworkinterface.UpdateFromRawDataWithContext(ctx, vlannetworkinterface, vlannetworkinterface.rawData, readWriteFields)
 }
 
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.
 func GetVLanNetworkInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VLanNetworkInterface, error) {
-	return common.GetObject[VLanNetworkInterface](c, uri, queryOpts...)
+	return GetVLanNetworkInterfaceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetVLanNetworkInterfaceWithContext will get a VLanNetworkInterface instance from the service.
+func GetVLanNetworkInterfaceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VLanNetworkInterface, error) {
+	return common.GetObjectWithContext[VLanNetworkInterface](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from
 // a provided reference.
 func ListReferencedVLanNetworkInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VLanNetworkInterface, error) {
-	return common.GetCollectionObjects[VLanNetworkInterface](c, link, queryOpts...)
+	return ListReferencedVLanNetworkInterfacesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedVLanNetworkInterfacesWithContext gets the collection of VLanNetworkInterface from
+// a provided reference.
+func ListReferencedVLanNetworkInterfacesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VLanNetworkInterface, error) {
+	return common.GetCollectionObjectsWithContext[VLanNetworkInterface](ctx, c, link, queryOpts...)
 }

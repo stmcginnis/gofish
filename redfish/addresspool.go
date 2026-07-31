@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -77,23 +78,44 @@ func (addresspool *AddressPool) UnmarshalJSON(b []byte) error {
 
 // GetAddressPool will get a AddressPool instance from the service.
 func GetAddressPool(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AddressPool, error) {
-	return common.GetObject[AddressPool](c, uri, queryOpts...)
+	return GetAddressPoolWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAddressPoolWithContext will get a AddressPool instance from the service.
+func GetAddressPoolWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AddressPool, error) {
+	return common.GetObjectWithContext[AddressPool](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedAddressPools gets the collection of AddressPool from
 // a provided reference.
 func ListReferencedAddressPools(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AddressPool, error) {
-	return common.GetCollectionObjects[AddressPool](c, link, queryOpts...)
+	return ListReferencedAddressPoolsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedAddressPoolsWithContext gets the collection of AddressPool from
+// a provided reference.
+func ListReferencedAddressPoolsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AddressPool, error) {
+	return common.GetCollectionObjectsWithContext[AddressPool](ctx, c, link, queryOpts...)
 }
 
 // Endpoints gets the endpoints connected to this address pool.
 func (addresspool *AddressPool) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](addresspool.GetClient(), addresspool.endpoints, queryOpts...)
+	return addresspool.EndpointsWithContext(common.ContextOf(addresspool.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the endpoints connected to this address pool.
+func (addresspool *AddressPool) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, addresspool.GetClient(), addresspool.endpoints, queryOpts...)
 }
 
 // Zones gets the zones associated with this address pool.
 func (addresspool *AddressPool) Zones(queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
-	return common.GetObjects[Zone](addresspool.GetClient(), addresspool.zones, queryOpts...)
+	return addresspool.ZonesWithContext(common.ContextOf(addresspool.GetClient()), queryOpts...)
+}
+
+// ZonesWithContext gets the zones associated with this address pool.
+func (addresspool *AddressPool) ZonesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetObjectsWithContext[Zone](ctx, addresspool.GetClient(), addresspool.zones, queryOpts...)
 }
 
 // BFDSingleHopOnly shall contain the BFD-related properties for an Ethernet fabric that uses Bidirectional

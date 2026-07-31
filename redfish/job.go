@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -166,16 +167,32 @@ func (job *Job) UnmarshalJSON(b []byte) error {
 
 // Steps gets the collection of steps for this job.
 func (job *Job) Steps(queryOpts ...common.QueryGroupOption) ([]*Job, error) {
-	return ListReferencedJobs(job.GetClient(), job.steps, queryOpts...)
+	return job.StepsWithContext(common.ContextOf(job.GetClient()), queryOpts...)
+}
+
+// StepsWithContext gets the collection of steps for this job.
+func (job *Job) StepsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Job, error) {
+	return ListReferencedJobsWithContext(ctx, job.GetClient(), job.steps, queryOpts...)
 }
 
 // GetJob will get a Job instance from the service.
 func GetJob(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Job, error) {
-	return common.GetObject[Job](c, uri, queryOpts...)
+	return GetJobWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetJobWithContext will get a Job instance from the service.
+func GetJobWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Job, error) {
+	return common.GetObjectWithContext[Job](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedJobs gets the collection of Job from
 // a provided reference.
 func ListReferencedJobs(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Job, error) {
-	return common.GetCollectionObjects[Job](c, link, queryOpts...)
+	return ListReferencedJobsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedJobsWithContext gets the collection of Job from
+// a provided reference.
+func ListReferencedJobsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Job, error) {
+	return common.GetCollectionObjectsWithContext[Job](ctx, c, link, queryOpts...)
 }

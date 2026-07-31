@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -195,6 +196,11 @@ func (storagegroup *StorageGroup) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (storagegroup *StorageGroup) Update() error {
+	return storagegroup.UpdateWithContext(common.ContextOf(storagegroup.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (storagegroup *StorageGroup) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(StorageGroup)
@@ -214,37 +220,64 @@ func (storagegroup *StorageGroup) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(storagegroup).Elem()
 
-	return storagegroup.Entity.Update(originalElement, currentElement, readWriteFields)
+	return storagegroup.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetStorageGroup will get a StorageGroup instance from the service.
 func GetStorageGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageGroup, error) {
-	return common.GetObject[StorageGroup](c, uri, queryOpts...)
+	return GetStorageGroupWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetStorageGroupWithContext will get a StorageGroup instance from the service.
+func GetStorageGroupWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageGroup, error) {
+	return common.GetObjectWithContext[StorageGroup](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedStorageGroups gets the collection of StorageGroup from
 // a provided reference.
 func ListReferencedStorageGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
-	return common.GetCollectionObjects[StorageGroup](c, link, queryOpts...)
+	return ListReferencedStorageGroupsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedStorageGroupsWithContext gets the collection of StorageGroup from
+// a provided reference.
+func ListReferencedStorageGroupsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetCollectionObjectsWithContext[StorageGroup](ctx, c, link, queryOpts...)
 }
 
 // ChildStorageGroups gets child groups of this group.
 func (storagegroup *StorageGroup) ChildStorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
-	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.childStorageGroups, queryOpts...)
+	return storagegroup.ChildStorageGroupsWithContext(common.ContextOf(storagegroup.GetClient()), queryOpts...)
+}
+
+// ChildStorageGroupsWithContext gets child groups of this group.
+func (storagegroup *StorageGroup) ChildStorageGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetObjectsWithContext[StorageGroup](ctx, storagegroup.GetClient(), storagegroup.childStorageGroups, queryOpts...)
 }
 
 // ParentStorageGroups gets parent groups of this group.
 func (storagegroup *StorageGroup) ParentStorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
-	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.parentStorageGroups, queryOpts...)
+	return storagegroup.ParentStorageGroupsWithContext(common.ContextOf(storagegroup.GetClient()), queryOpts...)
+}
+
+// ParentStorageGroupsWithContext gets parent groups of this group.
+func (storagegroup *StorageGroup) ParentStorageGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetObjectsWithContext[StorageGroup](ctx, storagegroup.GetClient(), storagegroup.parentStorageGroups, queryOpts...)
 }
 
 // ClassOfService gets the ClassOfService that all storage in this StorageGroup
 // conforms to.
 func (storagegroup *StorageGroup) ClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return storagegroup.ClassOfServiceWithContext(common.ContextOf(storagegroup.GetClient()), queryOpts...)
+}
+
+// ClassOfServiceWithContext gets the ClassOfService that all storage in this StorageGroup
+// conforms to.
+func (storagegroup *StorageGroup) ClassOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if storagegroup.classOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storagegroup.GetClient(), storagegroup.classOfService, queryOpts...)
+	return GetClassOfServiceWithContext(ctx, storagegroup.GetClient(), storagegroup.classOfService, queryOpts...)
 }
 
 // MappedVolume is an exposed volume mapping.
@@ -260,7 +293,15 @@ type MappedVolume struct {
 // ClientEndpointGroups.  The property VolumesAreExposed shall be set to true
 // when this action is completed.
 func (storagegroup *StorageGroup) ExposeVolumes() error {
-	err := storagegroup.Post(storagegroup.exposeVolumesTarget, nil)
+	return storagegroup.ExposeVolumesWithContext(common.ContextOf(storagegroup.GetClient()))
+}
+
+// ExposeVolumesWithContext exposes the storage of this group via the target endpoints
+// named in the ServerEndpointGroups to the initiator endpoints named in the
+// ClientEndpointGroups.  The property VolumesAreExposed shall be set to true
+// when this action is completed.
+func (storagegroup *StorageGroup) ExposeVolumesWithContext(ctx context.Context) error {
+	err := storagegroup.PostWithContext(ctx, storagegroup.exposeVolumesTarget, nil)
 	if err == nil {
 		// Only set to exposed if no error. Calling expose when already exposed
 		// could fail so we don't want to indicate they are not exposed.
@@ -273,7 +314,14 @@ func (storagegroup *StorageGroup) ExposeVolumes() error {
 // named in the ClientEndpointGroups. The property VolumesAreExposed shall be
 // set to false when this action is completed.
 func (storagegroup *StorageGroup) HideVolumes() error {
-	err := storagegroup.Post(storagegroup.hideVolumesTarget, nil)
+	return storagegroup.HideVolumesWithContext(common.ContextOf(storagegroup.GetClient()))
+}
+
+// HideVolumesWithContext hides the storage of this group from the initiator endpoints
+// named in the ClientEndpointGroups. The property VolumesAreExposed shall be
+// set to false when this action is completed.
+func (storagegroup *StorageGroup) HideVolumesWithContext(ctx context.Context) error {
+	err := storagegroup.PostWithContext(ctx, storagegroup.hideVolumesTarget, nil)
 	if err == nil {
 		storagegroup.VolumesAreExposed = false
 	}

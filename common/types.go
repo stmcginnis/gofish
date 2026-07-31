@@ -5,6 +5,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,18 +23,33 @@ type ClientSettings struct {
 // Client is a connection to a Redfish service.
 type Client interface {
 	GetSettings() ClientSettings
+	// Context returns the client's cached context, used by the context-free
+	// methods below to delegate to their WithContext variants.
+	Context() context.Context
 	Get(url string) (*http.Response, error)
+	GetWithContext(ctx context.Context, url string) (*http.Response, error)
 	GetWithHeaders(url string, customHeaders map[string]string) (*http.Response, error)
+	GetWithHeadersWithContext(ctx context.Context, url string, customHeaders map[string]string) (*http.Response, error)
 	Post(url string, payload interface{}) (*http.Response, error)
+	PostWithContext(ctx context.Context, url string, payload interface{}) (*http.Response, error)
 	PostWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
+	PostWithHeadersWithContext(ctx context.Context, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
 	PostMultipart(url string, payload map[string]io.Reader) (*http.Response, error)
+	PostMultipartWithContext(ctx context.Context, url string, payload map[string]io.Reader) (*http.Response, error)
 	PostMultipartWithHeaders(url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error)
+	PostMultipartWithHeadersWithContext(ctx context.Context, url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error)
 	Patch(url string, payload interface{}) (*http.Response, error)
+	PatchWithContext(ctx context.Context, url string, payload interface{}) (*http.Response, error)
 	PatchWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
+	PatchWithHeadersWithContext(ctx context.Context, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
 	Put(url string, payload interface{}) (*http.Response, error)
+	PutWithContext(ctx context.Context, url string, payload interface{}) (*http.Response, error)
 	PutWithHeaders(url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
+	PutWithHeadersWithContext(ctx context.Context, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error)
 	Delete(url string) (*http.Response, error)
+	DeleteWithContext(ctx context.Context, url string) (*http.Response, error)
 	DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error)
+	DeleteWithHeadersWithContext(ctx context.Context, url string, customHeaders map[string]string) (*http.Response, error)
 }
 
 // Link is an OData link reference

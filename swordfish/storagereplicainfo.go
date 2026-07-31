@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -464,11 +465,22 @@ type StorageReplicaInfo struct {
 
 // GetStorageReplicaInfo will get a StorageReplicaInfo instance from the service.
 func GetStorageReplicaInfo(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageReplicaInfo, error) {
-	return common.GetObject[StorageReplicaInfo](c, uri, queryOpts...)
+	return GetStorageReplicaInfoWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetStorageReplicaInfoWithContext will get a StorageReplicaInfo instance from the service.
+func GetStorageReplicaInfoWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageReplicaInfo, error) {
+	return common.GetObjectWithContext[StorageReplicaInfo](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedStorageReplicaInfos gets the collection of StorageReplicaInfo from
 // a provided reference.
 func ListReferencedStorageReplicaInfos(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageReplicaInfo, error) {
-	return common.GetCollectionObjects[StorageReplicaInfo](c, link, queryOpts...)
+	return ListReferencedStorageReplicaInfosWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedStorageReplicaInfosWithContext gets the collection of StorageReplicaInfo from
+// a provided reference.
+func ListReferencedStorageReplicaInfosWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageReplicaInfo, error) {
+	return common.GetCollectionObjectsWithContext[StorageReplicaInfo](ctx, c, link, queryOpts...)
 }
