@@ -67,14 +67,14 @@ type Event struct {
 }
 
 // GetEvent will get a Event instance from the service.
-func GetEvent(c common.Client, uri string) (*Event, error) {
-	return common.GetObject[Event](c, uri)
+func GetEvent(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Event, error) {
+	return common.GetObject[Event](c, uri, queryOpts...)
 }
 
 // ListReferencedEvents gets the collection of Event from
 // a provided reference.
-func ListReferencedEvents(c common.Client, link string) ([]*Event, error) {
-	return common.GetCollectionObjects[Event](c, link)
+func ListReferencedEvents(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Event, error) {
+	return common.GetCollectionObjects[Event](c, link, queryOpts...)
 }
 
 // EventRecord
@@ -188,11 +188,11 @@ func (eventrecord *EventRecord) UnmarshalJSON(b []byte) error {
 }
 
 // LogEntry gets the log entry for this event.
-func (eventrecord *EventRecord) LogEntry(c common.Client) (*LogEntry, error) {
+func (eventrecord *EventRecord) LogEntry(c common.Client, queryOpts ...common.QueryGroupOption) (*LogEntry, error) {
 	if eventrecord.logEntry == "" {
 		return nil, nil
 	}
-	return GetLogEntry(c, eventrecord.logEntry)
+	return GetLogEntry(c, eventrecord.logEntry, queryOpts...)
 }
 
 // EventRecordActions shall contain the available actions for this resource.

@@ -63,6 +63,6 @@ func (i *KCSInterface) Update() error {
 }
 
 // GetKCSInterface will get a KCSInterface instance from the service.
-func GetKCSInterface(c common.Client, uri string) (*KCSInterface, error) {
-	return common.GetObject[KCSInterface](c, uri)
+func GetKCSInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KCSInterface, error) {
+	return common.GetObject[KCSInterface](c, uri, queryOpts...)
 }

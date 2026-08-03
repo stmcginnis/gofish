@@ -23,13 +23,13 @@ type ComputerSystem struct {
 }
 
 // NodeManager gets the NodeManager for the system.
-func (cs *ComputerSystem) NodeManager() (*NodeManager, error) {
-	return GetNodeManager(cs.GetClient(), cs.nodeManager)
+func (cs *ComputerSystem) NodeManager(queryOpts ...common.QueryGroupOption) (*NodeManager, error) {
+	return GetNodeManager(cs.GetClient(), cs.nodeManager, queryOpts...)
 }
 
 // FixedBootOrder gets the FixedBootOrder instance for the system.
-func (cs *ComputerSystem) FixedBootOrder() (*FixedBootOrder, error) {
-	return GetFixedBootOrder(cs.GetClient(), cs.fixedBootOrder)
+func (cs *ComputerSystem) FixedBootOrder(queryOpts ...common.QueryGroupOption) (*FixedBootOrder, error) {
+	return GetFixedBootOrder(cs.GetClient(), cs.fixedBootOrder, queryOpts...)
 }
 
 // FromComputerSystem converts a standard ComputerSystem object to the OEM implementation.

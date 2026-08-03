@@ -218,33 +218,33 @@ func (storagegroup *StorageGroup) Update() error {
 }
 
 // GetStorageGroup will get a StorageGroup instance from the service.
-func GetStorageGroup(c common.Client, uri string) (*StorageGroup, error) {
-	return common.GetObject[StorageGroup](c, uri)
+func GetStorageGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageGroup, error) {
+	return common.GetObject[StorageGroup](c, uri, queryOpts...)
 }
 
 // ListReferencedStorageGroups gets the collection of StorageGroup from
 // a provided reference.
-func ListReferencedStorageGroups(c common.Client, link string) ([]*StorageGroup, error) {
-	return common.GetCollectionObjects[StorageGroup](c, link)
+func ListReferencedStorageGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetCollectionObjects[StorageGroup](c, link, queryOpts...)
 }
 
 // ChildStorageGroups gets child groups of this group.
-func (storagegroup *StorageGroup) ChildStorageGroups() ([]*StorageGroup, error) {
-	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.childStorageGroups)
+func (storagegroup *StorageGroup) ChildStorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.childStorageGroups, queryOpts...)
 }
 
 // ParentStorageGroups gets parent groups of this group.
-func (storagegroup *StorageGroup) ParentStorageGroups() ([]*StorageGroup, error) {
-	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.parentStorageGroups)
+func (storagegroup *StorageGroup) ParentStorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetObjects[StorageGroup](storagegroup.GetClient(), storagegroup.parentStorageGroups, queryOpts...)
 }
 
 // ClassOfService gets the ClassOfService that all storage in this StorageGroup
 // conforms to.
-func (storagegroup *StorageGroup) ClassOfService() (*ClassOfService, error) {
+func (storagegroup *StorageGroup) ClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if storagegroup.classOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storagegroup.GetClient(), storagegroup.classOfService)
+	return GetClassOfService(storagegroup.GetClient(), storagegroup.classOfService, queryOpts...)
 }
 
 // MappedVolume is an exposed volume mapping.

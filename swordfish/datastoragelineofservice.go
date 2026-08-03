@@ -93,12 +93,12 @@ func (datastoragelineofservice *DataStorageLineOfService) Update() error {
 }
 
 // GetDataStorageLineOfService will get a DataStorageLineOfService instance from the service.
-func GetDataStorageLineOfService(c common.Client, uri string) (*DataStorageLineOfService, error) {
-	return common.GetObject[DataStorageLineOfService](c, uri)
+func GetDataStorageLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataStorageLineOfService, error) {
+	return common.GetObject[DataStorageLineOfService](c, uri, queryOpts...)
 }
 
 // ListReferencedDataStorageLineOfServices gets the collection of DataStorageLineOfService from
 // a provided reference.
-func ListReferencedDataStorageLineOfServices(c common.Client, link string) ([]*DataStorageLineOfService, error) {
-	return common.GetCollectionObjects[DataStorageLineOfService](c, link)
+func ListReferencedDataStorageLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataStorageLineOfService, error) {
+	return common.GetCollectionObjects[DataStorageLineOfService](c, link, queryOpts...)
 }

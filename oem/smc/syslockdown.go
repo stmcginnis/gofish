@@ -63,6 +63,6 @@ func (i *SysLockdown) Update() error {
 }
 
 // GetSysLockdown will get a SysLockdown instance from the service.
-func GetSysLockdown(c common.Client, uri string) (*SysLockdown, error) {
-	return common.GetObject[SysLockdown](c, uri)
+func GetSysLockdown(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SysLockdown, error) {
+	return common.GetObject[SysLockdown](c, uri, queryOpts...)
 }

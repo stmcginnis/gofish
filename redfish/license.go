@@ -175,17 +175,17 @@ func (license *License) UnmarshalJSON(b []byte) error {
 
 // TargetServices gets a set of Manager objects that represent the services where
 // the license is installed, such as remote Redfish services.
-func (license *License) TargetServices() ([]*Manager, error) {
-	return common.GetObjects[Manager](license.GetClient(), license.targetServices)
+func (license *License) TargetServices(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](license.GetClient(), license.targetServices, queryOpts...)
 }
 
 // GetLicense will get a License instance from the service.
-func GetLicense(c common.Client, uri string) (*License, error) {
-	return common.GetObject[License](c, uri)
+func GetLicense(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*License, error) {
+	return common.GetObject[License](c, uri, queryOpts...)
 }
 
 // ListReferencedLicenses gets the collection of License from
 // a provided reference.
-func ListReferencedLicenses(c common.Client, link string) ([]*License, error) {
-	return common.GetCollectionObjects[License](c, link)
+func ListReferencedLicenses(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*License, error) {
+	return common.GetCollectionObjects[License](c, link, queryOpts...)
 }

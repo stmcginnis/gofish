@@ -83,17 +83,17 @@ func (containerimage *ContainerImage) UnmarshalJSON(b []byte) error {
 }
 
 // GetContainerImage will get a ContainerImage instance from the service.
-func GetContainerImage(c common.Client, uri string) (*ContainerImage, error) {
-	return common.GetObject[ContainerImage](c, uri)
+func GetContainerImage(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ContainerImage, error) {
+	return common.GetObject[ContainerImage](c, uri, queryOpts...)
 }
 
 // ListReferencedContainerImages gets the collection of ContainerImage from
 // a provided reference.
-func ListReferencedContainerImages(c common.Client, link string) ([]*ContainerImage, error) {
-	return common.GetCollectionObjects[ContainerImage](c, link)
+func ListReferencedContainerImages(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ContainerImage, error) {
+	return common.GetCollectionObjects[ContainerImage](c, link, queryOpts...)
 }
 
 // Containers get the container instances using this container image.
-func (containerimage *ContainerImage) Containers() ([]*Container, error) {
-	return common.GetObjects[Container](containerimage.GetClient(), containerimage.containers)
+func (containerimage *ContainerImage) Containers(queryOpts ...common.QueryGroupOption) ([]*Container, error) {
+	return common.GetObjects[Container](containerimage.GetClient(), containerimage.containers, queryOpts...)
 }

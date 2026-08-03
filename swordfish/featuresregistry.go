@@ -38,14 +38,14 @@ type FeaturesRegistry struct {
 }
 
 // GetFeaturesRegistry will get a FeaturesRegistry instance from the service.
-func GetFeaturesRegistry(c common.Client, uri string) (*FeaturesRegistry, error) {
-	return common.GetObject[FeaturesRegistry](c, uri)
+func GetFeaturesRegistry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FeaturesRegistry, error) {
+	return common.GetObject[FeaturesRegistry](c, uri, queryOpts...)
 }
 
 // ListReferencedFeaturesRegistrys gets the collection of FeaturesRegistry from
 // a provided reference.
-func ListReferencedFeaturesRegistrys(c common.Client, link string) ([]*FeaturesRegistry, error) {
-	return common.GetCollectionObjects[FeaturesRegistry](c, link)
+func ListReferencedFeaturesRegistrys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*FeaturesRegistry, error) {
+	return common.GetCollectionObjects[FeaturesRegistry](c, link, queryOpts...)
 }
 
 // FeaturesRegistryProperty shall represent the suffix to be used in the Feature and shall be unique within this

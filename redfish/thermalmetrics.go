@@ -115,12 +115,12 @@ func (thermalmetrics *ThermalMetrics) ResetMetrics() error {
 }
 
 // GetThermalMetrics will get a ThermalMetrics instance from the service.
-func GetThermalMetrics(c common.Client, uri string) (*ThermalMetrics, error) {
-	return common.GetObject[ThermalMetrics](c, uri)
+func GetThermalMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalMetrics, error) {
+	return common.GetObject[ThermalMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedThermalMetricss gets the collection of ThermalMetrics from
 // a provided reference.
-func ListReferencedThermalMetrics(c common.Client, link string) ([]*ThermalMetrics, error) {
-	return common.GetCollectionObjects[ThermalMetrics](c, link)
+func ListReferencedThermalMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalMetrics, error) {
+	return common.GetCollectionObjects[ThermalMetrics](c, link, queryOpts...)
 }

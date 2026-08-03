@@ -176,26 +176,26 @@ func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) Update() err
 }
 
 // GetDataProtectionLoSCapabilities will get a DataProtectionLoSCapabilities instance from the service.
-func GetDataProtectionLoSCapabilities(c common.Client, uri string) (*DataProtectionLoSCapabilities, error) {
-	return common.GetObject[DataProtectionLoSCapabilities](c, uri)
+func GetDataProtectionLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataProtectionLoSCapabilities, error) {
+	return common.GetObject[DataProtectionLoSCapabilities](c, uri, queryOpts...)
 }
 
 // ListReferencedDataProtectionLoSCapabilities gets the collection of DataProtectionLoSCapabilities from
 // a provided reference.
-func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string) ([]*DataProtectionLoSCapabilities, error) {
-	return common.GetCollectionObjects[DataProtectionLoSCapabilities](c, link)
+func ListReferencedDataProtectionLoSCapabilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataProtectionLoSCapabilities, error) {
+	return common.GetCollectionObjects[DataProtectionLoSCapabilities](c, link, queryOpts...)
 }
 
 // SupportedReplicaOptions gets the support replica ClassesOfService.
-func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptions() ([]*ClassOfService, error) {
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedReplicaOptions(queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
 	return common.GetObjects[ClassOfService](
 		dataprotectionloscapabilities.GetClient(),
-		dataprotectionloscapabilities.supportedReplicaOptions)
+		dataprotectionloscapabilities.supportedReplicaOptions, queryOpts...)
 }
 
 // SupportedLinesOfService gets the supported lines of service.
-func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLinesOfService() ([]*DataProtectionLineOfService, error) {
+func (dataprotectionloscapabilities *DataProtectionLoSCapabilities) SupportedLinesOfService(queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
 	return common.GetObjects[DataProtectionLineOfService](
 		dataprotectionloscapabilities.GetClient(),
-		dataprotectionloscapabilities.supportedLinesOfService)
+		dataprotectionloscapabilities.supportedLinesOfService, queryOpts...)
 }

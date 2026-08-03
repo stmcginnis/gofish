@@ -588,243 +588,243 @@ func (chassis *Chassis) Update() error {
 }
 
 // GetChassis will get a Chassis instance from the Redfish service.
-func GetChassis(c common.Client, uri string) (*Chassis, error) {
-	return common.GetObject[Chassis](c, uri)
+func GetChassis(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Chassis, error) {
+	return common.GetObject[Chassis](c, uri, queryOpts...)
 }
 
 // ListReferencedChassis gets the collection of Chassis from a provided reference.
-func ListReferencedChassis(c common.Client, link string) ([]*Chassis, error) {
-	return common.GetCollectionObjects[Chassis](c, link)
+func ListReferencedChassis(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetCollectionObjects[Chassis](c, link, queryOpts...)
 }
 
 // Certificates returns certificates in this Chassis.
-func (chassis *Chassis) Certificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(chassis.GetClient(), chassis.certificates)
+func (chassis *Chassis) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(chassis.GetClient(), chassis.certificates, queryOpts...)
 }
 
 // Controls returns controls in this Chassis.
-func (chassis *Chassis) Controls() ([]*Control, error) {
-	return ListReferencedControls(chassis.GetClient(), chassis.controls)
+func (chassis *Chassis) Controls(queryOpts ...common.QueryGroupOption) ([]*Control, error) {
+	return ListReferencedControls(chassis.GetClient(), chassis.controls, queryOpts...)
 }
 
 // ConnectedCoolingLoops returns a collection of CoolingLoops associated with this Chassis.
-func (chassis *Chassis) ConnectedCoolingLoops() ([]*CoolingLoop, error) {
-	return common.GetObjects[CoolingLoop](chassis.GetClient(), chassis.connectedCoolingLoops)
+func (chassis *Chassis) ConnectedCoolingLoops(queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
+	return common.GetObjects[CoolingLoop](chassis.GetClient(), chassis.connectedCoolingLoops, queryOpts...)
 }
 
 // CoolingUnits returns a collection of CoolingUnits associated with this Chassis.
-func (chassis *Chassis) CoolingUnits() ([]*CoolingUnit, error) {
-	return common.GetObjects[CoolingUnit](chassis.GetClient(), chassis.coolingUnits)
+func (chassis *Chassis) CoolingUnits(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return common.GetObjects[CoolingUnit](chassis.GetClient(), chassis.coolingUnits, queryOpts...)
 }
 
 // Drives gets the drives attached to the storage controllers that this
 // resource represents.
-func (chassis *Chassis) Drives() ([]*Drive, error) {
+func (chassis *Chassis) Drives(queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
 	// In version v1.2.0 of the spec, Drives were added to the Chassis.Links
 	// property. But in v1.14.0 of the spec, Chassis.Drives was added as a
 	// direct property.
 	if chassis.drives != "" {
-		return common.GetCollectionObjects[Drive](chassis.GetClient(), chassis.drives)
+		return common.GetCollectionObjects[Drive](chassis.GetClient(), chassis.drives, queryOpts...)
 	}
 
 	if len(chassis.linkedDrives) > 0 {
-		return common.GetObjects[Drive](chassis.GetClient(), chassis.linkedDrives)
+		return common.GetObjects[Drive](chassis.GetClient(), chassis.linkedDrives, queryOpts...)
 	}
 
 	return []*Drive{}, nil
 }
 
 // EnvironmentMetrics gets the environment metrics for the chassis
-func (chassis *Chassis) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (chassis *Chassis) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if chassis.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(chassis.GetClient(), chassis.environmentMetrics)
+	return GetEnvironmentMetrics(chassis.GetClient(), chassis.environmentMetrics, queryOpts...)
 }
 
 // Facility gets the smallest facility that contains the chassis.
-func (chassis *Chassis) Facility() (*Facility, error) {
+func (chassis *Chassis) Facility(queryOpts ...common.QueryGroupOption) (*Facility, error) {
 	if chassis.facility == "" {
 		return nil, nil
 	}
 
-	return GetFacility(chassis.GetClient(), chassis.facility)
+	return GetFacility(chassis.GetClient(), chassis.facility, queryOpts...)
 }
 
 // Memory gets the memory in the chassis.
-func (chassis *Chassis) Memory() ([]*Memory, error) {
-	return ListReferencedMemorys(chassis.GetClient(), chassis.memory)
+func (chassis *Chassis) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return ListReferencedMemorys(chassis.GetClient(), chassis.memory, queryOpts...)
 }
 
 // MemoryDomains gets the memory domains in the chassis.
-func (chassis *Chassis) MemoryDomains() ([]*MemoryDomain, error) {
-	return ListReferencedMemoryDomains(chassis.GetClient(), chassis.memoryDomains)
+func (chassis *Chassis) MemoryDomains(queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
+	return ListReferencedMemoryDomains(chassis.GetClient(), chassis.memoryDomains, queryOpts...)
 }
 
 // Thermal gets the thermal temperature and cooling information for the chassis
 // This link has been deprecated in favor of the ThermalSubsystem link property.
-func (chassis *Chassis) Thermal() (*Thermal, error) {
+func (chassis *Chassis) Thermal(queryOpts ...common.QueryGroupOption) (*Thermal, error) {
 	if chassis.thermal == "" {
 		return nil, nil
 	}
 
-	return GetThermal(chassis.GetClient(), chassis.thermal)
+	return GetThermal(chassis.GetClient(), chassis.thermal, queryOpts...)
 }
 
 // ThermalSubsystem gets the thermal subsystem for this chassis.
-func (chassis *Chassis) ThermalSubsystem() (*ThermalSubsystem, error) {
+func (chassis *Chassis) ThermalSubsystem(queryOpts ...common.QueryGroupOption) (*ThermalSubsystem, error) {
 	if chassis.thermalSubsystem == "" {
 		return nil, nil
 	}
 
-	return GetThermalSubsystem(chassis.GetClient(), chassis.thermalSubsystem)
+	return GetThermalSubsystem(chassis.GetClient(), chassis.thermalSubsystem, queryOpts...)
 }
 
 // PCIeDevices gets the PCIe devices in the chassis
-func (chassis *Chassis) PCIeDevices() ([]*PCIeDevice, error) {
+func (chassis *Chassis) PCIeDevices(queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
 	if chassis.PCIeDevicesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedPCIeDevices(chassis.GetClient(), chassis.PCIeDevicesLink.String())
+	return ListReferencedPCIeDevices(chassis.GetClient(), chassis.PCIeDevicesLink.String(), queryOpts...)
 }
 
 // PCIeSlots gets the PCIe slots properties for the chassis.
 // This property has been deprecated in favor of the PCIeDevices property. The PCIeSlots schema has been
 // deprecated in favor of the PCIeDevice schema. Empty PCIe slots are represented by PCIeDevice resources
 // using the `Absent` value of the State property within Status.
-func (chassis *Chassis) PCIeSlots() (*PCIeSlots, error) {
+func (chassis *Chassis) PCIeSlots(queryOpts ...common.QueryGroupOption) (*PCIeSlots, error) {
 	if chassis.pcieSlots == "" {
 		return nil, nil
 	}
 
-	return GetPCIeSlots(chassis.GetClient(), chassis.pcieSlots)
+	return GetPCIeSlots(chassis.GetClient(), chassis.pcieSlots, queryOpts...)
 }
 
 // Power gets the power information for the chassis
 // This link has been deprecated in favor of the PowerSubsystem link property.
-func (chassis *Chassis) Power() (*Power, error) {
+func (chassis *Chassis) Power(queryOpts ...common.QueryGroupOption) (*Power, error) {
 	if chassis.power == "" {
 		return nil, nil
 	}
 
-	return GetPower(chassis.GetClient(), chassis.power)
+	return GetPower(chassis.GetClient(), chassis.power, queryOpts...)
 }
 
 // PowerSubsystem gets the power subsystem for the chassis
 // This link has been deprecated in favor of the PowerSubsystem link property.
-func (chassis *Chassis) PowerSubsystem() (*PowerSubsystem, error) {
+func (chassis *Chassis) PowerSubsystem(queryOpts ...common.QueryGroupOption) (*PowerSubsystem, error) {
 	if chassis.powerSubsystem == "" {
 		return nil, nil
 	}
 
-	return GetPowerSubsystem(chassis.GetClient(), chassis.powerSubsystem)
+	return GetPowerSubsystem(chassis.GetClient(), chassis.powerSubsystem, queryOpts...)
 }
 
 // Cables gets the connected cables.
-func (chassis *Chassis) Cables() ([]*Cable, error) {
-	return common.GetObjects[Cable](chassis.GetClient(), chassis.cables)
+func (chassis *Chassis) Cables(queryOpts ...common.QueryGroupOption) ([]*Cable, error) {
+	return common.GetObjects[Cable](chassis.GetClient(), chassis.cables, queryOpts...)
 }
 
 // ComputerSystems returns the collection of systems from this chassis
-func (chassis *Chassis) ComputerSystems() ([]*ComputerSystem, error) {
-	return common.GetObjects[ComputerSystem](chassis.GetClient(), chassis.computerSystems)
+func (chassis *Chassis) ComputerSystems(queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetObjects[ComputerSystem](chassis.GetClient(), chassis.computerSystems, queryOpts...)
 }
 
 // ContainedBy gets the chassis that contains this chassis. The result is nil
 // if this chassis is not contained by another one.
-func (chassis *Chassis) ContainedBy() (*Chassis, error) {
+func (chassis *Chassis) ContainedBy(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if chassis.containedBy == "" {
 		return nil, nil
 	}
-	return GetChassis(chassis.GetClient(), chassis.containedBy)
+	return GetChassis(chassis.GetClient(), chassis.containedBy, queryOpts...)
 }
 
 // Contains gets the chassis instances that this chassis contains.
-func (chassis *Chassis) Contains() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](chassis.GetClient(), chassis.contains)
+func (chassis *Chassis) Contains(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](chassis.GetClient(), chassis.contains, queryOpts...)
 }
 
 // Fans gets the the fans that provide cooling to this chassis. This property shall not be present if the
 // ThermalManagedByParent property contains `true` or if the fans are contained in the ThermalSubsystem
 // resource for this chassis.
-func (chassis *Chassis) Fans() ([]*Fan, error) {
-	return common.GetObjects[Fan](chassis.GetClient(), chassis.fans)
+func (chassis *Chassis) Fans(queryOpts ...common.QueryGroupOption) ([]*Fan, error) {
+	return common.GetObjects[Fan](chassis.GetClient(), chassis.fans, queryOpts...)
 }
 
 // ManagedBy gets the collection of managers of this chassis
-func (chassis *Chassis) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](chassis.GetClient(), chassis.managedBy)
+func (chassis *Chassis) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](chassis.GetClient(), chassis.managedBy, queryOpts...)
 }
 
 // ManagersInChassis gets the managers contained in this chassis.
-func (chassis *Chassis) ManagersInChassis() ([]*Manager, error) {
-	return common.GetObjects[Manager](chassis.GetClient(), chassis.managersInChassis)
+func (chassis *Chassis) ManagersInChassis(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](chassis.GetClient(), chassis.managersInChassis, queryOpts...)
 }
 
 // PowerDistribution gets the power distribution functionality contained within this chassis.
-func (chassis *Chassis) PowerDistribution() (*PowerDistribution, error) {
+func (chassis *Chassis) PowerDistribution(queryOpts ...common.QueryGroupOption) (*PowerDistribution, error) {
 	if chassis.powerDistribution == "" {
 		return nil, nil
 	}
-	return GetPowerDistribution(chassis.GetClient(), chassis.powerDistribution)
+	return GetPowerDistribution(chassis.GetClient(), chassis.powerDistribution, queryOpts...)
 }
 
 // PowerOutlets gets the power outlets in this chassis.
-func (chassis *Chassis) PowerOutlets() ([]*Outlet, error) {
-	return common.GetObjects[Outlet](chassis.GetClient(), chassis.powerOutlets)
+func (chassis *Chassis) PowerOutlets(queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
+	return common.GetObjects[Outlet](chassis.GetClient(), chassis.powerOutlets, queryOpts...)
 }
 
 // PowerSupplies gets the power supplies that provide power to this chassis. This property shall not be
 // present if the PoweredByParent property contains 'true' or if the power supplies are contained in the
 // PowerSubsystem resource for this chassis.
-func (chassis *Chassis) PowerSupplies() ([]*PowerSupply, error) {
-	return common.GetObjects[PowerSupply](chassis.GetClient(), chassis.powerSupplies)
+func (chassis *Chassis) PowerSupplies(queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
+	return common.GetObjects[PowerSupply](chassis.GetClient(), chassis.powerSupplies, queryOpts...)
 }
 
 // Processors returns the collection of systems from this chassis.
 // Added in v1.25.0.
-func (chassis *Chassis) Processors() ([]*Processor, error) {
-	return ListReferencedProcessors(chassis.GetClient(), chassis.processors)
+func (chassis *Chassis) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return ListReferencedProcessors(chassis.GetClient(), chassis.processors, queryOpts...)
 }
 
 // ResourceBlocks gets the resource blocks located in this chassis.
-func (chassis *Chassis) ResourceBlocks() ([]*ResourceBlock, error) {
-	return common.GetObjects[ResourceBlock](chassis.GetClient(), chassis.resourceBlocks)
+func (chassis *Chassis) ResourceBlocks(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return common.GetObjects[ResourceBlock](chassis.GetClient(), chassis.resourceBlocks, queryOpts...)
 }
 
 // Storage gets the storage subsystems connected to or inside this chassis.
-func (chassis *Chassis) Storage() ([]*Storage, error) {
-	return common.GetObjects[Storage](chassis.GetClient(), chassis.storage)
+func (chassis *Chassis) Storage(queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return common.GetObjects[Storage](chassis.GetClient(), chassis.storage, queryOpts...)
 }
 
 // Sensors gets the collection of sensors located in the equipment and sub-components of this chassis
-func (chassis *Chassis) Sensors() ([]*Sensor, error) {
-	return ListReferencedSensors(chassis.GetClient(), chassis.sensors)
+func (chassis *Chassis) Sensors(queryOpts ...common.QueryGroupOption) ([]*Sensor, error) {
+	return ListReferencedSensors(chassis.GetClient(), chassis.sensors, queryOpts...)
 }
 
 // Switches gets the switches in this chassis.
-func (chassis *Chassis) Switches() ([]*Switch, error) {
-	return common.GetObjects[Switch](chassis.GetClient(), chassis.switches)
+func (chassis *Chassis) Switches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetObjects[Switch](chassis.GetClient(), chassis.switches, queryOpts...)
 }
 
 // NetworkAdapters gets the collection of network adapters of this chassis
-func (chassis *Chassis) NetworkAdapters() ([]*NetworkAdapter, error) {
+func (chassis *Chassis) NetworkAdapters(queryOpts ...common.QueryGroupOption) ([]*NetworkAdapter, error) {
 	if chassis.networkAdapters == "" {
 		return nil, nil
 	}
-	return ListReferencedNetworkAdapter(chassis.GetClient(), chassis.networkAdapters)
+	return ListReferencedNetworkAdapter(chassis.GetClient(), chassis.networkAdapters, queryOpts...)
 }
 
 // LogServices get this chassis's log services.
-func (chassis *Chassis) LogServices() ([]*LogService, error) {
-	return ListReferencedLogServices(chassis.GetClient(), chassis.logServices)
+func (chassis *Chassis) LogServices(queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
+	return ListReferencedLogServices(chassis.GetClient(), chassis.logServices, queryOpts...)
 }
 
 // The Assembly schema defines an assembly.
 // Assembly information contains details about a device, such as part number, serial number, manufacturer, and production date.
 // It also provides access to the original data for the assembly.
-func (chassis *Chassis) Assembly() (*Assembly, error) {
-	return GetAssembly(chassis.GetClient(), chassis.assembly)
+func (chassis *Chassis) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return GetAssembly(chassis.GetClient(), chassis.assembly, queryOpts...)
 }
 
 // GetSupportedResetTypes returns any reset types that the Chassis declares as supported
@@ -892,10 +892,10 @@ func (chassis *Chassis) Reset(resetType ResetType) error {
 }
 
 // LeakDetectors gets the collection of leak detectors for this chassis.
-func (chassis *Chassis) LeakDetectors() ([]*LeakDetector, error) {
+func (chassis *Chassis) LeakDetectors(queryOpts ...common.QueryGroupOption) ([]*LeakDetector, error) {
 	if chassis.leakdetectors == "" {
 		return nil, nil
 	}
 
-	return ListReferencedLeakDetectors(chassis.GetClient(), chassis.leakdetectors)
+	return ListReferencedLeakDetectors(chassis.GetClient(), chassis.leakdetectors, queryOpts...)
 }

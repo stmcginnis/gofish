@@ -67,12 +67,12 @@ func (routesetentry *RouteSetEntry) Update() error {
 }
 
 // GetRouteSetEntry will get a RouteSetEntry instance from the service.
-func GetRouteSetEntry(c common.Client, uri string) (*RouteSetEntry, error) {
-	return common.GetObject[RouteSetEntry](c, uri)
+func GetRouteSetEntry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RouteSetEntry, error) {
+	return common.GetObject[RouteSetEntry](c, uri, queryOpts...)
 }
 
 // ListReferencedRouteSetEntrys gets the collection of RouteSetEntry from
 // a provided reference.
-func ListReferencedRouteSetEntrys(c common.Client, link string) ([]*RouteSetEntry, error) {
-	return common.GetCollectionObjects[RouteSetEntry](c, link)
+func ListReferencedRouteSetEntrys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*RouteSetEntry, error) {
+	return common.GetCollectionObjects[RouteSetEntry](c, link, queryOpts...)
 }

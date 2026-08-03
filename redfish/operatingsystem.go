@@ -188,37 +188,37 @@ func (operatingsystem *OperatingSystem) UnmarshalJSON(b []byte) error {
 }
 
 // SoftwareImage gets the software image from which this operating system runs.
-func (operatingsystem *OperatingSystem) SoftwareImage() (*SoftwareInventory, error) {
+func (operatingsystem *OperatingSystem) SoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if operatingsystem.softwareImage == "" {
 		return nil, nil
 	}
-	return GetSoftwareInventory(operatingsystem.GetClient(), operatingsystem.softwareImage)
+	return GetSoftwareInventory(operatingsystem.GetClient(), operatingsystem.softwareImage, queryOpts...)
 }
 
 // Applications gets the applications running under this operating system.
-func (operatingsystem *OperatingSystem) Applications() ([]*Application, error) {
-	return ListReferencedApplications(operatingsystem.GetClient(), operatingsystem.applications)
+func (operatingsystem *OperatingSystem) Applications(queryOpts ...common.QueryGroupOption) ([]*Application, error) {
+	return ListReferencedApplications(operatingsystem.GetClient(), operatingsystem.applications, queryOpts...)
 }
 
 // ContainerImages gets the container images available to container engines on this operating system.
-func (operatingsystem *OperatingSystem) ContainerImages() ([]*ContainerImage, error) {
-	return ListReferencedContainerImages(operatingsystem.GetClient(), operatingsystem.containerImages)
+func (operatingsystem *OperatingSystem) ContainerImages(queryOpts ...common.QueryGroupOption) ([]*ContainerImage, error) {
+	return ListReferencedContainerImages(operatingsystem.GetClient(), operatingsystem.containerImages, queryOpts...)
 }
 
 // Containers gets the containers running under this operating system.
-func (operatingsystem *OperatingSystem) Containers() ([]*Container, error) {
-	return ListReferencedContainers(operatingsystem.GetClient(), operatingsystem.containers)
+func (operatingsystem *OperatingSystem) Containers(queryOpts ...common.QueryGroupOption) ([]*Container, error) {
+	return ListReferencedContainers(operatingsystem.GetClient(), operatingsystem.containers, queryOpts...)
 }
 
 // GetOperatingSystem will get a OperatingSystem instance from the service.
-func GetOperatingSystem(c common.Client, uri string) (*OperatingSystem, error) {
-	return common.GetObject[OperatingSystem](c, uri)
+func GetOperatingSystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OperatingSystem, error) {
+	return common.GetObject[OperatingSystem](c, uri, queryOpts...)
 }
 
 // ListReferencedOperatingSystems gets the collection of OperatingSystem from
 // a provided reference.
-func ListReferencedOperatingSystems(c common.Client, link string) ([]*OperatingSystem, error) {
-	return common.GetCollectionObjects[OperatingSystem](c, link)
+func ListReferencedOperatingSystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OperatingSystem, error) {
+	return common.GetCollectionObjects[OperatingSystem](c, link, queryOpts...)
 }
 
 // VirtualMachineEngine shall contain a virtual machine engine running in an operating system.

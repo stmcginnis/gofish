@@ -63,8 +63,8 @@ func (sessionservice *SessionService) UnmarshalJSON(b []byte) error {
 }
 
 // Sessions gets a collection of sessions.
-func (sessionservice *SessionService) Sessions() ([]*Session, error) {
-	return ListReferencedSessions(sessionservice.GetClient(), sessionservice.sessions)
+func (sessionservice *SessionService) Sessions(queryOpts ...common.QueryGroupOption) ([]*Session, error) {
+	return ListReferencedSessions(sessionservice.GetClient(), sessionservice.sessions, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -76,12 +76,12 @@ func (sessionservice *SessionService) Update() error {
 }
 
 // GetSessionService will get a SessionService instance from the service.
-func GetSessionService(c common.Client, uri string) (*SessionService, error) {
-	return common.GetObject[SessionService](c, uri)
+func GetSessionService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SessionService, error) {
+	return common.GetObject[SessionService](c, uri, queryOpts...)
 }
 
 // ListReferencedSessionServices gets the collection of SessionService from
 // a provided reference.
-func ListReferencedSessionServices(c common.Client, link string) ([]*SessionService, error) {
-	return common.GetCollectionObjects[SessionService](c, link)
+func ListReferencedSessionServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SessionService, error) {
+	return common.GetCollectionObjects[SessionService](c, link, queryOpts...)
 }

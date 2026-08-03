@@ -261,14 +261,14 @@ func (networkport *NetworkPort) Update() error {
 }
 
 // GetNetworkPort will get a NetworkPort instance from the service.
-func GetNetworkPort(c common.Client, uri string) (*NetworkPort, error) {
-	return common.GetObject[NetworkPort](c, uri)
+func GetNetworkPort(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkPort, error) {
+	return common.GetObject[NetworkPort](c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkPorts gets the collection of NetworkPort from
 // a provided reference.
-func ListReferencedNetworkPorts(c common.Client, link string) ([]*NetworkPort, error) {
-	return common.GetCollectionObjects[NetworkPort](c, link)
+func ListReferencedNetworkPorts(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
+	return common.GetCollectionObjects[NetworkPort](c, link, queryOpts...)
 }
 
 // SupportedLinkCapabilities shall describe the static capabilities of an

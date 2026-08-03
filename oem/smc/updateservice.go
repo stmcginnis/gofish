@@ -48,8 +48,8 @@ func (cert *SSLCert) UnmarshalJSON(b []byte) error {
 
 // GetSSLCert will get the SSLCert instance from the Redfish
 // service.
-func GetSSLCert(c common.Client, uri string) (*SSLCert, error) {
-	return common.GetObject[SSLCert](c, uri)
+func GetSSLCert(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SSLCert, error) {
+	return common.GetObject[SSLCert](c, uri, queryOpts...)
 }
 
 // Upload will update the SSL certificate on the BMC with the provided certificate and key.
@@ -102,8 +102,8 @@ func (ipmi *IPMIConfig) UnmarshalJSON(b []byte) error {
 
 // GetIPMIConfig will get the IPMIConfig instance from the Redfish
 // service.
-func GetIPMIConfig(c common.Client, uri string) (*IPMIConfig, error) {
-	return common.GetObject[IPMIConfig](c, uri)
+func GetIPMIConfig(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IPMIConfig, error) {
+	return common.GetObject[IPMIConfig](c, uri, queryOpts...)
 }
 
 // Upload restores a saved IPMI configuration.
@@ -174,8 +174,8 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 }
 
 // GetUpdateService will get a UpdateService instance from the service.
-func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri)
+func GetUpdateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
+	return common.GetObject[UpdateService](c, uri, queryOpts...)
 }
 
 // Install performs the installation of an update.
@@ -191,11 +191,11 @@ func (us *UpdateService) Install(targets, installOptions []string) error {
 }
 
 // SSLCert will get the SSLCert information from the service.
-func (us *UpdateService) SSLCert() (*SSLCert, error) {
-	return GetSSLCert(us.GetClient(), us.sslCert)
+func (us *UpdateService) SSLCert(queryOpts ...common.QueryGroupOption) (*SSLCert, error) {
+	return GetSSLCert(us.GetClient(), us.sslCert, queryOpts...)
 }
 
 // IPMIConfig will get the IPMIConfig information from the service.
-func (us *UpdateService) IPMIConfig() (*IPMIConfig, error) {
-	return GetIPMIConfig(us.GetClient(), us.ipmiConfig)
+func (us *UpdateService) IPMIConfig(queryOpts ...common.QueryGroupOption) (*IPMIConfig, error) {
+	return GetIPMIConfig(us.GetClient(), us.ipmiConfig, queryOpts...)
 }

@@ -129,17 +129,17 @@ func (endpointgroup *EndpointGroup) Update() error {
 }
 
 // GetEndpointGroup will get a EndpointGroup instance from the service.
-func GetEndpointGroup(c common.Client, uri string) (*EndpointGroup, error) {
-	return common.GetObject[EndpointGroup](c, uri)
+func GetEndpointGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EndpointGroup, error) {
+	return common.GetObject[EndpointGroup](c, uri, queryOpts...)
 }
 
 // ListReferencedEndpointGroups gets the collection of EndpointGroup from
 // a provided reference.
-func ListReferencedEndpointGroups(c common.Client, link string) ([]*EndpointGroup, error) {
-	return common.GetCollectionObjects[EndpointGroup](c, link)
+func ListReferencedEndpointGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return common.GetCollectionObjects[EndpointGroup](c, link, queryOpts...)
 }
 
 // Endpoints gets the group's endpoints.
-func (endpointgroup *EndpointGroup) Endpoints() ([]*redfish.Endpoint, error) {
-	return redfish.ListReferencedEndpoints(endpointgroup.GetClient(), endpointgroup.endpoints)
+func (endpointgroup *EndpointGroup) Endpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return redfish.ListReferencedEndpoints(endpointgroup.GetClient(), endpointgroup.endpoints, queryOpts...)
 }

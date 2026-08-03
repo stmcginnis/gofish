@@ -113,35 +113,35 @@ func (memorydomain *MemoryDomain) UnmarshalJSON(b []byte) error {
 
 // CXLLogicalDevices gets the CXLLogicalDevice that represent the CXL logical devices
 // that are associated with this memory domain.
-func (memorydomain *MemoryDomain) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
-	return common.GetObjects[CXLLogicalDevice](memorydomain.GetClient(), memorydomain.cxlLogicalDevices)
+func (memorydomain *MemoryDomain) CXLLogicalDevices(queryOpts ...common.QueryGroupOption) ([]*CXLLogicalDevice, error) {
+	return common.GetObjects[CXLLogicalDevice](memorydomain.GetClient(), memorydomain.cxlLogicalDevices, queryOpts...)
 }
 
 // FabricAdapters gets the fabric adapters that present this memory domain to a fabric.
-func (memorydomain *MemoryDomain) FabricAdapters() ([]*FabricAdapter, error) {
-	return common.GetObjects[FabricAdapter](memorydomain.GetClient(), memorydomain.fabricAdapters)
+func (memorydomain *MemoryDomain) FabricAdapters(queryOpts ...common.QueryGroupOption) ([]*FabricAdapter, error) {
+	return common.GetObjects[FabricAdapter](memorydomain.GetClient(), memorydomain.fabricAdapters, queryOpts...)
 }
 
 // MediaControllers gets the media controllers for this memory domain.
 // This property has been deprecated in favor of the FabricAdapters property.
-func (memorydomain *MemoryDomain) MediaControllers() ([]*MediaController, error) {
-	return common.GetObjects[MediaController](memorydomain.GetClient(), memorydomain.mediaControllers)
+func (memorydomain *MemoryDomain) MediaControllers(queryOpts ...common.QueryGroupOption) ([]*MediaController, error) {
+	return common.GetObjects[MediaController](memorydomain.GetClient(), memorydomain.mediaControllers, queryOpts...)
 }
 
 // PCIeFunctions gets the PCIe functions representing this memory domain.
-func (memorydomain *MemoryDomain) PCIeFunctions() ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](memorydomain.GetClient(), memorydomain.pcieFunctions)
+func (memorydomain *MemoryDomain) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](memorydomain.GetClient(), memorydomain.pcieFunctions, queryOpts...)
 }
 
 // GetMemoryDomain will get a MemoryDomain instance from the service.
-func GetMemoryDomain(c common.Client, uri string) (*MemoryDomain, error) {
-	return common.GetObject[MemoryDomain](c, uri)
+func GetMemoryDomain(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryDomain, error) {
+	return common.GetObject[MemoryDomain](c, uri, queryOpts...)
 }
 
 // ListReferencedMemoryDomains gets the collection of MemoryDomain from
 // a provided reference.
-func ListReferencedMemoryDomains(c common.Client, link string) ([]*MemoryDomain, error) {
-	return common.GetCollectionObjects[MemoryDomain](c, link)
+func ListReferencedMemoryDomains(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
+	return common.GetCollectionObjects[MemoryDomain](c, link, queryOpts...)
 }
 
 // MemorySet shall represent the interleave sets for a memory chunk.
@@ -173,6 +173,6 @@ func (memoryset *MemorySet) UnmarshalJSON(b []byte) error {
 }
 
 // MemorySet gets the Memory objects that are part of this set.
-func (memoryset *MemorySet) MemorySet(c common.Client) ([]*Memory, error) {
-	return common.GetObjects[Memory](c, memoryset.memorySet)
+func (memoryset *MemorySet) MemorySet(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetObjects[Memory](c, memoryset.memorySet, queryOpts...)
 }

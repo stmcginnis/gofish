@@ -99,13 +99,13 @@ func (spdmpolicy *SPDMPolicy) UnmarshalJSON(b []byte) error {
 }
 
 // RevokedCertificates gets the set of revoked SPDM device certificates.
-func (spdmpolicy *SPDMPolicy) RevokedCertificates(c common.Client) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, spdmpolicy.revokedCertificates)
+func (spdmpolicy *SPDMPolicy) RevokedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(c, spdmpolicy.revokedCertificates, queryOpts...)
 }
 
 // TrustedCertificates gets the set of trusted SPDM device certificates.
-func (spdmpolicy *SPDMPolicy) TrustedCertificates(c common.Client) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, spdmpolicy.trustedCertificates)
+func (spdmpolicy *SPDMPolicy) TrustedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(c, spdmpolicy.trustedCertificates, queryOpts...)
 }
 
 // SecurityPolicy shall represent configurable security-related policies managed by a manager. All security
@@ -167,14 +167,14 @@ func (securitypolicy *SecurityPolicy) Update() error {
 }
 
 // GetSecurityPolicy will get a SecurityPolicy instance from the service.
-func GetSecurityPolicy(c common.Client, uri string) (*SecurityPolicy, error) {
-	return common.GetObject[SecurityPolicy](c, uri)
+func GetSecurityPolicy(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SecurityPolicy, error) {
+	return common.GetObject[SecurityPolicy](c, uri, queryOpts...)
 }
 
 // ListReferencedSecurityPolicys gets the collection of SecurityPolicy from
 // a provided reference.
-func ListReferencedSecurityPolicys(c common.Client, link string) ([]*SecurityPolicy, error) {
-	return common.GetCollectionObjects[SecurityPolicy](c, link)
+func ListReferencedSecurityPolicys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SecurityPolicy, error) {
+	return common.GetCollectionObjects[SecurityPolicy](c, link, queryOpts...)
 }
 
 // TLSAlgorithmSet shall contain TLS algorithm settings.
@@ -271,11 +271,11 @@ func (tlspolicy *TLSPolicy) UnmarshalJSON(b []byte) error {
 }
 
 // RevokedCertificates gets the set of revoked TLS certificates.
-func (tlspolicy *TLSPolicy) RevokedCertificates(c common.Client) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, tlspolicy.revokedCertificates)
+func (tlspolicy *TLSPolicy) RevokedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(c, tlspolicy.revokedCertificates, queryOpts...)
 }
 
 // TrustedCertificates gets the set of trusted TLS certificates.
-func (tlspolicy *TLSPolicy) TrustedCertificates(c common.Client) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, tlspolicy.trustedCertificates)
+func (tlspolicy *TLSPolicy) TrustedCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(c, tlspolicy.trustedCertificates, queryOpts...)
 }

@@ -71,6 +71,6 @@ func (r *NTP) Update() error {
 }
 
 // GetNTP will get a NTP instance from the service.
-func GetNTP(c common.Client, uri string) (*NTP, error) {
-	return common.GetObject[NTP](c, uri)
+func GetNTP(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NTP, error) {
+	return common.GetObject[NTP](c, uri, queryOpts...)
 }

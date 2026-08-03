@@ -131,8 +131,8 @@ func (outletgroup *OutletGroup) ResetMetrics() error {
 }
 
 // Outlets get the outlets that are in this outlet group.
-func (outletgroup *OutletGroup) Outlets() ([]*Outlet, error) {
-	return common.GetObjects[Outlet](outletgroup.GetClient(), outletgroup.outlets)
+func (outletgroup *OutletGroup) Outlets(queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
+	return common.GetObjects[Outlet](outletgroup.GetClient(), outletgroup.outlets, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -152,12 +152,12 @@ func (outletgroup *OutletGroup) Update() error {
 }
 
 // GetOutletGroup will get a OutletGroup instance from the service.
-func GetOutletGroup(c common.Client, uri string) (*OutletGroup, error) {
-	return common.GetObject[OutletGroup](c, uri)
+func GetOutletGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OutletGroup, error) {
+	return common.GetObject[OutletGroup](c, uri, queryOpts...)
 }
 
 // ListReferencedOutletGroups gets the collection of OutletGroup from
 // a provided reference.
-func ListReferencedOutletGroups(c common.Client, link string) ([]*OutletGroup, error) {
-	return common.GetCollectionObjects[OutletGroup](c, link)
+func ListReferencedOutletGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OutletGroup, error) {
+	return common.GetCollectionObjects[OutletGroup](c, link, queryOpts...)
 }

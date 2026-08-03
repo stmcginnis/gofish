@@ -794,136 +794,136 @@ func (volume *Volume) Update() error {
 }
 
 // GetVolume will get a Volume instance from the service.
-func GetVolume(c common.Client, uri string) (*Volume, error) {
-	return common.GetObject[Volume](c, uri)
+func GetVolume(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Volume, error) {
+	return common.GetObject[Volume](c, uri, queryOpts...)
 }
 
 // ListReferencedVolumes gets the collection of Volume from a provided reference.
-func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
-	return common.GetCollectionObjects[Volume](c, link)
+func ListReferencedVolumes(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetCollectionObjects[Volume](c, link, queryOpts...)
 }
 
 // CacheDataVolumes gets the data volumes this volume serves as a cache volume.
-func (volume *Volume) CacheDataVolumes() ([]*Volume, error) {
-	return common.GetObjects[Volume](volume.GetClient(), volume.cacheDataVolumes)
+func (volume *Volume) CacheDataVolumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetObjects[Volume](volume.GetClient(), volume.cacheDataVolumes, queryOpts...)
 }
 
 // CacheVolumeSources gets the cache volume source for this volume.
-func (volume *Volume) CacheVolumeSource() (*Volume, error) {
+func (volume *Volume) CacheVolumeSource(queryOpts ...common.QueryGroupOption) (*Volume, error) {
 	if volume.cacheVolumeSource == "" {
 		return nil, nil
 	}
 
-	return GetVolume(volume.GetClient(), volume.cacheVolumeSource)
+	return GetVolume(volume.GetClient(), volume.cacheVolumeSource, queryOpts...)
 }
 
 // ClassOfService gets the class of service that this storage volume conforms to.
-func (volume *Volume) ClassOfService() (*ClassOfService, error) {
+func (volume *Volume) ClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if volume.classOfService == "" {
 		return nil, nil
 	}
 
-	return GetClassOfService(volume.GetClient(), volume.classOfService)
+	return GetClassOfService(volume.GetClient(), volume.classOfService, queryOpts...)
 }
 
 // ClientEndpoints gets the client Endpoints associated with this volume.
-func (volume *Volume) ClientEndpoints() ([]*redfish.Endpoint, error) {
-	return common.GetObjects[redfish.Endpoint](volume.GetClient(), volume.clientEndpoints)
+func (volume *Volume) ClientEndpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return common.GetObjects[redfish.Endpoint](volume.GetClient(), volume.clientEndpoints, queryOpts...)
 }
 
 // ConsistencyGroups gets the ConsistencyGroups associated with this volume.
-func (volume *Volume) ConsistencyGroups() ([]*ConsistencyGroup, error) {
-	return common.GetObjects[ConsistencyGroup](volume.GetClient(), volume.consistencyGroups)
+func (volume *Volume) ConsistencyGroups(queryOpts ...common.QueryGroupOption) ([]*ConsistencyGroup, error) {
+	return common.GetObjects[ConsistencyGroup](volume.GetClient(), volume.consistencyGroups, queryOpts...)
 }
 
 // Controllers gets the controllers (of type StorageController) associated with
 // this volume. When the volume is of type NVMe, these may be both the physical
 // and logical controller representations.
-func (volume *Volume) Controllers() ([]*redfish.StorageController, error) {
-	return common.GetObjects[redfish.StorageController](volume.GetClient(), volume.controllers)
+func (volume *Volume) Controllers(queryOpts ...common.QueryGroupOption) ([]*redfish.StorageController, error) {
+	return common.GetObjects[redfish.StorageController](volume.GetClient(), volume.controllers, queryOpts...)
 }
 
 // getDrives gets a set of referenced drives.
-func (volume *Volume) getDrives(links []string) ([]*redfish.Drive, error) {
-	return common.GetObjects[redfish.Drive](volume.GetClient(), links)
+func (volume *Volume) getDrives(links []string, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return common.GetObjects[redfish.Drive](volume.GetClient(), links, queryOpts...)
 }
 
 // DedicatedSpareDrives references the Drives that are dedicated spares for this
 // volume.
-func (volume *Volume) DedicatedSpareDrives() ([]*redfish.Drive, error) {
-	return volume.getDrives(volume.dedicatedSpareDrives)
+func (volume *Volume) DedicatedSpareDrives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return volume.getDrives(volume.dedicatedSpareDrives, queryOpts...)
 }
 
 // Drives references the Drives that are associated with this volume.
-func (volume *Volume) Drives() ([]*redfish.Drive, error) {
-	return volume.getDrives(volume.drives)
+func (volume *Volume) Drives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return volume.getDrives(volume.drives, queryOpts...)
 }
 
 // OwningStorageResource gets the Storage resource that owns or contains this volume.
-func (volume *Volume) OwningStorageResource() (*redfish.Storage, error) {
+func (volume *Volume) OwningStorageResource(queryOpts ...common.QueryGroupOption) (*redfish.Storage, error) {
 	if volume.owningStorageResource == "" {
 		return nil, nil
 	}
 
-	return redfish.GetStorage(volume.GetClient(), volume.owningStorageResource)
+	return redfish.GetStorage(volume.GetClient(), volume.owningStorageResource, queryOpts...)
 }
 
 // OwningStorageService gets the StorageService that owns or contains this volume.
-func (volume *Volume) OwningStorageService() (*StorageService, error) {
+func (volume *Volume) OwningStorageService(queryOpts ...common.QueryGroupOption) (*StorageService, error) {
 	if volume.owningStorageService == "" {
 		return nil, nil
 	}
 
-	return GetStorageService(volume.GetClient(), volume.owningStorageService)
+	return GetStorageService(volume.GetClient(), volume.owningStorageService, queryOpts...)
 }
 
 // ProvidingStoragePool gets the StoragePool resource that provides this volume resource.
-func (volume *Volume) ProvidingStoragePool() (*StoragePool, error) {
+func (volume *Volume) ProvidingStoragePool(queryOpts ...common.QueryGroupOption) (*StoragePool, error) {
 	if volume.providingStoragePool == "" {
 		return nil, nil
 	}
 
-	return GetStoragePool(volume.GetClient(), volume.providingStoragePool)
+	return GetStoragePool(volume.GetClient(), volume.providingStoragePool, queryOpts...)
 }
 
 // ServerEndpoints gets the server Endpoints associated with this volume.
-func (volume *Volume) ServerEndpoints() ([]*redfish.Endpoint, error) {
-	return common.GetObjects[redfish.Endpoint](volume.GetClient(), volume.serverEndpoints)
+func (volume *Volume) ServerEndpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return common.GetObjects[redfish.Endpoint](volume.GetClient(), volume.serverEndpoints, queryOpts...)
 }
 
 // SpareResourceSets gets the spare resources that can be used for this volume.
-func (volume *Volume) SpareResourceSets() ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](volume.GetClient(), volume.spareResourceSets)
+func (volume *Volume) SpareResourceSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetObjects[SpareResourceSet](volume.GetClient(), volume.spareResourceSets, queryOpts...)
 }
 
 // StorageGroups gets the storage groups that associated with this volume.
 // This property is deprecated in favor of the Connections property.
-func (volume *Volume) StorageGroups() ([]*StorageGroup, error) {
-	return common.GetObjects[StorageGroup](volume.GetClient(), volume.storageGroups)
+func (volume *Volume) StorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetObjects[StorageGroup](volume.GetClient(), volume.storageGroups, queryOpts...)
 }
 
 // AllocatedPools gets the storage pools that associated with this volume.
-func (volume *Volume) AllocatedPools() ([]*StoragePool, error) {
-	return common.GetObjects[StoragePool](volume.GetClient(), volume.allocatedPools)
+func (volume *Volume) AllocatedPools(queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
+	return common.GetObjects[StoragePool](volume.GetClient(), volume.allocatedPools, queryOpts...)
 }
 
 // CapacitySources gets the space allocations to this volume.
-func (volume *Volume) CapacitySources() ([]*CapacitySource, error) {
-	return common.GetObjects[CapacitySource](volume.GetClient(), volume.capacitySources)
+func (volume *Volume) CapacitySources(queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
+	return common.GetObjects[CapacitySource](volume.GetClient(), volume.capacitySources, queryOpts...)
 }
 
 // Connections gets the connections that include this volume.
-func (volume *Volume) Connections() ([]*redfish.Connection, error) {
-	return common.GetObjects[redfish.Connection](volume.GetClient(), volume.connections)
+func (volume *Volume) Connections(queryOpts ...common.QueryGroupOption) ([]*redfish.Connection, error) {
+	return common.GetObjects[redfish.Connection](volume.GetClient(), volume.connections, queryOpts...)
 }
 
 // Metrics gets the metrics for this volume. IO metrics are reported in the IOStatistics property.
-func (volume *Volume) Metrics() (*VolumeMetrics, error) {
+func (volume *Volume) Metrics(queryOpts ...common.QueryGroupOption) (*VolumeMetrics, error) {
 	if volume.metrics == "" {
 		return nil, nil
 	}
 
-	return GetVolumeMetrics(volume.GetClient(), volume.metrics)
+	return GetVolumeMetrics(volume.GetClient(), volume.metrics, queryOpts...)
 }
 
 // AssignReplicaTarget is used to establish a replication relationship by

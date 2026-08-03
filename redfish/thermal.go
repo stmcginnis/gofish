@@ -272,11 +272,11 @@ func (thermal *Thermal) Update() error {
 }
 
 // GetThermal will get a Thermal instance from the service.
-func GetThermal(c common.Client, uri string) (*Thermal, error) {
-	return common.GetObject[Thermal](c, uri)
+func GetThermal(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Thermal, error) {
+	return common.GetObject[Thermal](c, uri, queryOpts...)
 }
 
 // ListReferencedThermals gets the collection of Thermal from a provided reference.
-func ListReferencedThermals(c common.Client, link string) ([]*Thermal, error) {
-	return common.GetCollectionObjects[Thermal](c, link)
+func ListReferencedThermals(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Thermal, error) {
+	return common.GetCollectionObjects[Thermal](c, link, queryOpts...)
 }

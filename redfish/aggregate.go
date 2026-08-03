@@ -67,8 +67,8 @@ func (aggregate *Aggregate) UnmarshalJSON(b []byte) error {
 }
 
 // Elements get the elements of this aggregate.
-func (aggregate *Aggregate) Elements() ([]*Resource, error) {
-	return common.GetObjects[Resource](aggregate.GetClient(), aggregate.elements)
+func (aggregate *Aggregate) Elements(queryOpts ...common.QueryGroupOption) ([]*Resource, error) {
+	return common.GetObjects[Resource](aggregate.GetClient(), aggregate.elements, queryOpts...)
 }
 
 // AddElements adds one or more resources to the aggregate.
@@ -115,12 +115,12 @@ func (aggregate *Aggregate) SetDefaultBootOrder() error {
 }
 
 // GetAggregate will get a Aggregate instance from the service.
-func GetAggregate(c common.Client, uri string) (*Aggregate, error) {
-	return common.GetObject[Aggregate](c, uri)
+func GetAggregate(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Aggregate, error) {
+	return common.GetObject[Aggregate](c, uri, queryOpts...)
 }
 
 // ListReferencedAggregates gets the collection of Aggregate from
 // a provided reference.
-func ListReferencedAggregates(c common.Client, link string) ([]*Aggregate, error) {
-	return common.GetCollectionObjects[Aggregate](c, link)
+func ListReferencedAggregates(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Aggregate, error) {
+	return common.GetCollectionObjects[Aggregate](c, link, queryOpts...)
 }

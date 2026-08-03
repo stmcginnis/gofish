@@ -375,11 +375,11 @@ func (memorysummary *ProcessorMemorySummary) UnmarshalJSON(b []byte) error {
 }
 
 // Metrics gets the memory metrics for this processor memory summary.
-func (memorysummary *ProcessorMemorySummary) Metrics(c common.Client) (*MemoryMetrics, error) {
+func (memorysummary *ProcessorMemorySummary) Metrics(c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
 	if memorysummary.metrics == "" {
 		return nil, nil
 	}
-	return GetMemoryMetrics(c, memorysummary.metrics)
+	return GetMemoryMetrics(c, memorysummary.metrics, queryOpts...)
 }
 
 // Processor is used to represent a single processor contained within a
@@ -723,134 +723,134 @@ func (processor *Processor) ResetToDefaults() error {
 }
 
 // AccelerationFunctions gets acceleration functions associated with this processor.
-func (processor *Processor) AcclerationFunctions() ([]*AccelerationFunction, error) {
-	return common.GetObjects[AccelerationFunction](processor.GetClient(), processor.accelerationFunctions)
+func (processor *Processor) AcclerationFunctions(queryOpts ...common.QueryGroupOption) ([]*AccelerationFunction, error) {
+	return common.GetObjects[AccelerationFunction](processor.GetClient(), processor.accelerationFunctions, queryOpts...)
 }
 
 // AppliedOperatingConfig gets the operating configuration that is applied to this processor.
-func (processor *Processor) AppliedOperatingConfig() (*OperatingConfig, error) {
+func (processor *Processor) AppliedOperatingConfig(queryOpts ...common.QueryGroupOption) (*OperatingConfig, error) {
 	if processor.appliedOperatingConfig == "" {
 		return nil, nil
 	}
-	return GetOperatingConfig(processor.GetClient(), processor.appliedOperatingConfig)
+	return GetOperatingConfig(processor.GetClient(), processor.appliedOperatingConfig, queryOpts...)
 }
 
 // Assembly gets the containing assembly for this processor.
-func (processor *Processor) Assembly() (*Assembly, error) {
+func (processor *Processor) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if processor.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(processor.GetClient(), processor.assembly)
+	return GetAssembly(processor.GetClient(), processor.assembly, queryOpts...)
 }
 
-func (processor *Processor) CacheMemory() ([]*Memory, error) {
+func (processor *Processor) CacheMemory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
 	if processor.cacheMemory == "" {
 		return nil, nil
 	}
-	return ListReferencedMemorys(processor.GetClient(), processor.cacheMemory)
+	return ListReferencedMemorys(processor.GetClient(), processor.cacheMemory, queryOpts...)
 }
 
 // Certificates gets the certificates for device identity and attestation.
-func (processor *Processor) Certificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](processor.GetClient(), processor.certificates)
+func (processor *Processor) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](processor.GetClient(), processor.certificates, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this processor.
-func (processor *Processor) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (processor *Processor) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if processor.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(processor.GetClient(), processor.environmentMetrics)
+	return GetEnvironmentMetrics(processor.GetClient(), processor.environmentMetrics, queryOpts...)
 }
 
 // Metrics gets the metrics associated with this processor.
-func (processor *Processor) Metrics() (*ProcessorMetrics, error) {
+func (processor *Processor) Metrics(queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
 	if processor.metrics == "" {
 		return nil, nil
 	}
-	return GetProcessorMetrics(processor.GetClient(), processor.metrics)
+	return GetProcessorMetrics(processor.GetClient(), processor.metrics, queryOpts...)
 }
 
 // OperatingConfigs gets acceleration functions associated with this processor.
-func (processor *Processor) OperatingConfigs() ([]*OperatingConfig, error) {
-	return common.GetObjects[OperatingConfig](processor.GetClient(), processor.operatingConfigs)
+func (processor *Processor) OperatingConfigs(queryOpts ...common.QueryGroupOption) ([]*OperatingConfig, error) {
+	return common.GetObjects[OperatingConfig](processor.GetClient(), processor.operatingConfigs, queryOpts...)
 }
 
 // Ports gets the interconnect and fabric ports of this processor. It shall not
 // contain ports for GraphicsController resources, USBController resources, or
 // other local adapter-related types of resources.
-func (processor *Processor) Ports() ([]*Port, error) {
-	return ListReferencedPorts(processor.GetClient(), processor.ports)
+func (processor *Processor) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPorts(processor.GetClient(), processor.ports, queryOpts...)
 }
 
 // SubProcessors gets the sub-processors associated with this processor, such as
 // cores or threads, that are part of a processor.
-func (processor *Processor) SubProcessors() ([]*Processor, error) {
-	return common.GetObjects[Processor](processor.GetClient(), processor.subProcessors)
+func (processor *Processor) SubProcessors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](processor.GetClient(), processor.subProcessors, queryOpts...)
 }
 
 // Chassis gets the physical container associated with this processor.
-func (processor *Processor) Chassis() (*Chassis, error) {
+func (processor *Processor) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if processor.chassis == "" {
 		return nil, nil
 	}
-	return GetChassis(processor.GetClient(), processor.chassis)
+	return GetChassis(processor.GetClient(), processor.chassis, queryOpts...)
 }
 
 // ConnectedProcessors gets the processors that are directly connected to this processor.
-func (processor *Processor) ConnectedProcessors() ([]*Processor, error) {
-	return common.GetObjects[Processor](processor.GetClient(), processor.connectedProcessors)
+func (processor *Processor) ConnectedProcessors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](processor.GetClient(), processor.connectedProcessors, queryOpts...)
 }
 
 // Endpoints gets the endpoints associated with this processor.
-func (processor *Processor) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](processor.GetClient(), processor.endpoints)
+func (processor *Processor) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](processor.GetClient(), processor.endpoints, queryOpts...)
 }
 
 // FabricAdapters gets the fabric adapters that present this processor to a fabric.
-func (processor *Processor) FabricAdapters() ([]*FabricAdapter, error) {
-	return common.GetObjects[FabricAdapter](processor.GetClient(), processor.fabricAdapters)
+func (processor *Processor) FabricAdapters(queryOpts ...common.QueryGroupOption) ([]*FabricAdapter, error) {
+	return common.GetObjects[FabricAdapter](processor.GetClient(), processor.fabricAdapters, queryOpts...)
 }
 
 // GraphicsController gets a graphics controller associated with this processor.
-func (processor *Processor) GraphicsController() (*GraphicsController, error) {
+func (processor *Processor) GraphicsController(queryOpts ...common.QueryGroupOption) (*GraphicsController, error) {
 	if processor.graphicsController == "" {
 		return nil, nil
 	}
-	return GetGraphicsController(processor.GetClient(), processor.graphicsController)
+	return GetGraphicsController(processor.GetClient(), processor.graphicsController, queryOpts...)
 }
 
 // Memory gets the memory objects that are associated with this processor.
-func (processor *Processor) Memory() ([]*Memory, error) {
-	return common.GetObjects[Memory](processor.GetClient(), processor.memory)
+func (processor *Processor) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetObjects[Memory](processor.GetClient(), processor.memory, queryOpts...)
 }
 
 // NetworkDeviceFunctions gets the memory objects that are associated with this processor.
-func (processor *Processor) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](processor.GetClient(), processor.networkDeviceFunctions)
+func (processor *Processor) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjects[NetworkDeviceFunction](processor.GetClient(), processor.networkDeviceFunctions, queryOpts...)
 }
 
 // PCIeDevice gets the PCIe device associated with this processor.
-func (processor *Processor) PCIeDevice() (*PCIeDevice, error) {
+func (processor *Processor) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
 	if processor.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(processor.GetClient(), processor.pcieDevice)
+	return GetPCIeDevice(processor.GetClient(), processor.pcieDevice, queryOpts...)
 }
 
 // PCIeFunctions gets the PCIeFunctions associated with this processor.
-func (processor *Processor) PCIeFunctions() ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](processor.GetClient(), processor.pcieFunctions)
+func (processor *Processor) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](processor.GetClient(), processor.pcieFunctions, queryOpts...)
 }
 
 // GetProcessor will get a Processor instance from the system
-func GetProcessor(c common.Client, uri string) (*Processor, error) {
-	return common.GetObject[Processor](c, uri)
+func GetProcessor(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Processor, error) {
+	return common.GetObject[Processor](c, uri, queryOpts...)
 }
 
 // ListReferencedProcessors gets the collection of Processor from a provided reference.
-func ListReferencedProcessors(c common.Client, link string) ([]*Processor, error) {
-	return common.GetCollectionObjects[Processor](c, link)
+func ListReferencedProcessors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetCollectionObjects[Processor](c, link, queryOpts...)
 }
 
 // ProcessorID shall contain identification information for a processor.

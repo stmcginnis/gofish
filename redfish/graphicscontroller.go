@@ -96,21 +96,21 @@ func (graphicscontroller *GraphicsController) UnmarshalJSON(b []byte) error {
 }
 
 // Ports get the ports associated with this graphics controller.
-func (graphicscontroller *GraphicsController) Ports() ([]*Port, error) {
-	return ListReferencedPorts(graphicscontroller.GetClient(), graphicscontroller.ports)
+func (graphicscontroller *GraphicsController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPorts(graphicscontroller.GetClient(), graphicscontroller.ports, queryOpts...)
 }
 
 // PCIeDevice gets the PCIeDevice for this graphics controller.
-func (graphicscontroller *GraphicsController) PCIeDevice() (*PCIeDevice, error) {
+func (graphicscontroller *GraphicsController) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
 	if graphicscontroller.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(graphicscontroller.GetClient(), graphicscontroller.pcieDevice)
+	return GetPCIeDevice(graphicscontroller.GetClient(), graphicscontroller.pcieDevice, queryOpts...)
 }
 
 // Processors gets this graphics controllers processors.
-func (graphicscontroller *GraphicsController) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](graphicscontroller.GetClient(), graphicscontroller.processors)
+func (graphicscontroller *GraphicsController) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](graphicscontroller.GetClient(), graphicscontroller.processors, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -123,12 +123,12 @@ func (graphicscontroller *GraphicsController) Update() error {
 }
 
 // GetGraphicsController will get a GraphicsController instance from the service.
-func GetGraphicsController(c common.Client, uri string) (*GraphicsController, error) {
-	return common.GetObject[GraphicsController](c, uri)
+func GetGraphicsController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*GraphicsController, error) {
+	return common.GetObject[GraphicsController](c, uri, queryOpts...)
 }
 
 // ListReferencedGraphicsControllers gets the collection of GraphicsController from
 // a provided reference.
-func ListReferencedGraphicsControllers(c common.Client, link string) ([]*GraphicsController, error) {
-	return common.GetCollectionObjects[GraphicsController](c, link)
+func ListReferencedGraphicsControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*GraphicsController, error) {
+	return common.GetCollectionObjects[GraphicsController](c, link, queryOpts...)
 }

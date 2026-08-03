@@ -32,12 +32,12 @@ type ServiceConditions struct {
 }
 
 // GetServiceConditions will get a ServiceConditions instance from the service.
-func GetServiceConditions(c common.Client, uri string) (*ServiceConditions, error) {
-	return common.GetObject[ServiceConditions](c, uri)
+func GetServiceConditions(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ServiceConditions, error) {
+	return common.GetObject[ServiceConditions](c, uri, queryOpts...)
 }
 
 // ListReferencedServiceConditionss gets the collection of ServiceConditions from
 // a provided reference.
-func ListReferencedServiceConditionss(c common.Client, link string) ([]*ServiceConditions, error) {
-	return common.GetCollectionObjects[ServiceConditions](c, link)
+func ListReferencedServiceConditionss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ServiceConditions, error) {
+	return common.GetCollectionObjects[ServiceConditions](c, link, queryOpts...)
 }

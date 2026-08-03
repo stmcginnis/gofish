@@ -27,12 +27,12 @@ type FileSystemMetrics struct {
 }
 
 // GetFileSystemMetrics will get a FileSystemMetrics instance from the service.
-func GetFileSystemMetrics(c common.Client, uri string) (*FileSystemMetrics, error) {
-	return common.GetObject[FileSystemMetrics](c, uri)
+func GetFileSystemMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FileSystemMetrics, error) {
+	return common.GetObject[FileSystemMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedFileSystemMetricses gets the collection of FileSystemMetrics from
 // a provided reference.
-func ListReferencedFileSystemMetricses(c common.Client, link string) ([]*FileSystemMetrics, error) {
-	return common.GetCollectionObjects[FileSystemMetrics](c, link)
+func ListReferencedFileSystemMetricses(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*FileSystemMetrics, error) {
+	return common.GetCollectionObjects[FileSystemMetrics](c, link, queryOpts...)
 }

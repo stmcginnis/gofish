@@ -66,6 +66,6 @@ func (i *MemoryHealthComp) Update() error {
 }
 
 // GetMemoryHealthComp will get a MemoryHealthComp instance from the service.
-func GetMemoryHealthComp(c common.Client, uri string) (*MemoryHealthComp, error) {
-	return common.GetObject[MemoryHealthComp](c, uri)
+func GetMemoryHealthComp(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryHealthComp, error) {
+	return common.GetObject[MemoryHealthComp](c, uri, queryOpts...)
 }

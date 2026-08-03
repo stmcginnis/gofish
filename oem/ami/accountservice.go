@@ -42,8 +42,8 @@ type AccountServiceConfigurations struct {
 
 // GetAccountServiceConfigurations will get an AccountServiceConfigurations instance from the Redfish
 // service.
-func GetAccountServiceConfigurations(c common.Client, uri string) (*AccountServiceConfigurations, error) {
-	return common.GetObject[AccountServiceConfigurations](c, uri)
+func GetAccountServiceConfigurations(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AccountServiceConfigurations, error) {
+	return common.GetObject[AccountServiceConfigurations](c, uri, queryOpts...)
 }
 
 // AccountService is an AMI OEM instance of an AccountService.
@@ -79,6 +79,6 @@ func FromAccountService(accountService *redfish.AccountService) (*AccountService
 }
 
 // Configuration will get the AccountServiceConfigurations for this AccountService.
-func (as *AccountService) Configuration() (*AccountServiceConfigurations, error) {
-	return GetAccountServiceConfigurations(as.GetClient(), as.configuration)
+func (as *AccountService) Configuration(queryOpts ...common.QueryGroupOption) (*AccountServiceConfigurations, error) {
+	return GetAccountServiceConfigurations(as.GetClient(), as.configuration, queryOpts...)
 }

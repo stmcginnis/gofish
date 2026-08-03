@@ -178,14 +178,14 @@ func (aggregationsource *AggregationSource) Update() error {
 }
 
 // GetAggregationSource will get a AggregationSource instance from the service.
-func GetAggregationSource(c common.Client, uri string) (*AggregationSource, error) {
-	return common.GetObject[AggregationSource](c, uri)
+func GetAggregationSource(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AggregationSource, error) {
+	return common.GetObject[AggregationSource](c, uri, queryOpts...)
 }
 
 // ListReferencedAggregationSources gets the collection of AggregationSource from
 // a provided reference.
-func ListReferencedAggregationSources(c common.Client, link string) ([]*AggregationSource, error) {
-	return common.GetCollectionObjects[AggregationSource](c, link)
+func ListReferencedAggregationSources(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AggregationSource, error) {
+	return common.GetCollectionObjects[AggregationSource](c, link, queryOpts...)
 }
 
 // SNMPSettings shall contain the settings for an SNMP aggregation source.

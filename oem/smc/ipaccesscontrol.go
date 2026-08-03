@@ -80,11 +80,11 @@ func (i *IPAccessControl) Update() error {
 	return i.Entity.Update(originalElement, currentElement, readWriteFields)
 }
 
-func (i *IPAccessControl) FilterRules() ([]*FilterRule, error) {
-	return common.GetCollectionObjects[FilterRule](i.GetClient(), i.filterRules)
+func (i *IPAccessControl) FilterRules(queryOpts ...common.QueryGroupOption) ([]*FilterRule, error) {
+	return common.GetCollectionObjects[FilterRule](i.GetClient(), i.filterRules, queryOpts...)
 }
 
 // GetIPAccessControl will get a IPAccessControl instance from the service.
-func GetIPAccessControl(c common.Client, uri string) (*IPAccessControl, error) {
-	return common.GetObject[IPAccessControl](c, uri)
+func GetIPAccessControl(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IPAccessControl, error) {
+	return common.GetObject[IPAccessControl](c, uri, queryOpts...)
 }

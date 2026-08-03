@@ -151,7 +151,7 @@ func CollectListGeneric[T any, PT interface {
 
 	CollectResourceCollection(get, collection.Members, queryOpts...)
 	if collection.MembersNextLink != "" {
-		err := CollectListGeneric(get, c, collection.MembersNextLink)
+		err := CollectListGeneric(get, c, collection.MembersNextLink, queryOpts...)
 		if err != nil {
 			return err
 		}
@@ -183,9 +183,9 @@ func CollectResourceCollection[T any, PT interface {
 		wg.Add(1)
 		limiter <- struct{}{}
 
-		go func(itemLink PT, _ ...QueryGroupOption) {
+		go func(itemLink PT, opts ...QueryGroupOption) {
 			defer wg.Done()
-			get(itemLink)
+			get(itemLink, opts...)
 			<-limiter
 		}(itemLink, queryOpts...)
 	}

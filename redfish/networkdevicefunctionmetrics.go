@@ -108,12 +108,12 @@ type NetworkDeviceFunctionMetrics struct {
 }
 
 // GetNetworkDeviceFunctionMetrics will get a NetworkDeviceFunctionMetrics instance from the service.
-func GetNetworkDeviceFunctionMetrics(c common.Client, uri string) (*NetworkDeviceFunctionMetrics, error) {
-	return common.GetObject[NetworkDeviceFunctionMetrics](c, uri)
+func GetNetworkDeviceFunctionMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkDeviceFunctionMetrics, error) {
+	return common.GetObject[NetworkDeviceFunctionMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkDeviceFunctionMetricss gets the collection of NetworkDeviceFunctionMetrics from
 // a provided reference.
-func ListReferencedNetworkDeviceFunctionMetricss(c common.Client, link string) ([]*NetworkDeviceFunctionMetrics, error) {
-	return common.GetCollectionObjects[NetworkDeviceFunctionMetrics](c, link)
+func ListReferencedNetworkDeviceFunctionMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunctionMetrics, error) {
+	return common.GetCollectionObjects[NetworkDeviceFunctionMetrics](c, link, queryOpts...)
 }

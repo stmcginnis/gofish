@@ -196,45 +196,45 @@ func (hostinterface *HostInterface) Update() error {
 }
 
 // GetHostInterface will get a HostInterface instance from the service.
-func GetHostInterface(c common.Client, uri string) (*HostInterface, error) {
-	return common.GetObject[HostInterface](c, uri)
+func GetHostInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*HostInterface, error) {
+	return common.GetObject[HostInterface](c, uri, queryOpts...)
 }
 
 // ListReferencedHostInterfaces gets the collection of HostInterface from
 // a provided reference.
-func ListReferencedHostInterfaces(c common.Client, link string) ([]*HostInterface, error) {
-	return common.GetCollectionObjects[HostInterface](c, link)
+func ListReferencedHostInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*HostInterface, error) {
+	return common.GetCollectionObjects[HostInterface](c, link, queryOpts...)
 }
 
 // ComputerSystems references the ComputerSystems that this host interface is associated with.
-func (hostinterface *HostInterface) ComputerSystems() ([]*ComputerSystem, error) {
-	return common.GetObjects[ComputerSystem](hostinterface.GetClient(), hostinterface.computerSystems)
+func (hostinterface *HostInterface) ComputerSystems(queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetObjects[ComputerSystem](hostinterface.GetClient(), hostinterface.computerSystems, queryOpts...)
 }
 
 // HostEthernetInterfaces gets the network interface controllers or cards (NICs)
 // that a Computer System uses to communicate with this Host Interface.
-func (hostinterface *HostInterface) HostEthernetInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.hostEthernetInterfaces)
+func (hostinterface *HostInterface) HostEthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.hostEthernetInterfaces, queryOpts...)
 }
 
 // ManagerNetworkInterfaces gets the network interface controllers or cards
 // (NIC) that this Manager uses for network communication with this Host Interface.
-func (hostinterface *HostInterface) ManagerNetworkInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.managerEthernetInterface)
+func (hostinterface *HostInterface) ManagerNetworkInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(hostinterface.GetClient(), hostinterface.managerEthernetInterface, queryOpts...)
 }
 
 // AuthRoleNone gets the role that contains the privileges on this host interface when no authentication is performed.
-func (hostinterface *HostInterface) AuthNoneRole() (*Role, error) {
+func (hostinterface *HostInterface) AuthNoneRole(queryOpts ...common.QueryGroupOption) (*Role, error) {
 	if hostinterface.authNoneRole == "" {
 		return nil, nil
 	}
-	return GetRole(hostinterface.GetClient(), hostinterface.authNoneRole)
+	return GetRole(hostinterface.GetClient(), hostinterface.authNoneRole, queryOpts...)
 }
 
 // CredentialBootstrappingRole gets the role that contains the privileges for the bootstrap account created for this interface.
-func (hostinterface *HostInterface) CredentialBootstrappingRole() (*Role, error) {
+func (hostinterface *HostInterface) CredentialBootstrappingRole(queryOpts ...common.QueryGroupOption) (*Role, error) {
 	if hostinterface.credentialBootstrappingRole == "" {
 		return nil, nil
 	}
-	return GetRole(hostinterface.GetClient(), hostinterface.credentialBootstrappingRole)
+	return GetRole(hostinterface.GetClient(), hostinterface.credentialBootstrappingRole, queryOpts...)
 }

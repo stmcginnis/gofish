@@ -55,17 +55,17 @@ func (certificatelocations *CertificateLocations) UnmarshalJSON(b []byte) error 
 }
 
 // GetCertificateLocations will get a CertificateLocations instance from the service.
-func GetCertificateLocations(c common.Client, uri string) (*CertificateLocations, error) {
-	return common.GetObject[CertificateLocations](c, uri)
+func GetCertificateLocations(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CertificateLocations, error) {
+	return common.GetObject[CertificateLocations](c, uri, queryOpts...)
 }
 
 // ListReferencedCertificateLocationss gets the collection of CertificateLocations from
 // a provided reference.
-func ListReferencedCertificateLocations(c common.Client, link string) ([]*CertificateLocations, error) {
-	return common.GetCollectionObjects[CertificateLocations](c, link)
+func ListReferencedCertificateLocations(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CertificateLocations, error) {
+	return common.GetCollectionObjects[CertificateLocations](c, link, queryOpts...)
 }
 
 // Certificates retrieves a collection of the Certificates installed on the system.
-func (certificatelocations *CertificateLocations) Certificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](certificatelocations.GetClient(), certificatelocations.certificates)
+func (certificatelocations *CertificateLocations) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](certificatelocations.GetClient(), certificatelocations.certificates, queryOpts...)
 }

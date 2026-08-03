@@ -76,30 +76,30 @@ func (usbcontroller *USBController) UnmarshalJSON(b []byte) error {
 }
 
 // PCIeDevice gets the PCIeDevice for this USB controller.
-func (usbcontroller *USBController) PCIeDevice() (*PCIeDevice, error) {
+func (usbcontroller *USBController) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
 	if usbcontroller.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(usbcontroller.GetClient(), usbcontroller.pcieDevice)
+	return GetPCIeDevice(usbcontroller.GetClient(), usbcontroller.pcieDevice, queryOpts...)
 }
 
 // Processors gets the processors that can utilize this USB controller.
-func (usbcontroller *USBController) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](usbcontroller.GetClient(), usbcontroller.processors)
+func (usbcontroller *USBController) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](usbcontroller.GetClient(), usbcontroller.processors, queryOpts...)
 }
 
 // Ports gets the ports of the USB controller.
-func (usbcontroller *USBController) Ports() ([]*Port, error) {
-	return ListReferencedPorts(usbcontroller.GetClient(), usbcontroller.ports)
+func (usbcontroller *USBController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPorts(usbcontroller.GetClient(), usbcontroller.ports, queryOpts...)
 }
 
 // GetUSBController will get a USBController instance from the service.
-func GetUSBController(c common.Client, uri string) (*USBController, error) {
-	return common.GetObject[USBController](c, uri)
+func GetUSBController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*USBController, error) {
+	return common.GetObject[USBController](c, uri, queryOpts...)
 }
 
 // ListReferencedUSBControllers gets the collection of USBController from
 // a provided reference.
-func ListReferencedUSBControllers(c common.Client, link string) ([]*USBController, error) {
-	return common.GetCollectionObjects[USBController](c, link)
+func ListReferencedUSBControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*USBController, error) {
+	return common.GetCollectionObjects[USBController](c, link, queryOpts...)
 }

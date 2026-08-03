@@ -4,7 +4,10 @@
 
 package common
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Query struct {
 	expand         ExpandOption
@@ -48,6 +51,17 @@ func WithExpandLevel(expandLevel int) func(*Query) {
 	}
 }
 
+// WithoutExpand disables $expand for a single call, on both collection and
+// resource requests, overriding any default set on the client.
+func WithoutExpand() func(*QueryGroup) {
+	return func(q *QueryGroup) {
+		q.QueryCollection.expand = ExpandNone
+		q.QueryCollection.expandLevel = 0
+		q.QueryResource.expand = ExpandNone
+		q.QueryResource.expandLevel = 0
+	}
+}
+
 func WithResourceQueryOpts(queryOpts ...QueryOption) func(*QueryGroup) {
 	return func(q *QueryGroup) {
 		for _, queryOpt := range queryOpts {
@@ -67,10 +81,16 @@ func WithCollectionQueryOpts(queryOpts ...QueryOption) func(*QueryGroup) {
 func BuildQueryGroup(c Client, opts ...QueryGroupOption) *QueryGroup {
 	queryGroup := &QueryGroup{}
 
-	// apply client settings first, followed by override settings
-	opts = append(c.GetSettings().DefaultQueryOptions, opts...)
+	// apply client settings first, followed by override settings.
+	// this must not append directly to the client's slice: any spare capacity
+	// there would be written to by concurrent callers, letting one call's
+	// options leak into another's.
+	defaults := c.GetSettings().DefaultQueryOptions
+	all := make([]QueryGroupOption, 0, len(defaults)+len(opts))
+	all = append(all, defaults...)
+	all = append(all, opts...)
 
-	for _, opt := range opts {
+	for _, opt := range all {
 		opt(queryGroup)
 	}
 
@@ -94,7 +114,13 @@ func BuildQuery(c Client, url string, collection bool, opts ...QueryGroupOption)
 	}
 
 	if queryOpts != "" {
-		url = url + "?" + queryOpts
+		// the url may already carry a query string. Members@odata.nextLink,
+		// for example, encodes the page offset in one.
+		separator := "?"
+		if strings.Contains(url, "?") {
+			separator = "&"
+		}
+		url = url + separator + queryOpts
 	}
 
 	return url

@@ -463,12 +463,12 @@ type StorageReplicaInfo struct {
 }
 
 // GetStorageReplicaInfo will get a StorageReplicaInfo instance from the service.
-func GetStorageReplicaInfo(c common.Client, uri string) (*StorageReplicaInfo, error) {
-	return common.GetObject[StorageReplicaInfo](c, uri)
+func GetStorageReplicaInfo(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageReplicaInfo, error) {
+	return common.GetObject[StorageReplicaInfo](c, uri, queryOpts...)
 }
 
 // ListReferencedStorageReplicaInfos gets the collection of StorageReplicaInfo from
 // a provided reference.
-func ListReferencedStorageReplicaInfos(c common.Client, link string) ([]*StorageReplicaInfo, error) {
-	return common.GetCollectionObjects[StorageReplicaInfo](c, link)
+func ListReferencedStorageReplicaInfos(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageReplicaInfo, error) {
+	return common.GetCollectionObjects[StorageReplicaInfo](c, link, queryOpts...)
 }

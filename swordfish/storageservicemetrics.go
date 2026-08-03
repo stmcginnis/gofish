@@ -28,12 +28,12 @@ type StorageServiceMetrics struct {
 }
 
 // GetStorageServiceMetrics will get a StorageServiceMetrics instance from the service.
-func GetStorageServiceMetrics(c common.Client, uri string) (*StorageServiceMetrics, error) {
-	return common.GetObject[StorageServiceMetrics](c, uri)
+func GetStorageServiceMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageServiceMetrics, error) {
+	return common.GetObject[StorageServiceMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedStorageServiceMetricss gets the collection of StorageServiceMetrics from
 // a provided reference.
-func ListReferencedStorageServiceMetricss(c common.Client, link string) ([]*StorageServiceMetrics, error) {
-	return common.GetCollectionObjects[StorageServiceMetrics](c, link)
+func ListReferencedStorageServiceMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageServiceMetrics, error) {
+	return common.GetCollectionObjects[StorageServiceMetrics](c, link, queryOpts...)
 }

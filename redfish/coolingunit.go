@@ -205,58 +205,58 @@ func (coolingunit *CoolingUnit) Update() error {
 }
 
 // GetCoolingUnit will get a CoolingUnit instance from the service.
-func GetCoolingUnit(c common.Client, uri string) (*CoolingUnit, error) {
-	return common.GetObject[CoolingUnit](c, uri)
+func GetCoolingUnit(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolingUnit, error) {
+	return common.GetObject[CoolingUnit](c, uri, queryOpts...)
 }
 
 // ListReferencedCoolingUnits gets the collection of CoolingUnit from
 // a provided reference.
-func ListReferencedCoolingUnits(c common.Client, link string) ([]*CoolingUnit, error) {
-	return common.GetCollectionObjects[CoolingUnit](c, link)
+func ListReferencedCoolingUnits(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return common.GetCollectionObjects[CoolingUnit](c, link, queryOpts...)
 }
 
 // Assembly gets a collection of assemblies.
-func (coolingunit *CoolingUnit) Assembly() ([]*Assembly, error) {
-	return ListReferencedAssemblys(coolingunit.GetClient(), coolingunit.assembly)
+func (coolingunit *CoolingUnit) Assembly(queryOpts ...common.QueryGroupOption) ([]*Assembly, error) {
+	return ListReferencedAssemblys(coolingunit.GetClient(), coolingunit.assembly, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this cooling unit.
-func (coolingunit *CoolingUnit) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (coolingunit *CoolingUnit) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if coolingunit.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(coolingunit.GetClient(), coolingunit.environmentMetrics)
+	return GetEnvironmentMetrics(coolingunit.GetClient(), coolingunit.environmentMetrics, queryOpts...)
 }
 
 // Filters gets a collection of filters.
-func (coolingunit *CoolingUnit) Filters() ([]*Filter, error) {
-	return ListReferencedFilters(coolingunit.GetClient(), coolingunit.filters)
+func (coolingunit *CoolingUnit) Filters(queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return ListReferencedFilters(coolingunit.GetClient(), coolingunit.filters, queryOpts...)
 }
 
 // LeakDetection gets the of leak detection of this cooling unit.
-func (coolingunit *CoolingUnit) LeakDetection() (*LeakDetection, error) {
+func (coolingunit *CoolingUnit) LeakDetection(queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
 	if coolingunit.leakDetection == "" {
 		return nil, nil
 	}
-	return GetLeakDetection(coolingunit.GetClient(), coolingunit.leakDetection)
+	return GetLeakDetection(coolingunit.GetClient(), coolingunit.leakDetection, queryOpts...)
 }
 
 // PrimaryCoolantConnectors gets a collection of primary coolant connectors.
-func (coolingunit *CoolingUnit) PrimaryCoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.primaryCoolantConnectors)
+func (coolingunit *CoolingUnit) PrimaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.primaryCoolantConnectors, queryOpts...)
 }
 
 // Pumps gets a collection of pumps.
-func (coolingunit *CoolingUnit) Pumps() ([]*Pump, error) {
-	return ListReferencedPumps(coolingunit.GetClient(), coolingunit.pumps)
+func (coolingunit *CoolingUnit) Pumps(queryOpts ...common.QueryGroupOption) ([]*Pump, error) {
+	return ListReferencedPumps(coolingunit.GetClient(), coolingunit.pumps, queryOpts...)
 }
 
 // Reservoirs gets a collection of reservoirs.
-func (coolingunit *CoolingUnit) Reservoirs() ([]*Reservoir, error) {
-	return ListReferencedReservoirs(coolingunit.GetClient(), coolingunit.reservoirs)
+func (coolingunit *CoolingUnit) Reservoirs(queryOpts ...common.QueryGroupOption) ([]*Reservoir, error) {
+	return ListReferencedReservoirs(coolingunit.GetClient(), coolingunit.reservoirs, queryOpts...)
 }
 
 // SecondaryCoolantConnectors gets a collection of secondary coolant connectors.
-func (coolingunit *CoolingUnit) SecondaryCoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.secondaryCoolantConnectors)
+func (coolingunit *CoolingUnit) SecondaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(coolingunit.GetClient(), coolingunit.secondaryCoolantConnectors, queryOpts...)
 }

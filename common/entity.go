@@ -487,7 +487,7 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 func GetObjects[T any, PT interface {
 	*T
 	SchemaObject
-}](c Client, uris []string) ([]*T, error) {
+}](c Client, uris []string, opts ...QueryGroupOption) ([]*T, error) {
 	var result []*T
 	if len(uris) == 0 {
 		return result, nil
@@ -504,7 +504,7 @@ func GetObjects[T any, PT interface {
 
 	// Worker function to get a single object
 	get := func(link string) {
-		entity, err := GetObject[T, PT](c, link)
+		entity, err := GetObject[T, PT](c, link, opts...)
 		ch <- GetResult{Item: entity, Link: link, Error: err}
 	}
 

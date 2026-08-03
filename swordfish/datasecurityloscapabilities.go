@@ -198,12 +198,12 @@ type DataSecurityLoSCapabilities struct {
 // }
 
 // GetDataSecurityLoSCapabilities will get a DataSecurityLoSCapabilities instance from the service.
-func GetDataSecurityLoSCapabilities(c common.Client, uri string) (*DataSecurityLoSCapabilities, error) {
-	return common.GetObject[DataSecurityLoSCapabilities](c, uri)
+func GetDataSecurityLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataSecurityLoSCapabilities, error) {
+	return common.GetObject[DataSecurityLoSCapabilities](c, uri, queryOpts...)
 }
 
 // ListReferencedDataSecurityLoSCapabilities gets the collection of DataSecurityLoSCapabilities from
 // a provided reference.
-func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string) ([]*DataSecurityLoSCapabilities, error) {
-	return common.GetCollectionObjects[DataSecurityLoSCapabilities](c, link)
+func ListReferencedDataSecurityLoSCapabilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataSecurityLoSCapabilities, error) {
+	return common.GetCollectionObjects[DataSecurityLoSCapabilities](c, link, queryOpts...)
 }

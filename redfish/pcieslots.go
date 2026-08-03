@@ -99,13 +99,13 @@ func (slot *PCIeSlot) UnmarshalJSON(b []byte) error {
 }
 
 // PCIeDevices gets the PCIe devices contained in this slot.
-func (slot *PCIeSlot) PCIeDevice(c common.Client) ([]*PCIeDevice, error) {
-	return common.GetObjects[PCIeDevice](c, slot.pcieDevice)
+func (slot *PCIeSlot) PCIeDevice(c common.Client, queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
+	return common.GetObjects[PCIeDevice](c, slot.pcieDevice, queryOpts...)
 }
 
 // Processors gets the processors that are directly connected or directly bridged to this PCIe slot.
-func (slot *PCIeSlot) Processors(c common.Client) ([]*Processor, error) {
-	return common.GetObjects[Processor](c, slot.processors)
+func (slot *PCIeSlot) Processors(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](c, slot.processors, queryOpts...)
 }
 
 // PCIeSlots is used to represent a PCIeSlots resource for a Redfish implementation.
@@ -152,6 +152,6 @@ func (pcieSlots *PCIeSlots) UnmarshalJSON(b []byte) error {
 }
 
 // GetPCIeSlots will get a PCIeSlots instance from the chassis.
-func GetPCIeSlots(c common.Client, uri string) (*PCIeSlots, error) {
-	return common.GetObject[PCIeSlots](c, uri)
+func GetPCIeSlots(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PCIeSlots, error) {
+	return common.GetObject[PCIeSlots](c, uri, queryOpts...)
 }

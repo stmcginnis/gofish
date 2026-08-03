@@ -113,12 +113,12 @@ func (registeredclient *RegisteredClient) Update() error {
 }
 
 // GetRegisteredClient will get a RegisteredClient instance from the service.
-func GetRegisteredClient(c common.Client, uri string) (*RegisteredClient, error) {
-	return common.GetObject[RegisteredClient](c, uri)
+func GetRegisteredClient(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RegisteredClient, error) {
+	return common.GetObject[RegisteredClient](c, uri, queryOpts...)
 }
 
 // ListReferencedRegisteredClients gets the collection of RegisteredClient from
 // a provided reference.
-func ListReferencedRegisteredClients(c common.Client, link string) ([]*RegisteredClient, error) {
-	return common.GetCollectionObjects[RegisteredClient](c, link)
+func ListReferencedRegisteredClients(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*RegisteredClient, error) {
+	return common.GetCollectionObjects[RegisteredClient](c, link, queryOpts...)
 }

@@ -113,12 +113,12 @@ func (commonauthinfo *CommonAuthInfo) UnmarshalJSON(b []byte) error {
 }
 
 // ComponentCertificate gets the identity of the component.
-func (commonauthinfo *CommonAuthInfo) ComponentCertificate(c common.Client) (*Certificate, error) {
+func (commonauthinfo *CommonAuthInfo) ComponentCertificate(c common.Client, queryOpts ...common.QueryGroupOption) (*Certificate, error) {
 	if commonauthinfo.componentCertificate == "" {
 		return nil, nil
 	}
 
-	return GetCertificate(c, commonauthinfo.componentCertificate)
+	return GetCertificate(c, commonauthinfo.componentCertificate, queryOpts...)
 }
 
 // CommunicationInfo shall contain information about communication between two components.
@@ -235,14 +235,14 @@ func (componentintegrity *ComponentIntegrity) Update() error {
 }
 
 // GetComponentIntegrity will get a ComponentIntegrity instance from the service.
-func GetComponentIntegrity(c common.Client, uri string) (*ComponentIntegrity, error) {
-	return common.GetObject[ComponentIntegrity](c, uri)
+func GetComponentIntegrity(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ComponentIntegrity, error) {
+	return common.GetObject[ComponentIntegrity](c, uri, queryOpts...)
 }
 
 // ListReferencedComponentIntegritys gets the collection of ComponentIntegrity from
 // a provided reference.
-func ListReferencedComponentIntegritys(c common.Client, link string) ([]*ComponentIntegrity, error) {
-	return common.GetCollectionObjects[ComponentIntegrity](c, link)
+func ListReferencedComponentIntegritys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ComponentIntegrity, error) {
+	return common.GetCollectionObjects[ComponentIntegrity](c, link, queryOpts...)
 }
 
 // SPDMGetSignedMeasurementsRequest contains the parameters for the SPDMGetSignedMeasurements action.
@@ -311,12 +311,12 @@ func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) Unma
 }
 
 // Certificate gets the certificate corresponding to the SPDM slot identifier that can be used to validate the signature.
-func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) Certificate() (*Certificate, error) {
+func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) Certificate(queryOpts ...common.QueryGroupOption) (*Certificate, error) {
 	if spdmgetsignedmeasurementsresponse.certificate == "" {
 		return nil, nil
 	}
 
-	return GetCertificate(spdmgetsignedmeasurementsresponse.client, spdmgetsignedmeasurementsresponse.certificate)
+	return GetCertificate(spdmgetsignedmeasurementsresponse.client, spdmgetsignedmeasurementsresponse.certificate, queryOpts...)
 }
 
 func (spdmgetsignedmeasurementsresponse *SPDMGetSignedMeasurementsResponse) SetClient(c common.Client) {
@@ -469,12 +469,12 @@ func (spdmrequesterauth *SPDMrequesterAuth) UnmarshalJSON(b []byte) error {
 }
 
 // ProvidedCertificate gets the identity of the SPDM Requester provided in mutual authentication.
-func (spdmrequesterauth *SPDMrequesterAuth) ProvidedCertificate(c common.Client) (*Certificate, error) {
+func (spdmrequesterauth *SPDMrequesterAuth) ProvidedCertificate(c common.Client, queryOpts ...common.QueryGroupOption) (*Certificate, error) {
 	if spdmrequesterauth.providedCertificate == "" {
 		return nil, nil
 	}
 
-	return GetCertificate(c, spdmrequesterauth.providedCertificate)
+	return GetCertificate(c, spdmrequesterauth.providedCertificate, queryOpts...)
 }
 
 // SPDMresponderAuth shall contain common identity-related authentication information.
@@ -509,12 +509,12 @@ func (spdmresponderauth *SPDMresponderAuth) UnmarshalJSON(b []byte) error {
 }
 
 // ComponentCertificate gets the identity of the component referenced by the TargetComponentURI property.
-func (spdmresponderauth *SPDMresponderAuth) ComponentCertificate(c common.Client) (*Certificate, error) {
+func (spdmresponderauth *SPDMresponderAuth) ComponentCertificate(c common.Client, queryOpts ...common.QueryGroupOption) (*Certificate, error) {
 	if spdmresponderauth.componentCertificate == "" {
 		return nil, nil
 	}
 
-	return GetCertificate(c, spdmresponderauth.componentCertificate)
+	return GetCertificate(c, spdmresponderauth.componentCertificate, queryOpts...)
 }
 
 // SPDMsingleMeasurement shall contain a single SPDM measurement for an SPDM Responder.
@@ -641,12 +641,12 @@ func (tpmauth *TPMauth) UnmarshalJSON(b []byte) error {
 }
 
 // ComponentCertificate gets the identity of the component referenced by the TargetComponentURI property.
-func (tpmauth *TPMauth) ComponentCertificate(c common.Client) (*Certificate, error) {
+func (tpmauth *TPMauth) ComponentCertificate(c common.Client, queryOpts ...common.QueryGroupOption) (*Certificate, error) {
 	if tpmauth.componentCertificate == "" {
 		return nil, nil
 	}
 
-	return GetCertificate(c, tpmauth.componentCertificate)
+	return GetCertificate(c, tpmauth.componentCertificate, queryOpts...)
 }
 
 // TPMcommunication shall contain information about communication between two components.

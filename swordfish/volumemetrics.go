@@ -47,12 +47,12 @@ type VolumeMetrics struct {
 }
 
 // GetVolumeMetrics will get a VolumeMetrics instance from the service.
-func GetVolumeMetrics(c common.Client, uri string) (*VolumeMetrics, error) {
-	return common.GetObject[VolumeMetrics](c, uri)
+func GetVolumeMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VolumeMetrics, error) {
+	return common.GetObject[VolumeMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedVolumeMetricss gets the collection of VolumeMetrics from
 // a provided reference.
-func ListReferencedVolumeMetricss(c common.Client, link string) ([]*VolumeMetrics, error) {
-	return common.GetCollectionObjects[VolumeMetrics](c, link)
+func ListReferencedVolumeMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VolumeMetrics, error) {
+	return common.GetCollectionObjects[VolumeMetrics](c, link, queryOpts...)
 }

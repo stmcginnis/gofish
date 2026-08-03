@@ -343,14 +343,14 @@ func (pciedevice *PCIeDevice) Update() error {
 }
 
 // GetPCIeDevice will get a PCIeDevice instance from the service.
-func GetPCIeDevice(c common.Client, uri string) (*PCIeDevice, error) {
-	return common.GetObject[PCIeDevice](c, uri)
+func GetPCIeDevice(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
+	return common.GetObject[PCIeDevice](c, uri, queryOpts...)
 }
 
 // ListReferencedPCIeDevices gets the collection of PCIeDevice from
 // a provided reference.
-func ListReferencedPCIeDevices(c common.Client, link string) ([]*PCIeDevice, error) {
-	return common.GetCollectionObjects[PCIeDevice](c, link)
+func ListReferencedPCIeDevices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
+	return common.GetCollectionObjects[PCIeDevice](c, link, queryOpts...)
 }
 
 // PCIeInterface properties shall be the definition for a PCIe Interface for a
@@ -388,46 +388,46 @@ func (p *PCIeInterface) UnmarshalJSON(b []byte) error {
 }
 
 // Assembly gets the assembly for this device.
-func (pciedevice *PCIeDevice) Assembly() (*Assembly, error) {
+func (pciedevice *PCIeDevice) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if pciedevice.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(pciedevice.GetClient(), pciedevice.assembly)
+	return GetAssembly(pciedevice.GetClient(), pciedevice.assembly, queryOpts...)
 }
 
 // CXLLogicalDevices gets the associated CXLLogicalDevices for this device.
-func (pciedevice *PCIeDevice) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
+func (pciedevice *PCIeDevice) CXLLogicalDevices(queryOpts ...common.QueryGroupOption) ([]*CXLLogicalDevice, error) {
 	if pciedevice.cxlLogicalDevices == "" {
 		return []*CXLLogicalDevice{}, nil
 	}
-	return ListReferencedCXLLogicalDevices(pciedevice.GetClient(), pciedevice.cxlLogicalDevices)
+	return ListReferencedCXLLogicalDevices(pciedevice.GetClient(), pciedevice.cxlLogicalDevices, queryOpts...)
 }
 
 // Chassis gets the chassis in which the PCIe device is contained.
-func (pciedevice *PCIeDevice) Chassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](pciedevice.GetClient(), pciedevice.chassis)
+func (pciedevice *PCIeDevice) Chassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](pciedevice.GetClient(), pciedevice.chassis, queryOpts...)
 }
 
 // PCIeFunctions get the PCIe functions that this device exposes.
-func (pciedevice *PCIeDevice) PCIeFunctions() ([]*PCIeFunction, error) {
+func (pciedevice *PCIeDevice) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
 	if len(pciedevice.pcieFunctionsArray) > 0 {
-		return common.GetObjects[PCIeFunction](pciedevice.GetClient(), pciedevice.pcieFunctionsArray)
+		return common.GetObjects[PCIeFunction](pciedevice.GetClient(), pciedevice.pcieFunctionsArray, queryOpts...)
 	}
 	if pciedevice.pcieFunctions == "" {
 		return nil, nil
 	}
-	return ListReferencedPCIeFunctions(pciedevice.GetClient(), pciedevice.pcieFunctions)
+	return ListReferencedPCIeFunctions(pciedevice.GetClient(), pciedevice.pcieFunctions, queryOpts...)
 }
 
 // Switch gets the switch for this device.
-func (pciedevice *PCIeDevice) Switch() (*Switch, error) {
+func (pciedevice *PCIeDevice) Switch(queryOpts ...common.QueryGroupOption) (*Switch, error) {
 	if pciedevice.sw == "" {
 		return nil, nil
 	}
-	return GetSwitch(pciedevice.GetClient(), pciedevice.sw)
+	return GetSwitch(pciedevice.GetClient(), pciedevice.sw, queryOpts...)
 }
 
 // Processors gets the processors that are directly connected or directly bridged to this PCIe device.
-func (pciedevice *PCIeDevice) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](pciedevice.GetClient(), pciedevice.processors)
+func (pciedevice *PCIeDevice) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](pciedevice.GetClient(), pciedevice.processors, queryOpts...)
 }

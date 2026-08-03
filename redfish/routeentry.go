@@ -57,8 +57,8 @@ func (routeentry *RouteEntry) UnmarshalJSON(b []byte) error {
 }
 
 // RouteSet gets the associated route set.
-func (routeentry *RouteEntry) RouteSet() ([]*RouteSetEntry, error) {
-	return ListReferencedRouteSetEntrys(routeentry.GetClient(), routeentry.routeSet)
+func (routeentry *RouteEntry) RouteSet(queryOpts ...common.QueryGroupOption) ([]*RouteSetEntry, error) {
+	return ListReferencedRouteSetEntrys(routeentry.GetClient(), routeentry.routeSet, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -70,12 +70,12 @@ func (routeentry *RouteEntry) Update() error {
 }
 
 // GetRouteEntry will get a RouteEntry instance from the service.
-func GetRouteEntry(c common.Client, uri string) (*RouteEntry, error) {
-	return common.GetObject[RouteEntry](c, uri)
+func GetRouteEntry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RouteEntry, error) {
+	return common.GetObject[RouteEntry](c, uri, queryOpts...)
 }
 
 // ListReferencedRouteEntrys gets the collection of RouteEntry from
 // a provided reference.
-func ListReferencedRouteEntrys(c common.Client, link string) ([]*RouteEntry, error) {
-	return common.GetCollectionObjects[RouteEntry](c, link)
+func ListReferencedRouteEntrys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*RouteEntry, error) {
+	return common.GetCollectionObjects[RouteEntry](c, link, queryOpts...)
 }

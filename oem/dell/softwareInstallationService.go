@@ -298,6 +298,6 @@ func (sis *SoftwareInstallationService) GetRepoBasedUpdateList() (*UpdateList, e
 	return &ul, nil
 }
 
-func GetSoftwareInstallationService(c common.Client, uri string) (*SoftwareInstallationService, error) {
-	return common.GetObject[SoftwareInstallationService](c, uri)
+func GetSoftwareInstallationService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SoftwareInstallationService, error) {
+	return common.GetObject[SoftwareInstallationService](c, uri, queryOpts...)
 }

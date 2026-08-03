@@ -133,13 +133,15 @@ type MessageRegistry struct {
 }
 
 // GetMessageRegistry will get a MessageRegistry instance from the Redfish service.
-func GetMessageRegistry(c common.Client, uri string) (*MessageRegistry, error) {
-	return common.GetObject[MessageRegistry](c, uri)
+func GetMessageRegistry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MessageRegistry, error) {
+	return common.GetObject[MessageRegistry](c, uri, queryOpts...)
 }
 
 // ListReferencedMessageRegistries gets the collection of MessageRegistry.
-func ListReferencedMessageRegistries(c common.Client, link string) ([]*MessageRegistry, error) {
+func ListReferencedMessageRegistries(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistry, error) {
 	var result []*MessageRegistry
+	// the collection GET is deliberately unexpanded: only the member links are
+	// read from it, and each registry is fetched individually below.
 	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return nil, err
@@ -147,14 +149,14 @@ func ListReferencedMessageRegistries(c common.Client, link string) ([]*MessageRe
 
 	// TODO: Look at what to do to make parallel
 	for _, sLink := range links.ItemLinks {
-		mrf, err := GetMessageRegistryFile(c, sLink)
+		mrf, err := GetMessageRegistryFile(c, sLink, queryOpts...)
 		if err != nil {
 			return nil, err
 		}
 
 		// get message registry from all location
 		for _, location := range mrf.Location {
-			mr, err := GetMessageRegistry(c, location.URI)
+			mr, err := GetMessageRegistry(c, location.URI, queryOpts...)
 			if err != nil {
 				return nil, err
 			}
@@ -168,7 +170,7 @@ func ListReferencedMessageRegistries(c common.Client, link string) ([]*MessageRe
 
 // ListReferencedMessageRegistriesByLanguage gets the collection of MessageRegistry.
 // language is the RFC5646-conformant language code for the message registry.
-func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language string) ([]*MessageRegistry, error) {
+func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistry, error) {
 	language = strings.TrimSpace(language)
 	if language == "" {
 		return nil, fmt.Errorf("received empty language")
@@ -176,13 +178,15 @@ func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language s
 
 	// TODO: Looks at what to do to make parallel.
 	var result []*MessageRegistry
+	// the collection GET is deliberately unexpanded: only the member links are
+	// read from it, and each registry is fetched individually below.
 	links, err := common.GetCollection(c, link)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, sLink := range links.ItemLinks {
-		mrf, err := GetMessageRegistryFile(c, sLink)
+		mrf, err := GetMessageRegistryFile(c, sLink, queryOpts...)
 		if err != nil {
 			return nil, err
 		}
@@ -190,7 +194,7 @@ func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language s
 		// get message registry by language
 		for _, location := range mrf.Location {
 			if location.Language == language {
-				mr, err := GetMessageRegistry(c, location.URI)
+				mr, err := GetMessageRegistry(c, location.URI, queryOpts...)
 				if err != nil {
 					return nil, err
 				}

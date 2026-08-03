@@ -46,12 +46,12 @@ type StoragePoolMetrics struct {
 }
 
 // GetStoragePoolMetrics will get a StoragePoolMetrics instance from the service.
-func GetStoragePoolMetrics(c common.Client, uri string) (*StoragePoolMetrics, error) {
-	return common.GetObject[StoragePoolMetrics](c, uri)
+func GetStoragePoolMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StoragePoolMetrics, error) {
+	return common.GetObject[StoragePoolMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedStoragePoolMetricss gets the collection of StoragePoolMetrics from
 // a provided reference.
-func ListReferencedStoragePoolMetricss(c common.Client, link string) ([]*StoragePoolMetrics, error) {
-	return common.GetCollectionObjects[StoragePoolMetrics](c, link)
+func ListReferencedStoragePoolMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StoragePoolMetrics, error) {
+	return common.GetCollectionObjects[StoragePoolMetrics](c, link, queryOpts...)
 }

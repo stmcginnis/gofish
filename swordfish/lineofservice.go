@@ -26,12 +26,12 @@ type LineOfService struct {
 }
 
 // GetLineOfService will get a LineOfService instance from the service.
-func GetLineOfService(c common.Client, uri string) (*LineOfService, error) {
-	return common.GetObject[LineOfService](c, uri)
+func GetLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LineOfService, error) {
+	return common.GetObject[LineOfService](c, uri, queryOpts...)
 }
 
 // ListReferencedLineOfServices gets the collection of LineOfService from
 // a provided reference.
-func ListReferencedLineOfServices(c common.Client, link string) ([]*LineOfService, error) {
-	return common.GetCollectionObjects[LineOfService](c, link)
+func ListReferencedLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LineOfService, error) {
+	return common.GetCollectionObjects[LineOfService](c, link, queryOpts...)
 }

@@ -16,6 +16,6 @@ type Snooping struct {
 }
 
 // GetSnooping will get a Snooping instance from the service.
-func GetSnooping(c common.Client, uri string) (*Snooping, error) {
-	return common.GetObject[Snooping](c, uri)
+func GetSnooping(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Snooping, error) {
+	return common.GetObject[Snooping](c, uri, queryOpts...)
 }

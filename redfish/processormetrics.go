@@ -223,12 +223,12 @@ func (processormetrics *ProcessorMetrics) ClearCurrentPeriod() error {
 }
 
 // GetProcessorMetrics will get a ProcessorMetrics instance from the service.
-func GetProcessorMetrics(c common.Client, uri string) (*ProcessorMetrics, error) {
-	return common.GetObject[ProcessorMetrics](c, uri)
+func GetProcessorMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
+	return common.GetObject[ProcessorMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedProcessorMetricss gets the collection of ProcessorMetrics from
 // a provided reference.
-func ListReferencedProcessorMetricss(c common.Client, link string) ([]*ProcessorMetrics, error) {
-	return common.GetCollectionObjects[ProcessorMetrics](c, link)
+func ListReferencedProcessorMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ProcessorMetrics, error) {
+	return common.GetCollectionObjects[ProcessorMetrics](c, link, queryOpts...)
 }

@@ -232,80 +232,80 @@ func (facility *Facility) UnmarshalJSON(b []byte) error {
 }
 
 // CDUs get the cooling distribution units associated with this facility.
-func (facility *Facility) CDUs() ([]*CoolingUnit, error) {
-	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.cdus)
+func (facility *Facility) CDUs(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.cdus, queryOpts...)
 }
 
 // ContainedByFacility get facility that contains this facility.
-func (facility *Facility) ContainedByFacility() (*Facility, error) {
+func (facility *Facility) ContainedByFacility(queryOpts ...common.QueryGroupOption) (*Facility, error) {
 	if facility.containedByFacility == "" {
 		return nil, nil
 	}
-	return GetFacility(facility.GetClient(), facility.containedByFacility)
+	return GetFacility(facility.GetClient(), facility.containedByFacility, queryOpts...)
 }
 
 // ContainsChassis get the chassis within this facility.
-func (facility *Facility) ContainsChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](facility.GetClient(), facility.containsChassis)
+func (facility *Facility) ContainsChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](facility.GetClient(), facility.containsChassis, queryOpts...)
 }
 
 // ContainsFacilities get facilities within this facility.
-func (facility *Facility) ContainsFacilities() ([]*Facility, error) {
-	return common.GetObjects[Facility](facility.GetClient(), facility.containsFacilities)
+func (facility *Facility) ContainsFacilities(queryOpts ...common.QueryGroupOption) ([]*Facility, error) {
+	return common.GetObjects[Facility](facility.GetClient(), facility.containsFacilities, queryOpts...)
 }
 
 // CoolingLoops get cooling loops within this facility.
-func (facility *Facility) CoolingLoops() ([]*CoolingLoop, error) {
-	return common.GetObjects[CoolingLoop](facility.GetClient(), facility.coolingLoops)
+func (facility *Facility) CoolingLoops(queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
+	return common.GetObjects[CoolingLoop](facility.GetClient(), facility.coolingLoops, queryOpts...)
 }
 
 // ElectricalBuses get electrical buses within this facility.
-func (facility *Facility) ElectricalBuses() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.electricalBuses)
+func (facility *Facility) ElectricalBuses(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.electricalBuses, queryOpts...)
 }
 
 // FloorPDUs get floor power distribution units within this facility.
-func (facility *Facility) FloorPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.floorPDUs)
+func (facility *Facility) FloorPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.floorPDUs, queryOpts...)
 }
 
 // ImmersionUnits get immersion cooling units within this facility.
-func (facility *Facility) ImmersionUnits() ([]*CoolingUnit, error) {
-	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.immersionUnits)
+func (facility *Facility) ImmersionUnits(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.immersionUnits, queryOpts...)
 }
 
 // ManagedBy gets the managers of this facility.
-func (facility *Facility) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](facility.GetClient(), facility.managedBy)
+func (facility *Facility) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](facility.GetClient(), facility.managedBy, queryOpts...)
 }
 
 // PowerShelves get power shelves within this facility.
-func (facility *Facility) PowerShelves() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.powerShelves)
+func (facility *Facility) PowerShelves(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.powerShelves, queryOpts...)
 }
 
 // RackPDUs get rack power distribution units within this facility.
-func (facility *Facility) RackPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.rackPDUs)
+func (facility *Facility) RackPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.rackPDUs, queryOpts...)
 }
 
 // Switchgear get switchgear power distribution units within this facility.
-func (facility *Facility) Switchgear() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.switchgear)
+func (facility *Facility) Switchgear(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.switchgear, queryOpts...)
 }
 
 // TransferSwitches get transfer switches within this facility.
-func (facility *Facility) TransferSwitches() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.transferSwitches)
+func (facility *Facility) TransferSwitches(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.transferSwitches, queryOpts...)
 }
 
 // GetFacility will get a Facility instance from the service.
-func GetFacility(c common.Client, uri string) (*Facility, error) {
-	return common.GetObject[Facility](c, uri)
+func GetFacility(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Facility, error) {
+	return common.GetObject[Facility](c, uri, queryOpts...)
 }
 
 // ListReferencedFacilities gets the collection of Facility from
 // a provided reference.
-func ListReferencedFacilities(c common.Client, link string) ([]*Facility, error) {
-	return common.GetCollectionObjects[Facility](c, link)
+func ListReferencedFacilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Facility, error) {
+	return common.GetCollectionObjects[Facility](c, link, queryOpts...)
 }

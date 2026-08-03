@@ -271,14 +271,14 @@ func (resourceblock *ResourceBlock) Update() error {
 }
 
 // GetResourceBlock will get a ResourceBlock instance from the service.
-func GetResourceBlock(c common.Client, uri string) (*ResourceBlock, error) {
-	return common.GetObject[ResourceBlock](c, uri)
+func GetResourceBlock(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ResourceBlock, error) {
+	return common.GetObject[ResourceBlock](c, uri, queryOpts...)
 }
 
 // ListReferencedResourceBlocks gets the collection of ResourceBlock from
 // a provided reference.
-func ListReferencedResourceBlocks(c common.Client, link string) ([]*ResourceBlock, error) {
-	return common.GetCollectionObjects[ResourceBlock](c, link)
+func ListReferencedResourceBlocks(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return common.GetCollectionObjects[ResourceBlock](c, link, queryOpts...)
 }
 
 // ResourceBlockLimits shall specify the allowable quantities of types of resource blocks for a given composition

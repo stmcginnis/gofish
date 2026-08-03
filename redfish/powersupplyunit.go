@@ -218,14 +218,14 @@ func (powerSupplyUnit *PowerSupplyUnit) Update() error {
 }
 
 // GetPowerSupplyUnit will get a PowerSupplyUnit instance from the Redfish service.
-func GetPowerSupplyUnit(c common.Client, uri string) (*PowerSupplyUnit, error) {
-	return common.GetObject[PowerSupplyUnit](c, uri)
+func GetPowerSupplyUnit(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerSupplyUnit, error) {
+	return common.GetObject[PowerSupplyUnit](c, uri, queryOpts...)
 }
 
 // ListReferencedPowerSupplyUnits gets the collection of PowerSupplies from
 // a provided reference.
-func ListReferencedPowerSupplyUnits(c common.Client, link string) ([]*PowerSupplyUnit, error) {
-	return common.GetCollectionObjects[PowerSupplyUnit](c, link)
+func ListReferencedPowerSupplyUnits(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerSupplyUnit, error) {
+	return common.GetCollectionObjects[PowerSupplyUnit](c, link, queryOpts...)
 }
 
 // This action shall reset a power supply. A GracefulRestart ResetType shall reset the power supply
@@ -243,36 +243,36 @@ func (powerSupplyUnit *PowerSupplyUnit) Reset(resetType ResetType) error {
 }
 
 // Assembly gets the containing assembly for this power supply.
-func (powerSupplyUnit *PowerSupplyUnit) Assembly() (*Assembly, error) {
+func (powerSupplyUnit *PowerSupplyUnit) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if powerSupplyUnit.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(powerSupplyUnit.GetClient(), powerSupplyUnit.assembly)
+	return GetAssembly(powerSupplyUnit.GetClient(), powerSupplyUnit.assembly, queryOpts...)
 }
 
 // Metrics gets the metrics associated with this power supply.
-func (powerSupplyUnit *PowerSupplyUnit) Metrics() (*PowerSupplyUnitMetrics, error) {
+func (powerSupplyUnit *PowerSupplyUnit) Metrics(queryOpts ...common.QueryGroupOption) (*PowerSupplyUnitMetrics, error) {
 	if powerSupplyUnit.metrics == "" {
 		return nil, nil
 	}
-	return GetPowerSupplyUnitMetrics(powerSupplyUnit.GetClient(), powerSupplyUnit.metrics)
+	return GetPowerSupplyUnitMetrics(powerSupplyUnit.GetClient(), powerSupplyUnit.metrics, queryOpts...)
 }
 
 // Outlet get the outlet connected to this power supply.
 // Deprecated (v1.4)
-func (powerSupplyUnit *PowerSupplyUnit) Outlet() (*Outlet, error) {
+func (powerSupplyUnit *PowerSupplyUnit) Outlet(queryOpts ...common.QueryGroupOption) (*Outlet, error) {
 	if powerSupplyUnit.metrics == "" {
 		return nil, nil
 	}
-	return GetOutlet(powerSupplyUnit.GetClient(), powerSupplyUnit.outlet)
+	return GetOutlet(powerSupplyUnit.GetClient(), powerSupplyUnit.outlet, queryOpts...)
 }
 
 // PowerOutlets gets the outlets that supply power to this power supply.
-func (powerSupplyUnit *PowerSupplyUnit) PowerOutlets() ([]*Outlet, error) {
-	return common.GetObjects[Outlet](powerSupplyUnit.GetClient(), powerSupplyUnit.powerOutlets)
+func (powerSupplyUnit *PowerSupplyUnit) PowerOutlets(queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
+	return common.GetObjects[Outlet](powerSupplyUnit.GetClient(), powerSupplyUnit.powerOutlets, queryOpts...)
 }
 
 // PoweringChassis gets the collection of the chassis directly powered by this power supply.
-func (powerSupplyUnit *PowerSupplyUnit) PoweringChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](powerSupplyUnit.GetClient(), powerSupplyUnit.poweringChassis)
+func (powerSupplyUnit *PowerSupplyUnit) PoweringChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](powerSupplyUnit.GetClient(), powerSupplyUnit.poweringChassis, queryOpts...)
 }

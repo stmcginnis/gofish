@@ -44,12 +44,12 @@ type DataSecurityLineOfService struct {
 }
 
 // GetDataSecurityLineOfService will get a DataSecurityLineOfService instance from the service.
-func GetDataSecurityLineOfService(c common.Client, uri string) (*DataSecurityLineOfService, error) {
-	return common.GetObject[DataSecurityLineOfService](c, uri)
+func GetDataSecurityLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataSecurityLineOfService, error) {
+	return common.GetObject[DataSecurityLineOfService](c, uri, queryOpts...)
 }
 
 // ListReferencedDataSecurityLineOfServices gets the collection of DataSecurityLineOfService from
 // a provided reference.
-func ListReferencedDataSecurityLineOfServices(c common.Client, link string) ([]*DataSecurityLineOfService, error) {
-	return common.GetCollectionObjects[DataSecurityLineOfService](c, link)
+func ListReferencedDataSecurityLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataSecurityLineOfService, error) {
+	return common.GetCollectionObjects[DataSecurityLineOfService](c, link, queryOpts...)
 }

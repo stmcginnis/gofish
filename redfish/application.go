@@ -72,19 +72,19 @@ func (application *Application) UnmarshalJSON(b []byte) error {
 }
 
 // GetApplication will get a Application instance from the service.
-func GetApplication(c common.Client, uri string) (*Application, error) {
-	return common.GetObject[Application](c, uri)
+func GetApplication(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Application, error) {
+	return common.GetObject[Application](c, uri, queryOpts...)
 }
 
 // ListReferencedApplications gets the collection of Application from
 // a provided reference.
-func ListReferencedApplications(c common.Client, link string) ([]*Application, error) {
-	return common.GetCollectionObjects[Application](c, link)
+func ListReferencedApplications(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Application, error) {
+	return common.GetCollectionObjects[Application](c, link, queryOpts...)
 }
 
 // SoftwareImage returns a `SoftwareInventory“ that represents the software image from which this application runs.
-func (application *Application) SoftwareImage() (*SoftwareInventory, error) {
-	return GetSoftwareInventory(application.GetClient(), application.softwareImage)
+func (application *Application) SoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return GetSoftwareInventory(application.GetClient(), application.softwareImage, queryOpts...)
 }
 
 // Reset resets the application.

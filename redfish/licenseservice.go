@@ -106,8 +106,8 @@ func (licenseservice *LicenseService) Install(parameters *InstallLicenseParamete
 }
 
 // Licenses gets the set of installed licenses.
-func (licenseservice *LicenseService) Licenses() ([]*License, error) {
-	return ListReferencedLicenses(licenseservice.GetClient(), licenseservice.licenses)
+func (licenseservice *LicenseService) Licenses(queryOpts ...common.QueryGroupOption) ([]*License, error) {
+	return ListReferencedLicenses(licenseservice.GetClient(), licenseservice.licenses, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -121,12 +121,12 @@ func (licenseservice *LicenseService) Update() error {
 }
 
 // GetLicenseService will get a LicenseService instance from the service.
-func GetLicenseService(c common.Client, uri string) (*LicenseService, error) {
-	return common.GetObject[LicenseService](c, uri)
+func GetLicenseService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LicenseService, error) {
+	return common.GetObject[LicenseService](c, uri, queryOpts...)
 }
 
 // ListReferencedLicenseServices gets the collection of LicenseService from
 // a provided reference.
-func ListReferencedLicenseServices(c common.Client, link string) ([]*LicenseService, error) {
-	return common.GetCollectionObjects[LicenseService](c, link)
+func ListReferencedLicenseServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LicenseService, error) {
+	return common.GetCollectionObjects[LicenseService](c, link, queryOpts...)
 }

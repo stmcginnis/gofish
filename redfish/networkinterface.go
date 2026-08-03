@@ -78,37 +78,37 @@ func (networkinterface *NetworkInterface) UnmarshalJSON(b []byte) error {
 }
 
 // GetNetworkInterface will get a NetworkInterface instance from the service.
-func GetNetworkInterface(c common.Client, uri string) (*NetworkInterface, error) {
-	return common.GetObject[NetworkInterface](c, uri)
+func GetNetworkInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkInterface, error) {
+	return common.GetObject[NetworkInterface](c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkInterfaces gets the collection of NetworkInterface from
 // a provided reference.
-func ListReferencedNetworkInterfaces(c common.Client, link string) ([]*NetworkInterface, error) {
-	return common.GetCollectionObjects[NetworkInterface](c, link)
+func ListReferencedNetworkInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkInterface, error) {
+	return common.GetCollectionObjects[NetworkInterface](c, link, queryOpts...)
 }
 
 // NetworkAdapter gets the NetworkAdapter for this interface.
-func (networkinterface *NetworkInterface) NetworkAdapter() (*NetworkAdapter, error) {
+func (networkinterface *NetworkInterface) NetworkAdapter(queryOpts ...common.QueryGroupOption) (*NetworkAdapter, error) {
 	if networkinterface.networkAdapter == "" {
 		return nil, nil
 	}
 
-	return GetNetworkAdapter(networkinterface.GetClient(), networkinterface.networkAdapter)
+	return GetNetworkAdapter(networkinterface.GetClient(), networkinterface.networkAdapter, queryOpts...)
 }
 
 // NetworkDeviceFunctions gets the collection of NetworkDeviceFunctions of this network interface
-func (networkinterface *NetworkInterface) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](networkinterface.GetClient(), networkinterface.networkDeviceFunctions)
+func (networkinterface *NetworkInterface) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjects[NetworkDeviceFunction](networkinterface.GetClient(), networkinterface.networkDeviceFunctions, queryOpts...)
 }
 
 // NetworkPorts gets the collection of NetworkPorts of this network interface
 // This property has been deprecated in favor of the Ports property.
-func (networkinterface *NetworkInterface) NetworkPorts() ([]*NetworkPort, error) {
-	return common.GetObjects[NetworkPort](networkinterface.GetClient(), networkinterface.networkPorts)
+func (networkinterface *NetworkInterface) NetworkPorts(queryOpts ...common.QueryGroupOption) ([]*NetworkPort, error) {
+	return common.GetObjects[NetworkPort](networkinterface.GetClient(), networkinterface.networkPorts, queryOpts...)
 }
 
 // Ports gets the ports associated with this network interface.
-func (networkinterface *NetworkInterface) Ports() ([]*Port, error) {
-	return common.GetObjects[Port](networkinterface.GetClient(), networkinterface.ports)
+func (networkinterface *NetworkInterface) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjects[Port](networkinterface.GetClient(), networkinterface.ports, queryOpts...)
 }

@@ -52,14 +52,14 @@ type OperatingConfig struct {
 }
 
 // GetOperatingConfig will get a OperatingConfig instance from the service.
-func GetOperatingConfig(c common.Client, uri string) (*OperatingConfig, error) {
-	return common.GetObject[OperatingConfig](c, uri)
+func GetOperatingConfig(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OperatingConfig, error) {
+	return common.GetObject[OperatingConfig](c, uri, queryOpts...)
 }
 
 // ListReferencedOperatingConfigs gets the collection of OperatingConfig from
 // a provided reference.
-func ListReferencedOperatingConfigs(c common.Client, link string) ([]*OperatingConfig, error) {
-	return common.GetCollectionObjects[OperatingConfig](c, link)
+func ListReferencedOperatingConfigs(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OperatingConfig, error) {
+	return common.GetCollectionObjects[OperatingConfig](c, link, queryOpts...)
 }
 
 // TurboProfileDatapoint shall specify the turbo profile for a set of active cores.

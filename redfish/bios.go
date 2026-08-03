@@ -98,13 +98,13 @@ func (bios *Bios) UnmarshalJSON(b []byte) error {
 }
 
 // GetBios will get a Bios instance from the service.
-func GetBios(c common.Client, uri string) (*Bios, error) {
-	return common.GetObject[Bios](c, uri)
+func GetBios(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Bios, error) {
+	return common.GetObject[Bios](c, uri, queryOpts...)
 }
 
 // ListReferencedBioss gets the collection of Bios from a provided reference.
-func ListReferencedBioss(c common.Client, link string) ([]*Bios, error) {
-	return common.GetCollectionObjects[Bios](c, link)
+func ListReferencedBioss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Bios, error) {
+	return common.GetCollectionObjects[Bios](c, link, queryOpts...)
 }
 
 // ChangePasswordTarget returns the action target URL for #Bios.ChangePassword,
@@ -209,10 +209,10 @@ func (bios *Bios) UpdateBiosAttributes(attrs SettingsAttributes) error {
 
 // GetActiveSoftwareImage gets the SoftwareInventory which represents the
 // active BIOS firmware image.
-func (bios *Bios) GetActiveSoftwareImage() (*SoftwareInventory, error) {
+func (bios *Bios) GetActiveSoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if bios.activeSoftwareImage == "" {
 		return nil, nil
 	}
 
-	return GetSoftwareInventory(bios.GetClient(), bios.activeSoftwareImage)
+	return GetSoftwareInventory(bios.GetClient(), bios.activeSoftwareImage, queryOpts...)
 }

@@ -129,12 +129,12 @@ func (datastorageloscapabilities *DataStorageLoSCapabilities) Update() error {
 }
 
 // GetDataStorageLoSCapabilities will get a DataStorageLoSCapabilities instance from the service.
-func GetDataStorageLoSCapabilities(c common.Client, uri string) (*DataStorageLoSCapabilities, error) {
-	return common.GetObject[DataStorageLoSCapabilities](c, uri)
+func GetDataStorageLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataStorageLoSCapabilities, error) {
+	return common.GetObject[DataStorageLoSCapabilities](c, uri, queryOpts...)
 }
 
 // ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
 // a provided reference.
-func ListReferencedDataStorageLoSCapabilities(c common.Client, link string) ([]*DataStorageLoSCapabilities, error) {
-	return common.GetCollectionObjects[DataStorageLoSCapabilities](c, link)
+func ListReferencedDataStorageLoSCapabilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataStorageLoSCapabilities, error) {
+	return common.GetCollectionObjects[DataStorageLoSCapabilities](c, link, queryOpts...)
 }

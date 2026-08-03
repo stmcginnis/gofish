@@ -107,18 +107,18 @@ func (spareresourceset *SpareResourceSet) Update() error {
 }
 
 // GetSpareResourceSet will get a SpareResourceSet instance from the service.
-func GetSpareResourceSet(c common.Client, uri string) (*SpareResourceSet, error) {
-	return common.GetObject[SpareResourceSet](c, uri)
+func GetSpareResourceSet(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SpareResourceSet, error) {
+	return common.GetObject[SpareResourceSet](c, uri, queryOpts...)
 }
 
 // ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
 // a provided reference.
-func ListReferencedSpareResourceSets(c common.Client, link string) ([]*SpareResourceSet, error) {
-	return common.GetCollectionObjects[SpareResourceSet](c, link)
+func ListReferencedSpareResourceSets(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetCollectionObjects[SpareResourceSet](c, link, queryOpts...)
 }
 
 // ReplacementSpareSets gets other spare sets that can be utilized to replenish
 // this spare set.
-func (spareresourceset *SpareResourceSet) ReplacementSpareSets() ([]*SpareResourceSet, error) {
-	return ListReferencedSpareResourceSets(spareresourceset.GetClient(), spareresourceset.replacementSpareSets)
+func (spareresourceset *SpareResourceSet) ReplacementSpareSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return ListReferencedSpareResourceSets(spareresourceset.GetClient(), spareresourceset.replacementSpareSets, queryOpts...)
 }

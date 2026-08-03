@@ -104,14 +104,14 @@ func (mdd *ManagerDiagnosticData) ResetMetrics() error {
 }
 
 // GetManagerDiagnosticData will get a ManagerDiagnosticData instance from the service.
-func GetManagerDiagnosticData(c common.Client, uri string) (*ManagerDiagnosticData, error) {
-	return common.GetObject[ManagerDiagnosticData](c, uri)
+func GetManagerDiagnosticData(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ManagerDiagnosticData, error) {
+	return common.GetObject[ManagerDiagnosticData](c, uri, queryOpts...)
 }
 
 // ListReferencedManagerDiagnosticDatas gets the collection of ManagerDiagnosticData from
 // a provided reference.
-func ListReferencedManagerDiagnosticDatas(c common.Client, link string) ([]*ManagerDiagnosticData, error) {
-	return common.GetCollectionObjects[ManagerDiagnosticData](c, link)
+func ListReferencedManagerDiagnosticDatas(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ManagerDiagnosticData, error) {
+	return common.GetCollectionObjects[ManagerDiagnosticData](c, link, queryOpts...)
 }
 
 // MemoryECCStatistics shall contain the memory ECC statistics of a manager.

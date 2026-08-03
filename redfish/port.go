@@ -874,64 +874,64 @@ func (port *Port) UnmarshalJSON(b []byte) error {
 }
 
 // EnvironmentMetrics gets the environment metrics for this port or any attached small form-factor pluggable (SFP) device.
-func (port *Port) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (port *Port) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if port.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(port.GetClient(), port.environmentMetrics)
+	return GetEnvironmentMetrics(port.GetClient(), port.environmentMetrics, queryOpts...)
 }
 
 // Metrics gets the metrics for this port.
-func (port *Port) Metrics() (*PortMetrics, error) {
+func (port *Port) Metrics(queryOpts ...common.QueryGroupOption) (*PortMetrics, error) {
 	if port.metrics == "" {
 		return nil, nil
 	}
-	return GetPortMetrics(port.GetClient(), port.metrics)
+	return GetPortMetrics(port.GetClient(), port.metrics, queryOpts...)
 }
 
 // AssociatedEndpoints gets the endpoints at the other end of the link.
-func (port *Port) AssociatedEndpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](port.GetClient(), port.associatedEndpoints)
+func (port *Port) AssociatedEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](port.GetClient(), port.associatedEndpoints, queryOpts...)
 }
 
 // Cables gets the cables connected to this port.
-func (port *Port) Cables() ([]*Cable, error) {
-	return common.GetObjects[Cable](port.GetClient(), port.cables)
+func (port *Port) Cables(queryOpts ...common.QueryGroupOption) ([]*Cable, error) {
+	return common.GetObjects[Cable](port.GetClient(), port.cables, queryOpts...)
 }
 
 // ConnectedPorts gets the remote device ports connected to the other end of the link.
-func (port *Port) ConnectedPorts() ([]*Port, error) {
-	return common.GetObjects[Port](port.GetClient(), port.connectedPorts)
+func (port *Port) ConnectedPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjects[Port](port.GetClient(), port.connectedPorts, queryOpts...)
 }
 
 // ConnectedSwitchPorts gets the switch ports connected to the other end of the link.
-func (port *Port) ConnectedSwitchPorts() ([]*Port, error) {
-	return common.GetObjects[Port](port.GetClient(), port.connectedSwitchPorts)
+func (port *Port) ConnectedSwitchPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjects[Port](port.GetClient(), port.connectedSwitchPorts, queryOpts...)
 }
 
 // ConnectedSwitches gets the switches connected to the other end of the link.
-func (port *Port) ConnectedSwitches() ([]*Switch, error) {
-	return common.GetObjects[Switch](port.GetClient(), port.connectedSwitches)
+func (port *Port) ConnectedSwitches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetObjects[Switch](port.GetClient(), port.connectedSwitches, queryOpts...)
 }
 
 // EthernetInterfaces gets the Ethernet interfaces this port provides.
-func (port *Port) EthernetInterfaces() ([]*EthernetInterface, error) {
-	return common.GetObjects[EthernetInterface](port.GetClient(), port.ethernetInterfaces)
+func (port *Port) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return common.GetObjects[EthernetInterface](port.GetClient(), port.ethernetInterfaces, queryOpts...)
 }
 
 // GenZLPRT gets the Gen-Z Core Specification-defined Linear Packet Relay Table for this port.
-func (port *Port) GenZLPRT() ([]*RouteEntry, error) {
-	return common.GetObjects[RouteEntry](port.GetClient(), port.genZLPRT)
+func (port *Port) GenZLPRT(queryOpts ...common.QueryGroupOption) ([]*RouteEntry, error) {
+	return common.GetObjects[RouteEntry](port.GetClient(), port.genZLPRT, queryOpts...)
 }
 
 // GenZMPRT gets the Gen-Z Core Specification-defined Multi-subnet Packet Relay Table for this port.
-func (port *Port) GenZMPRT() ([]*RouteEntry, error) {
-	return common.GetObjects[RouteEntry](port.GetClient(), port.genZMPRT)
+func (port *Port) GenZMPRT(queryOpts ...common.QueryGroupOption) ([]*RouteEntry, error) {
+	return common.GetObjects[RouteEntry](port.GetClient(), port.genZMPRT, queryOpts...)
 }
 
 // GenZVCAT gets the Gen-Z Virtual Channel Action Table for the port.
-func (port *Port) GenZVCAT() ([]*VCATEntry, error) {
-	return common.GetObjects[VCATEntry](port.GetClient(), port.genZVCAT)
+func (port *Port) GenZVCAT(queryOpts ...common.QueryGroupOption) ([]*VCATEntry, error) {
+	return common.GetObjects[VCATEntry](port.GetClient(), port.genZVCAT, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -974,14 +974,14 @@ func (port *Port) Update() error {
 }
 
 // GetPort will get a Port instance from the service.
-func GetPort(c common.Client, uri string) (*Port, error) {
-	return common.GetObject[Port](c, uri)
+func GetPort(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Port, error) {
+	return common.GetObject[Port](c, uri, queryOpts...)
 }
 
 // ListReferencedPorts gets the collection of Port from
 // a provided reference.
-func ListReferencedPorts(c common.Client, link string) ([]*Port, error) {
-	return common.GetCollectionObjects[Port](c, link)
+func ListReferencedPorts(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetCollectionObjects[Port](c, link, queryOpts...)
 }
 
 // ResetPort resets this port.

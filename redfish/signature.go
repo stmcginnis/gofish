@@ -45,12 +45,12 @@ type Signature struct {
 }
 
 // GetSignature will get a Signature instance from the service.
-func GetSignature(c common.Client, uri string) (*Signature, error) {
-	return common.GetObject[Signature](c, uri)
+func GetSignature(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Signature, error) {
+	return common.GetObject[Signature](c, uri, queryOpts...)
 }
 
 // ListReferencedSignatures gets the collection of Signature from
 // a provided reference.
-func ListReferencedSignatures(c common.Client, link string) ([]*Signature, error) {
-	return common.GetCollectionObjects[Signature](c, link)
+func ListReferencedSignatures(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Signature, error) {
+	return common.GetCollectionObjects[Signature](c, link, queryOpts...)
 }

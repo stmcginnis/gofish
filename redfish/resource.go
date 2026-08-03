@@ -174,11 +174,11 @@ func (condition *Condition) UnmarshalJSON(b []byte) error {
 }
 
 // LogEntry gets the log entry created for this condition.
-func (condition *Condition) LogEntry(c common.Client) (*LogEntry, error) {
+func (condition *Condition) LogEntry(c common.Client, queryOpts ...common.QueryGroupOption) (*LogEntry, error) {
 	if condition.logEntry == "" {
 		return nil, nil
 	}
-	return GetLogEntry(c, condition.logEntry)
+	return GetLogEntry(c, condition.logEntry, queryOpts...)
 }
 
 // ResourceIdentifier shall be unique within the managed ecosystem.
@@ -429,14 +429,14 @@ type Resource struct {
 }
 
 // GetResource will get a Resource instance from the service.
-func GetResource(c common.Client, uri string) (*Resource, error) {
-	return common.GetObject[Resource](c, uri)
+func GetResource(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Resource, error) {
+	return common.GetObject[Resource](c, uri, queryOpts...)
 }
 
 // ListReferencedResources gets the collection of Resource from
 // a provided reference.
-func ListReferencedResources(c common.Client, link string) ([]*Resource, error) {
-	return common.GetCollectionObjects[Resource](c, link)
+func ListReferencedResources(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Resource, error) {
+	return common.GetCollectionObjects[Resource](c, link, queryOpts...)
 }
 
 // ResourceCollection

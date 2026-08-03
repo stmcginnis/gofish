@@ -69,6 +69,6 @@ func (i *Syslog) Update() error {
 }
 
 // GetSyslog will get a Syslog instance from the service.
-func GetSyslog(c common.Client, uri string) (*Syslog, error) {
-	return common.GetObject[Syslog](c, uri)
+func GetSyslog(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Syslog, error) {
+	return common.GetObject[Syslog](c, uri, queryOpts...)
 }

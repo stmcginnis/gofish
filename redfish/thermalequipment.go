@@ -69,32 +69,32 @@ func (thermalequipment *ThermalEquipment) UnmarshalJSON(b []byte) error {
 }
 
 // CDUs gets a collection of coolant distribution units.
-func (thermalequipment *ThermalEquipment) CDUs() ([]*CoolingUnit, error) {
-	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.cdus)
+func (thermalequipment *ThermalEquipment) CDUs(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.cdus, queryOpts...)
 }
 
 // CoolingLoops gets a collection of cooling loops.
-func (thermalequipment *ThermalEquipment) CoolingLoops() ([]*CoolingLoop, error) {
-	return ListReferencedCoolingLoops(thermalequipment.GetClient(), thermalequipment.coolingLoops)
+func (thermalequipment *ThermalEquipment) CoolingLoops(queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
+	return ListReferencedCoolingLoops(thermalequipment.GetClient(), thermalequipment.coolingLoops, queryOpts...)
 }
 
 // HeatExchangers gets a collection of heat exchangers.
-func (thermalequipment *ThermalEquipment) HeatExchangers() ([]*CoolingUnit, error) {
-	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.heatExchangers)
+func (thermalequipment *ThermalEquipment) HeatExchangers(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.heatExchangers, queryOpts...)
 }
 
 // ImmersionUnits gets a collection of immersion cooling units.
-func (thermalequipment *ThermalEquipment) ImmersionUnits() ([]*CoolingUnit, error) {
-	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.immersionUnits)
+func (thermalequipment *ThermalEquipment) ImmersionUnits(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.immersionUnits, queryOpts...)
 }
 
 // GetThermalEquipment will get a ThermalEquipment instance from the service.
-func GetThermalEquipment(c common.Client, uri string) (*ThermalEquipment, error) {
-	return common.GetObject[ThermalEquipment](c, uri)
+func GetThermalEquipment(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalEquipment, error) {
+	return common.GetObject[ThermalEquipment](c, uri, queryOpts...)
 }
 
 // ListReferencedThermalEquipments gets the collection of ThermalEquipment from
 // a provided reference.
-func ListReferencedThermalEquipments(c common.Client, link string) ([]*ThermalEquipment, error) {
-	return common.GetCollectionObjects[ThermalEquipment](c, link)
+func ListReferencedThermalEquipments(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalEquipment, error) {
+	return common.GetCollectionObjects[ThermalEquipment](c, link, queryOpts...)
 }

@@ -120,14 +120,14 @@ func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) Update() error
 }
 
 // GetIOPerformanceLoSCapabilities will get a IOPerformanceLoSCapabilities instance from the service.
-func GetIOPerformanceLoSCapabilities(c common.Client, uri string) (*IOPerformanceLoSCapabilities, error) {
-	return common.GetObject[IOPerformanceLoSCapabilities](c, uri)
+func GetIOPerformanceLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOPerformanceLoSCapabilities, error) {
+	return common.GetObject[IOPerformanceLoSCapabilities](c, uri, queryOpts...)
 }
 
 // ListReferencedIOPerformanceLoSCapabilitiess gets the collection of IOPerformanceLoSCapabilities from
 // a provided reference.
-func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string) ([]*IOPerformanceLoSCapabilities, error) {
-	return common.GetCollectionObjects[IOPerformanceLoSCapabilities](c, link)
+func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLoSCapabilities, error) {
+	return common.GetCollectionObjects[IOPerformanceLoSCapabilities](c, link, queryOpts...)
 }
 
 // IOWorkload is used to describe an IO Workload.

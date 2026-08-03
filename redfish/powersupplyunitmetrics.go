@@ -105,8 +105,8 @@ func (metrics *PowerSupplyUnitMetrics) UnmarshalJSON(b []byte) error {
 }
 
 // GetPowerSupplyUnitMetrics will get a PowerSupplyMetrics instance from the Redfish service.
-func GetPowerSupplyUnitMetrics(c common.Client, uri string) (*PowerSupplyUnitMetrics, error) {
-	return common.GetObject[PowerSupplyUnitMetrics](c, uri)
+func GetPowerSupplyUnitMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerSupplyUnitMetrics, error) {
+	return common.GetObject[PowerSupplyUnitMetrics](c, uri, queryOpts...)
 }
 
 // This action resets the summary metrics related to this equipment.

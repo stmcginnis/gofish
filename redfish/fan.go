@@ -120,16 +120,16 @@ func (fan *Fan) UnmarshalJSON(b []byte) error {
 }
 
 // Assembly gets the assembly for this fan.
-func (fan *Fan) Assembly() (*Assembly, error) {
+func (fan *Fan) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if fan.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(fan.GetClient(), fan.assembly)
+	return GetAssembly(fan.GetClient(), fan.assembly, queryOpts...)
 }
 
 // CoolingChassis get the cooling chassis related to this fan.
-func (fan *Fan) CoolingChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](fan.GetClient(), fan.coolingChassis)
+func (fan *Fan) CoolingChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](fan.GetClient(), fan.coolingChassis, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -142,12 +142,12 @@ func (fan *Fan) Update() error {
 }
 
 // GetFan will get a Fan instance from the service.
-func GetFan(c common.Client, uri string) (*Fan, error) {
-	return common.GetObject[Fan](c, uri)
+func GetFan(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Fan, error) {
+	return common.GetObject[Fan](c, uri, queryOpts...)
 }
 
 // ListReferencedFans gets the collection of Fan from
 // a provided reference.
-func ListReferencedFans(c common.Client, link string) ([]*Fan, error) {
-	return common.GetCollectionObjects[Fan](c, link)
+func ListReferencedFans(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Fan, error) {
+	return common.GetCollectionObjects[Fan](c, link, queryOpts...)
 }

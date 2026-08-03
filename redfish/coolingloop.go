@@ -161,37 +161,37 @@ func (coolingloop *CoolingLoop) Update() error {
 }
 
 // GetCoolingLoop will get a CoolingLoop instance from the service.
-func GetCoolingLoop(c common.Client, uri string) (*CoolingLoop, error) {
-	return common.GetObject[CoolingLoop](c, uri)
+func GetCoolingLoop(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolingLoop, error) {
+	return common.GetObject[CoolingLoop](c, uri, queryOpts...)
 }
 
 // ListReferencedCoolingLoops gets the collection of CoolingLoop from
 // a provided reference.
-func ListReferencedCoolingLoops(c common.Client, link string) ([]*CoolingLoop, error) {
-	return common.GetCollectionObjects[CoolingLoop](c, link)
+func ListReferencedCoolingLoops(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
+	return common.GetCollectionObjects[CoolingLoop](c, link, queryOpts...)
 }
 
 // PrimaryCoolantConnectors gets the primary coolant connectors for this equipment.
-func (coolingloop *CoolingLoop) PrimaryCoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingloop.GetClient(), coolingloop.primaryCoolantConnectors)
+func (coolingloop *CoolingLoop) PrimaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(coolingloop.GetClient(), coolingloop.primaryCoolantConnectors, queryOpts...)
 }
 
 // SecondaryCoolantConnectors gets the secondary coolant connectors for this equipment.
-func (coolingloop *CoolingLoop) SecondaryCoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(coolingloop.GetClient(), coolingloop.secondaryCoolantConnectors)
+func (coolingloop *CoolingLoop) SecondaryCoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(coolingloop.GetClient(), coolingloop.secondaryCoolantConnectors, queryOpts...)
 }
 
 // Chassis gets the physical container that contains this resource.
-func (coolingloop *CoolingLoop) Chassis() (*Chassis, error) {
-	return GetChassis(coolingloop.GetClient(), coolingloop.chassis)
+func (coolingloop *CoolingLoop) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
+	return GetChassis(coolingloop.GetClient(), coolingloop.chassis, queryOpts...)
 }
 
 // Facility gets the physical container that contains this resource.
-func (coolingloop *CoolingLoop) Facility() (*Facility, error) {
-	return GetFacility(coolingloop.GetClient(), coolingloop.chassis)
+func (coolingloop *CoolingLoop) Facility(queryOpts ...common.QueryGroupOption) (*Facility, error) {
+	return GetFacility(coolingloop.GetClient(), coolingloop.chassis, queryOpts...)
 }
 
 // ManagedBy gets the collection of managers of this equipment.
-func (coolingloop *CoolingLoop) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](coolingloop.GetClient(), coolingloop.managedBy)
+func (coolingloop *CoolingLoop) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](coolingloop.GetClient(), coolingloop.managedBy, queryOpts...)
 }

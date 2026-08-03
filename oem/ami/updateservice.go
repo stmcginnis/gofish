@@ -144,8 +144,8 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 }
 
 // GetUpdateService will get a UpdateService instance from the service.
-func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri)
+func GetUpdateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
+	return common.GetObject[UpdateService](c, uri, queryOpts...)
 }
 
 // UploadCABundle uploads CA certificates.

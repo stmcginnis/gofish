@@ -226,23 +226,23 @@ func (cable *Cable) UnmarshalJSON(b []byte) error {
 }
 
 // DownstreamChassis gets the physical downstream containers connected to this cable.
-func (cable *Cable) DownstreamChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](cable.GetClient(), cable.downstreamChassis)
+func (cable *Cable) DownstreamChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](cable.GetClient(), cable.downstreamChassis, queryOpts...)
 }
 
 // DownstreamPorts gets the physical downstream connections connected to this cable.
-func (cable *Cable) DownstreamPorts() ([]*Port, error) {
-	return common.GetObjects[Port](cable.GetClient(), cable.downstreamPorts)
+func (cable *Cable) DownstreamPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjects[Port](cable.GetClient(), cable.downstreamPorts, queryOpts...)
 }
 
 // UpstreamChassis gets the physical upstream containers connected to this cable.
-func (cable *Cable) UpstreamChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](cable.GetClient(), cable.upstreamChassis)
+func (cable *Cable) UpstreamChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](cable.GetClient(), cable.upstreamChassis, queryOpts...)
 }
 
 // UpstreamPorts gets the physical upstream connections connected to this cable.
-func (cable *Cable) UptreamPorts() ([]*Port, error) {
-	return common.GetObjects[Port](cable.GetClient(), cable.upstreamPorts)
+func (cable *Cable) UptreamPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjects[Port](cable.GetClient(), cable.upstreamPorts, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -271,12 +271,12 @@ func (cable *Cable) Update() error {
 }
 
 // GetCable will get a Cable instance from the service.
-func GetCable(c common.Client, uri string) (*Cable, error) {
-	return common.GetObject[Cable](c, uri)
+func GetCable(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Cable, error) {
+	return common.GetObject[Cable](c, uri, queryOpts...)
 }
 
 // ListReferencedCables gets the collection of Cable from
 // a provided reference.
-func ListReferencedCables(c common.Client, link string) ([]*Cable, error) {
-	return common.GetCollectionObjects[Cable](c, link)
+func ListReferencedCables(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Cable, error) {
+	return common.GetCollectionObjects[Cable](c, link, queryOpts...)
 }

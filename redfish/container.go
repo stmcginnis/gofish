@@ -73,14 +73,14 @@ func (container *Container) UnmarshalJSON(b []byte) error {
 }
 
 // GetContainer will get a Container instance from the service.
-func GetContainer(c common.Client, uri string) (*Container, error) {
-	return common.GetObject[Container](c, uri)
+func GetContainer(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Container, error) {
+	return common.GetObject[Container](c, uri, queryOpts...)
 }
 
 // ListReferencedContainers gets the collection of Container from
 // a provided reference.
-func ListReferencedContainers(c common.Client, link string) ([]*Container, error) {
-	return common.GetCollectionObjects[Container](c, link)
+func ListReferencedContainers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Container, error) {
+	return common.GetCollectionObjects[Container](c, link, queryOpts...)
 }
 
 // Reset resets the container.
@@ -93,21 +93,21 @@ func (container *Container) Reset() error {
 }
 
 // EthernetIntefaces gets the ethernet interfaces associated with this container.
-func (container *Container) EthernetInterfaces() ([]*EthernetInterface, error) {
+func (container *Container) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
 	if container.ethernetInterfaces == "" {
 		return nil, nil
 	}
 
-	return ListReferencedEthernetInterfaces(container.GetClient(), container.ethernetInterfaces)
+	return ListReferencedEthernetInterfaces(container.GetClient(), container.ethernetInterfaces, queryOpts...)
 }
 
 // ContainerImage gets the image used by this container.
-func (container *Container) ContainerImage() (*ContainerImage, error) {
+func (container *Container) ContainerImage(queryOpts ...common.QueryGroupOption) (*ContainerImage, error) {
 	if container.containerImage == "" {
 		return nil, nil
 	}
 
-	return GetContainerImage(container.GetClient(), container.containerImage)
+	return GetContainerImage(container.GetClient(), container.containerImage, queryOpts...)
 }
 
 // Limits shall contain the resource limits allocated to a container.

@@ -92,12 +92,12 @@ func (ioconnectivityloscapabilities *IOConnectivityLoSCapabilities) Update() err
 
 // GetIOConnectivityLoSCapabilities will get a IOConnectivityLoSCapabilities
 // instance from the service.
-func GetIOConnectivityLoSCapabilities(c common.Client, uri string) (*IOConnectivityLoSCapabilities, error) {
-	return common.GetObject[IOConnectivityLoSCapabilities](c, uri)
+func GetIOConnectivityLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOConnectivityLoSCapabilities, error) {
+	return common.GetObject[IOConnectivityLoSCapabilities](c, uri, queryOpts...)
 }
 
 // ListReferencedIOConnectivityLoSCapabilitiess gets the collection of
 // IOConnectivityLoSCapabilities from a provided reference.
-func ListReferencedIOConnectivityLoSCapabilitiess(c common.Client, link string) ([]*IOConnectivityLoSCapabilities, error) {
-	return common.GetCollectionObjects[IOConnectivityLoSCapabilities](c, link)
+func ListReferencedIOConnectivityLoSCapabilitiess(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLoSCapabilities, error) {
+	return common.GetCollectionObjects[IOConnectivityLoSCapabilities](c, link, queryOpts...)
 }

@@ -342,73 +342,73 @@ func (storagepool *StoragePool) Update() error {
 }
 
 // GetStoragePool will get a StoragePool instance from the service.
-func GetStoragePool(c common.Client, uri string) (*StoragePool, error) {
-	return common.GetObject[StoragePool](c, uri)
+func GetStoragePool(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StoragePool, error) {
+	return common.GetObject[StoragePool](c, uri, queryOpts...)
 }
 
 // ListReferencedStoragePools gets the collection of StoragePool from
 // a provided reference.
-func ListReferencedStoragePools(c common.Client, link string) ([]*StoragePool, error) {
-	return common.GetCollectionObjects[StoragePool](c, link)
+func ListReferencedStoragePools(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
+	return common.GetCollectionObjects[StoragePool](c, link, queryOpts...)
 }
 
 // DedicatedSpareDrives gets the Drive entities which are currently assigned as
 // a dedicated spare and are able to support this StoragePool.
-func (storagepool *StoragePool) DedicatedSpareDrives() ([]*redfish.Drive, error) {
-	return common.GetObjects[redfish.Drive](storagepool.GetClient(), storagepool.dedicatedSpareDrives)
+func (storagepool *StoragePool) DedicatedSpareDrives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return common.GetObjects[redfish.Drive](storagepool.GetClient(), storagepool.dedicatedSpareDrives, queryOpts...)
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
-func (storagepool *StoragePool) SpareResourceSets() ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](storagepool.GetClient(), storagepool.spareResourceSets)
+func (storagepool *StoragePool) SpareResourceSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetObjects[SpareResourceSet](storagepool.GetClient(), storagepool.spareResourceSets, queryOpts...)
 }
 
 // AllocatedPools gets the storage pools allocated from this storage pool.
-func (storagepool *StoragePool) AllocatedPools() ([]*StoragePool, error) {
-	return ListReferencedStoragePools(storagepool.GetClient(), storagepool.allocatedPools)
+func (storagepool *StoragePool) AllocatedPools(queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
+	return ListReferencedStoragePools(storagepool.GetClient(), storagepool.allocatedPools, queryOpts...)
 }
 
 // AllocatedVolumes gets the volumes allocated from this storage pool.
-func (storagepool *StoragePool) AllocatedVolumes() ([]*Volume, error) {
-	return ListReferencedVolumes(storagepool.GetClient(), storagepool.allocatedVolumes)
+func (storagepool *StoragePool) AllocatedVolumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return ListReferencedVolumes(storagepool.GetClient(), storagepool.allocatedVolumes, queryOpts...)
 }
 
 // CapacitySources gets space allocations to this pool.
-func (storagepool *StoragePool) CapacitySources() ([]*CapacitySource, error) {
-	return common.GetObjects[CapacitySource](storagepool.GetClient(), storagepool.capacitySources)
+func (storagepool *StoragePool) CapacitySources(queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
+	return common.GetObjects[CapacitySource](storagepool.GetClient(), storagepool.capacitySources, queryOpts...)
 }
 
 // ClassesOfService gets references to all classes of service supported by this
 // storage pool. Capacity allocated from this storage pool shall conform to one
 // of the referenced classes of service.
-func (storagepool *StoragePool) ClassesOfService() ([]*ClassOfService, error) {
-	return ListReferencedClassOfServices(storagepool.GetClient(), storagepool.classesOfService)
+func (storagepool *StoragePool) ClassesOfService(queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
+	return ListReferencedClassOfServices(storagepool.GetClient(), storagepool.classesOfService, queryOpts...)
 }
 
 // DefaultClassOfService gets the default ClassOfService for this pool.
-func (storagepool *StoragePool) DefaultClassOfService() (*ClassOfService, error) {
+func (storagepool *StoragePool) DefaultClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if storagepool.defaultClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storagepool.GetClient(), storagepool.defaultClassOfService)
+	return GetClassOfService(storagepool.GetClient(), storagepool.defaultClassOfService, queryOpts...)
 }
 
 // OwningStorageResource gets the Storage resource that owns or contains this StoragePool.
-func (storagepool *StoragePool) OwningStorageResource() (*redfish.Storage, error) {
+func (storagepool *StoragePool) OwningStorageResource(queryOpts ...common.QueryGroupOption) (*redfish.Storage, error) {
 	if storagepool.owningStorageResource == "" {
 		return nil, nil
 	}
 
-	return redfish.GetStorage(storagepool.GetClient(), storagepool.owningStorageResource)
+	return redfish.GetStorage(storagepool.GetClient(), storagepool.owningStorageResource, queryOpts...)
 }
 
 // Metrics gets the metrics for this storage pool.
-func (storagepool *StoragePool) Metrics() (*StoragePoolMetrics, error) {
+func (storagepool *StoragePool) Metrics(queryOpts ...common.QueryGroupOption) (*StoragePoolMetrics, error) {
 	if storagepool.metrics == "" {
 		return nil, nil
 	}
-	return GetStoragePoolMetrics(storagepool.GetClient(), storagepool.metrics)
+	return GetStoragePoolMetrics(storagepool.GetClient(), storagepool.metrics, queryOpts...)
 }
 
 // AddDrives will add an additional drive, or set of drives, to a capacity source for the storage pool.

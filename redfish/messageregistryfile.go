@@ -58,11 +58,11 @@ type MessageRegistryFile struct {
 
 // GetMessageRegistryFile will get a MessageRegistryFile
 // instance from the Redfish service.
-func GetMessageRegistryFile(c common.Client, uri string) (*MessageRegistryFile, error) {
-	return common.GetObject[MessageRegistryFile](c, uri)
+func GetMessageRegistryFile(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MessageRegistryFile, error) {
+	return common.GetObject[MessageRegistryFile](c, uri, queryOpts...)
 }
 
 // ListReferencedMessageRegistryFiles gets the collection of MessageRegistryFile.
-func ListReferencedMessageRegistryFiles(c common.Client, link string) ([]*MessageRegistryFile, error) {
-	return common.GetCollectionObjects[MessageRegistryFile](c, link)
+func ListReferencedMessageRegistryFiles(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistryFile, error) {
+	return common.GetCollectionObjects[MessageRegistryFile](c, link, queryOpts...)
 }

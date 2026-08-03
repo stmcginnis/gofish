@@ -96,41 +96,41 @@ func (powerEquipment *PowerEquipment) UnmarshalJSON(b []byte) error {
 }
 
 // GetPowerEquipment will get a PowerEquipment instance from the Redfish service.
-func GetPowerEquipment(c common.Client, uri string) (*PowerEquipment, error) {
-	return common.GetObject[PowerEquipment](c, uri)
+func GetPowerEquipment(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerEquipment, error) {
+	return common.GetObject[PowerEquipment](c, uri, queryOpts...)
 }
 
 // ManagedBy gets the collection of managers of this PowerEquipment
-func (powerEquipment *PowerEquipment) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](powerEquipment.GetClient(), powerEquipment.managedBy)
+func (powerEquipment *PowerEquipment) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](powerEquipment.GetClient(), powerEquipment.managedBy, queryOpts...)
 }
 
 // ElectricalBuses gets the collection that contains a set of electrical bus units.
-func (powerEquipment *PowerEquipment) ElectricalBuses() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.electricalBuses)
+func (powerEquipment *PowerEquipment) ElectricalBuses(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.electricalBuses, queryOpts...)
 }
 
 // FloorPDUs gets the collection that contains a set of floor power distribution units.
-func (powerEquipment *PowerEquipment) FloorPDUs() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.floorPDUs)
+func (powerEquipment *PowerEquipment) FloorPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.floorPDUs, queryOpts...)
 }
 
 // PowerShelves gets the collection that contains a set of power shelves.
-func (powerEquipment *PowerEquipment) PowerShelves() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.powerShelves)
+func (powerEquipment *PowerEquipment) PowerShelves(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.powerShelves, queryOpts...)
 }
 
 // RackPDUs gets the collection that contains a set of rack-level power distribution units.
-func (powerEquipment *PowerEquipment) RackPDUs() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.rackPDUs)
+func (powerEquipment *PowerEquipment) RackPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.rackPDUs, queryOpts...)
 }
 
 // Switchgear gets the collection that contains a set of switchgear.
-func (powerEquipment *PowerEquipment) Switchgear() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.switchgear)
+func (powerEquipment *PowerEquipment) Switchgear(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.switchgear, queryOpts...)
 }
 
 // TransferSwitches gets the collection that contains a set of transfer switches.
-func (powerEquipment *PowerEquipment) TransferSwitches() ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.transferSwitches)
+func (powerEquipment *PowerEquipment) TransferSwitches(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.transferSwitches, queryOpts...)
 }

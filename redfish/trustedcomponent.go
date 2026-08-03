@@ -118,35 +118,35 @@ type TrustedComponent struct {
 }
 
 // ActiveSoftwareImage gets the active firmware image for this trusted component.
-func (trustedComponent *TrustedComponent) ActiveSoftwareImage() (*SoftwareInventory, error) {
+func (trustedComponent *TrustedComponent) ActiveSoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if trustedComponent.Links.ActiveSoftwareImage.IsZero() {
 		return nil, nil
 	}
-	return GetSoftwareInventory(trustedComponent.GetClient(), trustedComponent.Links.ActiveSoftwareImage.String())
+	return GetSoftwareInventory(trustedComponent.GetClient(), trustedComponent.Links.ActiveSoftwareImage.String(), queryOpts...)
 }
 
 // ComponentIntegrity gets the resources for which the trusted component is responsible.
-func (trustedComponent *TrustedComponent) ComponentIntegrity() ([]*ComponentIntegrity, error) {
+func (trustedComponent *TrustedComponent) ComponentIntegrity(queryOpts ...common.QueryGroupOption) ([]*ComponentIntegrity, error) {
 	if len(trustedComponent.Links.ComponentIntegrity) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[ComponentIntegrity](trustedComponent.GetClient(), trustedComponent.Links.ComponentIntegrity.ToStrings())
+	return common.GetObjects[ComponentIntegrity](trustedComponent.GetClient(), trustedComponent.Links.ComponentIntegrity.ToStrings(), queryOpts...)
 }
 
 // SoftwareImages gets the firmware images that apply to this trusted component.
-func (trustedComponent *TrustedComponent) SoftwareImages() ([]*SoftwareInventory, error) {
+func (trustedComponent *TrustedComponent) SoftwareImages(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
 	if len(trustedComponent.Links.SoftwareImages) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[SoftwareInventory](trustedComponent.GetClient(), trustedComponent.Links.SoftwareImages.ToStrings())
+	return common.GetObjects[SoftwareInventory](trustedComponent.GetClient(), trustedComponent.Links.SoftwareImages.ToStrings(), queryOpts...)
 }
 
 // Certificates gets the certificates associated with this trusted component.
-func (trustedComponent *TrustedComponent) Certificates() ([]*Certificate, error) {
+func (trustedComponent *TrustedComponent) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if trustedComponent.CertificatesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedCertificates(trustedComponent.GetClient(), trustedComponent.CertificatesLink.String())
+	return ListReferencedCertificates(trustedComponent.GetClient(), trustedComponent.CertificatesLink.String(), queryOpts...)
 }
 
 // TPMGetEventLog gets the event log for TPM 2.0 devices.
@@ -171,12 +171,12 @@ func (trustedComponent *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogRespo
 }
 
 // GetTrustedComponent will get a TrustedComponent instance from the service.
-func GetTrustedComponent(c common.Client, uri string) (*TrustedComponent, error) {
-	return common.GetObject[TrustedComponent](c, uri)
+func GetTrustedComponent(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*TrustedComponent, error) {
+	return common.GetObject[TrustedComponent](c, uri, queryOpts...)
 }
 
 // ListReferencedTrustedComponents gets the collection of TrustedComponent from
 // a provided reference.
-func ListReferencedTrustedComponents(c common.Client, link string) ([]*TrustedComponent, error) {
-	return common.GetCollectionObjects[TrustedComponent](c, link)
+func ListReferencedTrustedComponents(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*TrustedComponent, error) {
+	return common.GetCollectionObjects[TrustedComponent](c, link, queryOpts...)
 }
