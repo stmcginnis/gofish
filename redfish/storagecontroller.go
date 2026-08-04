@@ -344,37 +344,37 @@ func (storagecontroller *StorageController) UnmarshalJSON(b []byte) error {
 }
 
 // Assembly gets the storage controller's assembly.
-func (storagecontroller *StorageController) Assembly() (*Assembly, error) {
+func (storagecontroller *StorageController) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if storagecontroller.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(storagecontroller.GetClient(), storagecontroller.assembly)
+	return GetAssembly(storagecontroller.GetClient(), storagecontroller.assembly, queryOpts...)
 }
 
 // Certificates gets the storage controller's certificates.
-func (storagecontroller *StorageController) Certificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(storagecontroller.GetClient(), storagecontroller.certificates)
+func (storagecontroller *StorageController) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(storagecontroller.GetClient(), storagecontroller.certificates, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this storage controller.
-func (storagecontroller *StorageController) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (storagecontroller *StorageController) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if storagecontroller.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(storagecontroller.GetClient(), storagecontroller.environmentMetrics)
+	return GetEnvironmentMetrics(storagecontroller.GetClient(), storagecontroller.environmentMetrics, queryOpts...)
 }
 
 // Metrics gets the metrics associated with this storage controller.
-func (storagecontroller *StorageController) Metrics() (*StorageControllerMetrics, error) {
+func (storagecontroller *StorageController) Metrics(queryOpts ...common.QueryGroupOption) (*StorageControllerMetrics, error) {
 	if storagecontroller.metrics == "" {
 		return nil, nil
 	}
-	return GetStorageControllerMetrics(storagecontroller.GetClient(), storagecontroller.metrics)
+	return GetStorageControllerMetrics(storagecontroller.GetClient(), storagecontroller.metrics, queryOpts...)
 }
 
 // Ports gets the ports that exist on the storage controller.
-func (storagecontroller *StorageController) Ports() ([]*Port, error) {
-	return ListReferencedPorts(storagecontroller.GetClient(), storagecontroller.ports)
+func (storagecontroller *StorageController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPorts(storagecontroller.GetClient(), storagecontroller.ports, queryOpts...)
 }
 
 // // AttachedVolumes gets the volumes that are attached to this instance of storage controller.
@@ -385,30 +385,30 @@ func (storagecontroller *StorageController) Ports() ([]*Port, error) {
 // Batteries gets the batteries that provide power to this storage controller during a power-loss event,
 // such as with battery-backed RAID controllers. This property shall not be present if the batteries
 // power the containing chassis as a whole rather than the individual storage controller.
-func (storagecontroller *StorageController) Batteries() ([]*Battery, error) {
-	return common.GetObjects[Battery](storagecontroller.GetClient(), storagecontroller.batteries)
+func (storagecontroller *StorageController) Batteries(queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return common.GetObjects[Battery](storagecontroller.GetClient(), storagecontroller.batteries, queryOpts...)
 }
 
 // Endpoints gets the storage controller's endpoints.
-func (storagecontroller *StorageController) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](storagecontroller.GetClient(), storagecontroller.endpoints)
+func (storagecontroller *StorageController) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](storagecontroller.GetClient(), storagecontroller.endpoints, queryOpts...)
 }
 
 // NVMeDiscoveredSubsystems gets the storage that represent the NVMe subsystems discovered by
 // this discovery controller. This property shall only be present if ControllerType in
 // NVMeControllerProperties contains 'Discovery'.
-func (storagecontroller *StorageController) NVMeDiscoveredSubsystems() ([]*Storage, error) {
-	return common.GetObjects[Storage](storagecontroller.GetClient(), storagecontroller.nvmeDiscoveredSubsystems)
+func (storagecontroller *StorageController) NVMeDiscoveredSubsystems(queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return common.GetObjects[Storage](storagecontroller.GetClient(), storagecontroller.nvmeDiscoveredSubsystems, queryOpts...)
 }
 
 // NetworkDeviceFunctions the network device functions that provide connectivity to this controller.
-func (storagecontroller *StorageController) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](storagecontroller.GetClient(), storagecontroller.networkDeviceFunctions)
+func (storagecontroller *StorageController) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjects[NetworkDeviceFunction](storagecontroller.GetClient(), storagecontroller.networkDeviceFunctions, queryOpts...)
 }
 
 // PCIeFunctions gets the the PCIe functions that the storage controller produces.
-func (storagecontroller *StorageController) PCIeFunctions() ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](storagecontroller.GetClient(), storagecontroller.pcieFunctions)
+func (storagecontroller *StorageController) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](storagecontroller.GetClient(), storagecontroller.pcieFunctions, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -421,12 +421,12 @@ func (storagecontroller *StorageController) Update() error {
 }
 
 // GetStorageController will get a Storage controller instance from the service.
-func GetStorageController(c common.Client, uri string) (*StorageController, error) {
-	return common.GetObject[StorageController](c, uri)
+func GetStorageController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageController, error) {
+	return common.GetObject[StorageController](c, uri, queryOpts...)
 }
 
 // ListReferencedStorageControllers gets the collection of StorageControllers
 // from a provided reference.
-func ListReferencedStorageControllers(c common.Client, link string) ([]*StorageController, error) {
-	return common.GetCollectionObjects[StorageController](c, link)
+func ListReferencedStorageControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return common.GetCollectionObjects[StorageController](c, link, queryOpts...)
 }

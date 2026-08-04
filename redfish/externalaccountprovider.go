@@ -122,11 +122,11 @@ func (externalaccountprovider *ExternalAccountProvider) UnmarshalJSON(b []byte) 
 }
 
 // Certificates returns certificates in this external account provider.
-func (externalaccountprovider *ExternalAccountProvider) Certificates() ([]*Certificate, error) {
+func (externalaccountprovider *ExternalAccountProvider) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if externalaccountprovider.certificates == "" {
 		return []*Certificate{}, nil
 	}
-	return ListReferencedCertificates(externalaccountprovider.GetClient(), externalaccountprovider.certificates)
+	return ListReferencedCertificates(externalaccountprovider.GetClient(), externalaccountprovider.certificates, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -143,14 +143,14 @@ func (externalaccountprovider *ExternalAccountProvider) Update() error {
 }
 
 // GetExternalAccountProvider will get a ExternalAccountProvider instance from the service.
-func GetExternalAccountProvider(c common.Client, uri string) (*ExternalAccountProvider, error) {
-	return common.GetObject[ExternalAccountProvider](c, uri)
+func GetExternalAccountProvider(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ExternalAccountProvider, error) {
+	return common.GetObject[ExternalAccountProvider](c, uri, queryOpts...)
 }
 
 // ListReferencedExternalAccountProviders gets the collection of ExternalAccountProvider from
 // a provided reference.
-func ListReferencedExternalAccountProviders(c common.Client, link string) ([]*ExternalAccountProvider, error) {
-	return common.GetCollectionObjects[ExternalAccountProvider](c, link)
+func ListReferencedExternalAccountProviders(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ExternalAccountProvider, error) {
+	return common.GetCollectionObjects[ExternalAccountProvider](c, link, queryOpts...)
 }
 
 // LDAPSearchSettings shall contain all required settings to search a generic LDAP service.

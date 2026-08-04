@@ -131,44 +131,44 @@ func (heater *Heater) UnmarshalJSON(b []byte) error {
 }
 
 // Assembly gets the assembly for this heater.
-func (heater *Heater) Assembly() (*Assembly, error) {
+func (heater *Heater) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if heater.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(heater.GetClient(), heater.assembly)
+	return GetAssembly(heater.GetClient(), heater.assembly, queryOpts...)
 }
 
 // Managers gets the managers for this heater.
-func (heater *Heater) Managers() ([]*Manager, error) {
-	return common.GetObjects[Manager](heater.GetClient(), heater.managers)
+func (heater *Heater) Managers(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](heater.GetClient(), heater.managers, queryOpts...)
 }
 
 // Memory gets the memory associated with this heater.
-func (heater *Heater) Memory() ([]*Memory, error) {
-	return common.GetObjects[Memory](heater.GetClient(), heater.memory)
+func (heater *Heater) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetObjects[Memory](heater.GetClient(), heater.memory, queryOpts...)
 }
 
 // NetworkAdapters gets the network adapters associated with this heater.
-func (heater *Heater) NetworkAdapters() ([]*NetworkAdapter, error) {
-	return common.GetObjects[NetworkAdapter](heater.GetClient(), heater.networkAdapters)
+func (heater *Heater) NetworkAdapters(queryOpts ...common.QueryGroupOption) ([]*NetworkAdapter, error) {
+	return common.GetObjects[NetworkAdapter](heater.GetClient(), heater.networkAdapters, queryOpts...)
 }
 
 // Processors gets this heater's processors.
-func (heater *Heater) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](heater.GetClient(), heater.processors)
+func (heater *Heater) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](heater.GetClient(), heater.processors, queryOpts...)
 }
 
 // StorageControllers gets the storage controllers associated with this heater.
-func (heater *Heater) StorageControllers() ([]*StorageController, error) {
-	return common.GetObjects[StorageController](heater.GetClient(), heater.storageControllers)
+func (heater *Heater) StorageControllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return common.GetObjects[StorageController](heater.GetClient(), heater.storageControllers, queryOpts...)
 }
 
 // Metrics gets the heater metrics for this heater.
-func (heater *Heater) Metrics() (*HeaterMetrics, error) {
+func (heater *Heater) Metrics(queryOpts ...common.QueryGroupOption) (*HeaterMetrics, error) {
 	if heater.metrics == "" {
 		return nil, nil
 	}
-	return GetHeaterMetrics(heater.GetClient(), heater.metrics)
+	return GetHeaterMetrics(heater.GetClient(), heater.metrics, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -181,12 +181,12 @@ func (heater *Heater) Update() error {
 }
 
 // GetHeater will get a Heater instance from the service.
-func GetHeater(c common.Client, uri string) (*Heater, error) {
-	return common.GetObject[Heater](c, uri)
+func GetHeater(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Heater, error) {
+	return common.GetObject[Heater](c, uri, queryOpts...)
 }
 
 // ListReferencedHeaters gets the collection of Heater from
 // a provided reference.
-func ListReferencedHeaters(c common.Client, link string) ([]*Heater, error) {
-	return common.GetCollectionObjects[Heater](c, link)
+func ListReferencedHeaters(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Heater, error) {
+	return common.GetCollectionObjects[Heater](c, link, queryOpts...)
 }

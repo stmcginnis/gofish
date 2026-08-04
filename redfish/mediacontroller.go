@@ -116,35 +116,35 @@ func (mediacontroller *MediaController) Reset(resetType ResetType) error {
 }
 
 // EnvironmentMetrics gets the environment metrics for this media controller.
-func (mediacontroller *MediaController) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (mediacontroller *MediaController) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if mediacontroller.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(mediacontroller.GetClient(), mediacontroller.environmentMetrics)
+	return GetEnvironmentMetrics(mediacontroller.GetClient(), mediacontroller.environmentMetrics, queryOpts...)
 }
 
 // Ports gets the ports associated with this media controller.
-func (mediacontroller *MediaController) Ports() ([]*Port, error) {
-	return ListReferencedPorts(mediacontroller.GetClient(), mediacontroller.ports)
+func (mediacontroller *MediaController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPorts(mediacontroller.GetClient(), mediacontroller.ports, queryOpts...)
 }
 
 // Endpoints get the Endpoints with which this media controller is associated.
-func (mediacontroller *MediaController) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](mediacontroller.GetClient(), mediacontroller.endpoints)
+func (mediacontroller *MediaController) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](mediacontroller.GetClient(), mediacontroller.endpoints, queryOpts...)
 }
 
 // MemoryDomains get the memory domains associated with this memory controller.
-func (mediacontroller *MediaController) MemoryDomains() ([]*MemoryDomain, error) {
-	return common.GetObjects[MemoryDomain](mediacontroller.GetClient(), mediacontroller.memoryDomains)
+func (mediacontroller *MediaController) MemoryDomains(queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
+	return common.GetObjects[MemoryDomain](mediacontroller.GetClient(), mediacontroller.memoryDomains, queryOpts...)
 }
 
 // GetMediaController will get a MediaController instance from the service.
-func GetMediaController(c common.Client, uri string) (*MediaController, error) {
-	return common.GetObject[MediaController](c, uri)
+func GetMediaController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MediaController, error) {
+	return common.GetObject[MediaController](c, uri, queryOpts...)
 }
 
 // ListReferencedMediaControllers gets the collection of MediaController from
 // a provided reference.
-func ListReferencedMediaControllers(c common.Client, link string) ([]*MediaController, error) {
-	return common.GetCollectionObjects[MediaController](c, link)
+func ListReferencedMediaControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MediaController, error) {
+	return common.GetCollectionObjects[MediaController](c, link, queryOpts...)
 }

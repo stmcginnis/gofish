@@ -49,12 +49,12 @@ func (memorychunk *MemoryChunk) UnmarshalJSON(b []byte) error {
 }
 
 // MemoryChunks gets the memory chunks providing capacity.
-func (memorychunk *MemoryChunk) MemoryChunks(c common.Client) (*MemoryChunks, error) {
+func (memorychunk *MemoryChunk) MemoryChunks(c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryChunks, error) {
 	if memorychunk.chunkLink == "" {
 		return nil, nil
 	}
 
-	return GetMemoryChunks(c, memorychunk.chunkLink)
+	return GetMemoryChunks(c, memorychunk.chunkLink, queryOpts...)
 }
 
 // MemoryExtent shall contain the definition of a memory extent identifying an available address range in the
@@ -155,12 +155,12 @@ func (memoryregion *MemoryRegion) Update() error {
 }
 
 // GetMemoryRegion will get a MemoryRegion instance from the service.
-func GetMemoryRegion(c common.Client, uri string) (*MemoryRegion, error) {
-	return common.GetObject[MemoryRegion](c, uri)
+func GetMemoryRegion(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryRegion, error) {
+	return common.GetObject[MemoryRegion](c, uri, queryOpts...)
 }
 
 // ListReferencedMemoryRegions gets the collection of MemoryRegion from
 // a provided reference.
-func ListReferencedMemoryRegions(c common.Client, link string) ([]*MemoryRegion, error) {
-	return common.GetCollectionObjects[MemoryRegion](c, link)
+func ListReferencedMemoryRegions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryRegion, error) {
+	return common.GetCollectionObjects[MemoryRegion](c, link, queryOpts...)
 }

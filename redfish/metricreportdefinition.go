@@ -235,8 +235,8 @@ func (metricreportdefinition *MetricReportDefinition) UnmarshalJSON(b []byte) er
 }
 
 // Triggers get the associated triggers.
-func (metricreportdefinition *MetricReportDefinition) Triggers() ([]*Triggers, error) {
-	return common.GetObjects[Triggers](metricreportdefinition.GetClient(), metricreportdefinition.triggers)
+func (metricreportdefinition *MetricReportDefinition) Triggers(queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
+	return common.GetObjects[Triggers](metricreportdefinition.GetClient(), metricreportdefinition.triggers, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -256,12 +256,12 @@ func (metricreportdefinition *MetricReportDefinition) Update() error {
 }
 
 // GetMetricReportDefinition will get a MetricReportDefinition instance from the service.
-func GetMetricReportDefinition(c common.Client, uri string) (*MetricReportDefinition, error) {
-	return common.GetObject[MetricReportDefinition](c, uri)
+func GetMetricReportDefinition(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricReportDefinition, error) {
+	return common.GetObject[MetricReportDefinition](c, uri, queryOpts...)
 }
 
 // ListReferencedMetricReportDefinitions gets the collection of MetricReportDefinition from
 // a provided reference.
-func ListReferencedMetricReportDefinitions(c common.Client, link string) ([]*MetricReportDefinition, error) {
-	return common.GetCollectionObjects[MetricReportDefinition](c, link)
+func ListReferencedMetricReportDefinitions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
+	return common.GetCollectionObjects[MetricReportDefinition](c, link, queryOpts...)
 }

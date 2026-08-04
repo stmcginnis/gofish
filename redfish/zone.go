@@ -221,33 +221,33 @@ func (zone *Zone) RemoveEndpoint(endpointURI, endpointETag, zoneETag string) err
 }
 
 // AddressPools gets the address pools associated with this zone.
-func (zone *Zone) AddressPools() ([]*AddressPool, error) {
-	return common.GetObjects[AddressPool](zone.GetClient(), zone.addressPools)
+func (zone *Zone) AddressPools(queryOpts ...common.QueryGroupOption) ([]*AddressPool, error) {
+	return common.GetObjects[AddressPool](zone.GetClient(), zone.addressPools, queryOpts...)
 }
 
 // ContainedByZones gets the zone that contain this zone.
-func (zone *Zone) ContainedByZones() ([]*Zone, error) {
-	return common.GetObjects[Zone](zone.GetClient(), zone.containedByZones)
+func (zone *Zone) ContainedByZones(queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetObjects[Zone](zone.GetClient(), zone.containedByZones, queryOpts...)
 }
 
 // ContainsZones gets the zones that are contained by this zone.
-func (zone *Zone) ContainsZones() ([]*Zone, error) {
-	return common.GetObjects[Zone](zone.GetClient(), zone.containsZones)
+func (zone *Zone) ContainsZones(queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetObjects[Zone](zone.GetClient(), zone.containsZones, queryOpts...)
 }
 
 // Endpoints gets the endpoints that this zone contains.
-func (zone *Zone) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](zone.GetClient(), zone.endpoints)
+func (zone *Zone) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](zone.GetClient(), zone.endpoints, queryOpts...)
 }
 
 // InvolvedSwitches gets the switches in this zone.
-func (zone *Zone) InvolvedSwitches() ([]*Switch, error) {
-	return common.GetObjects[Switch](zone.GetClient(), zone.involvedSwitches)
+func (zone *Zone) InvolvedSwitches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetObjects[Switch](zone.GetClient(), zone.involvedSwitches, queryOpts...)
 }
 
 // ResourceBlocks gets the resource blocks with which this zone is associated.
-func (zone *Zone) ResourceBlocks() ([]*ResourceBlock, error) {
-	return common.GetObjects[ResourceBlock](zone.GetClient(), zone.resourceBlocks)
+func (zone *Zone) ResourceBlocks(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return common.GetObjects[ResourceBlock](zone.GetClient(), zone.resourceBlocks, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -261,12 +261,12 @@ func (zone *Zone) Update() error {
 }
 
 // GetZone will get a Zone instance from the service.
-func GetZone(c common.Client, uri string) (*Zone, error) {
-	return common.GetObject[Zone](c, uri)
+func GetZone(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Zone, error) {
+	return common.GetObject[Zone](c, uri, queryOpts...)
 }
 
 // ListReferencedZones gets the collection of Zone from
 // a provided reference.
-func ListReferencedZones(c common.Client, link string) ([]*Zone, error) {
-	return common.GetCollectionObjects[Zone](c, link)
+func ListReferencedZones(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetCollectionObjects[Zone](c, link, queryOpts...)
 }

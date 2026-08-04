@@ -57,23 +57,23 @@ func (metricreport *MetricReport) UnmarshalJSON(b []byte) error {
 }
 
 // MetricReportDefinition gets the definition for this metric
-func (metricreport *MetricReport) MetricReportDefinition() (*MetricReportDefinition, error) {
+func (metricreport *MetricReport) MetricReportDefinition(queryOpts ...common.QueryGroupOption) (*MetricReportDefinition, error) {
 	if metricreport.metricReportDefinition == "" {
 		return nil, nil
 	}
 
-	return GetMetricReportDefinition(metricreport.GetClient(), metricreport.metricReportDefinition)
+	return GetMetricReportDefinition(metricreport.GetClient(), metricreport.metricReportDefinition, queryOpts...)
 }
 
 // GetMetricReport will get a MetricReport instance from the service.
-func GetMetricReport(c common.Client, uri string) (*MetricReport, error) {
-	return common.GetObject[MetricReport](c, uri)
+func GetMetricReport(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricReport, error) {
+	return common.GetObject[MetricReport](c, uri, queryOpts...)
 }
 
 // ListReferencedMetricReports gets the collection of MetricReport from
 // a provided reference.
-func ListReferencedMetricReports(c common.Client, link string) ([]*MetricReport, error) {
-	return common.GetCollectionObjects[MetricReport](c, link)
+func ListReferencedMetricReports(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricReport, error) {
+	return common.GetCollectionObjects[MetricReport](c, link, queryOpts...)
 }
 
 // MetricValue shall contain properties that capture a metric value and other associated information.

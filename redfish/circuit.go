@@ -439,8 +439,8 @@ func (circuit *Circuit) UnmarshalJSON(b []byte) error {
 }
 
 // GetCircuit will get a Circuit instance from the Redfish service.
-func GetCircuit(c common.Client, uri string) (*Circuit, error) {
-	return common.GetObject[Circuit](c, uri)
+func GetCircuit(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Circuit, error) {
+	return common.GetObject[Circuit](c, uri, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -502,23 +502,23 @@ func (circuit *Circuit) ResetMetrics() error {
 
 // ListReferencedCircuits gets the collection of Circuits from
 // a provided reference.
-func ListReferencedCircuits(c common.Client, link string) ([]*Circuit, error) {
-	return common.GetCollectionObjects[Circuit](c, link)
+func ListReferencedCircuits(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return common.GetCollectionObjects[Circuit](c, link, queryOpts...)
 }
 
 // BranchCircuit gets a resource that represents the branch circuit associated with this circuit.
-func (circuit *Circuit) BranchCircuit() (*Circuit, error) {
-	return GetCircuit(circuit.GetClient(), circuit.branchCircuit)
+func (circuit *Circuit) BranchCircuit(queryOpts ...common.QueryGroupOption) (*Circuit, error) {
+	return GetCircuit(circuit.GetClient(), circuit.branchCircuit, queryOpts...)
 }
 
 // SourceCircuit gets a resource that represents the circuit that provides power to this circuit.
-func (circuit *Circuit) SourceCircuit() (*Circuit, error) {
-	return GetCircuit(circuit.GetClient(), circuit.sourceCircuit)
+func (circuit *Circuit) SourceCircuit(queryOpts ...common.QueryGroupOption) (*Circuit, error) {
+	return GetCircuit(circuit.GetClient(), circuit.sourceCircuit, queryOpts...)
 }
 
 // DistributionCircuits gets the collection that contains the circuits powered by this circuit.
-func (circuit *Circuit) DistributionCircuits() ([]*Circuit, error) {
-	return common.GetObjects[Circuit](circuit.GetClient(), circuit.distributionCircuits)
+func (circuit *Circuit) DistributionCircuits(queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return common.GetObjects[Circuit](circuit.GetClient(), circuit.distributionCircuits, queryOpts...)
 }
 
 // TODO: outlets, power outlet

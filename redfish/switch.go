@@ -175,43 +175,43 @@ func (sw *Switch) UnmarshalJSON(b []byte) error {
 }
 
 // Certificates returns certificates related to this device.
-func (sw *Switch) Certificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(sw.GetClient(), sw.certificates)
+func (sw *Switch) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(sw.GetClient(), sw.certificates, queryOpts...)
 }
 
 // LogServices gets the log services related to this device.
-func (sw *Switch) LogServices() ([]*LogService, error) {
-	return ListReferencedLogServices(sw.GetClient(), sw.logServices)
+func (sw *Switch) LogServices(queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
+	return ListReferencedLogServices(sw.GetClient(), sw.logServices, queryOpts...)
 }
 
 // Metrics gets the switch metrics related to this device.
-func (sw *Switch) Metrics() (*SwitchMetrics, error) {
-	return GetSwitchMetrics(sw.GetClient(), sw.metrics)
+func (sw *Switch) Metrics(queryOpts ...common.QueryGroupOption) (*SwitchMetrics, error) {
+	return GetSwitchMetrics(sw.GetClient(), sw.metrics, queryOpts...)
 }
 
 // Ports gets the ports related to this device.
-func (sw *Switch) Ports() ([]*Port, error) {
-	return ListReferencedPorts(sw.GetClient(), sw.ports)
+func (sw *Switch) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPorts(sw.GetClient(), sw.ports, queryOpts...)
 }
 
 // Chassis gets the containing chassis of this device.
-func (sw *Switch) Chassis() (*Chassis, error) {
-	return GetChassis(sw.GetClient(), sw.chassis)
+func (sw *Switch) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
+	return GetChassis(sw.GetClient(), sw.chassis, queryOpts...)
 }
 
 // Endpoints gets any endpoints associated with this fabric.
-func (sw *Switch) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](sw.GetClient(), sw.endpoints)
+func (sw *Switch) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](sw.GetClient(), sw.endpoints, queryOpts...)
 }
 
 // ManagedBy gets the managers of this fabric.
-func (sw *Switch) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](sw.GetClient(), sw.managedBy)
+func (sw *Switch) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](sw.GetClient(), sw.managedBy, queryOpts...)
 }
 
 // PCIeDevice gets the PCIe device providing this switch.
-func (sw *Switch) PCIeDevice() (*PCIeDevice, error) {
-	return GetPCIeDevice(sw.GetClient(), sw.pcieDevice)
+func (sw *Switch) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
+	return GetPCIeDevice(sw.GetClient(), sw.pcieDevice, queryOpts...)
 }
 
 // Reset resets this switch.
@@ -239,14 +239,14 @@ func (sw *Switch) Update() error {
 }
 
 // GetSwitch will get a Switch instance from the service.
-func GetSwitch(c common.Client, uri string) (*Switch, error) {
-	return common.GetObject[Switch](c, uri)
+func GetSwitch(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Switch, error) {
+	return common.GetObject[Switch](c, uri, queryOpts...)
 }
 
 // ListReferencedSwitches gets the collection of Switch from
 // a provided reference.
-func ListReferencedSwitches(c common.Client, link string) ([]*Switch, error) {
-	return common.GetCollectionObjects[Switch](c, link)
+func ListReferencedSwitches(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetCollectionObjects[Switch](c, link, queryOpts...)
 }
 
 // VCSSwitch shall contain Virtual CXL Switch (VCS) properties for a switch.

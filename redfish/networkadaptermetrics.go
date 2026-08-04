@@ -60,12 +60,12 @@ type NetworkAdapterMetrics struct {
 }
 
 // GetNetworkAdapterMetrics will get a NetworkAdapterMetrics instance from the service.
-func GetNetworkAdapterMetrics(c common.Client, uri string) (*NetworkAdapterMetrics, error) {
-	return common.GetObject[NetworkAdapterMetrics](c, uri)
+func GetNetworkAdapterMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkAdapterMetrics, error) {
+	return common.GetObject[NetworkAdapterMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkAdapterMetrics gets the collection of NetworkAdapterMetrics from
 // a provided reference.
-func ListReferencedNetworkAdapterMetrics(c common.Client, link string) ([]*NetworkAdapterMetrics, error) {
-	return common.GetCollectionObjects[NetworkAdapterMetrics](c, link)
+func ListReferencedNetworkAdapterMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkAdapterMetrics, error) {
+	return common.GetCollectionObjects[NetworkAdapterMetrics](c, link, queryOpts...)
 }

@@ -46,12 +46,12 @@ type NVMeFirmwareImage struct {
 }
 
 // GetNVMeFirmwareImage will get a NVMeFirmwareImage instance from the service.
-func GetNVMeFirmwareImage(c common.Client, uri string) (*NVMeFirmwareImage, error) {
-	return common.GetObject[NVMeFirmwareImage](c, uri)
+func GetNVMeFirmwareImage(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NVMeFirmwareImage, error) {
+	return common.GetObject[NVMeFirmwareImage](c, uri, queryOpts...)
 }
 
 // ListReferencedNVMeFirmwareImages gets the collection of NVMeFirmwareImage from
 // a provided reference.
-func ListReferencedNVMeFirmwareImages(c common.Client, link string) ([]*NVMeFirmwareImage, error) {
-	return common.GetCollectionObjects[NVMeFirmwareImage](c, link)
+func ListReferencedNVMeFirmwareImages(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NVMeFirmwareImage, error) {
+	return common.GetCollectionObjects[NVMeFirmwareImage](c, link, queryOpts...)
 }

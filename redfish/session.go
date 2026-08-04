@@ -113,11 +113,11 @@ func (session *Session) UnmarshalJSON(b []byte) error {
 }
 
 // OutboundConnection gets the outbound connection associated with this session.
-func (session *Session) OutboundConnection() (*OutboundConnection, error) {
+func (session *Session) OutboundConnection(queryOpts ...common.QueryGroupOption) (*OutboundConnection, error) {
 	if session.outboundConnection == "" {
 		return nil, nil
 	}
-	return GetOutboundConnection(session.GetClient(), session.outboundConnection)
+	return GetOutboundConnection(session.GetClient(), session.outboundConnection, queryOpts...)
 }
 
 // AuthToken contains the authentication and session information.
@@ -169,11 +169,11 @@ func DeleteSession(c common.Client, sessionURL string) (err error) {
 }
 
 // GetSession will get a Session instance from the Redfish service.
-func GetSession(c common.Client, uri string) (*Session, error) {
-	return common.GetObject[Session](c, uri)
+func GetSession(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Session, error) {
+	return common.GetObject[Session](c, uri, queryOpts...)
 }
 
 // ListReferencedSessions gets the collection of Sessions
-func ListReferencedSessions(c common.Client, link string) ([]*Session, error) {
-	return common.GetCollectionObjects[Session](c, link)
+func ListReferencedSessions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Session, error) {
+	return common.GetCollectionObjects[Session](c, link, queryOpts...)
 }

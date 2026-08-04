@@ -92,8 +92,8 @@ func (nm *NodeManager) UnmarshalJSON(b []byte) error {
 }
 
 // GetNodeManager will get a NodeManager instance from the service.
-func GetNodeManager(c common.Client, uri string) (*NodeManager, error) {
-	return common.GetObject[NodeManager](c, uri)
+func GetNodeManager(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NodeManager, error) {
+	return common.GetObject[NodeManager](c, uri, queryOpts...)
 }
 
 // ClearAllPolicies clears the configured policies of the NodeManager.

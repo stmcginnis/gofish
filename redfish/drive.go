@@ -429,57 +429,57 @@ func (drive *Drive) Update() error {
 }
 
 // GetDrive will get a Drive instance from the service.
-func GetDrive(c common.Client, uri string) (*Drive, error) {
-	return common.GetObject[Drive](c, uri)
+func GetDrive(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Drive, error) {
+	return common.GetObject[Drive](c, uri, queryOpts...)
 }
 
 // ListReferencedDrives gets the collection of Drives from a provided reference.
-func ListReferencedDrives(c common.Client, link string) ([]*Drive, error) {
-	return common.GetCollectionObjects[Drive](c, link)
+func ListReferencedDrives(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
+	return common.GetCollectionObjects[Drive](c, link, queryOpts...)
 }
 
 // Assembly gets the Assembly for this drive.
-func (drive *Drive) Assembly() (*Assembly, error) {
+func (drive *Drive) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if drive.assembly == "" {
 		return nil, nil
 	}
 
-	return GetAssembly(drive.GetClient(), drive.assembly)
+	return GetAssembly(drive.GetClient(), drive.assembly, queryOpts...)
 }
 
 // Chassis gets the containing chassis for this drive.
-func (drive *Drive) Chassis() (*Chassis, error) {
+func (drive *Drive) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if drive.chassis == "" {
 		return nil, nil
 	}
 
-	return GetChassis(drive.GetClient(), drive.chassis)
+	return GetChassis(drive.GetClient(), drive.chassis, queryOpts...)
 }
 
 // Endpoints references the Endpoints that this drive is associated with.
-func (drive *Drive) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](drive.GetClient(), drive.endpoints)
+func (drive *Drive) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](drive.GetClient(), drive.endpoints, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this drive.
 // If no metrics are available the EnvironmentMetrics reference will be nil but
 // no error will be returned unless it was due to a problem fetching the data.
-func (drive *Drive) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (drive *Drive) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if drive.environmentMetrics == "" {
 		return nil, nil
 	}
 
-	return GetEnvironmentMetrics(drive.GetClient(), drive.environmentMetrics)
+	return GetEnvironmentMetrics(drive.GetClient(), drive.environmentMetrics, queryOpts...)
 }
 
 // Volumes references the Volumes that this drive is associated with.
-func (drive *Drive) Volumes() ([]*Volume, error) {
-	return common.GetObjects[Volume](drive.GetClient(), drive.volumes)
+func (drive *Drive) Volumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetObjects[Volume](drive.GetClient(), drive.volumes, queryOpts...)
 }
 
 // PCIeFunctions references the PCIeFunctions that this drive is associated with.
-func (drive *Drive) PCIeFunctions() ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](drive.GetClient(), drive.pcieFunctions)
+func (drive *Drive) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](drive.GetClient(), drive.pcieFunctions, queryOpts...)
 }
 
 // // StoragePools references the StoragePools that this drive is associated with.

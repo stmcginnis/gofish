@@ -255,8 +255,8 @@ func (clientcertificate *ClientCertificate) UnmarshalJSON(b []byte) error {
 }
 
 // ClientCertificates gets the client certificates.
-func (clientcertificate *ClientCertificate) ClientCertificates(c common.Client) ([]*Certificate, error) {
-	return ListReferencedCertificates(c, clientcertificate.certificates)
+func (clientcertificate *ClientCertificate) ClientCertificates(c common.Client, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(c, clientcertificate.certificates, queryOpts...)
 }
 
 // AccountService contains properties for managing user accounts. The
@@ -433,16 +433,16 @@ func (accountservice *AccountService) UnmarshalJSON(b []byte) error {
 }
 
 // AdditionalExternalAccountProviders gets additional external account providers that this account service uses.
-func (accountservice *AccountService) AdditionalExternalAccountProviders() ([]*ExternalAccountProvider, error) {
-	return ListReferencedExternalAccountProviders(accountservice.GetClient(), accountservice.additionalExternalAccountProviders)
+func (accountservice *AccountService) AdditionalExternalAccountProviders(queryOpts ...common.QueryGroupOption) ([]*ExternalAccountProvider, error) {
+	return ListReferencedExternalAccountProviders(accountservice.GetClient(), accountservice.additionalExternalAccountProviders, queryOpts...)
 }
 
 // PrivilegeMap gets the mapping of the privileges required to complete a requested operation on a URI associated with this service.
-func (accountservice *AccountService) PrivilegeMap() (*PrivilegeRegistry, error) {
+func (accountservice *AccountService) PrivilegeMap(queryOpts ...common.QueryGroupOption) (*PrivilegeRegistry, error) {
 	if accountservice.privilegeMap == "" {
 		return nil, nil
 	}
-	return GetPrivilegeRegistry(accountservice.GetClient(), accountservice.privilegeMap)
+	return GetPrivilegeRegistry(accountservice.GetClient(), accountservice.privilegeMap, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -464,18 +464,18 @@ func (accountservice *AccountService) Update() error {
 
 // GetAccountService will get the AccountService instance from the Redfish
 // service.
-func GetAccountService(c common.Client, uri string) (*AccountService, error) {
-	return common.GetObject[AccountService](c, uri)
+func GetAccountService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AccountService, error) {
+	return common.GetObject[AccountService](c, uri, queryOpts...)
 }
 
 // Accounts get the accounts from the account service
-func (accountservice *AccountService) Accounts() ([]*ManagerAccount, error) {
-	return ListReferencedManagerAccounts(accountservice.GetClient(), accountservice.accounts)
+func (accountservice *AccountService) Accounts(queryOpts ...common.QueryGroupOption) ([]*ManagerAccount, error) {
+	return ListReferencedManagerAccounts(accountservice.GetClient(), accountservice.accounts, queryOpts...)
 }
 
 // Roles gets the roles from the account service
-func (accountservice *AccountService) Roles() ([]*Role, error) {
-	return ListReferencedRoles(accountservice.GetClient(), accountservice.roles)
+func (accountservice *AccountService) Roles(queryOpts ...common.QueryGroupOption) ([]*Role, error) {
+	return ListReferencedRoles(accountservice.GetClient(), accountservice.roles, queryOpts...)
 }
 
 // CreateAccount creates a new Redfish user account.

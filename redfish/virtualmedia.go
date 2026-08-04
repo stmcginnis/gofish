@@ -192,13 +192,13 @@ func (virtualmedia *VirtualMedia) UnmarshalJSON(b []byte) error {
 }
 
 // Certificates gets the server certificates for the server referenced by the Image property.
-func (virtualmedia *VirtualMedia) Certificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.certificates)
+func (virtualmedia *VirtualMedia) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.certificates, queryOpts...)
 }
 
 // ClientCertificates gets the client identity certificates.
-func (virtualmedia *VirtualMedia) ClientCertificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.clientCertificates)
+func (virtualmedia *VirtualMedia) ClientCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](virtualmedia.GetClient(), virtualmedia.clientCertificates, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -297,11 +297,11 @@ func (virtualmedia *VirtualMedia) InsertMediaConfig(config VirtualMediaConfig) (
 }
 
 // GetVirtualMedia will get a VirtualMedia instance from the service.
-func GetVirtualMedia(c common.Client, uri string) (*VirtualMedia, error) {
-	return common.GetObject[VirtualMedia](c, uri)
+func GetVirtualMedia(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VirtualMedia, error) {
+	return common.GetObject[VirtualMedia](c, uri, queryOpts...)
 }
 
 // ListReferencedVirtualMedias gets the collection of VirtualMedia from a provided reference.
-func ListReferencedVirtualMedias(c common.Client, link string) ([]*VirtualMedia, error) {
-	return common.GetCollectionObjects[VirtualMedia](c, link)
+func ListReferencedVirtualMedias(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
+	return common.GetCollectionObjects[VirtualMedia](c, link, queryOpts...)
 }

@@ -130,12 +130,12 @@ func (environmentmetrics *EnvironmentMetrics) Update() error {
 }
 
 // GetEnvironmentMetrics will get a EnvironmentMetrics instance from the service.
-func GetEnvironmentMetrics(c common.Client, uri string) (*EnvironmentMetrics, error) {
-	return common.GetObject[EnvironmentMetrics](c, uri)
+func GetEnvironmentMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return common.GetObject[EnvironmentMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedEnvironmentMetrics gets the collection of EnvironmentMetrics from
 // a provided reference.
-func ListReferencedEnvironmentMetrics(c common.Client, link string) ([]*EnvironmentMetrics, error) {
-	return common.GetCollectionObjects[EnvironmentMetrics](c, link)
+func ListReferencedEnvironmentMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EnvironmentMetrics, error) {
+	return common.GetCollectionObjects[EnvironmentMetrics](c, link, queryOpts...)
 }

@@ -153,12 +153,12 @@ func (softwareinventory *SoftwareInventory) Update() error {
 }
 
 // GetSoftwareInventory will get a SoftwareInventory instance from the service.
-func GetSoftwareInventory(c common.Client, uri string) (*SoftwareInventory, error) {
-	return common.GetObject[SoftwareInventory](c, uri)
+func GetSoftwareInventory(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return common.GetObject[SoftwareInventory](c, uri, queryOpts...)
 }
 
 // ListReferencedSoftwareInventories gets the collection of SoftwareInventory from
 // a provided reference.
-func ListReferencedSoftwareInventories(c common.Client, link string) ([]*SoftwareInventory, error) {
-	return common.GetCollectionObjects[SoftwareInventory](c, link)
+func ListReferencedSoftwareInventories(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return common.GetCollectionObjects[SoftwareInventory](c, link, queryOpts...)
 }

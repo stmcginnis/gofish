@@ -135,31 +135,31 @@ func (telemetryservice *TelemetryService) UnmarshalJSON(b []byte) error {
 }
 
 // LogService gets the log service that the telemetry service uses.
-func (telemetryservice *TelemetryService) LogService() (*LogService, error) {
+func (telemetryservice *TelemetryService) LogService(queryOpts ...common.QueryGroupOption) (*LogService, error) {
 	if telemetryservice.logService == "" {
 		return nil, nil
 	}
-	return GetLogService(telemetryservice.GetClient(), telemetryservice.logService)
+	return GetLogService(telemetryservice.GetClient(), telemetryservice.logService, queryOpts...)
 }
 
 // MetricDefinitions gets the metric definitions.
-func (telemetryservice *TelemetryService) MetricDefinitions() ([]*MetricDefinition, error) {
-	return ListReferencedMetricDefinitions(telemetryservice.GetClient(), telemetryservice.metricDefinitions)
+func (telemetryservice *TelemetryService) MetricDefinitions(queryOpts ...common.QueryGroupOption) ([]*MetricDefinition, error) {
+	return ListReferencedMetricDefinitions(telemetryservice.GetClient(), telemetryservice.metricDefinitions, queryOpts...)
 }
 
 // MetricReportDefinitions gets the metric report definitions.
-func (telemetryservice *TelemetryService) MetricReportDefinitions() ([]*MetricReportDefinition, error) {
-	return ListReferencedMetricReportDefinitions(telemetryservice.GetClient(), telemetryservice.metricReportDefinitions)
+func (telemetryservice *TelemetryService) MetricReportDefinitions(queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
+	return ListReferencedMetricReportDefinitions(telemetryservice.GetClient(), telemetryservice.metricReportDefinitions, queryOpts...)
 }
 
 // MetricReports gets the metric reports.
-func (telemetryservice *TelemetryService) MetricReports() ([]*MetricReport, error) {
-	return ListReferencedMetricReports(telemetryservice.GetClient(), telemetryservice.metricReports)
+func (telemetryservice *TelemetryService) MetricReports(queryOpts ...common.QueryGroupOption) ([]*MetricReport, error) {
+	return ListReferencedMetricReports(telemetryservice.GetClient(), telemetryservice.metricReports, queryOpts...)
 }
 
 // Triggers gets the triggers.
-func (telemetryservice *TelemetryService) Triggers() ([]*Triggers, error) {
-	return ListReferencedTriggerss(telemetryservice.GetClient(), telemetryservice.triggers)
+func (telemetryservice *TelemetryService) Triggers(queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
+	return ListReferencedTriggerss(telemetryservice.GetClient(), telemetryservice.triggers, queryOpts...)
 }
 
 // ClearMetricReports will clear the metric reports for this telemetry service.
@@ -199,12 +199,12 @@ func (telemetryservice *TelemetryService) Update() error {
 }
 
 // GetTelemetryService will get a TelemetryService instance from the service.
-func GetTelemetryService(c common.Client, uri string) (*TelemetryService, error) {
-	return common.GetObject[TelemetryService](c, uri)
+func GetTelemetryService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*TelemetryService, error) {
+	return common.GetObject[TelemetryService](c, uri, queryOpts...)
 }
 
 // ListReferencedTelemetryServices gets the collection of TelemetryService from
 // a provided reference.
-func ListReferencedTelemetryServices(c common.Client, link string) ([]*TelemetryService, error) {
-	return common.GetCollectionObjects[TelemetryService](c, link)
+func ListReferencedTelemetryServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*TelemetryService, error) {
+	return common.GetCollectionObjects[TelemetryService](c, link, queryOpts...)
 }

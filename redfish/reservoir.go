@@ -113,16 +113,16 @@ func (reservoir *Reservoir) UnmarshalJSON(b []byte) error {
 }
 
 // Assembly gets the containing assembly for this reservoir.
-func (reservoir *Reservoir) Assembly() (*Assembly, error) {
+func (reservoir *Reservoir) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if reservoir.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(reservoir.GetClient(), reservoir.assembly)
+	return GetAssembly(reservoir.GetClient(), reservoir.assembly, queryOpts...)
 }
 
 // Filters gets a collection of filters.
-func (reservoir *Reservoir) Filters() ([]*Filter, error) {
-	return common.GetObjects[Filter](reservoir.GetClient(), reservoir.filters)
+func (reservoir *Reservoir) Filters(queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return common.GetObjects[Filter](reservoir.GetClient(), reservoir.filters, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -134,12 +134,12 @@ func (reservoir *Reservoir) Update() error {
 }
 
 // GetReservoir will get a Reservoir instance from the service.
-func GetReservoir(c common.Client, uri string) (*Reservoir, error) {
-	return common.GetObject[Reservoir](c, uri)
+func GetReservoir(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Reservoir, error) {
+	return common.GetObject[Reservoir](c, uri, queryOpts...)
 }
 
 // ListReferencedReservoirs gets the collection of Reservoir from
 // a provided reference.
-func ListReferencedReservoirs(c common.Client, link string) ([]*Reservoir, error) {
-	return common.GetCollectionObjects[Reservoir](c, link)
+func ListReferencedReservoirs(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Reservoir, error) {
+	return common.GetCollectionObjects[Reservoir](c, link, queryOpts...)
 }

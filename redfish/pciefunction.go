@@ -211,76 +211,76 @@ func (pciefunction *PCIeFunction) UnmarshalJSON(b []byte) error {
 }
 
 // GetPCIeFunction will get a PCIeFunction instance from the service.
-func GetPCIeFunction(c common.Client, uri string) (*PCIeFunction, error) {
-	return common.GetObject[PCIeFunction](c, uri)
+func GetPCIeFunction(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PCIeFunction, error) {
+	return common.GetObject[PCIeFunction](c, uri, queryOpts...)
 }
 
 // ListReferencedPCIeFunctions gets the collection of PCIeFunction from
 // a provided reference.
-func ListReferencedPCIeFunctions(c common.Client, link string) ([]*PCIeFunction, error) {
-	return common.GetCollectionObjects[PCIeFunction](c, link)
+func ListReferencedPCIeFunctions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetCollectionObjects[PCIeFunction](c, link, queryOpts...)
 }
 
 // CXLLogicalDevice gets the CXL logical device to which this PCIe function is assigned.
-func (pciefunction *PCIeFunction) CXLLogicalDevice() (*CXLLogicalDevice, error) {
+func (pciefunction *PCIeFunction) CXLLogicalDevice(queryOpts ...common.QueryGroupOption) (*CXLLogicalDevice, error) {
 	if pciefunction.cxlLogicalDevice == "" {
 		return nil, nil
 	}
-	return GetCXLLogicalDevice(pciefunction.GetClient(), pciefunction.cxlLogicalDevice)
+	return GetCXLLogicalDevice(pciefunction.GetClient(), pciefunction.cxlLogicalDevice, queryOpts...)
 }
 
 // Drives gets the PCIe function's drives.
-func (pciefunction *PCIeFunction) Drives() ([]*Drive, error) {
+func (pciefunction *PCIeFunction) Drives(queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
 	if len(pciefunction.drives) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[Drive](pciefunction.GetClient(), pciefunction.drives)
+	return common.GetObjects[Drive](pciefunction.GetClient(), pciefunction.drives, queryOpts...)
 }
 
 // EthernetInterfaces gets the PCIe function's ethernet interfaces.
-func (pciefunction *PCIeFunction) EthernetInterfaces() ([]*EthernetInterface, error) {
+func (pciefunction *PCIeFunction) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
 	if len(pciefunction.ethernetInterfaces) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[EthernetInterface](pciefunction.GetClient(), pciefunction.ethernetInterfaces)
+	return common.GetObjects[EthernetInterface](pciefunction.GetClient(), pciefunction.ethernetInterfaces, queryOpts...)
 }
 
 // MemoryDomains gets the memory domains associated with this PCIe function.
-func (pciefunction *PCIeFunction) MemoryDomains() ([]*MemoryDomain, error) {
+func (pciefunction *PCIeFunction) MemoryDomains(queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
 	if len(pciefunction.memoryDomains) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[MemoryDomain](pciefunction.GetClient(), pciefunction.memoryDomains)
+	return common.GetObjects[MemoryDomain](pciefunction.GetClient(), pciefunction.memoryDomains, queryOpts...)
 }
 
 // NetworkDeviceFunctions gets the PCIe function's ethernet interfaces.
-func (pciefunction *PCIeFunction) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
+func (pciefunction *PCIeFunction) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
 	if len(pciefunction.networkDeviceFunctions) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[NetworkDeviceFunction](pciefunction.GetClient(), pciefunction.networkDeviceFunctions)
+	return common.GetObjects[NetworkDeviceFunction](pciefunction.GetClient(), pciefunction.networkDeviceFunctions, queryOpts...)
 }
 
 // PCIeDevice gets the associated PCIe device for this function.
-func (pciefunction *PCIeFunction) PCIeDevice() (*PCIeDevice, error) {
+func (pciefunction *PCIeFunction) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
 	if pciefunction.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(pciefunction.GetClient(), pciefunction.pcieDevice)
+	return GetPCIeDevice(pciefunction.GetClient(), pciefunction.pcieDevice, queryOpts...)
 }
 
 // Processor gets the processor that is hosted on this PCIe function.
-func (pciefunction *PCIeFunction) Processor() (*Processor, error) {
+func (pciefunction *PCIeFunction) Processor(queryOpts ...common.QueryGroupOption) (*Processor, error) {
 	if pciefunction.processor == "" {
 		return nil, nil
 	}
-	return GetProcessor(pciefunction.GetClient(), pciefunction.processor)
+	return GetProcessor(pciefunction.GetClient(), pciefunction.processor, queryOpts...)
 }
 
 // StorageControllers gets the associated storage controllers.
-func (pciefunction *PCIeFunction) StorageControllers() ([]*StorageController, error) {
+func (pciefunction *PCIeFunction) StorageControllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
 	if len(pciefunction.storageControllers) == 0 {
 		return nil, nil
 	}
-	return common.GetObjects[StorageController](pciefunction.GetClient(), pciefunction.storageControllers)
+	return common.GetObjects[StorageController](pciefunction.GetClient(), pciefunction.storageControllers, queryOpts...)
 }

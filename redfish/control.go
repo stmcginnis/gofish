@@ -217,14 +217,14 @@ func (control *Control) Update() error {
 }
 
 // GetControl will get a Control instance from the service.
-func GetControl(c common.Client, uri string) (*Control, error) {
-	return common.GetObject[Control](c, uri)
+func GetControl(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Control, error) {
+	return common.GetObject[Control](c, uri, queryOpts...)
 }
 
 // ListReferencedControls gets the collection of Control from
 // a provided reference.
-func ListReferencedControls(c common.Client, link string) ([]*Control, error) {
-	return common.GetCollectionObjects[Control](c, link)
+func ListReferencedControls(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Control, error) {
+	return common.GetCollectionObjects[Control](c, link, queryOpts...)
 }
 
 // ResetToDefault resets the values of writable properties to factory defaults.

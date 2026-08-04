@@ -139,16 +139,16 @@ func (pump *Pump) SetMode(mode PumpMode) error {
 }
 
 // Assembly gets the containing assembly for this pump.
-func (pump *Pump) Assembly() (*Assembly, error) {
+func (pump *Pump) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if pump.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(pump.GetClient(), pump.assembly)
+	return GetAssembly(pump.GetClient(), pump.assembly, queryOpts...)
 }
 
 // Filters gets a collection of filters.
-func (pump *Pump) Filters() ([]*Filter, error) {
-	return common.GetObjects[Filter](pump.GetClient(), pump.filters)
+func (pump *Pump) Filters(queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return common.GetObjects[Filter](pump.GetClient(), pump.filters, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -163,12 +163,12 @@ func (pump *Pump) Update() error {
 }
 
 // GetPump will get a Pump instance from the service.
-func GetPump(c common.Client, uri string) (*Pump, error) {
-	return common.GetObject[Pump](c, uri)
+func GetPump(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Pump, error) {
+	return common.GetObject[Pump](c, uri, queryOpts...)
 }
 
 // ListReferencedPumps gets the collection of Pump from
 // a provided reference.
-func ListReferencedPumps(c common.Client, link string) ([]*Pump, error) {
-	return common.GetCollectionObjects[Pump](c, link)
+func ListReferencedPumps(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Pump, error) {
+	return common.GetCollectionObjects[Pump](c, link, queryOpts...)
 }

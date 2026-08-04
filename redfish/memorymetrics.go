@@ -208,12 +208,12 @@ func (memorymetrics *MemoryMetrics) ClearCurrentPeriod() error {
 }
 
 // GetMemoryMetrics will get a MemoryMetrics instance from the service.
-func GetMemoryMetrics(c common.Client, uri string) (*MemoryMetrics, error) {
-	return common.GetObject[MemoryMetrics](c, uri)
+func GetMemoryMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
+	return common.GetObject[MemoryMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedMemoryMetricss gets the collection of MemoryMetrics from
 // a provided reference.
-func ListReferencedMemoryMetricss(c common.Client, link string) ([]*MemoryMetrics, error) {
-	return common.GetCollectionObjects[MemoryMetrics](c, link)
+func ListReferencedMemoryMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryMetrics, error) {
+	return common.GetCollectionObjects[MemoryMetrics](c, link, queryOpts...)
 }

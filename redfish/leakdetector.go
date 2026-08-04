@@ -69,14 +69,14 @@ type LeakDetector struct {
 }
 
 // GetLeakDetector will get a LeakDetector instance from the service.
-func GetLeakDetector(c common.Client, uri string) (*LeakDetector, error) {
-	return common.GetObject[LeakDetector](c, uri)
+func GetLeakDetector(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LeakDetector, error) {
+	return common.GetObject[LeakDetector](c, uri, queryOpts...)
 }
 
 // ListReferencedLeakDetectors gets the collection of LeakDetector from
 // a provided reference.
-func ListReferencedLeakDetectors(c common.Client, link string) ([]*LeakDetector, error) {
-	return common.GetCollectionObjects[LeakDetector](c, link)
+func ListReferencedLeakDetectors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LeakDetector, error) {
+	return common.GetCollectionObjects[LeakDetector](c, link, queryOpts...)
 }
 
 // LeakDetectorArrayExcerpt shall represent a state-based or digital-value leak detector for a Redfish

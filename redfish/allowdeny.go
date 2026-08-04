@@ -115,12 +115,12 @@ func (allowdeny *AllowDeny) Update() error {
 }
 
 // GetAllowDeny will get a AllowDeny instance from the service.
-func GetAllowDeny(c common.Client, uri string) (*AllowDeny, error) {
-	return common.GetObject[AllowDeny](c, uri)
+func GetAllowDeny(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AllowDeny, error) {
+	return common.GetObject[AllowDeny](c, uri, queryOpts...)
 }
 
 // ListReferencedAllowDenys gets the collection of AllowDeny from
 // a provided reference.
-func ListReferencedAllowDenys(c common.Client, link string) ([]*AllowDeny, error) {
-	return common.GetCollectionObjects[AllowDeny](c, link)
+func ListReferencedAllowDenys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AllowDeny, error) {
+	return common.GetCollectionObjects[AllowDeny](c, link, queryOpts...)
 }

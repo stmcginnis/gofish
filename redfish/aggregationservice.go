@@ -108,18 +108,18 @@ func (aggregationservice *AggregationService) SetDefaultBootOrder(systems []stri
 }
 
 // Aggregates gets the aggregates associated with this service.
-func (aggregationservice *AggregationService) Aggregates() ([]*Aggregate, error) {
-	return ListReferencedAggregates(aggregationservice.GetClient(), aggregationservice.aggregates)
+func (aggregationservice *AggregationService) Aggregates(queryOpts ...common.QueryGroupOption) ([]*Aggregate, error) {
+	return ListReferencedAggregates(aggregationservice.GetClient(), aggregationservice.aggregates, queryOpts...)
 }
 
 // AggregationSources gets the aggregation sources associated with this service.
-func (aggregationservice *AggregationService) AggregationSources() ([]*AggregationSource, error) {
-	return ListReferencedAggregationSources(aggregationservice.GetClient(), aggregationservice.aggregationSources)
+func (aggregationservice *AggregationService) AggregationSources(queryOpts ...common.QueryGroupOption) ([]*AggregationSource, error) {
+	return ListReferencedAggregationSources(aggregationservice.GetClient(), aggregationservice.aggregationSources, queryOpts...)
 }
 
 // ConnectionMethods gets the connection methods associated with this service.
-func (aggregationservice *AggregationService) ConnectionMethods() ([]*ConnectionMethod, error) {
-	return ListReferencedConnectionMethods(aggregationservice.GetClient(), aggregationservice.connectionMethods)
+func (aggregationservice *AggregationService) ConnectionMethods(queryOpts ...common.QueryGroupOption) ([]*ConnectionMethod, error) {
+	return ListReferencedConnectionMethods(aggregationservice.GetClient(), aggregationservice.connectionMethods, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -132,12 +132,12 @@ func (aggregationservice *AggregationService) Update() error {
 }
 
 // GetAggregationService will get a AggregationService instance from the service.
-func GetAggregationService(c common.Client, uri string) (*AggregationService, error) {
-	return common.GetObject[AggregationService](c, uri)
+func GetAggregationService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AggregationService, error) {
+	return common.GetObject[AggregationService](c, uri, queryOpts...)
 }
 
 // ListReferencedAggregationServices gets the collection of AggregationService from
 // a provided reference.
-func ListReferencedAggregationServices(c common.Client, link string) ([]*AggregationService, error) {
-	return common.GetCollectionObjects[AggregationService](c, link)
+func ListReferencedAggregationServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AggregationService, error) {
+	return common.GetCollectionObjects[AggregationService](c, link, queryOpts...)
 }

@@ -201,14 +201,14 @@ func (metricdefinition *MetricDefinition) Update() error {
 }
 
 // GetMetricDefinition will get a MetricDefinition instance from the service.
-func GetMetricDefinition(c common.Client, uri string) (*MetricDefinition, error) {
-	return common.GetObject[MetricDefinition](c, uri)
+func GetMetricDefinition(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricDefinition, error) {
+	return common.GetObject[MetricDefinition](c, uri, queryOpts...)
 }
 
 // ListReferencedMetricDefinitions gets the collection of MetricDefinition from
 // a provided reference.
-func ListReferencedMetricDefinitions(c common.Client, link string) ([]*MetricDefinition, error) {
-	return common.GetCollectionObjects[MetricDefinition](c, link)
+func ListReferencedMetricDefinitions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricDefinition, error) {
+	return common.GetCollectionObjects[MetricDefinition](c, link, queryOpts...)
 }
 
 // Wildcard shall contain a wildcard and its substitution values.

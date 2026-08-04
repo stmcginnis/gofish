@@ -278,6 +278,6 @@ func (networkProtocol *NetworkProtocolSettings) Update() error {
 	return networkProtocol.UpdateFromRawData(networkProtocol, networkProtocol.rawData, readWriteFields)
 }
 
-func GetNetworkProtocol(c common.Client, uri string) (*NetworkProtocolSettings, error) {
-	return common.GetObject[NetworkProtocolSettings](c, uri)
+func GetNetworkProtocol(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkProtocolSettings, error) {
+	return common.GetObject[NetworkProtocolSettings](c, uri, queryOpts...)
 }

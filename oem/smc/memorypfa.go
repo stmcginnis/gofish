@@ -69,6 +69,6 @@ func (i *MemoryPFA) Update() error {
 }
 
 // GetMemoryPFA will get a MemoryPFA instance from the service.
-func GetMemoryPFA(c common.Client, uri string) (*MemoryPFA, error) {
-	return common.GetObject[MemoryPFA](c, uri)
+func GetMemoryPFA(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryPFA, error) {
+	return common.GetObject[MemoryPFA](c, uri, queryOpts...)
 }

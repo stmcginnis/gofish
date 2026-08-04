@@ -60,14 +60,14 @@ func (assembly *Assembly) Update() error {
 }
 
 // GetAssembly will get a Assembly instance from the service.
-func GetAssembly(c common.Client, uri string) (*Assembly, error) {
-	return common.GetObject[Assembly](c, uri)
+func GetAssembly(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return common.GetObject[Assembly](c, uri, queryOpts...)
 }
 
 // ListReferencedAssemblys gets the collection of Assembly from
 // a provided reference.
-func ListReferencedAssemblys(c common.Client, link string) ([]*Assembly, error) {
-	return common.GetCollectionObjects[Assembly](c, link)
+func ListReferencedAssemblys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Assembly, error) {
+	return common.GetCollectionObjects[Assembly](c, link, queryOpts...)
 }
 
 // AssemblyData is information about an assembly.

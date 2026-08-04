@@ -218,14 +218,14 @@ type PortMetrics struct {
 }
 
 // GetPortMetrics will get a PortMetrics instance from the service.
-func GetPortMetrics(c common.Client, uri string) (*PortMetrics, error) {
-	return common.GetObject[PortMetrics](c, uri)
+func GetPortMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PortMetrics, error) {
+	return common.GetObject[PortMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedPortMetricss gets the collection of PortMetrics from
 // a provided reference.
-func ListReferencedPortMetricss(c common.Client, link string) ([]*PortMetrics, error) {
-	return common.GetCollectionObjects[PortMetrics](c, link)
+func ListReferencedPortMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PortMetrics, error) {
+	return common.GetCollectionObjects[PortMetrics](c, link, queryOpts...)
 }
 
 // SASPortMetrics shall describe physical (phy) related metrics for Serial Attached SCSI (SAS).

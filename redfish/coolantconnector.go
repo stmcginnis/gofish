@@ -178,27 +178,27 @@ func (coolantconnector *CoolantConnector) Update() error {
 }
 
 // GetCoolantConnector will get a CoolantConnector instance from the service.
-func GetCoolantConnector(c common.Client, uri string) (*CoolantConnector, error) {
-	return common.GetObject[CoolantConnector](c, uri)
+func GetCoolantConnector(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolantConnector, error) {
+	return common.GetObject[CoolantConnector](c, uri, queryOpts...)
 }
 
 // ListReferencedCoolantConnectors gets the collection of CoolantConnector from
 // a provided reference.
-func ListReferencedCoolantConnectors(c common.Client, link string) ([]*CoolantConnector, error) {
-	return common.GetCollectionObjects[CoolantConnector](c, link)
+func ListReferencedCoolantConnectors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return common.GetCollectionObjects[CoolantConnector](c, link, queryOpts...)
 }
 
 // ConnectedChassis retrieves a collection of the Chassis at the other end of the connection.
-func (coolantconnector *CoolantConnector) ConnectedChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](coolantconnector.GetClient(), coolantconnector.connectedChassis)
+func (coolantconnector *CoolantConnector) ConnectedChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](coolantconnector.GetClient(), coolantconnector.connectedChassis, queryOpts...)
 }
 
 // ConnectedCoolingLoop gets the cooling loop at the other end of the connection.
-func (coolantconnector *CoolantConnector) ConnectedCoolingLoop() (*CoolingLoop, error) {
-	return GetCoolingLoop(coolantconnector.GetClient(), coolantconnector.connectedCoolingLoop)
+func (coolantconnector *CoolantConnector) ConnectedCoolingLoop(queryOpts ...common.QueryGroupOption) (*CoolingLoop, error) {
+	return GetCoolingLoop(coolantconnector.GetClient(), coolantconnector.connectedCoolingLoop, queryOpts...)
 }
 
 // ConnectedCoolingUnit gets the cooling unit at the other end of the connection.
-func (coolantconnector *CoolantConnector) ConnectedCoolingUnit() (*CoolingUnit, error) {
-	return GetCoolingUnit(coolantconnector.GetClient(), coolantconnector.connectedCoolingUnit)
+func (coolantconnector *CoolantConnector) ConnectedCoolingUnit(queryOpts ...common.QueryGroupOption) (*CoolingUnit, error) {
+	return GetCoolingUnit(coolantconnector.GetClient(), coolantconnector.connectedCoolingUnit, queryOpts...)
 }

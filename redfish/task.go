@@ -163,17 +163,17 @@ func (task *Task) UnmarshalJSON(b []byte) error {
 
 // SubTasks gets the sub-tasks for this task.
 // This property shall not be present if this resource represents a sub-task for a task.
-func (task *Task) SubTasks() ([]*Task, error) {
-	return common.GetObjects[Task](task.GetClient(), task.subTasks)
+func (task *Task) SubTasks(queryOpts ...common.QueryGroupOption) ([]*Task, error) {
+	return common.GetObjects[Task](task.GetClient(), task.subTasks, queryOpts...)
 }
 
 // GetTask will get a Task instance from the service.
-func GetTask(c common.Client, uri string) (*Task, error) {
-	return common.GetObject[Task](c, uri)
+func GetTask(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Task, error) {
+	return common.GetObject[Task](c, uri, queryOpts...)
 }
 
 // ListReferencedTasks gets the collection of Task from
 // a provided reference.
-func ListReferencedTasks(c common.Client, link string) ([]*Task, error) {
-	return common.GetCollectionObjects[Task](c, link)
+func ListReferencedTasks(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Task, error) {
+	return common.GetCollectionObjects[Task](c, link, queryOpts...)
 }

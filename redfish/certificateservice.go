@@ -59,22 +59,22 @@ func (certificateservice *CertificateService) UnmarshalJSON(b []byte) error {
 }
 
 // CertificateLocations get the certificate locations.
-func (certificateservice *CertificateService) CertificateLocations() (*CertificateLocations, error) {
+func (certificateservice *CertificateService) CertificateLocations(queryOpts ...common.QueryGroupOption) (*CertificateLocations, error) {
 	if certificateservice.certificateLocations == "" {
 		return nil, nil
 	}
-	return GetCertificateLocations(certificateservice.GetClient(), certificateservice.certificateLocations)
+	return GetCertificateLocations(certificateservice.GetClient(), certificateservice.certificateLocations, queryOpts...)
 }
 
 // GetCertificateService will get a CertificateService instance from the service.
-func GetCertificateService(c common.Client, uri string) (*CertificateService, error) {
-	return common.GetObject[CertificateService](c, uri)
+func GetCertificateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CertificateService, error) {
+	return common.GetObject[CertificateService](c, uri, queryOpts...)
 }
 
 // ListReferencedCertificateServices gets the collection of CertificateService from
 // a provided reference.
-func ListReferencedCertificateServices(c common.Client, link string) ([]*CertificateService, error) {
-	return common.GetCollectionObjects[CertificateService](c, link)
+func ListReferencedCertificateServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CertificateService, error) {
+	return common.GetCollectionObjects[CertificateService](c, link, queryOpts...)
 }
 
 // GenerateCSRResponse shall contain the properties found in the response body for the GenerateCSR action.
@@ -116,8 +116,8 @@ func (generatecsrresponse *GenerateCSRResponse) UnmarshalJSON(b []byte) error {
 
 // Certificates gets the collection of where the certificate is installed after
 // the certificate authority (CA) has signed the certificate.
-func (generatecsrresponse *GenerateCSRResponse) Certificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(generatecsrresponse.client, generatecsrresponse.certificateCollection)
+func (generatecsrresponse *GenerateCSRResponse) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(generatecsrresponse.client, generatecsrresponse.certificateCollection, queryOpts...)
 }
 
 type GenerateCSRRequest struct {

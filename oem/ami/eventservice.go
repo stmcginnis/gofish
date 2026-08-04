@@ -47,6 +47,6 @@ func FromEventService(eventService *redfish.EventService) (*EventService, error)
 }
 
 // Certificates will get the Certificates for this EventService.
-func (es *EventService) Certificates() ([]*redfish.Certificate, error) {
-	return redfish.ListReferencedCertificates(es.GetClient(), es.certificates)
+func (es *EventService) Certificates(queryOpts ...common.QueryGroupOption) ([]*redfish.Certificate, error) {
+	return redfish.ListReferencedCertificates(es.GetClient(), es.certificates, queryOpts...)
 }

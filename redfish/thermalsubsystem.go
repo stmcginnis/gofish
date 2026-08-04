@@ -81,55 +81,55 @@ func (thermalsubsystem *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 }
 
 // CoolantConnectors gets the coolant connectors for this equipment.
-func (thermalsubsystem *ThermalSubsystem) CoolantConnectors() ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(thermalsubsystem.GetClient(), thermalsubsystem.coolantConnectors)
+func (thermalsubsystem *ThermalSubsystem) CoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectors(thermalsubsystem.GetClient(), thermalsubsystem.coolantConnectors, queryOpts...)
 }
 
 // Fans gets the fans for this equipment.
-func (thermalsubsystem *ThermalSubsystem) Fans() ([]*Fan, error) {
-	return ListReferencedFans(thermalsubsystem.GetClient(), thermalsubsystem.fans)
+func (thermalsubsystem *ThermalSubsystem) Fans(queryOpts ...common.QueryGroupOption) ([]*Fan, error) {
+	return ListReferencedFans(thermalsubsystem.GetClient(), thermalsubsystem.fans, queryOpts...)
 }
 
 // Heaters gets the heaters within this subsystem.
-func (thermalsubsystem *ThermalSubsystem) Heaters() ([]*Heater, error) {
-	return ListReferencedHeaters(thermalsubsystem.GetClient(), thermalsubsystem.heaters)
+func (thermalsubsystem *ThermalSubsystem) Heaters(queryOpts ...common.QueryGroupOption) ([]*Heater, error) {
+	return ListReferencedHeaters(thermalsubsystem.GetClient(), thermalsubsystem.heaters, queryOpts...)
 }
 
 // LeakDetection gets the leak detection system within the ThermalSubsystem.
 // This property has been deprecated in favor of LeakDetectors under the Chassis resource.
-func (thermalsubsystem *ThermalSubsystem) LeakDetection() (*LeakDetection, error) {
+func (thermalsubsystem *ThermalSubsystem) LeakDetection(queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
 	if thermalsubsystem.leakDetection == "" {
 		return nil, nil
 	}
 
-	return GetLeakDetection(thermalsubsystem.GetClient(), thermalsubsystem.leakDetection)
+	return GetLeakDetection(thermalsubsystem.GetClient(), thermalsubsystem.leakDetection, queryOpts...)
 }
 
 // Pumps gets the pumps for this equipment.
-func (thermalsubsystem *ThermalSubsystem) Pumps() ([]*Pump, error) {
-	return ListReferencedPumps(thermalsubsystem.GetClient(), thermalsubsystem.pumps)
+func (thermalsubsystem *ThermalSubsystem) Pumps(queryOpts ...common.QueryGroupOption) ([]*Pump, error) {
+	return ListReferencedPumps(thermalsubsystem.GetClient(), thermalsubsystem.pumps, queryOpts...)
 }
 
 // Filters gets the filters within this subsystem.
-func (thermalsubsystem *ThermalSubsystem) Filters() ([]*Filter, error) {
-	return ListReferencedFilters(thermalsubsystem.GetClient(), thermalsubsystem.filters)
+func (thermalsubsystem *ThermalSubsystem) Filters(queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return ListReferencedFilters(thermalsubsystem.GetClient(), thermalsubsystem.filters, queryOpts...)
 }
 
 // ThermalMetrics gets the summary of thermal metrics for this subsystem.
-func (thermalsubsystem *ThermalSubsystem) ThermalMetrics() (*ThermalMetrics, error) {
+func (thermalsubsystem *ThermalSubsystem) ThermalMetrics(queryOpts ...common.QueryGroupOption) (*ThermalMetrics, error) {
 	if thermalsubsystem.thermalMetrics == "" {
 		return nil, nil
 	}
-	return GetThermalMetrics(thermalsubsystem.GetClient(), thermalsubsystem.thermalMetrics)
+	return GetThermalMetrics(thermalsubsystem.GetClient(), thermalsubsystem.thermalMetrics, queryOpts...)
 }
 
 // GetThermalSubsystem will get a ThermalSubsystem instance from the service.
-func GetThermalSubsystem(c common.Client, uri string) (*ThermalSubsystem, error) {
-	return common.GetObject[ThermalSubsystem](c, uri)
+func GetThermalSubsystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalSubsystem, error) {
+	return common.GetObject[ThermalSubsystem](c, uri, queryOpts...)
 }
 
 // ListReferencedThermalSubsystems gets the collection of ThermalSubsystem from
 // a provided reference.
-func ListReferencedThermalSubsystems(c common.Client, link string) ([]*ThermalSubsystem, error) {
-	return common.GetCollectionObjects[ThermalSubsystem](c, link)
+func ListReferencedThermalSubsystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalSubsystem, error) {
+	return common.GetCollectionObjects[ThermalSubsystem](c, link, queryOpts...)
 }

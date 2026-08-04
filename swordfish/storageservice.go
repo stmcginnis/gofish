@@ -212,116 +212,116 @@ func (storageservice *StorageService) Update() error {
 }
 
 // GetStorageService will get a StorageService instance from the service.
-func GetStorageService(c common.Client, uri string) (*StorageService, error) {
-	return common.GetObject[StorageService](c, uri)
+func GetStorageService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageService, error) {
+	return common.GetObject[StorageService](c, uri, queryOpts...)
 }
 
 // ListReferencedStorageServices gets the collection of StorageService from
 // a provided reference.
-func ListReferencedStorageServices(c common.Client, link string) ([]*StorageService, error) {
-	return common.GetCollectionObjects[StorageService](c, link)
+func ListReferencedStorageServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageService, error) {
+	return common.GetCollectionObjects[StorageService](c, link, queryOpts...)
 }
 
 // ClassesOfService gets the storage service's classes of service.
-func (storageservice *StorageService) ClassesOfService() ([]*ClassOfService, error) {
-	return ListReferencedClassOfServices(storageservice.GetClient(), storageservice.classesOfService)
+func (storageservice *StorageService) ClassesOfService(queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
+	return ListReferencedClassOfServices(storageservice.GetClient(), storageservice.classesOfService, queryOpts...)
 }
 
 // DataProtectionLoSCapabilities gets the storage service's data protection
 // capabilities.
-func (storageservice *StorageService) DataProtectionLoSCapabilities() (*DataProtectionLoSCapabilities, error) {
+func (storageservice *StorageService) DataProtectionLoSCapabilities(queryOpts ...common.QueryGroupOption) (*DataProtectionLoSCapabilities, error) {
 	if storageservice.dataProtectionLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataProtectionLoSCapabilities(storageservice.GetClient(), storageservice.dataProtectionLoSCapabilities)
+	return GetDataProtectionLoSCapabilities(storageservice.GetClient(), storageservice.dataProtectionLoSCapabilities, queryOpts...)
 }
 
 // DataSecurityLoSCapabilities gets the storage service's data security
 // capabilities.
-func (storageservice *StorageService) DataSecurityLoSCapabilities() (*DataSecurityLoSCapabilities, error) {
+func (storageservice *StorageService) DataSecurityLoSCapabilities(queryOpts ...common.QueryGroupOption) (*DataSecurityLoSCapabilities, error) {
 	if storageservice.dataSecurityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataSecurityLoSCapabilities(storageservice.GetClient(), storageservice.dataSecurityLoSCapabilities)
+	return GetDataSecurityLoSCapabilities(storageservice.GetClient(), storageservice.dataSecurityLoSCapabilities, queryOpts...)
 }
 
 // DataStorageLoSCapabilities references the data storage capabilities of this service.
-func (storageservice *StorageService) DataStorageLoSCapabilities() (*DataStorageLoSCapabilities, error) {
+func (storageservice *StorageService) DataStorageLoSCapabilities(queryOpts ...common.QueryGroupOption) (*DataStorageLoSCapabilities, error) {
 	if storageservice.dataStorageLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetDataStorageLoSCapabilities(storageservice.GetClient(), storageservice.dataStorageLoSCapabilities)
+	return GetDataStorageLoSCapabilities(storageservice.GetClient(), storageservice.dataStorageLoSCapabilities, queryOpts...)
 }
 
 // DefaultClassOfService references the default class of service for entities
 // allocated by this storage service.
-func (storageservice *StorageService) DefaultClassOfService() (*ClassOfService, error) {
+func (storageservice *StorageService) DefaultClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if storageservice.defaultClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storageservice.GetClient(), storageservice.defaultClassOfService)
+	return GetClassOfService(storageservice.GetClient(), storageservice.defaultClassOfService, queryOpts...)
 }
 
 // Drives gets the storage service's drives.
-func (storageservice *StorageService) Drives() ([]*redfish.Drive, error) {
-	return redfish.ListReferencedDrives(storageservice.GetClient(), storageservice.drives)
+func (storageservice *StorageService) Drives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return redfish.ListReferencedDrives(storageservice.GetClient(), storageservice.drives, queryOpts...)
 }
 
 // EndpointGroups gets the storage service's endpoint groups.
-func (storageservice *StorageService) EndpointGroups() ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(storageservice.GetClient(), storageservice.endpointGroups)
+func (storageservice *StorageService) EndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return ListReferencedEndpointGroups(storageservice.GetClient(), storageservice.endpointGroups, queryOpts...)
 }
 
 // Endpoints gets the storage service's endpoints.
-func (storageservice *StorageService) Endpoints() ([]*redfish.Endpoint, error) {
-	return redfish.ListReferencedEndpoints(storageservice.GetClient(), storageservice.endpoints)
+func (storageservice *StorageService) Endpoints(queryOpts ...common.QueryGroupOption) ([]*redfish.Endpoint, error) {
+	return redfish.ListReferencedEndpoints(storageservice.GetClient(), storageservice.endpoints, queryOpts...)
 }
 
 // FileSystems gets all filesystems available through this storage service.
-func (storageservice *StorageService) FileSystems() ([]*FileSystem, error) {
-	return ListReferencedFileSystems(storageservice.GetClient(), storageservice.fileSystems)
+func (storageservice *StorageService) FileSystems(queryOpts ...common.QueryGroupOption) ([]*FileSystem, error) {
+	return ListReferencedFileSystems(storageservice.GetClient(), storageservice.fileSystems, queryOpts...)
 }
 
 // IOConnectivityLoSCapabilities references the IO connectivity capabilities of this service.
-func (storageservice *StorageService) IOConnectivityLoSCapabilities() (*IOConnectivityLoSCapabilities, error) {
+func (storageservice *StorageService) IOConnectivityLoSCapabilities(queryOpts ...common.QueryGroupOption) (*IOConnectivityLoSCapabilities, error) {
 	if storageservice.ioConnectivityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetIOConnectivityLoSCapabilities(storageservice.GetClient(), storageservice.ioConnectivityLoSCapabilities)
+	return GetIOConnectivityLoSCapabilities(storageservice.GetClient(), storageservice.ioConnectivityLoSCapabilities, queryOpts...)
 }
 
 // IOPerformanceLoSCapabilities references the IO performance capabilities of this service.
-func (storageservice *StorageService) IOPerformanceLoSCapabilities() (*IOPerformanceLoSCapabilities, error) {
+func (storageservice *StorageService) IOPerformanceLoSCapabilities(queryOpts ...common.QueryGroupOption) (*IOPerformanceLoSCapabilities, error) {
 	if storageservice.ioConnectivityLoSCapabilities == "" {
 		return nil, nil
 	}
-	return GetIOPerformanceLoSCapabilities(storageservice.GetClient(), storageservice.ioPerformanceLoSCapabilities)
+	return GetIOPerformanceLoSCapabilities(storageservice.GetClient(), storageservice.ioPerformanceLoSCapabilities, queryOpts...)
 }
 
 // Redundancy gets the redundancy information for the storage subsystem.
-func (storageservice *StorageService) Redundancy() ([]*redfish.Redundancy, error) {
-	return common.GetObjects[redfish.Redundancy](storageservice.GetClient(), storageservice.redundancy)
+func (storageservice *StorageService) Redundancy(queryOpts ...common.QueryGroupOption) ([]*redfish.Redundancy, error) {
+	return common.GetObjects[redfish.Redundancy](storageservice.GetClient(), storageservice.redundancy, queryOpts...)
 }
 
 // LinesOfService gets lines of service for this service.
-func (storageservice *StorageService) LinesOfService() ([]*LineOfService, error) {
-	return common.GetObjects[LineOfService](storageservice.GetClient(), storageservice.linesOfService)
+func (storageservice *StorageService) LinesOfService(queryOpts ...common.QueryGroupOption) ([]*LineOfService, error) {
+	return common.GetObjects[LineOfService](storageservice.GetClient(), storageservice.linesOfService, queryOpts...)
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
-func (storageservice *StorageService) SpareResourceSets() ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](storageservice.GetClient(), storageservice.spareResourceSets)
+func (storageservice *StorageService) SpareResourceSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetObjects[SpareResourceSet](storageservice.GetClient(), storageservice.spareResourceSets, queryOpts...)
 }
 
 // StorageGroups gets the storage groups that are a part of this storage service.
-func (storageservice *StorageService) StorageGroups() ([]*StorageGroup, error) {
-	return common.GetCollectionObjects[StorageGroup](storageservice.GetClient(), storageservice.storageGroups)
+func (storageservice *StorageService) StorageGroups(queryOpts ...common.QueryGroupOption) ([]*StorageGroup, error) {
+	return common.GetCollectionObjects[StorageGroup](storageservice.GetClient(), storageservice.storageGroups, queryOpts...)
 }
 
 // Volumes gets the volumes that are a part of this storage service.
-func (storageservice *StorageService) Volumes() ([]*Volume, error) {
-	return ListReferencedVolumes(storageservice.GetClient(), storageservice.volumes)
+func (storageservice *StorageService) Volumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return ListReferencedVolumes(storageservice.GetClient(), storageservice.volumes, queryOpts...)
 }
 
 // SetEncryptionKey shall set the encryption key for the storage subsystem.
@@ -334,9 +334,9 @@ func (storageservice *StorageService) SetEncryptionKey(key string) error {
 }
 
 // Metrics gets the metrics for this storage pool.
-func (storageservice *StorageService) Metrics() (*StorageServiceMetrics, error) {
+func (storageservice *StorageService) Metrics(queryOpts ...common.QueryGroupOption) (*StorageServiceMetrics, error) {
 	if storageservice.metrics == "" {
 		return nil, nil
 	}
-	return GetStorageServiceMetrics(storageservice.GetClient(), storageservice.metrics)
+	return GetStorageServiceMetrics(storageservice.GetClient(), storageservice.metrics, queryOpts...)
 }

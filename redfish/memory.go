@@ -576,8 +576,8 @@ func (memory *Memory) Update() error {
 }
 
 // GetMemory will get a Memory instance from the service.
-func GetMemory(c common.Client, uri string) (*Memory, error) {
-	return common.GetObject[Memory](c, uri)
+func GetMemory(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Memory, error) {
+	return common.GetObject[Memory](c, uri, queryOpts...)
 }
 
 // ListReferencedMemorys gets the collection of Memory from
@@ -587,77 +587,77 @@ func ListReferencedMemorys(c common.Client, link string, queryOpts ...common.Que
 }
 
 // Assembly gets this memory's assembly.
-func (memory *Memory) Assembly() (*Assembly, error) {
+func (memory *Memory) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if memory.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(memory.GetClient(), memory.assembly)
+	return GetAssembly(memory.GetClient(), memory.assembly, queryOpts...)
 }
 
 // Certificates gets certificates for device identity and attestation.
-func (memory *Memory) Certificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](memory.GetClient(), memory.certificates)
+func (memory *Memory) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](memory.GetClient(), memory.certificates, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this memory.
-func (memory *Memory) EnvironmentMetrics() (*EnvironmentMetrics, error) {
+func (memory *Memory) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if memory.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(memory.GetClient(), memory.environmentMetrics)
+	return GetEnvironmentMetrics(memory.GetClient(), memory.environmentMetrics, queryOpts...)
 }
 
 // Log gets the log service for this memory.
-func (memory *Memory) Log() (*LogService, error) {
+func (memory *Memory) Log(queryOpts ...common.QueryGroupOption) (*LogService, error) {
 	if memory.log == "" {
 		return nil, nil
 	}
-	return GetLogService(memory.GetClient(), memory.log)
+	return GetLogService(memory.GetClient(), memory.log, queryOpts...)
 }
 
 // Metrics gets the memory metrics.
-func (memory *Memory) Metrics() (*MemoryMetrics, error) {
+func (memory *Memory) Metrics(queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
 	if memory.metrics == nil {
 		return nil, nil
 	}
 	if memory.metrics.ID != "" {
 		return memory.metrics, nil
 	}
-	return GetMemoryMetrics(memory.GetClient(), memory.metrics.ODataID)
+	return GetMemoryMetrics(memory.GetClient(), memory.metrics.ODataID, queryOpts...)
 }
 
 // Batteries gets the batteries that provide power to this memory device during
 // a power-loss event, such as with battery-backed NVDIMMs.
-func (memory *Memory) Batteries() ([]*Battery, error) {
-	return common.GetObjects[Battery](memory.GetClient(), memory.batteries)
+func (memory *Memory) Batteries(queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return common.GetObjects[Battery](memory.GetClient(), memory.batteries, queryOpts...)
 }
 
 // Chassis gets the containing chassis of this memory.
-func (memory *Memory) Chassis() (*Chassis, error) {
+func (memory *Memory) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if memory.chassis == "" {
 		return nil, nil
 	}
-	return GetChassis(memory.GetClient(), memory.chassis)
+	return GetChassis(memory.GetClient(), memory.chassis, queryOpts...)
 }
 
 // Endpoints gets the endpoints associated with this memory.
-func (memory *Memory) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](memory.GetClient(), memory.endpoints)
+func (memory *Memory) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](memory.GetClient(), memory.endpoints, queryOpts...)
 }
 
 // MemoryMediaSources gets the memory chunks providing media for this memory.
-func (memory *Memory) MemoryMediaSources() ([]*MemoryChunks, error) {
-	return common.GetObjects[MemoryChunks](memory.GetClient(), memory.memoryMediaSources)
+func (memory *Memory) MemoryMediaSources(queryOpts ...common.QueryGroupOption) ([]*MemoryChunks, error) {
+	return common.GetObjects[MemoryChunks](memory.GetClient(), memory.memoryMediaSources, queryOpts...)
 }
 
 // MemoryRegionMediaSources gets the memory regions providing media for this memory.
-func (memory *Memory) MemoryRegionMediaSources() ([]*MemoryRegion, error) {
-	return common.GetObjects[MemoryRegion](memory.GetClient(), memory.memoryRegionMediaSources)
+func (memory *Memory) MemoryRegionMediaSources(queryOpts ...common.QueryGroupOption) ([]*MemoryRegion, error) {
+	return common.GetObjects[MemoryRegion](memory.GetClient(), memory.memoryRegionMediaSources, queryOpts...)
 }
 
 // Processors gets the processors associated with this memory device.
-func (memory *Memory) Processors() ([]*Processor, error) {
-	return common.GetObjects[Processor](memory.GetClient(), memory.processors)
+func (memory *Memory) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](memory.GetClient(), memory.processors, queryOpts...)
 }
 
 // DisalbeMasterPassphrase will disable the master passphrase on the supplied

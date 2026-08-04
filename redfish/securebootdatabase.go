@@ -54,19 +54,19 @@ type SecureBootDatabaseActions struct {
 }
 
 // Certificates get the certificates contained in this UEFI Secure Boot database.
-func (securebootdatabase *SecureBootDatabase) Certificates() ([]*Certificate, error) {
+func (securebootdatabase *SecureBootDatabase) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if securebootdatabase.CertificatesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedCertificates(securebootdatabase.GetClient(), securebootdatabase.CertificatesLink.String())
+	return ListReferencedCertificates(securebootdatabase.GetClient(), securebootdatabase.CertificatesLink.String(), queryOpts...)
 }
 
 // Signatures get the certificates contained in this UEFI Secure Boot database.
-func (securebootdatabase *SecureBootDatabase) Signatures() ([]*Signature, error) {
+func (securebootdatabase *SecureBootDatabase) Signatures(queryOpts ...common.QueryGroupOption) ([]*Signature, error) {
 	if securebootdatabase.SignaturesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedSignatures(securebootdatabase.GetClient(), securebootdatabase.SignaturesLink.String())
+	return ListReferencedSignatures(securebootdatabase.GetClient(), securebootdatabase.SignaturesLink.String(), queryOpts...)
 }
 
 // ResetKeys will perform a reset of this UEFI Secure Boot key database. The `ResetAllKeysToDefault`
@@ -85,12 +85,12 @@ func (securebootdatabase *SecureBootDatabase) ResetKeys(resetType ResetKeysType)
 }
 
 // GetSecureBootDatabase will get a SecureBootDatabase instance from the service.
-func GetSecureBootDatabase(c common.Client, uri string) (*SecureBootDatabase, error) {
-	return common.GetObject[SecureBootDatabase](c, uri)
+func GetSecureBootDatabase(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SecureBootDatabase, error) {
+	return common.GetObject[SecureBootDatabase](c, uri, queryOpts...)
 }
 
 // ListReferencedSecureBootDatabases gets the collection of SecureBootDatabase from
 // a provided reference.
-func ListReferencedSecureBootDatabases(c common.Client, link string) ([]*SecureBootDatabase, error) {
-	return common.GetCollectionObjects[SecureBootDatabase](c, link)
+func ListReferencedSecureBootDatabases(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SecureBootDatabase, error) {
+	return common.GetCollectionObjects[SecureBootDatabase](c, link, queryOpts...)
 }

@@ -1055,49 +1055,49 @@ func (computersystem *ComputerSystem) Update() error {
 }
 
 // GetComputerSystem will get a ComputerSystem instance from the service.
-func GetComputerSystem(c common.Client, uri string) (*ComputerSystem, error) {
-	return common.GetObject[ComputerSystem](c, uri)
+func GetComputerSystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ComputerSystem, error) {
+	return common.GetObject[ComputerSystem](c, uri, queryOpts...)
 }
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
 // a provided reference.
-func ListReferencedComputerSystems(c common.Client, link string) ([]*ComputerSystem, error) {
-	return common.GetCollectionObjects[ComputerSystem](c, link)
+func ListReferencedComputerSystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetCollectionObjects[ComputerSystem](c, link, queryOpts...)
 }
 
 // Bios gets the Bios information for this ComputerSystem.
-func (computersystem *ComputerSystem) Bios() (*Bios, error) {
+func (computersystem *ComputerSystem) Bios(queryOpts ...common.QueryGroupOption) (*Bios, error) {
 	if computersystem.bios == "" {
 		return nil, nil
 	}
 
-	return GetBios(computersystem.GetClient(), computersystem.bios)
+	return GetBios(computersystem.GetClient(), computersystem.bios, queryOpts...)
 }
 
 // BootOptions gets all BootOption items for this system.
-func (computersystem *ComputerSystem) BootOptions() ([]*BootOption, error) {
+func (computersystem *ComputerSystem) BootOptions(queryOpts ...common.QueryGroupOption) ([]*BootOption, error) {
 	return common.GetCollectionObjects[BootOption](
 		computersystem.GetClient(),
-		computersystem.Boot.bootOptions)
+		computersystem.Boot.bootOptions, queryOpts...)
 }
 
-func (computersystem *ComputerSystem) BootCertificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(computersystem.GetClient(), computersystem.Boot.certificates)
+func (computersystem *ComputerSystem) BootCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(computersystem.GetClient(), computersystem.Boot.certificates, queryOpts...)
 }
 
 // EthernetInterfaces get this system's ethernet interfaces.
-func (computersystem *ComputerSystem) EthernetInterfaces() ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(computersystem.GetClient(), computersystem.ethernetInterfaces)
+func (computersystem *ComputerSystem) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfaces(computersystem.GetClient(), computersystem.ethernetInterfaces, queryOpts...)
 }
 
 // LogServices get this system's log services.
-func (computersystem *ComputerSystem) LogServices() ([]*LogService, error) {
-	return ListReferencedLogServices(computersystem.GetClient(), computersystem.logServices)
+func (computersystem *ComputerSystem) LogServices(queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
+	return ListReferencedLogServices(computersystem.GetClient(), computersystem.logServices, queryOpts...)
 }
 
 // ManagedBy gets all Managers for this system.
-func (computersystem *ComputerSystem) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](computersystem.GetClient(), computersystem.managedBy)
+func (computersystem *ComputerSystem) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](computersystem.GetClient(), computersystem.managedBy, queryOpts...)
 }
 
 // Memory gets this system's memory.
@@ -1106,42 +1106,42 @@ func (computersystem *ComputerSystem) Memory(queryOpts ...common.QueryGroupOptio
 }
 
 // MemoryDomains gets this system's memory domains.
-func (computersystem *ComputerSystem) MemoryDomains() ([]*MemoryDomain, error) {
-	return ListReferencedMemoryDomains(computersystem.GetClient(), computersystem.memoryDomains)
+func (computersystem *ComputerSystem) MemoryDomains(queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
+	return ListReferencedMemoryDomains(computersystem.GetClient(), computersystem.memoryDomains, queryOpts...)
 }
 
 // NetworkInterfaces returns a collection of network interfaces in this system.
-func (computersystem *ComputerSystem) NetworkInterfaces() ([]*NetworkInterface, error) {
-	return ListReferencedNetworkInterfaces(computersystem.GetClient(), computersystem.networkInterfaces)
+func (computersystem *ComputerSystem) NetworkInterfaces(queryOpts ...common.QueryGroupOption) ([]*NetworkInterface, error) {
+	return ListReferencedNetworkInterfaces(computersystem.GetClient(), computersystem.networkInterfaces, queryOpts...)
 }
 
 // OperatingSystem gets this system's operating system.
-func (computersystem *ComputerSystem) OperatingSystem() (*OperatingSystem, error) {
-	return GetOperatingSystem(computersystem.GetClient(), computersystem.operatingSystem)
+func (computersystem *ComputerSystem) OperatingSystem(queryOpts ...common.QueryGroupOption) (*OperatingSystem, error) {
+	return GetOperatingSystem(computersystem.GetClient(), computersystem.operatingSystem, queryOpts...)
 }
 
 // PCIeDevices gets all PCIeDevices for this system.
-func (computersystem *ComputerSystem) PCIeDevices() ([]*PCIeDevice, error) {
-	return common.GetObjects[PCIeDevice](computersystem.GetClient(), computersystem.pcieDevices)
+func (computersystem *ComputerSystem) PCIeDevices(queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
+	return common.GetObjects[PCIeDevice](computersystem.GetClient(), computersystem.pcieDevices, queryOpts...)
 }
 
 // PCIeFunctions gets all PCIeFunctions for this system.
-func (computersystem *ComputerSystem) PCIeFunctions() ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](computersystem.GetClient(), computersystem.pcieFunctions)
+func (computersystem *ComputerSystem) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](computersystem.GetClient(), computersystem.pcieFunctions, queryOpts...)
 }
 
 // Processors returns a collection of processors from this system
-func (computersystem *ComputerSystem) Processors() ([]*Processor, error) {
-	return ListReferencedProcessors(computersystem.GetClient(), computersystem.processors)
+func (computersystem *ComputerSystem) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return ListReferencedProcessors(computersystem.GetClient(), computersystem.processors, queryOpts...)
 }
 
 // SecureBoot gets the secure boot information for the system.
-func (computersystem *ComputerSystem) SecureBoot() (*SecureBoot, error) {
+func (computersystem *ComputerSystem) SecureBoot(queryOpts ...common.QueryGroupOption) (*SecureBoot, error) {
 	if computersystem.secureBoot == "" {
 		return nil, nil
 	}
 
-	return GetSecureBoot(computersystem.GetClient(), computersystem.secureBoot)
+	return GetSecureBoot(computersystem.GetClient(), computersystem.secureBoot, queryOpts...)
 }
 
 // SetBoot set a boot object based on a payload request
@@ -1285,23 +1285,23 @@ func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
 }
 
 // SimpleStorages gets all simple storage services of this system.
-func (computersystem *ComputerSystem) SimpleStorages() ([]*SimpleStorage, error) {
-	return ListReferencedSimpleStorages(computersystem.GetClient(), computersystem.simpleStorage)
+func (computersystem *ComputerSystem) SimpleStorages(queryOpts ...common.QueryGroupOption) ([]*SimpleStorage, error) {
+	return ListReferencedSimpleStorages(computersystem.GetClient(), computersystem.simpleStorage, queryOpts...)
 }
 
 // Storage gets the storage associated with this system.
-func (computersystem *ComputerSystem) Storage() ([]*Storage, error) {
-	return ListReferencedStorages(computersystem.GetClient(), computersystem.storage)
+func (computersystem *ComputerSystem) Storage(queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return ListReferencedStorages(computersystem.GetClient(), computersystem.storage, queryOpts...)
 }
 
 // VirtualMedia gets the virtual media associated with this system.
-func (computersystem *ComputerSystem) VirtualMedia() ([]*VirtualMedia, error) {
-	return ListReferencedVirtualMedias(computersystem.GetClient(), computersystem.virtualMedia)
+func (computersystem *ComputerSystem) VirtualMedia(queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
+	return ListReferencedVirtualMedias(computersystem.GetClient(), computersystem.virtualMedia, queryOpts...)
 }
 
 // USBControllers gets the USB controllers associated with this system.
-func (computersystem *ComputerSystem) USBControllers() ([]*USBController, error) {
-	return ListReferencedUSBControllers(computersystem.GetClient(), computersystem.usbControllers)
+func (computersystem *ComputerSystem) USBControllers(queryOpts ...common.QueryGroupOption) ([]*USBController, error) {
+	return ListReferencedUSBControllers(computersystem.GetClient(), computersystem.usbControllers, queryOpts...)
 }
 
 // CSLinks are references to resources that are related to, but not contained
@@ -1393,11 +1393,11 @@ func (memorySummary *MemorySummary) UnmarshalJSON(b []byte) error {
 }
 
 // Metrics gets the memory summary metrics
-func (memorySummary *MemorySummary) Metrics(c common.Client) (*MemoryMetrics, error) {
+func (memorySummary *MemorySummary) Metrics(c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
 	if memorySummary.metrics == "" {
 		return nil, nil
 	}
-	return GetMemoryMetrics(c, memorySummary.metrics)
+	return GetMemoryMetrics(c, memorySummary.metrics, queryOpts...)
 }
 
 // ProcessorSummary is This type shall contain properties which describe
@@ -1440,11 +1440,11 @@ func (processorSummary *ProcessorSummary) UnmarshalJSON(b []byte) error {
 }
 
 // Metrics gets the processor summary metrics
-func (processorSummary *ProcessorSummary) Metrics(c common.Client) (*ProcessorMetrics, error) {
+func (processorSummary *ProcessorSummary) Metrics(c common.Client, queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
 	if processorSummary.metrics == "" {
 		return nil, nil
 	}
-	return GetProcessorMetrics(c, processorSummary.metrics)
+	return GetProcessorMetrics(c, processorSummary.metrics, queryOpts...)
 }
 
 // TrustedModules is This type shall describe a trusted module for a system.

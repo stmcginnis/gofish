@@ -53,19 +53,19 @@ func (leakdetection *LeakDetection) UnmarshalJSON(b []byte) error {
 }
 
 // LeakDetectors gets the leak detectors within this subsystem.
-func (leakdetection *LeakDetection) LeakDetectors() ([]*LeakDetector, error) {
-	return ListReferencedLeakDetectors(leakdetection.GetClient(), leakdetection.leakDetectors)
+func (leakdetection *LeakDetection) LeakDetectors(queryOpts ...common.QueryGroupOption) ([]*LeakDetector, error) {
+	return ListReferencedLeakDetectors(leakdetection.GetClient(), leakdetection.leakDetectors, queryOpts...)
 }
 
 // GetLeakDetection will get a LeakDetection instance from the service.
-func GetLeakDetection(c common.Client, uri string) (*LeakDetection, error) {
-	return common.GetObject[LeakDetection](c, uri)
+func GetLeakDetection(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
+	return common.GetObject[LeakDetection](c, uri, queryOpts...)
 }
 
 // ListReferencedLeakDetections gets the collection of LeakDetection from
 // a provided reference.
-func ListReferencedLeakDetections(c common.Client, link string) ([]*LeakDetection, error) {
-	return common.GetCollectionObjects[LeakDetection](c, link)
+func ListReferencedLeakDetections(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LeakDetection, error) {
+	return common.GetCollectionObjects[LeakDetection](c, link, queryOpts...)
 }
 
 // LeakDetectorGroup shall contain a group of leak detection equipment that reports a unified status.

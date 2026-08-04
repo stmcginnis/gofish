@@ -176,40 +176,40 @@ func (battery *Battery) Update() error {
 }
 
 // GetBattery will get a Battery instance from the service.
-func GetBattery(c common.Client, uri string) (*Battery, error) {
-	return common.GetObject[Battery](c, uri)
+func GetBattery(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Battery, error) {
+	return common.GetObject[Battery](c, uri, queryOpts...)
 }
 
 // ListReferencedBatterys gets the collection of Battery from
 // a provided reference.
-func ListReferencedBatterys(c common.Client, link string) ([]*Battery, error) {
-	return common.GetCollectionObjects[Battery](c, link)
+func ListReferencedBatterys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return common.GetCollectionObjects[Battery](c, link, queryOpts...)
 }
 
 // Assembly get the containing assembly of this battery.
-func (battery *Battery) Assembly() (*Assembly, error) {
+func (battery *Battery) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if battery.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(battery.GetClient(), battery.assembly)
+	return GetAssembly(battery.GetClient(), battery.assembly, queryOpts...)
 }
 
 // BatteryMetrics get the metrics for this battery.
-func (battery *Battery) BatteryMetrics() (*BatteryMetrics, error) {
+func (battery *Battery) BatteryMetrics(queryOpts ...common.QueryGroupOption) (*BatteryMetrics, error) {
 	if battery.metrics == "" {
 		return nil, nil
 	}
-	return GetBatteryMetrics(battery.GetClient(), battery.metrics)
+	return GetBatteryMetrics(battery.GetClient(), battery.metrics, queryOpts...)
 }
 
 // Memory returns a collection of Memory devices associated with this Battery.
-func (battery *Battery) Memory() ([]*Memory, error) {
-	return common.GetObjects[Memory](battery.GetClient(), battery.memory)
+func (battery *Battery) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetObjects[Memory](battery.GetClient(), battery.memory, queryOpts...)
 }
 
 // StorageControllers returns a collection of StorageControllers associated with this Battery.
-func (battery *Battery) StorageControllers() ([]*StorageController, error) {
-	return common.GetObjects[StorageController](battery.GetClient(), battery.storageControllers)
+func (battery *Battery) StorageControllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return common.GetObjects[StorageController](battery.GetClient(), battery.storageControllers, queryOpts...)
 }
 
 // Calibrate performs a self-calibration, or learn cycle, of the battery.

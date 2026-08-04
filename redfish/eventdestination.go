@@ -395,8 +395,8 @@ func (eventdestination *EventDestination) Update() error {
 }
 
 // GetEventDestination will get a EventDestination instance from the service.
-func GetEventDestination(c common.Client, uri string) (*EventDestination, error) {
-	return common.GetObject[EventDestination](c, uri)
+func GetEventDestination(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EventDestination, error) {
+	return common.GetObject[EventDestination](c, uri, queryOpts...)
 }
 
 // subscriptionPayload is the payload to create the event subscription
@@ -617,8 +617,8 @@ func DeleteEventDestination(c common.Client, uri string) error {
 
 // ListReferencedEventDestinations gets the collection of EventDestination from
 // a provided reference.
-func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDestination, error) {
-	return common.GetCollectionObjects[EventDestination](c, link)
+func ListReferencedEventDestinations(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EventDestination, error) {
+	return common.GetCollectionObjects[EventDestination](c, link, queryOpts...)
 }
 
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included
@@ -626,19 +626,19 @@ func ListReferencedEventDestinations(c common.Client, link string) ([]*EventDest
 type HTTPHeaderProperty map[string][]string
 
 // Certificates gets the server certificates for the server referenced by the Destination property.
-func (eventdestination *EventDestination) Certificates() ([]*Certificate, error) {
+func (eventdestination *EventDestination) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if eventdestination.certificates == "" {
 		return []*Certificate{}, nil
 	}
 
-	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.certificates)
+	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.certificates, queryOpts...)
 }
 
 // ClientCertificates gets the client identity certificates for the server referenced by the Destination property.
-func (eventdestination *EventDestination) ClientCertificates() ([]*Certificate, error) {
+func (eventdestination *EventDestination) ClientCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if eventdestination.clientCertificates == "" {
 		return []*Certificate{}, nil
 	}
 
-	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.clientCertificates)
+	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.clientCertificates, queryOpts...)
 }

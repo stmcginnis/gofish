@@ -69,6 +69,6 @@ func (i *SMCRAKP) Update() error {
 }
 
 // GetSMCRAKP will get a SMCRAKP instance from the service.
-func GetSMCRAKP(c common.Client, uri string) (*SMCRAKP, error) {
-	return common.GetObject[SMCRAKP](c, uri)
+func GetSMCRAKP(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SMCRAKP, error) {
+	return common.GetObject[SMCRAKP](c, uri, queryOpts...)
 }

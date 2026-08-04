@@ -563,8 +563,8 @@ func (logentry *LogEntry) UnmarshalJSON(b []byte) error {
 }
 
 // RelatedLogEntries gets the set of LogEntry in this or other log services that are related to this log entry.
-func (logentry *LogEntry) RelatedLogEntries() ([]*LogEntry, error) {
-	return common.GetObjects[LogEntry](logentry.GetClient(), logentry.relatedLogEntries)
+func (logentry *LogEntry) RelatedLogEntries(queryOpts ...common.QueryGroupOption) ([]*LogEntry, error) {
+	return common.GetObjects[LogEntry](logentry.GetClient(), logentry.relatedLogEntries, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -577,12 +577,12 @@ func (logentry *LogEntry) Update() error {
 }
 
 // GetLogEntry will get a LogEntry instance from the service.
-func GetLogEntry(c common.Client, uri string) (*LogEntry, error) {
-	return common.GetObject[LogEntry](c, uri)
+func GetLogEntry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LogEntry, error) {
+	return common.GetObject[LogEntry](c, uri, queryOpts...)
 }
 
 // ListReferencedLogEntrys gets the collection of LogEntry from
 // a provided reference.
-func ListReferencedLogEntrys(c common.Client, link string) ([]*LogEntry, error) {
-	return common.GetCollectionObjects[LogEntry](c, link)
+func ListReferencedLogEntrys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LogEntry, error) {
+	return common.GetCollectionObjects[LogEntry](c, link, queryOpts...)
 }

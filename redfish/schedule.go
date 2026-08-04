@@ -127,12 +127,12 @@ func (schedule *Schedule) Update() error {
 }
 
 // GetSchedule will get a Schedule instance from the service.
-func GetSchedule(c common.Client, uri string) (*Schedule, error) {
-	return common.GetObject[Schedule](c, uri)
+func GetSchedule(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Schedule, error) {
+	return common.GetObject[Schedule](c, uri, queryOpts...)
 }
 
 // ListReferencedSchedules gets the collection of Schedule from
 // a provided reference.
-func ListReferencedSchedules(c common.Client, link string) ([]*Schedule, error) {
-	return common.GetCollectionObjects[Schedule](c, link)
+func ListReferencedSchedules(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Schedule, error) {
+	return common.GetCollectionObjects[Schedule](c, link, queryOpts...)
 }

@@ -123,14 +123,14 @@ func (key *Key) Update() error {
 }
 
 // GetKey will get a Key instance from the service.
-func GetKey(c common.Client, uri string) (*Key, error) {
-	return common.GetObject[Key](c, uri)
+func GetKey(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Key, error) {
+	return common.GetObject[Key](c, uri, queryOpts...)
 }
 
 // ListReferencedKeys gets the collection of Key from
 // a provided reference.
-func ListReferencedKeys(c common.Client, link string) ([]*Key, error) {
-	return common.GetCollectionObjects[Key](c, link)
+func ListReferencedKeys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Key, error) {
+	return common.GetCollectionObjects[Key](c, link, queryOpts...)
 }
 
 // KeyNVMeoF shall contain NVMe-oF specific properties for a key.

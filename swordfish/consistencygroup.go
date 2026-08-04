@@ -261,8 +261,8 @@ func (consistencygroup *ConsistencyGroup) SuspendReplication(targetGroupURI stri
 }
 
 // Volumes gets the volumes in this consistency group.
-func (consistencygroup *ConsistencyGroup) Volumes() ([]*Volume, error) {
-	return common.GetObjects[Volume](consistencygroup.GetClient(), consistencygroup.volumes)
+func (consistencygroup *ConsistencyGroup) Volumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetObjects[Volume](consistencygroup.GetClient(), consistencygroup.volumes, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -285,12 +285,12 @@ func (consistencygroup *ConsistencyGroup) Update() error {
 }
 
 // GetConsistencyGroup will get a ConsistencyGroup instance from the service.
-func GetConsistencyGroup(c common.Client, uri string) (*ConsistencyGroup, error) {
-	return common.GetObject[ConsistencyGroup](c, uri)
+func GetConsistencyGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ConsistencyGroup, error) {
+	return common.GetObject[ConsistencyGroup](c, uri, queryOpts...)
 }
 
 // ListReferencedConsistencyGroups gets the collection of ConsistencyGroup from
 // a provided reference.
-func ListReferencedConsistencyGroups(c common.Client, link string) ([]*ConsistencyGroup, error) {
-	return common.GetCollectionObjects[ConsistencyGroup](c, link)
+func ListReferencedConsistencyGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ConsistencyGroup, error) {
+	return common.GetCollectionObjects[ConsistencyGroup](c, link, queryOpts...)
 }

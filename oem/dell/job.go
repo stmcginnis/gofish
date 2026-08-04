@@ -32,6 +32,6 @@ type Job struct {
 }
 
 // GetJob will get a Job instance from the service.
-func GetJob(c common.Client, uri string) (*Job, error) {
-	return common.GetObject[Job](c, uri)
+func GetJob(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Job, error) {
+	return common.GetObject[Job](c, uri, queryOpts...)
 }

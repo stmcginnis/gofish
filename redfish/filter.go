@@ -99,11 +99,11 @@ func (filter *Filter) UnmarshalJSON(b []byte) error {
 }
 
 // Assembly gets the assembly for this filter.
-func (filter *Filter) Assembly() (*Assembly, error) {
+func (filter *Filter) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if filter.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(filter.GetClient(), filter.assembly)
+	return GetAssembly(filter.GetClient(), filter.assembly, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -119,12 +119,12 @@ func (filter *Filter) Update() error {
 }
 
 // GetFilter will get a Filter instance from the service.
-func GetFilter(c common.Client, uri string) (*Filter, error) {
-	return common.GetObject[Filter](c, uri)
+func GetFilter(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Filter, error) {
+	return common.GetObject[Filter](c, uri, queryOpts...)
 }
 
 // ListReferencedFilters gets the collection of Filter from
 // a provided reference.
-func ListReferencedFilters(c common.Client, link string) ([]*Filter, error) {
-	return common.GetCollectionObjects[Filter](c, link)
+func ListReferencedFilters(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return common.GetCollectionObjects[Filter](c, link, queryOpts...)
 }

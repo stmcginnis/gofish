@@ -47,8 +47,8 @@ func (lm *LicenseManager) UnmarshalJSON(b []byte) error {
 }
 
 // GetLicenseManager will get a LicenseManager instance from the service.
-func GetLicenseManager(c common.Client, uri string) (*LicenseManager, error) {
-	return common.GetObject[LicenseManager](c, uri)
+func GetLicenseManager(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LicenseManager, error) {
+	return common.GetObject[LicenseManager](c, uri, queryOpts...)
 }
 
 // ActivateLicense performs the ActivateLicense action of the LicenseManager.
@@ -70,8 +70,8 @@ func (lm *LicenseManager) ClearLicense() error {
 }
 
 // QueryLicense will get the license information from the service.
-func (lm *LicenseManager) QueryLicense() (*QueryLicense, error) {
-	return GetQueryLicense(lm.GetClient(), lm.queryLicense)
+func (lm *LicenseManager) QueryLicense(queryOpts ...common.QueryGroupOption) (*QueryLicense, error) {
+	return GetQueryLicense(lm.GetClient(), lm.queryLicense, queryOpts...)
 }
 
 // QueryLicense contains license information.
@@ -81,6 +81,6 @@ type QueryLicense struct {
 }
 
 // GetQueryLicense will get the QueryLicense instance from the service.
-func GetQueryLicense(c common.Client, uri string) (*QueryLicense, error) {
-	return common.GetObject[QueryLicense](c, uri)
+func GetQueryLicense(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*QueryLicense, error) {
+	return common.GetObject[QueryLicense](c, uri, queryOpts...)
 }

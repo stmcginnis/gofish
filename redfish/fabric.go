@@ -82,28 +82,28 @@ func (fabric *Fabric) UnmarshalJSON(b []byte) error {
 }
 
 // AddressPools gets any address pools associated with this fabric.
-func (fabric *Fabric) AddressPools() ([]*AddressPool, error) {
-	return ListReferencedAddressPools(fabric.GetClient(), fabric.addressPools)
+func (fabric *Fabric) AddressPools(queryOpts ...common.QueryGroupOption) ([]*AddressPool, error) {
+	return ListReferencedAddressPools(fabric.GetClient(), fabric.addressPools, queryOpts...)
 }
 
 // Connections gets any connections associated with this fabric.
-func (fabric *Fabric) Connections() ([]*Connection, error) {
-	return ListReferencedConnections(fabric.GetClient(), fabric.connections)
+func (fabric *Fabric) Connections(queryOpts ...common.QueryGroupOption) ([]*Connection, error) {
+	return ListReferencedConnections(fabric.GetClient(), fabric.connections, queryOpts...)
 }
 
 // EndpointGroups gets any endpoint groups associated with this fabric.
-func (fabric *Fabric) EndpointGroups() ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(fabric.GetClient(), fabric.endpointGroups)
+func (fabric *Fabric) EndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return ListReferencedEndpointGroups(fabric.GetClient(), fabric.endpointGroups, queryOpts...)
 }
 
 // Endpoints gets any endpoints associated with this fabric.
-func (fabric *Fabric) Endpoints() ([]*Endpoint, error) {
-	return ListReferencedEndpoints(fabric.GetClient(), fabric.endpoints)
+func (fabric *Fabric) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return ListReferencedEndpoints(fabric.GetClient(), fabric.endpoints, queryOpts...)
 }
 
 // Switches gets any switches associated with this fabric.
-func (fabric *Fabric) Switches() ([]*Switch, error) {
-	return ListReferencedSwitches(fabric.GetClient(), fabric.switches)
+func (fabric *Fabric) Switches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return ListReferencedSwitches(fabric.GetClient(), fabric.switches, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -116,12 +116,12 @@ func (fabric *Fabric) Update() error {
 }
 
 // GetFabric will get a Fabric instance from the service.
-func GetFabric(c common.Client, uri string) (*Fabric, error) {
-	return common.GetObject[Fabric](c, uri)
+func GetFabric(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Fabric, error) {
+	return common.GetObject[Fabric](c, uri, queryOpts...)
 }
 
 // ListReferencedFabrics gets the collection of Fabric from
 // a provided reference.
-func ListReferencedFabrics(c common.Client, link string) ([]*Fabric, error) {
-	return common.GetCollectionObjects[Fabric](c, link)
+func ListReferencedFabrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Fabric, error) {
+	return common.GetCollectionObjects[Fabric](c, link, queryOpts...)
 }

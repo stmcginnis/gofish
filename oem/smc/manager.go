@@ -104,73 +104,73 @@ func FromManager(manager *redfish.Manager) (*Manager, error) {
 }
 
 // RADIUS gets the RADIUS instance associated with this manager.
-func (m *Manager) RADIUS() (*RADIUS, error) {
-	return GetRADIUS(m.GetClient(), m.radius)
+func (m *Manager) RADIUS(queryOpts ...common.QueryGroupOption) (*RADIUS, error) {
+	return GetRADIUS(m.GetClient(), m.radius, queryOpts...)
 }
 
 // MouseMode gets the MouseMode instance associated with this manager.
-func (m *Manager) MouseMode() (*MouseMode, error) {
-	return GetMouseMode(m.GetClient(), m.mouseMode)
+func (m *Manager) MouseMode(queryOpts ...common.QueryGroupOption) (*MouseMode, error) {
+	return GetMouseMode(m.GetClient(), m.mouseMode, queryOpts...)
 }
 
 // NTP gets the NTP instance associated with this manager.
-func (m *Manager) NTP() (*NTP, error) {
-	return GetNTP(m.GetClient(), m.ntp)
+func (m *Manager) NTP(queryOpts ...common.QueryGroupOption) (*NTP, error) {
+	return GetNTP(m.GetClient(), m.ntp, queryOpts...)
 }
 
 // SMCRAKP gets the SMCRAKP instance associated with this manager.
-func (m *Manager) SMCRAKP() (*SMCRAKP, error) {
-	return GetSMCRAKP(m.GetClient(), m.smcRAKP)
+func (m *Manager) SMCRAKP(queryOpts ...common.QueryGroupOption) (*SMCRAKP, error) {
+	return GetSMCRAKP(m.GetClient(), m.smcRAKP, queryOpts...)
 }
 
 // Syslog gets the Syslog instance associated with this manager.
-func (m *Manager) Syslog() (*Syslog, error) {
-	return GetSyslog(m.GetClient(), m.syslog)
+func (m *Manager) Syslog(queryOpts ...common.QueryGroupOption) (*Syslog, error) {
+	return GetSyslog(m.GetClient(), m.syslog, queryOpts...)
 }
 
 // SysLockdown gets the SysLockdown instance associated with this manager.
-func (m *Manager) SysLockdown() (*SysLockdown, error) {
-	return GetSysLockdown(m.GetClient(), m.sysLockdown)
+func (m *Manager) SysLockdown(queryOpts ...common.QueryGroupOption) (*SysLockdown, error) {
+	return GetSysLockdown(m.GetClient(), m.sysLockdown, queryOpts...)
 }
 
 // MemoryPFA gets the MemoryPFA instance associated with this manager.
-func (m *Manager) MemoryPFA() (*MemoryPFA, error) {
-	return GetMemoryPFA(m.GetClient(), m.memoryPFA)
+func (m *Manager) MemoryPFA(queryOpts ...common.QueryGroupOption) (*MemoryPFA, error) {
+	return GetMemoryPFA(m.GetClient(), m.memoryPFA, queryOpts...)
 }
 
 // MemoryHealthComp gets the MemoryHealthComp instance associated with this manager.
-func (m *Manager) MemoryHealthComp() (*MemoryHealthComp, error) {
-	return GetMemoryHealthComp(m.GetClient(), m.memoryHealthComp)
+func (m *Manager) MemoryHealthComp(queryOpts ...common.QueryGroupOption) (*MemoryHealthComp, error) {
+	return GetMemoryHealthComp(m.GetClient(), m.memoryHealthComp, queryOpts...)
 }
 
 // Snooping gets the Snooping instance associated with this manager.
-func (m *Manager) Snooping() (*Snooping, error) {
-	return GetSnooping(m.GetClient(), m.snooping)
+func (m *Manager) Snooping(queryOpts ...common.QueryGroupOption) (*Snooping, error) {
+	return GetSnooping(m.GetClient(), m.snooping, queryOpts...)
 }
 
 // FanMode gets the FanMode instance associated with this manager.
-func (m *Manager) FanMode() (*FanMode, error) {
-	return GetFanMode(m.GetClient(), m.fanMode)
+func (m *Manager) FanMode(queryOpts ...common.QueryGroupOption) (*FanMode, error) {
+	return GetFanMode(m.GetClient(), m.fanMode, queryOpts...)
 }
 
 // IKVM gets the IKVM instance associated with this manager.
-func (m *Manager) IKVM() (*IKVM, error) {
-	return GetIKVM(m.GetClient(), m.iKVM)
+func (m *Manager) IKVM(queryOpts ...common.QueryGroupOption) (*IKVM, error) {
+	return GetIKVM(m.GetClient(), m.iKVM, queryOpts...)
 }
 
 // KCSInterface gets the KCSInterface instance associated with this manager.
-func (m *Manager) KCSInterface() (*KCSInterface, error) {
-	return GetKCSInterface(m.GetClient(), m.kcsInterface)
+func (m *Manager) KCSInterface(queryOpts ...common.QueryGroupOption) (*KCSInterface, error) {
+	return GetKCSInterface(m.GetClient(), m.kcsInterface, queryOpts...)
 }
 
 // LLDP gets the LLDP instance associated with this manager.
-func (m *Manager) LLDP() (*LLDP, error) {
-	return GetLLDP(m.GetClient(), m.lldp)
+func (m *Manager) LLDP(queryOpts ...common.QueryGroupOption) (*LLDP, error) {
+	return GetLLDP(m.GetClient(), m.lldp, queryOpts...)
 }
 
 // LicenseManager gets the LicenseManager instance associated with this manager.
-func (m *Manager) LicenseManager() (*LicenseManager, error) {
-	return GetLicenseManager(m.GetClient(), m.licenseManager)
+func (m *Manager) LicenseManager(queryOpts ...common.QueryGroupOption) (*LicenseManager, error) {
+	return GetLicenseManager(m.GetClient(), m.licenseManager, queryOpts...)
 }
 
 // ManagerConfigReset resets the BMC to factory defaults.

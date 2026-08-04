@@ -35,12 +35,12 @@ type Message struct {
 }
 
 // GetMessage will get a Message instance from the service.
-func GetMessage(c Client, uri string) (*Message, error) {
-	return GetObject[Message](c, uri)
+func GetMessage(c Client, uri string, queryOpts ...QueryGroupOption) (*Message, error) {
+	return GetObject[Message](c, uri, queryOpts...)
 }
 
 // ListReferencedMessages gets the collection of Message from
 // a provided reference.
-func ListReferencedMessages(c Client, link string) ([]*Message, error) {
-	return GetCollectionObjects[Message](c, link)
+func ListReferencedMessages(c Client, link string, queryOpts ...QueryGroupOption) ([]*Message, error) {
+	return GetCollectionObjects[Message](c, link, queryOpts...)
 }

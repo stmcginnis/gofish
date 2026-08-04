@@ -75,14 +75,14 @@ type Manifest struct {
 }
 
 // GetManifest will get a Manifest instance from the service.
-func GetManifest(c common.Client, uri string) (*Manifest, error) {
-	return common.GetObject[Manifest](c, uri)
+func GetManifest(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Manifest, error) {
+	return common.GetObject[Manifest](c, uri, queryOpts...)
 }
 
 // ListReferencedManifests gets the collection of Manifest from
 // a provided reference.
-func ListReferencedManifests(c common.Client, link string) ([]*Manifest, error) {
-	return common.GetCollectionObjects[Manifest](c, link)
+func ListReferencedManifests(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Manifest, error) {
+	return common.GetCollectionObjects[Manifest](c, link, queryOpts...)
 }
 
 // Stanza shall contain properties that describe a request to be fulfilled within a manifest.

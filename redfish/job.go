@@ -165,17 +165,17 @@ func (job *Job) UnmarshalJSON(b []byte) error {
 }
 
 // Steps gets the collection of steps for this job.
-func (job *Job) Steps() ([]*Job, error) {
-	return ListReferencedJobs(job.GetClient(), job.steps)
+func (job *Job) Steps(queryOpts ...common.QueryGroupOption) ([]*Job, error) {
+	return ListReferencedJobs(job.GetClient(), job.steps, queryOpts...)
 }
 
 // GetJob will get a Job instance from the service.
-func GetJob(c common.Client, uri string) (*Job, error) {
-	return common.GetObject[Job](c, uri)
+func GetJob(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Job, error) {
+	return common.GetObject[Job](c, uri, queryOpts...)
 }
 
 // ListReferencedJobs gets the collection of Job from
 // a provided reference.
-func ListReferencedJobs(c common.Client, link string) ([]*Job, error) {
-	return common.GetCollectionObjects[Job](c, link)
+func ListReferencedJobs(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Job, error) {
+	return common.GetCollectionObjects[Job](c, link, queryOpts...)
 }

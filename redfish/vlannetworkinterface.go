@@ -76,12 +76,12 @@ func (vlannetworkinterface *VLanNetworkInterface) Update() error {
 }
 
 // GetVLanNetworkInterface will get a VLanNetworkInterface instance from the service.
-func GetVLanNetworkInterface(c common.Client, uri string) (*VLanNetworkInterface, error) {
-	return common.GetObject[VLanNetworkInterface](c, uri)
+func GetVLanNetworkInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VLanNetworkInterface, error) {
+	return common.GetObject[VLanNetworkInterface](c, uri, queryOpts...)
 }
 
 // ListReferencedVLanNetworkInterfaces gets the collection of VLanNetworkInterface from
 // a provided reference.
-func ListReferencedVLanNetworkInterfaces(c common.Client, link string) ([]*VLanNetworkInterface, error) {
-	return common.GetCollectionObjects[VLanNetworkInterface](c, link)
+func ListReferencedVLanNetworkInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VLanNetworkInterface, error) {
+	return common.GetCollectionObjects[VLanNetworkInterface](c, link, queryOpts...)
 }

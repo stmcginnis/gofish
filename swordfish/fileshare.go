@@ -162,35 +162,35 @@ func (fileshare *FileShare) Update() error {
 }
 
 // GetFileShare will get a FileShare instance from the service.
-func GetFileShare(c common.Client, uri string) (*FileShare, error) {
-	return common.GetObject[FileShare](c, uri)
+func GetFileShare(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FileShare, error) {
+	return common.GetObject[FileShare](c, uri, queryOpts...)
 }
 
 // ListReferencedFileShares gets the collection of FileShare from a provided
 // reference.
-func ListReferencedFileShares(c common.Client, link string) ([]*FileShare, error) {
-	return common.GetCollectionObjects[FileShare](c, link)
+func ListReferencedFileShares(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*FileShare, error) {
+	return common.GetCollectionObjects[FileShare](c, link, queryOpts...)
 }
 
 // ClassOfService gets the file share's class of service.
-func (fileshare *FileShare) ClassOfService() (*ClassOfService, error) {
+func (fileshare *FileShare) ClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	var result *ClassOfService
 	if fileshare.classOfService == "" {
 		return result, nil
 	}
-	return GetClassOfService(fileshare.GetClient(), fileshare.classOfService)
+	return GetClassOfService(fileshare.GetClient(), fileshare.classOfService, queryOpts...)
 }
 
 // FileSystem gets the file share's associated file system.
-func (fileshare *FileShare) FileSystem() (*FileSystem, error) {
+func (fileshare *FileShare) FileSystem(queryOpts ...common.QueryGroupOption) (*FileSystem, error) {
 	var result *FileSystem
 	if fileshare.fileSystem == "" {
 		return result, nil
 	}
-	return GetFileSystem(fileshare.GetClient(), fileshare.fileSystem)
+	return GetFileSystem(fileshare.GetClient(), fileshare.fileSystem, queryOpts...)
 }
 
 // EthernetInterfaces gets the EthernetInterfaces associated with this share.
-func (fileshare *FileShare) EthernetInterfaces() ([]*redfish.EthernetInterface, error) {
-	return redfish.ListReferencedEthernetInterfaces(fileshare.GetClient(), fileshare.ethernetInterfaces)
+func (fileshare *FileShare) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*redfish.EthernetInterface, error) {
+	return redfish.ListReferencedEthernetInterfaces(fileshare.GetClient(), fileshare.ethernetInterfaces, queryOpts...)
 }

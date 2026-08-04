@@ -112,12 +112,12 @@ func (role *Role) Update() error {
 }
 
 // GetRole will get a Role instance from the service.
-func GetRole(c common.Client, uri string) (*Role, error) {
-	return common.GetObject[Role](c, uri)
+func GetRole(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Role, error) {
+	return common.GetObject[Role](c, uri, queryOpts...)
 }
 
 // ListReferencedRoles gets the collection of Role from
 // a provided reference.
-func ListReferencedRoles(c common.Client, link string) ([]*Role, error) {
-	return common.GetCollectionObjects[Role](c, link)
+func ListReferencedRoles(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Role, error) {
+	return common.GetCollectionObjects[Role](c, link, queryOpts...)
 }

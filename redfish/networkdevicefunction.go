@@ -431,56 +431,56 @@ func (networkdevicefunction *NetworkDeviceFunction) UnmarshalJSON(b []byte) erro
 }
 
 // Endpoints gets the endpoints that are associated with this network device function.
-func (networkdevicefunction *NetworkDeviceFunction) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](networkdevicefunction.GetClient(), networkdevicefunction.endpoints)
+func (networkdevicefunction *NetworkDeviceFunction) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](networkdevicefunction.GetClient(), networkdevicefunction.endpoints, queryOpts...)
 }
 
 // EthernetInterfaces gets the virtual interfaces that were created when one of the network device function VLANs is
 // represented as a virtual NIC for the purpose of showing the IP address associated with that VLAN.
-func (networkdevicefunction *NetworkDeviceFunction) EthernetInterfaces() ([]*EthernetInterface, error) {
-	return common.GetObjects[EthernetInterface](networkdevicefunction.GetClient(), networkdevicefunction.ethernetInterfaces)
+func (networkdevicefunction *NetworkDeviceFunction) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return common.GetObjects[EthernetInterface](networkdevicefunction.GetClient(), networkdevicefunction.ethernetInterfaces, queryOpts...)
 }
 
 // OffloadProcessors gets the processors that performs offload computation for this network function, such as
 // with a SmartNIC. This property shall not be present if OffloadSystem is present.
-func (networkdevicefunction *NetworkDeviceFunction) OffloadProcessors() ([]*Processor, error) {
-	return common.GetObjects[Processor](networkdevicefunction.GetClient(), networkdevicefunction.offloadProcessors)
+func (networkdevicefunction *NetworkDeviceFunction) OffloadProcessors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjects[Processor](networkdevicefunction.GetClient(), networkdevicefunction.offloadProcessors, queryOpts...)
 }
 
 // OffloadSystem shall contain a link to a resource of type ComputerSystem that represents the system that performs
 // offload computation for this network function, such as with a SmartNIC. The SystemType property contained in the
 // referenced ComputerSystem resource should contain the value 'DPU'. This property shall not be present if
 // OffloadProcessors is present.
-func (networkdevicefunction *NetworkDeviceFunction) OffloadSystem() (*ComputerSystem, error) {
+func (networkdevicefunction *NetworkDeviceFunction) OffloadSystem(queryOpts ...common.QueryGroupOption) (*ComputerSystem, error) {
 	if networkdevicefunction.offloadSystem == "" {
 		return nil, nil
 	}
-	return GetComputerSystem(networkdevicefunction.GetClient(), networkdevicefunction.offloadSystem)
+	return GetComputerSystem(networkdevicefunction.GetClient(), networkdevicefunction.offloadSystem, queryOpts...)
 }
 
 // PCIeFunction gets the PCIe function associated with this network device function.
-func (networkdevicefunction *NetworkDeviceFunction) PCIeFunction() (*PCIeFunction, error) {
+func (networkdevicefunction *NetworkDeviceFunction) PCIeFunction(queryOpts ...common.QueryGroupOption) (*PCIeFunction, error) {
 	if networkdevicefunction.pcieFunction == "" {
 		return nil, nil
 	}
-	return GetPCIeFunction(networkdevicefunction.GetClient(), networkdevicefunction.pcieFunction)
+	return GetPCIeFunction(networkdevicefunction.GetClient(), networkdevicefunction.pcieFunction, queryOpts...)
 }
 
 // PhysicalNetworkPortAssignment gets the physical port to which this network device function is currently assigned.
-func (networkdevicefunction *NetworkDeviceFunction) PhysicalNetworkPortAssignment() (*Port, error) {
+func (networkdevicefunction *NetworkDeviceFunction) PhysicalNetworkPortAssignment(queryOpts ...common.QueryGroupOption) (*Port, error) {
 	if networkdevicefunction.physicalNetworkPortAssignment == "" {
 		return nil, nil
 	}
-	return GetPort(networkdevicefunction.GetClient(), networkdevicefunction.physicalNetworkPortAssignment)
+	return GetPort(networkdevicefunction.GetClient(), networkdevicefunction.physicalNetworkPortAssignment, queryOpts...)
 }
 
 // PhysicalPortAssignment gets the physical port to which this network device function is currently assigned.
 // This property has been deprecated in favor of the PhysicalNetworkPortAssignment property.
-func (networkdevicefunction *NetworkDeviceFunction) PhysicalPortAssignment() (*NetworkPort, error) {
+func (networkdevicefunction *NetworkDeviceFunction) PhysicalPortAssignment(queryOpts ...common.QueryGroupOption) (*NetworkPort, error) {
 	if networkdevicefunction.physicalPortAssignment == "" {
 		return nil, nil
 	}
-	return GetNetworkPort(networkdevicefunction.GetClient(), networkdevicefunction.physicalPortAssignment)
+	return GetNetworkPort(networkdevicefunction.GetClient(), networkdevicefunction.physicalPortAssignment, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -496,14 +496,14 @@ func (networkdevicefunction *NetworkDeviceFunction) Update() error {
 }
 
 // GetNetworkDeviceFunction will get a NetworkDeviceFunction instance from the service.
-func GetNetworkDeviceFunction(c common.Client, uri string) (*NetworkDeviceFunction, error) {
-	return common.GetObject[NetworkDeviceFunction](c, uri)
+func GetNetworkDeviceFunction(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NetworkDeviceFunction, error) {
+	return common.GetObject[NetworkDeviceFunction](c, uri, queryOpts...)
 }
 
 // ListReferencedNetworkDeviceFunctions gets the collection of NetworkDeviceFunction from
 // a provided reference.
-func ListReferencedNetworkDeviceFunctions(c common.Client, link string) ([]*NetworkDeviceFunction, error) {
-	return common.GetCollectionObjects[NetworkDeviceFunction](c, link)
+func ListReferencedNetworkDeviceFunctions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetCollectionObjects[NetworkDeviceFunction](c, link, queryOpts...)
 }
 
 // ISCSIBoot shall describe the iSCSI boot capabilities, status, and

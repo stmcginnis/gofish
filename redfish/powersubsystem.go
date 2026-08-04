@@ -89,22 +89,22 @@ func (powersubsystem *PowerSubsystem) UnmarshalJSON(b []byte) error {
 }
 
 // Batteries gets the batteries in this power subsystem.
-func (powersubsystem *PowerSubsystem) Batteries() ([]*Battery, error) {
-	return ListReferencedBatterys(powersubsystem.GetClient(), powersubsystem.batteries)
+func (powersubsystem *PowerSubsystem) Batteries(queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return ListReferencedBatterys(powersubsystem.GetClient(), powersubsystem.batteries, queryOpts...)
 }
 
 // PowerSupplies gets the power supplies in this power subsystem.
-func (powersubsystem *PowerSubsystem) PowerSupplies() ([]*PowerSupply, error) {
-	return ListReferencedPowerSupplies(powersubsystem.GetClient(), powersubsystem.powerSupplies)
+func (powersubsystem *PowerSubsystem) PowerSupplies(queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
+	return ListReferencedPowerSupplies(powersubsystem.GetClient(), powersubsystem.powerSupplies, queryOpts...)
 }
 
 // GetPowerSubsystem will get a PowerSubsystem instance from the service.
-func GetPowerSubsystem(c common.Client, uri string) (*PowerSubsystem, error) {
-	return common.GetObject[PowerSubsystem](c, uri)
+func GetPowerSubsystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerSubsystem, error) {
+	return common.GetObject[PowerSubsystem](c, uri, queryOpts...)
 }
 
 // ListReferencedPowerSubsystems gets the collection of PowerSubsystem from
 // a provided reference.
-func ListReferencedPowerSubsystems(c common.Client, link string) ([]*PowerSubsystem, error) {
-	return common.GetCollectionObjects[PowerSubsystem](c, link)
+func ListReferencedPowerSubsystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerSubsystem, error) {
+	return common.GetCollectionObjects[PowerSubsystem](c, link, queryOpts...)
 }

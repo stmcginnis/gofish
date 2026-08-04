@@ -473,11 +473,11 @@ func (sensor *Sensor) ResetToDefaults() error {
 }
 
 // GetSensor retrieves a specific sensor from the service.
-func GetSensor(c common.Client, uri string) (*Sensor, error) {
-	return common.GetObject[Sensor](c, uri)
+func GetSensor(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Sensor, error) {
+	return common.GetObject[Sensor](c, uri, queryOpts...)
 }
 
 // ListReferencedSensors retrieves a collection of sensors.
-func ListReferencedSensors(c common.Client, link string) ([]*Sensor, error) {
-	return common.GetCollectionObjects[Sensor](c, link)
+func ListReferencedSensors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Sensor, error) {
+	return common.GetCollectionObjects[Sensor](c, link, queryOpts...)
 }

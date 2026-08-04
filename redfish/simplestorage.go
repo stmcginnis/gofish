@@ -83,30 +83,30 @@ func (simplestorage *SimpleStorage) UnmarshalJSON(b []byte) error {
 }
 
 // GetSimpleStorage will get a SimpleStorage instance from the service.
-func GetSimpleStorage(c common.Client, uri string) (*SimpleStorage, error) {
-	return common.GetObject[SimpleStorage](c, uri)
+func GetSimpleStorage(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SimpleStorage, error) {
+	return common.GetObject[SimpleStorage](c, uri, queryOpts...)
 }
 
 // ListReferencedSimpleStorages gets the collection of SimpleStorage from
 // a provided reference.
-func ListReferencedSimpleStorages(c common.Client, link string) ([]*SimpleStorage, error) {
-	return common.GetCollectionObjects[SimpleStorage](c, link)
+func ListReferencedSimpleStorages(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SimpleStorage, error) {
+	return common.GetCollectionObjects[SimpleStorage](c, link, queryOpts...)
 }
 
 // Chassis gets the chassis containing this storage service.
-func (simplestorage *SimpleStorage) Chassis() (*Chassis, error) {
+func (simplestorage *SimpleStorage) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if simplestorage.chassis == "" {
 		return nil, nil
 	}
 
-	return GetChassis(simplestorage.GetClient(), simplestorage.chassis)
+	return GetChassis(simplestorage.GetClient(), simplestorage.chassis, queryOpts...)
 }
 
 // Storage gets the chassis containing this storage service.
-func (simplestorage *SimpleStorage) Storage() (*Storage, error) {
+func (simplestorage *SimpleStorage) Storage(queryOpts ...common.QueryGroupOption) (*Storage, error) {
 	if simplestorage.storage == "" {
 		return nil, nil
 	}
 
-	return GetStorage(simplestorage.GetClient(), simplestorage.storage)
+	return GetStorage(simplestorage.GetClient(), simplestorage.storage, queryOpts...)
 }

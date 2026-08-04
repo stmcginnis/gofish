@@ -387,14 +387,14 @@ func (ethernetinterface *EthernetInterface) Update() error {
 }
 
 // GetEthernetInterface will get a EthernetInterface instance from the service.
-func GetEthernetInterface(c common.Client, uri string) (*EthernetInterface, error) {
-	return common.GetObject[EthernetInterface](c, uri)
+func GetEthernetInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EthernetInterface, error) {
+	return common.GetObject[EthernetInterface](c, uri, queryOpts...)
 }
 
 // ListReferencedEthernetInterfaces gets the collection of EthernetInterface from
 // a provided reference.
-func ListReferencedEthernetInterfaces(c common.Client, link string) ([]*EthernetInterface, error) {
-	return common.GetCollectionObjects[EthernetInterface](c, link)
+func ListReferencedEthernetInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return common.GetCollectionObjects[EthernetInterface](c, link, queryOpts...)
 }
 
 // IPv6AddressPolicyEntry describes and entry in the Address Selection Policy
@@ -424,44 +424,44 @@ type StatelessAddressAutoConfiguration struct {
 
 // VLAN gets the VLAN for this interface. If this interface supports more than one VLAN, the VLAN call
 // will return nil and the VLANs call should be used instead.
-func (ethernetinterface *EthernetInterface) VLANs() ([]*VLanNetworkInterface, error) {
-	return ListReferencedVLanNetworkInterfaces(ethernetinterface.GetClient(), ethernetinterface.vlans)
+func (ethernetinterface *EthernetInterface) VLANs(queryOpts ...common.QueryGroupOption) ([]*VLanNetworkInterface, error) {
+	return ListReferencedVLanNetworkInterfaces(ethernetinterface.GetClient(), ethernetinterface.vlans, queryOpts...)
 }
 
 // AffiliatedInterfaces gets any ethernet interfaces that are affiliated with this interface.
-func (ethernetinterface *EthernetInterface) AffiliatedInterfaces() ([]*EthernetInterface, error) {
-	return common.GetObjects[EthernetInterface](ethernetinterface.GetClient(), ethernetinterface.affiliatedInterfaces)
+func (ethernetinterface *EthernetInterface) AffiliatedInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return common.GetObjects[EthernetInterface](ethernetinterface.GetClient(), ethernetinterface.affiliatedInterfaces, queryOpts...)
 }
 
 // Chassis gets the containing chassis.
-func (ethernetinterface *EthernetInterface) Chassis() (*Chassis, error) {
+func (ethernetinterface *EthernetInterface) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if ethernetinterface.chassis == "" {
 		return nil, nil
 	}
 
-	return GetChassis(ethernetinterface.GetClient(), ethernetinterface.chassis)
+	return GetChassis(ethernetinterface.GetClient(), ethernetinterface.chassis, queryOpts...)
 }
 
 // Endpoints gets any endpoints associated with this interface.
-func (ethernetinterface *EthernetInterface) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](ethernetinterface.GetClient(), ethernetinterface.endpoints)
+func (ethernetinterface *EthernetInterface) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](ethernetinterface.GetClient(), ethernetinterface.endpoints, queryOpts...)
 }
 
 // HostInterface gets the associated host interface.
-func (ethernetinterface *EthernetInterface) HostInterface() (*HostInterface, error) {
+func (ethernetinterface *EthernetInterface) HostInterface(queryOpts ...common.QueryGroupOption) (*HostInterface, error) {
 	if ethernetinterface.hostInterface == "" {
 		return nil, nil
 	}
 
-	return GetHostInterface(ethernetinterface.GetClient(), ethernetinterface.hostInterface)
+	return GetHostInterface(ethernetinterface.GetClient(), ethernetinterface.hostInterface, queryOpts...)
 }
 
 // NetworkDeviceFunctions gets any device functions associated with this interface.
-func (ethernetinterface *EthernetInterface) NetworkDeviceFunctions() ([]*NetworkDeviceFunction, error) {
-	return common.GetObjects[NetworkDeviceFunction](ethernetinterface.GetClient(), ethernetinterface.networkDeviceFunctions)
+func (ethernetinterface *EthernetInterface) NetworkDeviceFunctions(queryOpts ...common.QueryGroupOption) ([]*NetworkDeviceFunction, error) {
+	return common.GetObjects[NetworkDeviceFunction](ethernetinterface.GetClient(), ethernetinterface.networkDeviceFunctions, queryOpts...)
 }
 
 // Ports gets any ports associated with this interface.
-func (ethernetinterface *EthernetInterface) Ports() ([]*Port, error) {
-	return common.GetObjects[Port](ethernetinterface.GetClient(), ethernetinterface.ports)
+func (ethernetinterface *EthernetInterface) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjects[Port](ethernetinterface.GetClient(), ethernetinterface.ports, queryOpts...)
 }

@@ -855,17 +855,17 @@ func (volume *Volume) SuspendReplication(targetVolumeURI string) error {
 
 // CacheDataVolumes gets the cache data volumes this volume serves as a cache volume. The
 // corresponding VolumeUsage property shall be set to CacheOnly when this property is used.
-func (volume *Volume) CacheDataVolumes() ([]*Volume, error) {
-	return common.GetObjects[Volume](volume.GetClient(), volume.cacheDataVolumes)
+func (volume *Volume) CacheDataVolumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetObjects[Volume](volume.GetClient(), volume.cacheDataVolumes, queryOpts...)
 }
 
 // CacheVolumeSource gets the cache volume source for this volume. The corresponding VolumeUsage
 // property shall be set to Data when this property is used.
-func (volume *Volume) CacheVolumeSource() (*Volume, error) {
+func (volume *Volume) CacheVolumeSource(queryOpts ...common.QueryGroupOption) (*Volume, error) {
 	if volume.cacheVolumeSource == "" {
 		return nil, nil
 	}
-	return GetVolume(volume.GetClient(), volume.cacheVolumeSource)
+	return GetVolume(volume.GetClient(), volume.cacheVolumeSource, queryOpts...)
 }
 
 // // ClassOfService gets the cache volume source for this volume. The corresponding VolumeUsage
@@ -878,33 +878,33 @@ func (volume *Volume) CacheVolumeSource() (*Volume, error) {
 // }
 
 // ClientEndpoints gets the client Endpoints this volume is associated with.
-func (volume *Volume) ClientEndpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](volume.GetClient(), volume.clientEndpoints)
+func (volume *Volume) ClientEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](volume.GetClient(), volume.clientEndpoints, queryOpts...)
 }
 
 // Controllers gets the controllers (of type StorageController) associated with this volume.
 // When the volume is of type NVMe, these may be both the physical and logical controller
 // representations.
-func (volume *Volume) Controllers() ([]*StorageController, error) {
-	return common.GetObjects[StorageController](volume.GetClient(), volume.controllers)
+func (volume *Volume) Controllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return common.GetObjects[StorageController](volume.GetClient(), volume.controllers, queryOpts...)
 }
 
 // DedicatedSpareDrives gets the drives which are dedicated spares for this volume.
-func (volume *Volume) DedicatedSpareDrives() ([]*Drive, error) {
-	return common.GetObjects[Drive](volume.GetClient(), volume.dedicatedSpareDrives)
+func (volume *Volume) DedicatedSpareDrives(queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
+	return common.GetObjects[Drive](volume.GetClient(), volume.dedicatedSpareDrives, queryOpts...)
 }
 
 // Drives references the Drives that this volume is associated with.
-func (volume *Volume) Drives() ([]*Drive, error) {
-	return common.GetObjects[Drive](volume.GetClient(), volume.drives)
+func (volume *Volume) Drives(queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
+	return common.GetObjects[Drive](volume.GetClient(), volume.drives, queryOpts...)
 }
 
 // OwningStorageResource gets the Storage resource that owns or contains this volume.
-func (volume *Volume) OwningStorageResource() (*Storage, error) {
+func (volume *Volume) OwningStorageResource(queryOpts ...common.QueryGroupOption) (*Storage, error) {
 	if volume.owningStorageResource == "" {
 		return nil, nil
 	}
-	return GetStorage(volume.GetClient(), volume.owningStorageResource)
+	return GetStorage(volume.GetClient(), volume.owningStorageResource, queryOpts...)
 }
 
 // // OwningStorageService gets the StorageService that owns or contains this volume.
@@ -916,8 +916,8 @@ func (volume *Volume) OwningStorageResource() (*Storage, error) {
 // }
 
 // ServerEndpoints gets the server Endpoints this volume is associated with.
-func (volume *Volume) ServerEndpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](volume.GetClient(), volume.serverEndpoints)
+func (volume *Volume) ServerEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](volume.GetClient(), volume.serverEndpoints, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -945,13 +945,13 @@ func (volume *Volume) Update() error {
 }
 
 // GetVolume will get a Volume instance from the service.
-func GetVolume(c common.Client, uri string) (*Volume, error) {
-	return common.GetObject[Volume](c, uri)
+func GetVolume(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Volume, error) {
+	return common.GetObject[Volume](c, uri, queryOpts...)
 }
 
 // ListReferencedVolumes gets the collection of Volumes from a provided reference.
-func ListReferencedVolumes(c common.Client, link string) ([]*Volume, error) {
-	return common.GetCollectionObjects[Volume](c, link)
+func ListReferencedVolumes(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetCollectionObjects[Volume](c, link, queryOpts...)
 }
 
 // AllowedVolumesUpdateApplyTimes returns the set of allowed apply times to request when setting the volumes values

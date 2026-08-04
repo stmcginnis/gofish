@@ -180,18 +180,18 @@ func (logservice *LogService) Update() error {
 }
 
 // GetLogService will get a LogService instance from the service.
-func GetLogService(c common.Client, uri string) (*LogService, error) {
-	return common.GetObject[LogService](c, uri)
+func GetLogService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LogService, error) {
+	return common.GetObject[LogService](c, uri, queryOpts...)
 }
 
 // ListReferencedLogServices gets the collection of LogService from a provided reference.
-func ListReferencedLogServices(c common.Client, link string) ([]*LogService, error) {
-	return common.GetCollectionObjects[LogService](c, link)
+func ListReferencedLogServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
+	return common.GetCollectionObjects[LogService](c, link, queryOpts...)
 }
 
 // Entries gets the log entries of this service.
-func (logservice *LogService) Entries() ([]*LogEntry, error) {
-	return ListReferencedLogEntrys(logservice.GetClient(), logservice.EntriesLink.String())
+func (logservice *LogService) Entries(queryOpts ...common.QueryGroupOption) ([]*LogEntry, error) {
+	return ListReferencedLogEntrys(logservice.GetClient(), logservice.EntriesLink.String(), queryOpts...)
 }
 
 // FilteredEntries gets the log entries of this service with filtering applied (e.g. skip, top).

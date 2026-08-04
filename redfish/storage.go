@@ -252,8 +252,8 @@ func (storage *Storage) UnmarshalJSON(b []byte) error {
 }
 
 // Connection gets the connections that this storage subsystem contains.
-func (storage *Storage) Connections() ([]*Connection, error) {
-	return ListReferencedConnections(storage.GetClient(), storage.connections)
+func (storage *Storage) Connections(queryOpts ...common.QueryGroupOption) ([]*Connection, error) {
+	return ListReferencedConnections(storage.GetClient(), storage.connections, queryOpts...)
 }
 
 // ConsistencyGroups gets groups of volumes that are treated as a single resource
@@ -263,20 +263,20 @@ func (storage *Storage) Connections() ([]*Connection, error) {
 // }
 
 // Controllers gets the set of storage controllers allocated to this storage subsystem.
-func (storage *Storage) Controllers() ([]*StorageController, error) {
-	return ListReferencedStorageControllers(storage.GetClient(), storage.controllers)
+func (storage *Storage) Controllers(queryOpts ...common.QueryGroupOption) ([]*StorageController, error) {
+	return ListReferencedStorageControllers(storage.GetClient(), storage.controllers, queryOpts...)
 }
 
 // Drives gets the drives attached to the storage controllers that this
 // resource represents.
-func (storage *Storage) Drives() ([]*Drive, error) {
-	return common.GetObjects[Drive](storage.GetClient(), storage.drives)
+func (storage *Storage) Drives(queryOpts ...common.QueryGroupOption) ([]*Drive, error) {
+	return common.GetObjects[Drive](storage.GetClient(), storage.drives, queryOpts...)
 }
 
 // EndpointGroups gets the set of endpoints that are used for a common purpose such as an ACL
 // or logical identification, that belong to this storage subsystem.
-func (storage *Storage) EndpointGroups() ([]*EndpointGroup, error) {
-	return ListReferencedEndpointGroups(storage.GetClient(), storage.endpointGroups)
+func (storage *Storage) EndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return ListReferencedEndpointGroups(storage.GetClient(), storage.endpointGroups, queryOpts...)
 }
 
 // FileSystems gets the file systems that are allocated by this storage subsystem.
@@ -285,31 +285,31 @@ func (storage *Storage) EndpointGroups() ([]*EndpointGroup, error) {
 // }
 
 // Volumes gets the volumes associated with this storage subsystem.
-func (storage *Storage) Volumes() ([]*Volume, error) {
-	return ListReferencedVolumes(storage.GetClient(), storage.volumes)
+func (storage *Storage) Volumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return ListReferencedVolumes(storage.GetClient(), storage.volumes, queryOpts...)
 }
 
 // Enclosures gets the physical containers attached to this resource.
-func (storage *Storage) Enclosures() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](storage.GetClient(), storage.enclosures)
+func (storage *Storage) Enclosures(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](storage.GetClient(), storage.enclosures, queryOpts...)
 }
 
 // HostingStorageSystems gets the storage systems that host this storage subsystem.
-func (storage *Storage) HostingStorageSystems() ([]*ComputerSystem, error) {
-	return common.GetObjects[ComputerSystem](storage.GetClient(), storage.hostingStorageSystems)
+func (storage *Storage) HostingStorageSystems(queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetObjects[ComputerSystem](storage.GetClient(), storage.hostingStorageSystems, queryOpts...)
 }
 
 // NVMeoFDiscoverySubsystems gets the discovery subsystems that discovered this subsystem in an NVMe-oF environment.
-func (storage *Storage) NVMeoFDiscoverySubsystems() ([]*Storage, error) {
-	return common.GetObjects[Storage](storage.GetClient(), storage.nvmeoFDiscoverySubsystems)
+func (storage *Storage) NVMeoFDiscoverySubsystems(queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return common.GetObjects[Storage](storage.GetClient(), storage.nvmeoFDiscoverySubsystems, queryOpts...)
 }
 
 // SimpleStorage gets the simple storage instance that corresponds to this storage.
-func (storage *Storage) SimpleStorage() (*SimpleStorage, error) {
+func (storage *Storage) SimpleStorage(queryOpts ...common.QueryGroupOption) (*SimpleStorage, error) {
 	if storage.simpleStorage == "" {
 		return nil, nil
 	}
-	return GetSimpleStorage(storage.GetClient(), storage.simpleStorage)
+	return GetSimpleStorage(storage.GetClient(), storage.simpleStorage, queryOpts...)
 }
 
 // // StorageServices gets the storage services that connect to this storage subsystem.
@@ -359,14 +359,14 @@ func (storage *Storage) Update() error {
 }
 
 // GetStorage will get a Storage instance from the service.
-func GetStorage(c common.Client, uri string) (*Storage, error) {
-	return common.GetObject[Storage](c, uri)
+func GetStorage(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Storage, error) {
+	return common.GetObject[Storage](c, uri, queryOpts...)
 }
 
 // ListReferencedStorages gets the collection of Storage from a provided
 // reference.
-func ListReferencedStorages(c common.Client, link string) ([]*Storage, error) {
-	return common.GetCollectionObjects[Storage](c, link)
+func ListReferencedStorages(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return common.GetCollectionObjects[Storage](c, link, queryOpts...)
 }
 
 // GetOperationApplyTimeValues returns the OperationApplyTime values applicable for this storage

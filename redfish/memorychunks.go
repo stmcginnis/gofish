@@ -80,11 +80,11 @@ func (interleaveset *InterleaveSet) UnmarshalJSON(b []byte) error {
 }
 
 // Memory gets the associated memory device.
-func (interleaveset *InterleaveSet) Memory(c common.Client) (*Memory, error) {
+func (interleaveset *InterleaveSet) Memory(c common.Client, queryOpts ...common.QueryGroupOption) (*Memory, error) {
 	if interleaveset.memory == "" {
 		return nil, nil
 	}
-	return GetMemory(c, interleaveset.memory)
+	return GetMemory(c, interleaveset.memory, queryOpts...)
 }
 
 // MemoryChunks shall represent memory chunks and interleave sets in a Redfish implementation.
@@ -185,12 +185,12 @@ func (memorychunks *MemoryChunks) Update() error {
 }
 
 // GetMemoryChunks will get a MemoryChunks instance from the service.
-func GetMemoryChunks(c common.Client, uri string) (*MemoryChunks, error) {
-	return common.GetObject[MemoryChunks](c, uri)
+func GetMemoryChunks(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryChunks, error) {
+	return common.GetObject[MemoryChunks](c, uri, queryOpts...)
 }
 
 // ListReferencedMemoryChunks gets the collection of MemoryChunks from
 // a provided reference.
-func ListReferencedMemoryChunks(c common.Client, link string) ([]*MemoryChunks, error) {
-	return common.GetCollectionObjects[MemoryChunks](c, link)
+func ListReferencedMemoryChunks(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryChunks, error) {
+	return common.GetCollectionObjects[MemoryChunks](c, link, queryOpts...)
 }

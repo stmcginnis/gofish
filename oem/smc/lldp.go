@@ -70,6 +70,6 @@ func (i *LLDP) Update() error {
 }
 
 // GetLLDP will get a LLDP instance from the service.
-func GetLLDP(c common.Client, uri string) (*LLDP, error) {
-	return common.GetObject[LLDP](c, uri)
+func GetLLDP(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LLDP, error) {
+	return common.GetObject[LLDP](c, uri, queryOpts...)
 }

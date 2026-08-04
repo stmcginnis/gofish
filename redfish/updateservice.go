@@ -318,19 +318,19 @@ func (updateService *UpdateService) StartUpdate() error {
 }
 
 // FirmwareInventories gets the collection of firmware inventories of this update service
-func (updateService *UpdateService) FirmwareInventories() ([]*SoftwareInventory, error) {
-	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.firmwareInventory)
+func (updateService *UpdateService) FirmwareInventories(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.firmwareInventory, queryOpts...)
 }
 
 // PublicIdentitySSHKey get the public key that is used with the SimpleUpdate action
 // for the key-based authentication. The GenerateSSHIdentityKeyPair and RemoveSSHIdentityKeyPair
 // are used to update the key for the SimpleUpdate action.
 // This property shall not be present if a key-pair is not available.
-func (updateService *UpdateService) PublicIdentitySSHKey() (*Key, error) {
+func (updateService *UpdateService) PublicIdentitySSHKey(queryOpts ...common.QueryGroupOption) (*Key, error) {
 	if updateService.publicIdentitySSHKey == "" {
 		return nil, nil
 	}
-	return GetKey(updateService.GetClient(), updateService.publicIdentitySSHKey)
+	return GetKey(updateService.GetClient(), updateService.publicIdentitySSHKey, queryOpts...)
 }
 
 // RemoteServerCertificates gets the server certificates for the server referenced by the
@@ -342,8 +342,8 @@ func (updateService *UpdateService) PublicIdentitySSHKey() (*Key, error) {
 // not perform certificate verification with certificates in this collection. Regardless of
 // the contents of this collection, services may perform additional verification based on
 // other factors, such as the configuration of the SecurityPolicy resource.
-func (updateService *UpdateService) RemoteServerCertificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](updateService.GetClient(), updateService.remoteServerCertificates)
+func (updateService *UpdateService) RemoteServerCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](updateService.GetClient(), updateService.remoteServerCertificates, queryOpts...)
 }
 
 // RemoteServerSSHKeys gets the server SSH keys for the server referenced by the ImageURI
@@ -353,16 +353,16 @@ func (updateService *UpdateService) RemoteServerCertificates() ([]*Certificate, 
 // image. If the server cannot be verified, the service shall not send the transfer request.
 // If VerifyRemoteServerSSHKey is `false`, the service shall not perform key verification
 // with keys in this collection.
-func (updateService *UpdateService) RemoteServerSSHKeys() ([]*Key, error) {
-	return common.GetObjects[Key](updateService.GetClient(), updateService.remoteServerSSHKeys)
+func (updateService *UpdateService) RemoteServerSSHKeys(queryOpts ...common.QueryGroupOption) ([]*Key, error) {
+	return common.GetObjects[Key](updateService.GetClient(), updateService.remoteServerSSHKeys, queryOpts...)
 }
 
 // SoftwareInventories gets the collection of software inventories of this update service
-func (updateService *UpdateService) SoftwareInventories() ([]*SoftwareInventory, error) {
-	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.softwareInventory)
+func (updateService *UpdateService) SoftwareInventories(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.softwareInventory, queryOpts...)
 }
 
 // GetUpdateService will get a UpdateService instance from the service.
-func GetUpdateService(c common.Client, uri string) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri)
+func GetUpdateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
+	return common.GetObject[UpdateService](c, uri, queryOpts...)
 }

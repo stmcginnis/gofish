@@ -150,14 +150,14 @@ func (keypolicy *KeyPolicy) Update() error {
 }
 
 // GetKeyPolicy will get a KeyPolicy instance from the service.
-func GetKeyPolicy(c common.Client, uri string) (*KeyPolicy, error) {
-	return common.GetObject[KeyPolicy](c, uri)
+func GetKeyPolicy(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KeyPolicy, error) {
+	return common.GetObject[KeyPolicy](c, uri, queryOpts...)
 }
 
 // ListReferencedKeyPolicys gets the collection of KeyPolicy from
 // a provided reference.
-func ListReferencedKeyPolicys(c common.Client, link string) ([]*KeyPolicy, error) {
-	return common.GetCollectionObjects[KeyPolicy](c, link)
+func ListReferencedKeyPolicys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*KeyPolicy, error) {
+	return common.GetCollectionObjects[KeyPolicy](c, link, queryOpts...)
 }
 
 // NVMeoF shall contain NVMe-oF specific properties for a key policy.

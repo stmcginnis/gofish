@@ -67,12 +67,12 @@ type BatteryMetrics struct {
 }
 
 // GetBatteryMetrics will get a BatteryMetrics instance from the service.
-func GetBatteryMetrics(c common.Client, uri string) (*BatteryMetrics, error) {
-	return common.GetObject[BatteryMetrics](c, uri)
+func GetBatteryMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*BatteryMetrics, error) {
+	return common.GetObject[BatteryMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedBatteryMetricss gets the collection of BatteryMetrics from
 // a provided reference.
-func ListReferencedBatteryMetricss(c common.Client, link string) ([]*BatteryMetrics, error) {
-	return common.GetCollectionObjects[BatteryMetrics](c, link)
+func ListReferencedBatteryMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*BatteryMetrics, error) {
+	return common.GetCollectionObjects[BatteryMetrics](c, link, queryOpts...)
 }

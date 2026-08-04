@@ -64,6 +64,6 @@ func (i *IKVM) Update() error {
 }
 
 // GetIKVM will get a IKVM instance from the service.
-func GetIKVM(c common.Client, uri string) (*IKVM, error) {
-	return common.GetObject[IKVM](c, uri)
+func GetIKVM(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IKVM, error) {
+	return common.GetObject[IKVM](c, uri, queryOpts...)
 }

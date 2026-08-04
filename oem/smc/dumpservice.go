@@ -21,14 +21,14 @@ type Dump struct {
 }
 
 // GetDump will get a Dump instance from the service.
-func GetDump(c common.Client, uri string) (*Dump, error) {
-	return common.GetObject[Dump](c, uri)
+func GetDump(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Dump, error) {
+	return common.GetObject[Dump](c, uri, queryOpts...)
 }
 
 // ListReferencedDumps gets the collection of Dumps from
 // a provided reference.
-func ListReferencedDumps(c common.Client, uri string) ([]*Dump, error) {
-	return common.GetCollectionObjects[Dump](c, uri)
+func ListReferencedDumps(c common.Client, uri string, queryOpts ...common.QueryGroupOption) ([]*Dump, error) {
+	return common.GetCollectionObjects[Dump](c, uri, queryOpts...)
 }
 
 // DumpService is the dump service instance associated with the system.
@@ -73,13 +73,13 @@ func (ds *DumpService) UnmarshalJSON(b []byte) error {
 }
 
 // GetDefaultDumpService will get the default DumpService instance from the service.
-func GetDefaultDumpService(c common.Client) (*DumpService, error) {
-	return common.GetObject[DumpService](c, "/redfish/v1/Oem/Supermicro/DumpService/")
+func GetDefaultDumpService(c common.Client, queryOpts ...common.QueryGroupOption) (*DumpService, error) {
+	return common.GetObject[DumpService](c, "/redfish/v1/Oem/Supermicro/DumpService/", queryOpts...)
 }
 
 // GetDumpService will get a DumpService instance from the service.
-func GetDumpService(c common.Client, uri string) (*DumpService, error) {
-	return common.GetObject[DumpService](c, uri)
+func GetDumpService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DumpService, error) {
+	return common.GetObject[DumpService](c, uri, queryOpts...)
 }
 
 // CreateDump creates a new dump. Allowable dumpType is usually only
@@ -118,6 +118,6 @@ func (ds *DumpService) Collect(dumpType, actionType string) error {
 }
 
 // Dumps will get the Dumps from the service.
-func (ds *DumpService) Dumps() ([]*Dump, error) {
-	return ListReferencedDumps(ds.GetClient(), ds.dumps)
+func (ds *DumpService) Dumps(queryOpts ...common.QueryGroupOption) ([]*Dump, error) {
+	return ListReferencedDumps(ds.GetClient(), ds.dumps, queryOpts...)
 }

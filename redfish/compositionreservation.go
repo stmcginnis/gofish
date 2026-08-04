@@ -59,21 +59,21 @@ func (compositionreservation *CompositionReservation) UnmarshalJSON(b []byte) er
 }
 
 // GetCompositionReservation will get a CompositionReservation instance from the service.
-func GetCompositionReservation(c common.Client, uri string) (*CompositionReservation, error) {
-	return common.GetObject[CompositionReservation](c, uri)
+func GetCompositionReservation(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CompositionReservation, error) {
+	return common.GetObject[CompositionReservation](c, uri, queryOpts...)
 }
 
 // ListReferencedCompositionReservations gets the collection of CompositionReservation from
 // a provided reference.
-func ListReferencedCompositionReservations(c common.Client, link string) ([]*CompositionReservation, error) {
-	return common.GetCollectionObjects[CompositionReservation](c, link)
+func ListReferencedCompositionReservations(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CompositionReservation, error) {
+	return common.GetCollectionObjects[CompositionReservation](c, link, queryOpts...)
 }
 
 // ReservedResourceBlocks gets reserved resource blocks for this reservation.
 // Upon deletion of the reservation or when the reservation is applied, the
 // Reserved property in the referenced resource blocks shall change to 'false'.
-func (compositionreservation *CompositionReservation) ReservedResourceBlocks() ([]*ResourceBlock, error) {
+func (compositionreservation *CompositionReservation) ReservedResourceBlocks(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
 	return common.GetObjects[ResourceBlock](
 		compositionreservation.GetClient(),
-		compositionreservation.reservedResourceBlocks)
+		compositionreservation.reservedResourceBlocks, queryOpts...)
 }

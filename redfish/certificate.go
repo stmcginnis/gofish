@@ -196,13 +196,13 @@ func (certificate *Certificate) UnmarshalJSON(b []byte) error {
 }
 
 // GetCertificate will get a Certificate instance from the Redfish service.
-func GetCertificate(c common.Client, uri string) (*Certificate, error) {
-	return common.GetObject[Certificate](c, uri)
+func GetCertificate(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Certificate, error) {
+	return common.GetObject[Certificate](c, uri, queryOpts...)
 }
 
 // ListReferencedCertificates gets the Certificates collection.
-func ListReferencedCertificates(c common.Client, link string) ([]*Certificate, error) {
-	return common.GetCollectionObjects[Certificate](c, link)
+func ListReferencedCertificates(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetCollectionObjects[Certificate](c, link, queryOpts...)
 }
 
 func (certificate *Certificate) RekeyCertificate(challengePassword, keyCurveID, keyPairAlgorithm string, keyBitLength int) error {

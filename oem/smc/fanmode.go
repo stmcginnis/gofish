@@ -63,6 +63,6 @@ func (i *FanMode) Update() error {
 }
 
 // GetFanMode will get a FanMode instance from the service.
-func GetFanMode(c common.Client, uri string) (*FanMode, error) {
-	return common.GetObject[FanMode](c, uri)
+func GetFanMode(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FanMode, error) {
+	return common.GetObject[FanMode](c, uri, queryOpts...)
 }

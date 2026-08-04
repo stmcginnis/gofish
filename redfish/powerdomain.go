@@ -104,47 +104,47 @@ func (powerdomain *PowerDomain) UnmarshalJSON(b []byte) error {
 }
 
 // ElectricalBuses gets the electrical buses in this power domain.
-func (powerdomain *PowerDomain) ElectricalBuses() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.electricalBuses)
+func (powerdomain *PowerDomain) ElectricalBuses(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.electricalBuses, queryOpts...)
 }
 
 // FloorPDUs gets the floor power distribution units in this power domain.
-func (powerdomain *PowerDomain) FloorPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.floorPDUs)
+func (powerdomain *PowerDomain) FloorPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.floorPDUs, queryOpts...)
 }
 
 // ManagedBy gets the managers that manage this power domain.
-func (powerdomain *PowerDomain) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](powerdomain.GetClient(), powerdomain.managedBy)
+func (powerdomain *PowerDomain) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](powerdomain.GetClient(), powerdomain.managedBy, queryOpts...)
 }
 
 // PowerShelves gets the power shelves in this power domain.
-func (powerdomain *PowerDomain) PowerShelves() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.powerShelves)
+func (powerdomain *PowerDomain) PowerShelves(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.powerShelves, queryOpts...)
 }
 
 // RackPDUs gets the rack-level power distribution units in this power domain.
-func (powerdomain *PowerDomain) RackPDUs() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.rackPDUs)
+func (powerdomain *PowerDomain) RackPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.rackPDUs, queryOpts...)
 }
 
 // Switchgear gets the switchgear in this power domain.
-func (powerdomain *PowerDomain) Switchgear() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.switchgear)
+func (powerdomain *PowerDomain) Switchgear(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.switchgear, queryOpts...)
 }
 
 // TransferSwitches gets the transfer switches in this power domain.
-func (powerdomain *PowerDomain) TransferSwitches() ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.transferSwitches)
+func (powerdomain *PowerDomain) TransferSwitches(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjects[PowerDistribution](powerdomain.GetClient(), powerdomain.transferSwitches, queryOpts...)
 }
 
 // GetPowerDomain will get a PowerDomain instance from the service.
-func GetPowerDomain(c common.Client, uri string) (*PowerDomain, error) {
-	return common.GetObject[PowerDomain](c, uri)
+func GetPowerDomain(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerDomain, error) {
+	return common.GetObject[PowerDomain](c, uri, queryOpts...)
 }
 
 // ListReferencedPowerDomains gets the collection of PowerDomain from
 // a provided reference.
-func ListReferencedPowerDomains(c common.Client, link string) ([]*PowerDomain, error) {
-	return common.GetCollectionObjects[PowerDomain](c, link)
+func ListReferencedPowerDomains(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerDomain, error) {
+	return common.GetCollectionObjects[PowerDomain](c, link, queryOpts...)
 }

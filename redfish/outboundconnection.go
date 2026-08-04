@@ -141,21 +141,21 @@ func (outboundconnection *OutboundConnection) UnmarshalJSON(b []byte) error {
 }
 
 // Session gets the the active connection for this outbound connection.
-func (outboundconnection *OutboundConnection) Session() (*Session, error) {
+func (outboundconnection *OutboundConnection) Session(queryOpts ...common.QueryGroupOption) (*Session, error) {
 	if outboundconnection.session == "" {
 		return nil, nil
 	}
-	return GetSession(outboundconnection.GetClient(), outboundconnection.session)
+	return GetSession(outboundconnection.GetClient(), outboundconnection.session, queryOpts...)
 }
 
 // Certificates gets the server certificates for the remote client referenced by the EndpointURI property.
-func (outboundconnection *OutboundConnection) Certificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.certificates)
+func (outboundconnection *OutboundConnection) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.certificates, queryOpts...)
 }
 
 // ClientCertificates gets the client identity certificates for the service.
-func (outboundconnection *OutboundConnection) ClientCertificates() ([]*Certificate, error) {
-	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.clientCertificates)
+func (outboundconnection *OutboundConnection) ClientCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.clientCertificates, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -169,14 +169,14 @@ func (outboundconnection *OutboundConnection) Update() error {
 }
 
 // GetOutboundConnection will get a OutboundConnection instance from the service.
-func GetOutboundConnection(c common.Client, uri string) (*OutboundConnection, error) {
-	return common.GetObject[OutboundConnection](c, uri)
+func GetOutboundConnection(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OutboundConnection, error) {
+	return common.GetObject[OutboundConnection](c, uri, queryOpts...)
 }
 
 // ListReferencedOutboundConnections gets the collection of OutboundConnection from
 // a provided reference.
-func ListReferencedOutboundConnections(c common.Client, link string) ([]*OutboundConnection, error) {
-	return common.GetCollectionObjects[OutboundConnection](c, link)
+func ListReferencedOutboundConnections(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OutboundConnection, error) {
+	return common.GetCollectionObjects[OutboundConnection](c, link, queryOpts...)
 }
 
 // RetryPolicyType shall contain the retry policy for an outbound connection.

@@ -237,14 +237,14 @@ func (eventservice *EventService) Update() error {
 }
 
 // GetEventService will get a EventService instance from the service.
-func GetEventService(c common.Client, uri string) (*EventService, error) {
-	return common.GetObject[EventService](c, uri)
+func GetEventService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EventService, error) {
+	return common.GetObject[EventService](c, uri, queryOpts...)
 }
 
 // ListReferencedEventServices gets the collection of EventService from
 // a provided reference.
-func ListReferencedEventServices(c common.Client, link string) ([]*EventService, error) {
-	return common.GetCollectionObjects[EventService](c, link)
+func ListReferencedEventServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EventService, error) {
+	return common.GetCollectionObjects[EventService](c, link, queryOpts...)
 }
 
 // GetEventSubscriptions gets all the subscriptions using the event service.

@@ -70,6 +70,6 @@ func (r *MouseMode) Update() error {
 }
 
 // GetMouseMode will get a MouseMode instance from the service.
-func GetMouseMode(c common.Client, uri string) (*MouseMode, error) {
-	return common.GetObject[MouseMode](c, uri)
+func GetMouseMode(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MouseMode, error) {
+	return common.GetObject[MouseMode](c, uri, queryOpts...)
 }

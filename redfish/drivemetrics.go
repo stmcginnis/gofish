@@ -45,12 +45,12 @@ type DriveMetrics struct {
 }
 
 // GetDriveMetrics will get a DriveMetrics instance from the service.
-func GetDriveMetrics(c common.Client, uri string) (*DriveMetrics, error) {
-	return common.GetObject[DriveMetrics](c, uri)
+func GetDriveMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DriveMetrics, error) {
+	return common.GetObject[DriveMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedDriveMetricss gets the collection of DriveMetrics from
 // a provided reference.
-func ListReferencedDriveMetricss(c common.Client, link string) ([]*DriveMetrics, error) {
-	return common.GetCollectionObjects[DriveMetrics](c, link)
+func ListReferencedDriveMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DriveMetrics, error) {
+	return common.GetCollectionObjects[DriveMetrics](c, link, queryOpts...)
 }

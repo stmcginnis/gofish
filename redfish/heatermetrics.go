@@ -77,12 +77,12 @@ func (heatermetrics *HeaterMetrics) ResetMetrics() error {
 }
 
 // GetHeaterMetrics will get a HeaterMetrics instance from the service.
-func GetHeaterMetrics(c common.Client, uri string) (*HeaterMetrics, error) {
-	return common.GetObject[HeaterMetrics](c, uri)
+func GetHeaterMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*HeaterMetrics, error) {
+	return common.GetObject[HeaterMetrics](c, uri, queryOpts...)
 }
 
 // ListReferencedHeaterMetrics gets the collection of HeaterMetrics from
 // a provided reference.
-func ListReferencedHeaterMetrics(c common.Client, link string) ([]*HeaterMetrics, error) {
-	return common.GetCollectionObjects[HeaterMetrics](c, link)
+func ListReferencedHeaterMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*HeaterMetrics, error) {
+	return common.GetCollectionObjects[HeaterMetrics](c, link, queryOpts...)
 }

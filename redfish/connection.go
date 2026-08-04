@@ -153,34 +153,34 @@ func (connection *Connection) UnmarshalJSON(b []byte) error {
 }
 
 // GetConnection will get a Connection instance from the service.
-func GetConnection(c common.Client, uri string) (*Connection, error) {
-	return common.GetObject[Connection](c, uri)
+func GetConnection(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Connection, error) {
+	return common.GetObject[Connection](c, uri, queryOpts...)
 }
 
 // ListReferencedConnections gets the collection of Connection from
 // a provided reference.
-func ListReferencedConnections(c common.Client, link string) ([]*Connection, error) {
-	return common.GetCollectionObjects[Connection](c, link)
+func ListReferencedConnections(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Connection, error) {
+	return common.GetCollectionObjects[Connection](c, link, queryOpts...)
 }
 
 // InitiatorEndpointGroups get the initiator endpoint groups associated with this connection.
-func (connection *Connection) InitiatorEndpointGroups() ([]*EndpointGroup, error) {
-	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.initiatorEndpointGroups)
+func (connection *Connection) InitiatorEndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.initiatorEndpointGroups, queryOpts...)
 }
 
 // InitiatorEndpoints get the initiator endpoint associated with this connection.
-func (connection *Connection) InitiatorEndpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](connection.GetClient(), connection.initiatorEndpoints)
+func (connection *Connection) InitiatorEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](connection.GetClient(), connection.initiatorEndpoints, queryOpts...)
 }
 
 // TargetEndpointGroups get the target endpoint groups associated with this connection.
-func (connection *Connection) TargetEndpointGroups() ([]*EndpointGroup, error) {
-	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.targetEndpointGroups)
+func (connection *Connection) TargetEndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.targetEndpointGroups, queryOpts...)
 }
 
 // TargetEndpoints get the target endpoint associated with this connection.
-func (connection *Connection) TargetEndpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](connection.GetClient(), connection.targetEndpoints)
+func (connection *Connection) TargetEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](connection.GetClient(), connection.targetEndpoints, queryOpts...)
 }
 
 // ConnectionKey shall contain the permission key information required to access the target resources for a

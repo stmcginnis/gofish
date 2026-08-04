@@ -100,22 +100,22 @@ func (accelerationfunction *AccelerationFunction) UnmarshalJSON(b []byte) error 
 }
 
 // GetAccelerationFunction will get a AccelerationFunction instance from the service.
-func GetAccelerationFunction(c common.Client, uri string) (*AccelerationFunction, error) {
-	return common.GetObject[AccelerationFunction](c, uri)
+func GetAccelerationFunction(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AccelerationFunction, error) {
+	return common.GetObject[AccelerationFunction](c, uri, queryOpts...)
 }
 
 // ListReferencedAccelerationFunctions gets the collection of AccelerationFunction from
 // a provided reference.
-func ListReferencedAccelerationFunctions(c common.Client, link string) ([]*AccelerationFunction, error) {
-	return common.GetCollectionObjects[AccelerationFunction](c, link)
+func ListReferencedAccelerationFunctions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AccelerationFunction, error) {
+	return common.GetCollectionObjects[AccelerationFunction](c, link, queryOpts...)
 }
 
 // Endpoints gets the endpoints connected to this accelerator.
-func (accelerationfunction *AccelerationFunction) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](accelerationfunction.GetClient(), accelerationfunction.endpoints)
+func (accelerationfunction *AccelerationFunction) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](accelerationfunction.GetClient(), accelerationfunction.endpoints, queryOpts...)
 }
 
 // PCIeFunctions gets the PCIe functions associated with this accelerator.
-func (accelerationfunction *AccelerationFunction) PCIeFunctions() ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](accelerationfunction.GetClient(), accelerationfunction.pcieFunctions)
+func (accelerationfunction *AccelerationFunction) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjects[PCIeFunction](accelerationfunction.GetClient(), accelerationfunction.pcieFunctions, queryOpts...)
 }

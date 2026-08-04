@@ -158,14 +158,14 @@ func (compositionservice *CompositionService) Update() error {
 }
 
 // GetCompositionService will get a CompositionService instance from the service.
-func GetCompositionService(c common.Client, uri string) (*CompositionService, error) {
-	return common.GetObject[CompositionService](c, uri)
+func GetCompositionService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CompositionService, error) {
+	return common.GetObject[CompositionService](c, uri, queryOpts...)
 }
 
 // ListReferencedCompositionServices gets the collection of CompositionService from
 // a provided reference.
-func ListReferencedCompositionServices(c common.Client, link string) ([]*CompositionService, error) {
-	return common.GetCollectionObjects[CompositionService](c, link)
+func ListReferencedCompositionServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CompositionService, error) {
+	return common.GetCollectionObjects[CompositionService](c, link, queryOpts...)
 }
 
 // Compose performs a set of operations specified by a manifest.
@@ -186,29 +186,29 @@ func (compositionservice *CompositionService) Compose(request *ComposeRequest) (
 }
 
 // ActivePool gets a resource collection whose members represent the resource blocks in the active pool.
-func (compositionservice *CompositionService) ActivePool() ([]*ResourceBlock, error) {
+func (compositionservice *CompositionService) ActivePool(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
 	if compositionservice.activePool == "" {
 		return nil, nil
 	}
 
-	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.activePool)
+	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.activePool, queryOpts...)
 }
 
 // CompositionReservations gets a resource collection whose members represent the reserved resource blocks and the
 // related document that caused the reservations.
-func (compositionservice *CompositionService) CompositionReservations() ([]*ResourceBlock, error) {
+func (compositionservice *CompositionService) CompositionReservations(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
 	if compositionservice.compositionReservations == "" {
 		return nil, nil
 	}
 
-	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.compositionReservations)
+	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.compositionReservations, queryOpts...)
 }
 
 // FreePool gets a resource collection whose members represent the reserved resource blocks in the free pool.
-func (compositionservice *CompositionService) FreePool() ([]*ResourceBlock, error) {
+func (compositionservice *CompositionService) FreePool(queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
 	if compositionservice.freePool == "" {
 		return nil, nil
 	}
 
-	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.freePool)
+	return ListReferencedResourceBlocks(compositionservice.GetClient(), compositionservice.freePool, queryOpts...)
 }

@@ -76,24 +76,24 @@ func (addresspool *AddressPool) UnmarshalJSON(b []byte) error {
 }
 
 // GetAddressPool will get a AddressPool instance from the service.
-func GetAddressPool(c common.Client, uri string) (*AddressPool, error) {
-	return common.GetObject[AddressPool](c, uri)
+func GetAddressPool(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AddressPool, error) {
+	return common.GetObject[AddressPool](c, uri, queryOpts...)
 }
 
 // ListReferencedAddressPools gets the collection of AddressPool from
 // a provided reference.
-func ListReferencedAddressPools(c common.Client, link string) ([]*AddressPool, error) {
-	return common.GetCollectionObjects[AddressPool](c, link)
+func ListReferencedAddressPools(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AddressPool, error) {
+	return common.GetCollectionObjects[AddressPool](c, link, queryOpts...)
 }
 
 // Endpoints gets the endpoints connected to this address pool.
-func (addresspool *AddressPool) Endpoints() ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](addresspool.GetClient(), addresspool.endpoints)
+func (addresspool *AddressPool) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjects[Endpoint](addresspool.GetClient(), addresspool.endpoints, queryOpts...)
 }
 
 // Zones gets the zones associated with this address pool.
-func (addresspool *AddressPool) Zones() ([]*Zone, error) {
-	return common.GetObjects[Zone](addresspool.GetClient(), addresspool.zones)
+func (addresspool *AddressPool) Zones(queryOpts ...common.QueryGroupOption) ([]*Zone, error) {
+	return common.GetObjects[Zone](addresspool.GetClient(), addresspool.zones, queryOpts...)
 }
 
 // BFDSingleHopOnly shall contain the BFD-related properties for an Ethernet fabric that uses Bidirectional

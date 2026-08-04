@@ -60,8 +60,8 @@ type ActionInfoParameter struct {
 	Required bool
 }
 
-func GetActionInfo(c common.Client, uri string) (*ActionInfo, error) {
-	return common.GetObject[ActionInfo](c, uri)
+func GetActionInfo(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
+	return common.GetObject[ActionInfo](c, uri, queryOpts...)
 }
 
 func (actionInfo *ActionInfo) GetParamValues(name string, dataType ActionInfoDataTypes) ([]string, error) {

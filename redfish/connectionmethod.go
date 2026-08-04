@@ -89,17 +89,17 @@ func (connectionmethod *ConnectionMethod) UnmarshalJSON(b []byte) error {
 }
 
 // GetConnectionMethod will get a ConnectionMethod instance from the service.
-func GetConnectionMethod(c common.Client, uri string) (*ConnectionMethod, error) {
-	return common.GetObject[ConnectionMethod](c, uri)
+func GetConnectionMethod(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ConnectionMethod, error) {
+	return common.GetObject[ConnectionMethod](c, uri, queryOpts...)
 }
 
 // ListReferencedConnectionMethods gets the collection of ConnectionMethod from
 // a provided reference.
-func ListReferencedConnectionMethods(c common.Client, link string) ([]*ConnectionMethod, error) {
-	return common.GetCollectionObjects[ConnectionMethod](c, link)
+func ListReferencedConnectionMethods(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ConnectionMethod, error) {
+	return common.GetCollectionObjects[ConnectionMethod](c, link, queryOpts...)
 }
 
 // AggregationSources gets the access points using this connection method.
-func (connectionmethod *ConnectionMethod) AggregationSources() ([]*AggregationSource, error) {
-	return common.GetObjects[AggregationSource](connectionmethod.GetClient(), connectionmethod.aggregationSources)
+func (connectionmethod *ConnectionMethod) AggregationSources(queryOpts ...common.QueryGroupOption) ([]*AggregationSource, error) {
+	return common.GetObjects[AggregationSource](connectionmethod.GetClient(), connectionmethod.aggregationSources, queryOpts...)
 }

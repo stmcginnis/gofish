@@ -161,21 +161,21 @@ func (manageraccount *ManagerAccount) UnmarshalJSON(b []byte) error {
 }
 
 // Role gets the role of this ManagerAccount.
-func (manageraccount *ManagerAccount) Role() (*Role, error) {
+func (manageraccount *ManagerAccount) Role(queryOpts ...common.QueryGroupOption) (*Role, error) {
 	if manageraccount.role == "" {
 		return nil, nil
 	}
-	return GetRole(manageraccount.GetClient(), manageraccount.role)
+	return GetRole(manageraccount.GetClient(), manageraccount.role, queryOpts...)
 }
 
 // Certificates gets the user identity certificates for this account.
-func (manageraccount *ManagerAccount) Certificates() ([]*Certificate, error) {
-	return common.GetObjects[Certificate](manageraccount.GetClient(), manageraccount.certificates)
+func (manageraccount *ManagerAccount) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjects[Certificate](manageraccount.GetClient(), manageraccount.certificates, queryOpts...)
 }
 
 // Keys gets the keys that can be used to authenticate this account.
-func (manageraccount *ManagerAccount) Keys() ([]*Key, error) {
-	return common.GetObjects[Key](manageraccount.GetClient(), manageraccount.keys)
+func (manageraccount *ManagerAccount) Keys(queryOpts ...common.QueryGroupOption) ([]*Key, error) {
+	return common.GetObjects[Key](manageraccount.GetClient(), manageraccount.keys, queryOpts...)
 }
 
 // ChangePassword changes the account password while requiring password for the current session.
@@ -222,14 +222,14 @@ func (manageraccount *ManagerAccount) Update() error {
 }
 
 // GetManagerAccount will get a ManagerAccount instance from the service.
-func GetManagerAccount(c common.Client, uri string) (*ManagerAccount, error) {
-	return common.GetObject[ManagerAccount](c, uri)
+func GetManagerAccount(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ManagerAccount, error) {
+	return common.GetObject[ManagerAccount](c, uri, queryOpts...)
 }
 
 // ListReferencedManagerAccounts gets the collection of ManagerAccount from
 // a provided reference.
-func ListReferencedManagerAccounts(c common.Client, link string) ([]*ManagerAccount, error) {
-	return common.GetCollectionObjects[ManagerAccount](c, link)
+func ListReferencedManagerAccounts(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ManagerAccount, error) {
+	return common.GetCollectionObjects[ManagerAccount](c, link, queryOpts...)
 }
 
 // SNMPUserInfo is shall contain the SNMP settings for an account.

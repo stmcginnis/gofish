@@ -72,6 +72,6 @@ func (r *RADIUS) Update() error {
 }
 
 // GetRADIUS will get a RADIUS instance from the service.
-func GetRADIUS(c common.Client, uri string) (*RADIUS, error) {
-	return common.GetObject[RADIUS](c, uri)
+func GetRADIUS(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RADIUS, error) {
+	return common.GetObject[RADIUS](c, uri, queryOpts...)
 }

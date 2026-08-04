@@ -26,6 +26,6 @@ type FixedBootOrder struct {
 }
 
 // GetFixedBootOrder will get a FixedBootOrder instance from the service.
-func GetFixedBootOrder(c common.Client, uri string) (*FixedBootOrder, error) {
-	return common.GetObject[FixedBootOrder](c, uri)
+func GetFixedBootOrder(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*FixedBootOrder, error) {
+	return common.GetObject[FixedBootOrder](c, uri, queryOpts...)
 }

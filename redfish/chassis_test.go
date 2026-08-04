@@ -385,6 +385,116 @@ func TestChassisDrives(t *testing.T) {
 	}
 }
 
+// decodeChassis decodes the shared chassis fixture and attaches a client.
+func decodeChassis(t *testing.T, client common.Client) *Chassis {
+	t.Helper()
+	var chassis Chassis
+	if err := json.NewDecoder(strings.NewReader(chassisBody)).Decode(&chassis); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+	chassis.SetClient(client)
+	return &chassis
+}
+
+// expandDefaultOptions is the client-wide default that ClientConfig.AutoExpand
+// installs when the service advertises support for $expand.
+func expandDefaultOptions() []common.QueryGroupOption {
+	return []common.QueryGroupOption{
+		common.WithCollectionQueryOpts(
+			common.WithExpand(common.ExpandOptionPeriod),
+			common.WithExpandFallback(true)),
+	}
+}
+
+// driveClient returns a client that answers pairs of drive collection/member GETs.
+func driveClient(defaults []common.QueryGroupOption, walks int) *common.TestClient {
+	responses := make([]interface{}, 0, walks*2)
+	for i := 0; i < walks; i++ {
+		responses = append(responses, getCall(driveCollection), getCall(driveBody))
+	}
+	return &common.TestClient{
+		Settings:               common.ClientSettings{DefaultQueryOptions: defaults},
+		CustomReturnForActions: map[string][]interface{}{http.MethodGet: responses},
+	}
+}
+
+// TestChassisDrivesExpandClientDefault tests that a client-wide $expand default
+// is applied to a call that does not ask for anything.
+func TestChassisDrivesExpandClientDefault(t *testing.T) {
+	testClient := driveClient(expandDefaultOptions(), 1)
+
+	if _, err := decodeChassis(t, testClient).Drives(); err != nil {
+		t.Errorf("Error getting drives: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if !strings.Contains(calls[0].URL, "$expand=.") {
+		t.Errorf("Expected the collection GET to carry $expand, got: %s", calls[0].URL)
+	}
+}
+
+// TestChassisDrivesWithoutExpand tests that a single call can disable $expand
+// even when the client has it enabled by default.
+func TestChassisDrivesWithoutExpand(t *testing.T) {
+	testClient := driveClient(expandDefaultOptions(), 1)
+
+	drives, err := decodeChassis(t, testClient).Drives(common.WithoutExpand())
+	if err != nil {
+		t.Errorf("Error getting drives: %s", err)
+	}
+	if len(drives) != 1 {
+		t.Errorf("Expected 1 drive to be returned, got %d", len(drives))
+	}
+
+	for _, call := range testClient.CapturedCalls() {
+		if strings.Contains(call.URL, "$expand") {
+			t.Errorf("Expected no $expand on any request, got: %s", call.URL)
+		}
+	}
+}
+
+// TestChassisDrivesExpandOptIn tests that a single call can enable $expand when
+// the client has no default.
+func TestChassisDrivesExpandOptIn(t *testing.T) {
+	testClient := driveClient(nil, 1)
+
+	_, err := decodeChassis(t, testClient).Drives(
+		common.WithCollectionQueryOpts(common.WithExpand(common.ExpandOptionPeriod)))
+	if err != nil {
+		t.Errorf("Error getting drives: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if !strings.Contains(calls[0].URL, "$expand=.") {
+		t.Errorf("Expected the collection GET to carry $expand, got: %s", calls[0].URL)
+	}
+}
+
+// TestChassisDrivesExpandDoesNotLeak tests that options given to one call do not
+// affect the next call made through the same client.
+func TestChassisDrivesExpandDoesNotLeak(t *testing.T) {
+	testClient := driveClient(expandDefaultOptions(), 2)
+	chassis := decodeChassis(t, testClient)
+
+	if _, err := chassis.Drives(common.WithoutExpand()); err != nil {
+		t.Errorf("Error getting drives: %s", err)
+	}
+	firstWalk := len(testClient.CapturedCalls())
+
+	if _, err := chassis.Drives(); err != nil {
+		t.Errorf("Error getting drives: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if strings.Contains(calls[0].URL, "$expand") {
+		t.Errorf("First call should not have been expanded: %s", calls[0].URL)
+	}
+	if !strings.Contains(calls[firstWalk].URL, "$expand=.") {
+		t.Errorf("Second call should have fallen back to the client default: %s",
+			calls[firstWalk].URL)
+	}
+}
+
 // TestChassisLinkedDrives tests getting the drives returned through the links for a chassis.
 func TestChassisLinkedDrives(t *testing.T) {
 	var result Chassis

@@ -207,13 +207,13 @@ func (power *Power) RedundancySet(memberID int) []PowerSupply {
 }
 
 // GetPower retrieves a Power instance from the service.
-func GetPower(c common.Client, uri string) (*Power, error) {
-	return common.GetObject[Power](c, uri)
+func GetPower(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Power, error) {
+	return common.GetObject[Power](c, uri, queryOpts...)
 }
 
 // ListReferencedPowers retrieves a collection of Power from a reference.
-func ListReferencedPowers(c common.Client, link string) ([]*Power, error) {
-	return common.GetCollectionObjects[Power](c, link)
+func ListReferencedPowers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Power, error) {
+	return common.GetCollectionObjects[Power](c, link, queryOpts...)
 }
 
 // PowerControl represents power control functions for a chassis or system.
@@ -447,24 +447,24 @@ func (powersupply *PowerSupply) UnmarshalJSON(b []byte) error {
 }
 
 // Assembly gets the containing assembly.
-func (powersupply *PowerSupply) Assembly() (*Assembly, error) {
+func (powersupply *PowerSupply) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if powersupply.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(powersupply.GetClient(), powersupply.assembly)
+	return GetAssembly(powersupply.GetClient(), powersupply.assembly, queryOpts...)
 }
 
 // Metrics gets the metrics associated with this power supply.
-func (powersupply *PowerSupply) Metrics() (*PowerSupplyUnitMetrics, error) {
+func (powersupply *PowerSupply) Metrics(queryOpts ...common.QueryGroupOption) (*PowerSupplyUnitMetrics, error) {
 	if powersupply.metrics == "" {
 		return nil, nil
 	}
-	return GetPowerSupplyUnitMetrics(powersupply.GetClient(), powersupply.metrics)
+	return GetPowerSupplyUnitMetrics(powersupply.GetClient(), powersupply.metrics, queryOpts...)
 }
 
 // Redundancy gets the endpoints at the other end of the link.
-func (powersupply *PowerSupply) Redundancy() ([]*Redundancy, error) {
-	return common.GetObjects[Redundancy](powersupply.GetClient(), powersupply.redundancyLinks)
+func (powersupply *PowerSupply) Redundancy(queryOpts ...common.QueryGroupOption) ([]*Redundancy, error) {
+	return common.GetObjects[Redundancy](powersupply.GetClient(), powersupply.redundancyLinks, queryOpts...)
 }
 
 // GetPowerSupply retrieves a PowerSupply instance from the service.
@@ -474,8 +474,8 @@ func GetPowerSupply(c common.Client, uri string) (*PowerSupply, error) {
 }
 
 // ListReferencedPowerSupplies retrieves a collection of PowerSupplies from a reference.
-func ListReferencedPowerSupplies(c common.Client, link string) ([]*PowerSupply, error) {
-	return common.GetCollectionObjects[PowerSupply](c, link)
+func ListReferencedPowerSupplies(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
+	return common.GetCollectionObjects[PowerSupply](c, link, queryOpts...)
 }
 
 // Reset is an action that resets a power supply. A GracefulRestart ResetType

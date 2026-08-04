@@ -62,14 +62,14 @@ func (vcatentry *VCATEntry) Update() error {
 }
 
 // GetVCATEntry will get a VCATEntry instance from the service.
-func GetVCATEntry(c common.Client, uri string) (*VCATEntry, error) {
-	return common.GetObject[VCATEntry](c, uri)
+func GetVCATEntry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VCATEntry, error) {
+	return common.GetObject[VCATEntry](c, uri, queryOpts...)
 }
 
 // ListReferencedVCATEntries gets the collection of VCATEntry from
 // a provided reference.
-func ListReferencedVCATEntries(c common.Client, link string) ([]*VCATEntry, error) {
-	return common.GetCollectionObjects[VCATEntry](c, link)
+func ListReferencedVCATEntries(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VCATEntry, error) {
+	return common.GetCollectionObjects[VCATEntry](c, link, queryOpts...)
 }
 
 // VCATableEntry shall contain a Virtual Channel entry definition that describes a specific Virtual Channel.

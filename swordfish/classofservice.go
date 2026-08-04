@@ -86,42 +86,42 @@ func (classofservice *ClassOfService) UnmarshalJSON(b []byte) error {
 }
 
 // GetClassOfService will get a ClassOfService instance from the service.
-func GetClassOfService(c common.Client, uri string) (*ClassOfService, error) {
-	return common.GetObject[ClassOfService](c, uri)
+func GetClassOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return common.GetObject[ClassOfService](c, uri, queryOpts...)
 }
 
 // ListReferencedClassOfServices gets the collection of ClassOfService from
 // a provided reference.
-func ListReferencedClassOfServices(c common.Client, link string) ([]*ClassOfService, error) {
-	return common.GetCollectionObjects[ClassOfService](c, link)
+func ListReferencedClassOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
+	return common.GetCollectionObjects[ClassOfService](c, link, queryOpts...)
 }
 
 // DataProtectionLinesOfServices gets the DataProtectionLinesOfService that are
 // part of this ClassOfService.
-func (classofservice *ClassOfService) DataProtectionLinesOfServices() ([]*DataProtectionLineOfService, error) {
-	return common.GetObjects[DataProtectionLineOfService](classofservice.GetClient(), classofservice.dataProtectionLinesOfService)
+func (classofservice *ClassOfService) DataProtectionLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*DataProtectionLineOfService, error) {
+	return common.GetObjects[DataProtectionLineOfService](classofservice.GetClient(), classofservice.dataProtectionLinesOfService, queryOpts...)
 }
 
 // DataSecurityLinesOfServices gets the DataSecurityLinesOfService that are
 // part of this ClassOfService.
-func (classofservice *ClassOfService) DataSecurityLinesOfServices() ([]*DataSecurityLineOfService, error) {
-	return common.GetObjects[DataSecurityLineOfService](classofservice.GetClient(), classofservice.dataSecurityLinesOfService)
+func (classofservice *ClassOfService) DataSecurityLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*DataSecurityLineOfService, error) {
+	return common.GetObjects[DataSecurityLineOfService](classofservice.GetClient(), classofservice.dataSecurityLinesOfService, queryOpts...)
 }
 
 // DataStorageLinesOfServices gets the DataStorageLinesOfService that are
 // part of this ClassOfService.
-func (classofservice *ClassOfService) DataStorageLinesOfServices() ([]*DataStorageLineOfService, error) {
-	return common.GetObjects[DataStorageLineOfService](classofservice.GetClient(), classofservice.dataStorageLinesOfService)
+func (classofservice *ClassOfService) DataStorageLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*DataStorageLineOfService, error) {
+	return common.GetObjects[DataStorageLineOfService](classofservice.GetClient(), classofservice.dataStorageLinesOfService, queryOpts...)
 }
 
 // IOConnectivityLinesOfServices gets the IOConnectivityLinesOfService that are
 // part of this ClassOfService.
-func (classofservice *ClassOfService) IOConnectivityLinesOfServices() ([]*IOConnectivityLineOfService, error) {
-	return common.GetObjects[IOConnectivityLineOfService](classofservice.GetClient(), classofservice.ioConnectivityLinesOfService)
+func (classofservice *ClassOfService) IOConnectivityLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLineOfService, error) {
+	return common.GetObjects[IOConnectivityLineOfService](classofservice.GetClient(), classofservice.ioConnectivityLinesOfService, queryOpts...)
 }
 
 // IOPerformanceLinesOfServices gets the IOPerformanceLinesOfService that are
 // part of this ClassOfService.
-func (classofservice *ClassOfService) IOPerformanceLinesOfServices() ([]*IOPerformanceLineOfService, error) {
-	return common.GetObjects[IOPerformanceLineOfService](classofservice.GetClient(), classofservice.ioPerformanceLinesOfService)
+func (classofservice *ClassOfService) IOPerformanceLinesOfServices(queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLineOfService, error) {
+	return common.GetObjects[IOPerformanceLineOfService](classofservice.GetClient(), classofservice.ioPerformanceLinesOfService, queryOpts...)
 }

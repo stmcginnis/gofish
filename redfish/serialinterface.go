@@ -203,12 +203,12 @@ func (serialInterface *SerialInterface) Update() error {
 }
 
 // GetSerialInterface will get a SerialInterface instance from the service.
-func GetSerialInterface(c common.Client, uri string) (*SerialInterface, error) {
-	return common.GetObject[SerialInterface](c, uri)
+func GetSerialInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SerialInterface, error) {
+	return common.GetObject[SerialInterface](c, uri, queryOpts...)
 }
 
 // ListReferencedSerialInterfaces gets the collection of SerialInterface from
 // a provided reference.
-func ListReferencedSerialInterfaces(c common.Client, link string) ([]*SerialInterface, error) {
-	return common.GetCollectionObjects[SerialInterface](c, link)
+func ListReferencedSerialInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SerialInterface, error) {
+	return common.GetCollectionObjects[SerialInterface](c, link, queryOpts...)
 }

@@ -260,26 +260,26 @@ func (outlet *Outlet) ResetMetrics() error {
 }
 
 // BranchCircuit gets the branch circuit associated with this outlet.
-func (outlet *Outlet) BranchCircuit() (*Circuit, error) {
+func (outlet *Outlet) BranchCircuit(queryOpts ...common.QueryGroupOption) (*Circuit, error) {
 	if outlet.branchCircuit == "" {
 		return nil, nil
 	}
-	return GetCircuit(outlet.GetClient(), outlet.branchCircuit)
+	return GetCircuit(outlet.GetClient(), outlet.branchCircuit, queryOpts...)
 }
 
 // Chassis gets the chassis connected to this outlet.
-func (outlet *Outlet) Chassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](outlet.GetClient(), outlet.chassis)
+func (outlet *Outlet) Chassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](outlet.GetClient(), outlet.chassis, queryOpts...)
 }
 
 // DistributionCircuits gets the circuits powered by this outlet.
-func (outlet *Outlet) DistributionCircuits() ([]*Circuit, error) {
-	return common.GetObjects[Circuit](outlet.GetClient(), outlet.distributionCircuits)
+func (outlet *Outlet) DistributionCircuits(queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return common.GetObjects[Circuit](outlet.GetClient(), outlet.distributionCircuits, queryOpts...)
 }
 
 // PowerSupplies gets the power supplies connected to this outlet.
-func (outlet *Outlet) PowerSupplies() ([]*PowerSupply, error) {
-	return common.GetObjects[PowerSupply](outlet.GetClient(), outlet.powerSupplies)
+func (outlet *Outlet) PowerSupplies(queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
+	return common.GetObjects[PowerSupply](outlet.GetClient(), outlet.powerSupplies, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -301,14 +301,14 @@ func (outlet *Outlet) Update() error {
 }
 
 // GetOutlet will get a Outlet instance from the service.
-func GetOutlet(c common.Client, uri string) (*Outlet, error) {
-	return common.GetObject[Outlet](c, uri)
+func GetOutlet(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Outlet, error) {
+	return common.GetObject[Outlet](c, uri, queryOpts...)
 }
 
 // ListReferencedOutlets gets the collection of Outlet from
 // a provided reference.
-func ListReferencedOutlets(c common.Client, link string) ([]*Outlet, error) {
-	return common.GetCollectionObjects[Outlet](c, link)
+func ListReferencedOutlets(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
+	return common.GetCollectionObjects[Outlet](c, link, queryOpts...)
 }
 
 // VoltageSensors shall contain properties that describe voltage sensor readings for an outlet.

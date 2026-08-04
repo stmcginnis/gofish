@@ -76,8 +76,8 @@ func (taskService *TaskService) UnmarshalJSON(b []byte) error {
 }
 
 // Tasks gets the collection of tasks of this task service
-func (taskService *TaskService) Tasks() ([]*Task, error) {
-	return ListReferencedTasks(taskService.GetClient(), taskService.tasks)
+func (taskService *TaskService) Tasks(queryOpts ...common.QueryGroupOption) ([]*Task, error) {
+	return ListReferencedTasks(taskService.GetClient(), taskService.tasks, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -89,6 +89,6 @@ func (taskService *TaskService) Update() error {
 }
 
 // GetTaskService will get a TaskService instance from the service.
-func GetTaskService(c common.Client, uri string) (*TaskService, error) {
-	return common.GetObject[TaskService](c, uri)
+func GetTaskService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*TaskService, error) {
+	return common.GetObject[TaskService](c, uri, queryOpts...)
 }

@@ -206,8 +206,8 @@ func (triggers *Triggers) UnmarshalJSON(b []byte) error {
 
 // MetricReportDefinitions gets the metric report definitions that generate new metric
 // reports when a trigger condition is met and when the TriggerActions property contains 'RedfishMetricReport'.
-func (triggers *Triggers) MetricReportDefinitions() ([]*MetricReportDefinition, error) {
-	return common.GetObjects[MetricReportDefinition](triggers.GetClient(), triggers.metricReportDefinitions)
+func (triggers *Triggers) MetricReportDefinitions(queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
+	return common.GetObjects[MetricReportDefinition](triggers.GetClient(), triggers.metricReportDefinitions, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -222,12 +222,12 @@ func (triggers *Triggers) Update() error {
 }
 
 // GetTriggers will get a Triggers instance from the service.
-func GetTriggers(c common.Client, uri string) (*Triggers, error) {
-	return common.GetObject[Triggers](c, uri)
+func GetTriggers(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Triggers, error) {
+	return common.GetObject[Triggers](c, uri, queryOpts...)
 }
 
 // ListReferencedTriggerss gets the collection of Triggers from
 // a provided reference.
-func ListReferencedTriggerss(c common.Client, link string) ([]*Triggers, error) {
-	return common.GetCollectionObjects[Triggers](c, link)
+func ListReferencedTriggerss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
+	return common.GetCollectionObjects[Triggers](c, link, queryOpts...)
 }

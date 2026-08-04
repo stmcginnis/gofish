@@ -226,14 +226,14 @@ func (endpoint *Endpoint) UnmarshalJSON(b []byte) error {
 }
 
 // GetEndpoint will get a Endpoint instance from the service.
-func GetEndpoint(c common.Client, uri string) (*Endpoint, error) {
-	return common.GetObject[Endpoint](c, uri)
+func GetEndpoint(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Endpoint, error) {
+	return common.GetObject[Endpoint](c, uri, queryOpts...)
 }
 
 // ListReferencedEndpoints gets the collection of Endpoint from
 // a provided reference.
-func ListReferencedEndpoints(c common.Client, link string) ([]*Endpoint, error) {
-	return common.GetCollectionObjects[Endpoint](c, link)
+func ListReferencedEndpoints(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetCollectionObjects[Endpoint](c, link, queryOpts...)
 }
 
 // GCID shall contain the Gen-Z Core Specification-defined Global

@@ -128,8 +128,8 @@ func (nvmedomain *NVMeDomain) UnmarshalJSON(b []byte) error {
 }
 
 // AssociatedDomains gets the NVMeDomains associated with this domain.
-func (nvmedomain *NVMeDomain) AssociatedDomains() ([]*NVMeDomain, error) {
-	return common.GetObjects[NVMeDomain](nvmedomain.GetClient(), nvmedomain.associatedDomains)
+func (nvmedomain *NVMeDomain) AssociatedDomains(queryOpts ...common.QueryGroupOption) ([]*NVMeDomain, error) {
+	return common.GetObjects[NVMeDomain](nvmedomain.GetClient(), nvmedomain.associatedDomains, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -150,12 +150,12 @@ func (nvmedomain *NVMeDomain) Update() error {
 }
 
 // GetNVMeDomain will get a NVMeDomain instance from the service.
-func GetNVMeDomain(c common.Client, uri string) (*NVMeDomain, error) {
-	return common.GetObject[NVMeDomain](c, uri)
+func GetNVMeDomain(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NVMeDomain, error) {
+	return common.GetObject[NVMeDomain](c, uri, queryOpts...)
 }
 
 // ListReferencedNVMeDomains gets the collection of NVMeDomain from
 // a provided reference.
-func ListReferencedNVMeDomains(c common.Client, link string) ([]*NVMeDomain, error) {
-	return common.GetCollectionObjects[NVMeDomain](c, link)
+func ListReferencedNVMeDomains(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NVMeDomain, error) {
+	return common.GetCollectionObjects[NVMeDomain](c, link, queryOpts...)
 }

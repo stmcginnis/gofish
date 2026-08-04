@@ -407,13 +407,13 @@ func (manager *Manager) Update() error {
 }
 
 // GetManager will get a Manager instance from the Swordfish service.
-func GetManager(c common.Client, uri string) (*Manager, error) {
-	return common.GetObject[Manager](c, uri)
+func GetManager(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Manager, error) {
+	return common.GetObject[Manager](c, uri, queryOpts...)
 }
 
 // ListReferencedManagers gets the collection of Managers
-func ListReferencedManagers(c common.Client, link string) ([]*Manager, error) {
-	return common.GetCollectionObjects[Manager](c, link)
+func ListReferencedManagers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetCollectionObjects[Manager](c, link, queryOpts...)
 }
 
 // ForceFailover forces a failover to the specified manager.
@@ -471,12 +471,12 @@ func (manager *Manager) GetSupportedResetTypes() ([]ResetType, error) {
 }
 
 // ResetActionInfo returns the ActionInfo for the Manager reset action if supported
-func (manager *Manager) ResetActionInfo() (*ActionInfo, error) {
+func (manager *Manager) ResetActionInfo(queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
 	if manager.Actions.Reset.ActionInfoTarget == "" {
 		return nil, ErrActionNotSupported
 	}
 
-	return common.GetObject[ActionInfo](manager.GetClient(), manager.Actions.Reset.ActionInfoTarget)
+	return common.GetObject[ActionInfo](manager.GetClient(), manager.Actions.Reset.ActionInfoTarget, queryOpts...)
 }
 
 // Reset shall perform a reset of the manager.
@@ -546,12 +546,12 @@ func (manager *Manager) GetSupportedResetToDefaultsTypes() ([]ResetToDefaultsTyp
 }
 
 // ResetToDefaultsActionInfo returns the ActionInfo for the Manager ResetToDefaults action if supported
-func (manager *Manager) ResetToDefaultsActionInfo() (*ActionInfo, error) {
+func (manager *Manager) ResetToDefaultsActionInfo(queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
 	if manager.Actions.ResetToDefaults.ActionInfoTarget == "" {
 		return nil, ErrActionNotSupported
 	}
 
-	return common.GetObject[ActionInfo](manager.GetClient(), manager.Actions.ResetToDefaults.ActionInfoTarget)
+	return common.GetObject[ActionInfo](manager.GetClient(), manager.Actions.ResetToDefaults.ActionInfoTarget, queryOpts...)
 }
 
 // ResetToDefaults resets the manager settings to factory defaults. This can cause the manager to reset.
@@ -567,137 +567,137 @@ func (manager *Manager) ResetToDefaults(resetType ResetToDefaultsType) error {
 }
 
 // DedicatedNetworkPorts gets the dedicated network ports of the manager.
-func (manager *Manager) DedicatedNetworkPorts() ([]*Port, error) {
+func (manager *Manager) DedicatedNetworkPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
 	if manager.DedicatedNetworkPortsLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedPorts(manager.GetClient(), manager.DedicatedNetworkPortsLink.String())
+	return ListReferencedPorts(manager.GetClient(), manager.DedicatedNetworkPortsLink.String(), queryOpts...)
 }
 
 // EthernetInterfaces get this manager's ethernet interfaces.
-func (manager *Manager) EthernetInterfaces() ([]*EthernetInterface, error) {
+func (manager *Manager) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
 	if manager.EthernetInterfacesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedEthernetInterfaces(manager.GetClient(), manager.EthernetInterfacesLink.String())
+	return ListReferencedEthernetInterfaces(manager.GetClient(), manager.EthernetInterfacesLink.String(), queryOpts...)
 }
 
 // HostInterfaces get this manager's host interfaces.
-func (manager *Manager) HostInterfaces() ([]*HostInterface, error) {
+func (manager *Manager) HostInterfaces(queryOpts ...common.QueryGroupOption) ([]*HostInterface, error) {
 	if manager.HostInterfacesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedHostInterfaces(manager.GetClient(), manager.HostInterfacesLink.String())
+	return ListReferencedHostInterfaces(manager.GetClient(), manager.HostInterfacesLink.String(), queryOpts...)
 }
 
 // LogServices get this manager's log services on this system.
-func (manager *Manager) LogServices() ([]*LogService, error) {
+func (manager *Manager) LogServices(queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
 	if manager.LogServicesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedLogServices(manager.GetClient(), manager.LogServicesLink.String())
+	return ListReferencedLogServices(manager.GetClient(), manager.LogServicesLink.String(), queryOpts...)
 }
 
 // ManagerDiagnosticData gets the diagnostic data for this manager.
-func (manager *Manager) ManagerDiagnosticData() (*ManagerDiagnosticData, error) {
+func (manager *Manager) ManagerDiagnosticData(queryOpts ...common.QueryGroupOption) (*ManagerDiagnosticData, error) {
 	if manager.ManagerDiagnosticDataLink.IsZero() {
 		return nil, nil
 	}
-	return GetManagerDiagnosticData(manager.GetClient(), manager.ManagerDiagnosticDataLink.String())
+	return GetManagerDiagnosticData(manager.GetClient(), manager.ManagerDiagnosticDataLink.String(), queryOpts...)
 }
 
 // NetworkProtocol get this manager's network protocol settings.
-func (manager *Manager) NetworkProtocol() (*NetworkProtocolSettings, error) {
+func (manager *Manager) NetworkProtocol(queryOpts ...common.QueryGroupOption) (*NetworkProtocolSettings, error) {
 	if manager.NetworkProtocolLink.IsZero() {
 		return nil, nil
 	}
-	return GetNetworkProtocol(manager.GetClient(), manager.NetworkProtocolLink.String())
+	return GetNetworkProtocol(manager.GetClient(), manager.NetworkProtocolLink.String(), queryOpts...)
 }
 
 // RemoteAccountService gets the account service resource for the remote manager that this resource represents.
 // This property shall only be present when providing aggregation of a remote manager.
-func (manager *Manager) RemoteAccountService() (*AccountService, error) {
+func (manager *Manager) RemoteAccountService(queryOpts ...common.QueryGroupOption) (*AccountService, error) {
 	if manager.RemoteAccountServiceLink.IsZero() {
 		return nil, nil
 	}
-	return GetAccountService(manager.GetClient(), manager.RemoteAccountServiceLink.String())
+	return GetAccountService(manager.GetClient(), manager.RemoteAccountServiceLink.String(), queryOpts...)
 }
 
 // SharedNetworkPorts gets the shared network ports of the manager.
-func (manager *Manager) SharedNetworkPorts() ([]*Port, error) {
+func (manager *Manager) SharedNetworkPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
 	if manager.SharedNetworkPortsLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedPorts(manager.GetClient(), manager.SharedNetworkPortsLink.String())
+	return ListReferencedPorts(manager.GetClient(), manager.SharedNetworkPortsLink.String(), queryOpts...)
 }
 
 // SerialInterfaces get this manager's serial interfaces.
-func (manager *Manager) SerialInterfaces() ([]*SerialInterface, error) {
+func (manager *Manager) SerialInterfaces(queryOpts ...common.QueryGroupOption) ([]*SerialInterface, error) {
 	if manager.SerialInterfacesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedSerialInterfaces(manager.GetClient(), manager.SerialInterfacesLink.String())
+	return ListReferencedSerialInterfaces(manager.GetClient(), manager.SerialInterfacesLink.String(), queryOpts...)
 }
 
 // USBPorts get the USB ports of the manager.
-func (manager *Manager) USBPorts() ([]*Port, error) {
+func (manager *Manager) USBPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
 	if manager.USBPortsLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedPorts(manager.GetClient(), manager.USBPortsLink.String())
+	return ListReferencedPorts(manager.GetClient(), manager.USBPortsLink.String(), queryOpts...)
 }
 
 // VirtualMedia gets the virtual media associated with this manager.
 // This property has been deprecated in favor of the VirtualMedia property in the ComputerSystem resource.
-func (manager *Manager) VirtualMedia() ([]*VirtualMedia, error) {
+func (manager *Manager) VirtualMedia(queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
 	if manager.VirtualMediaLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedVirtualMedias(manager.GetClient(), manager.VirtualMediaLink.String())
+	return ListReferencedVirtualMedias(manager.GetClient(), manager.VirtualMediaLink.String(), queryOpts...)
 }
 
 // ActiveSoftwareImage gets the software inventory resource that represents the active firmware image for this manager.
-func (manager *Manager) ActiveSoftwareImage() (*SoftwareInventory, error) {
+func (manager *Manager) ActiveSoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if manager.Links.ActiveSoftwareImage.IsZero() {
 		return nil, nil
 	}
-	return GetSoftwareInventory(manager.GetClient(), manager.Links.ActiveSoftwareImage.String())
+	return GetSoftwareInventory(manager.GetClient(), manager.Links.ActiveSoftwareImage.String(), queryOpts...)
 }
 
 // ManagedBy gets the managers responsible for managing this manager.
-func (manager *Manager) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](manager.GetClient(), manager.Links.ManagedBy.ToStrings())
+func (manager *Manager) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](manager.GetClient(), manager.Links.ManagedBy.ToStrings(), queryOpts...)
 }
 
 // ManagedForChassis gets the the chassis this manager controls.
-func (manager *Manager) ManagedForChassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](manager.GetClient(), manager.Links.ManagerForChassis.ToStrings())
+func (manager *Manager) ManagedForChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](manager.GetClient(), manager.Links.ManagerForChassis.ToStrings(), queryOpts...)
 }
 
 // ManagerForManagers gets the managers that are managed by this manager.
-func (manager *Manager) ManagerForManagers() ([]*Manager, error) {
-	return common.GetObjects[Manager](manager.GetClient(), manager.Links.ManagerForManagers.ToStrings())
+func (manager *Manager) ManagerForManagers(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](manager.GetClient(), manager.Links.ManagerForManagers.ToStrings(), queryOpts...)
 }
 
 // ManagerForServers gets the systems that this manager controls.
-func (manager *Manager) ManagerForServers() ([]*ComputerSystem, error) {
-	return common.GetObjects[ComputerSystem](manager.GetClient(), manager.Links.ManagerForServers.ToStrings())
+func (manager *Manager) ManagerForServers(queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetObjects[ComputerSystem](manager.GetClient(), manager.Links.ManagerForServers.ToStrings(), queryOpts...)
 }
 
 // ManagerForSwitches gets the switches that this manager controls.
-func (manager *Manager) ManagerForSwitches() ([]*Switch, error) {
-	return common.GetObjects[Switch](manager.GetClient(), manager.Links.ManagerForSwitches.ToStrings())
+func (manager *Manager) ManagerForSwitches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetObjects[Switch](manager.GetClient(), manager.Links.ManagerForSwitches.ToStrings(), queryOpts...)
 }
 
 // SelectedNetworkPort gets the current network port used by this manager.
-func (manager *Manager) SelectedNetworkPort() (*Port, error) {
+func (manager *Manager) SelectedNetworkPort(queryOpts ...common.QueryGroupOption) (*Port, error) {
 	if manager.Links.SelectedNetworkPort.IsZero() {
 		return nil, nil
 	}
-	return GetPort(manager.GetClient(), manager.Links.SelectedNetworkPort.String())
+	return GetPort(manager.GetClient(), manager.Links.SelectedNetworkPort.String(), queryOpts...)
 }
 
 // SoftwareImages gets the firmware images that apply to this manager.
-func (manager *Manager) SoftwareImages() ([]*SoftwareInventory, error) {
-	return common.GetObjects[SoftwareInventory](manager.GetClient(), manager.Links.SoftwareImages.ToStrings())
+func (manager *Manager) SoftwareImages(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return common.GetObjects[SoftwareInventory](manager.GetClient(), manager.Links.SoftwareImages.ToStrings(), queryOpts...)
 }

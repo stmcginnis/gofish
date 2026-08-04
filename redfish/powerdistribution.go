@@ -249,8 +249,8 @@ func (powerDistribution *PowerDistribution) UnmarshalJSON(b []byte) error {
 }
 
 // GetPowerDistribution will get a PowerDistribution instance from the Redfish service.
-func GetPowerDistribution(c common.Client, uri string) (*PowerDistribution, error) {
-	return common.GetObject[PowerDistribution](c, uri)
+func GetPowerDistribution(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerDistribution, error) {
+	return common.GetObject[PowerDistribution](c, uri, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
@@ -291,69 +291,69 @@ func (powerDistribution *PowerDistribution) TransferControl() error {
 
 // ListReferencedPowerDistribution gets the collection of PowerDistribution from
 // a provided reference.
-func ListReferencedPowerDistributionUnits(c common.Client, link string) ([]*PowerDistribution, error) {
-	return common.GetCollectionObjects[PowerDistribution](c, link)
+func ListReferencedPowerDistributionUnits(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetCollectionObjects[PowerDistribution](c, link, queryOpts...)
 }
 
 // Deprecated: (v1.3) in favor of the Sensors link in the Chassis resource.
-func (powerDistribution *PowerDistribution) Sensors() ([]*Sensor, error) {
-	return ListReferencedSensors(powerDistribution.GetClient(), powerDistribution.sensors)
+func (powerDistribution *PowerDistribution) Sensors(queryOpts ...common.QueryGroupOption) ([]*Sensor, error) {
+	return ListReferencedSensors(powerDistribution.GetClient(), powerDistribution.sensors, queryOpts...)
 }
 
 // Deprecated: (v1.3) in favor of the PowerSupplies link in the Chassis resource.
-func (powerDistribution *PowerDistribution) PowerSupplies() ([]*PowerSupplyUnit, error) {
-	return ListReferencedPowerSupplyUnits(powerDistribution.GetClient(), powerDistribution.powerSupplies)
+func (powerDistribution *PowerDistribution) PowerSupplies(queryOpts ...common.QueryGroupOption) ([]*PowerSupplyUnit, error) {
+	return ListReferencedPowerSupplyUnits(powerDistribution.GetClient(), powerDistribution.powerSupplies, queryOpts...)
 }
 
 // ManagedBy gets the collection of managers for this equipment.
-func (powerDistribution *PowerDistribution) ManagedBy() ([]*Manager, error) {
-	return common.GetObjects[Manager](powerDistribution.GetClient(), powerDistribution.managedBy)
+func (powerDistribution *PowerDistribution) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjects[Manager](powerDistribution.GetClient(), powerDistribution.managedBy, queryOpts...)
 }
 
 // Chassis gets the collection of chassis for this equipment.
-func (powerDistribution *PowerDistribution) Chassis() ([]*Chassis, error) {
-	return common.GetObjects[Chassis](powerDistribution.GetClient(), powerDistribution.chassis)
+func (powerDistribution *PowerDistribution) Chassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjects[Chassis](powerDistribution.GetClient(), powerDistribution.chassis, queryOpts...)
 }
 
 // Branches gets the collection that contains the branch circuits for this equipment.
-func (powerDistribution *PowerDistribution) Branches() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.branches)
+func (powerDistribution *PowerDistribution) Branches(queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.branches, queryOpts...)
 }
 
 // Feeders gets the collection that contains the feeder circuits for this equipment.
-func (powerDistribution *PowerDistribution) Feeders() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.feeders)
+func (powerDistribution *PowerDistribution) Feeders(queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.feeders, queryOpts...)
 }
 
 // Mains gets the collection that contains the power input circuits for this equipment.
-func (powerDistribution *PowerDistribution) Mains() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.mains)
+func (powerDistribution *PowerDistribution) Mains(queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.mains, queryOpts...)
 }
 
 // Subfeeds gets the collection that contains the subfeed circuits for this equipment.
-func (powerDistribution *PowerDistribution) Subfeeds() ([]*Circuit, error) {
-	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.subfeeds)
+func (powerDistribution *PowerDistribution) Subfeeds(queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return ListReferencedCircuits(powerDistribution.GetClient(), powerDistribution.subfeeds, queryOpts...)
 }
 
 // Facility gets a resource that represents the facility that contains this equipment.
-func (powerDistribution *PowerDistribution) Facility() (*Facility, error) {
-	return GetFacility(powerDistribution.GetClient(), powerDistribution.facility)
+func (powerDistribution *PowerDistribution) Facility(queryOpts ...common.QueryGroupOption) (*Facility, error) {
+	return GetFacility(powerDistribution.GetClient(), powerDistribution.facility, queryOpts...)
 }
 
 // Metrics gets the metrics of a power distribution component or unit.
-func (powerDistribution *PowerDistribution) Metrics() (metrics *PowerDistributionMetrics, err error) {
+func (powerDistribution *PowerDistribution) Metrics(queryOpts ...common.QueryGroupOption) (metrics *PowerDistributionMetrics, err error) {
 	if powerDistribution.metrics == "" {
 		return
 	}
-	return GetPowerDistributionMetrics(powerDistribution.GetClient(), powerDistribution.metrics)
+	return GetPowerDistributionMetrics(powerDistribution.GetClient(), powerDistribution.metrics, queryOpts...)
 }
 
 // OutletGroups gets the collection that contains the outlet groups for this equipment.
-func (powerDistribution *PowerDistribution) OutletGroups() ([]*OutletGroup, error) {
-	return ListReferencedOutletGroups(powerDistribution.GetClient(), powerDistribution.outletGroups)
+func (powerDistribution *PowerDistribution) OutletGroups(queryOpts ...common.QueryGroupOption) ([]*OutletGroup, error) {
+	return ListReferencedOutletGroups(powerDistribution.GetClient(), powerDistribution.outletGroups, queryOpts...)
 }
 
 // Outlets gets the collection that contains the outlets for this equipment.
-func (powerDistribution *PowerDistribution) Outlets() ([]*Outlet, error) {
-	return ListReferencedOutlets(powerDistribution.GetClient(), powerDistribution.outlets)
+func (powerDistribution *PowerDistribution) Outlets(queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
+	return ListReferencedOutlets(powerDistribution.GetClient(), powerDistribution.outlets, queryOpts...)
 }

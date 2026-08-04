@@ -76,16 +76,16 @@ func (jobservice *JobService) UnmarshalJSON(b []byte) error {
 }
 
 // GetJobService will get a JobService instance from the service.
-func GetJobService(c common.Client, uri string) (*JobService, error) {
-	return common.GetObject[JobService](c, uri)
+func GetJobService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*JobService, error) {
+	return common.GetObject[JobService](c, uri, queryOpts...)
 }
 
 // Jobs gets the collection of jobs of this job service
-func (jobservice *JobService) Jobs() ([]*Job, error) {
-	return ListReferencedJobs(jobservice.GetClient(), jobservice.jobs)
+func (jobservice *JobService) Jobs(queryOpts ...common.QueryGroupOption) ([]*Job, error) {
+	return ListReferencedJobs(jobservice.GetClient(), jobservice.jobs, queryOpts...)
 }
 
 // Log gets the LogService instance for this job service
-func (jobservice *JobService) Log() (*LogService, error) {
-	return GetLogService(jobservice.GetClient(), jobservice.log)
+func (jobservice *JobService) Log(queryOpts ...common.QueryGroupOption) (*LogService, error) {
+	return GetLogService(jobservice.GetClient(), jobservice.log, queryOpts...)
 }

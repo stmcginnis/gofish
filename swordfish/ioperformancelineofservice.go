@@ -95,12 +95,12 @@ func (ioperformancelineofservice *IOPerformanceLineOfService) Update() error {
 }
 
 // GetIOPerformanceLineOfService will get a IOPerformanceLineOfService instance from the service.
-func GetIOPerformanceLineOfService(c common.Client, uri string) (*IOPerformanceLineOfService, error) {
-	return common.GetObject[IOPerformanceLineOfService](c, uri)
+func GetIOPerformanceLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOPerformanceLineOfService, error) {
+	return common.GetObject[IOPerformanceLineOfService](c, uri, queryOpts...)
 }
 
 // ListReferencedIOPerformanceLineOfServices gets the collection of IOPerformanceLineOfService from
 // a provided reference.
-func ListReferencedIOPerformanceLineOfServices(c common.Client, link string) ([]*IOPerformanceLineOfService, error) {
-	return common.GetCollectionObjects[IOPerformanceLineOfService](c, link)
+func ListReferencedIOPerformanceLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLineOfService, error) {
+	return common.GetCollectionObjects[IOPerformanceLineOfService](c, link, queryOpts...)
 }
