@@ -100,6 +100,11 @@ linters:
       - legacy
       - std-error-handling
     rules:
+      # WithContext boilerplate pushes these near-duplicate upstream files
+      # over the dupl threshold; excluded here to avoid hand-editing them.
+      - path: oem/smc/(ikvm|memoryhealthcomp)\.go
+        linters:
+          - dupl
       - path: (.+)\.go$
         text: declaration of "(err|ctx)" shadows declaration at
       - path: (.+)\.go$
