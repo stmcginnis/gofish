@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -246,44 +247,79 @@ func (outlet *Outlet) UnmarshalJSON(b []byte) error {
 
 // PowerControl controls the power state of the outlet.
 func (outlet *Outlet) PowerControl(powerState ActionPowerState) error {
+	return outlet.PowerControlWithContext(common.ContextOf(outlet.GetClient()), powerState)
+}
+
+// PowerControlWithContext controls the power state of the outlet.
+func (outlet *Outlet) PowerControlWithContext(ctx context.Context, powerState ActionPowerState) error {
 	params := struct {
 		PowerState ActionPowerState
 	}{
 		PowerState: powerState,
 	}
-	return outlet.Post(outlet.powerControlTarget, params)
+	return outlet.PostWithContext(ctx, outlet.powerControlTarget, params)
 }
 
 // ResetMetrics resets metrics related to this outlet.
 func (outlet *Outlet) ResetMetrics() error {
-	return outlet.Post(outlet.resetMetricsTarget, nil)
+	return outlet.ResetMetricsWithContext(common.ContextOf(outlet.GetClient()))
+}
+
+// ResetMetricsWithContext resets metrics related to this outlet.
+func (outlet *Outlet) ResetMetricsWithContext(ctx context.Context) error {
+	return outlet.PostWithContext(ctx, outlet.resetMetricsTarget, nil)
 }
 
 // BranchCircuit gets the branch circuit associated with this outlet.
 func (outlet *Outlet) BranchCircuit(queryOpts ...common.QueryGroupOption) (*Circuit, error) {
+	return outlet.BranchCircuitWithContext(common.ContextOf(outlet.GetClient()), queryOpts...)
+}
+
+// BranchCircuitWithContext gets the branch circuit associated with this outlet.
+func (outlet *Outlet) BranchCircuitWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Circuit, error) {
 	if outlet.branchCircuit == "" {
 		return nil, nil
 	}
-	return GetCircuit(outlet.GetClient(), outlet.branchCircuit, queryOpts...)
+	return GetCircuitWithContext(ctx, outlet.GetClient(), outlet.branchCircuit, queryOpts...)
 }
 
 // Chassis gets the chassis connected to this outlet.
 func (outlet *Outlet) Chassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
-	return common.GetObjects[Chassis](outlet.GetClient(), outlet.chassis, queryOpts...)
+	return outlet.ChassisWithContext(common.ContextOf(outlet.GetClient()), queryOpts...)
+}
+
+// ChassisWithContext gets the chassis connected to this outlet.
+func (outlet *Outlet) ChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjectsWithContext[Chassis](ctx, outlet.GetClient(), outlet.chassis, queryOpts...)
 }
 
 // DistributionCircuits gets the circuits powered by this outlet.
 func (outlet *Outlet) DistributionCircuits(queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
-	return common.GetObjects[Circuit](outlet.GetClient(), outlet.distributionCircuits, queryOpts...)
+	return outlet.DistributionCircuitsWithContext(common.ContextOf(outlet.GetClient()), queryOpts...)
+}
+
+// DistributionCircuitsWithContext gets the circuits powered by this outlet.
+func (outlet *Outlet) DistributionCircuitsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Circuit, error) {
+	return common.GetObjectsWithContext[Circuit](ctx, outlet.GetClient(), outlet.distributionCircuits, queryOpts...)
 }
 
 // PowerSupplies gets the power supplies connected to this outlet.
 func (outlet *Outlet) PowerSupplies(queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
-	return common.GetObjects[PowerSupply](outlet.GetClient(), outlet.powerSupplies, queryOpts...)
+	return outlet.PowerSuppliesWithContext(common.ContextOf(outlet.GetClient()), queryOpts...)
+}
+
+// PowerSuppliesWithContext gets the power supplies connected to this outlet.
+func (outlet *Outlet) PowerSuppliesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
+	return common.GetObjectsWithContext[PowerSupply](ctx, outlet.GetClient(), outlet.powerSupplies, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (outlet *Outlet) Update() error {
+	return outlet.UpdateWithContext(common.ContextOf(outlet.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (outlet *Outlet) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"ConfigurationLocked",
 		"ElectricalConsumerNames",
@@ -297,18 +333,29 @@ func (outlet *Outlet) Update() error {
 		"UserLabel",
 	}
 
-	return outlet.UpdateFromRawData(outlet, outlet.rawData, readWriteFields)
+	return outlet.UpdateFromRawDataWithContext(ctx, outlet, outlet.rawData, readWriteFields)
 }
 
 // GetOutlet will get a Outlet instance from the service.
 func GetOutlet(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Outlet, error) {
-	return common.GetObject[Outlet](c, uri, queryOpts...)
+	return GetOutletWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetOutletWithContext will get a Outlet instance from the service.
+func GetOutletWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Outlet, error) {
+	return common.GetObjectWithContext[Outlet](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedOutlets gets the collection of Outlet from
 // a provided reference.
 func ListReferencedOutlets(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
-	return common.GetCollectionObjects[Outlet](c, link, queryOpts...)
+	return ListReferencedOutletsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedOutletsWithContext gets the collection of Outlet from
+// a provided reference.
+func ListReferencedOutletsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
+	return common.GetCollectionObjectsWithContext[Outlet](ctx, c, link, queryOpts...)
 }
 
 // VoltageSensors shall contain properties that describe voltage sensor readings for an outlet.

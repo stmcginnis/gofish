@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -65,6 +66,11 @@ func (ioconnectivitylineofservice *IOConnectivityLineOfService) UnmarshalJSON(b 
 
 // Update commits updates to this object's properties to the running system.
 func (ioconnectivitylineofservice *IOConnectivityLineOfService) Update() error {
+	return ioconnectivitylineofservice.UpdateWithContext(common.ContextOf(ioconnectivitylineofservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (ioconnectivitylineofservice *IOConnectivityLineOfService) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(IOConnectivityLineOfService)
@@ -79,16 +85,27 @@ func (ioconnectivitylineofservice *IOConnectivityLineOfService) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(ioconnectivitylineofservice).Elem()
 
-	return ioconnectivitylineofservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return ioconnectivitylineofservice.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetIOConnectivityLineOfService will get a IOConnectivityLineOfService instance from the service.
 func GetIOConnectivityLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOConnectivityLineOfService, error) {
-	return common.GetObject[IOConnectivityLineOfService](c, uri, queryOpts...)
+	return GetIOConnectivityLineOfServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetIOConnectivityLineOfServiceWithContext will get a IOConnectivityLineOfService instance from the service.
+func GetIOConnectivityLineOfServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOConnectivityLineOfService, error) {
+	return common.GetObjectWithContext[IOConnectivityLineOfService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedIOConnectivityLineOfServices gets the collection of IOConnectivityLineOfService from
 // a provided reference.
 func ListReferencedIOConnectivityLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLineOfService, error) {
-	return common.GetCollectionObjects[IOConnectivityLineOfService](c, link, queryOpts...)
+	return ListReferencedIOConnectivityLineOfServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedIOConnectivityLineOfServicesWithContext gets the collection of IOConnectivityLineOfService from
+// a provided reference.
+func ListReferencedIOConnectivityLineOfServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOConnectivityLineOfService, error) {
+	return common.GetCollectionObjectsWithContext[IOConnectivityLineOfService](ctx, c, link, queryOpts...)
 }

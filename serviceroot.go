@@ -5,6 +5,7 @@
 package gofish
 
 import (
+	"context"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
@@ -204,7 +205,12 @@ type Service struct {
 
 // ServiceRootWithCert returns both the Service instance and the TLS cert presented by the BMC
 func ServiceRootWithCert(c common.Client) (*Service, *x509.Certificate, error) {
-	resp, err := c.Get(common.DefaultServiceRoot)
+	return ServiceRootWithCertWithContext(common.ContextOf(c), c)
+}
+
+// ServiceRootWithCertWithContext returns both the Service instance and the TLS cert presented by the BMC
+func ServiceRootWithCertWithContext(ctx context.Context, c common.Client) (*Service, *x509.Certificate, error) {
+	resp, err := c.GetWithContext(ctx, common.DefaultServiceRoot)
 	defer common.DeferredCleanupHTTPResponse(resp)
 
 	var cert *x509.Certificate
@@ -228,120 +234,195 @@ func ServiceRootWithCert(c common.Client) (*Service, *x509.Certificate, error) {
 
 // ServiceRoot will get a Service instance from the service.
 func ServiceRoot(c common.Client) (*Service, error) {
-	svc, _, err := ServiceRootWithCert(c)
+	return ServiceRootWithContext(common.ContextOf(c), c)
+}
+
+// ServiceRootWithContext will get a Service instance from the service.
+func ServiceRootWithContext(ctx context.Context, c common.Client) (*Service, error) {
+	svc, _, err := ServiceRootWithCertWithContext(ctx, c)
 	return svc, err
 }
 
 // AccountService gets the Redfish AccountService
 func (serviceroot *Service) AccountService(queryOpts ...common.QueryGroupOption) (*redfish.AccountService, error) {
+	return serviceroot.AccountServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// AccountServiceWithContext gets the Redfish AccountService
+func (serviceroot *Service) AccountServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.AccountService, error) {
 	if serviceroot.AccountServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetAccountService(serviceroot.GetClient(), serviceroot.AccountServiceLink.String(), queryOpts...)
+	return redfish.GetAccountServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.AccountServiceLink.String(), queryOpts...)
 }
 
 // AggregationService gets the aggregation service.
 func (serviceroot *Service) AggregationService(queryOpts ...common.QueryGroupOption) (*redfish.AggregationService, error) {
+	return serviceroot.AggregationServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// AggregationServiceWithContext gets the aggregation service.
+func (serviceroot *Service) AggregationServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.AggregationService, error) {
 	if serviceroot.AggregationServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetAggregationService(serviceroot.GetClient(), serviceroot.AggregationServiceLink.String(), queryOpts...)
+	return redfish.GetAggregationServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.AggregationServiceLink.String(), queryOpts...)
 }
 
 // Cables gets a collection of cables.
 func (serviceroot *Service) Cables(queryOpts ...common.QueryGroupOption) ([]*redfish.Cable, error) {
+	return serviceroot.CablesWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// CablesWithContext gets a collection of cables.
+func (serviceroot *Service) CablesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Cable, error) {
 	if serviceroot.CablesLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedCables(serviceroot.GetClient(), serviceroot.CablesLink.String(), queryOpts...)
+	return redfish.ListReferencedCablesWithContext(ctx, serviceroot.GetClient(), serviceroot.CablesLink.String(), queryOpts...)
 }
 
 // CertificateService gets the certificate service.
 func (serviceroot *Service) CertificateService(queryOpts ...common.QueryGroupOption) (*redfish.CertificateService, error) {
+	return serviceroot.CertificateServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// CertificateServiceWithContext gets the certificate service.
+func (serviceroot *Service) CertificateServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.CertificateService, error) {
 	if serviceroot.CertificateServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetCertificateService(serviceroot.GetClient(), serviceroot.CertificateServiceLink.String(), queryOpts...)
+	return redfish.GetCertificateServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.CertificateServiceLink.String(), queryOpts...)
 }
 
 // Chassis gets the chassis instances managed by this service.
 func (serviceroot *Service) Chassis(queryOpts ...common.QueryGroupOption) ([]*redfish.Chassis, error) {
+	return serviceroot.ChassisWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// ChassisWithContext gets the chassis instances managed by this service.
+func (serviceroot *Service) ChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Chassis, error) {
 	if serviceroot.ChassisLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedChassis(serviceroot.GetClient(), serviceroot.ChassisLink.String(), queryOpts...)
+	return redfish.ListReferencedChassisWithContext(ctx, serviceroot.GetClient(), serviceroot.ChassisLink.String(), queryOpts...)
 }
 
 // ComponentIntegrity gets a collection of cables.
 func (serviceroot *Service) ComponentIntegrity(queryOpts ...common.QueryGroupOption) ([]*redfish.ComponentIntegrity, error) {
+	return serviceroot.ComponentIntegrityWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// ComponentIntegrityWithContext gets a collection of cables.
+func (serviceroot *Service) ComponentIntegrityWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.ComponentIntegrity, error) {
 	if serviceroot.ComponentIntegrityLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedComponentIntegritys(serviceroot.GetClient(), serviceroot.ComponentIntegrityLink.String(), queryOpts...)
+	return redfish.ListReferencedComponentIntegritysWithContext(ctx, serviceroot.GetClient(), serviceroot.ComponentIntegrityLink.String(), queryOpts...)
 }
 
 // CompositionService gets the composition service.
 func (serviceroot *Service) CompositionService(queryOpts ...common.QueryGroupOption) (*redfish.CompositionService, error) {
+	return serviceroot.CompositionServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// CompositionServiceWithContext gets the composition service.
+func (serviceroot *Service) CompositionServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.CompositionService, error) {
 	if serviceroot.CompositionServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetCompositionService(serviceroot.GetClient(), serviceroot.CompositionServiceLink.String(), queryOpts...)
+	return redfish.GetCompositionServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.CompositionServiceLink.String(), queryOpts...)
 }
 
 // EventService gets the Redfish EventService
 func (serviceroot *Service) EventService(queryOpts ...common.QueryGroupOption) (*redfish.EventService, error) {
+	return serviceroot.EventServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// EventServiceWithContext gets the Redfish EventService
+func (serviceroot *Service) EventServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.EventService, error) {
 	if serviceroot.EventServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetEventService(serviceroot.GetClient(), serviceroot.EventServiceLink.String(), queryOpts...)
+	return redfish.GetEventServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.EventServiceLink.String(), queryOpts...)
 }
 
 // Fabrics gets a collection of fabrics.
 func (serviceroot *Service) Fabrics(queryOpts ...common.QueryGroupOption) ([]*redfish.Fabric, error) {
+	return serviceroot.FabricsWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// FabricsWithContext gets a collection of fabrics.
+func (serviceroot *Service) FabricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Fabric, error) {
 	if serviceroot.FabricsLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedFabrics(serviceroot.GetClient(), serviceroot.FabricsLink.String(), queryOpts...)
+	return redfish.ListReferencedFabricsWithContext(ctx, serviceroot.GetClient(), serviceroot.FabricsLink.String(), queryOpts...)
 }
 
 // Facilities gets a collection of facilities.
 func (serviceroot *Service) Facilities(queryOpts ...common.QueryGroupOption) ([]*redfish.Facility, error) {
+	return serviceroot.FacilitiesWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// FacilitiesWithContext gets a collection of facilities.
+func (serviceroot *Service) FacilitiesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Facility, error) {
 	if serviceroot.FacilitiesLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedFacilities(serviceroot.GetClient(), serviceroot.FacilitiesLink.String(), queryOpts...)
+	return redfish.ListReferencedFacilitiesWithContext(ctx, serviceroot.GetClient(), serviceroot.FacilitiesLink.String(), queryOpts...)
 }
 
 // JobService gets the job service instance
 func (serviceroot *Service) JobService(queryOpts ...common.QueryGroupOption) (*redfish.JobService, error) {
+	return serviceroot.JobServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// JobServiceWithContext gets the job service instance
+func (serviceroot *Service) JobServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.JobService, error) {
 	if serviceroot.JobServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetJobService(serviceroot.GetClient(), serviceroot.JobServiceLink.String(), queryOpts...)
+	return redfish.GetJobServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.JobServiceLink.String(), queryOpts...)
 }
 
 // KeyService gets the key service.
 func (serviceroot *Service) KeyService(queryOpts ...common.QueryGroupOption) (*redfish.KeyService, error) {
+	return serviceroot.KeyServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// KeyServiceWithContext gets the key service.
+func (serviceroot *Service) KeyServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.KeyService, error) {
 	if serviceroot.KeyServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetKeyService(serviceroot.GetClient(), serviceroot.KeyServiceLink.String(), queryOpts...)
+	return redfish.GetKeyServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.KeyServiceLink.String(), queryOpts...)
 }
 
 // LicenseService gets the license service.
 func (serviceroot *Service) LicenseService(queryOpts ...common.QueryGroupOption) (*redfish.LicenseService, error) {
+	return serviceroot.LicenseServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// LicenseServiceWithContext gets the license service.
+func (serviceroot *Service) LicenseServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.LicenseService, error) {
 	if serviceroot.LicenseServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetLicenseService(serviceroot.GetClient(), serviceroot.LicenseServiceLink.String(), queryOpts...)
+	return redfish.GetLicenseServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.LicenseServiceLink.String(), queryOpts...)
 }
 
 // Managers gets the manager instances of this service.
 func (serviceroot *Service) Managers(queryOpts ...common.QueryGroupOption) ([]*redfish.Manager, error) {
+	return serviceroot.ManagersWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// ManagersWithContext gets the manager instances of this service.
+func (serviceroot *Service) ManagersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Manager, error) {
 	if serviceroot.ManagersLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedManagers(serviceroot.GetClient(), serviceroot.ManagersLink.String(), queryOpts...)
+	return redfish.ListReferencedManagersWithContext(ctx, serviceroot.GetClient(), serviceroot.ManagersLink.String(), queryOpts...)
 }
 
 // // NVMeDomains gets a collection of Swordfish NVMe domains.
@@ -367,148 +448,240 @@ func (serviceroot *Service) Managers(queryOpts ...common.QueryGroupOption) ([]*r
 
 // RegisteredClients gets a collection of registered clients.
 func (serviceroot *Service) RegisteredClients(queryOpts ...common.QueryGroupOption) ([]*redfish.RegisteredClient, error) {
+	return serviceroot.RegisteredClientsWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// RegisteredClientsWithContext gets a collection of registered clients.
+func (serviceroot *Service) RegisteredClientsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.RegisteredClient, error) {
 	if serviceroot.RegisteredClientsLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedRegisteredClients(serviceroot.GetClient(), serviceroot.RegisteredClientsLink.String(), queryOpts...)
+	return redfish.ListReferencedRegisteredClientsWithContext(ctx, serviceroot.GetClient(), serviceroot.RegisteredClientsLink.String(), queryOpts...)
 }
 
 // Registries gets the Redfish Registries
 func (serviceroot *Service) Registries(queryOpts ...common.QueryGroupOption) ([]*redfish.MessageRegistryFile, error) {
+	return serviceroot.RegistriesWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// RegistriesWithContext gets the Redfish Registries
+func (serviceroot *Service) RegistriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.MessageRegistryFile, error) {
 	if serviceroot.RegistriesLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedMessageRegistryFiles(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), queryOpts...)
+	return redfish.ListReferencedMessageRegistryFilesWithContext(ctx, serviceroot.GetClient(), serviceroot.RegistriesLink.String(), queryOpts...)
 }
 
 // ResourceBlocks gets a collection of resource blocks.
 func (serviceroot *Service) ResourceBlocks(queryOpts ...common.QueryGroupOption) ([]*redfish.ResourceBlock, error) {
+	return serviceroot.ResourceBlocksWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// ResourceBlocksWithContext gets a collection of resource blocks.
+func (serviceroot *Service) ResourceBlocksWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.ResourceBlock, error) {
 	if serviceroot.ResourceBlocksLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedResourceBlocks(serviceroot.GetClient(), serviceroot.ResourceBlocksLink.String(), queryOpts...)
+	return redfish.ListReferencedResourceBlocksWithContext(ctx, serviceroot.GetClient(), serviceroot.ResourceBlocksLink.String(), queryOpts...)
 }
 
 // ServiceConditions gets the service conditions.
 func (serviceroot *Service) ServiceConditions(queryOpts ...common.QueryGroupOption) (*redfish.ServiceConditions, error) {
+	return serviceroot.ServiceConditionsWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// ServiceConditionsWithContext gets the service conditions.
+func (serviceroot *Service) ServiceConditionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.ServiceConditions, error) {
 	if serviceroot.ServiceConditionsLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetServiceConditions(serviceroot.GetClient(), serviceroot.ServiceConditionsLink.String(), queryOpts...)
+	return redfish.GetServiceConditionsWithContext(ctx, serviceroot.GetClient(), serviceroot.ServiceConditionsLink.String(), queryOpts...)
 }
 
 // SessionService gets the session service.
 func (serviceroot *Service) SessionService(queryOpts ...common.QueryGroupOption) (*redfish.SessionService, error) {
+	return serviceroot.SessionServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// SessionServiceWithContext gets the session service.
+func (serviceroot *Service) SessionServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.SessionService, error) {
 	if serviceroot.SessionServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetSessionService(serviceroot.GetClient(), serviceroot.SessionServiceLink.String(), queryOpts...)
+	return redfish.GetSessionServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.SessionServiceLink.String(), queryOpts...)
 }
 
 // Storage gets a collection of storage objects.
 func (serviceroot *Service) Storage(queryOpts ...common.QueryGroupOption) ([]*redfish.Storage, error) {
+	return serviceroot.StorageWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// StorageWithContext gets a collection of storage objects.
+func (serviceroot *Service) StorageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Storage, error) {
 	if serviceroot.StorageLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedStorages(serviceroot.GetClient(), serviceroot.StorageLink.String(), queryOpts...)
+	return redfish.ListReferencedStoragesWithContext(ctx, serviceroot.GetClient(), serviceroot.StorageLink.String(), queryOpts...)
 }
 
 // StorageServices gets the Swordfish storage services
 func (serviceroot *Service) StorageServices(queryOpts ...common.QueryGroupOption) ([]*swordfish.StorageService, error) {
+	return serviceroot.StorageServicesWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// StorageServicesWithContext gets the Swordfish storage services
+func (serviceroot *Service) StorageServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*swordfish.StorageService, error) {
 	if serviceroot.StorageServicesLink.IsZero() {
 		return nil, nil
 	}
-	return swordfish.ListReferencedStorageServices(serviceroot.GetClient(), serviceroot.StorageServicesLink.String(), queryOpts...)
+	return swordfish.ListReferencedStorageServicesWithContext(ctx, serviceroot.GetClient(), serviceroot.StorageServicesLink.String(), queryOpts...)
 }
 
 // StorageSystems gets the storage system instances managed by this service.
 func (serviceroot *Service) StorageSystems(queryOpts ...common.QueryGroupOption) ([]*swordfish.StorageSystem, error) {
+	return serviceroot.StorageSystemsWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// StorageSystemsWithContext gets the storage system instances managed by this service.
+func (serviceroot *Service) StorageSystemsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*swordfish.StorageSystem, error) {
 	if serviceroot.StorageSystemsLink.IsZero() {
 		return nil, nil
 	}
-	return swordfish.ListReferencedStorageSystems(serviceroot.GetClient(), serviceroot.StorageSystemsLink.String(), queryOpts...)
+	return swordfish.ListReferencedStorageSystemsWithContext(ctx, serviceroot.GetClient(), serviceroot.StorageSystemsLink.String(), queryOpts...)
 }
 
 // Tasks gets the system's tasks
 func (serviceroot *Service) Tasks(queryOpts ...common.QueryGroupOption) ([]*redfish.Task, error) {
+	return serviceroot.TasksWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// TasksWithContext gets the system's tasks
+func (serviceroot *Service) TasksWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Task, error) {
 	if serviceroot.TasksLink.IsZero() {
 		return nil, nil
 	}
-	ts, err := redfish.GetTaskService(serviceroot.GetClient(), serviceroot.TasksLink.String())
+	ts, err := redfish.GetTaskServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.TasksLink.String())
 	if err != nil {
 		return nil, err
 	}
 
-	return ts.Tasks(queryOpts...)
+	return ts.TasksWithContext(ctx, queryOpts...)
 }
 
 // TaskService gets the task service instance
 func (serviceroot *Service) TaskService(queryOpts ...common.QueryGroupOption) (*redfish.TaskService, error) {
+	return serviceroot.TaskServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// TaskServiceWithContext gets the task service instance
+func (serviceroot *Service) TaskServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.TaskService, error) {
 	if serviceroot.TasksLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetTaskService(serviceroot.GetClient(), serviceroot.TasksLink.String(), queryOpts...)
+	return redfish.GetTaskServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.TasksLink.String(), queryOpts...)
 }
 
 // CreateSession creates a new session and returns the token and id
 func (serviceroot *Service) CreateSession(username, password string) (*redfish.AuthToken, error) {
+	return serviceroot.CreateSessionWithContext(common.ContextOf(serviceroot.GetClient()), username, password)
+}
+
+// CreateSessionWithContext creates a new session and returns the token and id
+func (serviceroot *Service) CreateSessionWithContext(ctx context.Context, username, password string) (*redfish.AuthToken, error) {
 	if serviceroot.Links.Sessions.IsZero() {
 		return nil, ErrSessionNotSupported
 	}
 
-	return redfish.CreateSession(serviceroot.GetClient(), serviceroot.Links.Sessions.String(), username, password)
+	return redfish.CreateSessionWithContext(ctx, serviceroot.GetClient(), serviceroot.Links.Sessions.String(), username, password)
 }
 
 // ManagerProvidingService gets the manager for this Redfish service.
 func (serviceroot *Service) ManagerProvidingService(queryOpts ...common.QueryGroupOption) (*redfish.Manager, error) {
+	return serviceroot.ManagerProvidingServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// ManagerProvidingServiceWithContext gets the manager for this Redfish service.
+func (serviceroot *Service) ManagerProvidingServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.Manager, error) {
 	if serviceroot.Links.ManagerProvidingService.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetManager(serviceroot.GetClient(), serviceroot.Links.ManagerProvidingService.String(), queryOpts...)
+	return redfish.GetManagerWithContext(ctx, serviceroot.GetClient(), serviceroot.Links.ManagerProvidingService.String(), queryOpts...)
 }
 
 // PowerEquipment gets the powerEquipment instances of this service.
 func (serviceroot *Service) PowerEquipment(queryOpts ...common.QueryGroupOption) (*redfish.PowerEquipment, error) {
+	return serviceroot.PowerEquipmentWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// PowerEquipmentWithContext gets the powerEquipment instances of this service.
+func (serviceroot *Service) PowerEquipmentWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.PowerEquipment, error) {
 	if serviceroot.PowerEquipmentLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetPowerEquipment(serviceroot.GetClient(), serviceroot.PowerEquipmentLink.String(), queryOpts...)
+	return redfish.GetPowerEquipmentWithContext(ctx, serviceroot.GetClient(), serviceroot.PowerEquipmentLink.String(), queryOpts...)
 }
 
 // Sessions gets the system's active sessions
 func (serviceroot *Service) Sessions(queryOpts ...common.QueryGroupOption) ([]*redfish.Session, error) {
+	return serviceroot.SessionsWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// SessionsWithContext gets the system's active sessions
+func (serviceroot *Service) SessionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Session, error) {
 	if serviceroot.Links.Sessions.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedSessions(serviceroot.GetClient(), serviceroot.Links.Sessions.String(), queryOpts...)
+	return redfish.ListReferencedSessionsWithContext(ctx, serviceroot.GetClient(), serviceroot.Links.Sessions.String(), queryOpts...)
 }
 
 // DeleteSession logout the specified session
 func (serviceroot *Service) DeleteSession(url string) error {
-	return redfish.DeleteSession(serviceroot.GetClient(), url)
+	return serviceroot.DeleteSessionWithContext(common.ContextOf(serviceroot.GetClient()), url)
+}
+
+// DeleteSessionWithContext logout the specified session
+func (serviceroot *Service) DeleteSessionWithContext(ctx context.Context, url string) error {
+	return redfish.DeleteSessionWithContext(ctx, serviceroot.GetClient(), url)
 }
 
 // MessageRegistries gets all the available message registries in all languages
 func (serviceroot *Service) MessageRegistries(queryOpts ...common.QueryGroupOption) ([]*redfish.MessageRegistry, error) {
+	return serviceroot.MessageRegistriesWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// MessageRegistriesWithContext gets all the available message registries in all languages
+func (serviceroot *Service) MessageRegistriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.MessageRegistry, error) {
 	if serviceroot.RegistriesLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedMessageRegistries(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), queryOpts...)
+	return redfish.ListReferencedMessageRegistriesWithContext(ctx, serviceroot.GetClient(), serviceroot.RegistriesLink.String(), queryOpts...)
 }
 
 // MessageRegistry gets a specific message registry.
 // uri is the uri for the message registry
 func (serviceroot *Service) MessageRegistry(uri string, queryOpts ...common.QueryGroupOption) (*redfish.MessageRegistry, error) {
-	return redfish.GetMessageRegistry(serviceroot.GetClient(), uri, queryOpts...)
+	return serviceroot.MessageRegistryWithContext(common.ContextOf(serviceroot.GetClient()), uri, queryOpts...)
+}
+
+// MessageRegistryWithContext gets a specific message registry.
+// uri is the uri for the message registry
+func (serviceroot *Service) MessageRegistryWithContext(ctx context.Context, uri string, queryOpts ...common.QueryGroupOption) (*redfish.MessageRegistry, error) {
+	return redfish.GetMessageRegistryWithContext(ctx, serviceroot.GetClient(), uri, queryOpts...)
 }
 
 // MessageRegistriesByLanguage gets the message registries by language.
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageRegistriesByLanguage(language string, queryOpts ...common.QueryGroupOption) ([]*redfish.MessageRegistry, error) {
+	return serviceroot.MessageRegistriesByLanguageWithContext(common.ContextOf(serviceroot.GetClient()), language, queryOpts...)
+}
+
+// MessageRegistriesByLanguageWithContext gets the message registries by language.
+// language is the RFC5646-conformant language code for the message registry, for example: "en".
+func (serviceroot *Service) MessageRegistriesByLanguageWithContext(ctx context.Context, language string, queryOpts ...common.QueryGroupOption) ([]*redfish.MessageRegistry, error) {
 	if serviceroot.RegistriesLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedMessageRegistriesByLanguage(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), language, queryOpts...)
+	return redfish.ListReferencedMessageRegistriesByLanguageWithContext(ctx, serviceroot.GetClient(), serviceroot.RegistriesLink.String(), language, queryOpts...)
 }
 
 // MessageRegistryByLanguage gets a specific message registry by language.
@@ -517,10 +690,19 @@ func (serviceroot *Service) MessageRegistriesByLanguage(language string, queryOp
 // by the Redfish Specification, for example: "Alert.1.0.0".
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageRegistryByLanguage(registry, language string) (*redfish.MessageRegistry, error) {
+	return serviceroot.MessageRegistryByLanguageWithContext(common.ContextOf(serviceroot.GetClient()), registry, language)
+}
+
+// MessageRegistryByLanguageWithContext gets a specific message registry by language.
+// registry is used to identify the correct Message Registry file and it shall
+// contain the Message Registry name and it major and minor versions, as defined
+// by the Redfish Specification, for example: "Alert.1.0.0".
+// language is the RFC5646-conformant language code for the message registry, for example: "en".
+func (serviceroot *Service) MessageRegistryByLanguageWithContext(ctx context.Context, registry, language string) (*redfish.MessageRegistry, error) {
 	if serviceroot.RegistriesLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), registry, language)
+	return redfish.GetMessageRegistryByLanguageWithContext(ctx, serviceroot.GetClient(), serviceroot.RegistriesLink.String(), registry, language)
 }
 
 // MessageByLanguage tries to find and get the message in the correct language from the informed messageID.
@@ -533,40 +715,73 @@ func (serviceroot *Service) MessageRegistryByLanguage(registry, language string)
 //
 // language is the RFC5646-conformant language code for the message registry, for example: "en".
 func (serviceroot *Service) MessageByLanguage(messageID, language string) (*redfish.MessageRegistryMessage, error) {
+	return serviceroot.MessageByLanguageWithContext(common.ContextOf(serviceroot.GetClient()), messageID, language)
+}
+
+// MessageByLanguageWithContext tries to find and get the message in the correct language from the informed messageID.
+// messageID is the key used to find the registry, version and message, for example: "Alert.1.0.LanDisconnect"
+//
+//   - The segment before the 1st period is the Registry Name (Registry Prefix): Alert
+//   - The segment between the 1st and 2nd period is the major version: 1
+//   - The segment between the 2nd and 3rd period is the minor version: 0
+//   - The segment after the 3rd period is the Message Identifier in the Registry: LanDisconnect
+//
+// language is the RFC5646-conformant language code for the message registry, for example: "en".
+func (serviceroot *Service) MessageByLanguageWithContext(ctx context.Context, messageID, language string) (*redfish.MessageRegistryMessage, error) {
 	if serviceroot.RegistriesLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetMessageFromMessageRegistryByLanguage(serviceroot.GetClient(), serviceroot.RegistriesLink.String(), messageID, language)
+	return redfish.GetMessageFromMessageRegistryByLanguageWithContext(ctx, serviceroot.GetClient(), serviceroot.RegistriesLink.String(), messageID, language)
 }
 
 // Systems get the system instances from the service
 func (serviceroot *Service) Systems(queryOpts ...common.QueryGroupOption) ([]*redfish.ComputerSystem, error) {
+	return serviceroot.SystemsWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// SystemsWithContext get the system instances from the service
+func (serviceroot *Service) SystemsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.ComputerSystem, error) {
 	if serviceroot.SystemsLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.ListReferencedComputerSystems(serviceroot.GetClient(), serviceroot.SystemsLink.String(), queryOpts...)
+	return redfish.ListReferencedComputerSystemsWithContext(ctx, serviceroot.GetClient(), serviceroot.SystemsLink.String(), queryOpts...)
 }
 
 // TelemetryService gets the telemetry service instance.
 func (serviceroot *Service) TelemetryService(queryOpts ...common.QueryGroupOption) (*redfish.TelemetryService, error) {
+	return serviceroot.TelemetryServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// TelemetryServiceWithContext gets the telemetry service instance.
+func (serviceroot *Service) TelemetryServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.TelemetryService, error) {
 	if serviceroot.TelemetryServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetTelemetryService(serviceroot.GetClient(), serviceroot.TelemetryServiceLink.String(), queryOpts...)
+	return redfish.GetTelemetryServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.TelemetryServiceLink.String(), queryOpts...)
 }
 
 // ThermalEquipment gets the thermal equipment instance.
 func (serviceroot *Service) ThermalEquipment(queryOpts ...common.QueryGroupOption) (*redfish.ThermalEquipment, error) {
+	return serviceroot.ThermalEquipmentWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// ThermalEquipmentWithContext gets the thermal equipment instance.
+func (serviceroot *Service) ThermalEquipmentWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.ThermalEquipment, error) {
 	if serviceroot.ThermalEquipmentLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetThermalEquipment(serviceroot.GetClient(), serviceroot.ThermalEquipmentLink.String(), queryOpts...)
+	return redfish.GetThermalEquipmentWithContext(ctx, serviceroot.GetClient(), serviceroot.ThermalEquipmentLink.String(), queryOpts...)
 }
 
 // UpdateService gets the update service instance
 func (serviceroot *Service) UpdateService(queryOpts ...common.QueryGroupOption) (*redfish.UpdateService, error) {
+	return serviceroot.UpdateServiceWithContext(common.ContextOf(serviceroot.GetClient()), queryOpts...)
+}
+
+// UpdateServiceWithContext gets the update service instance
+func (serviceroot *Service) UpdateServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.UpdateService, error) {
 	if serviceroot.UpdateServiceLink.IsZero() {
 		return nil, nil
 	}
-	return redfish.GetUpdateService(serviceroot.GetClient(), serviceroot.UpdateServiceLink.String(), queryOpts...)
+	return redfish.GetUpdateServiceWithContext(ctx, serviceroot.GetClient(), serviceroot.UpdateServiceLink.String(), queryOpts...)
 }

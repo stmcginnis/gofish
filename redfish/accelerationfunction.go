@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -101,21 +102,42 @@ func (accelerationfunction *AccelerationFunction) UnmarshalJSON(b []byte) error 
 
 // GetAccelerationFunction will get a AccelerationFunction instance from the service.
 func GetAccelerationFunction(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AccelerationFunction, error) {
-	return common.GetObject[AccelerationFunction](c, uri, queryOpts...)
+	return GetAccelerationFunctionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAccelerationFunctionWithContext will get a AccelerationFunction instance from the service.
+func GetAccelerationFunctionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AccelerationFunction, error) {
+	return common.GetObjectWithContext[AccelerationFunction](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedAccelerationFunctions gets the collection of AccelerationFunction from
 // a provided reference.
 func ListReferencedAccelerationFunctions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AccelerationFunction, error) {
-	return common.GetCollectionObjects[AccelerationFunction](c, link, queryOpts...)
+	return ListReferencedAccelerationFunctionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedAccelerationFunctionsWithContext gets the collection of AccelerationFunction from
+// a provided reference.
+func ListReferencedAccelerationFunctionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AccelerationFunction, error) {
+	return common.GetCollectionObjectsWithContext[AccelerationFunction](ctx, c, link, queryOpts...)
 }
 
 // Endpoints gets the endpoints connected to this accelerator.
 func (accelerationfunction *AccelerationFunction) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](accelerationfunction.GetClient(), accelerationfunction.endpoints, queryOpts...)
+	return accelerationfunction.EndpointsWithContext(common.ContextOf(accelerationfunction.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the endpoints connected to this accelerator.
+func (accelerationfunction *AccelerationFunction) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, accelerationfunction.GetClient(), accelerationfunction.endpoints, queryOpts...)
 }
 
 // PCIeFunctions gets the PCIe functions associated with this accelerator.
 func (accelerationfunction *AccelerationFunction) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](accelerationfunction.GetClient(), accelerationfunction.pcieFunctions, queryOpts...)
+	return accelerationfunction.PCIeFunctionsWithContext(common.ContextOf(accelerationfunction.GetClient()), queryOpts...)
+}
+
+// PCIeFunctionsWithContext gets the PCIe functions associated with this accelerator.
+func (accelerationfunction *AccelerationFunction) PCIeFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjectsWithContext[PCIeFunction](ctx, accelerationfunction.GetClient(), accelerationfunction.pcieFunctions, queryOpts...)
 }

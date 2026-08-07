@@ -5,6 +5,7 @@
 package dell
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -29,6 +30,11 @@ type EventService struct {
 
 // SubmitTestEvent sends event according to msgId and returns error.
 func (eventservice *EventService) SubmitTestEvent(messageID, eType string, protocol redfish.EventDestinationProtocol) error {
+	return eventservice.SubmitTestEventWithContext(common.ContextOf(eventservice.GetClient()), messageID, eType, protocol)
+}
+
+// SubmitTestEventWithContext sends event according to msgId and returns error.
+func (eventservice *EventService) SubmitTestEventWithContext(ctx context.Context, messageID, eType string, protocol redfish.EventDestinationProtocol) error {
 	payload := PayloadType{
 		Destination: eventservice.SubmitTestEventTarget,
 		EventTypes:  eType,
@@ -37,7 +43,7 @@ func (eventservice *EventService) SubmitTestEvent(messageID, eType string, proto
 		MessageID:   messageID,
 	}
 
-	resp, err := eventservice.GetClient().Post(eventservice.SubmitTestEventTarget, payload)
+	resp, err := eventservice.GetClient().PostWithContext(ctx, eventservice.SubmitTestEventTarget, payload)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return fmt.Errorf("failed to post submitTestEvent due to: %w", err)

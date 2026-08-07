@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -46,6 +47,11 @@ func (i *MemoryHealthComp) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (i *MemoryHealthComp) Update() error {
+	return i.UpdateWithContext(common.ContextOf(i.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *MemoryHealthComp) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(MemoryHealthComp)
@@ -62,10 +68,15 @@ func (i *MemoryHealthComp) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetMemoryHealthComp will get a MemoryHealthComp instance from the service.
 func GetMemoryHealthComp(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryHealthComp, error) {
-	return common.GetObject[MemoryHealthComp](c, uri, queryOpts...)
+	return GetMemoryHealthCompWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMemoryHealthCompWithContext will get a MemoryHealthComp instance from the service.
+func GetMemoryHealthCompWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryHealthComp, error) {
+	return common.GetObjectWithContext[MemoryHealthComp](ctx, c, uri, queryOpts...)
 }

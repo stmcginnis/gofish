@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -48,11 +49,22 @@ type VolumeMetrics struct {
 
 // GetVolumeMetrics will get a VolumeMetrics instance from the service.
 func GetVolumeMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VolumeMetrics, error) {
-	return common.GetObject[VolumeMetrics](c, uri, queryOpts...)
+	return GetVolumeMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetVolumeMetricsWithContext will get a VolumeMetrics instance from the service.
+func GetVolumeMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*VolumeMetrics, error) {
+	return common.GetObjectWithContext[VolumeMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedVolumeMetricss gets the collection of VolumeMetrics from
 // a provided reference.
 func ListReferencedVolumeMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VolumeMetrics, error) {
-	return common.GetCollectionObjects[VolumeMetrics](c, link, queryOpts...)
+	return ListReferencedVolumeMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedVolumeMetricssWithContext gets the collection of VolumeMetrics from
+// a provided reference.
+func ListReferencedVolumeMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*VolumeMetrics, error) {
+	return common.GetCollectionObjectsWithContext[VolumeMetrics](ctx, c, link, queryOpts...)
 }

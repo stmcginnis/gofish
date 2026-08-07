@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -60,7 +61,10 @@ func (i *IPAccessControl) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *IPAccessControl) Update() error {
+func (i *IPAccessControl) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *IPAccessControl) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(IPAccessControl)
@@ -77,14 +81,23 @@ func (i *IPAccessControl) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 func (i *IPAccessControl) FilterRules(queryOpts ...common.QueryGroupOption) ([]*FilterRule, error) {
-	return common.GetCollectionObjects[FilterRule](i.GetClient(), i.filterRules, queryOpts...)
+	return i.FilterRulesWithContext(common.ContextOf(i.GetClient()), queryOpts...)
+}
+
+func (i *IPAccessControl) FilterRulesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*FilterRule, error) {
+	return common.GetCollectionObjectsWithContext[FilterRule](ctx, i.GetClient(), i.filterRules, queryOpts...)
 }
 
 // GetIPAccessControl will get a IPAccessControl instance from the service.
 func GetIPAccessControl(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IPAccessControl, error) {
-	return common.GetObject[IPAccessControl](c, uri, queryOpts...)
+	return GetIPAccessControlWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetIPAccessControlWithContext will get a IPAccessControl instance from the service.
+func GetIPAccessControlWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IPAccessControl, error) {
+	return common.GetObjectWithContext[IPAccessControl](ctx, c, uri, queryOpts...)
 }

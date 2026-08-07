@@ -5,6 +5,7 @@
 package zt
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -59,13 +60,20 @@ func getSubscriptionURL(ztSubscribeResponse *SubscribeResponseType) string {
 // eventsReceiverURL is the http/s URL that will accept the events sent from redfish
 // protocol is usually "redfish"
 func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol redfish.EventDestinationProtocol) (string, error) {
+	return eventservice.SubscribeWithContext(common.ContextOf(eventservice.GetClient()), eventsReceiverURL, protocol)
+}
+
+// SubscribeWithContext to ZT systems redfish
+// eventsReceiverURL is the http/s URL that will accept the events sent from redfish
+// protocol is usually "redfish"
+func (eventservice *EventService) SubscribeWithContext(ctx context.Context, eventsReceiverURL string, protocol redfish.EventDestinationProtocol) (string, error) {
 	z := &SubscriptionZtRequestType{
 		Destination: eventsReceiverURL,
 		Protocol:    protocol,
 		Context:     eventContext,
 	}
 
-	resp, err := eventservice.GetClient().Post(eventservice.Subscriptions, z)
+	resp, err := eventservice.GetClient().PostWithContext(ctx, eventservice.Subscriptions, z)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", fmt.Errorf("failed to POST subscribe request to redfish due to %w", err)
@@ -87,6 +95,15 @@ func (eventservice *EventService) Subscribe(eventsReceiverURL string, protocol r
 // This issue is reported at https://bugzilla.redhat.com/show_bug.cgi?id=2094842
 // To work around this limit, we retry sending the request until we get a good response.
 func (eventservice *EventService) SubmitTestEvent(msgID string) error {
+	return eventservice.SubmitTestEventWithContext(common.ContextOf(eventservice.GetClient()), msgID)
+}
+
+// SubmitTestEventWithContext sends event according to msgId and returns error.
+// ZT systems redfish current firmware limits the SubmitTestEvent() request rate.
+// The first request will be OK, but if another request is sent with-in 5-15 sec, it will get a 400 error response.
+// This issue is reported at https://bugzilla.redhat.com/show_bug.cgi?id=2094842
+// To work around this limit, we retry sending the request until we get a good response.
+func (eventservice *EventService) SubmitTestEventWithContext(ctx context.Context, msgID string) error {
 	const (
 		retryInterval        = 5 * time.Second
 		retryAttempts        = 6
@@ -100,7 +117,7 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 	}
 
 	for retryCounter := 0; retryCounter < retryAttempts; retryCounter++ {
-		resp, err = eventservice.GetClient().Post(eventservice.SubmitTestEventTarget, p)
+		resp, err = eventservice.GetClient().PostWithContext(ctx, eventservice.SubmitTestEventTarget, p)
 		if err == nil {
 			if retryCounter > retryReportThreshold {
 				log.Printf("Had to retry %v times to send SubmitTestEvent()", retryCounter)
@@ -113,7 +130,16 @@ func (eventservice *EventService) SubmitTestEvent(msgID string) error {
 			_ = common.CleanupHTTPResponse(resp)
 		}
 
-		time.Sleep(retryInterval)
+		// Retrying with a dead context can never succeed; give up rather than
+		// sleeping through the remaining attempts.
+		if ctx.Err() != nil {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(retryInterval):
+		}
 	}
 	if err != nil {
 		return err

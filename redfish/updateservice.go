@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -253,6 +254,14 @@ func (updateService *UpdateService) UnmarshalJSON(b []byte) error {
 // referenced by the PublicIdentitySSHKey property. Any existing key-pair is deleted
 // and replaced by the new key-pair.
 func (updateService *UpdateService) GenerateSSHIdentityKeyPair(curve ECDSACurveType, keyLength int, keyType SSHAlgoKeyType) error {
+	return updateService.GenerateSSHIdentityKeyPairWithContext(common.ContextOf(updateService.GetClient()), curve, keyLength, keyType)
+}
+
+// GenerateSSHIdentityKeyPairWithContext generates a new SSH identity key-pair to be used with the
+// UpdateService resource. The generated public key is stored in the Key resource
+// referenced by the PublicIdentitySSHKey property. Any existing key-pair is deleted
+// and replaced by the new key-pair.
+func (updateService *UpdateService) GenerateSSHIdentityKeyPairWithContext(ctx context.Context, curve ECDSACurveType, keyLength int, keyType SSHAlgoKeyType) error {
 	t := struct {
 		Curve     ECDSACurveType
 		KeyLength int
@@ -262,12 +271,17 @@ func (updateService *UpdateService) GenerateSSHIdentityKeyPair(curve ECDSACurveT
 		KeyLength: keyLength,
 		KeyType:   keyType,
 	}
-	return updateService.Post(updateService.generateSSHIdentityKeyPairTarget, t)
+	return updateService.PostWithContext(ctx, updateService.generateSSHIdentityKeyPairTarget, t)
 }
 
 // RemoveSSHIdentityKeyPair removes the SSH identity key-pair used with the UpdateService resource.
 func (updateService *UpdateService) RemoveSSHIdentityKeyPair() error {
-	return updateService.Post(updateService.generateSSHIdentityKeyPairTarget, nil)
+	return updateService.RemoveSSHIdentityKeyPairWithContext(common.ContextOf(updateService.GetClient()))
+}
+
+// RemoveSSHIdentityKeyPairWithContext removes the SSH identity key-pair used with the UpdateService resource.
+func (updateService *UpdateService) RemoveSSHIdentityKeyPairWithContext(ctx context.Context) error {
+	return updateService.PostWithContext(ctx, updateService.generateSSHIdentityKeyPairTarget, nil)
 }
 
 // SimpleUpdateParameters contains the parameters for the SimpleUpdate action.
@@ -305,7 +319,14 @@ type SimpleUpdateParameters struct {
 // located at an ImageURI parameter-specified URI.
 // It returns TaskMonitorInfo for tracking the async operation if the service returns HTTP 202 Accepted.
 func (updateService *UpdateService) SimpleUpdate(parameters *SimpleUpdateParameters) (*TaskMonitorInfo, error) {
-	resp, taskInfo, err := PostWithTask(updateService.GetClient(),
+	return updateService.SimpleUpdateWithContext(common.ContextOf(updateService.GetClient()), parameters)
+}
+
+// SimpleUpdateWithContext will update installed software components using a software image file
+// located at an ImageURI parameter-specified URI.
+// It returns TaskMonitorInfo for tracking the async operation if the service returns HTTP 202 Accepted.
+func (updateService *UpdateService) SimpleUpdateWithContext(ctx context.Context, parameters *SimpleUpdateParameters) (*TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTaskWithContext(ctx, updateService.GetClient(),
 		updateService.simpleUpdateTarget, parameters, updateService.Headers(), false)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
@@ -314,12 +335,23 @@ func (updateService *UpdateService) SimpleUpdate(parameters *SimpleUpdateParamet
 // StartUpdate starts updating all images that have been previously invoked using an
 // OperationApplyTime value of `OnStartUpdateRequest`.
 func (updateService *UpdateService) StartUpdate() error {
-	return updateService.Post(updateService.startUpdateTarget, nil)
+	return updateService.StartUpdateWithContext(common.ContextOf(updateService.GetClient()))
+}
+
+// StartUpdateWithContext starts updating all images that have been previously invoked using an
+// OperationApplyTime value of `OnStartUpdateRequest`.
+func (updateService *UpdateService) StartUpdateWithContext(ctx context.Context) error {
+	return updateService.PostWithContext(ctx, updateService.startUpdateTarget, nil)
 }
 
 // FirmwareInventories gets the collection of firmware inventories of this update service
 func (updateService *UpdateService) FirmwareInventories(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
-	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.firmwareInventory, queryOpts...)
+	return updateService.FirmwareInventoriesWithContext(common.ContextOf(updateService.GetClient()), queryOpts...)
+}
+
+// FirmwareInventoriesWithContext gets the collection of firmware inventories of this update service
+func (updateService *UpdateService) FirmwareInventoriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return ListReferencedSoftwareInventoriesWithContext(ctx, updateService.GetClient(), updateService.firmwareInventory, queryOpts...)
 }
 
 // PublicIdentitySSHKey get the public key that is used with the SimpleUpdate action
@@ -327,10 +359,18 @@ func (updateService *UpdateService) FirmwareInventories(queryOpts ...common.Quer
 // are used to update the key for the SimpleUpdate action.
 // This property shall not be present if a key-pair is not available.
 func (updateService *UpdateService) PublicIdentitySSHKey(queryOpts ...common.QueryGroupOption) (*Key, error) {
+	return updateService.PublicIdentitySSHKeyWithContext(common.ContextOf(updateService.GetClient()), queryOpts...)
+}
+
+// PublicIdentitySSHKeyWithContext get the public key that is used with the SimpleUpdate action
+// for the key-based authentication. The GenerateSSHIdentityKeyPair and RemoveSSHIdentityKeyPair
+// are used to update the key for the SimpleUpdate action.
+// This property shall not be present if a key-pair is not available.
+func (updateService *UpdateService) PublicIdentitySSHKeyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Key, error) {
 	if updateService.publicIdentitySSHKey == "" {
 		return nil, nil
 	}
-	return GetKey(updateService.GetClient(), updateService.publicIdentitySSHKey, queryOpts...)
+	return GetKeyWithContext(ctx, updateService.GetClient(), updateService.publicIdentitySSHKey, queryOpts...)
 }
 
 // RemoteServerCertificates gets the server certificates for the server referenced by the
@@ -343,7 +383,20 @@ func (updateService *UpdateService) PublicIdentitySSHKey(queryOpts ...common.Que
 // the contents of this collection, services may perform additional verification based on
 // other factors, such as the configuration of the SecurityPolicy resource.
 func (updateService *UpdateService) RemoteServerCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return common.GetObjects[Certificate](updateService.GetClient(), updateService.remoteServerCertificates, queryOpts...)
+	return updateService.RemoteServerCertificatesWithContext(common.ContextOf(updateService.GetClient()), queryOpts...)
+}
+
+// RemoteServerCertificatesWithContext gets the server certificates for the server referenced by the
+// ImageURI property in SimpleUpdate.  If VerifyRemoteServerCertificate is `true`, services
+// shall compare the certificates in this collection with the certificate obtained during
+// handshaking with the image server in order to verify the identity of the image server
+// prior to transferring the image.  If the server cannot be verified, the service shall not
+// send the transfer request. If VerifyRemoteServerCertificate is `false`, the service shall
+// not perform certificate verification with certificates in this collection. Regardless of
+// the contents of this collection, services may perform additional verification based on
+// other factors, such as the configuration of the SecurityPolicy resource.
+func (updateService *UpdateService) RemoteServerCertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjectsWithContext[Certificate](ctx, updateService.GetClient(), updateService.remoteServerCertificates, queryOpts...)
 }
 
 // RemoteServerSSHKeys gets the server SSH keys for the server referenced by the ImageURI
@@ -354,15 +407,36 @@ func (updateService *UpdateService) RemoteServerCertificates(queryOpts ...common
 // If VerifyRemoteServerSSHKey is `false`, the service shall not perform key verification
 // with keys in this collection.
 func (updateService *UpdateService) RemoteServerSSHKeys(queryOpts ...common.QueryGroupOption) ([]*Key, error) {
-	return common.GetObjects[Key](updateService.GetClient(), updateService.remoteServerSSHKeys, queryOpts...)
+	return updateService.RemoteServerSSHKeysWithContext(common.ContextOf(updateService.GetClient()), queryOpts...)
+}
+
+// RemoteServerSSHKeysWithContext gets the server SSH keys for the server referenced by the ImageURI
+// property in SimpleUpdate. If VerifyRemoteServerSSHKey is `true`, services shall compare
+// the keys in this collection with the key obtained during handshaking with the image
+// server in order to verify the identity of the image server prior to transferring the
+// image. If the server cannot be verified, the service shall not send the transfer request.
+// If VerifyRemoteServerSSHKey is `false`, the service shall not perform key verification
+// with keys in this collection.
+func (updateService *UpdateService) RemoteServerSSHKeysWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Key, error) {
+	return common.GetObjectsWithContext[Key](ctx, updateService.GetClient(), updateService.remoteServerSSHKeys, queryOpts...)
 }
 
 // SoftwareInventories gets the collection of software inventories of this update service
 func (updateService *UpdateService) SoftwareInventories(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
-	return ListReferencedSoftwareInventories(updateService.GetClient(), updateService.softwareInventory, queryOpts...)
+	return updateService.SoftwareInventoriesWithContext(common.ContextOf(updateService.GetClient()), queryOpts...)
+}
+
+// SoftwareInventoriesWithContext gets the collection of software inventories of this update service
+func (updateService *UpdateService) SoftwareInventoriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return ListReferencedSoftwareInventoriesWithContext(ctx, updateService.GetClient(), updateService.softwareInventory, queryOpts...)
 }
 
 // GetUpdateService will get a UpdateService instance from the service.
 func GetUpdateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri, queryOpts...)
+	return GetUpdateServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetUpdateServiceWithContext will get a UpdateService instance from the service.
+func GetUpdateServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
+	return common.GetObjectWithContext[UpdateService](ctx, c, uri, queryOpts...)
 }

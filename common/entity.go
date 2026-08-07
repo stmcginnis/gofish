@@ -5,6 +5,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,20 @@ import (
 	"reflect"
 	"strings"
 )
+
+// ContextOf returns the cached context of the given client, falling back to
+// context.Background() when the client (or its context) is nil. It lets the
+// context-free shims safely resolve a context to pass to their WithContext
+// variants.
+func ContextOf(c Client) context.Context {
+	if c == nil {
+		return context.Background()
+	}
+	if ctx := c.Context(); ctx != nil {
+		return ctx
+	}
+	return context.Background()
+}
 
 // Entity provides the common basis for all Redfish and Swordfish objects.
 type Entity struct {
@@ -87,8 +102,13 @@ func (e *Entity) IsEtagMatchDisabled() bool {
 	return e.disableEtagMatch
 }
 
-// Update commits changes to an entity after validating allowed updates.
+// Update commits changes to an entity after validating allowed updates using the client's cached context.
 func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpdates []string) error {
+	return e.UpdateWithContext(ContextOf(e.client), originalEntity, updatedEntity, allowedUpdates)
+}
+
+// UpdateWithContext commits changes to an entity after validating allowed updates.
+func (e *Entity) UpdateWithContext(ctx context.Context, originalEntity, updatedEntity reflect.Value, allowedUpdates []string) error {
 	payload := getPatchPayloadFromUpdate(originalEntity, updatedEntity)
 
 	// Validate that all fields being updated are allowed
@@ -108,15 +128,20 @@ func (e *Entity) Update(originalEntity, updatedEntity reflect.Value, allowedUpda
 
 	// Send updates if there are any allowed changes
 	if len(payload) > 0 {
-		return e.Patch(e.ODataID, payload)
+		return e.PatchWithContext(ctx, e.ODataID, payload)
 	}
 
 	return nil
 }
 
-// Get performs a GET request against the Redfish service and saves the etag.
+// Get performs a GET request against the Redfish service and saves the etag using the provided client's cached context.
 func (e *Entity) Get(c Client, uri string, payload any) error {
-	resp, err := c.Get(uri)
+	return e.GetWithContext(ContextOf(c), c, uri, payload)
+}
+
+// GetWithContext performs a GET request against the Redfish service and saves the etag.
+func (e *Entity) GetWithContext(ctx context.Context, c Client, uri string, payload any) error {
+	resp, err := c.GetWithContext(ctx, uri)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
@@ -135,28 +160,44 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 	return nil
 }
 
-// Patch performs a PATCH request against the Redfish service with etag headers.
+// Patch performs a PATCH request against the Redfish service with etag headers using the client's cached context.
 func (e *Entity) Patch(uri string, payload any) error {
-	resp, err := e.client.PatchWithHeaders(uri, payload, e.Headers())
+	return e.PatchWithContext(ContextOf(e.client), uri, payload)
+}
+
+// PatchWithContext performs a PATCH request against the Redfish service with etag headers.
+func (e *Entity) PatchWithContext(ctx context.Context, uri string, payload any) error {
+	resp, err := e.client.PatchWithHeadersWithContext(ctx, uri, payload, e.Headers())
 	if err != nil {
 		return err
 	}
 	return CleanupHTTPResponse(resp)
 }
 
-// Post performs a POST request against the Redfish service with etag headers.
+// Post performs a POST request against the Redfish service with etag headers using the client's cached context.
 func (e *Entity) Post(uri string, payload any) error {
-	resp, err := e.PostWithResponse(uri, payload)
+	return e.PostWithContext(ContextOf(e.client), uri, payload)
+}
+
+// PostWithContext performs a POST request against the Redfish service with etag headers.
+func (e *Entity) PostWithContext(ctx context.Context, uri string, payload any) error {
+	resp, err := e.PostWithResponseWithContext(ctx, uri, payload)
 	if err != nil {
 		return err
 	}
 	return CleanupHTTPResponse(resp)
 }
 
-// PostWithResponse performs a POST request and returns the full response.
+// PostWithResponse performs a POST request and returns the full response using the client's cached context.
 // Callers must close the response body when done.
 func (e *Entity) PostWithResponse(uri string, payload any) (*http.Response, error) {
-	return e.client.PostWithHeaders(uri, payload, e.Headers())
+	return e.PostWithResponseWithContext(ContextOf(e.client), uri, payload)
+}
+
+// PostWithResponseWithContext performs a POST request and returns the full response.
+// Callers must close the response body when done.
+func (e *Entity) PostWithResponseWithContext(ctx context.Context, uri string, payload any) (*http.Response, error) {
+	return e.client.PostWithHeadersWithContext(ctx, uri, payload, e.Headers())
 }
 
 // Headers generates the appropriate Headers including etag if configured.
@@ -209,8 +250,17 @@ func (e *Filter) ClearFilter() {
 }
 
 // UpdateFromRawData provides a generic update implementation for resources
+// that store their original JSON data in a RawData field using the client's cached context.
+func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates []string) error {
+	if e == nil {
+		return fmt.Errorf("entity is nil")
+	}
+	return e.UpdateFromRawDataWithContext(ContextOf(e.client), resource, rawData, allowedUpdates)
+}
+
+// UpdateFromRawDataWithContext provides a generic update implementation for resources
 // that store their original JSON data in a RawData field.
-func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates []string) (retErr error) {
+func (e *Entity) UpdateFromRawDataWithContext(ctx context.Context, resource any, rawData []byte, allowedUpdates []string) (retErr error) {
 	if e == nil {
 		return fmt.Errorf("entity is nil")
 	}
@@ -272,7 +322,7 @@ func (e *Entity) UpdateFromRawData(resource any, rawData []byte, allowedUpdates 
 		}
 	}()
 
-	return e.Update(originalValue, currentValue, allowedUpdates)
+	return e.UpdateWithContext(ctx, originalValue, currentValue, allowedUpdates)
 }
 
 // getPatchPayloadFromUpdate compares original and updated structures and returns
@@ -456,11 +506,16 @@ type GenericSchemaObjectPointer[T any] interface {
 	SchemaObject
 }
 
-// GetObject retrieves a single API object from the service.
+// GetObject retrieves a single API object from the service using the client's cached context.
 func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string, opts ...QueryGroupOption) (*T, error) {
+	return GetObjectWithContext[T, PT](ContextOf(c), c, uri, opts...)
+}
+
+// GetObjectWithContext retrieves a single API object from the service.
+func GetObjectWithContext[T any, PT GenericSchemaObjectPointer[T]](ctx context.Context, c Client, uri string, opts ...QueryGroupOption) (*T, error) {
 	uri = BuildQuery(c, uri, false, opts...)
 
-	resp, err := c.Get(uri)
+	resp, err := c.GetWithContext(ctx, uri)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
@@ -483,11 +538,19 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 	return entity, nil
 }
 
-// GetObjects retrieves multiple API objects concurrently from the service.
+// GetObjects retrieves multiple API objects concurrently from the service using the client's cached context.
 func GetObjects[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, uris []string, opts ...QueryGroupOption) ([]*T, error) {
+	return GetObjectsWithContext[T, PT](ContextOf(c), c, uris, opts...)
+}
+
+// GetObjectsWithContext retrieves multiple API objects concurrently from the service.
+func GetObjectsWithContext[T any, PT interface {
+	*T
+	SchemaObject
+}](ctx context.Context, c Client, uris []string, opts ...QueryGroupOption) ([]*T, error) {
 	var result []*T
 	if len(uris) == 0 {
 		return result, nil
@@ -504,13 +567,13 @@ func GetObjects[T any, PT interface {
 
 	// Worker function to get a single object
 	get := func(link string) {
-		entity, err := GetObject[T, PT](c, link, opts...)
+		entity, err := GetObjectWithContext[T, PT](ctx, c, link, opts...)
 		ch <- GetResult{Item: entity, Link: link, Error: err}
 	}
 
 	// Start workers for each URI
 	go func() {
-		CollectCollection(get, uris)
+		CollectCollectionWithContext(ctx, get, uris)
 		close(ch)
 	}()
 

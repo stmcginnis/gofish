@@ -5,6 +5,7 @@
 package ami
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -145,16 +146,28 @@ func FromUpdateService(updateService *redfish.UpdateService) (*UpdateService, er
 
 // GetUpdateService will get a UpdateService instance from the service.
 func GetUpdateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
-	return common.GetObject[UpdateService](c, uri, queryOpts...)
+	return GetUpdateServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetUpdateServiceWithContext will get a UpdateService instance from the service.
+func GetUpdateServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*UpdateService, error) {
+	return common.GetObjectWithContext[UpdateService](ctx, c, uri, queryOpts...)
 }
 
 // UploadCABundle uploads CA certificates.
 // WARNING: The AMI Redfish service JsonSchema does not define any parameters for
 // this action. This is most likely incorrect and will cause this to fail.
 func (us *UpdateService) UploadCABundle() error {
+	return us.UploadCABundleWithContext(common.ContextOf(us.GetClient()))
+}
+
+// UploadCABundleWithContext uploads CA certificates.
+// WARNING: The AMI Redfish service JsonSchema does not define any parameters for
+// this action. This is most likely incorrect and will cause this to fail.
+func (us *UpdateService) UploadCABundleWithContext(ctx context.Context) error {
 	if us.uploadCABundleTarget == "" {
 		return errors.New("upload ca bundle is not supported by this system")
 	}
 
-	return us.Post(us.uploadCABundleTarget, nil)
+	return us.PostWithContext(ctx, us.uploadCABundleTarget, nil)
 }

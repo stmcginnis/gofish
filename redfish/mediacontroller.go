@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -107,44 +108,80 @@ func (mediacontroller *MediaController) UnmarshalJSON(b []byte) error {
 
 // Reset resets this media controller.
 func (mediacontroller *MediaController) Reset(resetType ResetType) error {
+	return mediacontroller.ResetWithContext(common.ContextOf(mediacontroller.GetClient()), resetType)
+}
+
+// ResetWithContext resets this media controller.
+func (mediacontroller *MediaController) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	parameters := struct {
 		ResetType ResetType
 	}{
 		ResetType: resetType,
 	}
-	return mediacontroller.Post(mediacontroller.resetTarget, parameters)
+	return mediacontroller.PostWithContext(ctx, mediacontroller.resetTarget, parameters)
 }
 
 // EnvironmentMetrics gets the environment metrics for this media controller.
 func (mediacontroller *MediaController) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return mediacontroller.EnvironmentMetricsWithContext(common.ContextOf(mediacontroller.GetClient()), queryOpts...)
+}
+
+// EnvironmentMetricsWithContext gets the environment metrics for this media controller.
+func (mediacontroller *MediaController) EnvironmentMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if mediacontroller.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(mediacontroller.GetClient(), mediacontroller.environmentMetrics, queryOpts...)
+	return GetEnvironmentMetricsWithContext(ctx, mediacontroller.GetClient(), mediacontroller.environmentMetrics, queryOpts...)
 }
 
 // Ports gets the ports associated with this media controller.
 func (mediacontroller *MediaController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return ListReferencedPorts(mediacontroller.GetClient(), mediacontroller.ports, queryOpts...)
+	return mediacontroller.PortsWithContext(common.ContextOf(mediacontroller.GetClient()), queryOpts...)
+}
+
+// PortsWithContext gets the ports associated with this media controller.
+func (mediacontroller *MediaController) PortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPortsWithContext(ctx, mediacontroller.GetClient(), mediacontroller.ports, queryOpts...)
 }
 
 // Endpoints get the Endpoints with which this media controller is associated.
 func (mediacontroller *MediaController) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](mediacontroller.GetClient(), mediacontroller.endpoints, queryOpts...)
+	return mediacontroller.EndpointsWithContext(common.ContextOf(mediacontroller.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext get the Endpoints with which this media controller is associated.
+func (mediacontroller *MediaController) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, mediacontroller.GetClient(), mediacontroller.endpoints, queryOpts...)
 }
 
 // MemoryDomains get the memory domains associated with this memory controller.
 func (mediacontroller *MediaController) MemoryDomains(queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
-	return common.GetObjects[MemoryDomain](mediacontroller.GetClient(), mediacontroller.memoryDomains, queryOpts...)
+	return mediacontroller.MemoryDomainsWithContext(common.ContextOf(mediacontroller.GetClient()), queryOpts...)
+}
+
+// MemoryDomainsWithContext get the memory domains associated with this memory controller.
+func (mediacontroller *MediaController) MemoryDomainsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
+	return common.GetObjectsWithContext[MemoryDomain](ctx, mediacontroller.GetClient(), mediacontroller.memoryDomains, queryOpts...)
 }
 
 // GetMediaController will get a MediaController instance from the service.
 func GetMediaController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MediaController, error) {
-	return common.GetObject[MediaController](c, uri, queryOpts...)
+	return GetMediaControllerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMediaControllerWithContext will get a MediaController instance from the service.
+func GetMediaControllerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MediaController, error) {
+	return common.GetObjectWithContext[MediaController](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMediaControllers gets the collection of MediaController from
 // a provided reference.
 func ListReferencedMediaControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MediaController, error) {
-	return common.GetCollectionObjects[MediaController](c, link, queryOpts...)
+	return ListReferencedMediaControllersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMediaControllersWithContext gets the collection of MediaController from
+// a provided reference.
+func ListReferencedMediaControllersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MediaController, error) {
+	return common.GetCollectionObjectsWithContext[MediaController](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -315,6 +316,11 @@ func (storagepool *StoragePool) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (storagepool *StoragePool) Update() error {
+	return storagepool.UpdateWithContext(common.ContextOf(storagepool.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (storagepool *StoragePool) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(StoragePool)
@@ -338,77 +344,137 @@ func (storagepool *StoragePool) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(storagepool).Elem()
 
-	return storagepool.Entity.Update(originalElement, currentElement, readWriteFields)
+	return storagepool.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetStoragePool will get a StoragePool instance from the service.
 func GetStoragePool(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StoragePool, error) {
-	return common.GetObject[StoragePool](c, uri, queryOpts...)
+	return GetStoragePoolWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetStoragePoolWithContext will get a StoragePool instance from the service.
+func GetStoragePoolWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StoragePool, error) {
+	return common.GetObjectWithContext[StoragePool](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedStoragePools gets the collection of StoragePool from
 // a provided reference.
 func ListReferencedStoragePools(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
-	return common.GetCollectionObjects[StoragePool](c, link, queryOpts...)
+	return ListReferencedStoragePoolsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedStoragePoolsWithContext gets the collection of StoragePool from
+// a provided reference.
+func ListReferencedStoragePoolsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
+	return common.GetCollectionObjectsWithContext[StoragePool](ctx, c, link, queryOpts...)
 }
 
 // DedicatedSpareDrives gets the Drive entities which are currently assigned as
 // a dedicated spare and are able to support this StoragePool.
 func (storagepool *StoragePool) DedicatedSpareDrives(queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
-	return common.GetObjects[redfish.Drive](storagepool.GetClient(), storagepool.dedicatedSpareDrives, queryOpts...)
+	return storagepool.DedicatedSpareDrivesWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// DedicatedSpareDrivesWithContext gets the Drive entities which are currently assigned as
+// a dedicated spare and are able to support this StoragePool.
+func (storagepool *StoragePool) DedicatedSpareDrivesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*redfish.Drive, error) {
+	return common.GetObjectsWithContext[redfish.Drive](ctx, storagepool.GetClient(), storagepool.dedicatedSpareDrives, queryOpts...)
 }
 
 // SpareResourceSets gets resources that may be utilized to replace the capacity
 // provided by a failed resource having a compatible type.
 func (storagepool *StoragePool) SpareResourceSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
-	return common.GetObjects[SpareResourceSet](storagepool.GetClient(), storagepool.spareResourceSets, queryOpts...)
+	return storagepool.SpareResourceSetsWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// SpareResourceSetsWithContext gets resources that may be utilized to replace the capacity
+// provided by a failed resource having a compatible type.
+func (storagepool *StoragePool) SpareResourceSetsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetObjectsWithContext[SpareResourceSet](ctx, storagepool.GetClient(), storagepool.spareResourceSets, queryOpts...)
 }
 
 // AllocatedPools gets the storage pools allocated from this storage pool.
 func (storagepool *StoragePool) AllocatedPools(queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
-	return ListReferencedStoragePools(storagepool.GetClient(), storagepool.allocatedPools, queryOpts...)
+	return storagepool.AllocatedPoolsWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// AllocatedPoolsWithContext gets the storage pools allocated from this storage pool.
+func (storagepool *StoragePool) AllocatedPoolsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*StoragePool, error) {
+	return ListReferencedStoragePoolsWithContext(ctx, storagepool.GetClient(), storagepool.allocatedPools, queryOpts...)
 }
 
 // AllocatedVolumes gets the volumes allocated from this storage pool.
 func (storagepool *StoragePool) AllocatedVolumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
-	return ListReferencedVolumes(storagepool.GetClient(), storagepool.allocatedVolumes, queryOpts...)
+	return storagepool.AllocatedVolumesWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// AllocatedVolumesWithContext gets the volumes allocated from this storage pool.
+func (storagepool *StoragePool) AllocatedVolumesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return ListReferencedVolumesWithContext(ctx, storagepool.GetClient(), storagepool.allocatedVolumes, queryOpts...)
 }
 
 // CapacitySources gets space allocations to this pool.
 func (storagepool *StoragePool) CapacitySources(queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
-	return common.GetObjects[CapacitySource](storagepool.GetClient(), storagepool.capacitySources, queryOpts...)
+	return storagepool.CapacitySourcesWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// CapacitySourcesWithContext gets space allocations to this pool.
+func (storagepool *StoragePool) CapacitySourcesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CapacitySource, error) {
+	return common.GetObjectsWithContext[CapacitySource](ctx, storagepool.GetClient(), storagepool.capacitySources, queryOpts...)
 }
 
 // ClassesOfService gets references to all classes of service supported by this
 // storage pool. Capacity allocated from this storage pool shall conform to one
 // of the referenced classes of service.
 func (storagepool *StoragePool) ClassesOfService(queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
-	return ListReferencedClassOfServices(storagepool.GetClient(), storagepool.classesOfService, queryOpts...)
+	return storagepool.ClassesOfServiceWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// ClassesOfServiceWithContext gets references to all classes of service supported by this
+// storage pool. Capacity allocated from this storage pool shall conform to one
+// of the referenced classes of service.
+func (storagepool *StoragePool) ClassesOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ClassOfService, error) {
+	return ListReferencedClassOfServicesWithContext(ctx, storagepool.GetClient(), storagepool.classesOfService, queryOpts...)
 }
 
 // DefaultClassOfService gets the default ClassOfService for this pool.
 func (storagepool *StoragePool) DefaultClassOfService(queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
+	return storagepool.DefaultClassOfServiceWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// DefaultClassOfServiceWithContext gets the default ClassOfService for this pool.
+func (storagepool *StoragePool) DefaultClassOfServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ClassOfService, error) {
 	if storagepool.defaultClassOfService == "" {
 		return nil, nil
 	}
-	return GetClassOfService(storagepool.GetClient(), storagepool.defaultClassOfService, queryOpts...)
+	return GetClassOfServiceWithContext(ctx, storagepool.GetClient(), storagepool.defaultClassOfService, queryOpts...)
 }
 
 // OwningStorageResource gets the Storage resource that owns or contains this StoragePool.
 func (storagepool *StoragePool) OwningStorageResource(queryOpts ...common.QueryGroupOption) (*redfish.Storage, error) {
+	return storagepool.OwningStorageResourceWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// OwningStorageResourceWithContext gets the Storage resource that owns or contains this StoragePool.
+func (storagepool *StoragePool) OwningStorageResourceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*redfish.Storage, error) {
 	if storagepool.owningStorageResource == "" {
 		return nil, nil
 	}
 
-	return redfish.GetStorage(storagepool.GetClient(), storagepool.owningStorageResource, queryOpts...)
+	return redfish.GetStorageWithContext(ctx, storagepool.GetClient(), storagepool.owningStorageResource, queryOpts...)
 }
 
 // Metrics gets the metrics for this storage pool.
 func (storagepool *StoragePool) Metrics(queryOpts ...common.QueryGroupOption) (*StoragePoolMetrics, error) {
+	return storagepool.MetricsWithContext(common.ContextOf(storagepool.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the metrics for this storage pool.
+func (storagepool *StoragePool) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*StoragePoolMetrics, error) {
 	if storagepool.metrics == "" {
 		return nil, nil
 	}
-	return GetStoragePoolMetrics(storagepool.GetClient(), storagepool.metrics, queryOpts...)
+	return GetStoragePoolMetricsWithContext(ctx, storagepool.GetClient(), storagepool.metrics, queryOpts...)
 }
 
 // AddDrives will add an additional drive, or set of drives, to a capacity source for the storage pool.
@@ -419,6 +485,17 @@ func (storagepool *StoragePool) Metrics(queryOpts ...common.QueryGroupOption) (*
 // `drives` is the existing drive or drives to be added to a capacity source of the storage pool. The
 // implementation may impose restrictions on the number of drives added simultaneously.
 func (storagepool *StoragePool) AddDrives(capacitySource *CapacitySource, drives []*redfish.Drive) error {
+	return storagepool.AddDrivesWithContext(common.ContextOf(storagepool.GetClient()), capacitySource, drives)
+}
+
+// AddDrivesWithContext will add an additional drive, or set of drives, to a capacity source for the storage pool.
+//
+// `capacitySource` is the target capacity source for the drive(s). This property does not need to be
+// specified if the storage pool only contains one capacity source, or if the implementation is
+// capable of automatically selecting the appropriate capacity source.
+// `drives` is the existing drive or drives to be added to a capacity source of the storage pool. The
+// implementation may impose restrictions on the number of drives added simultaneously.
+func (storagepool *StoragePool) AddDrivesWithContext(ctx context.Context, capacitySource *CapacitySource, drives []*redfish.Drive) error {
 	if storagepool.addDrivesTarget == "" {
 		return errors.New("action not supported by this service")
 	}
@@ -436,13 +513,20 @@ func (storagepool *StoragePool) AddDrives(capacitySource *CapacitySource, drives
 		payload.Drives = append(payload.Drives, drive.ODataID)
 	}
 
-	return storagepool.Post(storagepool.addDrivesTarget, payload)
+	return storagepool.PostWithContext(ctx, storagepool.addDrivesTarget, payload)
 }
 
 // RemoveDrives will remove drive(s) from the capacity source for the StoragePool.
 //
 // `drives` is the drive or drives to be removed from the underlying capacity source.
 func (storagepool *StoragePool) RemoveDrives(drives []*redfish.Drive) error {
+	return storagepool.RemoveDrivesWithContext(common.ContextOf(storagepool.GetClient()), drives)
+}
+
+// RemoveDrivesWithContext will remove drive(s) from the capacity source for the StoragePool.
+//
+// `drives` is the drive or drives to be removed from the underlying capacity source.
+func (storagepool *StoragePool) RemoveDrivesWithContext(ctx context.Context, drives []*redfish.Drive) error {
 	if storagepool.removeDrivesTarget == "" {
 		return errors.New("action not supported by this service")
 	}
@@ -455,7 +539,7 @@ func (storagepool *StoragePool) RemoveDrives(drives []*redfish.Drive) error {
 		payload.Drives = append(payload.Drives, drive.ODataID)
 	}
 
-	return storagepool.Post(storagepool.removeDrivesTarget, payload)
+	return storagepool.PostWithContext(ctx, storagepool.removeDrivesTarget, payload)
 }
 
 // SetCompressionState will set the compression state of the storage pool.
@@ -463,6 +547,14 @@ func (storagepool *StoragePool) RemoveDrives(drives []*redfish.Drive) error {
 //
 // `enable` indicates the desired compression state of the storage pool.
 func (storagepool *StoragePool) SetCompressionState(enable bool) error {
+	return storagepool.SetCompressionStateWithContext(common.ContextOf(storagepool.GetClient()), enable)
+}
+
+// SetCompressionStateWithContext will set the compression state of the storage pool.
+// This may be both a highly impactful, as well as a long running operation.
+//
+// `enable` indicates the desired compression state of the storage pool.
+func (storagepool *StoragePool) SetCompressionStateWithContext(ctx context.Context, enable bool) error {
 	if storagepool.setCompressionStateTarget == "" {
 		return errors.New("action not supported by this service")
 	}
@@ -471,7 +563,7 @@ func (storagepool *StoragePool) SetCompressionState(enable bool) error {
 		Enable bool
 	}{Enable: enable}
 
-	return storagepool.Post(storagepool.setCompressionStateTarget, payload)
+	return storagepool.PostWithContext(ctx, storagepool.setCompressionStateTarget, payload)
 }
 
 // SetDeduplicationState will set the dedupe state of the storage pool.
@@ -479,6 +571,14 @@ func (storagepool *StoragePool) SetCompressionState(enable bool) error {
 //
 // `enable` indicates the desired deduplication state of the storage pool.
 func (storagepool *StoragePool) SetDeduplicationState(enable bool) error {
+	return storagepool.SetDeduplicationStateWithContext(common.ContextOf(storagepool.GetClient()), enable)
+}
+
+// SetDeduplicationStateWithContext will set the dedupe state of the storage pool.
+// This may be both a highly impactful, as well as a long running operation.
+//
+// `enable` indicates the desired deduplication state of the storage pool.
+func (storagepool *StoragePool) SetDeduplicationStateWithContext(ctx context.Context, enable bool) error {
 	if storagepool.setCompressionStateTarget == "" {
 		return errors.New("action not supported by this service")
 	}
@@ -487,7 +587,7 @@ func (storagepool *StoragePool) SetDeduplicationState(enable bool) error {
 		Enable bool
 	}{Enable: enable}
 
-	return storagepool.Post(storagepool.setCompressionStateTarget, payload)
+	return storagepool.PostWithContext(ctx, storagepool.setCompressionStateTarget, payload)
 }
 
 // SetEncryptionState set the encryption state of the storage pool.
@@ -495,6 +595,14 @@ func (storagepool *StoragePool) SetDeduplicationState(enable bool) error {
 //
 // `enable` indicates the desired encryption state of the storage pool.
 func (storagepool *StoragePool) SetEncryptionState(enable bool) error {
+	return storagepool.SetEncryptionStateWithContext(common.ContextOf(storagepool.GetClient()), enable)
+}
+
+// SetEncryptionStateWithContext set the encryption state of the storage pool.
+// This may be both a highly impactful, as well as a long running operation.
+//
+// `enable` indicates the desired encryption state of the storage pool.
+func (storagepool *StoragePool) SetEncryptionStateWithContext(ctx context.Context, enable bool) error {
 	if storagepool.setEncryptionStateTarget == "" {
 		return errors.New("action not supported by this service")
 	}
@@ -503,5 +611,5 @@ func (storagepool *StoragePool) SetEncryptionState(enable bool) error {
 		Enable bool
 	}{Enable: enable}
 
-	return storagepool.Post(storagepool.setEncryptionStateTarget, payload)
+	return storagepool.PostWithContext(ctx, storagepool.setEncryptionStateTarget, payload)
 }

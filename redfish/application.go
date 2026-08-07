@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -73,18 +74,34 @@ func (application *Application) UnmarshalJSON(b []byte) error {
 
 // GetApplication will get a Application instance from the service.
 func GetApplication(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Application, error) {
-	return common.GetObject[Application](c, uri, queryOpts...)
+	return GetApplicationWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetApplicationWithContext will get a Application instance from the service.
+func GetApplicationWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Application, error) {
+	return common.GetObjectWithContext[Application](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedApplications gets the collection of Application from
 // a provided reference.
 func ListReferencedApplications(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Application, error) {
-	return common.GetCollectionObjects[Application](c, link, queryOpts...)
+	return ListReferencedApplicationsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedApplicationsWithContext gets the collection of Application from
+// a provided reference.
+func ListReferencedApplicationsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Application, error) {
+	return common.GetCollectionObjectsWithContext[Application](ctx, c, link, queryOpts...)
 }
 
 // SoftwareImage returns a `SoftwareInventory“ that represents the software image from which this application runs.
 func (application *Application) SoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
-	return GetSoftwareInventory(application.GetClient(), application.softwareImage, queryOpts...)
+	return application.SoftwareImageWithContext(common.ContextOf(application.GetClient()), queryOpts...)
+}
+
+// SoftwareImageWithContext returns a `SoftwareInventory“ that represents the software image from which this application runs.
+func (application *Application) SoftwareImageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return GetSoftwareInventoryWithContext(ctx, application.GetClient(), application.softwareImage, queryOpts...)
 }
 
 // Reset resets the application.
@@ -94,9 +111,19 @@ func (application *Application) SoftwareImage(queryOpts ...common.QueryGroupOpti
 // `GracefulShutdown` and `ForceOff` shall indicate requests to stop or disable the application.
 // `On` and `ForceOn` shall indicate requests to start or enable the application.
 func (application *Application) Reset(resetType ResetType) error {
+	return application.ResetWithContext(common.ContextOf(application.GetClient()), resetType)
+}
+
+// ResetWithContext resets the application.
+//
+// `ResetType` is the type of reset.
+// `GracefulRestart` and `ForceRestart` shall indicate requests to restart the application.
+// `GracefulShutdown` and `ForceOff` shall indicate requests to stop or disable the application.
+// `On` and `ForceOn` shall indicate requests to start or enable the application.
+func (application *Application) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	t := struct {
 		ResetType ResetType
 	}{ResetType: resetType}
 
-	return application.Post(application.resetTarget, t)
+	return application.PostWithContext(ctx, application.resetTarget, t)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -60,21 +61,37 @@ func (certificateservice *CertificateService) UnmarshalJSON(b []byte) error {
 
 // CertificateLocations get the certificate locations.
 func (certificateservice *CertificateService) CertificateLocations(queryOpts ...common.QueryGroupOption) (*CertificateLocations, error) {
+	return certificateservice.CertificateLocationsWithContext(common.ContextOf(certificateservice.GetClient()), queryOpts...)
+}
+
+// CertificateLocationsWithContext get the certificate locations.
+func (certificateservice *CertificateService) CertificateLocationsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*CertificateLocations, error) {
 	if certificateservice.certificateLocations == "" {
 		return nil, nil
 	}
-	return GetCertificateLocations(certificateservice.GetClient(), certificateservice.certificateLocations, queryOpts...)
+	return GetCertificateLocationsWithContext(ctx, certificateservice.GetClient(), certificateservice.certificateLocations, queryOpts...)
 }
 
 // GetCertificateService will get a CertificateService instance from the service.
 func GetCertificateService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CertificateService, error) {
-	return common.GetObject[CertificateService](c, uri, queryOpts...)
+	return GetCertificateServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCertificateServiceWithContext will get a CertificateService instance from the service.
+func GetCertificateServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CertificateService, error) {
+	return common.GetObjectWithContext[CertificateService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCertificateServices gets the collection of CertificateService from
 // a provided reference.
 func ListReferencedCertificateServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CertificateService, error) {
-	return common.GetCollectionObjects[CertificateService](c, link, queryOpts...)
+	return ListReferencedCertificateServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCertificateServicesWithContext gets the collection of CertificateService from
+// a provided reference.
+func ListReferencedCertificateServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CertificateService, error) {
+	return common.GetCollectionObjectsWithContext[CertificateService](ctx, c, link, queryOpts...)
 }
 
 // GenerateCSRResponse shall contain the properties found in the response body for the GenerateCSR action.
@@ -117,7 +134,13 @@ func (generatecsrresponse *GenerateCSRResponse) UnmarshalJSON(b []byte) error {
 // Certificates gets the collection of where the certificate is installed after
 // the certificate authority (CA) has signed the certificate.
 func (generatecsrresponse *GenerateCSRResponse) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(generatecsrresponse.client, generatecsrresponse.certificateCollection, queryOpts...)
+	return generatecsrresponse.CertificatesWithContext(common.ContextOf(generatecsrresponse.client), queryOpts...)
+}
+
+// CertificatesWithContext gets the collection of where the certificate is installed after
+// the certificate authority (CA) has signed the certificate.
+func (generatecsrresponse *GenerateCSRResponse) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, generatecsrresponse.client, generatecsrresponse.certificateCollection, queryOpts...)
 }
 
 type GenerateCSRRequest struct {
@@ -176,7 +199,15 @@ type GenerateCSRRequest struct {
 // installation of the certificate.
 // WARNING: this has not been fully tested and is subject to change.
 func (certificateservice *CertificateService) GenerateCSR(request *GenerateCSRRequest) (*GenerateCSRResponse, error) {
-	resp, err := certificateservice.PostWithResponse(certificateservice.generateCSRTarget, request)
+	return certificateservice.GenerateCSRWithContext(common.ContextOf(certificateservice.GetClient()), request)
+}
+
+// GenerateCSRWithContext makes a certificate signing request. The response shall contain a signing request that a certificate
+// authority (CA) will sign. The service should retain the private key that was generated during this request for
+// installation of the certificate.
+// WARNING: this has not been fully tested and is subject to change.
+func (certificateservice *CertificateService) GenerateCSRWithContext(ctx context.Context, request *GenerateCSRRequest) (*GenerateCSRResponse, error) {
+	resp, err := certificateservice.PostWithResponseWithContext(ctx, certificateservice.generateCSRTarget, request)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
@@ -203,6 +234,20 @@ func (certificateservice *CertificateService) GenerateCSR(request *GenerateCSRRe
 // `certificateURI` is a link to a resource of type Certificate that is being replaced.
 // WARNING: this has not been fully tested.
 func (certificateservice *CertificateService) ReplaceCertificate(certificateString string, certificateType CertificateType, certificateURI string) error {
+	return certificateservice.ReplaceCertificateWithContext(common.ContextOf(certificateservice.GetClient()), certificateString, certificateType, certificateURI)
+}
+
+// ReplaceCertificateWithContext replaces a certificate.
+//
+// `certificateString` is the string of the certificate, and the format shall follow the requirements specified by the
+// CertificateType property value. If the service does not know the private key for the certificate and it is needed to
+// use the certificate, the client shall provide the private key as part of the string in the request.
+//
+// `certificateType` specifies the format type of the certificate.
+//
+// `certificateURI` is a link to a resource of type Certificate that is being replaced.
+// WARNING: this has not been fully tested.
+func (certificateservice *CertificateService) ReplaceCertificateWithContext(ctx context.Context, certificateString string, certificateType CertificateType, certificateURI string) error {
 	// TODO: The new certificate resource is returned in the `Location` header of the response.
 	// Need to rework to be able to extract this header to use the URI to get the certificate.
 	// If we actually need it, that is.
@@ -216,5 +261,5 @@ func (certificateservice *CertificateService) ReplaceCertificate(certificateStri
 		certificateURI,
 	}
 
-	return certificateservice.Post(certificateservice.replaceCertificateTarget, payload)
+	return certificateservice.PostWithContext(ctx, certificateservice.replaceCertificateTarget, payload)
 }

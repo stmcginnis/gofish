@@ -5,6 +5,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -23,7 +24,12 @@ type TestAPICall struct {
 	Payload string
 	// CustomHeaders is the Map that holds customer HTTP headers
 	CustomHeaders map[string]string
+	// Context is the context the call was made with: the per-call context for
+	// WithContext methods, the client's cached context otherwise.
+	Context context.Context
 }
+
+var _ Client = (*TestClient)(nil)
 
 // TestClient is a mock client to use for unit testing some of the
 // function calls and actions that would normally need to connect
@@ -38,13 +44,40 @@ type TestClient struct {
 	// http.MethodPatch and http.MethodDelete.
 	// For each key it is possible to define a list of
 	// returns (in the order they should be returned).
+	// Note that calls rejected by a dead per-call context are still recorded
+	// and therefore still consume a slot in this list.
 	CustomReturnForActions map[string][]interface{}
 	Settings               ClientSettings
+	// ctx is the cached context returned by Context.
+	ctx context.Context
+}
+
+// Context returns the client's cached context, defaulting to context.Background().
+func (c *TestClient) Context() context.Context {
+	if c == nil {
+		return context.Background()
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.ctx == nil {
+		return context.Background()
+	}
+	return c.ctx
+}
+
+// SetContext sets the cached context returned by Context and used by the
+// context-free methods.
+func (c *TestClient) SetContext(ctx context.Context) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.ctx = ctx
 }
 
 // CapturedCalls gets all calls that were made through this instance
 func (c *TestClient) CapturedCalls() []TestAPICall {
-	return c.calls
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return append([]TestAPICall(nil), c.calls...)
 }
 
 // actionCount returns how many actions
@@ -106,26 +139,40 @@ func (c *TestClient) getPayloadToBeRecorded(payload interface{}) string {
 
 // Reset resets the captured information for this mock client.
 func (c *TestClient) Reset() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.calls = []TestAPICall{}
 	c.CustomReturnForActions = map[string][]interface{}{}
 }
 
 // recordCall is a helper to record any API calls made through this client
-func (c *TestClient) recordCall(action, url string, payload interface{}, customHeaders map[string]string) {
+func (c *TestClient) recordCall(ctx context.Context, action, url string, payload interface{}, customHeaders map[string]string) {
 	call := TestAPICall{
 		Action:        action,
 		URL:           url,
 		Payload:       c.getPayloadToBeRecorded(payload),
 		CustomHeaders: customHeaders,
+		Context:       ctx,
 	}
 
 	c.calls = append(c.calls, call)
 }
 
 func (c *TestClient) performAction(action, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.performActionWithContext(c.Context(), action, url, payload, customHeaders)
+}
+
+func (c *TestClient) performActionWithContext(ctx context.Context, action, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.recordCall(action, url, payload, customHeaders)
+	c.recordCall(ctx, action, url, payload, customHeaders)
+	// Mirror the real client: a dead context fails the call before any
+	// response is produced.
+	if ctx != nil {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+	}
 	customReturnForAction := c.getCustomReturnForAction(action)
 	if customReturnForAction == nil {
 		body := io.NopCloser(strings.NewReader(""))
@@ -202,6 +249,66 @@ func (c *TestClient) Delete(url string) (*http.Response, error) {
 // DeleteWithHeaders performs a Delete request against the Redfish service.
 func (c *TestClient) DeleteWithHeaders(url string, customHeaders map[string]string) (*http.Response, error) {
 	return c.performAction(http.MethodDelete, url, nil, customHeaders)
+}
+
+// GetWithContext performs a GET request against the Redfish service.
+func (c *TestClient) GetWithContext(ctx context.Context, url string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodGet, url, nil, nil)
+}
+
+// GetWithHeadersWithContext performs a GET request against the Redfish service.
+func (c *TestClient) GetWithHeadersWithContext(ctx context.Context, url string, customHeaders map[string]string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodGet, url, nil, customHeaders)
+}
+
+// PostWithContext performs a Post request against the Redfish service.
+func (c *TestClient) PostWithContext(ctx context.Context, url string, payload interface{}) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPost, url, payload, nil)
+}
+
+// PostWithHeadersWithContext performs a Post request against the Redfish service.
+func (c *TestClient) PostWithHeadersWithContext(ctx context.Context, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPost, url, payload, customHeaders)
+}
+
+// PostMultipartWithContext performs a Post request against the Redfish service.
+func (c *TestClient) PostMultipartWithContext(ctx context.Context, url string, payload map[string]io.Reader) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPost, url, payload, nil)
+}
+
+// PostMultipartWithHeadersWithContext performs a Post request against the Redfish service.
+func (c *TestClient) PostMultipartWithHeadersWithContext(ctx context.Context, url string, payload map[string]io.Reader, customHeaders map[string]string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPost, url, payload, customHeaders)
+}
+
+// PutWithContext performs a Put request against the Redfish service.
+func (c *TestClient) PutWithContext(ctx context.Context, url string, payload interface{}) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPut, url, payload, nil)
+}
+
+// PutWithHeadersWithContext performs a Put request against the Redfish service.
+func (c *TestClient) PutWithHeadersWithContext(ctx context.Context, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPut, url, payload, customHeaders)
+}
+
+// PatchWithContext performs a Patch request against the Redfish service.
+func (c *TestClient) PatchWithContext(ctx context.Context, url string, payload interface{}) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPatch, url, payload, nil)
+}
+
+// PatchWithHeadersWithContext performs a Patch request against the Redfish service.
+func (c *TestClient) PatchWithHeadersWithContext(ctx context.Context, url string, payload interface{}, customHeaders map[string]string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodPatch, url, payload, customHeaders)
+}
+
+// DeleteWithContext performs a Delete request against the Redfish service.
+func (c *TestClient) DeleteWithContext(ctx context.Context, url string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodDelete, url, nil, nil)
+}
+
+// DeleteWithHeadersWithContext performs a Delete request against the Redfish service.
+func (c *TestClient) DeleteWithHeadersWithContext(ctx context.Context, url string, customHeaders map[string]string) (*http.Response, error) {
+	return c.performActionWithContext(ctx, http.MethodDelete, url, nil, customHeaders)
 }
 
 func (c *TestClient) GetSettings() ClientSettings {

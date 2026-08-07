@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -393,6 +394,11 @@ func (manager *Manager) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (manager *Manager) Update() error {
+	return manager.UpdateWithContext(common.ContextOf(manager.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (manager *Manager) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AutoDSTEnabled",
 		"DateTime",
@@ -403,33 +409,57 @@ func (manager *Manager) Update() error {
 		"TimeZoneName",
 	}
 
-	return manager.UpdateFromRawData(manager, manager.RawData, readWriteFields)
+	return manager.UpdateFromRawDataWithContext(ctx, manager, manager.RawData, readWriteFields)
 }
 
 // GetManager will get a Manager instance from the Swordfish service.
 func GetManager(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Manager, error) {
-	return common.GetObject[Manager](c, uri, queryOpts...)
+	return GetManagerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetManagerWithContext will get a Manager instance from the Swordfish service.
+func GetManagerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Manager, error) {
+	return common.GetObjectWithContext[Manager](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedManagers gets the collection of Managers
 func ListReferencedManagers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetCollectionObjects[Manager](c, link, queryOpts...)
+	return ListReferencedManagersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedManagersWithContext gets the collection of Managers
+func ListReferencedManagersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetCollectionObjectsWithContext[Manager](ctx, c, link, queryOpts...)
 }
 
 // ForceFailover forces a failover to the specified manager.
 // **Need to test.** Spec calls for the Manager as a parameter, but it may actually
 // be the Manager.ODataID.
 func (manager *Manager) ForceFailover(newManager *Manager) error {
+	return manager.ForceFailoverWithContext(common.ContextOf(manager.GetClient()), newManager)
+}
+
+// ForceFailoverWithContext forces a failover to the specified manager.
+// **Need to test.** Spec calls for the Manager as a parameter, but it may actually
+// be the Manager.ODataID.
+func (manager *Manager) ForceFailoverWithContext(ctx context.Context, newManager *Manager) error {
 	if manager.Actions.ForceFailover.Target == "" {
 		return ErrActionNotSupported
 	}
-	return manager.Post(manager.Actions.ForceFailover.Target, newManager)
+	return manager.PostWithContext(ctx, manager.Actions.ForceFailover.Target, newManager)
 }
 
 // ModifyRedundancySet adds members to or removes members from a redundant group of managers.
 // **Need to test.** Spec calls for the Manager as a parameter, but it may actually
 // be the Manager.ODataID.
 func (manager *Manager) ModifyRedundancySet(addManagers, removeManagers []*Manager) error {
+	return manager.ModifyRedundancySetWithContext(common.ContextOf(manager.GetClient()), addManagers, removeManagers)
+}
+
+// ModifyRedundancySetWithContext adds members to or removes members from a redundant group of managers.
+// **Need to test.** Spec calls for the Manager as a parameter, but it may actually
+// be the Manager.ODataID.
+func (manager *Manager) ModifyRedundancySetWithContext(ctx context.Context, addManagers, removeManagers []*Manager) error {
 	if manager.Actions.ModifyRedundancySet.Target == "" {
 		return ErrActionNotSupported
 	}
@@ -440,19 +470,25 @@ func (manager *Manager) ModifyRedundancySet(addManagers, removeManagers []*Manag
 		Add:    addManagers,
 		Remove: removeManagers,
 	}
-	return manager.Post(manager.Actions.ModifyRedundancySet.Target, parameters)
+	return manager.PostWithContext(ctx, manager.Actions.ModifyRedundancySet.Target, parameters)
 }
 
 // GetSupportedResetTypes returns any reset types that the Manager declares as supported
 // via either ActionInfo or AllowableValues.
 func (manager *Manager) GetSupportedResetTypes() ([]ResetType, error) {
+	return manager.GetSupportedResetTypesWithContext(common.ContextOf(manager.GetClient()))
+}
+
+// GetSupportedResetTypesWithContext returns any reset types that the Manager declares as supported
+// via either ActionInfo or AllowableValues.
+func (manager *Manager) GetSupportedResetTypesWithContext(ctx context.Context) ([]ResetType, error) {
 	if len(manager.Actions.Reset.AllowedResetTypes) > 0 {
 		return manager.Actions.Reset.AllowedResetTypes, nil
 	}
 
 	// if we don't have ResetTypes, try to get from ActionInfo
 	if manager.Actions.Reset.ActionInfoTarget != "" {
-		resetActionInfo, err := manager.ResetActionInfo()
+		resetActionInfo, err := manager.ResetActionInfoWithContext(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -472,15 +508,25 @@ func (manager *Manager) GetSupportedResetTypes() ([]ResetType, error) {
 
 // ResetActionInfo returns the ActionInfo for the Manager reset action if supported
 func (manager *Manager) ResetActionInfo(queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
+	return manager.ResetActionInfoWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ResetActionInfoWithContext returns the ActionInfo for the Manager reset action if supported
+func (manager *Manager) ResetActionInfoWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
 	if manager.Actions.Reset.ActionInfoTarget == "" {
 		return nil, ErrActionNotSupported
 	}
 
-	return common.GetObject[ActionInfo](manager.GetClient(), manager.Actions.Reset.ActionInfoTarget, queryOpts...)
+	return common.GetObjectWithContext[ActionInfo](ctx, manager.GetClient(), manager.Actions.Reset.ActionInfoTarget, queryOpts...)
 }
 
 // Reset shall perform a reset of the manager.
 func (manager *Manager) Reset(resetType ResetType) error {
+	return manager.ResetWithContext(common.ContextOf(manager.GetClient()), resetType)
+}
+
+// ResetWithContext shall perform a reset of the manager.
+func (manager *Manager) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	resetTarget := manager.Actions.Reset.Target
 	supportedResetTypes := manager.Actions.Reset.AllowedResetTypes
 
@@ -491,10 +537,10 @@ func (manager *Manager) Reset(resetType ResetType) error {
 			t := struct {
 				ResetType ResetType
 			}{ResetType: resetType}
-			return manager.Post(resetTarget, t)
+			return manager.PostWithContext(ctx, resetTarget, t)
 		}
 		// reset directly without reset type. HPE server has the behavior
-		return manager.Post(resetTarget, struct{}{})
+		return manager.PostWithContext(ctx, resetTarget, struct{}{})
 	}
 	// Make sure the requested reset type is supported by the manager.
 	valid := false
@@ -513,19 +559,25 @@ func (manager *Manager) Reset(resetType ResetType) error {
 	t := struct {
 		ResetType ResetType
 	}{ResetType: resetType}
-	return manager.Post(resetTarget, t)
+	return manager.PostWithContext(ctx, resetTarget, t)
 }
 
 // GetSupportedResetToDefaultsTypes returns any reset to defaults
 // types that the Manager declares as supported via either ActionInfo or AllowableValues.
 func (manager *Manager) GetSupportedResetToDefaultsTypes() ([]ResetToDefaultsType, error) {
+	return manager.GetSupportedResetToDefaultsTypesWithContext(common.ContextOf(manager.GetClient()))
+}
+
+// GetSupportedResetToDefaultsTypesWithContext returns any reset to defaults
+// types that the Manager declares as supported via either ActionInfo or AllowableValues.
+func (manager *Manager) GetSupportedResetToDefaultsTypesWithContext(ctx context.Context) ([]ResetToDefaultsType, error) {
 	if len(manager.Actions.ResetToDefaults.AllowedResetTypes) > 0 {
 		return manager.Actions.ResetToDefaults.AllowedResetTypes, nil
 	}
 
 	// if we don't have ResetTypes, try to get from ActionInfo
 	if manager.Actions.ResetToDefaults.ActionInfoTarget != "" {
-		resetActionInfo, err := manager.ResetToDefaultsActionInfo()
+		resetActionInfo, err := manager.ResetToDefaultsActionInfoWithContext(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -547,15 +599,25 @@ func (manager *Manager) GetSupportedResetToDefaultsTypes() ([]ResetToDefaultsTyp
 
 // ResetToDefaultsActionInfo returns the ActionInfo for the Manager ResetToDefaults action if supported
 func (manager *Manager) ResetToDefaultsActionInfo(queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
+	return manager.ResetToDefaultsActionInfoWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ResetToDefaultsActionInfoWithContext returns the ActionInfo for the Manager ResetToDefaults action if supported
+func (manager *Manager) ResetToDefaultsActionInfoWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
 	if manager.Actions.ResetToDefaults.ActionInfoTarget == "" {
 		return nil, ErrActionNotSupported
 	}
 
-	return common.GetObject[ActionInfo](manager.GetClient(), manager.Actions.ResetToDefaults.ActionInfoTarget, queryOpts...)
+	return common.GetObjectWithContext[ActionInfo](ctx, manager.GetClient(), manager.Actions.ResetToDefaults.ActionInfoTarget, queryOpts...)
 }
 
 // ResetToDefaults resets the manager settings to factory defaults. This can cause the manager to reset.
 func (manager *Manager) ResetToDefaults(resetType ResetToDefaultsType) error {
+	return manager.ResetToDefaultsWithContext(common.ContextOf(manager.GetClient()), resetType)
+}
+
+// ResetToDefaultsWithContext resets the manager settings to factory defaults. This can cause the manager to reset.
+func (manager *Manager) ResetToDefaultsWithContext(ctx context.Context, resetType ResetToDefaultsType) error {
 	if manager.Actions.ResetToDefaults.Target == "" {
 		return ErrActionNotSupported
 	}
@@ -563,141 +625,238 @@ func (manager *Manager) ResetToDefaults(resetType ResetToDefaultsType) error {
 	t := struct {
 		ResetType ResetToDefaultsType
 	}{ResetType: resetType}
-	return manager.Post(manager.Actions.ResetToDefaults.Target, t)
+	return manager.PostWithContext(ctx, manager.Actions.ResetToDefaults.Target, t)
 }
 
 // DedicatedNetworkPorts gets the dedicated network ports of the manager.
 func (manager *Manager) DedicatedNetworkPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return manager.DedicatedNetworkPortsWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// DedicatedNetworkPortsWithContext gets the dedicated network ports of the manager.
+func (manager *Manager) DedicatedNetworkPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
 	if manager.DedicatedNetworkPortsLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedPorts(manager.GetClient(), manager.DedicatedNetworkPortsLink.String(), queryOpts...)
+	return ListReferencedPortsWithContext(ctx, manager.GetClient(), manager.DedicatedNetworkPortsLink.String(), queryOpts...)
 }
 
 // EthernetInterfaces get this manager's ethernet interfaces.
 func (manager *Manager) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return manager.EthernetInterfacesWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// EthernetInterfacesWithContext get this manager's ethernet interfaces.
+func (manager *Manager) EthernetInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
 	if manager.EthernetInterfacesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedEthernetInterfaces(manager.GetClient(), manager.EthernetInterfacesLink.String(), queryOpts...)
+	return ListReferencedEthernetInterfacesWithContext(ctx, manager.GetClient(), manager.EthernetInterfacesLink.String(), queryOpts...)
 }
 
 // HostInterfaces get this manager's host interfaces.
 func (manager *Manager) HostInterfaces(queryOpts ...common.QueryGroupOption) ([]*HostInterface, error) {
+	return manager.HostInterfacesWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// HostInterfacesWithContext get this manager's host interfaces.
+func (manager *Manager) HostInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*HostInterface, error) {
 	if manager.HostInterfacesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedHostInterfaces(manager.GetClient(), manager.HostInterfacesLink.String(), queryOpts...)
+	return ListReferencedHostInterfacesWithContext(ctx, manager.GetClient(), manager.HostInterfacesLink.String(), queryOpts...)
 }
 
 // LogServices get this manager's log services on this system.
 func (manager *Manager) LogServices(queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
+	return manager.LogServicesWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// LogServicesWithContext get this manager's log services on this system.
+func (manager *Manager) LogServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
 	if manager.LogServicesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedLogServices(manager.GetClient(), manager.LogServicesLink.String(), queryOpts...)
+	return ListReferencedLogServicesWithContext(ctx, manager.GetClient(), manager.LogServicesLink.String(), queryOpts...)
 }
 
 // ManagerDiagnosticData gets the diagnostic data for this manager.
 func (manager *Manager) ManagerDiagnosticData(queryOpts ...common.QueryGroupOption) (*ManagerDiagnosticData, error) {
+	return manager.ManagerDiagnosticDataWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ManagerDiagnosticDataWithContext gets the diagnostic data for this manager.
+func (manager *Manager) ManagerDiagnosticDataWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ManagerDiagnosticData, error) {
 	if manager.ManagerDiagnosticDataLink.IsZero() {
 		return nil, nil
 	}
-	return GetManagerDiagnosticData(manager.GetClient(), manager.ManagerDiagnosticDataLink.String(), queryOpts...)
+	return GetManagerDiagnosticDataWithContext(ctx, manager.GetClient(), manager.ManagerDiagnosticDataLink.String(), queryOpts...)
 }
 
 // NetworkProtocol get this manager's network protocol settings.
 func (manager *Manager) NetworkProtocol(queryOpts ...common.QueryGroupOption) (*NetworkProtocolSettings, error) {
+	return manager.NetworkProtocolWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// NetworkProtocolWithContext get this manager's network protocol settings.
+func (manager *Manager) NetworkProtocolWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*NetworkProtocolSettings, error) {
 	if manager.NetworkProtocolLink.IsZero() {
 		return nil, nil
 	}
-	return GetNetworkProtocol(manager.GetClient(), manager.NetworkProtocolLink.String(), queryOpts...)
+	return GetNetworkProtocolWithContext(ctx, manager.GetClient(), manager.NetworkProtocolLink.String(), queryOpts...)
 }
 
 // RemoteAccountService gets the account service resource for the remote manager that this resource represents.
 // This property shall only be present when providing aggregation of a remote manager.
 func (manager *Manager) RemoteAccountService(queryOpts ...common.QueryGroupOption) (*AccountService, error) {
+	return manager.RemoteAccountServiceWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// RemoteAccountServiceWithContext gets the account service resource for the remote manager that this resource represents.
+// This property shall only be present when providing aggregation of a remote manager.
+func (manager *Manager) RemoteAccountServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*AccountService, error) {
 	if manager.RemoteAccountServiceLink.IsZero() {
 		return nil, nil
 	}
-	return GetAccountService(manager.GetClient(), manager.RemoteAccountServiceLink.String(), queryOpts...)
+	return GetAccountServiceWithContext(ctx, manager.GetClient(), manager.RemoteAccountServiceLink.String(), queryOpts...)
 }
 
 // SharedNetworkPorts gets the shared network ports of the manager.
 func (manager *Manager) SharedNetworkPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return manager.SharedNetworkPortsWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// SharedNetworkPortsWithContext gets the shared network ports of the manager.
+func (manager *Manager) SharedNetworkPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
 	if manager.SharedNetworkPortsLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedPorts(manager.GetClient(), manager.SharedNetworkPortsLink.String(), queryOpts...)
+	return ListReferencedPortsWithContext(ctx, manager.GetClient(), manager.SharedNetworkPortsLink.String(), queryOpts...)
 }
 
 // SerialInterfaces get this manager's serial interfaces.
 func (manager *Manager) SerialInterfaces(queryOpts ...common.QueryGroupOption) ([]*SerialInterface, error) {
+	return manager.SerialInterfacesWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// SerialInterfacesWithContext get this manager's serial interfaces.
+func (manager *Manager) SerialInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SerialInterface, error) {
 	if manager.SerialInterfacesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedSerialInterfaces(manager.GetClient(), manager.SerialInterfacesLink.String(), queryOpts...)
+	return ListReferencedSerialInterfacesWithContext(ctx, manager.GetClient(), manager.SerialInterfacesLink.String(), queryOpts...)
 }
 
 // USBPorts get the USB ports of the manager.
 func (manager *Manager) USBPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return manager.USBPortsWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// USBPortsWithContext get the USB ports of the manager.
+func (manager *Manager) USBPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
 	if manager.USBPortsLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedPorts(manager.GetClient(), manager.USBPortsLink.String(), queryOpts...)
+	return ListReferencedPortsWithContext(ctx, manager.GetClient(), manager.USBPortsLink.String(), queryOpts...)
 }
 
 // VirtualMedia gets the virtual media associated with this manager.
 // This property has been deprecated in favor of the VirtualMedia property in the ComputerSystem resource.
 func (manager *Manager) VirtualMedia(queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
+	return manager.VirtualMediaWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// VirtualMediaWithContext gets the virtual media associated with this manager.
+// This property has been deprecated in favor of the VirtualMedia property in the ComputerSystem resource.
+func (manager *Manager) VirtualMediaWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
 	if manager.VirtualMediaLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedVirtualMedias(manager.GetClient(), manager.VirtualMediaLink.String(), queryOpts...)
+	return ListReferencedVirtualMediasWithContext(ctx, manager.GetClient(), manager.VirtualMediaLink.String(), queryOpts...)
 }
 
 // ActiveSoftwareImage gets the software inventory resource that represents the active firmware image for this manager.
 func (manager *Manager) ActiveSoftwareImage(queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return manager.ActiveSoftwareImageWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ActiveSoftwareImageWithContext gets the software inventory resource that represents the active firmware image for this manager.
+func (manager *Manager) ActiveSoftwareImageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
 	if manager.Links.ActiveSoftwareImage.IsZero() {
 		return nil, nil
 	}
-	return GetSoftwareInventory(manager.GetClient(), manager.Links.ActiveSoftwareImage.String(), queryOpts...)
+	return GetSoftwareInventoryWithContext(ctx, manager.GetClient(), manager.Links.ActiveSoftwareImage.String(), queryOpts...)
 }
 
 // ManagedBy gets the managers responsible for managing this manager.
 func (manager *Manager) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](manager.GetClient(), manager.Links.ManagedBy.ToStrings(), queryOpts...)
+	return manager.ManagedByWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ManagedByWithContext gets the managers responsible for managing this manager.
+func (manager *Manager) ManagedByWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, manager.GetClient(), manager.Links.ManagedBy.ToStrings(), queryOpts...)
 }
 
 // ManagedForChassis gets the the chassis this manager controls.
 func (manager *Manager) ManagedForChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
-	return common.GetObjects[Chassis](manager.GetClient(), manager.Links.ManagerForChassis.ToStrings(), queryOpts...)
+	return manager.ManagedForChassisWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ManagedForChassisWithContext gets the the chassis this manager controls.
+func (manager *Manager) ManagedForChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjectsWithContext[Chassis](ctx, manager.GetClient(), manager.Links.ManagerForChassis.ToStrings(), queryOpts...)
 }
 
 // ManagerForManagers gets the managers that are managed by this manager.
 func (manager *Manager) ManagerForManagers(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](manager.GetClient(), manager.Links.ManagerForManagers.ToStrings(), queryOpts...)
+	return manager.ManagerForManagersWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ManagerForManagersWithContext gets the managers that are managed by this manager.
+func (manager *Manager) ManagerForManagersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, manager.GetClient(), manager.Links.ManagerForManagers.ToStrings(), queryOpts...)
 }
 
 // ManagerForServers gets the systems that this manager controls.
 func (manager *Manager) ManagerForServers(queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
-	return common.GetObjects[ComputerSystem](manager.GetClient(), manager.Links.ManagerForServers.ToStrings(), queryOpts...)
+	return manager.ManagerForServersWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ManagerForServersWithContext gets the systems that this manager controls.
+func (manager *Manager) ManagerForServersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetObjectsWithContext[ComputerSystem](ctx, manager.GetClient(), manager.Links.ManagerForServers.ToStrings(), queryOpts...)
 }
 
 // ManagerForSwitches gets the switches that this manager controls.
 func (manager *Manager) ManagerForSwitches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
-	return common.GetObjects[Switch](manager.GetClient(), manager.Links.ManagerForSwitches.ToStrings(), queryOpts...)
+	return manager.ManagerForSwitchesWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// ManagerForSwitchesWithContext gets the switches that this manager controls.
+func (manager *Manager) ManagerForSwitchesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetObjectsWithContext[Switch](ctx, manager.GetClient(), manager.Links.ManagerForSwitches.ToStrings(), queryOpts...)
 }
 
 // SelectedNetworkPort gets the current network port used by this manager.
 func (manager *Manager) SelectedNetworkPort(queryOpts ...common.QueryGroupOption) (*Port, error) {
+	return manager.SelectedNetworkPortWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// SelectedNetworkPortWithContext gets the current network port used by this manager.
+func (manager *Manager) SelectedNetworkPortWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Port, error) {
 	if manager.Links.SelectedNetworkPort.IsZero() {
 		return nil, nil
 	}
-	return GetPort(manager.GetClient(), manager.Links.SelectedNetworkPort.String(), queryOpts...)
+	return GetPortWithContext(ctx, manager.GetClient(), manager.Links.SelectedNetworkPort.String(), queryOpts...)
 }
 
 // SoftwareImages gets the firmware images that apply to this manager.
 func (manager *Manager) SoftwareImages(queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
-	return common.GetObjects[SoftwareInventory](manager.GetClient(), manager.Links.SoftwareImages.ToStrings(), queryOpts...)
+	return manager.SoftwareImagesWithContext(common.ContextOf(manager.GetClient()), queryOpts...)
+}
+
+// SoftwareImagesWithContext gets the firmware images that apply to this manager.
+func (manager *Manager) SoftwareImagesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return common.GetObjectsWithContext[SoftwareInventory](ctx, manager.GetClient(), manager.Links.SoftwareImages.ToStrings(), queryOpts...)
 }

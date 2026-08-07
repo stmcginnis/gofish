@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -185,6 +186,11 @@ func (metricdefinition *MetricDefinition) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (metricdefinition *MetricDefinition) Update() error {
+	return metricdefinition.UpdateWithContext(common.ContextOf(metricdefinition.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (metricdefinition *MetricDefinition) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Calculable",
 		"CalculationTimeInterval",
@@ -197,18 +203,29 @@ func (metricdefinition *MetricDefinition) Update() error {
 		"Units",
 	}
 
-	return metricdefinition.UpdateFromRawData(metricdefinition, metricdefinition.rawData, readWriteFields)
+	return metricdefinition.UpdateFromRawDataWithContext(ctx, metricdefinition, metricdefinition.rawData, readWriteFields)
 }
 
 // GetMetricDefinition will get a MetricDefinition instance from the service.
 func GetMetricDefinition(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricDefinition, error) {
-	return common.GetObject[MetricDefinition](c, uri, queryOpts...)
+	return GetMetricDefinitionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMetricDefinitionWithContext will get a MetricDefinition instance from the service.
+func GetMetricDefinitionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricDefinition, error) {
+	return common.GetObjectWithContext[MetricDefinition](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMetricDefinitions gets the collection of MetricDefinition from
 // a provided reference.
 func ListReferencedMetricDefinitions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricDefinition, error) {
-	return common.GetCollectionObjects[MetricDefinition](c, link, queryOpts...)
+	return ListReferencedMetricDefinitionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMetricDefinitionsWithContext gets the collection of MetricDefinition from
+// a provided reference.
+func ListReferencedMetricDefinitionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricDefinition, error) {
+	return common.GetCollectionObjectsWithContext[MetricDefinition](ctx, c, link, queryOpts...)
 }
 
 // Wildcard shall contain a wildcard and its substitution values.

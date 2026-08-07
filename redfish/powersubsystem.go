@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -90,21 +91,42 @@ func (powersubsystem *PowerSubsystem) UnmarshalJSON(b []byte) error {
 
 // Batteries gets the batteries in this power subsystem.
 func (powersubsystem *PowerSubsystem) Batteries(queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
-	return ListReferencedBatterys(powersubsystem.GetClient(), powersubsystem.batteries, queryOpts...)
+	return powersubsystem.BatteriesWithContext(common.ContextOf(powersubsystem.GetClient()), queryOpts...)
+}
+
+// BatteriesWithContext gets the batteries in this power subsystem.
+func (powersubsystem *PowerSubsystem) BatteriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return ListReferencedBatterysWithContext(ctx, powersubsystem.GetClient(), powersubsystem.batteries, queryOpts...)
 }
 
 // PowerSupplies gets the power supplies in this power subsystem.
 func (powersubsystem *PowerSubsystem) PowerSupplies(queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
-	return ListReferencedPowerSupplies(powersubsystem.GetClient(), powersubsystem.powerSupplies, queryOpts...)
+	return powersubsystem.PowerSuppliesWithContext(common.ContextOf(powersubsystem.GetClient()), queryOpts...)
+}
+
+// PowerSuppliesWithContext gets the power supplies in this power subsystem.
+func (powersubsystem *PowerSubsystem) PowerSuppliesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerSupply, error) {
+	return ListReferencedPowerSuppliesWithContext(ctx, powersubsystem.GetClient(), powersubsystem.powerSupplies, queryOpts...)
 }
 
 // GetPowerSubsystem will get a PowerSubsystem instance from the service.
 func GetPowerSubsystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerSubsystem, error) {
-	return common.GetObject[PowerSubsystem](c, uri, queryOpts...)
+	return GetPowerSubsystemWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPowerSubsystemWithContext will get a PowerSubsystem instance from the service.
+func GetPowerSubsystemWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerSubsystem, error) {
+	return common.GetObjectWithContext[PowerSubsystem](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedPowerSubsystems gets the collection of PowerSubsystem from
 // a provided reference.
 func ListReferencedPowerSubsystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerSubsystem, error) {
-	return common.GetCollectionObjects[PowerSubsystem](c, link, queryOpts...)
+	return ListReferencedPowerSubsystemsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedPowerSubsystemsWithContext gets the collection of PowerSubsystem from
+// a provided reference.
+func ListReferencedPowerSubsystemsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*PowerSubsystem, error) {
+	return common.GetCollectionObjectsWithContext[PowerSubsystem](ctx, c, link, queryOpts...)
 }

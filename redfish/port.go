@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -875,67 +876,125 @@ func (port *Port) UnmarshalJSON(b []byte) error {
 
 // EnvironmentMetrics gets the environment metrics for this port or any attached small form-factor pluggable (SFP) device.
 func (port *Port) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return port.EnvironmentMetricsWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// EnvironmentMetricsWithContext gets the environment metrics for this port or any attached small form-factor pluggable (SFP) device.
+func (port *Port) EnvironmentMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if port.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(port.GetClient(), port.environmentMetrics, queryOpts...)
+	return GetEnvironmentMetricsWithContext(ctx, port.GetClient(), port.environmentMetrics, queryOpts...)
 }
 
 // Metrics gets the metrics for this port.
 func (port *Port) Metrics(queryOpts ...common.QueryGroupOption) (*PortMetrics, error) {
+	return port.MetricsWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the metrics for this port.
+func (port *Port) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*PortMetrics, error) {
 	if port.metrics == "" {
 		return nil, nil
 	}
-	return GetPortMetrics(port.GetClient(), port.metrics, queryOpts...)
+	return GetPortMetricsWithContext(ctx, port.GetClient(), port.metrics, queryOpts...)
 }
 
 // AssociatedEndpoints gets the endpoints at the other end of the link.
 func (port *Port) AssociatedEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](port.GetClient(), port.associatedEndpoints, queryOpts...)
+	return port.AssociatedEndpointsWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// AssociatedEndpointsWithContext gets the endpoints at the other end of the link.
+func (port *Port) AssociatedEndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, port.GetClient(), port.associatedEndpoints, queryOpts...)
 }
 
 // Cables gets the cables connected to this port.
 func (port *Port) Cables(queryOpts ...common.QueryGroupOption) ([]*Cable, error) {
-	return common.GetObjects[Cable](port.GetClient(), port.cables, queryOpts...)
+	return port.CablesWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// CablesWithContext gets the cables connected to this port.
+func (port *Port) CablesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Cable, error) {
+	return common.GetObjectsWithContext[Cable](ctx, port.GetClient(), port.cables, queryOpts...)
 }
 
 // ConnectedPorts gets the remote device ports connected to the other end of the link.
 func (port *Port) ConnectedPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return common.GetObjects[Port](port.GetClient(), port.connectedPorts, queryOpts...)
+	return port.ConnectedPortsWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// ConnectedPortsWithContext gets the remote device ports connected to the other end of the link.
+func (port *Port) ConnectedPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjectsWithContext[Port](ctx, port.GetClient(), port.connectedPorts, queryOpts...)
 }
 
 // ConnectedSwitchPorts gets the switch ports connected to the other end of the link.
 func (port *Port) ConnectedSwitchPorts(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return common.GetObjects[Port](port.GetClient(), port.connectedSwitchPorts, queryOpts...)
+	return port.ConnectedSwitchPortsWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// ConnectedSwitchPortsWithContext gets the switch ports connected to the other end of the link.
+func (port *Port) ConnectedSwitchPortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetObjectsWithContext[Port](ctx, port.GetClient(), port.connectedSwitchPorts, queryOpts...)
 }
 
 // ConnectedSwitches gets the switches connected to the other end of the link.
 func (port *Port) ConnectedSwitches(queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
-	return common.GetObjects[Switch](port.GetClient(), port.connectedSwitches, queryOpts...)
+	return port.ConnectedSwitchesWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// ConnectedSwitchesWithContext gets the switches connected to the other end of the link.
+func (port *Port) ConnectedSwitchesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetObjectsWithContext[Switch](ctx, port.GetClient(), port.connectedSwitches, queryOpts...)
 }
 
 // EthernetInterfaces gets the Ethernet interfaces this port provides.
 func (port *Port) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
-	return common.GetObjects[EthernetInterface](port.GetClient(), port.ethernetInterfaces, queryOpts...)
+	return port.EthernetInterfacesWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// EthernetInterfacesWithContext gets the Ethernet interfaces this port provides.
+func (port *Port) EthernetInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return common.GetObjectsWithContext[EthernetInterface](ctx, port.GetClient(), port.ethernetInterfaces, queryOpts...)
 }
 
 // GenZLPRT gets the Gen-Z Core Specification-defined Linear Packet Relay Table for this port.
 func (port *Port) GenZLPRT(queryOpts ...common.QueryGroupOption) ([]*RouteEntry, error) {
-	return common.GetObjects[RouteEntry](port.GetClient(), port.genZLPRT, queryOpts...)
+	return port.GenZLPRTWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// GenZLPRTWithContext gets the Gen-Z Core Specification-defined Linear Packet Relay Table for this port.
+func (port *Port) GenZLPRTWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*RouteEntry, error) {
+	return common.GetObjectsWithContext[RouteEntry](ctx, port.GetClient(), port.genZLPRT, queryOpts...)
 }
 
 // GenZMPRT gets the Gen-Z Core Specification-defined Multi-subnet Packet Relay Table for this port.
 func (port *Port) GenZMPRT(queryOpts ...common.QueryGroupOption) ([]*RouteEntry, error) {
-	return common.GetObjects[RouteEntry](port.GetClient(), port.genZMPRT, queryOpts...)
+	return port.GenZMPRTWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// GenZMPRTWithContext gets the Gen-Z Core Specification-defined Multi-subnet Packet Relay Table for this port.
+func (port *Port) GenZMPRTWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*RouteEntry, error) {
+	return common.GetObjectsWithContext[RouteEntry](ctx, port.GetClient(), port.genZMPRT, queryOpts...)
 }
 
 // GenZVCAT gets the Gen-Z Virtual Channel Action Table for the port.
 func (port *Port) GenZVCAT(queryOpts ...common.QueryGroupOption) ([]*VCATEntry, error) {
-	return common.GetObjects[VCATEntry](port.GetClient(), port.genZVCAT, queryOpts...)
+	return port.GenZVCATWithContext(common.ContextOf(port.GetClient()), queryOpts...)
+}
+
+// GenZVCATWithContext gets the Gen-Z Virtual Channel Action Table for the port.
+func (port *Port) GenZVCATWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*VCATEntry, error) {
+	return common.GetObjectsWithContext[VCATEntry](ctx, port.GetClient(), port.genZVCAT, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
-func (port *Port) Update() error {
+func (port *Port) Update() error { return port.UpdateWithContext(common.ContextOf(port.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (port *Port) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"BackpressureSampleInterval",
 		"CompletionCollectionInterval",
@@ -970,22 +1029,38 @@ func (port *Port) Update() error {
 		"LocationIndicatorActive",
 	}
 
-	return port.UpdateFromRawData(port, port.rawData, readWriteFields)
+	return port.UpdateFromRawDataWithContext(ctx, port, port.rawData, readWriteFields)
 }
 
 // GetPort will get a Port instance from the service.
 func GetPort(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Port, error) {
-	return common.GetObject[Port](c, uri, queryOpts...)
+	return GetPortWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPortWithContext will get a Port instance from the service.
+func GetPortWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Port, error) {
+	return common.GetObjectWithContext[Port](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedPorts gets the collection of Port from
 // a provided reference.
 func ListReferencedPorts(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return common.GetCollectionObjects[Port](c, link, queryOpts...)
+	return ListReferencedPortsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedPortsWithContext gets the collection of Port from
+// a provided reference.
+func ListReferencedPortsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return common.GetCollectionObjectsWithContext[Port](ctx, c, link, queryOpts...)
 }
 
 // ResetPort resets this port.
 func (port *Port) ResetPort(resetType ResetType) error {
+	return port.ResetPortWithContext(common.ContextOf(port.GetClient()), resetType)
+}
+
+// ResetPortWithContext resets this port.
+func (port *Port) ResetPortWithContext(ctx context.Context, resetType ResetType) error {
 	if port.resetTarget == "" {
 		return fmt.Errorf("ResetPort action is not supported")
 	}
@@ -995,14 +1070,19 @@ func (port *Port) ResetPort(resetType ResetType) error {
 	}{
 		ResetType: resetType,
 	}
-	return port.Post(port.resetTarget, t)
+	return port.PostWithContext(ctx, port.resetTarget, t)
 }
 
 // ResetPPB resets the PCI-to-PCI bridge (PPB) for this port.
 func (port *Port) ResetPPB() error {
+	return port.ResetPPBWithContext(common.ContextOf(port.GetClient()))
+}
+
+// ResetPPBWithContext resets the PCI-to-PCI bridge (PPB) for this port.
+func (port *Port) ResetPPBWithContext(ctx context.Context) error {
 	if port.resetPPBTarget == "" {
 		return fmt.Errorf("ResetPPB action is not supported")
 	}
 
-	return port.Post(port.resetPPBTarget, nil)
+	return port.PostWithContext(ctx, port.resetPPBTarget, nil)
 }

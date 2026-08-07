@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -385,18 +386,28 @@ func (eventdestination *EventDestination) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (eventdestination *EventDestination) Update() error {
+	return eventdestination.UpdateWithContext(common.ContextOf(eventdestination.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (eventdestination *EventDestination) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Context",
 		"DeliveryRetryPolicy",
 		"VerifyCertificate",
 	}
 
-	return eventdestination.UpdateFromRawData(eventdestination, eventdestination.rawData, readWriteFields)
+	return eventdestination.UpdateFromRawDataWithContext(ctx, eventdestination, eventdestination.rawData, readWriteFields)
 }
 
 // GetEventDestination will get a EventDestination instance from the service.
 func GetEventDestination(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EventDestination, error) {
-	return common.GetObject[EventDestination](c, uri, queryOpts...)
+	return GetEventDestinationWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetEventDestinationWithContext will get a EventDestination instance from the service.
+func GetEventDestinationWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EventDestination, error) {
+	return common.GetObjectWithContext[EventDestination](ctx, c, uri, queryOpts...)
 }
 
 // subscriptionPayload is the payload to create the event subscription
@@ -503,6 +514,21 @@ func CreateEventDestination(
 	context string,
 	oem interface{},
 ) (string, error) {
+	return CreateEventDestinationWithContext(common.ContextOf(c), c, uri, destination, eventTypes, httpHeaders, protocol, context, oem)
+}
+
+// Deprecated: (v1.5) EventType-based eventing is DEPRECATED in the Redfish schema
+// in favor of using RegistryPrefix and ResourceTypes
+func CreateEventDestinationWithContext(ctx context.Context,
+	c common.Client,
+	uri string,
+	destination string,
+	eventTypes []EventType,
+	httpHeaders map[string]string,
+	protocol EventDestinationProtocol,
+	context string,
+	oem interface{},
+) (string, error) {
 	// validate mandatory input parameters
 	if err := validateCreateEventDestinationParams(uri, destination, protocol, context, eventTypes); err != nil {
 		return "", err
@@ -513,7 +539,7 @@ func CreateEventDestination(
 		EventTypes: eventTypes,
 	}
 
-	return sendCreateEventDestinationRequest(c, s, uri, destination, httpHeaders, protocol, context, oem)
+	return sendCreateEventDestinationRequestWithContext(ctx, c, s, uri, destination, httpHeaders, protocol, context, oem)
 }
 
 // For Redfish v1.5+
@@ -547,6 +573,40 @@ func CreateEventDestinationInstance(
 	deliveryRetryPolicy DeliveryRetryPolicy,
 	oem interface{},
 ) (string, error) {
+	return CreateEventDestinationInstanceWithContext(common.ContextOf(c), c, uri, destination, registryPrefixes, resourceTypes, httpHeaders, protocol, context, deliveryRetryPolicy, oem)
+}
+
+// For Redfish v1.5+
+// CreateEventDestination will create a EventDestination instance.
+// URI should contain the address of the collection for Event Subscriptions.
+// Destination should contain the URL of the destination for events to be sent.
+// RegistryPrefixes is the list of the prefixes for the Message Registries
+// that contain the MessageIds that are sent to this event destination.
+// If RegistryPrefixes is empty on subscription, the client is subscribing to all Message Registries.
+// ResourceTypes is the list of Resource Type values (Schema names) that correspond to the OriginOfCondition,
+// the version and full namespace should not be specified.
+// If ResourceTypes is empty on subscription, the client is subscribing to receive events regardless of ResourceType.
+// HttpHeaders is optional and gives the opportunity to specify any arbitrary
+// HTTP headers required for the event POST operation.
+// Protocol should be the communication protocol of the event endpoint, usually RedfishEventDestinationProtocol.
+// Context is a required client-supplied string that is sent with the event notifications.
+// DeliveryRetryPolicy is optional, it should contain the subscription delivery retry policy for events,
+// where the subscription type is RedfishEvent.
+// Oem is optional and gives the opportunity to specify any OEM specific properties,
+// it should contain the vendor specific struct that goes inside the Oem session.
+// Returns the new subscription URI if the event subscription is created with success or any error encountered.
+func CreateEventDestinationInstanceWithContext(ctx context.Context,
+	c common.Client,
+	uri string,
+	destination string,
+	registryPrefixes []string,
+	resourceTypes []string,
+	httpHeaders map[string]string,
+	protocol EventDestinationProtocol,
+	context string,
+	deliveryRetryPolicy DeliveryRetryPolicy,
+	oem interface{},
+) (string, error) {
 	// validate mandatory input parameters
 	if err := validateCreateEventDestinationMandatoryParams(uri, destination, protocol, context); err != nil {
 		return "", err
@@ -559,10 +619,10 @@ func CreateEventDestinationInstance(
 		DeliveryRetryPolicy: deliveryRetryPolicy,
 	}
 
-	return sendCreateEventDestinationRequest(c, s, uri, destination, httpHeaders, protocol, context, oem)
+	return sendCreateEventDestinationRequestWithContext(ctx, c, s, uri, destination, httpHeaders, protocol, context, oem)
 }
 
-func sendCreateEventDestinationRequest(
+func sendCreateEventDestinationRequestWithContext(ctx context.Context,
 	c common.Client,
 	s *subscriptionPayload,
 	uri string,
@@ -586,7 +646,7 @@ func sendCreateEventDestinationRequest(
 		s.Oem = oem
 	}
 
-	resp, err := c.Post(uri, s)
+	resp, err := c.PostWithContext(ctx, uri, s)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return "", err
@@ -604,12 +664,17 @@ func sendCreateEventDestinationRequest(
 
 // DeleteEventDestination will delete a EventDestination.
 func DeleteEventDestination(c common.Client, uri string) error {
+	return DeleteEventDestinationWithContext(common.ContextOf(c), c, uri)
+}
+
+// DeleteEventDestinationWithContext will delete a EventDestination.
+func DeleteEventDestinationWithContext(ctx context.Context, c common.Client, uri string) error {
 	// validate uri
 	if strings.TrimSpace(uri) == "" {
 		return fmt.Errorf("uri should not be empty")
 	}
 
-	resp, err := c.Delete(uri)
+	resp, err := c.DeleteWithContext(ctx, uri)
 	defer common.DeferredCleanupHTTPResponse(resp)
 
 	return err
@@ -618,7 +683,13 @@ func DeleteEventDestination(c common.Client, uri string) error {
 // ListReferencedEventDestinations gets the collection of EventDestination from
 // a provided reference.
 func ListReferencedEventDestinations(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EventDestination, error) {
-	return common.GetCollectionObjects[EventDestination](c, link, queryOpts...)
+	return ListReferencedEventDestinationsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedEventDestinationsWithContext gets the collection of EventDestination from
+// a provided reference.
+func ListReferencedEventDestinationsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EventDestination, error) {
+	return common.GetCollectionObjectsWithContext[EventDestination](ctx, c, link, queryOpts...)
 }
 
 // HTTPHeaderProperty shall a names and value of an HTTP header to be included
@@ -627,18 +698,28 @@ type HTTPHeaderProperty map[string][]string
 
 // Certificates gets the server certificates for the server referenced by the Destination property.
 func (eventdestination *EventDestination) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return eventdestination.CertificatesWithContext(common.ContextOf(eventdestination.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets the server certificates for the server referenced by the Destination property.
+func (eventdestination *EventDestination) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if eventdestination.certificates == "" {
 		return []*Certificate{}, nil
 	}
 
-	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.certificates, queryOpts...)
+	return ListReferencedCertificatesWithContext(ctx, eventdestination.GetClient(), eventdestination.certificates, queryOpts...)
 }
 
 // ClientCertificates gets the client identity certificates for the server referenced by the Destination property.
 func (eventdestination *EventDestination) ClientCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return eventdestination.ClientCertificatesWithContext(common.ContextOf(eventdestination.GetClient()), queryOpts...)
+}
+
+// ClientCertificatesWithContext gets the client identity certificates for the server referenced by the Destination property.
+func (eventdestination *EventDestination) ClientCertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if eventdestination.clientCertificates == "" {
 		return []*Certificate{}, nil
 	}
 
-	return ListReferencedCertificates(eventdestination.GetClient(), eventdestination.clientCertificates, queryOpts...)
+	return ListReferencedCertificatesWithContext(ctx, eventdestination.GetClient(), eventdestination.clientCertificates, queryOpts...)
 }

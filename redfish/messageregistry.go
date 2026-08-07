@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -134,29 +135,39 @@ type MessageRegistry struct {
 
 // GetMessageRegistry will get a MessageRegistry instance from the Redfish service.
 func GetMessageRegistry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MessageRegistry, error) {
-	return common.GetObject[MessageRegistry](c, uri, queryOpts...)
+	return GetMessageRegistryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMessageRegistryWithContext will get a MessageRegistry instance from the Redfish service.
+func GetMessageRegistryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MessageRegistry, error) {
+	return common.GetObjectWithContext[MessageRegistry](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMessageRegistries gets the collection of MessageRegistry.
 func ListReferencedMessageRegistries(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistry, error) {
+	return ListReferencedMessageRegistriesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMessageRegistriesWithContext gets the collection of MessageRegistry.
+func ListReferencedMessageRegistriesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistry, error) {
 	var result []*MessageRegistry
 	// the collection GET is deliberately unexpanded: only the member links are
 	// read from it, and each registry is fetched individually below.
-	links, err := common.GetCollection(c, link)
+	links, err := common.GetCollectionWithContext(ctx, c, link)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: Look at what to do to make parallel
 	for _, sLink := range links.ItemLinks {
-		mrf, err := GetMessageRegistryFile(c, sLink, queryOpts...)
+		mrf, err := GetMessageRegistryFileWithContext(ctx, c, sLink, queryOpts...)
 		if err != nil {
 			return nil, err
 		}
 
 		// get message registry from all location
 		for _, location := range mrf.Location {
-			mr, err := GetMessageRegistry(c, location.URI, queryOpts...)
+			mr, err := GetMessageRegistryWithContext(ctx, c, location.URI, queryOpts...)
 			if err != nil {
 				return nil, err
 			}
@@ -171,6 +182,12 @@ func ListReferencedMessageRegistries(c common.Client, link string, queryOpts ...
 // ListReferencedMessageRegistriesByLanguage gets the collection of MessageRegistry.
 // language is the RFC5646-conformant language code for the message registry.
 func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistry, error) {
+	return ListReferencedMessageRegistriesByLanguageWithContext(common.ContextOf(c), c, link, language, queryOpts...)
+}
+
+// ListReferencedMessageRegistriesByLanguageWithContext gets the collection of MessageRegistry.
+// language is the RFC5646-conformant language code for the message registry.
+func ListReferencedMessageRegistriesByLanguageWithContext(ctx context.Context, c common.Client, link, language string, queryOpts ...common.QueryGroupOption) ([]*MessageRegistry, error) {
 	language = strings.TrimSpace(language)
 	if language == "" {
 		return nil, fmt.Errorf("received empty language")
@@ -180,13 +197,13 @@ func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language s
 	var result []*MessageRegistry
 	// the collection GET is deliberately unexpanded: only the member links are
 	// read from it, and each registry is fetched individually below.
-	links, err := common.GetCollection(c, link)
+	links, err := common.GetCollectionWithContext(ctx, c, link)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, sLink := range links.ItemLinks {
-		mrf, err := GetMessageRegistryFile(c, sLink, queryOpts...)
+		mrf, err := GetMessageRegistryFileWithContext(ctx, c, sLink, queryOpts...)
 		if err != nil {
 			return nil, err
 		}
@@ -194,7 +211,7 @@ func ListReferencedMessageRegistriesByLanguage(c common.Client, link, language s
 		// get message registry by language
 		for _, location := range mrf.Location {
 			if location.Language == language {
-				mr, err := GetMessageRegistry(c, location.URI, queryOpts...)
+				mr, err := GetMessageRegistryWithContext(ctx, c, location.URI, queryOpts...)
 				if err != nil {
 					return nil, err
 				}
@@ -218,6 +235,21 @@ func GetMessageRegistryByLanguage(
 	registry string,
 	language string,
 ) (*MessageRegistry, error) {
+	return GetMessageRegistryByLanguageWithContext(common.ContextOf(c), c, link, registry, language)
+}
+
+// GetMessageRegistryByLanguageWithContext gets the message registry by language.
+// registry is used to identify the correct Message Registry
+// file (MessageRegistryFile.Registry) and it shall contain the
+// Message Registry name and it major and minor versions, as defined
+// by the Redfish Specification.
+// language is the RFC5646-conformant language code for the message registry.
+func GetMessageRegistryByLanguageWithContext(ctx context.Context,
+	c common.Client,
+	link string,
+	registry string,
+	language string,
+) (*MessageRegistry, error) {
 	registry = strings.TrimSpace(registry)
 	if registry == "" {
 		return nil, fmt.Errorf("received empty registry")
@@ -229,13 +261,13 @@ func GetMessageRegistryByLanguage(
 	}
 
 	// TODO: Look at what to do to make parallel
-	links, err := common.GetCollection(c, link)
+	links, err := common.GetCollectionWithContext(ctx, c, link)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, sLink := range links.ItemLinks {
-		s, err := GetMessageRegistryFile(c, sLink)
+		s, err := GetMessageRegistryFileWithContext(ctx, c, sLink)
 		if err != nil {
 			return nil, err
 		}
@@ -244,7 +276,7 @@ func GetMessageRegistryByLanguage(
 			// search for the correct location
 			for _, location := range s.Location {
 				if location.Language == language {
-					return GetMessageRegistry(c, location.URI)
+					return GetMessageRegistryWithContext(ctx, c, location.URI)
 				}
 			}
 		}
@@ -266,6 +298,27 @@ func GetMessageRegistryByLanguage(
 // language is the RFC5646-conformant language code for the message registry.
 // Example of language: en
 func GetMessageFromMessageRegistryByLanguage(
+	c common.Client,
+	link string,
+	messageID string,
+	language string,
+) (*MessageRegistryMessage, error) {
+	return GetMessageFromMessageRegistryByLanguageWithContext(common.ContextOf(c), c, link, messageID, language)
+}
+
+// GetMessageFromMessageRegistryByLanguageWithContext tries to find and get the message
+// from the informed messageID.
+// messageID is the key used to find the registry, version and message:
+// Example of messageID: Alert.1.0.LanDisconnect
+//
+//   - The segment before the 1st period is the Registry Name (Registry Prefix): Alert
+//   - The segment between the 1st and 2nd period is the major version: 1
+//   - The segment between the 2nd and 3rd period is the minor version: 0
+//   - The segment after the 3rd period is the Message Identifier in the Registry: LanDisconnect
+//
+// language is the RFC5646-conformant language code for the message registry.
+// Example of language: en
+func GetMessageFromMessageRegistryByLanguageWithContext(ctx context.Context,
 	c common.Client,
 	link string,
 	messageID string,
@@ -296,7 +349,7 @@ func GetMessageFromMessageRegistryByLanguage(
 	registryMajorMinorVersion := registryMajorVersion + "." + registryMinorVersion
 	registryMessageKey := messageIDSplitted[3]
 
-	allMessageRegistryByLanguage, err := ListReferencedMessageRegistriesByLanguage(c, link, language)
+	allMessageRegistryByLanguage, err := ListReferencedMessageRegistriesByLanguageWithContext(ctx, c, link, language)
 	if err != nil {
 		return nil, err
 	}

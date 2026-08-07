@@ -5,6 +5,7 @@
 package dell
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -167,6 +168,13 @@ func validateImportSystemConfigurationBody(b *ImportSystemConfigurationBody) err
 //
 // This can be used to set BIOS, iDRAC, and device settings automatically.
 func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*redfish.Task, error) {
+	return m.ImportSystemConfigurationWithContext(common.ContextOf(m.GetClient()), b)
+}
+
+// Import a system configuration in JSON format.
+//
+// This can be used to set BIOS, iDRAC, and device settings automatically.
+func (m *Manager) ImportSystemConfigurationWithContext(ctx context.Context, b *ImportSystemConfigurationBody) (*redfish.Task, error) {
 	if err := validateImportSystemConfigurationBody(b); err != nil {
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
@@ -174,11 +182,11 @@ func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*
 		return nil, errors.New("import system config is not supported by this system")
 	}
 
-	res, err := m.PostWithResponse(m.importSystemConfigTarget, b)
+	res, err := m.PostWithResponseWithContext(ctx, m.importSystemConfigTarget, b)
 	defer common.DeferredCleanupHTTPResponse(res)
 	if err != nil {
 		return nil, err
 	}
 
-	return redfish.GetTask(m.GetClient(), res.Header.Get("Location"))
+	return redfish.GetTaskWithContext(ctx, m.GetClient(), res.Header.Get("Location"))
 }

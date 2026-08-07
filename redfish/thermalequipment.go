@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -70,31 +71,62 @@ func (thermalequipment *ThermalEquipment) UnmarshalJSON(b []byte) error {
 
 // CDUs gets a collection of coolant distribution units.
 func (thermalequipment *ThermalEquipment) CDUs(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
-	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.cdus, queryOpts...)
+	return thermalequipment.CDUsWithContext(common.ContextOf(thermalequipment.GetClient()), queryOpts...)
+}
+
+// CDUsWithContext gets a collection of coolant distribution units.
+func (thermalequipment *ThermalEquipment) CDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return ListReferencedCoolingUnitsWithContext(ctx, thermalequipment.GetClient(), thermalequipment.cdus, queryOpts...)
 }
 
 // CoolingLoops gets a collection of cooling loops.
 func (thermalequipment *ThermalEquipment) CoolingLoops(queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
-	return ListReferencedCoolingLoops(thermalequipment.GetClient(), thermalequipment.coolingLoops, queryOpts...)
+	return thermalequipment.CoolingLoopsWithContext(common.ContextOf(thermalequipment.GetClient()), queryOpts...)
+}
+
+// CoolingLoopsWithContext gets a collection of cooling loops.
+func (thermalequipment *ThermalEquipment) CoolingLoopsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
+	return ListReferencedCoolingLoopsWithContext(ctx, thermalequipment.GetClient(), thermalequipment.coolingLoops, queryOpts...)
 }
 
 // HeatExchangers gets a collection of heat exchangers.
 func (thermalequipment *ThermalEquipment) HeatExchangers(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
-	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.heatExchangers, queryOpts...)
+	return thermalequipment.HeatExchangersWithContext(common.ContextOf(thermalequipment.GetClient()), queryOpts...)
+}
+
+// HeatExchangersWithContext gets a collection of heat exchangers.
+func (thermalequipment *ThermalEquipment) HeatExchangersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return ListReferencedCoolingUnitsWithContext(ctx, thermalequipment.GetClient(), thermalequipment.heatExchangers, queryOpts...)
 }
 
 // ImmersionUnits gets a collection of immersion cooling units.
 func (thermalequipment *ThermalEquipment) ImmersionUnits(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
-	return ListReferencedCoolingUnits(thermalequipment.GetClient(), thermalequipment.immersionUnits, queryOpts...)
+	return thermalequipment.ImmersionUnitsWithContext(common.ContextOf(thermalequipment.GetClient()), queryOpts...)
+}
+
+// ImmersionUnitsWithContext gets a collection of immersion cooling units.
+func (thermalequipment *ThermalEquipment) ImmersionUnitsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return ListReferencedCoolingUnitsWithContext(ctx, thermalequipment.GetClient(), thermalequipment.immersionUnits, queryOpts...)
 }
 
 // GetThermalEquipment will get a ThermalEquipment instance from the service.
 func GetThermalEquipment(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalEquipment, error) {
-	return common.GetObject[ThermalEquipment](c, uri, queryOpts...)
+	return GetThermalEquipmentWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetThermalEquipmentWithContext will get a ThermalEquipment instance from the service.
+func GetThermalEquipmentWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalEquipment, error) {
+	return common.GetObjectWithContext[ThermalEquipment](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedThermalEquipments gets the collection of ThermalEquipment from
 // a provided reference.
 func ListReferencedThermalEquipments(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalEquipment, error) {
-	return common.GetCollectionObjects[ThermalEquipment](c, link, queryOpts...)
+	return ListReferencedThermalEquipmentsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedThermalEquipmentsWithContext gets the collection of ThermalEquipment from
+// a provided reference.
+func ListReferencedThermalEquipmentsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalEquipment, error) {
+	return common.GetCollectionObjectsWithContext[ThermalEquipment](ctx, c, link, queryOpts...)
 }

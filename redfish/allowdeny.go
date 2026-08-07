@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -97,6 +98,11 @@ func (allowdeny *AllowDeny) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (allowdeny *AllowDeny) Update() error {
+	return allowdeny.UpdateWithContext(common.ContextOf(allowdeny.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (allowdeny *AllowDeny) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AllowType",
 		"DestinationPortLower",
@@ -111,16 +117,27 @@ func (allowdeny *AllowDeny) Update() error {
 		"StatefulSession",
 	}
 
-	return allowdeny.UpdateFromRawData(allowdeny, allowdeny.rawData, readWriteFields)
+	return allowdeny.UpdateFromRawDataWithContext(ctx, allowdeny, allowdeny.rawData, readWriteFields)
 }
 
 // GetAllowDeny will get a AllowDeny instance from the service.
 func GetAllowDeny(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AllowDeny, error) {
-	return common.GetObject[AllowDeny](c, uri, queryOpts...)
+	return GetAllowDenyWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAllowDenyWithContext will get a AllowDeny instance from the service.
+func GetAllowDenyWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AllowDeny, error) {
+	return common.GetObjectWithContext[AllowDeny](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedAllowDenys gets the collection of AllowDeny from
 // a provided reference.
 func ListReferencedAllowDenys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AllowDeny, error) {
-	return common.GetCollectionObjects[AllowDeny](c, link, queryOpts...)
+	return ListReferencedAllowDenysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedAllowDenysWithContext gets the collection of AllowDeny from
+// a provided reference.
+func ListReferencedAllowDenysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AllowDeny, error) {
+	return common.GetCollectionObjectsWithContext[AllowDeny](ctx, c, link, queryOpts...)
 }

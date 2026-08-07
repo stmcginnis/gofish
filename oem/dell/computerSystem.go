@@ -5,6 +5,7 @@
 package dell
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -155,8 +156,12 @@ func FromComputerSystem(computerSystem *redfish.ComputerSystem) (*ComputerSystem
 }
 
 func (cs *ComputerSystem) SoftwareInstallationService() (*SoftwareInstallationService, error) {
+	return cs.SoftwareInstallationServiceWithContext(common.ContextOf(cs.GetClient()))
+}
+
+func (cs *ComputerSystem) SoftwareInstallationServiceWithContext(ctx context.Context) (*SoftwareInstallationService, error) {
 	if cs.targetSoftwareInstallationService == "" {
 		return nil, errors.New("software installation service is not supported by this system")
 	}
-	return GetSoftwareInstallationService(cs.GetClient(), cs.targetSoftwareInstallationService)
+	return GetSoftwareInstallationServiceWithContext(ctx, cs.GetClient(), cs.targetSoftwareInstallationService)
 }

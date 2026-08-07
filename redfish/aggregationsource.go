@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -167,6 +168,11 @@ func (aggregationsource *AggregationSource) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (aggregationsource *AggregationSource) Update() error {
+	return aggregationsource.UpdateWithContext(common.ContextOf(aggregationsource.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (aggregationsource *AggregationSource) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AggregationType",
 		"HostName",
@@ -174,18 +180,29 @@ func (aggregationsource *AggregationSource) Update() error {
 		"UserName",
 	}
 
-	return aggregationsource.UpdateFromRawData(aggregationsource, aggregationsource.rawData, readWriteFields)
+	return aggregationsource.UpdateFromRawDataWithContext(ctx, aggregationsource, aggregationsource.rawData, readWriteFields)
 }
 
 // GetAggregationSource will get a AggregationSource instance from the service.
 func GetAggregationSource(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AggregationSource, error) {
-	return common.GetObject[AggregationSource](c, uri, queryOpts...)
+	return GetAggregationSourceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAggregationSourceWithContext will get a AggregationSource instance from the service.
+func GetAggregationSourceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AggregationSource, error) {
+	return common.GetObjectWithContext[AggregationSource](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedAggregationSources gets the collection of AggregationSource from
 // a provided reference.
 func ListReferencedAggregationSources(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AggregationSource, error) {
-	return common.GetCollectionObjects[AggregationSource](c, link, queryOpts...)
+	return ListReferencedAggregationSourcesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedAggregationSourcesWithContext gets the collection of AggregationSource from
+// a provided reference.
+func ListReferencedAggregationSourcesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*AggregationSource, error) {
+	return common.GetCollectionObjectsWithContext[AggregationSource](ctx, c, link, queryOpts...)
 }
 
 // SNMPSettings shall contain the settings for an SNMP aggregation source.

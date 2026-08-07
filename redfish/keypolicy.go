@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -142,22 +143,38 @@ func (keypolicy *KeyPolicy) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (keypolicy *KeyPolicy) Update() error {
+	return keypolicy.UpdateWithContext(common.ContextOf(keypolicy.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (keypolicy *KeyPolicy) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"IsDefault",
 	}
 
-	return keypolicy.UpdateFromRawData(keypolicy, keypolicy.rawData, readWriteFields)
+	return keypolicy.UpdateFromRawDataWithContext(ctx, keypolicy, keypolicy.rawData, readWriteFields)
 }
 
 // GetKeyPolicy will get a KeyPolicy instance from the service.
 func GetKeyPolicy(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KeyPolicy, error) {
-	return common.GetObject[KeyPolicy](c, uri, queryOpts...)
+	return GetKeyPolicyWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetKeyPolicyWithContext will get a KeyPolicy instance from the service.
+func GetKeyPolicyWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*KeyPolicy, error) {
+	return common.GetObjectWithContext[KeyPolicy](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedKeyPolicys gets the collection of KeyPolicy from
 // a provided reference.
 func ListReferencedKeyPolicys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*KeyPolicy, error) {
-	return common.GetCollectionObjects[KeyPolicy](c, link, queryOpts...)
+	return ListReferencedKeyPolicysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedKeyPolicysWithContext gets the collection of KeyPolicy from
+// a provided reference.
+func ListReferencedKeyPolicysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*KeyPolicy, error) {
+	return common.GetCollectionObjectsWithContext[KeyPolicy](ctx, c, link, queryOpts...)
 }
 
 // NVMeoF shall contain NVMe-oF specific properties for a key policy.

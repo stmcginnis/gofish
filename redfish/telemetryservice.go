@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -136,51 +137,98 @@ func (telemetryservice *TelemetryService) UnmarshalJSON(b []byte) error {
 
 // LogService gets the log service that the telemetry service uses.
 func (telemetryservice *TelemetryService) LogService(queryOpts ...common.QueryGroupOption) (*LogService, error) {
+	return telemetryservice.LogServiceWithContext(common.ContextOf(telemetryservice.GetClient()), queryOpts...)
+}
+
+// LogServiceWithContext gets the log service that the telemetry service uses.
+func (telemetryservice *TelemetryService) LogServiceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*LogService, error) {
 	if telemetryservice.logService == "" {
 		return nil, nil
 	}
-	return GetLogService(telemetryservice.GetClient(), telemetryservice.logService, queryOpts...)
+	return GetLogServiceWithContext(ctx, telemetryservice.GetClient(), telemetryservice.logService, queryOpts...)
 }
 
 // MetricDefinitions gets the metric definitions.
 func (telemetryservice *TelemetryService) MetricDefinitions(queryOpts ...common.QueryGroupOption) ([]*MetricDefinition, error) {
-	return ListReferencedMetricDefinitions(telemetryservice.GetClient(), telemetryservice.metricDefinitions, queryOpts...)
+	return telemetryservice.MetricDefinitionsWithContext(common.ContextOf(telemetryservice.GetClient()), queryOpts...)
+}
+
+// MetricDefinitionsWithContext gets the metric definitions.
+func (telemetryservice *TelemetryService) MetricDefinitionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MetricDefinition, error) {
+	return ListReferencedMetricDefinitionsWithContext(ctx, telemetryservice.GetClient(), telemetryservice.metricDefinitions, queryOpts...)
 }
 
 // MetricReportDefinitions gets the metric report definitions.
 func (telemetryservice *TelemetryService) MetricReportDefinitions(queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
-	return ListReferencedMetricReportDefinitions(telemetryservice.GetClient(), telemetryservice.metricReportDefinitions, queryOpts...)
+	return telemetryservice.MetricReportDefinitionsWithContext(common.ContextOf(telemetryservice.GetClient()), queryOpts...)
+}
+
+// MetricReportDefinitionsWithContext gets the metric report definitions.
+func (telemetryservice *TelemetryService) MetricReportDefinitionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
+	return ListReferencedMetricReportDefinitionsWithContext(ctx, telemetryservice.GetClient(), telemetryservice.metricReportDefinitions, queryOpts...)
 }
 
 // MetricReports gets the metric reports.
 func (telemetryservice *TelemetryService) MetricReports(queryOpts ...common.QueryGroupOption) ([]*MetricReport, error) {
-	return ListReferencedMetricReports(telemetryservice.GetClient(), telemetryservice.metricReports, queryOpts...)
+	return telemetryservice.MetricReportsWithContext(common.ContextOf(telemetryservice.GetClient()), queryOpts...)
+}
+
+// MetricReportsWithContext gets the metric reports.
+func (telemetryservice *TelemetryService) MetricReportsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MetricReport, error) {
+	return ListReferencedMetricReportsWithContext(ctx, telemetryservice.GetClient(), telemetryservice.metricReports, queryOpts...)
 }
 
 // Triggers gets the triggers.
 func (telemetryservice *TelemetryService) Triggers(queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
-	return ListReferencedTriggerss(telemetryservice.GetClient(), telemetryservice.triggers, queryOpts...)
+	return telemetryservice.TriggersWithContext(common.ContextOf(telemetryservice.GetClient()), queryOpts...)
+}
+
+// TriggersWithContext gets the triggers.
+func (telemetryservice *TelemetryService) TriggersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
+	return ListReferencedTriggerssWithContext(ctx, telemetryservice.GetClient(), telemetryservice.triggers, queryOpts...)
 }
 
 // ClearMetricReports will clear the metric reports for this telemetry service.
 func (telemetryservice *TelemetryService) ClearMetricReports() error {
-	return telemetryservice.Post(telemetryservice.clearMetricReportTarget, nil)
+	return telemetryservice.ClearMetricReportsWithContext(common.ContextOf(telemetryservice.GetClient()))
+}
+
+// ClearMetricReportsWithContext will clear the metric reports for this telemetry service.
+func (telemetryservice *TelemetryService) ClearMetricReportsWithContext(ctx context.Context) error {
+	return telemetryservice.PostWithContext(ctx, telemetryservice.clearMetricReportTarget, nil)
 }
 
 // ResetMetricReportDefinitionsToDefaults will reset the metric report definitions to factory defaults.
 func (telemetryservice *TelemetryService) ResetMetricReportDefinitionsToDefaults() error {
-	return telemetryservice.Post(telemetryservice.resetMetricReportDefinitionsToDefaultsTarget, nil)
+	return telemetryservice.ResetMetricReportDefinitionsToDefaultsWithContext(common.ContextOf(telemetryservice.GetClient()))
+}
+
+// ResetMetricReportDefinitionsToDefaultsWithContext will reset the metric report definitions to factory defaults.
+func (telemetryservice *TelemetryService) ResetMetricReportDefinitionsToDefaultsWithContext(ctx context.Context) error {
+	return telemetryservice.PostWithContext(ctx, telemetryservice.resetMetricReportDefinitionsToDefaultsTarget, nil)
 }
 
 // ResetTriggersToDefaults will reset the triggers to factory defaults.
 func (telemetryservice *TelemetryService) ResetTriggersToDefaults() error {
-	return telemetryservice.Post(telemetryservice.resetTriggersToDefaultsTarget, nil)
+	return telemetryservice.ResetTriggersToDefaultsWithContext(common.ContextOf(telemetryservice.GetClient()))
+}
+
+// ResetTriggersToDefaultsWithContext will reset the triggers to factory defaults.
+func (telemetryservice *TelemetryService) ResetTriggersToDefaultsWithContext(ctx context.Context) error {
+	return telemetryservice.PostWithContext(ctx, telemetryservice.resetTriggersToDefaultsTarget, nil)
 }
 
 // SubmitTestMetricReport will immediately generate the metric report as an alert event.
 // `reportValues` is the content for the generated metric report.
 // `metricReportName` is the name for the metric report.
 func (telemetryservice *TelemetryService) SubmitTestMetricReport(reportValues []TelemetryMetricValue, reportName string) error {
+	return telemetryservice.SubmitTestMetricReportWithContext(common.ContextOf(telemetryservice.GetClient()), reportValues, reportName)
+}
+
+// SubmitTestMetricReportWithContext will immediately generate the metric report as an alert event.
+// `reportValues` is the content for the generated metric report.
+// `metricReportName` is the name for the metric report.
+func (telemetryservice *TelemetryService) SubmitTestMetricReportWithContext(ctx context.Context, reportValues []TelemetryMetricValue, reportName string) error {
 	t := struct {
 		GeneratedMetricReportValues []TelemetryMetricValue
 		MetricReportName            string
@@ -188,23 +236,39 @@ func (telemetryservice *TelemetryService) SubmitTestMetricReport(reportValues []
 		GeneratedMetricReportValues: reportValues,
 		MetricReportName:            reportName,
 	}
-	return telemetryservice.Post(telemetryservice.submitTestMetricReportTarget, t)
+	return telemetryservice.PostWithContext(ctx, telemetryservice.submitTestMetricReportTarget, t)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (telemetryservice *TelemetryService) Update() error {
+	return telemetryservice.UpdateWithContext(common.ContextOf(telemetryservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (telemetryservice *TelemetryService) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"ServiceEnabled"}
 
-	return telemetryservice.UpdateFromRawData(telemetryservice, telemetryservice.rawData, readWriteFields)
+	return telemetryservice.UpdateFromRawDataWithContext(ctx, telemetryservice, telemetryservice.rawData, readWriteFields)
 }
 
 // GetTelemetryService will get a TelemetryService instance from the service.
 func GetTelemetryService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*TelemetryService, error) {
-	return common.GetObject[TelemetryService](c, uri, queryOpts...)
+	return GetTelemetryServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetTelemetryServiceWithContext will get a TelemetryService instance from the service.
+func GetTelemetryServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*TelemetryService, error) {
+	return common.GetObjectWithContext[TelemetryService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedTelemetryServices gets the collection of TelemetryService from
 // a provided reference.
 func ListReferencedTelemetryServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*TelemetryService, error) {
-	return common.GetCollectionObjects[TelemetryService](c, link, queryOpts...)
+	return ListReferencedTelemetryServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedTelemetryServicesWithContext gets the collection of TelemetryService from
+// a provided reference.
+func ListReferencedTelemetryServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*TelemetryService, error) {
+	return common.GetCollectionObjectsWithContext[TelemetryService](ctx, c, link, queryOpts...)
 }

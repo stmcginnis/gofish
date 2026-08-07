@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -562,6 +563,11 @@ func (memory *Memory) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (memory *Memory) Update() error {
+	return memory.UpdateWithContext(common.ContextOf(memory.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (memory *Memory) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Enabled",
 		"LocationIndicatorActive",
@@ -572,153 +578,261 @@ func (memory *Memory) Update() error {
 		"VolatileSizeLimitMiB",
 	}
 
-	return memory.UpdateFromRawData(memory, memory.rawData, readWriteFields)
+	return memory.UpdateFromRawDataWithContext(ctx, memory, memory.rawData, readWriteFields)
 }
 
 // GetMemory will get a Memory instance from the service.
 func GetMemory(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Memory, error) {
-	return common.GetObject[Memory](c, uri, queryOpts...)
+	return GetMemoryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMemoryWithContext will get a Memory instance from the service.
+func GetMemoryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Memory, error) {
+	return common.GetObjectWithContext[Memory](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMemorys gets the collection of Memory from
 // a provided reference.
 func ListReferencedMemorys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
-	return common.GetCollectionObjects[Memory](c, link, queryOpts...)
+	return ListReferencedMemorysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMemorysWithContext gets the collection of Memory from
+// a provided reference.
+func ListReferencedMemorysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return common.GetCollectionObjectsWithContext[Memory](ctx, c, link, queryOpts...)
 }
 
 // Assembly gets this memory's assembly.
 func (memory *Memory) Assembly(queryOpts ...common.QueryGroupOption) (*Assembly, error) {
+	return memory.AssemblyWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// AssemblyWithContext gets this memory's assembly.
+func (memory *Memory) AssemblyWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Assembly, error) {
 	if memory.assembly == "" {
 		return nil, nil
 	}
-	return GetAssembly(memory.GetClient(), memory.assembly, queryOpts...)
+	return GetAssemblyWithContext(ctx, memory.GetClient(), memory.assembly, queryOpts...)
 }
 
 // Certificates gets certificates for device identity and attestation.
 func (memory *Memory) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return common.GetObjects[Certificate](memory.GetClient(), memory.certificates, queryOpts...)
+	return memory.CertificatesWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets certificates for device identity and attestation.
+func (memory *Memory) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjectsWithContext[Certificate](ctx, memory.GetClient(), memory.certificates, queryOpts...)
 }
 
 // EnvironmentMetrics gets the environment metrics for this memory.
 func (memory *Memory) EnvironmentMetrics(queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return memory.EnvironmentMetricsWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// EnvironmentMetricsWithContext gets the environment metrics for this memory.
+func (memory *Memory) EnvironmentMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
 	if memory.environmentMetrics == "" {
 		return nil, nil
 	}
-	return GetEnvironmentMetrics(memory.GetClient(), memory.environmentMetrics, queryOpts...)
+	return GetEnvironmentMetricsWithContext(ctx, memory.GetClient(), memory.environmentMetrics, queryOpts...)
 }
 
 // Log gets the log service for this memory.
 func (memory *Memory) Log(queryOpts ...common.QueryGroupOption) (*LogService, error) {
+	return memory.LogWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// LogWithContext gets the log service for this memory.
+func (memory *Memory) LogWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*LogService, error) {
 	if memory.log == "" {
 		return nil, nil
 	}
-	return GetLogService(memory.GetClient(), memory.log, queryOpts...)
+	return GetLogServiceWithContext(ctx, memory.GetClient(), memory.log, queryOpts...)
 }
 
 // Metrics gets the memory metrics.
 func (memory *Memory) Metrics(queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
+	return memory.MetricsWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the memory metrics.
+func (memory *Memory) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
 	if memory.metrics == nil {
 		return nil, nil
 	}
 	if memory.metrics.ID != "" {
 		return memory.metrics, nil
 	}
-	return GetMemoryMetrics(memory.GetClient(), memory.metrics.ODataID, queryOpts...)
+	return GetMemoryMetricsWithContext(ctx, memory.GetClient(), memory.metrics.ODataID, queryOpts...)
 }
 
 // Batteries gets the batteries that provide power to this memory device during
 // a power-loss event, such as with battery-backed NVDIMMs.
 func (memory *Memory) Batteries(queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
-	return common.GetObjects[Battery](memory.GetClient(), memory.batteries, queryOpts...)
+	return memory.BatteriesWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// BatteriesWithContext gets the batteries that provide power to this memory device during
+// a power-loss event, such as with battery-backed NVDIMMs.
+func (memory *Memory) BatteriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Battery, error) {
+	return common.GetObjectsWithContext[Battery](ctx, memory.GetClient(), memory.batteries, queryOpts...)
 }
 
 // Chassis gets the containing chassis of this memory.
 func (memory *Memory) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
+	return memory.ChassisWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// ChassisWithContext gets the containing chassis of this memory.
+func (memory *Memory) ChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Chassis, error) {
 	if memory.chassis == "" {
 		return nil, nil
 	}
-	return GetChassis(memory.GetClient(), memory.chassis, queryOpts...)
+	return GetChassisWithContext(ctx, memory.GetClient(), memory.chassis, queryOpts...)
 }
 
 // Endpoints gets the endpoints associated with this memory.
 func (memory *Memory) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](memory.GetClient(), memory.endpoints, queryOpts...)
+	return memory.EndpointsWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets the endpoints associated with this memory.
+func (memory *Memory) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, memory.GetClient(), memory.endpoints, queryOpts...)
 }
 
 // MemoryMediaSources gets the memory chunks providing media for this memory.
 func (memory *Memory) MemoryMediaSources(queryOpts ...common.QueryGroupOption) ([]*MemoryChunks, error) {
-	return common.GetObjects[MemoryChunks](memory.GetClient(), memory.memoryMediaSources, queryOpts...)
+	return memory.MemoryMediaSourcesWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// MemoryMediaSourcesWithContext gets the memory chunks providing media for this memory.
+func (memory *Memory) MemoryMediaSourcesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MemoryChunks, error) {
+	return common.GetObjectsWithContext[MemoryChunks](ctx, memory.GetClient(), memory.memoryMediaSources, queryOpts...)
 }
 
 // MemoryRegionMediaSources gets the memory regions providing media for this memory.
 func (memory *Memory) MemoryRegionMediaSources(queryOpts ...common.QueryGroupOption) ([]*MemoryRegion, error) {
-	return common.GetObjects[MemoryRegion](memory.GetClient(), memory.memoryRegionMediaSources, queryOpts...)
+	return memory.MemoryRegionMediaSourcesWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// MemoryRegionMediaSourcesWithContext gets the memory regions providing media for this memory.
+func (memory *Memory) MemoryRegionMediaSourcesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MemoryRegion, error) {
+	return common.GetObjectsWithContext[MemoryRegion](ctx, memory.GetClient(), memory.memoryRegionMediaSources, queryOpts...)
 }
 
 // Processors gets the processors associated with this memory device.
 func (memory *Memory) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetObjects[Processor](memory.GetClient(), memory.processors, queryOpts...)
+	return memory.ProcessorsWithContext(common.ContextOf(memory.GetClient()), queryOpts...)
+}
+
+// ProcessorsWithContext gets the processors associated with this memory device.
+func (memory *Memory) ProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjectsWithContext[Processor](ctx, memory.GetClient(), memory.processors, queryOpts...)
 }
 
 // DisalbeMasterPassphrase will disable the master passphrase on the supplied
 // region provided the supplied master passphrase matches that of the region.
 func (memory *Memory) DisableMasterPassphrase(passphrase, regionID string) error {
+	return memory.DisableMasterPassphraseWithContext(common.ContextOf(memory.GetClient()), passphrase, regionID)
+}
+
+// DisalbeMasterPassphrase will disable the master passphrase on the supplied
+// region provided the supplied master passphrase matches that of the region.
+func (memory *Memory) DisableMasterPassphraseWithContext(ctx context.Context, passphrase, regionID string) error {
 	param := memoryParams{
 		Passphrase: passphrase,
 		RegionID:   regionID,
 	}
-	return memory.Post(memory.disableMasterPassphraseTarget, param)
+	return memory.PostWithContext(ctx, memory.disableMasterPassphraseTarget, param)
 }
 
 // DisablePassphrase will disable the need for passphrases on the supplied
 // region provided the supplied passphrase matches that of the region.
 func (memory *Memory) DisablePassphrase(passphrase, regionID string) error {
+	return memory.DisablePassphraseWithContext(common.ContextOf(memory.GetClient()), passphrase, regionID)
+}
+
+// DisablePassphraseWithContext will disable the need for passphrases on the supplied
+// region provided the supplied passphrase matches that of the region.
+func (memory *Memory) DisablePassphraseWithContext(ctx context.Context, passphrase, regionID string) error {
 	param := memoryParams{
 		Passphrase: passphrase,
 		RegionID:   regionID,
 	}
-	return memory.Post(memory.disablePassphraseTarget, param)
+	return memory.PostWithContext(ctx, memory.disablePassphraseTarget, param)
 }
 
 // FreezeSecurityState will freeze the security state of the memory device.
 func (memory *Memory) FreezeSecurityState() error {
-	return memory.Post(memory.freezeSecurityStateTarget, nil)
+	return memory.FreezeSecurityStateWithContext(common.ContextOf(memory.GetClient()))
+}
+
+// FreezeSecurityStateWithContext will freeze the security state of the memory device.
+func (memory *Memory) FreezeSecurityStateWithContext(ctx context.Context) error {
+	return memory.PostWithContext(ctx, memory.freezeSecurityStateTarget, nil)
 }
 
 // InjectPersistentPoison will inject poison to a specific persistent memory address
 // in the memory device.
 func (memory *Memory) InjectPersistentPoison(physicalAddress string) error {
+	return memory.InjectPersistentPoisonWithContext(common.ContextOf(memory.GetClient()), physicalAddress)
+}
+
+// InjectPersistentPoisonWithContext will inject poison to a specific persistent memory address
+// in the memory device.
+func (memory *Memory) InjectPersistentPoisonWithContext(ctx context.Context, physicalAddress string) error {
 	param := struct {
 		PhysicalAddress string
 	}{
 		PhysicalAddress: physicalAddress,
 	}
-	return memory.Post(memory.injectPersistentPoisonTarget, param)
+	return memory.PostWithContext(ctx, memory.injectPersistentPoisonTarget, param)
 }
 
 // OverwriteUnit will securely erase the supplied region provided the supplied
 // passphrase matches that of the given region using the NIST SP800-88 Purge: Overwrite.
 // Use the SecureEraseUnit method to perform NIST SP800-88 Purge: Cryptographic Erase.
 func (memory *Memory) OverwriteUnit(passphrase, regionID string) error {
+	return memory.OverwriteUnitWithContext(common.ContextOf(memory.GetClient()), passphrase, regionID)
+}
+
+// OverwriteUnitWithContext will securely erase the supplied region provided the supplied
+// passphrase matches that of the given region using the NIST SP800-88 Purge: Overwrite.
+// Use the SecureEraseUnit method to perform NIST SP800-88 Purge: Cryptographic Erase.
+func (memory *Memory) OverwriteUnitWithContext(ctx context.Context, passphrase, regionID string) error {
 	param := memoryParams{
 		Passphrase: passphrase,
 		RegionID:   regionID,
 	}
-	return memory.Post(memory.overwriteUnitTarget, param)
+	return memory.PostWithContext(ctx, memory.overwriteUnitTarget, param)
 }
 
 // Reset resets this memory device.
 func (memory *Memory) Reset(resetType ResetType) error {
+	return memory.ResetWithContext(common.ContextOf(memory.GetClient()), resetType)
+}
+
+// ResetWithContext resets this memory device.
+func (memory *Memory) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	t := struct {
 		ResetType ResetType
 	}{ResetType: resetType}
-	return memory.Post(memory.resetTarget, t)
+	return memory.PostWithContext(ctx, memory.resetTarget, t)
 }
 
 // ResetToDefaults will reset the values of writable properties in this resource
 // to their default values as specified by the manufacturer.
 func (memory *Memory) ResetToDefaults() error {
-	return memory.Post(memory.resetToDefaultsTarget, nil)
+	return memory.ResetToDefaultsWithContext(common.ContextOf(memory.GetClient()))
+}
+
+// ResetToDefaultsWithContext will reset the values of writable properties in this resource
+// to their default values as specified by the manufacturer.
+func (memory *Memory) ResetToDefaultsWithContext(ctx context.Context) error {
+	return memory.PostWithContext(ctx, memory.resetToDefaultsTarget, nil)
 }
 
 // ScanMedia will scan the media of the memory device.
@@ -726,6 +840,14 @@ func (memory *Memory) ResetToDefaults() error {
 // `noEventLog` is used to indicate whether events related to the media scan are not logged.
 // `physicalAddress` is the starting device physical address to scan as a hex-encoded string.
 func (memory *Memory) ScanMedia(length int, noEventLog bool, physicalAddress string) error {
+	return memory.ScanMediaWithContext(common.ContextOf(memory.GetClient()), length, noEventLog, physicalAddress)
+}
+
+// ScanMediaWithContext will scan the media of the memory device.
+// `length` is the length of the target region to scan in bytes from the physical address.
+// `noEventLog` is used to indicate whether events related to the media scan are not logged.
+// `physicalAddress` is the starting device physical address to scan as a hex-encoded string.
+func (memory *Memory) ScanMediaWithContext(ctx context.Context, length int, noEventLog bool, physicalAddress string) error {
 	param := struct {
 		Length          int
 		NoEventLog      bool
@@ -735,46 +857,69 @@ func (memory *Memory) ScanMedia(length int, noEventLog bool, physicalAddress str
 		NoEventLog:      noEventLog,
 		PhysicalAddress: physicalAddress,
 	}
-	return memory.Post(memory.scanMediaTarget, param)
+	return memory.PostWithContext(ctx, memory.scanMediaTarget, param)
 }
 
 // SecureEraseUnit will securely erase the supplied region provided the supplied passphrase
 // matches that of the given region using the NIST SP800-88 Purge: Cryptographic Erase.
 // Use the OverwriteUnit method to perform NIST SP800-88 Purge: Overwrite.
 func (memory *Memory) SecureEraseUnit(passphrase, regionID string) error {
+	return memory.SecureEraseUnitWithContext(common.ContextOf(memory.GetClient()), passphrase, regionID)
+}
+
+// SecureEraseUnitWithContext will securely erase the supplied region provided the supplied passphrase
+// matches that of the given region using the NIST SP800-88 Purge: Cryptographic Erase.
+// Use the OverwriteUnit method to perform NIST SP800-88 Purge: Overwrite.
+func (memory *Memory) SecureEraseUnitWithContext(ctx context.Context, passphrase, regionID string) error {
 	param := memoryParams{
 		Passphrase: passphrase,
 		RegionID:   regionID,
 	}
-	return memory.Post(memory.secureEraseUnitTarget, param)
+	return memory.PostWithContext(ctx, memory.secureEraseUnitTarget, param)
 }
 
 // SetMasterPassphrase will set the supplied master passphrase to the supplied region.
 func (memory *Memory) SetMasterPassphrase(passphrase, regionID string) error {
+	return memory.SetMasterPassphraseWithContext(common.ContextOf(memory.GetClient()), passphrase, regionID)
+}
+
+// SetMasterPassphraseWithContext will set the supplied master passphrase to the supplied region.
+func (memory *Memory) SetMasterPassphraseWithContext(ctx context.Context, passphrase, regionID string) error {
 	param := memoryParams{
 		Passphrase: passphrase,
 		RegionID:   regionID,
 	}
-	return memory.Post(memory.setMasterPassphraseTarget, param)
+	return memory.PostWithContext(ctx, memory.setMasterPassphraseTarget, param)
 }
 
 // SetPassphrase will apply the supplied passphrase to the supplied region.
 func (memory *Memory) SetPassphrase(passphrase, regionID string) error {
+	return memory.SetPassphraseWithContext(common.ContextOf(memory.GetClient()), passphrase, regionID)
+}
+
+// SetPassphraseWithContext will apply the supplied passphrase to the supplied region.
+func (memory *Memory) SetPassphraseWithContext(ctx context.Context, passphrase, regionID string) error {
 	param := memoryParams{
 		Passphrase: passphrase,
 		RegionID:   regionID,
 	}
-	return memory.Post(memory.setPassphraseTarget, param)
+	return memory.PostWithContext(ctx, memory.setPassphraseTarget, param)
 }
 
 // UnlockUnit will apply the supplied passphrase to the supplied region for the purpose
 // of unlocking the given regions.
 func (memory *Memory) UnlockUnit(passphrase, regionID string) error {
+	return memory.UnlockUnitWithContext(common.ContextOf(memory.GetClient()), passphrase, regionID)
+}
+
+// UnlockUnitWithContext will apply the supplied passphrase to the supplied region for the purpose
+// of unlocking the given regions.
+func (memory *Memory) UnlockUnitWithContext(ctx context.Context, passphrase, regionID string) error {
 	param := memoryParams{
 		Passphrase: passphrase,
 		RegionID:   regionID,
 	}
-	return memory.Post(memory.unlockUnitTarget, param)
+	return memory.PostWithContext(ctx, memory.unlockUnitTarget, param)
 }
 
 type memoryParams struct {

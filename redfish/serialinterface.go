@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -190,6 +191,11 @@ func (serialInterface *SerialInterface) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (serialInterface *SerialInterface) Update() error {
+	return serialInterface.UpdateWithContext(common.ContextOf(serialInterface.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (serialInterface *SerialInterface) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"BitRate",
 		"DataBits",
@@ -199,16 +205,27 @@ func (serialInterface *SerialInterface) Update() error {
 		"StopBits",
 	}
 
-	return serialInterface.UpdateFromRawData(serialInterface, serialInterface.rawData, readWriteFields)
+	return serialInterface.UpdateFromRawDataWithContext(ctx, serialInterface, serialInterface.rawData, readWriteFields)
 }
 
 // GetSerialInterface will get a SerialInterface instance from the service.
 func GetSerialInterface(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SerialInterface, error) {
-	return common.GetObject[SerialInterface](c, uri, queryOpts...)
+	return GetSerialInterfaceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSerialInterfaceWithContext will get a SerialInterface instance from the service.
+func GetSerialInterfaceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SerialInterface, error) {
+	return common.GetObjectWithContext[SerialInterface](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSerialInterfaces gets the collection of SerialInterface from
 // a provided reference.
 func ListReferencedSerialInterfaces(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SerialInterface, error) {
-	return common.GetCollectionObjects[SerialInterface](c, link, queryOpts...)
+	return ListReferencedSerialInterfacesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSerialInterfacesWithContext gets the collection of SerialInterface from
+// a provided reference.
+func ListReferencedSerialInterfacesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SerialInterface, error) {
+	return common.GetCollectionObjectsWithContext[SerialInterface](ctx, c, link, queryOpts...)
 }

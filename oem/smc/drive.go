@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -74,10 +75,15 @@ func FromDrive(drive *redfish.Drive) (Drive, error) {
 
 // Indicate will set the indicator light activity, true for on, false for off
 func (d *Drive) Indicate(active bool) error {
+	return d.IndicateWithContext(common.ContextOf(d.GetClient()), active)
+}
+
+// IndicateWithContext will set the indicator light activity, true for on, false for off
+func (d *Drive) IndicateWithContext(ctx context.Context, active bool) error {
 	// Return a common error to let the user try falling back on the normal gofish path
 	if d.indicateTarget == "" {
 		return ErrActionNotSupported
 	}
 
-	return d.Post(d.indicateTarget, map[string]interface{}{"Active": active})
+	return d.PostWithContext(ctx, d.indicateTarget, map[string]interface{}{"Active": active})
 }

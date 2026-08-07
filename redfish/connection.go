@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -154,33 +155,64 @@ func (connection *Connection) UnmarshalJSON(b []byte) error {
 
 // GetConnection will get a Connection instance from the service.
 func GetConnection(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Connection, error) {
-	return common.GetObject[Connection](c, uri, queryOpts...)
+	return GetConnectionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetConnectionWithContext will get a Connection instance from the service.
+func GetConnectionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Connection, error) {
+	return common.GetObjectWithContext[Connection](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedConnections gets the collection of Connection from
 // a provided reference.
 func ListReferencedConnections(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Connection, error) {
-	return common.GetCollectionObjects[Connection](c, link, queryOpts...)
+	return ListReferencedConnectionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedConnectionsWithContext gets the collection of Connection from
+// a provided reference.
+func ListReferencedConnectionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Connection, error) {
+	return common.GetCollectionObjectsWithContext[Connection](ctx, c, link, queryOpts...)
 }
 
 // InitiatorEndpointGroups get the initiator endpoint groups associated with this connection.
 func (connection *Connection) InitiatorEndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
-	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.initiatorEndpointGroups, queryOpts...)
+	return connection.InitiatorEndpointGroupsWithContext(common.ContextOf(connection.GetClient()), queryOpts...)
+}
+
+// InitiatorEndpointGroupsWithContext get the initiator endpoint groups associated with this connection.
+func (connection *Connection) InitiatorEndpointGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return common.GetObjectsWithContext[EndpointGroup](ctx, connection.GetClient(), connection.initiatorEndpointGroups, queryOpts...)
 }
 
 // InitiatorEndpoints get the initiator endpoint associated with this connection.
 func (connection *Connection) InitiatorEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](connection.GetClient(), connection.initiatorEndpoints, queryOpts...)
+	return connection.InitiatorEndpointsWithContext(common.ContextOf(connection.GetClient()), queryOpts...)
+}
+
+// InitiatorEndpointsWithContext get the initiator endpoint associated with this connection.
+func (connection *Connection) InitiatorEndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, connection.GetClient(), connection.initiatorEndpoints, queryOpts...)
 }
 
 // TargetEndpointGroups get the target endpoint groups associated with this connection.
 func (connection *Connection) TargetEndpointGroups(queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
-	return common.GetObjects[EndpointGroup](connection.GetClient(), connection.targetEndpointGroups, queryOpts...)
+	return connection.TargetEndpointGroupsWithContext(common.ContextOf(connection.GetClient()), queryOpts...)
+}
+
+// TargetEndpointGroupsWithContext get the target endpoint groups associated with this connection.
+func (connection *Connection) TargetEndpointGroupsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EndpointGroup, error) {
+	return common.GetObjectsWithContext[EndpointGroup](ctx, connection.GetClient(), connection.targetEndpointGroups, queryOpts...)
 }
 
 // TargetEndpoints get the target endpoint associated with this connection.
 func (connection *Connection) TargetEndpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](connection.GetClient(), connection.targetEndpoints, queryOpts...)
+	return connection.TargetEndpointsWithContext(common.ContextOf(connection.GetClient()), queryOpts...)
+}
+
+// TargetEndpointsWithContext get the target endpoint associated with this connection.
+func (connection *Connection) TargetEndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, connection.GetClient(), connection.targetEndpoints, queryOpts...)
 }
 
 // ConnectionKey shall contain the permission key information required to access the target resources for a

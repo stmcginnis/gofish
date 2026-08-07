@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -55,24 +56,41 @@ type SecureBootDatabaseActions struct {
 
 // Certificates get the certificates contained in this UEFI Secure Boot database.
 func (securebootdatabase *SecureBootDatabase) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return securebootdatabase.CertificatesWithContext(common.ContextOf(securebootdatabase.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext get the certificates contained in this UEFI Secure Boot database.
+func (securebootdatabase *SecureBootDatabase) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
 	if securebootdatabase.CertificatesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedCertificates(securebootdatabase.GetClient(), securebootdatabase.CertificatesLink.String(), queryOpts...)
+	return ListReferencedCertificatesWithContext(ctx, securebootdatabase.GetClient(), securebootdatabase.CertificatesLink.String(), queryOpts...)
 }
 
 // Signatures get the certificates contained in this UEFI Secure Boot database.
 func (securebootdatabase *SecureBootDatabase) Signatures(queryOpts ...common.QueryGroupOption) ([]*Signature, error) {
+	return securebootdatabase.SignaturesWithContext(common.ContextOf(securebootdatabase.GetClient()), queryOpts...)
+}
+
+// SignaturesWithContext get the certificates contained in this UEFI Secure Boot database.
+func (securebootdatabase *SecureBootDatabase) SignaturesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Signature, error) {
 	if securebootdatabase.SignaturesLink.IsZero() {
 		return nil, nil
 	}
-	return ListReferencedSignatures(securebootdatabase.GetClient(), securebootdatabase.SignaturesLink.String(), queryOpts...)
+	return ListReferencedSignaturesWithContext(ctx, securebootdatabase.GetClient(), securebootdatabase.SignaturesLink.String(), queryOpts...)
 }
 
 // ResetKeys will perform a reset of this UEFI Secure Boot key database. The `ResetAllKeysToDefault`
 // value shall reset this UEFI Secure Boot key database to the default values. The `DeleteAllKeys`
 // value shall delete the contents of this UEFI Secure Boot key database.
 func (securebootdatabase *SecureBootDatabase) ResetKeys(resetType ResetKeysType) error {
+	return securebootdatabase.ResetKeysWithContext(common.ContextOf(securebootdatabase.GetClient()), resetType)
+}
+
+// ResetKeysWithContext will perform a reset of this UEFI Secure Boot key database. The `ResetAllKeysToDefault`
+// value shall reset this UEFI Secure Boot key database to the default values. The `DeleteAllKeys`
+// value shall delete the contents of this UEFI Secure Boot key database.
+func (securebootdatabase *SecureBootDatabase) ResetKeysWithContext(ctx context.Context, resetType ResetKeysType) error {
 	if securebootdatabase.Actions.ResetKeys.Target == "" {
 		return ErrActionNotSupported
 	}
@@ -81,16 +99,27 @@ func (securebootdatabase *SecureBootDatabase) ResetKeys(resetType ResetKeysType)
 	}{
 		ResetKeysType: resetType,
 	}
-	return securebootdatabase.Post(securebootdatabase.Actions.ResetKeys.Target, params)
+	return securebootdatabase.PostWithContext(ctx, securebootdatabase.Actions.ResetKeys.Target, params)
 }
 
 // GetSecureBootDatabase will get a SecureBootDatabase instance from the service.
 func GetSecureBootDatabase(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SecureBootDatabase, error) {
-	return common.GetObject[SecureBootDatabase](c, uri, queryOpts...)
+	return GetSecureBootDatabaseWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSecureBootDatabaseWithContext will get a SecureBootDatabase instance from the service.
+func GetSecureBootDatabaseWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SecureBootDatabase, error) {
+	return common.GetObjectWithContext[SecureBootDatabase](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSecureBootDatabases gets the collection of SecureBootDatabase from
 // a provided reference.
 func ListReferencedSecureBootDatabases(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SecureBootDatabase, error) {
-	return common.GetCollectionObjects[SecureBootDatabase](c, link, queryOpts...)
+	return ListReferencedSecureBootDatabasesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSecureBootDatabasesWithContext gets the collection of SecureBootDatabase from
+// a provided reference.
+func ListReferencedSecureBootDatabasesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SecureBootDatabase, error) {
+	return common.GetCollectionObjectsWithContext[SecureBootDatabase](ctx, c, link, queryOpts...)
 }

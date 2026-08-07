@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -85,6 +86,11 @@ func (spareresourceset *SpareResourceSet) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (spareresourceset *SpareResourceSet) Update() error {
+	return spareresourceset.UpdateWithContext(common.ContextOf(spareresourceset.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (spareresourceset *SpareResourceSet) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(SpareResourceSet)
@@ -103,22 +109,39 @@ func (spareresourceset *SpareResourceSet) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(spareresourceset).Elem()
 
-	return spareresourceset.Entity.Update(originalElement, currentElement, readWriteFields)
+	return spareresourceset.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetSpareResourceSet will get a SpareResourceSet instance from the service.
 func GetSpareResourceSet(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SpareResourceSet, error) {
-	return common.GetObject[SpareResourceSet](c, uri, queryOpts...)
+	return GetSpareResourceSetWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSpareResourceSetWithContext will get a SpareResourceSet instance from the service.
+func GetSpareResourceSetWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SpareResourceSet, error) {
+	return common.GetObjectWithContext[SpareResourceSet](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSpareResourceSets gets the collection of SpareResourceSet from
 // a provided reference.
 func ListReferencedSpareResourceSets(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
-	return common.GetCollectionObjects[SpareResourceSet](c, link, queryOpts...)
+	return ListReferencedSpareResourceSetsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSpareResourceSetsWithContext gets the collection of SpareResourceSet from
+// a provided reference.
+func ListReferencedSpareResourceSetsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return common.GetCollectionObjectsWithContext[SpareResourceSet](ctx, c, link, queryOpts...)
 }
 
 // ReplacementSpareSets gets other spare sets that can be utilized to replenish
 // this spare set.
 func (spareresourceset *SpareResourceSet) ReplacementSpareSets(queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
-	return ListReferencedSpareResourceSets(spareresourceset.GetClient(), spareresourceset.replacementSpareSets, queryOpts...)
+	return spareresourceset.ReplacementSpareSetsWithContext(common.ContextOf(spareresourceset.GetClient()), queryOpts...)
+}
+
+// ReplacementSpareSetsWithContext gets other spare sets that can be utilized to replenish
+// this spare set.
+func (spareresourceset *SpareResourceSet) ReplacementSpareSetsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SpareResourceSet, error) {
+	return ListReferencedSpareResourceSetsWithContext(ctx, spareresourceset.GetClient(), spareresourceset.replacementSpareSets, queryOpts...)
 }

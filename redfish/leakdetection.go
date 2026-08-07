@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -54,18 +55,34 @@ func (leakdetection *LeakDetection) UnmarshalJSON(b []byte) error {
 
 // LeakDetectors gets the leak detectors within this subsystem.
 func (leakdetection *LeakDetection) LeakDetectors(queryOpts ...common.QueryGroupOption) ([]*LeakDetector, error) {
-	return ListReferencedLeakDetectors(leakdetection.GetClient(), leakdetection.leakDetectors, queryOpts...)
+	return leakdetection.LeakDetectorsWithContext(common.ContextOf(leakdetection.GetClient()), queryOpts...)
+}
+
+// LeakDetectorsWithContext gets the leak detectors within this subsystem.
+func (leakdetection *LeakDetection) LeakDetectorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*LeakDetector, error) {
+	return ListReferencedLeakDetectorsWithContext(ctx, leakdetection.GetClient(), leakdetection.leakDetectors, queryOpts...)
 }
 
 // GetLeakDetection will get a LeakDetection instance from the service.
 func GetLeakDetection(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
-	return common.GetObject[LeakDetection](c, uri, queryOpts...)
+	return GetLeakDetectionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetLeakDetectionWithContext will get a LeakDetection instance from the service.
+func GetLeakDetectionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
+	return common.GetObjectWithContext[LeakDetection](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedLeakDetections gets the collection of LeakDetection from
 // a provided reference.
 func ListReferencedLeakDetections(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LeakDetection, error) {
-	return common.GetCollectionObjects[LeakDetection](c, link, queryOpts...)
+	return ListReferencedLeakDetectionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedLeakDetectionsWithContext gets the collection of LeakDetection from
+// a provided reference.
+func ListReferencedLeakDetectionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LeakDetection, error) {
+	return common.GetCollectionObjectsWithContext[LeakDetection](ctx, c, link, queryOpts...)
 }
 
 // LeakDetectorGroup shall contain a group of leak detection equipment that reports a unified status.

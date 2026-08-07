@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -77,29 +78,55 @@ func (usbcontroller *USBController) UnmarshalJSON(b []byte) error {
 
 // PCIeDevice gets the PCIeDevice for this USB controller.
 func (usbcontroller *USBController) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
+	return usbcontroller.PCIeDeviceWithContext(common.ContextOf(usbcontroller.GetClient()), queryOpts...)
+}
+
+// PCIeDeviceWithContext gets the PCIeDevice for this USB controller.
+func (usbcontroller *USBController) PCIeDeviceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
 	if usbcontroller.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(usbcontroller.GetClient(), usbcontroller.pcieDevice, queryOpts...)
+	return GetPCIeDeviceWithContext(ctx, usbcontroller.GetClient(), usbcontroller.pcieDevice, queryOpts...)
 }
 
 // Processors gets the processors that can utilize this USB controller.
 func (usbcontroller *USBController) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetObjects[Processor](usbcontroller.GetClient(), usbcontroller.processors, queryOpts...)
+	return usbcontroller.ProcessorsWithContext(common.ContextOf(usbcontroller.GetClient()), queryOpts...)
+}
+
+// ProcessorsWithContext gets the processors that can utilize this USB controller.
+func (usbcontroller *USBController) ProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjectsWithContext[Processor](ctx, usbcontroller.GetClient(), usbcontroller.processors, queryOpts...)
 }
 
 // Ports gets the ports of the USB controller.
 func (usbcontroller *USBController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return ListReferencedPorts(usbcontroller.GetClient(), usbcontroller.ports, queryOpts...)
+	return usbcontroller.PortsWithContext(common.ContextOf(usbcontroller.GetClient()), queryOpts...)
+}
+
+// PortsWithContext gets the ports of the USB controller.
+func (usbcontroller *USBController) PortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPortsWithContext(ctx, usbcontroller.GetClient(), usbcontroller.ports, queryOpts...)
 }
 
 // GetUSBController will get a USBController instance from the service.
 func GetUSBController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*USBController, error) {
-	return common.GetObject[USBController](c, uri, queryOpts...)
+	return GetUSBControllerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetUSBControllerWithContext will get a USBController instance from the service.
+func GetUSBControllerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*USBController, error) {
+	return common.GetObjectWithContext[USBController](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedUSBControllers gets the collection of USBController from
 // a provided reference.
 func ListReferencedUSBControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*USBController, error) {
-	return common.GetCollectionObjects[USBController](c, link, queryOpts...)
+	return ListReferencedUSBControllersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedUSBControllersWithContext gets the collection of USBController from
+// a provided reference.
+func ListReferencedUSBControllersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*USBController, error) {
+	return common.GetCollectionObjectsWithContext[USBController](ctx, c, link, queryOpts...)
 }

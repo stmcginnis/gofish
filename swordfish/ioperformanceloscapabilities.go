@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -97,6 +98,11 @@ func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) UnmarshalJSON(
 
 // Update commits updates to this object's properties to the running system.
 func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) Update() error {
+	return ioperformanceloscapabilities.UpdateWithContext(common.ContextOf(ioperformanceloscapabilities.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(IOPerformanceLoSCapabilities)
@@ -116,18 +122,29 @@ func (ioperformanceloscapabilities *IOPerformanceLoSCapabilities) Update() error
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(ioperformanceloscapabilities).Elem()
 
-	return ioperformanceloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
+	return ioperformanceloscapabilities.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetIOPerformanceLoSCapabilities will get a IOPerformanceLoSCapabilities instance from the service.
 func GetIOPerformanceLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOPerformanceLoSCapabilities, error) {
-	return common.GetObject[IOPerformanceLoSCapabilities](c, uri, queryOpts...)
+	return GetIOPerformanceLoSCapabilitiesWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetIOPerformanceLoSCapabilitiesWithContext will get a IOPerformanceLoSCapabilities instance from the service.
+func GetIOPerformanceLoSCapabilitiesWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOPerformanceLoSCapabilities, error) {
+	return common.GetObjectWithContext[IOPerformanceLoSCapabilities](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedIOPerformanceLoSCapabilitiess gets the collection of IOPerformanceLoSCapabilities from
 // a provided reference.
 func ListReferencedIOPerformanceLoSCapabilitiess(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLoSCapabilities, error) {
-	return common.GetCollectionObjects[IOPerformanceLoSCapabilities](c, link, queryOpts...)
+	return ListReferencedIOPerformanceLoSCapabilitiessWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedIOPerformanceLoSCapabilitiessWithContext gets the collection of IOPerformanceLoSCapabilities from
+// a provided reference.
+func ListReferencedIOPerformanceLoSCapabilitiessWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLoSCapabilities, error) {
+	return common.GetCollectionObjectsWithContext[IOPerformanceLoSCapabilities](ctx, c, link, queryOpts...)
 }
 
 // IOWorkload is used to describe an IO Workload.

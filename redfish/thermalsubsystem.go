@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -82,54 +83,101 @@ func (thermalsubsystem *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 
 // CoolantConnectors gets the coolant connectors for this equipment.
 func (thermalsubsystem *ThermalSubsystem) CoolantConnectors(queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
-	return ListReferencedCoolantConnectors(thermalsubsystem.GetClient(), thermalsubsystem.coolantConnectors, queryOpts...)
+	return thermalsubsystem.CoolantConnectorsWithContext(common.ContextOf(thermalsubsystem.GetClient()), queryOpts...)
+}
+
+// CoolantConnectorsWithContext gets the coolant connectors for this equipment.
+func (thermalsubsystem *ThermalSubsystem) CoolantConnectorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return ListReferencedCoolantConnectorsWithContext(ctx, thermalsubsystem.GetClient(), thermalsubsystem.coolantConnectors, queryOpts...)
 }
 
 // Fans gets the fans for this equipment.
 func (thermalsubsystem *ThermalSubsystem) Fans(queryOpts ...common.QueryGroupOption) ([]*Fan, error) {
-	return ListReferencedFans(thermalsubsystem.GetClient(), thermalsubsystem.fans, queryOpts...)
+	return thermalsubsystem.FansWithContext(common.ContextOf(thermalsubsystem.GetClient()), queryOpts...)
+}
+
+// FansWithContext gets the fans for this equipment.
+func (thermalsubsystem *ThermalSubsystem) FansWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Fan, error) {
+	return ListReferencedFansWithContext(ctx, thermalsubsystem.GetClient(), thermalsubsystem.fans, queryOpts...)
 }
 
 // Heaters gets the heaters within this subsystem.
 func (thermalsubsystem *ThermalSubsystem) Heaters(queryOpts ...common.QueryGroupOption) ([]*Heater, error) {
-	return ListReferencedHeaters(thermalsubsystem.GetClient(), thermalsubsystem.heaters, queryOpts...)
+	return thermalsubsystem.HeatersWithContext(common.ContextOf(thermalsubsystem.GetClient()), queryOpts...)
+}
+
+// HeatersWithContext gets the heaters within this subsystem.
+func (thermalsubsystem *ThermalSubsystem) HeatersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Heater, error) {
+	return ListReferencedHeatersWithContext(ctx, thermalsubsystem.GetClient(), thermalsubsystem.heaters, queryOpts...)
 }
 
 // LeakDetection gets the leak detection system within the ThermalSubsystem.
 // This property has been deprecated in favor of LeakDetectors under the Chassis resource.
 func (thermalsubsystem *ThermalSubsystem) LeakDetection(queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
+	return thermalsubsystem.LeakDetectionWithContext(common.ContextOf(thermalsubsystem.GetClient()), queryOpts...)
+}
+
+// LeakDetectionWithContext gets the leak detection system within the ThermalSubsystem.
+// This property has been deprecated in favor of LeakDetectors under the Chassis resource.
+func (thermalsubsystem *ThermalSubsystem) LeakDetectionWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*LeakDetection, error) {
 	if thermalsubsystem.leakDetection == "" {
 		return nil, nil
 	}
 
-	return GetLeakDetection(thermalsubsystem.GetClient(), thermalsubsystem.leakDetection, queryOpts...)
+	return GetLeakDetectionWithContext(ctx, thermalsubsystem.GetClient(), thermalsubsystem.leakDetection, queryOpts...)
 }
 
 // Pumps gets the pumps for this equipment.
 func (thermalsubsystem *ThermalSubsystem) Pumps(queryOpts ...common.QueryGroupOption) ([]*Pump, error) {
-	return ListReferencedPumps(thermalsubsystem.GetClient(), thermalsubsystem.pumps, queryOpts...)
+	return thermalsubsystem.PumpsWithContext(common.ContextOf(thermalsubsystem.GetClient()), queryOpts...)
+}
+
+// PumpsWithContext gets the pumps for this equipment.
+func (thermalsubsystem *ThermalSubsystem) PumpsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Pump, error) {
+	return ListReferencedPumpsWithContext(ctx, thermalsubsystem.GetClient(), thermalsubsystem.pumps, queryOpts...)
 }
 
 // Filters gets the filters within this subsystem.
 func (thermalsubsystem *ThermalSubsystem) Filters(queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
-	return ListReferencedFilters(thermalsubsystem.GetClient(), thermalsubsystem.filters, queryOpts...)
+	return thermalsubsystem.FiltersWithContext(common.ContextOf(thermalsubsystem.GetClient()), queryOpts...)
+}
+
+// FiltersWithContext gets the filters within this subsystem.
+func (thermalsubsystem *ThermalSubsystem) FiltersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Filter, error) {
+	return ListReferencedFiltersWithContext(ctx, thermalsubsystem.GetClient(), thermalsubsystem.filters, queryOpts...)
 }
 
 // ThermalMetrics gets the summary of thermal metrics for this subsystem.
 func (thermalsubsystem *ThermalSubsystem) ThermalMetrics(queryOpts ...common.QueryGroupOption) (*ThermalMetrics, error) {
+	return thermalsubsystem.ThermalMetricsWithContext(common.ContextOf(thermalsubsystem.GetClient()), queryOpts...)
+}
+
+// ThermalMetricsWithContext gets the summary of thermal metrics for this subsystem.
+func (thermalsubsystem *ThermalSubsystem) ThermalMetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*ThermalMetrics, error) {
 	if thermalsubsystem.thermalMetrics == "" {
 		return nil, nil
 	}
-	return GetThermalMetrics(thermalsubsystem.GetClient(), thermalsubsystem.thermalMetrics, queryOpts...)
+	return GetThermalMetricsWithContext(ctx, thermalsubsystem.GetClient(), thermalsubsystem.thermalMetrics, queryOpts...)
 }
 
 // GetThermalSubsystem will get a ThermalSubsystem instance from the service.
 func GetThermalSubsystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalSubsystem, error) {
-	return common.GetObject[ThermalSubsystem](c, uri, queryOpts...)
+	return GetThermalSubsystemWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetThermalSubsystemWithContext will get a ThermalSubsystem instance from the service.
+func GetThermalSubsystemWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ThermalSubsystem, error) {
+	return common.GetObjectWithContext[ThermalSubsystem](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedThermalSubsystems gets the collection of ThermalSubsystem from
 // a provided reference.
 func ListReferencedThermalSubsystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalSubsystem, error) {
-	return common.GetCollectionObjects[ThermalSubsystem](c, link, queryOpts...)
+	return ListReferencedThermalSubsystemsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedThermalSubsystemsWithContext gets the collection of ThermalSubsystem from
+// a provided reference.
+func ListReferencedThermalSubsystemsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ThermalSubsystem, error) {
+	return common.GetCollectionObjectsWithContext[ThermalSubsystem](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -114,23 +115,37 @@ func (key *Key) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (key *Key) Update() error {
+func (key *Key) Update() error { return key.UpdateWithContext(common.ContextOf(key.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (key *Key) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"UserDescription",
 	}
 
-	return key.UpdateFromRawData(key, key.rawData, readWriteFields)
+	return key.UpdateFromRawDataWithContext(ctx, key, key.rawData, readWriteFields)
 }
 
 // GetKey will get a Key instance from the service.
 func GetKey(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Key, error) {
-	return common.GetObject[Key](c, uri, queryOpts...)
+	return GetKeyWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetKeyWithContext will get a Key instance from the service.
+func GetKeyWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Key, error) {
+	return common.GetObjectWithContext[Key](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedKeys gets the collection of Key from
 // a provided reference.
 func ListReferencedKeys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Key, error) {
-	return common.GetCollectionObjects[Key](c, link, queryOpts...)
+	return ListReferencedKeysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedKeysWithContext gets the collection of Key from
+// a provided reference.
+func ListReferencedKeysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Key, error) {
+	return common.GetCollectionObjectsWithContext[Key](ctx, c, link, queryOpts...)
 }
 
 // KeyNVMeoF shall contain NVMe-oF specific properties for a key.

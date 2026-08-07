@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -29,11 +30,22 @@ type StorageServiceMetrics struct {
 
 // GetStorageServiceMetrics will get a StorageServiceMetrics instance from the service.
 func GetStorageServiceMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageServiceMetrics, error) {
-	return common.GetObject[StorageServiceMetrics](c, uri, queryOpts...)
+	return GetStorageServiceMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetStorageServiceMetricsWithContext will get a StorageServiceMetrics instance from the service.
+func GetStorageServiceMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*StorageServiceMetrics, error) {
+	return common.GetObjectWithContext[StorageServiceMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedStorageServiceMetricss gets the collection of StorageServiceMetrics from
 // a provided reference.
 func ListReferencedStorageServiceMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageServiceMetrics, error) {
-	return common.GetCollectionObjects[StorageServiceMetrics](c, link, queryOpts...)
+	return ListReferencedStorageServiceMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedStorageServiceMetricssWithContext gets the collection of StorageServiceMetrics from
+// a provided reference.
+func ListReferencedStorageServiceMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*StorageServiceMetrics, error) {
+	return common.GetCollectionObjectsWithContext[StorageServiceMetrics](ctx, c, link, queryOpts...)
 }

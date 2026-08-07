@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -176,46 +177,91 @@ func (sw *Switch) UnmarshalJSON(b []byte) error {
 
 // Certificates returns certificates related to this device.
 func (sw *Switch) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(sw.GetClient(), sw.certificates, queryOpts...)
+	return sw.CertificatesWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext returns certificates related to this device.
+func (sw *Switch) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, sw.GetClient(), sw.certificates, queryOpts...)
 }
 
 // LogServices gets the log services related to this device.
 func (sw *Switch) LogServices(queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
-	return ListReferencedLogServices(sw.GetClient(), sw.logServices, queryOpts...)
+	return sw.LogServicesWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// LogServicesWithContext gets the log services related to this device.
+func (sw *Switch) LogServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
+	return ListReferencedLogServicesWithContext(ctx, sw.GetClient(), sw.logServices, queryOpts...)
 }
 
 // Metrics gets the switch metrics related to this device.
 func (sw *Switch) Metrics(queryOpts ...common.QueryGroupOption) (*SwitchMetrics, error) {
-	return GetSwitchMetrics(sw.GetClient(), sw.metrics, queryOpts...)
+	return sw.MetricsWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// MetricsWithContext gets the switch metrics related to this device.
+func (sw *Switch) MetricsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SwitchMetrics, error) {
+	return GetSwitchMetricsWithContext(ctx, sw.GetClient(), sw.metrics, queryOpts...)
 }
 
 // Ports gets the ports related to this device.
 func (sw *Switch) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return ListReferencedPorts(sw.GetClient(), sw.ports, queryOpts...)
+	return sw.PortsWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// PortsWithContext gets the ports related to this device.
+func (sw *Switch) PortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPortsWithContext(ctx, sw.GetClient(), sw.ports, queryOpts...)
 }
 
 // Chassis gets the containing chassis of this device.
 func (sw *Switch) Chassis(queryOpts ...common.QueryGroupOption) (*Chassis, error) {
-	return GetChassis(sw.GetClient(), sw.chassis, queryOpts...)
+	return sw.ChassisWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// ChassisWithContext gets the containing chassis of this device.
+func (sw *Switch) ChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Chassis, error) {
+	return GetChassisWithContext(ctx, sw.GetClient(), sw.chassis, queryOpts...)
 }
 
 // Endpoints gets any endpoints associated with this fabric.
 func (sw *Switch) Endpoints(queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
-	return common.GetObjects[Endpoint](sw.GetClient(), sw.endpoints, queryOpts...)
+	return sw.EndpointsWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// EndpointsWithContext gets any endpoints associated with this fabric.
+func (sw *Switch) EndpointsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Endpoint, error) {
+	return common.GetObjectsWithContext[Endpoint](ctx, sw.GetClient(), sw.endpoints, queryOpts...)
 }
 
 // ManagedBy gets the managers of this fabric.
 func (sw *Switch) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](sw.GetClient(), sw.managedBy, queryOpts...)
+	return sw.ManagedByWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// ManagedByWithContext gets the managers of this fabric.
+func (sw *Switch) ManagedByWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, sw.GetClient(), sw.managedBy, queryOpts...)
 }
 
 // PCIeDevice gets the PCIe device providing this switch.
 func (sw *Switch) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
-	return GetPCIeDevice(sw.GetClient(), sw.pcieDevice, queryOpts...)
+	return sw.PCIeDeviceWithContext(common.ContextOf(sw.GetClient()), queryOpts...)
+}
+
+// PCIeDeviceWithContext gets the PCIe device providing this switch.
+func (sw *Switch) PCIeDeviceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
+	return GetPCIeDeviceWithContext(ctx, sw.GetClient(), sw.pcieDevice, queryOpts...)
 }
 
 // Reset resets this switch.
 func (sw *Switch) Reset(resetType ResetType) error {
+	return sw.ResetWithContext(common.ContextOf(sw.GetClient()), resetType)
+}
+
+// ResetWithContext resets this switch.
+func (sw *Switch) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	if sw.resetTarget == "" {
 		return errors.New("Reset is not supported by this system")
 	}
@@ -225,28 +271,42 @@ func (sw *Switch) Reset(resetType ResetType) error {
 	}{
 		ResetType: resetType,
 	}
-	return sw.Post(sw.resetTarget, parameters)
+	return sw.PostWithContext(ctx, sw.resetTarget, parameters)
 }
 
 // Update commits updates to this object's properties to the running system.
-func (sw *Switch) Update() error {
+func (sw *Switch) Update() error { return sw.UpdateWithContext(common.ContextOf(sw.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (sw *Switch) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"AssetTag",
 		"Enabled",
 		"IsManaged",
 		"LocationIndicatorActive"}
 
-	return sw.UpdateFromRawData(sw, sw.rawData, readWriteFields)
+	return sw.UpdateFromRawDataWithContext(ctx, sw, sw.rawData, readWriteFields)
 }
 
 // GetSwitch will get a Switch instance from the service.
 func GetSwitch(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Switch, error) {
-	return common.GetObject[Switch](c, uri, queryOpts...)
+	return GetSwitchWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSwitchWithContext will get a Switch instance from the service.
+func GetSwitchWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Switch, error) {
+	return common.GetObjectWithContext[Switch](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSwitches gets the collection of Switch from
 // a provided reference.
 func ListReferencedSwitches(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
-	return common.GetCollectionObjects[Switch](c, link, queryOpts...)
+	return ListReferencedSwitchesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSwitchesWithContext gets the collection of Switch from
+// a provided reference.
+func ListReferencedSwitchesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Switch, error) {
+	return common.GetCollectionObjectsWithContext[Switch](ctx, c, link, queryOpts...)
 }
 
 // VCSSwitch shall contain Virtual CXL Switch (VCS) properties for a switch.

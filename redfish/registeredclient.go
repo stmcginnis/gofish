@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -103,22 +104,38 @@ func (registeredclient *RegisteredClient) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (registeredclient *RegisteredClient) Update() error {
+	return registeredclient.UpdateWithContext(common.ContextOf(registeredclient.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (registeredclient *RegisteredClient) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"ClientType",
 		"ClientURI",
 		"Context",
 		"ExpirationDate",
 		"SubContext"}
 
-	return registeredclient.UpdateFromRawData(registeredclient, registeredclient.rawData, readWriteFields)
+	return registeredclient.UpdateFromRawDataWithContext(ctx, registeredclient, registeredclient.rawData, readWriteFields)
 }
 
 // GetRegisteredClient will get a RegisteredClient instance from the service.
 func GetRegisteredClient(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RegisteredClient, error) {
-	return common.GetObject[RegisteredClient](c, uri, queryOpts...)
+	return GetRegisteredClientWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetRegisteredClientWithContext will get a RegisteredClient instance from the service.
+func GetRegisteredClientWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*RegisteredClient, error) {
+	return common.GetObjectWithContext[RegisteredClient](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedRegisteredClients gets the collection of RegisteredClient from
 // a provided reference.
 func ListReferencedRegisteredClients(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*RegisteredClient, error) {
-	return common.GetCollectionObjects[RegisteredClient](c, link, queryOpts...)
+	return ListReferencedRegisteredClientsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedRegisteredClientsWithContext gets the collection of RegisteredClient from
+// a provided reference.
+func ListReferencedRegisteredClientsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*RegisteredClient, error) {
+	return common.GetCollectionObjectsWithContext[RegisteredClient](ctx, c, link, queryOpts...)
 }

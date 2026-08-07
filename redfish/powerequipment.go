@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -97,40 +98,80 @@ func (powerEquipment *PowerEquipment) UnmarshalJSON(b []byte) error {
 
 // GetPowerEquipment will get a PowerEquipment instance from the Redfish service.
 func GetPowerEquipment(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerEquipment, error) {
-	return common.GetObject[PowerEquipment](c, uri, queryOpts...)
+	return GetPowerEquipmentWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetPowerEquipmentWithContext will get a PowerEquipment instance from the Redfish service.
+func GetPowerEquipmentWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*PowerEquipment, error) {
+	return common.GetObjectWithContext[PowerEquipment](ctx, c, uri, queryOpts...)
 }
 
 // ManagedBy gets the collection of managers of this PowerEquipment
 func (powerEquipment *PowerEquipment) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](powerEquipment.GetClient(), powerEquipment.managedBy, queryOpts...)
+	return powerEquipment.ManagedByWithContext(common.ContextOf(powerEquipment.GetClient()), queryOpts...)
+}
+
+// ManagedByWithContext gets the collection of managers of this PowerEquipment
+func (powerEquipment *PowerEquipment) ManagedByWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, powerEquipment.GetClient(), powerEquipment.managedBy, queryOpts...)
 }
 
 // ElectricalBuses gets the collection that contains a set of electrical bus units.
 func (powerEquipment *PowerEquipment) ElectricalBuses(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.electricalBuses, queryOpts...)
+	return powerEquipment.ElectricalBusesWithContext(common.ContextOf(powerEquipment.GetClient()), queryOpts...)
+}
+
+// ElectricalBusesWithContext gets the collection that contains a set of electrical bus units.
+func (powerEquipment *PowerEquipment) ElectricalBusesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnitsWithContext(ctx, powerEquipment.GetClient(), powerEquipment.electricalBuses, queryOpts...)
 }
 
 // FloorPDUs gets the collection that contains a set of floor power distribution units.
 func (powerEquipment *PowerEquipment) FloorPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.floorPDUs, queryOpts...)
+	return powerEquipment.FloorPDUsWithContext(common.ContextOf(powerEquipment.GetClient()), queryOpts...)
+}
+
+// FloorPDUsWithContext gets the collection that contains a set of floor power distribution units.
+func (powerEquipment *PowerEquipment) FloorPDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnitsWithContext(ctx, powerEquipment.GetClient(), powerEquipment.floorPDUs, queryOpts...)
 }
 
 // PowerShelves gets the collection that contains a set of power shelves.
 func (powerEquipment *PowerEquipment) PowerShelves(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.powerShelves, queryOpts...)
+	return powerEquipment.PowerShelvesWithContext(common.ContextOf(powerEquipment.GetClient()), queryOpts...)
+}
+
+// PowerShelvesWithContext gets the collection that contains a set of power shelves.
+func (powerEquipment *PowerEquipment) PowerShelvesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnitsWithContext(ctx, powerEquipment.GetClient(), powerEquipment.powerShelves, queryOpts...)
 }
 
 // RackPDUs gets the collection that contains a set of rack-level power distribution units.
 func (powerEquipment *PowerEquipment) RackPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.rackPDUs, queryOpts...)
+	return powerEquipment.RackPDUsWithContext(common.ContextOf(powerEquipment.GetClient()), queryOpts...)
+}
+
+// RackPDUsWithContext gets the collection that contains a set of rack-level power distribution units.
+func (powerEquipment *PowerEquipment) RackPDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnitsWithContext(ctx, powerEquipment.GetClient(), powerEquipment.rackPDUs, queryOpts...)
 }
 
 // Switchgear gets the collection that contains a set of switchgear.
 func (powerEquipment *PowerEquipment) Switchgear(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.switchgear, queryOpts...)
+	return powerEquipment.SwitchgearWithContext(common.ContextOf(powerEquipment.GetClient()), queryOpts...)
+}
+
+// SwitchgearWithContext gets the collection that contains a set of switchgear.
+func (powerEquipment *PowerEquipment) SwitchgearWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnitsWithContext(ctx, powerEquipment.GetClient(), powerEquipment.switchgear, queryOpts...)
 }
 
 // TransferSwitches gets the collection that contains a set of transfer switches.
 func (powerEquipment *PowerEquipment) TransferSwitches(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return ListReferencedPowerDistributionUnits(powerEquipment.GetClient(), powerEquipment.transferSwitches, queryOpts...)
+	return powerEquipment.TransferSwitchesWithContext(common.ContextOf(powerEquipment.GetClient()), queryOpts...)
+}
+
+// TransferSwitchesWithContext gets the collection that contains a set of transfer switches.
+func (powerEquipment *PowerEquipment) TransferSwitchesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return ListReferencedPowerDistributionUnitsWithContext(ctx, powerEquipment.GetClient(), powerEquipment.transferSwitches, queryOpts...)
 }

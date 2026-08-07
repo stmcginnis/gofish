@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -82,19 +83,35 @@ func (switchmetrics *SwitchMetrics) UnmarshalJSON(b []byte) error {
 
 // ClearCurrentPeriod sets the CurrentPeriod property's values to 0.
 func (switchmetrics *SwitchMetrics) ClearCurrentPeriod() error {
+	return switchmetrics.ClearCurrentPeriodWithContext(common.ContextOf(switchmetrics.GetClient()))
+}
+
+// ClearCurrentPeriodWithContext sets the CurrentPeriod property's values to 0.
+func (switchmetrics *SwitchMetrics) ClearCurrentPeriodWithContext(ctx context.Context) error {
 	if switchmetrics.clearCurrentPeriodTarget == "" {
 		return errors.New("ClearCurrentPeriod is not supported by this system")
 	}
-	return switchmetrics.Post(switchmetrics.clearCurrentPeriodTarget, nil)
+	return switchmetrics.PostWithContext(ctx, switchmetrics.clearCurrentPeriodTarget, nil)
 }
 
 // GetSwitchMetrics will get a SwitchMetrics instance from the service.
 func GetSwitchMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SwitchMetrics, error) {
-	return common.GetObject[SwitchMetrics](c, uri, queryOpts...)
+	return GetSwitchMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSwitchMetricsWithContext will get a SwitchMetrics instance from the service.
+func GetSwitchMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SwitchMetrics, error) {
+	return common.GetObjectWithContext[SwitchMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSwitchMetricss gets the collection of SwitchMetrics from
 // a provided reference.
 func ListReferencedSwitchMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SwitchMetrics, error) {
-	return common.GetCollectionObjects[SwitchMetrics](c, link, queryOpts...)
+	return ListReferencedSwitchMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSwitchMetricssWithContext gets the collection of SwitchMetrics from
+// a provided reference.
+func ListReferencedSwitchMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SwitchMetrics, error) {
+	return common.GetCollectionObjectsWithContext[SwitchMetrics](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -58,22 +59,38 @@ func (metricreport *MetricReport) UnmarshalJSON(b []byte) error {
 
 // MetricReportDefinition gets the definition for this metric
 func (metricreport *MetricReport) MetricReportDefinition(queryOpts ...common.QueryGroupOption) (*MetricReportDefinition, error) {
+	return metricreport.MetricReportDefinitionWithContext(common.ContextOf(metricreport.GetClient()), queryOpts...)
+}
+
+// MetricReportDefinitionWithContext gets the definition for this metric
+func (metricreport *MetricReport) MetricReportDefinitionWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*MetricReportDefinition, error) {
 	if metricreport.metricReportDefinition == "" {
 		return nil, nil
 	}
 
-	return GetMetricReportDefinition(metricreport.GetClient(), metricreport.metricReportDefinition, queryOpts...)
+	return GetMetricReportDefinitionWithContext(ctx, metricreport.GetClient(), metricreport.metricReportDefinition, queryOpts...)
 }
 
 // GetMetricReport will get a MetricReport instance from the service.
 func GetMetricReport(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricReport, error) {
-	return common.GetObject[MetricReport](c, uri, queryOpts...)
+	return GetMetricReportWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMetricReportWithContext will get a MetricReport instance from the service.
+func GetMetricReportWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricReport, error) {
+	return common.GetObjectWithContext[MetricReport](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMetricReports gets the collection of MetricReport from
 // a provided reference.
 func ListReferencedMetricReports(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricReport, error) {
-	return common.GetCollectionObjects[MetricReport](c, link, queryOpts...)
+	return ListReferencedMetricReportsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMetricReportsWithContext gets the collection of MetricReport from
+// a provided reference.
+func ListReferencedMetricReportsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricReport, error) {
+	return common.GetCollectionObjectsWithContext[MetricReport](ctx, c, link, queryOpts...)
 }
 
 // MetricValue shall contain properties that capture a metric value and other associated information.

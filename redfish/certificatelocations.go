@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -56,16 +57,32 @@ func (certificatelocations *CertificateLocations) UnmarshalJSON(b []byte) error 
 
 // GetCertificateLocations will get a CertificateLocations instance from the service.
 func GetCertificateLocations(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CertificateLocations, error) {
-	return common.GetObject[CertificateLocations](c, uri, queryOpts...)
+	return GetCertificateLocationsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCertificateLocationsWithContext will get a CertificateLocations instance from the service.
+func GetCertificateLocationsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CertificateLocations, error) {
+	return common.GetObjectWithContext[CertificateLocations](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCertificateLocationss gets the collection of CertificateLocations from
 // a provided reference.
 func ListReferencedCertificateLocations(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CertificateLocations, error) {
-	return common.GetCollectionObjects[CertificateLocations](c, link, queryOpts...)
+	return ListReferencedCertificateLocationsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCertificateLocationss gets the collection of CertificateLocations from
+// a provided reference.
+func ListReferencedCertificateLocationsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CertificateLocations, error) {
+	return common.GetCollectionObjectsWithContext[CertificateLocations](ctx, c, link, queryOpts...)
 }
 
 // Certificates retrieves a collection of the Certificates installed on the system.
 func (certificatelocations *CertificateLocations) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return common.GetObjects[Certificate](certificatelocations.GetClient(), certificatelocations.certificates, queryOpts...)
+	return certificatelocations.CertificatesWithContext(common.ContextOf(certificatelocations.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext retrieves a collection of the Certificates installed on the system.
+func (certificatelocations *CertificateLocations) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return common.GetObjectsWithContext[Certificate](ctx, certificatelocations.GetClient(), certificatelocations.certificates, queryOpts...)
 }

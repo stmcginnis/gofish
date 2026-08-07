@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -142,41 +143,72 @@ func (outboundconnection *OutboundConnection) UnmarshalJSON(b []byte) error {
 
 // Session gets the the active connection for this outbound connection.
 func (outboundconnection *OutboundConnection) Session(queryOpts ...common.QueryGroupOption) (*Session, error) {
+	return outboundconnection.SessionWithContext(common.ContextOf(outboundconnection.GetClient()), queryOpts...)
+}
+
+// SessionWithContext gets the the active connection for this outbound connection.
+func (outboundconnection *OutboundConnection) SessionWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Session, error) {
 	if outboundconnection.session == "" {
 		return nil, nil
 	}
-	return GetSession(outboundconnection.GetClient(), outboundconnection.session, queryOpts...)
+	return GetSessionWithContext(ctx, outboundconnection.GetClient(), outboundconnection.session, queryOpts...)
 }
 
 // Certificates gets the server certificates for the remote client referenced by the EndpointURI property.
 func (outboundconnection *OutboundConnection) Certificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.certificates, queryOpts...)
+	return outboundconnection.CertificatesWithContext(common.ContextOf(outboundconnection.GetClient()), queryOpts...)
+}
+
+// CertificatesWithContext gets the server certificates for the remote client referenced by the EndpointURI property.
+func (outboundconnection *OutboundConnection) CertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, outboundconnection.GetClient(), outboundconnection.certificates, queryOpts...)
 }
 
 // ClientCertificates gets the client identity certificates for the service.
 func (outboundconnection *OutboundConnection) ClientCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(outboundconnection.GetClient(), outboundconnection.clientCertificates, queryOpts...)
+	return outboundconnection.ClientCertificatesWithContext(common.ContextOf(outboundconnection.GetClient()), queryOpts...)
+}
+
+// ClientCertificatesWithContext gets the client identity certificates for the service.
+func (outboundconnection *OutboundConnection) ClientCertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, outboundconnection.GetClient(), outboundconnection.clientCertificates, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (outboundconnection *OutboundConnection) Update() error {
+	return outboundconnection.UpdateWithContext(common.ContextOf(outboundconnection.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (outboundconnection *OutboundConnection) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"ConnectionEnabled",
 		"WebSocketPingIntervalMinutes",
 	}
 
-	return outboundconnection.UpdateFromRawData(outboundconnection, outboundconnection.rawData, readWriteFields)
+	return outboundconnection.UpdateFromRawDataWithContext(ctx, outboundconnection, outboundconnection.rawData, readWriteFields)
 }
 
 // GetOutboundConnection will get a OutboundConnection instance from the service.
 func GetOutboundConnection(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OutboundConnection, error) {
-	return common.GetObject[OutboundConnection](c, uri, queryOpts...)
+	return GetOutboundConnectionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetOutboundConnectionWithContext will get a OutboundConnection instance from the service.
+func GetOutboundConnectionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OutboundConnection, error) {
+	return common.GetObjectWithContext[OutboundConnection](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedOutboundConnections gets the collection of OutboundConnection from
 // a provided reference.
 func ListReferencedOutboundConnections(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OutboundConnection, error) {
-	return common.GetCollectionObjects[OutboundConnection](c, link, queryOpts...)
+	return ListReferencedOutboundConnectionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedOutboundConnectionsWithContext gets the collection of OutboundConnection from
+// a provided reference.
+func ListReferencedOutboundConnectionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OutboundConnection, error) {
+	return common.GetCollectionObjectsWithContext[OutboundConnection](ctx, c, link, queryOpts...)
 }
 
 // RetryPolicyType shall contain the retry policy for an outbound connection.

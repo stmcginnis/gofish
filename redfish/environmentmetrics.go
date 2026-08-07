@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -104,38 +105,64 @@ func (environmentmetrics *EnvironmentMetrics) UnmarshalJSON(b []byte) error {
 
 // ResetMetrics resets the summary metrics related to this equipment.
 func (environmentmetrics *EnvironmentMetrics) ResetMetrics() error {
+	return environmentmetrics.ResetMetricsWithContext(common.ContextOf(environmentmetrics.GetClient()))
+}
+
+// ResetMetricsWithContext resets the summary metrics related to this equipment.
+func (environmentmetrics *EnvironmentMetrics) ResetMetricsWithContext(ctx context.Context) error {
 	if environmentmetrics.resetMetricsTarget == "" {
 		return fmt.Errorf("ResetMetrics is not supported by this system")
 	}
 
-	return environmentmetrics.Post(environmentmetrics.resetMetricsTarget, nil)
+	return environmentmetrics.PostWithContext(ctx, environmentmetrics.resetMetricsTarget, nil)
 }
 
 // ResetToDefaults resets the values of writable properties to factory defaults.
 func (environmentmetrics *EnvironmentMetrics) ResetToDefaults() error {
+	return environmentmetrics.ResetToDefaultsWithContext(common.ContextOf(environmentmetrics.GetClient()))
+}
+
+// ResetToDefaultsWithContext resets the values of writable properties to factory defaults.
+func (environmentmetrics *EnvironmentMetrics) ResetToDefaultsWithContext(ctx context.Context) error {
 	if environmentmetrics.resetToDefaultsTarget == "" {
 		return fmt.Errorf("ResetToDefaults is not supported by this system")
 	}
 
-	return environmentmetrics.Post(environmentmetrics.resetToDefaultsTarget, nil)
+	return environmentmetrics.PostWithContext(ctx, environmentmetrics.resetToDefaultsTarget, nil)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (environmentmetrics *EnvironmentMetrics) Update() error {
+	return environmentmetrics.UpdateWithContext(common.ContextOf(environmentmetrics.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (environmentmetrics *EnvironmentMetrics) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"PowerLimitWatts",
 	}
 
-	return environmentmetrics.UpdateFromRawData(environmentmetrics, environmentmetrics.rawData, readWriteFields)
+	return environmentmetrics.UpdateFromRawDataWithContext(ctx, environmentmetrics, environmentmetrics.rawData, readWriteFields)
 }
 
 // GetEnvironmentMetrics will get a EnvironmentMetrics instance from the service.
 func GetEnvironmentMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
-	return common.GetObject[EnvironmentMetrics](c, uri, queryOpts...)
+	return GetEnvironmentMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetEnvironmentMetricsWithContext will get a EnvironmentMetrics instance from the service.
+func GetEnvironmentMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*EnvironmentMetrics, error) {
+	return common.GetObjectWithContext[EnvironmentMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedEnvironmentMetrics gets the collection of EnvironmentMetrics from
 // a provided reference.
 func ListReferencedEnvironmentMetrics(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EnvironmentMetrics, error) {
-	return common.GetCollectionObjects[EnvironmentMetrics](c, link, queryOpts...)
+	return ListReferencedEnvironmentMetricsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedEnvironmentMetricsWithContext gets the collection of EnvironmentMetrics from
+// a provided reference.
+func ListReferencedEnvironmentMetricsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*EnvironmentMetrics, error) {
+	return common.GetCollectionObjectsWithContext[EnvironmentMetrics](ctx, c, link, queryOpts...)
 }

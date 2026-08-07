@@ -5,6 +5,7 @@
 package ami
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -43,7 +44,13 @@ type AccountServiceConfigurations struct {
 // GetAccountServiceConfigurations will get an AccountServiceConfigurations instance from the Redfish
 // service.
 func GetAccountServiceConfigurations(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AccountServiceConfigurations, error) {
-	return common.GetObject[AccountServiceConfigurations](c, uri, queryOpts...)
+	return GetAccountServiceConfigurationsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAccountServiceConfigurationsWithContext will get an AccountServiceConfigurations instance from the Redfish
+// service.
+func GetAccountServiceConfigurationsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*AccountServiceConfigurations, error) {
+	return common.GetObjectWithContext[AccountServiceConfigurations](ctx, c, uri, queryOpts...)
 }
 
 // AccountService is an AMI OEM instance of an AccountService.
@@ -80,5 +87,10 @@ func FromAccountService(accountService *redfish.AccountService) (*AccountService
 
 // Configuration will get the AccountServiceConfigurations for this AccountService.
 func (as *AccountService) Configuration(queryOpts ...common.QueryGroupOption) (*AccountServiceConfigurations, error) {
-	return GetAccountServiceConfigurations(as.GetClient(), as.configuration, queryOpts...)
+	return as.ConfigurationWithContext(common.ContextOf(as.GetClient()), queryOpts...)
+}
+
+// ConfigurationWithContext will get the AccountServiceConfigurations for this AccountService.
+func (as *AccountService) ConfigurationWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*AccountServiceConfigurations, error) {
+	return GetAccountServiceConfigurationsWithContext(ctx, as.GetClient(), as.configuration, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/coreweave/gofish/common"
@@ -61,7 +62,11 @@ type ActionInfoParameter struct {
 }
 
 func GetActionInfo(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
-	return common.GetObject[ActionInfo](c, uri, queryOpts...)
+	return GetActionInfoWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+func GetActionInfoWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ActionInfo, error) {
+	return common.GetObjectWithContext[ActionInfo](ctx, c, uri, queryOpts...)
 }
 
 func (actionInfo *ActionInfo) GetParamValues(name string, dataType ActionInfoDataTypes) ([]string, error) {

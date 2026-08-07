@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -105,6 +106,11 @@ func (datastorageloscapabilities *DataStorageLoSCapabilities) UnmarshalJSON(b []
 
 // Update commits updates to this object's properties to the running system.
 func (datastorageloscapabilities *DataStorageLoSCapabilities) Update() error {
+	return datastorageloscapabilities.UpdateWithContext(common.ContextOf(datastorageloscapabilities.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (datastorageloscapabilities *DataStorageLoSCapabilities) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(DataStorageLoSCapabilities)
@@ -125,16 +131,27 @@ func (datastorageloscapabilities *DataStorageLoSCapabilities) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(datastorageloscapabilities).Elem()
 
-	return datastorageloscapabilities.Entity.Update(originalElement, currentElement, readWriteFields)
+	return datastorageloscapabilities.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetDataStorageLoSCapabilities will get a DataStorageLoSCapabilities instance from the service.
 func GetDataStorageLoSCapabilities(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataStorageLoSCapabilities, error) {
-	return common.GetObject[DataStorageLoSCapabilities](c, uri, queryOpts...)
+	return GetDataStorageLoSCapabilitiesWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetDataStorageLoSCapabilitiesWithContext will get a DataStorageLoSCapabilities instance from the service.
+func GetDataStorageLoSCapabilitiesWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*DataStorageLoSCapabilities, error) {
+	return common.GetObjectWithContext[DataStorageLoSCapabilities](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedDataStorageLoSCapabilities gets the collection of DataStorageLoSCapabilities from
 // a provided reference.
 func ListReferencedDataStorageLoSCapabilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataStorageLoSCapabilities, error) {
-	return common.GetCollectionObjects[DataStorageLoSCapabilities](c, link, queryOpts...)
+	return ListReferencedDataStorageLoSCapabilitiesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedDataStorageLoSCapabilitiesWithContext gets the collection of DataStorageLoSCapabilities from
+// a provided reference.
+func ListReferencedDataStorageLoSCapabilitiesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*DataStorageLoSCapabilities, error) {
+	return common.GetCollectionObjectsWithContext[DataStorageLoSCapabilities](ctx, c, link, queryOpts...)
 }

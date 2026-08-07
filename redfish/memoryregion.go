@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -50,11 +51,16 @@ func (memorychunk *MemoryChunk) UnmarshalJSON(b []byte) error {
 
 // MemoryChunks gets the memory chunks providing capacity.
 func (memorychunk *MemoryChunk) MemoryChunks(c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryChunks, error) {
+	return memorychunk.MemoryChunksWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// MemoryChunksWithContext gets the memory chunks providing capacity.
+func (memorychunk *MemoryChunk) MemoryChunksWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryChunks, error) {
 	if memorychunk.chunkLink == "" {
 		return nil, nil
 	}
 
-	return GetMemoryChunks(c, memorychunk.chunkLink, queryOpts...)
+	return GetMemoryChunksWithContext(ctx, c, memorychunk.chunkLink, queryOpts...)
 }
 
 // MemoryExtent shall contain the definition of a memory extent identifying an available address range in the
@@ -146,21 +152,37 @@ func (memoryregion *MemoryRegion) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (memoryregion *MemoryRegion) Update() error {
+	return memoryregion.UpdateWithContext(common.ContextOf(memoryregion.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (memoryregion *MemoryRegion) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"BlockSizeMiB",
 		"SanitizeOnRelease",
 	}
 
-	return memoryregion.UpdateFromRawData(memoryregion, memoryregion.rawData, readWriteFields)
+	return memoryregion.UpdateFromRawDataWithContext(ctx, memoryregion, memoryregion.rawData, readWriteFields)
 }
 
 // GetMemoryRegion will get a MemoryRegion instance from the service.
 func GetMemoryRegion(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryRegion, error) {
-	return common.GetObject[MemoryRegion](c, uri, queryOpts...)
+	return GetMemoryRegionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMemoryRegionWithContext will get a MemoryRegion instance from the service.
+func GetMemoryRegionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryRegion, error) {
+	return common.GetObjectWithContext[MemoryRegion](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMemoryRegions gets the collection of MemoryRegion from
 // a provided reference.
 func ListReferencedMemoryRegions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryRegion, error) {
-	return common.GetCollectionObjects[MemoryRegion](c, link, queryOpts...)
+	return ListReferencedMemoryRegionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMemoryRegionsWithContext gets the collection of MemoryRegion from
+// a provided reference.
+func ListReferencedMemoryRegionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryRegion, error) {
+	return common.GetCollectionObjectsWithContext[MemoryRegion](ctx, c, link, queryOpts...)
 }

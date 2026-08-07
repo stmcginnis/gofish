@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -129,11 +130,21 @@ func (nvmedomain *NVMeDomain) UnmarshalJSON(b []byte) error {
 
 // AssociatedDomains gets the NVMeDomains associated with this domain.
 func (nvmedomain *NVMeDomain) AssociatedDomains(queryOpts ...common.QueryGroupOption) ([]*NVMeDomain, error) {
-	return common.GetObjects[NVMeDomain](nvmedomain.GetClient(), nvmedomain.associatedDomains, queryOpts...)
+	return nvmedomain.AssociatedDomainsWithContext(common.ContextOf(nvmedomain.GetClient()), queryOpts...)
+}
+
+// AssociatedDomainsWithContext gets the NVMeDomains associated with this domain.
+func (nvmedomain *NVMeDomain) AssociatedDomainsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*NVMeDomain, error) {
+	return common.GetObjectsWithContext[NVMeDomain](ctx, nvmedomain.GetClient(), nvmedomain.associatedDomains, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (nvmedomain *NVMeDomain) Update() error {
+	return nvmedomain.UpdateWithContext(common.ContextOf(nvmedomain.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (nvmedomain *NVMeDomain) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(NVMeDomain)
@@ -146,16 +157,27 @@ func (nvmedomain *NVMeDomain) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(nvmedomain).Elem()
 
-	return nvmedomain.Entity.Update(originalElement, currentElement, readWriteFields)
+	return nvmedomain.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetNVMeDomain will get a NVMeDomain instance from the service.
 func GetNVMeDomain(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NVMeDomain, error) {
-	return common.GetObject[NVMeDomain](c, uri, queryOpts...)
+	return GetNVMeDomainWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetNVMeDomainWithContext will get a NVMeDomain instance from the service.
+func GetNVMeDomainWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*NVMeDomain, error) {
+	return common.GetObjectWithContext[NVMeDomain](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedNVMeDomains gets the collection of NVMeDomain from
 // a provided reference.
 func ListReferencedNVMeDomains(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NVMeDomain, error) {
-	return common.GetCollectionObjects[NVMeDomain](c, link, queryOpts...)
+	return ListReferencedNVMeDomainsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedNVMeDomainsWithContext gets the collection of NVMeDomain from
+// a provided reference.
+func ListReferencedNVMeDomainsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*NVMeDomain, error) {
+	return common.GetCollectionObjectsWithContext[NVMeDomain](ctx, c, link, queryOpts...)
 }

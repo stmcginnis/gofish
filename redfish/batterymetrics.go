@@ -5,6 +5,8 @@
 package redfish
 
 import (
+	"context"
+
 	"github.com/coreweave/gofish/common"
 )
 
@@ -68,11 +70,22 @@ type BatteryMetrics struct {
 
 // GetBatteryMetrics will get a BatteryMetrics instance from the service.
 func GetBatteryMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*BatteryMetrics, error) {
-	return common.GetObject[BatteryMetrics](c, uri, queryOpts...)
+	return GetBatteryMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetBatteryMetricsWithContext will get a BatteryMetrics instance from the service.
+func GetBatteryMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*BatteryMetrics, error) {
+	return common.GetObjectWithContext[BatteryMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedBatteryMetricss gets the collection of BatteryMetrics from
 // a provided reference.
 func ListReferencedBatteryMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*BatteryMetrics, error) {
-	return common.GetCollectionObjects[BatteryMetrics](c, link, queryOpts...)
+	return ListReferencedBatteryMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedBatteryMetricssWithContext gets the collection of BatteryMetrics from
+// a provided reference.
+func ListReferencedBatteryMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*BatteryMetrics, error) {
+	return common.GetCollectionObjectsWithContext[BatteryMetrics](ctx, c, link, queryOpts...)
 }

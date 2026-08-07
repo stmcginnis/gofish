@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -204,16 +205,32 @@ func (memorymetrics *MemoryMetrics) UnmarshalJSON(b []byte) error {
 
 // ClearCurrentPeriod sets the CurrentPeriod property's values to 0.
 func (memorymetrics *MemoryMetrics) ClearCurrentPeriod() error {
-	return memorymetrics.Post(memorymetrics.clearCurrentPeriodTarget, nil)
+	return memorymetrics.ClearCurrentPeriodWithContext(common.ContextOf(memorymetrics.GetClient()))
+}
+
+// ClearCurrentPeriodWithContext sets the CurrentPeriod property's values to 0.
+func (memorymetrics *MemoryMetrics) ClearCurrentPeriodWithContext(ctx context.Context) error {
+	return memorymetrics.PostWithContext(ctx, memorymetrics.clearCurrentPeriodTarget, nil)
 }
 
 // GetMemoryMetrics will get a MemoryMetrics instance from the service.
 func GetMemoryMetrics(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
-	return common.GetObject[MemoryMetrics](c, uri, queryOpts...)
+	return GetMemoryMetricsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMemoryMetricsWithContext will get a MemoryMetrics instance from the service.
+func GetMemoryMetricsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
+	return common.GetObjectWithContext[MemoryMetrics](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMemoryMetricss gets the collection of MemoryMetrics from
 // a provided reference.
 func ListReferencedMemoryMetricss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryMetrics, error) {
-	return common.GetCollectionObjects[MemoryMetrics](c, link, queryOpts...)
+	return ListReferencedMemoryMetricssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMemoryMetricssWithContext gets the collection of MemoryMetrics from
+// a provided reference.
+func ListReferencedMemoryMetricssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MemoryMetrics, error) {
+	return common.GetCollectionObjectsWithContext[MemoryMetrics](ctx, c, link, queryOpts...)
 }

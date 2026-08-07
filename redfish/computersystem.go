@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -611,8 +612,13 @@ type BootOption struct {
 
 // GetBootOption will get a BootOption instance from the service.
 func GetBootOption(c common.Client, uri string) (*BootOption, error) {
+	return GetBootOptionWithContext(common.ContextOf(c), c, uri)
+}
+
+// GetBootOptionWithContext will get a BootOption instance from the service.
+func GetBootOptionWithContext(ctx context.Context, c common.Client, uri string) (*BootOption, error) {
 	var bootoption BootOption
-	return &bootoption, bootoption.Get(c, uri, &bootoption)
+	return &bootoption, bootoption.GetWithContext(ctx, c, uri, &bootoption)
 }
 
 // ResetType describe the type off reset to be issue by the resource
@@ -1039,6 +1045,11 @@ func (computersystem *ComputerSystem) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (computersystem *ComputerSystem) Update() error {
+	return computersystem.UpdateWithContext(common.ContextOf(computersystem.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (computersystem *ComputerSystem) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AssetTag",
 		"HostName",
@@ -1051,105 +1062,190 @@ func (computersystem *ComputerSystem) Update() error {
 		"IndicatorLED",
 	}
 
-	return computersystem.UpdateFromRawData(computersystem, computersystem.RawData, readWriteFields)
+	return computersystem.UpdateFromRawDataWithContext(ctx, computersystem, computersystem.RawData, readWriteFields)
 }
 
 // GetComputerSystem will get a ComputerSystem instance from the service.
 func GetComputerSystem(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ComputerSystem, error) {
-	return common.GetObject[ComputerSystem](c, uri, queryOpts...)
+	return GetComputerSystemWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetComputerSystemWithContext will get a ComputerSystem instance from the service.
+func GetComputerSystemWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ComputerSystem, error) {
+	return common.GetObjectWithContext[ComputerSystem](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedComputerSystems gets the collection of ComputerSystem from
 // a provided reference.
 func ListReferencedComputerSystems(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
-	return common.GetCollectionObjects[ComputerSystem](c, link, queryOpts...)
+	return ListReferencedComputerSystemsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedComputerSystemsWithContext gets the collection of ComputerSystem from
+// a provided reference.
+func ListReferencedComputerSystemsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ComputerSystem, error) {
+	return common.GetCollectionObjectsWithContext[ComputerSystem](ctx, c, link, queryOpts...)
 }
 
 // Bios gets the Bios information for this ComputerSystem.
 func (computersystem *ComputerSystem) Bios(queryOpts ...common.QueryGroupOption) (*Bios, error) {
+	return computersystem.BiosWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// BiosWithContext gets the Bios information for this ComputerSystem.
+func (computersystem *ComputerSystem) BiosWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Bios, error) {
 	if computersystem.bios == "" {
 		return nil, nil
 	}
 
-	return GetBios(computersystem.GetClient(), computersystem.bios, queryOpts...)
+	return GetBiosWithContext(ctx, computersystem.GetClient(), computersystem.bios, queryOpts...)
 }
 
 // BootOptions gets all BootOption items for this system.
 func (computersystem *ComputerSystem) BootOptions(queryOpts ...common.QueryGroupOption) ([]*BootOption, error) {
-	return common.GetCollectionObjects[BootOption](
+	return computersystem.BootOptionsWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// BootOptionsWithContext gets all BootOption items for this system.
+func (computersystem *ComputerSystem) BootOptionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*BootOption, error) {
+	return common.GetCollectionObjectsWithContext[BootOption](ctx,
 		computersystem.GetClient(),
 		computersystem.Boot.bootOptions, queryOpts...)
 }
 
 func (computersystem *ComputerSystem) BootCertificates(queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
-	return ListReferencedCertificates(computersystem.GetClient(), computersystem.Boot.certificates, queryOpts...)
+	return computersystem.BootCertificatesWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+func (computersystem *ComputerSystem) BootCertificatesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Certificate, error) {
+	return ListReferencedCertificatesWithContext(ctx, computersystem.GetClient(), computersystem.Boot.certificates, queryOpts...)
 }
 
 // EthernetInterfaces get this system's ethernet interfaces.
 func (computersystem *ComputerSystem) EthernetInterfaces(queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
-	return ListReferencedEthernetInterfaces(computersystem.GetClient(), computersystem.ethernetInterfaces, queryOpts...)
+	return computersystem.EthernetInterfacesWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// EthernetInterfacesWithContext get this system's ethernet interfaces.
+func (computersystem *ComputerSystem) EthernetInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*EthernetInterface, error) {
+	return ListReferencedEthernetInterfacesWithContext(ctx, computersystem.GetClient(), computersystem.ethernetInterfaces, queryOpts...)
 }
 
 // LogServices get this system's log services.
 func (computersystem *ComputerSystem) LogServices(queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
-	return ListReferencedLogServices(computersystem.GetClient(), computersystem.logServices, queryOpts...)
+	return computersystem.LogServicesWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// LogServicesWithContext get this system's log services.
+func (computersystem *ComputerSystem) LogServicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*LogService, error) {
+	return ListReferencedLogServicesWithContext(ctx, computersystem.GetClient(), computersystem.logServices, queryOpts...)
 }
 
 // ManagedBy gets all Managers for this system.
 func (computersystem *ComputerSystem) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](computersystem.GetClient(), computersystem.managedBy, queryOpts...)
+	return computersystem.ManagedByWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// ManagedByWithContext gets all Managers for this system.
+func (computersystem *ComputerSystem) ManagedByWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, computersystem.GetClient(), computersystem.managedBy, queryOpts...)
 }
 
 // Memory gets this system's memory.
 func (computersystem *ComputerSystem) Memory(queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
-	return ListReferencedMemorys(computersystem.GetClient(), computersystem.memory, queryOpts...)
+	return computersystem.MemoryWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// MemoryWithContext gets this system's memory.
+func (computersystem *ComputerSystem) MemoryWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Memory, error) {
+	return ListReferencedMemorysWithContext(ctx, computersystem.GetClient(), computersystem.memory, queryOpts...)
 }
 
 // MemoryDomains gets this system's memory domains.
 func (computersystem *ComputerSystem) MemoryDomains(queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
-	return ListReferencedMemoryDomains(computersystem.GetClient(), computersystem.memoryDomains, queryOpts...)
+	return computersystem.MemoryDomainsWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// MemoryDomainsWithContext gets this system's memory domains.
+func (computersystem *ComputerSystem) MemoryDomainsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*MemoryDomain, error) {
+	return ListReferencedMemoryDomainsWithContext(ctx, computersystem.GetClient(), computersystem.memoryDomains, queryOpts...)
 }
 
 // NetworkInterfaces returns a collection of network interfaces in this system.
 func (computersystem *ComputerSystem) NetworkInterfaces(queryOpts ...common.QueryGroupOption) ([]*NetworkInterface, error) {
-	return ListReferencedNetworkInterfaces(computersystem.GetClient(), computersystem.networkInterfaces, queryOpts...)
+	return computersystem.NetworkInterfacesWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// NetworkInterfacesWithContext returns a collection of network interfaces in this system.
+func (computersystem *ComputerSystem) NetworkInterfacesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*NetworkInterface, error) {
+	return ListReferencedNetworkInterfacesWithContext(ctx, computersystem.GetClient(), computersystem.networkInterfaces, queryOpts...)
 }
 
 // OperatingSystem gets this system's operating system.
 func (computersystem *ComputerSystem) OperatingSystem(queryOpts ...common.QueryGroupOption) (*OperatingSystem, error) {
-	return GetOperatingSystem(computersystem.GetClient(), computersystem.operatingSystem, queryOpts...)
+	return computersystem.OperatingSystemWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// OperatingSystemWithContext gets this system's operating system.
+func (computersystem *ComputerSystem) OperatingSystemWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*OperatingSystem, error) {
+	return GetOperatingSystemWithContext(ctx, computersystem.GetClient(), computersystem.operatingSystem, queryOpts...)
 }
 
 // PCIeDevices gets all PCIeDevices for this system.
 func (computersystem *ComputerSystem) PCIeDevices(queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
-	return common.GetObjects[PCIeDevice](computersystem.GetClient(), computersystem.pcieDevices, queryOpts...)
+	return computersystem.PCIeDevicesWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// PCIeDevicesWithContext gets all PCIeDevices for this system.
+func (computersystem *ComputerSystem) PCIeDevicesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PCIeDevice, error) {
+	return common.GetObjectsWithContext[PCIeDevice](ctx, computersystem.GetClient(), computersystem.pcieDevices, queryOpts...)
 }
 
 // PCIeFunctions gets all PCIeFunctions for this system.
 func (computersystem *ComputerSystem) PCIeFunctions(queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
-	return common.GetObjects[PCIeFunction](computersystem.GetClient(), computersystem.pcieFunctions, queryOpts...)
+	return computersystem.PCIeFunctionsWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// PCIeFunctionsWithContext gets all PCIeFunctions for this system.
+func (computersystem *ComputerSystem) PCIeFunctionsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PCIeFunction, error) {
+	return common.GetObjectsWithContext[PCIeFunction](ctx, computersystem.GetClient(), computersystem.pcieFunctions, queryOpts...)
 }
 
 // Processors returns a collection of processors from this system
 func (computersystem *ComputerSystem) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return ListReferencedProcessors(computersystem.GetClient(), computersystem.processors, queryOpts...)
+	return computersystem.ProcessorsWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// ProcessorsWithContext returns a collection of processors from this system
+func (computersystem *ComputerSystem) ProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return ListReferencedProcessorsWithContext(ctx, computersystem.GetClient(), computersystem.processors, queryOpts...)
 }
 
 // SecureBoot gets the secure boot information for the system.
 func (computersystem *ComputerSystem) SecureBoot(queryOpts ...common.QueryGroupOption) (*SecureBoot, error) {
+	return computersystem.SecureBootWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// SecureBootWithContext gets the secure boot information for the system.
+func (computersystem *ComputerSystem) SecureBootWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*SecureBoot, error) {
 	if computersystem.secureBoot == "" {
 		return nil, nil
 	}
 
-	return GetSecureBoot(computersystem.GetClient(), computersystem.secureBoot, queryOpts...)
+	return GetSecureBootWithContext(ctx, computersystem.GetClient(), computersystem.secureBoot, queryOpts...)
 }
 
 // SetBoot set a boot object based on a payload request
 func (computersystem *ComputerSystem) SetBoot(b Boot) error { //nolint
+	return computersystem.SetBootWithContext(common.ContextOf(computersystem.GetClient()), b)
+}
+
+// SetBootWithContext set a boot object based on a payload request
+func (computersystem *ComputerSystem) SetBootWithContext(ctx context.Context, b Boot) error { //nolint
 	t := struct {
 		Boot Boot
 	}{Boot: b}
-	return computersystem.Patch(computersystem.ODataID, t)
+	return computersystem.PatchWithContext(ctx, computersystem.ODataID, t)
 }
 
 // Reset shall perform a reset of the ComputerSystem. For systems which implement
@@ -1159,6 +1255,16 @@ func (computersystem *ComputerSystem) SetBoot(b Boot) error { //nolint
 // 4-second hold of the Power Button). The ForceRestart value shall perform a
 // ForceOff action followed by a On action.
 func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
+	return computersystem.ResetWithContext(common.ContextOf(computersystem.GetClient()), resetType)
+}
+
+// ResetWithContext shall perform a reset of the ComputerSystem. For systems which implement
+// ACPI Power Button functionality, the PushPowerButton value shall perform or
+// emulate an ACPI Power Button push. The ForceOff value shall remove power from
+// the system or perform an ACPI Power Button Override (commonly known as a
+// 4-second hold of the Power Button). The ForceRestart value shall perform a
+// ForceOff action followed by a On action.
+func (computersystem *ComputerSystem) ResetWithContext(ctx context.Context, resetType ResetType) error {
 	// Make sure the requested reset type is supported by the system
 	valid := false
 	if len(computersystem.SupportedResetTypes) > 0 {
@@ -1182,19 +1288,25 @@ func (computersystem *ComputerSystem) Reset(resetType ResetType) error {
 		ResetType ResetType
 	}{ResetType: resetType}
 
-	return computersystem.Post(computersystem.resetTarget, t)
+	return computersystem.PostWithContext(ctx, computersystem.resetTarget, t)
 }
 
 // GetSupportedResetTypes returns any reset types that the ComputerSystem declares as supported
 // via either ActionInfo or AllowableValues.
 func (computersystem *ComputerSystem) GetSupportedResetTypes() ([]ResetType, error) {
+	return computersystem.GetSupportedResetTypesWithContext(common.ContextOf(computersystem.GetClient()))
+}
+
+// GetSupportedResetTypesWithContext returns any reset types that the ComputerSystem declares as supported
+// via either ActionInfo or AllowableValues.
+func (computersystem *ComputerSystem) GetSupportedResetTypesWithContext(ctx context.Context) ([]ResetType, error) {
 	if len(computersystem.SupportedResetTypes) > 0 {
 		return computersystem.SupportedResetTypes, nil
 	}
 
 	// if we don't have ResetTypes, try to get from ActionInfo
 	if computersystem.resetActionInfoTarget != "" {
-		resetActionInfo, err := computersystem.ResetActionInfo()
+		resetActionInfo, err := computersystem.ResetActionInfoWithContext(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -1214,15 +1326,25 @@ func (computersystem *ComputerSystem) GetSupportedResetTypes() ([]ResetType, err
 
 // ResetActionInfo returns the ActionInfo for the ComputerSystem reset action if supported
 func (computersystem *ComputerSystem) ResetActionInfo() (*ActionInfo, error) {
+	return computersystem.ResetActionInfoWithContext(common.ContextOf(computersystem.GetClient()))
+}
+
+// ResetActionInfoWithContext returns the ActionInfo for the ComputerSystem reset action if supported
+func (computersystem *ComputerSystem) ResetActionInfoWithContext(ctx context.Context) (*ActionInfo, error) {
 	if computersystem.resetActionInfoTarget == "" {
 		return nil, errors.New("ComputerSystem Reset ActionInfo not supported")
 	}
 
-	return common.GetObject[ActionInfo](computersystem.GetClient(), computersystem.resetActionInfoTarget)
+	return common.GetObjectWithContext[ActionInfo](ctx, computersystem.GetClient(), computersystem.resetActionInfoTarget)
 }
 
 // UpdateBootAttributesApplyAt is used to update attribute values and set apply time together
 func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, applyTime common.ApplyTime) error {
+	return computersystem.UpdateBootAttributesApplyAtWithContext(common.ContextOf(computersystem.GetClient()), attrs, applyTime)
+}
+
+// UpdateBootAttributesApplyAtWithContext is used to update attribute values and set apply time together
+func (computersystem *ComputerSystem) UpdateBootAttributesApplyAtWithContext(ctx context.Context, attrs SettingsAttributes, applyTime common.ApplyTime) error {
 	payload := make(map[string]interface{})
 
 	// Get a representation of the object's original state so we can find what
@@ -1240,7 +1362,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 		}
 	}
 
-	resp, err := computersystem.GetClient().Get(computersystem.settingsTarget)
+	resp, err := computersystem.GetClient().GetWithContext(ctx, computersystem.settingsTarget)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
@@ -1259,7 +1381,7 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 			header["If-Match"] = resp.Header["Etag"][0]
 		}
 
-		resp, err = computersystem.GetClient().PatchWithHeaders(computersystem.settingsTarget, data, header)
+		resp, err = computersystem.GetClient().PatchWithHeadersWithContext(ctx, computersystem.settingsTarget, data, header)
 		defer common.DeferredCleanupHTTPResponse(resp)
 		if err != nil {
 			return err
@@ -1271,37 +1393,67 @@ func (computersystem *ComputerSystem) UpdateBootAttributesApplyAt(attrs Settings
 
 // UpdateBootAttributes is used to update attribute values.
 func (computersystem *ComputerSystem) UpdateBootAttributes(attrs SettingsAttributes) error {
-	return computersystem.UpdateBootAttributesApplyAt(attrs, "")
+	return computersystem.UpdateBootAttributesWithContext(common.ContextOf(computersystem.GetClient()), attrs)
+}
+
+// UpdateBootAttributesWithContext is used to update attribute values.
+func (computersystem *ComputerSystem) UpdateBootAttributesWithContext(ctx context.Context, attrs SettingsAttributes) error {
+	return computersystem.UpdateBootAttributesApplyAtWithContext(ctx, attrs, "")
 }
 
 // SetDefaultBootOrder shall set the BootOrder array to the default settings.
 func (computersystem *ComputerSystem) SetDefaultBootOrder() error {
+	return computersystem.SetDefaultBootOrderWithContext(common.ContextOf(computersystem.GetClient()))
+}
+
+// SetDefaultBootOrderWithContext shall set the BootOrder array to the default settings.
+func (computersystem *ComputerSystem) SetDefaultBootOrderWithContext(ctx context.Context) error {
 	// This action wasn't added until 1.5.0, make sure this is supported.
 	if computersystem.setDefaultBootOrderTarget == "" {
 		return fmt.Errorf("SetDefaultBootOrder is not supported by this system")
 	}
 
-	return computersystem.Post(computersystem.setDefaultBootOrderTarget, nil)
+	return computersystem.PostWithContext(ctx, computersystem.setDefaultBootOrderTarget, nil)
 }
 
 // SimpleStorages gets all simple storage services of this system.
 func (computersystem *ComputerSystem) SimpleStorages(queryOpts ...common.QueryGroupOption) ([]*SimpleStorage, error) {
-	return ListReferencedSimpleStorages(computersystem.GetClient(), computersystem.simpleStorage, queryOpts...)
+	return computersystem.SimpleStoragesWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// SimpleStoragesWithContext gets all simple storage services of this system.
+func (computersystem *ComputerSystem) SimpleStoragesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*SimpleStorage, error) {
+	return ListReferencedSimpleStoragesWithContext(ctx, computersystem.GetClient(), computersystem.simpleStorage, queryOpts...)
 }
 
 // Storage gets the storage associated with this system.
 func (computersystem *ComputerSystem) Storage(queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
-	return ListReferencedStorages(computersystem.GetClient(), computersystem.storage, queryOpts...)
+	return computersystem.StorageWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// StorageWithContext gets the storage associated with this system.
+func (computersystem *ComputerSystem) StorageWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Storage, error) {
+	return ListReferencedStoragesWithContext(ctx, computersystem.GetClient(), computersystem.storage, queryOpts...)
 }
 
 // VirtualMedia gets the virtual media associated with this system.
 func (computersystem *ComputerSystem) VirtualMedia(queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
-	return ListReferencedVirtualMedias(computersystem.GetClient(), computersystem.virtualMedia, queryOpts...)
+	return computersystem.VirtualMediaWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// VirtualMediaWithContext gets the virtual media associated with this system.
+func (computersystem *ComputerSystem) VirtualMediaWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*VirtualMedia, error) {
+	return ListReferencedVirtualMediasWithContext(ctx, computersystem.GetClient(), computersystem.virtualMedia, queryOpts...)
 }
 
 // USBControllers gets the USB controllers associated with this system.
 func (computersystem *ComputerSystem) USBControllers(queryOpts ...common.QueryGroupOption) ([]*USBController, error) {
-	return ListReferencedUSBControllers(computersystem.GetClient(), computersystem.usbControllers, queryOpts...)
+	return computersystem.USBControllersWithContext(common.ContextOf(computersystem.GetClient()), queryOpts...)
+}
+
+// USBControllersWithContext gets the USB controllers associated with this system.
+func (computersystem *ComputerSystem) USBControllersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*USBController, error) {
+	return ListReferencedUSBControllersWithContext(ctx, computersystem.GetClient(), computersystem.usbControllers, queryOpts...)
 }
 
 // CSLinks are references to resources that are related to, but not contained
@@ -1394,10 +1546,15 @@ func (memorySummary *MemorySummary) UnmarshalJSON(b []byte) error {
 
 // Metrics gets the memory summary metrics
 func (memorySummary *MemorySummary) Metrics(c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
+	return memorySummary.MetricsWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// MetricsWithContext gets the memory summary metrics
+func (memorySummary *MemorySummary) MetricsWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*MemoryMetrics, error) {
 	if memorySummary.metrics == "" {
 		return nil, nil
 	}
-	return GetMemoryMetrics(c, memorySummary.metrics, queryOpts...)
+	return GetMemoryMetricsWithContext(ctx, c, memorySummary.metrics, queryOpts...)
 }
 
 // ProcessorSummary is This type shall contain properties which describe
@@ -1441,10 +1598,15 @@ func (processorSummary *ProcessorSummary) UnmarshalJSON(b []byte) error {
 
 // Metrics gets the processor summary metrics
 func (processorSummary *ProcessorSummary) Metrics(c common.Client, queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
+	return processorSummary.MetricsWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// MetricsWithContext gets the processor summary metrics
+func (processorSummary *ProcessorSummary) MetricsWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*ProcessorMetrics, error) {
 	if processorSummary.metrics == "" {
 		return nil, nil
 	}
-	return GetProcessorMetrics(c, processorSummary.metrics, queryOpts...)
+	return GetProcessorMetricsWithContext(ctx, c, processorSummary.metrics, queryOpts...)
 }
 
 // TrustedModules is This type shall describe a trusted module for a system.

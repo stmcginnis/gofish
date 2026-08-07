@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -147,18 +148,34 @@ func (softwareinventory *SoftwareInventory) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (softwareinventory *SoftwareInventory) Update() error {
+	return softwareinventory.UpdateWithContext(common.ContextOf(softwareinventory.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (softwareinventory *SoftwareInventory) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"WriteProtected"}
 
-	return softwareinventory.UpdateFromRawData(softwareinventory, softwareinventory.RawData, readWriteFields)
+	return softwareinventory.UpdateFromRawDataWithContext(ctx, softwareinventory, softwareinventory.RawData, readWriteFields)
 }
 
 // GetSoftwareInventory will get a SoftwareInventory instance from the service.
 func GetSoftwareInventory(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
-	return common.GetObject[SoftwareInventory](c, uri, queryOpts...)
+	return GetSoftwareInventoryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSoftwareInventoryWithContext will get a SoftwareInventory instance from the service.
+func GetSoftwareInventoryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SoftwareInventory, error) {
+	return common.GetObjectWithContext[SoftwareInventory](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSoftwareInventories gets the collection of SoftwareInventory from
 // a provided reference.
 func ListReferencedSoftwareInventories(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
-	return common.GetCollectionObjects[SoftwareInventory](c, link, queryOpts...)
+	return ListReferencedSoftwareInventoriesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSoftwareInventoriesWithContext gets the collection of SoftwareInventory from
+// a provided reference.
+func ListReferencedSoftwareInventoriesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*SoftwareInventory, error) {
+	return common.GetCollectionObjectsWithContext[SoftwareInventory](ctx, c, link, queryOpts...)
 }

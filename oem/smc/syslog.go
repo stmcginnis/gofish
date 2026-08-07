@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -44,7 +45,10 @@ func (i *Syslog) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *Syslog) Update() error {
+func (i *Syslog) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *Syslog) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(Syslog)
@@ -65,10 +69,15 @@ func (i *Syslog) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetSyslog will get a Syslog instance from the service.
 func GetSyslog(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Syslog, error) {
-	return common.GetObject[Syslog](c, uri, queryOpts...)
+	return GetSyslogWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSyslogWithContext will get a Syslog instance from the service.
+func GetSyslogWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Syslog, error) {
+	return common.GetObjectWithContext[Syslog](ctx, c, uri, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -162,6 +163,11 @@ func (coolantconnector *CoolantConnector) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (coolantconnector *CoolantConnector) Update() error {
+	return coolantconnector.UpdateWithContext(common.ContextOf(coolantconnector.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (coolantconnector *CoolantConnector) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"CoolingLoopName",
 		"CoolingManagerURI",
@@ -174,31 +180,57 @@ func (coolantconnector *CoolantConnector) Update() error {
 		"ValvePositionControlPercent",
 	}
 
-	return coolantconnector.UpdateFromRawData(coolantconnector, coolantconnector.rawData, readWriteFields)
+	return coolantconnector.UpdateFromRawDataWithContext(ctx, coolantconnector, coolantconnector.rawData, readWriteFields)
 }
 
 // GetCoolantConnector will get a CoolantConnector instance from the service.
 func GetCoolantConnector(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolantConnector, error) {
-	return common.GetObject[CoolantConnector](c, uri, queryOpts...)
+	return GetCoolantConnectorWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetCoolantConnectorWithContext will get a CoolantConnector instance from the service.
+func GetCoolantConnectorWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*CoolantConnector, error) {
+	return common.GetObjectWithContext[CoolantConnector](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedCoolantConnectors gets the collection of CoolantConnector from
 // a provided reference.
 func ListReferencedCoolantConnectors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
-	return common.GetCollectionObjects[CoolantConnector](c, link, queryOpts...)
+	return ListReferencedCoolantConnectorsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedCoolantConnectorsWithContext gets the collection of CoolantConnector from
+// a provided reference.
+func ListReferencedCoolantConnectorsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*CoolantConnector, error) {
+	return common.GetCollectionObjectsWithContext[CoolantConnector](ctx, c, link, queryOpts...)
 }
 
 // ConnectedChassis retrieves a collection of the Chassis at the other end of the connection.
 func (coolantconnector *CoolantConnector) ConnectedChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
-	return common.GetObjects[Chassis](coolantconnector.GetClient(), coolantconnector.connectedChassis, queryOpts...)
+	return coolantconnector.ConnectedChassisWithContext(common.ContextOf(coolantconnector.GetClient()), queryOpts...)
+}
+
+// ConnectedChassisWithContext retrieves a collection of the Chassis at the other end of the connection.
+func (coolantconnector *CoolantConnector) ConnectedChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjectsWithContext[Chassis](ctx, coolantconnector.GetClient(), coolantconnector.connectedChassis, queryOpts...)
 }
 
 // ConnectedCoolingLoop gets the cooling loop at the other end of the connection.
 func (coolantconnector *CoolantConnector) ConnectedCoolingLoop(queryOpts ...common.QueryGroupOption) (*CoolingLoop, error) {
-	return GetCoolingLoop(coolantconnector.GetClient(), coolantconnector.connectedCoolingLoop, queryOpts...)
+	return coolantconnector.ConnectedCoolingLoopWithContext(common.ContextOf(coolantconnector.GetClient()), queryOpts...)
+}
+
+// ConnectedCoolingLoopWithContext gets the cooling loop at the other end of the connection.
+func (coolantconnector *CoolantConnector) ConnectedCoolingLoopWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*CoolingLoop, error) {
+	return GetCoolingLoopWithContext(ctx, coolantconnector.GetClient(), coolantconnector.connectedCoolingLoop, queryOpts...)
 }
 
 // ConnectedCoolingUnit gets the cooling unit at the other end of the connection.
 func (coolantconnector *CoolantConnector) ConnectedCoolingUnit(queryOpts ...common.QueryGroupOption) (*CoolingUnit, error) {
-	return GetCoolingUnit(coolantconnector.GetClient(), coolantconnector.connectedCoolingUnit, queryOpts...)
+	return coolantconnector.ConnectedCoolingUnitWithContext(common.ContextOf(coolantconnector.GetClient()), queryOpts...)
+}
+
+// ConnectedCoolingUnitWithContext gets the cooling unit at the other end of the connection.
+func (coolantconnector *CoolantConnector) ConnectedCoolingUnitWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*CoolingUnit, error) {
+	return GetCoolingUnitWithContext(ctx, coolantconnector.GetClient(), coolantconnector.connectedCoolingUnit, queryOpts...)
 }

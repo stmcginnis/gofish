@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -97,38 +98,69 @@ func (graphicscontroller *GraphicsController) UnmarshalJSON(b []byte) error {
 
 // Ports get the ports associated with this graphics controller.
 func (graphicscontroller *GraphicsController) Ports(queryOpts ...common.QueryGroupOption) ([]*Port, error) {
-	return ListReferencedPorts(graphicscontroller.GetClient(), graphicscontroller.ports, queryOpts...)
+	return graphicscontroller.PortsWithContext(common.ContextOf(graphicscontroller.GetClient()), queryOpts...)
+}
+
+// PortsWithContext get the ports associated with this graphics controller.
+func (graphicscontroller *GraphicsController) PortsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Port, error) {
+	return ListReferencedPortsWithContext(ctx, graphicscontroller.GetClient(), graphicscontroller.ports, queryOpts...)
 }
 
 // PCIeDevice gets the PCIeDevice for this graphics controller.
 func (graphicscontroller *GraphicsController) PCIeDevice(queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
+	return graphicscontroller.PCIeDeviceWithContext(common.ContextOf(graphicscontroller.GetClient()), queryOpts...)
+}
+
+// PCIeDeviceWithContext gets the PCIeDevice for this graphics controller.
+func (graphicscontroller *GraphicsController) PCIeDeviceWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*PCIeDevice, error) {
 	if graphicscontroller.pcieDevice == "" {
 		return nil, nil
 	}
-	return GetPCIeDevice(graphicscontroller.GetClient(), graphicscontroller.pcieDevice, queryOpts...)
+	return GetPCIeDeviceWithContext(ctx, graphicscontroller.GetClient(), graphicscontroller.pcieDevice, queryOpts...)
 }
 
 // Processors gets this graphics controllers processors.
 func (graphicscontroller *GraphicsController) Processors(queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
-	return common.GetObjects[Processor](graphicscontroller.GetClient(), graphicscontroller.processors, queryOpts...)
+	return graphicscontroller.ProcessorsWithContext(common.ContextOf(graphicscontroller.GetClient()), queryOpts...)
+}
+
+// ProcessorsWithContext gets this graphics controllers processors.
+func (graphicscontroller *GraphicsController) ProcessorsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Processor, error) {
+	return common.GetObjectsWithContext[Processor](ctx, graphicscontroller.GetClient(), graphicscontroller.processors, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (graphicscontroller *GraphicsController) Update() error {
+	return graphicscontroller.UpdateWithContext(common.ContextOf(graphicscontroller.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (graphicscontroller *GraphicsController) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"AssetTag",
 	}
 
-	return graphicscontroller.UpdateFromRawData(graphicscontroller, graphicscontroller.rawData, readWriteFields)
+	return graphicscontroller.UpdateFromRawDataWithContext(ctx, graphicscontroller, graphicscontroller.rawData, readWriteFields)
 }
 
 // GetGraphicsController will get a GraphicsController instance from the service.
 func GetGraphicsController(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*GraphicsController, error) {
-	return common.GetObject[GraphicsController](c, uri, queryOpts...)
+	return GetGraphicsControllerWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetGraphicsControllerWithContext will get a GraphicsController instance from the service.
+func GetGraphicsControllerWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*GraphicsController, error) {
+	return common.GetObjectWithContext[GraphicsController](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedGraphicsControllers gets the collection of GraphicsController from
 // a provided reference.
 func ListReferencedGraphicsControllers(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*GraphicsController, error) {
-	return common.GetCollectionObjects[GraphicsController](c, link, queryOpts...)
+	return ListReferencedGraphicsControllersWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedGraphicsControllersWithContext gets the collection of GraphicsController from
+// a provided reference.
+func ListReferencedGraphicsControllersWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*GraphicsController, error) {
+	return common.GetCollectionObjectsWithContext[GraphicsController](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -68,27 +69,42 @@ func (aggregate *Aggregate) UnmarshalJSON(b []byte) error {
 
 // Elements get the elements of this aggregate.
 func (aggregate *Aggregate) Elements(queryOpts ...common.QueryGroupOption) ([]*Resource, error) {
-	return common.GetObjects[Resource](aggregate.GetClient(), aggregate.elements, queryOpts...)
+	return aggregate.ElementsWithContext(common.ContextOf(aggregate.GetClient()), queryOpts...)
+}
+
+// ElementsWithContext get the elements of this aggregate.
+func (aggregate *Aggregate) ElementsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Resource, error) {
+	return common.GetObjectsWithContext[Resource](ctx, aggregate.GetClient(), aggregate.elements, queryOpts...)
 }
 
 // AddElements adds one or more resources to the aggregate.
 func (aggregate *Aggregate) AddElements(elements []*Resource) error {
+	return aggregate.AddElementsWithContext(common.ContextOf(aggregate.GetClient()), elements)
+}
+
+// AddElementsWithContext adds one or more resources to the aggregate.
+func (aggregate *Aggregate) AddElementsWithContext(ctx context.Context, elements []*Resource) error {
 	t := struct {
 		Elements []*Resource
 	}{
 		Elements: elements,
 	}
-	return aggregate.Post(aggregate.addElementsTarget, t)
+	return aggregate.PostWithContext(ctx, aggregate.addElementsTarget, t)
 }
 
 // RemoveElements removes one or more resources from the aggregate.
 func (aggregate *Aggregate) RemoveElements(elements []*Resource) error {
+	return aggregate.RemoveElementsWithContext(common.ContextOf(aggregate.GetClient()), elements)
+}
+
+// RemoveElementsWithContext removes one or more resources from the aggregate.
+func (aggregate *Aggregate) RemoveElementsWithContext(ctx context.Context, elements []*Resource) error {
 	t := struct {
 		Elements []*Resource
 	}{
 		Elements: elements,
 	}
-	return aggregate.Post(aggregate.removeElementsTarget, t)
+	return aggregate.PostWithContext(ctx, aggregate.removeElementsTarget, t)
 }
 
 // Reset performs a reset of a collection of resources.
@@ -96,6 +112,14 @@ func (aggregate *Aggregate) RemoveElements(elements []*Resource) error {
 // `delayBetweenBatchesInSeconds` is the delay of the batches of elements being reset.
 // `resetType` is the type of reset to perform.
 func (aggregate *Aggregate) Reset(batchSize, delayBetweenBatchesInSeconds int, resetType ResetType) error {
+	return aggregate.ResetWithContext(common.ContextOf(aggregate.GetClient()), batchSize, delayBetweenBatchesInSeconds, resetType)
+}
+
+// ResetWithContext performs a reset of a collection of resources.
+// `batchSize` is the number of elements in each batch being reset.
+// `delayBetweenBatchesInSeconds` is the delay of the batches of elements being reset.
+// `resetType` is the type of reset to perform.
+func (aggregate *Aggregate) ResetWithContext(ctx context.Context, batchSize, delayBetweenBatchesInSeconds int, resetType ResetType) error {
 	t := struct {
 		BatchSize                    int
 		DelayBetweenBatchesInSeconds int
@@ -105,22 +129,39 @@ func (aggregate *Aggregate) Reset(batchSize, delayBetweenBatchesInSeconds int, r
 		DelayBetweenBatchesInSeconds: delayBetweenBatchesInSeconds,
 		ResetType:                    resetType,
 	}
-	return aggregate.Post(aggregate.resetTarget, t)
+	return aggregate.PostWithContext(ctx, aggregate.resetTarget, t)
 }
 
 // SetDefaultBootOrder is used to restore the boot order to the default state for the
 // computer systems that are members of this aggregate.
 func (aggregate *Aggregate) SetDefaultBootOrder() error {
-	return aggregate.Post(aggregate.setDefaultBootOrderTarget, nil)
+	return aggregate.SetDefaultBootOrderWithContext(common.ContextOf(aggregate.GetClient()))
+}
+
+// SetDefaultBootOrderWithContext is used to restore the boot order to the default state for the
+// computer systems that are members of this aggregate.
+func (aggregate *Aggregate) SetDefaultBootOrderWithContext(ctx context.Context) error {
+	return aggregate.PostWithContext(ctx, aggregate.setDefaultBootOrderTarget, nil)
 }
 
 // GetAggregate will get a Aggregate instance from the service.
 func GetAggregate(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Aggregate, error) {
-	return common.GetObject[Aggregate](c, uri, queryOpts...)
+	return GetAggregateWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetAggregateWithContext will get a Aggregate instance from the service.
+func GetAggregateWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Aggregate, error) {
+	return common.GetObjectWithContext[Aggregate](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedAggregates gets the collection of Aggregate from
 // a provided reference.
 func ListReferencedAggregates(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Aggregate, error) {
-	return common.GetCollectionObjects[Aggregate](c, link, queryOpts...)
+	return ListReferencedAggregatesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedAggregatesWithContext gets the collection of Aggregate from
+// a provided reference.
+func ListReferencedAggregatesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Aggregate, error) {
+	return common.GetCollectionObjectsWithContext[Aggregate](ctx, c, link, queryOpts...)
 }

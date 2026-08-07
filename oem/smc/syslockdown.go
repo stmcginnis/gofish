@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -42,7 +43,10 @@ func (i *SysLockdown) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *SysLockdown) Update() error {
+func (i *SysLockdown) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *SysLockdown) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(SysLockdown)
@@ -59,10 +63,15 @@ func (i *SysLockdown) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetSysLockdown will get a SysLockdown instance from the service.
 func GetSysLockdown(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SysLockdown, error) {
-	return common.GetObject[SysLockdown](c, uri, queryOpts...)
+	return GetSysLockdownWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSysLockdownWithContext will get a SysLockdown instance from the service.
+func GetSysLockdownWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*SysLockdown, error) {
+	return common.GetObjectWithContext[SysLockdown](ctx, c, uri, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -123,6 +124,16 @@ func (consistencygroup *ConsistencyGroup) UnmarshalJSON(b []byte) error {
 // `updateMode` is the replica update mode (synchronous vs asynchronous).
 // `targetGroupURI` is the Uri to the existing consistency group.
 func (consistencygroup *ConsistencyGroup) AssignReplicaTarget(replicaType ReplicaType, updateMode ReplicaUpdateMode, targetGroupURI string) error {
+	return consistencygroup.AssignReplicaTargetWithContext(common.ContextOf(consistencygroup.GetClient()), replicaType, updateMode, targetGroupURI)
+}
+
+// AssignReplicaTargetWithContext will establish a replication relationship by assigning an existing consistency group
+// to serve as a target replica for an existing source consistency group.
+//
+// `replicaType` is the type of replica relationship to be created (e.g., Clone, Mirror, Snap).
+// `updateMode` is the replica update mode (synchronous vs asynchronous).
+// `targetGroupURI` is the Uri to the existing consistency group.
+func (consistencygroup *ConsistencyGroup) AssignReplicaTargetWithContext(ctx context.Context, replicaType ReplicaType, updateMode ReplicaUpdateMode, targetGroupURI string) error {
 	if consistencygroup.assignReplicaTargetTarget == "" {
 		return errors.New("method not supported by this service")
 	}
@@ -137,7 +148,7 @@ func (consistencygroup *ConsistencyGroup) AssignReplicaTarget(replicaType Replic
 		TargetConsistencyGroup: targetGroupURI,
 	}
 
-	return consistencygroup.Post(consistencygroup.assignReplicaTargetTarget, payload)
+	return consistencygroup.PostWithContext(ctx, consistencygroup.assignReplicaTargetTarget, payload)
 }
 
 // CreateReplicaTarget will create a new consistency group resource to provide expanded data protection
@@ -148,6 +159,17 @@ func (consistencygroup *ConsistencyGroup) AssignReplicaTarget(replicaType Replic
 // `updateMode` is the replica update mode (synchronous vs asynchronous).
 // `targetGroupURI` is the Uri to the existing consistency group.
 func (consistencygroup *ConsistencyGroup) CreateReplicaTarget(groupName string, replicaType ReplicaType, updateMode ReplicaUpdateMode, targetGroupURI string) error {
+	return consistencygroup.CreateReplicaTargetWithContext(common.ContextOf(consistencygroup.GetClient()), groupName, replicaType, updateMode, targetGroupURI)
+}
+
+// CreateReplicaTargetWithContext will create a new consistency group resource to provide expanded data protection
+// through a replica relationship with the specified source consistency group.
+//
+// `groupName` is the name for the target consistency group.
+// `replicaType` is the type of replica relationship to be created (e.g., Clone, Mirror, Snap).
+// `updateMode` is the replica update mode (synchronous vs asynchronous).
+// `targetGroupURI` is the Uri to the existing consistency group.
+func (consistencygroup *ConsistencyGroup) CreateReplicaTargetWithContext(ctx context.Context, groupName string, replicaType ReplicaType, updateMode ReplicaUpdateMode, targetGroupURI string) error {
 	if consistencygroup.createReplicaTargetTarget == "" {
 		return errors.New("method not supported by this service")
 	}
@@ -164,7 +186,7 @@ func (consistencygroup *ConsistencyGroup) CreateReplicaTarget(groupName string, 
 		TargetConsistencyGroup: targetGroupURI,
 	}
 
-	return consistencygroup.Post(consistencygroup.createReplicaTargetTarget, payload)
+	return consistencygroup.PostWithContext(ctx, consistencygroup.createReplicaTargetTarget, payload)
 }
 
 // RemoveReplicaRelationship will disable data synchronization between a source and target consistency group,
@@ -173,6 +195,15 @@ func (consistencygroup *ConsistencyGroup) CreateReplicaTarget(groupName string, 
 // `deleteTarget` indicates whether or not to delete the target consistency group as part of the operation.
 // `targetGroupURI` is the Uri to the existing consistency group.
 func (consistencygroup *ConsistencyGroup) RemoveReplicaRelationship(deleteTarget bool, targetGroupURI string) error {
+	return consistencygroup.RemoveReplicaRelationshipWithContext(common.ContextOf(consistencygroup.GetClient()), deleteTarget, targetGroupURI)
+}
+
+// RemoveReplicaRelationshipWithContext will disable data synchronization between a source and target consistency group,
+// remove the replication relationship, and optionally delete the target consistency group.
+//
+// `deleteTarget` indicates whether or not to delete the target consistency group as part of the operation.
+// `targetGroupURI` is the Uri to the existing consistency group.
+func (consistencygroup *ConsistencyGroup) RemoveReplicaRelationshipWithContext(ctx context.Context, deleteTarget bool, targetGroupURI string) error {
 	if consistencygroup.removeReplicaRelationshipTarget == "" {
 		return errors.New("method not supported by this service")
 	}
@@ -185,7 +216,7 @@ func (consistencygroup *ConsistencyGroup) RemoveReplicaRelationship(deleteTarget
 		TargetConsistencyGroup:       targetGroupURI,
 	}
 
-	return consistencygroup.Post(consistencygroup.removeReplicaRelationshipTarget, payload)
+	return consistencygroup.PostWithContext(ctx, consistencygroup.removeReplicaRelationshipTarget, payload)
 }
 
 // ResumeReplication will resume the active data synchronization between a source and target
@@ -193,6 +224,14 @@ func (consistencygroup *ConsistencyGroup) RemoveReplicaRelationship(deleteTarget
 //
 // `targetGroupURI` is the Uri to the existing consistency group.
 func (consistencygroup *ConsistencyGroup) ResumeReplication(targetGroupURI string) error {
+	return consistencygroup.ResumeReplicationWithContext(common.ContextOf(consistencygroup.GetClient()), targetGroupURI)
+}
+
+// ResumeReplicationWithContext will resume the active data synchronization between a source and target
+// consistency group, without otherwise altering the replication relationship.
+//
+// `targetGroupURI` is the Uri to the existing consistency group.
+func (consistencygroup *ConsistencyGroup) ResumeReplicationWithContext(ctx context.Context, targetGroupURI string) error {
 	if consistencygroup.resumeReplicationTarget == "" {
 		return errors.New("method not supported by this service")
 	}
@@ -203,7 +242,7 @@ func (consistencygroup *ConsistencyGroup) ResumeReplication(targetGroupURI strin
 		TargetConsistencyGroup: targetGroupURI,
 	}
 
-	return consistencygroup.Post(consistencygroup.resumeReplicationTarget, payload)
+	return consistencygroup.PostWithContext(ctx, consistencygroup.resumeReplicationTarget, payload)
 }
 
 // ReverseReplicationRelationship will resume the active data synchronization between a source and target
@@ -211,6 +250,14 @@ func (consistencygroup *ConsistencyGroup) ResumeReplication(targetGroupURI strin
 //
 // `targetGroupURI` is the Uri to the existing consistency group.
 func (consistencygroup *ConsistencyGroup) ReverseReplicationRelationship(targetGroupURI string) error {
+	return consistencygroup.ReverseReplicationRelationshipWithContext(common.ContextOf(consistencygroup.GetClient()), targetGroupURI)
+}
+
+// ReverseReplicationRelationshipWithContext will resume the active data synchronization between a source and target
+// consistency group, without otherwise altering the replication relationship.
+//
+// `targetGroupURI` is the Uri to the existing consistency group.
+func (consistencygroup *ConsistencyGroup) ReverseReplicationRelationshipWithContext(ctx context.Context, targetGroupURI string) error {
 	if consistencygroup.reverseReplicationRelationshipTarget == "" {
 		return errors.New("method not supported by this service")
 	}
@@ -221,7 +268,7 @@ func (consistencygroup *ConsistencyGroup) ReverseReplicationRelationship(targetG
 		TargetConsistencyGroup: targetGroupURI,
 	}
 
-	return consistencygroup.Post(consistencygroup.reverseReplicationRelationshipTarget, payload)
+	return consistencygroup.PostWithContext(ctx, consistencygroup.reverseReplicationRelationshipTarget, payload)
 }
 
 // SplitReplication will split the replication relationship and suspend data synchronization
@@ -229,6 +276,14 @@ func (consistencygroup *ConsistencyGroup) ReverseReplicationRelationship(targetG
 //
 // `targetGroupURI` is the Uri to the existing consistency group.
 func (consistencygroup *ConsistencyGroup) SplitReplication(targetGroupURI string) error {
+	return consistencygroup.SplitReplicationWithContext(common.ContextOf(consistencygroup.GetClient()), targetGroupURI)
+}
+
+// SplitReplicationWithContext will split the replication relationship and suspend data synchronization
+// between a source and target consistency group.
+//
+// `targetGroupURI` is the Uri to the existing consistency group.
+func (consistencygroup *ConsistencyGroup) SplitReplicationWithContext(ctx context.Context, targetGroupURI string) error {
 	if consistencygroup.splitReplicationTarget == "" {
 		return errors.New("method not supported by this service")
 	}
@@ -239,7 +294,7 @@ func (consistencygroup *ConsistencyGroup) SplitReplication(targetGroupURI string
 		TargetConsistencyGroup: targetGroupURI,
 	}
 
-	return consistencygroup.Post(consistencygroup.splitReplicationTarget, payload)
+	return consistencygroup.PostWithContext(ctx, consistencygroup.splitReplicationTarget, payload)
 }
 
 // SuspendReplication will suspend active data synchronization between a source and target
@@ -247,6 +302,14 @@ func (consistencygroup *ConsistencyGroup) SplitReplication(targetGroupURI string
 //
 // `targetGroupURI` is the Uri to the existing consistency group.
 func (consistencygroup *ConsistencyGroup) SuspendReplication(targetGroupURI string) error {
+	return consistencygroup.SuspendReplicationWithContext(common.ContextOf(consistencygroup.GetClient()), targetGroupURI)
+}
+
+// SuspendReplicationWithContext will suspend active data synchronization between a source and target
+// consistency group, without otherwise altering the replication relationship.
+//
+// `targetGroupURI` is the Uri to the existing consistency group.
+func (consistencygroup *ConsistencyGroup) SuspendReplicationWithContext(ctx context.Context, targetGroupURI string) error {
 	if consistencygroup.suspendReplicationTarget == "" {
 		return errors.New("method not supported by this service")
 	}
@@ -257,16 +320,26 @@ func (consistencygroup *ConsistencyGroup) SuspendReplication(targetGroupURI stri
 		TargetConsistencyGroup: targetGroupURI,
 	}
 
-	return consistencygroup.Post(consistencygroup.suspendReplicationTarget, payload)
+	return consistencygroup.PostWithContext(ctx, consistencygroup.suspendReplicationTarget, payload)
 }
 
 // Volumes gets the volumes in this consistency group.
 func (consistencygroup *ConsistencyGroup) Volumes(queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
-	return common.GetObjects[Volume](consistencygroup.GetClient(), consistencygroup.volumes, queryOpts...)
+	return consistencygroup.VolumesWithContext(common.ContextOf(consistencygroup.GetClient()), queryOpts...)
+}
+
+// VolumesWithContext gets the volumes in this consistency group.
+func (consistencygroup *ConsistencyGroup) VolumesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Volume, error) {
+	return common.GetObjectsWithContext[Volume](ctx, consistencygroup.GetClient(), consistencygroup.volumes, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (consistencygroup *ConsistencyGroup) Update() error {
+	return consistencygroup.UpdateWithContext(common.ContextOf(consistencygroup.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (consistencygroup *ConsistencyGroup) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(ConsistencyGroup)
@@ -281,16 +354,27 @@ func (consistencygroup *ConsistencyGroup) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(consistencygroup).Elem()
 
-	return consistencygroup.Entity.Update(originalElement, currentElement, readWriteFields)
+	return consistencygroup.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetConsistencyGroup will get a ConsistencyGroup instance from the service.
 func GetConsistencyGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ConsistencyGroup, error) {
-	return common.GetObject[ConsistencyGroup](c, uri, queryOpts...)
+	return GetConsistencyGroupWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetConsistencyGroupWithContext will get a ConsistencyGroup instance from the service.
+func GetConsistencyGroupWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ConsistencyGroup, error) {
+	return common.GetObjectWithContext[ConsistencyGroup](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedConsistencyGroups gets the collection of ConsistencyGroup from
 // a provided reference.
 func ListReferencedConsistencyGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ConsistencyGroup, error) {
-	return common.GetCollectionObjects[ConsistencyGroup](c, link, queryOpts...)
+	return ListReferencedConsistencyGroupsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedConsistencyGroupsWithContext gets the collection of ConsistencyGroup from
+// a provided reference.
+func ListReferencedConsistencyGroupsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ConsistencyGroup, error) {
+	return common.GetCollectionObjectsWithContext[ConsistencyGroup](ctx, c, link, queryOpts...)
 }

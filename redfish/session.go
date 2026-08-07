@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"net/url"
 
@@ -114,10 +115,15 @@ func (session *Session) UnmarshalJSON(b []byte) error {
 
 // OutboundConnection gets the outbound connection associated with this session.
 func (session *Session) OutboundConnection(queryOpts ...common.QueryGroupOption) (*OutboundConnection, error) {
+	return session.OutboundConnectionWithContext(common.ContextOf(session.GetClient()), queryOpts...)
+}
+
+// OutboundConnectionWithContext gets the outbound connection associated with this session.
+func (session *Session) OutboundConnectionWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*OutboundConnection, error) {
 	if session.outboundConnection == "" {
 		return nil, nil
 	}
-	return GetOutboundConnection(session.GetClient(), session.outboundConnection, queryOpts...)
+	return GetOutboundConnectionWithContext(ctx, session.GetClient(), session.outboundConnection, queryOpts...)
 }
 
 // AuthToken contains the authentication and session information.
@@ -136,12 +142,17 @@ type authPayload struct {
 
 // CreateSession creates a new session and returns the token and id
 func CreateSession(c common.Client, uri, username, password string) (auth *AuthToken, err error) {
+	return CreateSessionWithContext(common.ContextOf(c), c, uri, username, password)
+}
+
+// CreateSessionWithContext creates a new session and returns the token and id
+func CreateSessionWithContext(ctx context.Context, c common.Client, uri, username, password string) (auth *AuthToken, err error) {
 	a := &authPayload{
 		UserName: username,
 		Password: password,
 	}
 
-	resp, err := c.Post(uri, a)
+	resp, err := c.PostWithContext(ctx, uri, a)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return auth, err
@@ -160,7 +171,12 @@ func CreateSession(c common.Client, uri, username, password string) (auth *AuthT
 
 // DeleteSession deletes a session using the location as argument
 func DeleteSession(c common.Client, sessionURL string) (err error) {
-	resp, err := c.Delete(sessionURL)
+	return DeleteSessionWithContext(common.ContextOf(c), c, sessionURL)
+}
+
+// DeleteSessionWithContext deletes a session using the location as argument
+func DeleteSessionWithContext(ctx context.Context, c common.Client, sessionURL string) (err error) {
+	resp, err := c.DeleteWithContext(ctx, sessionURL)
 	defer common.DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return err
@@ -170,10 +186,20 @@ func DeleteSession(c common.Client, sessionURL string) (err error) {
 
 // GetSession will get a Session instance from the Redfish service.
 func GetSession(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Session, error) {
-	return common.GetObject[Session](c, uri, queryOpts...)
+	return GetSessionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSessionWithContext will get a Session instance from the Redfish service.
+func GetSessionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Session, error) {
+	return common.GetObjectWithContext[Session](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSessions gets the collection of Sessions
 func ListReferencedSessions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Session, error) {
-	return common.GetCollectionObjects[Session](c, link, queryOpts...)
+	return ListReferencedSessionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSessionsWithContext gets the collection of Sessions
+func ListReferencedSessionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Session, error) {
+	return common.GetCollectionObjectsWithContext[Session](ctx, c, link, queryOpts...)
 }

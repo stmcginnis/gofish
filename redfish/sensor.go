@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -458,26 +459,46 @@ func (sensor *Sensor) UnmarshalJSON(b []byte) error {
 
 // ResetMetrics clears accumulated sensor metrics.
 func (sensor *Sensor) ResetMetrics() error {
+	return sensor.ResetMetricsWithContext(common.ContextOf(sensor.GetClient()))
+}
+
+// ResetMetricsWithContext clears accumulated sensor metrics.
+func (sensor *Sensor) ResetMetricsWithContext(ctx context.Context) error {
 	if sensor.resetMetricsTarget == "" {
 		return fmt.Errorf("ResetMetrics is not supported")
 	}
-	return sensor.Post(sensor.resetMetricsTarget, nil)
+	return sensor.PostWithContext(ctx, sensor.resetMetricsTarget, nil)
 }
 
 // ResetToDefaults restores factory settings (v1.6+).
 func (sensor *Sensor) ResetToDefaults() error {
+	return sensor.ResetToDefaultsWithContext(common.ContextOf(sensor.GetClient()))
+}
+
+// ResetToDefaultsWithContext restores factory settings (v1.6+).
+func (sensor *Sensor) ResetToDefaultsWithContext(ctx context.Context) error {
 	if sensor.resetToDefaultsTarget == "" {
 		return fmt.Errorf("ResetToDefaults is not supported")
 	}
-	return sensor.Post(sensor.resetToDefaultsTarget, nil)
+	return sensor.PostWithContext(ctx, sensor.resetToDefaultsTarget, nil)
 }
 
 // GetSensor retrieves a specific sensor from the service.
 func GetSensor(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Sensor, error) {
-	return common.GetObject[Sensor](c, uri, queryOpts...)
+	return GetSensorWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetSensorWithContext retrieves a specific sensor from the service.
+func GetSensorWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Sensor, error) {
+	return common.GetObjectWithContext[Sensor](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedSensors retrieves a collection of sensors.
 func ListReferencedSensors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Sensor, error) {
-	return common.GetCollectionObjects[Sensor](c, link, queryOpts...)
+	return ListReferencedSensorsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedSensorsWithContext retrieves a collection of sensors.
+func ListReferencedSensorsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Sensor, error) {
+	return common.GetCollectionObjectsWithContext[Sensor](ctx, c, link, queryOpts...)
 }

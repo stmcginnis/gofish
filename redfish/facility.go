@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -233,79 +234,155 @@ func (facility *Facility) UnmarshalJSON(b []byte) error {
 
 // CDUs get the cooling distribution units associated with this facility.
 func (facility *Facility) CDUs(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
-	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.cdus, queryOpts...)
+	return facility.CDUsWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// CDUsWithContext get the cooling distribution units associated with this facility.
+func (facility *Facility) CDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return common.GetObjectsWithContext[CoolingUnit](ctx, facility.GetClient(), facility.cdus, queryOpts...)
 }
 
 // ContainedByFacility get facility that contains this facility.
 func (facility *Facility) ContainedByFacility(queryOpts ...common.QueryGroupOption) (*Facility, error) {
+	return facility.ContainedByFacilityWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// ContainedByFacilityWithContext get facility that contains this facility.
+func (facility *Facility) ContainedByFacilityWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) (*Facility, error) {
 	if facility.containedByFacility == "" {
 		return nil, nil
 	}
-	return GetFacility(facility.GetClient(), facility.containedByFacility, queryOpts...)
+	return GetFacilityWithContext(ctx, facility.GetClient(), facility.containedByFacility, queryOpts...)
 }
 
 // ContainsChassis get the chassis within this facility.
 func (facility *Facility) ContainsChassis(queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
-	return common.GetObjects[Chassis](facility.GetClient(), facility.containsChassis, queryOpts...)
+	return facility.ContainsChassisWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// ContainsChassisWithContext get the chassis within this facility.
+func (facility *Facility) ContainsChassisWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Chassis, error) {
+	return common.GetObjectsWithContext[Chassis](ctx, facility.GetClient(), facility.containsChassis, queryOpts...)
 }
 
 // ContainsFacilities get facilities within this facility.
 func (facility *Facility) ContainsFacilities(queryOpts ...common.QueryGroupOption) ([]*Facility, error) {
-	return common.GetObjects[Facility](facility.GetClient(), facility.containsFacilities, queryOpts...)
+	return facility.ContainsFacilitiesWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// ContainsFacilitiesWithContext get facilities within this facility.
+func (facility *Facility) ContainsFacilitiesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Facility, error) {
+	return common.GetObjectsWithContext[Facility](ctx, facility.GetClient(), facility.containsFacilities, queryOpts...)
 }
 
 // CoolingLoops get cooling loops within this facility.
 func (facility *Facility) CoolingLoops(queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
-	return common.GetObjects[CoolingLoop](facility.GetClient(), facility.coolingLoops, queryOpts...)
+	return facility.CoolingLoopsWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// CoolingLoopsWithContext get cooling loops within this facility.
+func (facility *Facility) CoolingLoopsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolingLoop, error) {
+	return common.GetObjectsWithContext[CoolingLoop](ctx, facility.GetClient(), facility.coolingLoops, queryOpts...)
 }
 
 // ElectricalBuses get electrical buses within this facility.
 func (facility *Facility) ElectricalBuses(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.electricalBuses, queryOpts...)
+	return facility.ElectricalBusesWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// ElectricalBusesWithContext get electrical buses within this facility.
+func (facility *Facility) ElectricalBusesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, facility.GetClient(), facility.electricalBuses, queryOpts...)
 }
 
 // FloorPDUs get floor power distribution units within this facility.
 func (facility *Facility) FloorPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.floorPDUs, queryOpts...)
+	return facility.FloorPDUsWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// FloorPDUsWithContext get floor power distribution units within this facility.
+func (facility *Facility) FloorPDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, facility.GetClient(), facility.floorPDUs, queryOpts...)
 }
 
 // ImmersionUnits get immersion cooling units within this facility.
 func (facility *Facility) ImmersionUnits(queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
-	return common.GetObjects[CoolingUnit](facility.GetClient(), facility.immersionUnits, queryOpts...)
+	return facility.ImmersionUnitsWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// ImmersionUnitsWithContext get immersion cooling units within this facility.
+func (facility *Facility) ImmersionUnitsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*CoolingUnit, error) {
+	return common.GetObjectsWithContext[CoolingUnit](ctx, facility.GetClient(), facility.immersionUnits, queryOpts...)
 }
 
 // ManagedBy gets the managers of this facility.
 func (facility *Facility) ManagedBy(queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
-	return common.GetObjects[Manager](facility.GetClient(), facility.managedBy, queryOpts...)
+	return facility.ManagedByWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// ManagedByWithContext gets the managers of this facility.
+func (facility *Facility) ManagedByWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Manager, error) {
+	return common.GetObjectsWithContext[Manager](ctx, facility.GetClient(), facility.managedBy, queryOpts...)
 }
 
 // PowerShelves get power shelves within this facility.
 func (facility *Facility) PowerShelves(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.powerShelves, queryOpts...)
+	return facility.PowerShelvesWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// PowerShelvesWithContext get power shelves within this facility.
+func (facility *Facility) PowerShelvesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, facility.GetClient(), facility.powerShelves, queryOpts...)
 }
 
 // RackPDUs get rack power distribution units within this facility.
 func (facility *Facility) RackPDUs(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.rackPDUs, queryOpts...)
+	return facility.RackPDUsWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// RackPDUsWithContext get rack power distribution units within this facility.
+func (facility *Facility) RackPDUsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, facility.GetClient(), facility.rackPDUs, queryOpts...)
 }
 
 // Switchgear get switchgear power distribution units within this facility.
 func (facility *Facility) Switchgear(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.switchgear, queryOpts...)
+	return facility.SwitchgearWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// SwitchgearWithContext get switchgear power distribution units within this facility.
+func (facility *Facility) SwitchgearWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, facility.GetClient(), facility.switchgear, queryOpts...)
 }
 
 // TransferSwitches get transfer switches within this facility.
 func (facility *Facility) TransferSwitches(queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
-	return common.GetObjects[PowerDistribution](facility.GetClient(), facility.transferSwitches, queryOpts...)
+	return facility.TransferSwitchesWithContext(common.ContextOf(facility.GetClient()), queryOpts...)
+}
+
+// TransferSwitchesWithContext get transfer switches within this facility.
+func (facility *Facility) TransferSwitchesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*PowerDistribution, error) {
+	return common.GetObjectsWithContext[PowerDistribution](ctx, facility.GetClient(), facility.transferSwitches, queryOpts...)
 }
 
 // GetFacility will get a Facility instance from the service.
 func GetFacility(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Facility, error) {
-	return common.GetObject[Facility](c, uri, queryOpts...)
+	return GetFacilityWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetFacilityWithContext will get a Facility instance from the service.
+func GetFacilityWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Facility, error) {
+	return common.GetObjectWithContext[Facility](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedFacilities gets the collection of Facility from
 // a provided reference.
 func ListReferencedFacilities(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Facility, error) {
-	return common.GetCollectionObjects[Facility](c, link, queryOpts...)
+	return ListReferencedFacilitiesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedFacilitiesWithContext gets the collection of Facility from
+// a provided reference.
+func ListReferencedFacilitiesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Facility, error) {
+	return common.GetCollectionObjectsWithContext[Facility](ctx, c, link, queryOpts...)
 }

@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -68,13 +69,24 @@ type Event struct {
 
 // GetEvent will get a Event instance from the service.
 func GetEvent(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Event, error) {
-	return common.GetObject[Event](c, uri, queryOpts...)
+	return GetEventWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetEventWithContext will get a Event instance from the service.
+func GetEventWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Event, error) {
+	return common.GetObjectWithContext[Event](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedEvents gets the collection of Event from
 // a provided reference.
 func ListReferencedEvents(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Event, error) {
-	return common.GetCollectionObjects[Event](c, link, queryOpts...)
+	return ListReferencedEventsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedEventsWithContext gets the collection of Event from
+// a provided reference.
+func ListReferencedEventsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Event, error) {
+	return common.GetCollectionObjectsWithContext[Event](ctx, c, link, queryOpts...)
 }
 
 // EventRecord
@@ -189,10 +201,15 @@ func (eventrecord *EventRecord) UnmarshalJSON(b []byte) error {
 
 // LogEntry gets the log entry for this event.
 func (eventrecord *EventRecord) LogEntry(c common.Client, queryOpts ...common.QueryGroupOption) (*LogEntry, error) {
+	return eventrecord.LogEntryWithContext(common.ContextOf(c), c, queryOpts...)
+}
+
+// LogEntryWithContext gets the log entry for this event.
+func (eventrecord *EventRecord) LogEntryWithContext(ctx context.Context, c common.Client, queryOpts ...common.QueryGroupOption) (*LogEntry, error) {
 	if eventrecord.logEntry == "" {
 		return nil, nil
 	}
-	return GetLogEntry(c, eventrecord.logEntry, queryOpts...)
+	return GetLogEntryWithContext(ctx, c, eventrecord.logEntry, queryOpts...)
 }
 
 // EventRecordActions shall contain the available actions for this resource.

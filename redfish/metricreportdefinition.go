@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -236,11 +237,21 @@ func (metricreportdefinition *MetricReportDefinition) UnmarshalJSON(b []byte) er
 
 // Triggers get the associated triggers.
 func (metricreportdefinition *MetricReportDefinition) Triggers(queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
-	return common.GetObjects[Triggers](metricreportdefinition.GetClient(), metricreportdefinition.triggers, queryOpts...)
+	return metricreportdefinition.TriggersWithContext(common.ContextOf(metricreportdefinition.GetClient()), queryOpts...)
+}
+
+// TriggersWithContext get the associated triggers.
+func (metricreportdefinition *MetricReportDefinition) TriggersWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Triggers, error) {
+	return common.GetObjectsWithContext[Triggers](ctx, metricreportdefinition.GetClient(), metricreportdefinition.triggers, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (metricreportdefinition *MetricReportDefinition) Update() error {
+	return metricreportdefinition.UpdateWithContext(common.ContextOf(metricreportdefinition.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (metricreportdefinition *MetricReportDefinition) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"MetricProperties",
 		"MetricReportDefinitionEnabled",
@@ -252,16 +263,27 @@ func (metricreportdefinition *MetricReportDefinition) Update() error {
 		"SuppressRepeatedMetricValue",
 	}
 
-	return metricreportdefinition.UpdateFromRawData(metricreportdefinition, metricreportdefinition.rawData, readWriteFields)
+	return metricreportdefinition.UpdateFromRawDataWithContext(ctx, metricreportdefinition, metricreportdefinition.rawData, readWriteFields)
 }
 
 // GetMetricReportDefinition will get a MetricReportDefinition instance from the service.
 func GetMetricReportDefinition(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricReportDefinition, error) {
-	return common.GetObject[MetricReportDefinition](c, uri, queryOpts...)
+	return GetMetricReportDefinitionWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMetricReportDefinitionWithContext will get a MetricReportDefinition instance from the service.
+func GetMetricReportDefinitionWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*MetricReportDefinition, error) {
+	return common.GetObjectWithContext[MetricReportDefinition](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMetricReportDefinitions gets the collection of MetricReportDefinition from
 // a provided reference.
 func ListReferencedMetricReportDefinitions(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
-	return common.GetCollectionObjects[MetricReportDefinition](c, link, queryOpts...)
+	return ListReferencedMetricReportDefinitionsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMetricReportDefinitionsWithContext gets the collection of MetricReportDefinition from
+// a provided reference.
+func ListReferencedMetricReportDefinitionsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*MetricReportDefinition, error) {
+	return common.GetCollectionObjectsWithContext[MetricReportDefinition](ctx, c, link, queryOpts...)
 }

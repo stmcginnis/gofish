@@ -4,6 +4,8 @@
 
 package common
 
+import "context"
+
 type MessageExtendedInfo struct {
 	// MessageID shall be a key into message registry as described in the
 	// Redfish specification.
@@ -34,13 +36,24 @@ type Message struct {
 	MessageExtendedInfo
 }
 
-// GetMessage will get a Message instance from the service.
+// GetMessage will get a Message instance from the service using the client's cached context.
 func GetMessage(c Client, uri string, queryOpts ...QueryGroupOption) (*Message, error) {
-	return GetObject[Message](c, uri, queryOpts...)
+	return GetMessageWithContext(ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetMessageWithContext will get a Message instance from the service.
+func GetMessageWithContext(ctx context.Context, c Client, uri string, queryOpts ...QueryGroupOption) (*Message, error) {
+	return GetObjectWithContext[Message](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedMessages gets the collection of Message from
-// a provided reference.
+// a provided reference using the client's cached context.
 func ListReferencedMessages(c Client, link string, queryOpts ...QueryGroupOption) ([]*Message, error) {
-	return GetCollectionObjects[Message](c, link, queryOpts...)
+	return ListReferencedMessagesWithContext(ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedMessagesWithContext gets the collection of Message from
+// a provided reference.
+func ListReferencedMessagesWithContext(ctx context.Context, c Client, link string, queryOpts ...QueryGroupOption) ([]*Message, error) {
+	return GetCollectionObjectsWithContext[Message](ctx, c, link, queryOpts...)
 }

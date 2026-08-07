@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -564,25 +565,46 @@ func (logentry *LogEntry) UnmarshalJSON(b []byte) error {
 
 // RelatedLogEntries gets the set of LogEntry in this or other log services that are related to this log entry.
 func (logentry *LogEntry) RelatedLogEntries(queryOpts ...common.QueryGroupOption) ([]*LogEntry, error) {
-	return common.GetObjects[LogEntry](logentry.GetClient(), logentry.relatedLogEntries, queryOpts...)
+	return logentry.RelatedLogEntriesWithContext(common.ContextOf(logentry.GetClient()), queryOpts...)
+}
+
+// RelatedLogEntriesWithContext gets the set of LogEntry in this or other log services that are related to this log entry.
+func (logentry *LogEntry) RelatedLogEntriesWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*LogEntry, error) {
+	return common.GetObjectsWithContext[LogEntry](ctx, logentry.GetClient(), logentry.relatedLogEntries, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (logentry *LogEntry) Update() error {
+	return logentry.UpdateWithContext(common.ContextOf(logentry.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (logentry *LogEntry) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Resolved",
 	}
 
-	return logentry.UpdateFromRawData(logentry, logentry.rawData, readWriteFields)
+	return logentry.UpdateFromRawDataWithContext(ctx, logentry, logentry.rawData, readWriteFields)
 }
 
 // GetLogEntry will get a LogEntry instance from the service.
 func GetLogEntry(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LogEntry, error) {
-	return common.GetObject[LogEntry](c, uri, queryOpts...)
+	return GetLogEntryWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetLogEntryWithContext will get a LogEntry instance from the service.
+func GetLogEntryWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LogEntry, error) {
+	return common.GetObjectWithContext[LogEntry](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedLogEntrys gets the collection of LogEntry from
 // a provided reference.
 func ListReferencedLogEntrys(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LogEntry, error) {
-	return common.GetCollectionObjects[LogEntry](c, link, queryOpts...)
+	return ListReferencedLogEntrysWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedLogEntrysWithContext gets the collection of LogEntry from
+// a provided reference.
+func ListReferencedLogEntrysWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LogEntry, error) {
+	return common.GetCollectionObjectsWithContext[LogEntry](ctx, c, link, queryOpts...)
 }

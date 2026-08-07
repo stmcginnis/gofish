@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -114,9 +115,14 @@ func (fan *ThermalFan) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (fan *ThermalFan) Update() error {
+	return fan.UpdateWithContext(common.ContextOf(fan.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (fan *ThermalFan) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"IndicatorLED"}
 
-	return fan.UpdateFromRawData(fan, fan.RawData, readWriteFields)
+	return fan.UpdateFromRawDataWithContext(ctx, fan, fan.RawData, readWriteFields)
 }
 
 // Temperature represents a temperature sensor in a Redfish system.
@@ -203,12 +209,17 @@ func (temperature *Temperature) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (temperature *Temperature) Update() error {
+	return temperature.UpdateWithContext(common.ContextOf(temperature.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (temperature *Temperature) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"LowerThresholdUser",
 		"UpperThresholdUser",
 	}
 
-	return temperature.UpdateFromRawData(temperature, temperature.RawData, readWriteFields)
+	return temperature.UpdateFromRawDataWithContext(ctx, temperature, temperature.RawData, readWriteFields)
 }
 
 // Thermal represents thermal management data in a Redfish system.
@@ -263,20 +274,35 @@ func (thermal *Thermal) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (thermal *Thermal) Update() error {
+	return thermal.UpdateWithContext(common.ContextOf(thermal.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (thermal *Thermal) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Fans",
 		"Temperatures",
 	}
 
-	return thermal.UpdateFromRawData(thermal, thermal.rawData, readWriteFields)
+	return thermal.UpdateFromRawDataWithContext(ctx, thermal, thermal.rawData, readWriteFields)
 }
 
 // GetThermal will get a Thermal instance from the service.
 func GetThermal(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Thermal, error) {
-	return common.GetObject[Thermal](c, uri, queryOpts...)
+	return GetThermalWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetThermalWithContext will get a Thermal instance from the service.
+func GetThermalWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*Thermal, error) {
+	return common.GetObjectWithContext[Thermal](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedThermals gets the collection of Thermal from a provided reference.
 func ListReferencedThermals(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Thermal, error) {
-	return common.GetCollectionObjects[Thermal](c, link, queryOpts...)
+	return ListReferencedThermalsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedThermalsWithContext gets the collection of Thermal from a provided reference.
+func ListReferencedThermalsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*Thermal, error) {
+	return common.GetCollectionObjectsWithContext[Thermal](ctx, c, link, queryOpts...)
 }

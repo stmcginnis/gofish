@@ -5,6 +5,7 @@
 package swordfish
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -76,6 +77,11 @@ func (ioperformancelineofservice *IOPerformanceLineOfService) UnmarshalJSON(b []
 
 // Update commits updates to this object's properties to the running system.
 func (ioperformancelineofservice *IOPerformanceLineOfService) Update() error {
+	return ioperformancelineofservice.UpdateWithContext(common.ContextOf(ioperformancelineofservice.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (ioperformancelineofservice *IOPerformanceLineOfService) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(IOPerformanceLineOfService)
@@ -91,16 +97,27 @@ func (ioperformancelineofservice *IOPerformanceLineOfService) Update() error {
 	originalElement := reflect.ValueOf(original).Elem()
 	currentElement := reflect.ValueOf(ioperformancelineofservice).Elem()
 
-	return ioperformancelineofservice.Entity.Update(originalElement, currentElement, readWriteFields)
+	return ioperformancelineofservice.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetIOPerformanceLineOfService will get a IOPerformanceLineOfService instance from the service.
 func GetIOPerformanceLineOfService(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOPerformanceLineOfService, error) {
-	return common.GetObject[IOPerformanceLineOfService](c, uri, queryOpts...)
+	return GetIOPerformanceLineOfServiceWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetIOPerformanceLineOfServiceWithContext will get a IOPerformanceLineOfService instance from the service.
+func GetIOPerformanceLineOfServiceWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IOPerformanceLineOfService, error) {
+	return common.GetObjectWithContext[IOPerformanceLineOfService](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedIOPerformanceLineOfServices gets the collection of IOPerformanceLineOfService from
 // a provided reference.
 func ListReferencedIOPerformanceLineOfServices(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLineOfService, error) {
-	return common.GetCollectionObjects[IOPerformanceLineOfService](c, link, queryOpts...)
+	return ListReferencedIOPerformanceLineOfServicesWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedIOPerformanceLineOfServicesWithContext gets the collection of IOPerformanceLineOfService from
+// a provided reference.
+func ListReferencedIOPerformanceLineOfServicesWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*IOPerformanceLineOfService, error) {
+	return common.GetCollectionObjectsWithContext[IOPerformanceLineOfService](ctx, c, link, queryOpts...)
 }

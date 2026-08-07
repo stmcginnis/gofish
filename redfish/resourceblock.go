@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -264,21 +265,37 @@ func (resourceblock *ResourceBlock) UnmarshalJSON(b []byte) error {
 
 // Update commits updates to this object's properties to the running system.
 func (resourceblock *ResourceBlock) Update() error {
+	return resourceblock.UpdateWithContext(common.ContextOf(resourceblock.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (resourceblock *ResourceBlock) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{"Client",
 		"Pool"}
 
-	return resourceblock.UpdateFromRawData(resourceblock, resourceblock.rawData, readWriteFields)
+	return resourceblock.UpdateFromRawDataWithContext(ctx, resourceblock, resourceblock.rawData, readWriteFields)
 }
 
 // GetResourceBlock will get a ResourceBlock instance from the service.
 func GetResourceBlock(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ResourceBlock, error) {
-	return common.GetObject[ResourceBlock](c, uri, queryOpts...)
+	return GetResourceBlockWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetResourceBlockWithContext will get a ResourceBlock instance from the service.
+func GetResourceBlockWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ResourceBlock, error) {
+	return common.GetObjectWithContext[ResourceBlock](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedResourceBlocks gets the collection of ResourceBlock from
 // a provided reference.
 func ListReferencedResourceBlocks(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
-	return common.GetCollectionObjects[ResourceBlock](c, link, queryOpts...)
+	return ListReferencedResourceBlocksWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedResourceBlocksWithContext gets the collection of ResourceBlock from
+// a provided reference.
+func ListReferencedResourceBlocksWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ResourceBlock, error) {
+	return common.GetCollectionObjectsWithContext[ResourceBlock](ctx, c, link, queryOpts...)
 }
 
 // ResourceBlockLimits shall specify the allowable quantities of types of resource blocks for a given composition

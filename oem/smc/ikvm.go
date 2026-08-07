@@ -5,6 +5,7 @@
 package smc
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 
@@ -43,7 +44,10 @@ func (i *IKVM) UnmarshalJSON(b []byte) error {
 }
 
 // Update commits updates to this object's properties to the running system.
-func (i *IKVM) Update() error {
+func (i *IKVM) Update() error { return i.UpdateWithContext(common.ContextOf(i.GetClient())) }
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (i *IKVM) UpdateWithContext(ctx context.Context) error {
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	orig := new(IKVM)
@@ -60,10 +64,15 @@ func (i *IKVM) Update() error {
 	originalElement := reflect.ValueOf(orig).Elem()
 	currentElement := reflect.ValueOf(i).Elem()
 
-	return i.Entity.Update(originalElement, currentElement, readWriteFields)
+	return i.Entity.UpdateWithContext(ctx, originalElement, currentElement, readWriteFields)
 }
 
 // GetIKVM will get a IKVM instance from the service.
 func GetIKVM(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IKVM, error) {
-	return common.GetObject[IKVM](c, uri, queryOpts...)
+	return GetIKVMWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetIKVMWithContext will get a IKVM instance from the service.
+func GetIKVMWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*IKVM, error) {
+	return common.GetObjectWithContext[IKVM](ctx, c, uri, queryOpts...)
 }

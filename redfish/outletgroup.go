@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -117,26 +118,46 @@ func (outletgroup *OutletGroup) UnmarshalJSON(b []byte) error {
 
 // PowerControl controls the power state of the outlet group.
 func (outletgroup *OutletGroup) PowerControl(powerState PowerState) error {
+	return outletgroup.PowerControlWithContext(common.ContextOf(outletgroup.GetClient()), powerState)
+}
+
+// PowerControlWithContext controls the power state of the outlet group.
+func (outletgroup *OutletGroup) PowerControlWithContext(ctx context.Context, powerState PowerState) error {
 	params := struct {
 		PowerState PowerState
 	}{
 		PowerState: powerState,
 	}
-	return outletgroup.Post(outletgroup.powerControlTarget, params)
+	return outletgroup.PostWithContext(ctx, outletgroup.powerControlTarget, params)
 }
 
 // ResetMetrics resets metrics related to this outlet group.
 func (outletgroup *OutletGroup) ResetMetrics() error {
-	return outletgroup.Post(outletgroup.resetMetricsTarget, nil)
+	return outletgroup.ResetMetricsWithContext(common.ContextOf(outletgroup.GetClient()))
+}
+
+// ResetMetricsWithContext resets metrics related to this outlet group.
+func (outletgroup *OutletGroup) ResetMetricsWithContext(ctx context.Context) error {
+	return outletgroup.PostWithContext(ctx, outletgroup.resetMetricsTarget, nil)
 }
 
 // Outlets get the outlets that are in this outlet group.
 func (outletgroup *OutletGroup) Outlets(queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
-	return common.GetObjects[Outlet](outletgroup.GetClient(), outletgroup.outlets, queryOpts...)
+	return outletgroup.OutletsWithContext(common.ContextOf(outletgroup.GetClient()), queryOpts...)
+}
+
+// OutletsWithContext get the outlets that are in this outlet group.
+func (outletgroup *OutletGroup) OutletsWithContext(ctx context.Context, queryOpts ...common.QueryGroupOption) ([]*Outlet, error) {
+	return common.GetObjectsWithContext[Outlet](ctx, outletgroup.GetClient(), outletgroup.outlets, queryOpts...)
 }
 
 // Update commits updates to this object's properties to the running system.
 func (outletgroup *OutletGroup) Update() error {
+	return outletgroup.UpdateWithContext(common.ContextOf(outletgroup.GetClient()))
+}
+
+// UpdateWithContext commits updates to this object's properties to the running system.
+func (outletgroup *OutletGroup) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"ConfigurationLocked",
 		"CreatedBy",
@@ -148,16 +169,27 @@ func (outletgroup *OutletGroup) Update() error {
 		"PowerRestorePolicy",
 	}
 
-	return outletgroup.UpdateFromRawData(outletgroup, outletgroup.rawData, readWriteFields)
+	return outletgroup.UpdateFromRawDataWithContext(ctx, outletgroup, outletgroup.rawData, readWriteFields)
 }
 
 // GetOutletGroup will get a OutletGroup instance from the service.
 func GetOutletGroup(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OutletGroup, error) {
-	return common.GetObject[OutletGroup](c, uri, queryOpts...)
+	return GetOutletGroupWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetOutletGroupWithContext will get a OutletGroup instance from the service.
+func GetOutletGroupWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*OutletGroup, error) {
+	return common.GetObjectWithContext[OutletGroup](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedOutletGroups gets the collection of OutletGroup from
 // a provided reference.
 func ListReferencedOutletGroups(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OutletGroup, error) {
-	return common.GetCollectionObjects[OutletGroup](c, link, queryOpts...)
+	return ListReferencedOutletGroupsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedOutletGroupsWithContext gets the collection of OutletGroup from
+// a provided reference.
+func ListReferencedOutletGroupsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*OutletGroup, error) {
+	return common.GetCollectionObjectsWithContext[OutletGroup](ctx, c, link, queryOpts...)
 }

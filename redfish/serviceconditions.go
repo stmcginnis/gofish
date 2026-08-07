@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -33,11 +34,22 @@ type ServiceConditions struct {
 
 // GetServiceConditions will get a ServiceConditions instance from the service.
 func GetServiceConditions(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ServiceConditions, error) {
-	return common.GetObject[ServiceConditions](c, uri, queryOpts...)
+	return GetServiceConditionsWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetServiceConditionsWithContext will get a ServiceConditions instance from the service.
+func GetServiceConditionsWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*ServiceConditions, error) {
+	return common.GetObjectWithContext[ServiceConditions](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedServiceConditionss gets the collection of ServiceConditions from
 // a provided reference.
 func ListReferencedServiceConditionss(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ServiceConditions, error) {
-	return common.GetCollectionObjects[ServiceConditions](c, link, queryOpts...)
+	return ListReferencedServiceConditionssWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedServiceConditionssWithContext gets the collection of ServiceConditions from
+// a provided reference.
+func ListReferencedServiceConditionssWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*ServiceConditions, error) {
+	return common.GetCollectionObjectsWithContext[ServiceConditions](ctx, c, link, queryOpts...)
 }

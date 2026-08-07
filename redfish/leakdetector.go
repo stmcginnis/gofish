@@ -5,6 +5,7 @@
 package redfish
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/coreweave/gofish/common"
@@ -70,13 +71,24 @@ type LeakDetector struct {
 
 // GetLeakDetector will get a LeakDetector instance from the service.
 func GetLeakDetector(c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LeakDetector, error) {
-	return common.GetObject[LeakDetector](c, uri, queryOpts...)
+	return GetLeakDetectorWithContext(common.ContextOf(c), c, uri, queryOpts...)
+}
+
+// GetLeakDetectorWithContext will get a LeakDetector instance from the service.
+func GetLeakDetectorWithContext(ctx context.Context, c common.Client, uri string, queryOpts ...common.QueryGroupOption) (*LeakDetector, error) {
+	return common.GetObjectWithContext[LeakDetector](ctx, c, uri, queryOpts...)
 }
 
 // ListReferencedLeakDetectors gets the collection of LeakDetector from
 // a provided reference.
 func ListReferencedLeakDetectors(c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LeakDetector, error) {
-	return common.GetCollectionObjects[LeakDetector](c, link, queryOpts...)
+	return ListReferencedLeakDetectorsWithContext(common.ContextOf(c), c, link, queryOpts...)
+}
+
+// ListReferencedLeakDetectorsWithContext gets the collection of LeakDetector from
+// a provided reference.
+func ListReferencedLeakDetectorsWithContext(ctx context.Context, c common.Client, link string, queryOpts ...common.QueryGroupOption) ([]*LeakDetector, error) {
+	return common.GetCollectionObjectsWithContext[LeakDetector](ctx, c, link, queryOpts...)
 }
 
 // LeakDetectorArrayExcerpt shall represent a state-based or digital-value leak detector for a Redfish
@@ -106,9 +118,13 @@ type LeakDetectorExcerpt struct {
 }
 
 func (leakdetector *LeakDetector) Update() error {
+	return leakdetector.UpdateWithContext(common.ContextOf(leakdetector.GetClient()))
+}
+
+func (leakdetector *LeakDetector) UpdateWithContext(ctx context.Context) error {
 	readWriteFields := []string{
 		"Enabled",
 	}
 
-	return leakdetector.UpdateFromRawData(leakdetector, leakdetector.RawData, readWriteFields)
+	return leakdetector.UpdateFromRawDataWithContext(ctx, leakdetector, leakdetector.RawData, readWriteFields)
 }
