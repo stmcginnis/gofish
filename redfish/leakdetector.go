@@ -20,6 +20,14 @@ const (
 	FloatSwitchLeakDetectorType LeakDetectorType = "FloatSwitch"
 )
 
+type LeakReactionType string
+
+const (
+	LeakReactionTypeForceOff         LeakReactionType = "ForceOff"
+	LeakReactionTypeGracefulShutdown LeakReactionType = "GracefulShutdown"
+	LeakReactionTypeNone             LeakReactionType = "None"
+)
+
 // LeakDetector shall represent a state-based or digital-value leak detector for a Redfish implementation.
 type LeakDetector struct {
 	common.Entity
@@ -27,6 +35,8 @@ type LeakDetector struct {
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
 	ODataType string `json:"@odata.type"`
+	// CriticalReactionType specifies the reaction to perform when a critical leak is detected.
+	CriticalReactionType LeakReactionType
 	// Description provides a description of this resource.
 	Description string
 	// DetectorState shall contain the state of the leak detector.
@@ -65,6 +75,8 @@ type LeakDetector struct {
 	SparePartNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status common.Status
+	// WarningReactionType specifies the reaction to perform when a warning-level leak is detected.
+	WarningReactionType LeakReactionType
 	// RawData holds the original serialized JSON so we can compare updates
 	RawData []byte
 }
