@@ -13,12 +13,6 @@ import (
 	"github.com/stmcginnis/gofish/schemas"
 )
 
-func TestIDRACReset(t *testing.T) {
-	// This would require a mock server, for now just test the basic functionality exists
-	// The actual implementation would need integration testing with a real or mocked iDRAC
-	t.Skip("Skipping iDRAC reset test - requires integration testing with real iDRAC or comprehensive mocking")
-}
-
 func TestIDRACMonitor_CheckHealth(t *testing.T) {
 	// Create a mock manager
 	baseManager := schemas.Manager{}

@@ -303,6 +303,10 @@ func TestDellManager(t *testing.T) {
 		t.Errorf("Invalid ImportSystemConfig link: %s", result.importSystemConfigTarget)
 	}
 
+	if result.iDRACCardService != "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DelliDRACCardService" {
+		t.Errorf("Invalid iDRAC card service link: %s", result.iDRACCardService)
+	}
+
 	expectedAttributes := []string{
 		"/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1",
 		"/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/System.Embedded.1",

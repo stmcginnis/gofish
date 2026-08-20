@@ -16,6 +16,7 @@ type Manager struct {
 	schemas.Manager
 
 	importSystemConfigTarget string
+	iDRACCardService         string
 
 	// DellServiceLinks are the links to the Dell attribute resources found under
 	// Links.Oem.Dell.DellAttributes of the manager.
@@ -119,7 +120,8 @@ func FromManager(manager *schemas.Manager) (*Manager, error) {
 
 	type oemLinks struct {
 		Dell struct {
-			DellAttributes schemas.Links `json:"DellAttributes"`
+			DellAttributes       schemas.Links `json:"DellAttributes"`
+			DelliDRACCardService schemas.Link  `json:"DelliDRACCardService"`
 		} `json:"Dell"`
 	}
 	var links oemLinks
@@ -129,8 +131,18 @@ func FromManager(manager *schemas.Manager) (*Manager, error) {
 		}
 	}
 	m.DellServiceLinks = links.Dell.DellAttributes.ToStrings()
+	m.iDRACCardService = links.Dell.DelliDRACCardService.String()
 
 	return &m, nil
+}
+
+// IDRACCardService gets the Dell iDRAC card service linked by this manager.
+func (m *Manager) IDRACCardService() (*IDRACCardService, error) {
+	if m.iDRACCardService == "" {
+		return nil, errors.New("iDRAC card service is not supported by this manager")
+	}
+
+	return GetIDRACCardService(m.GetClient(), m.iDRACCardService)
 }
 
 // validateImportSystemConfigurationBody validates required fields in ImportSystemConfigurationBody
