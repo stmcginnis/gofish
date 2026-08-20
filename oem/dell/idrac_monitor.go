@@ -8,149 +8,220 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"syscall"
 	"time"
 
+	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/schemas"
 )
 
-// iDRACMonitor monitors iDRAC responsiveness and can trigger resets
-type iDRACMonitor struct {
-	service        *schemas.Entity // Using Entity as base for service access
+const (
+	defaultIDRACMonitorTimeout       = 30 * time.Second
+	defaultIDRACMonitorMaxRetries    = 3
+	defaultIDRACMonitorRetryInterval = time.Second
+)
+
+// IDRACMonitor monitors iDRAC responsiveness and can trigger resets.
+type IDRACMonitor struct {
+	service        *schemas.Entity
 	manager        *Manager
 	timeout        time.Duration
 	maxRetries     int
+	retryInterval  time.Duration
 	resetOnTimeout bool
 }
 
-// iDRACMonitorConfig configures the iDRAC monitor
-type iDRACMonitorConfig struct {
-	// Timeout for individual requests
+// IDRACMonitorConfig configures the iDRAC monitor.
+type IDRACMonitorConfig struct {
+	// Timeout is the maximum duration of an individual health check. A value of
+	// zero disables the per-request timeout.
 	Timeout time.Duration
-	// Maximum number of retries before considering iDRAC unresponsive
+	// MaxRetries is the number of retries after the initial attempt.
 	MaxRetries int
-	// Whether to automatically reset iDRAC when unresponsive
+	// RetryInterval is the base delay between attempts. Each subsequent delay is
+	// increased linearly. A value of zero disables the delay.
+	RetryInterval time.Duration
+	// ResetOnTimeout enables a graceful iDRAC reset after all health checks fail.
 	ResetOnTimeout bool
 }
 
-// NewiDRACMonitor creates a new iDRAC monitor
-func NewiDRACMonitor(service *schemas.Entity, manager *Manager, config *iDRACMonitorConfig) *iDRACMonitor {
-	if config == nil {
-		config = &iDRACMonitorConfig{
-			Timeout:        30 * time.Second,
-			MaxRetries:     3,
-			ResetOnTimeout: false,
-		}
+// NewIDRACMonitor creates a new iDRAC monitor. If service is nil, the manager
+// resource is used for health checks.
+func NewIDRACMonitor(service *schemas.Entity, manager *Manager, config *IDRACMonitorConfig) *IDRACMonitor {
+	effectiveConfig := IDRACMonitorConfig{
+		Timeout:       defaultIDRACMonitorTimeout,
+		MaxRetries:    defaultIDRACMonitorMaxRetries,
+		RetryInterval: defaultIDRACMonitorRetryInterval,
+	}
+	if config != nil {
+		effectiveConfig = *config
 	}
 
-	return &iDRACMonitor{
+	return &IDRACMonitor{
 		service:        service,
 		manager:        manager,
-		timeout:        config.Timeout,
-		maxRetries:     config.MaxRetries,
-		resetOnTimeout: config.ResetOnTimeout,
+		timeout:        effectiveConfig.Timeout,
+		maxRetries:     max(effectiveConfig.MaxRetries, 0),
+		retryInterval:  max(effectiveConfig.RetryInterval, 0),
+		resetOnTimeout: effectiveConfig.ResetOnTimeout,
 	}
 }
 
-// CheckHealth performs a health check on the iDRAC
-func (im *iDRACMonitor) CheckHealth(ctx context.Context) error {
-	// Create a context with timeout
-	_, cancel := context.WithTimeout(ctx, im.timeout)
-	defer cancel()
+// NewiDRACMonitor creates a new iDRAC monitor.
+// Deprecated: Use NewIDRACMonitor.
+func NewiDRACMonitor(service *schemas.Entity, manager *Manager, config *IDRACMonitorConfig) *IDRACMonitor {
+	return NewIDRACMonitor(service, manager, config)
+}
 
-	// Try to get basic manager information as a health check
-	// For now, just check if we can access the manager
-	if im.manager == nil || im.manager.ID == "" {
-		return errors.New("health check failed: manager not accessible")
+// CheckHealth verifies that the configured iDRAC resource responds to a GET.
+func (m *IDRACMonitor) CheckHealth(ctx context.Context) error {
+	if ctx == nil {
+		return errors.New("health check failed: context is nil")
+	}
+
+	resource, err := m.healthResource()
+	if err != nil {
+		return err
+	}
+	resourceClient := resource.GetClient()
+	if resourceClient == nil {
+		return errors.New("health check failed: resource has no client")
+	}
+	client, ok := resourceClient.(*gofish.APIClient)
+	if !ok {
+		return errors.New("health check failed: resource client is not an APIClient")
+	}
+
+	requestContext := ctx
+	if m.timeout > 0 {
+		var cancel context.CancelFunc
+		requestContext, cancel = context.WithTimeout(ctx, m.timeout)
+		defer cancel()
+	}
+
+	resp, err := client.WithContext(requestContext).Get(resource.ODataID)
+	defer schemas.DeferredCleanupHTTPResponse(resp)
+	if err != nil {
+		return fmt.Errorf("health check failed: %w", err)
 	}
 
 	return nil
 }
 
-// ExecuteWithRetry executes a function with retry logic and timeout detection
-func (im *iDRACMonitor) ExecuteWithRetry(ctx context.Context, operation func() error) error {
-	var lastErr error
-
-	for attempt := 0; attempt <= im.maxRetries; attempt++ {
-		// Check iDRAC health before attempting operation
-		if healthErr := im.CheckHealth(ctx); healthErr != nil {
-			if attempt == im.maxRetries {
-				if im.resetOnTimeout {
-					// Try to reset iDRAC before giving up
-					resetErr := im.manager.ResetiDRAC(GracefuliDRACReset)
-					if resetErr != nil {
-						return fmt.Errorf("iDRAC unresponsive after %d attempts, reset also failed: %w", im.maxRetries+1, resetErr)
-					}
-					return fmt.Errorf("iDRAC was unresponsive, performed reset but operation failed")
-				}
-				return fmt.Errorf("iDRAC unresponsive after %d attempts: %w", im.maxRetries+1, healthErr)
-			}
-			// Wait before retry
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-time.After(time.Duration(attempt+1) * time.Second):
-				continue
-			}
+func (m *IDRACMonitor) healthResource() (*schemas.Entity, error) {
+	if m.service != nil {
+		if m.service.ODataID == "" {
+			return nil, errors.New("health check failed: service has no @odata.id")
 		}
-
-		// Execute the operation
-		if err := operation(); err != nil {
-			lastErr = err
-			// If it's a network error or timeout, retry
-			if isRetryableError(err) {
-				continue
-			}
-			// Non-retryable error, return immediately
-			return err
-		}
-
-		// Success
-		return nil
+		return m.service, nil
 	}
-
-	return lastErr
+	if m.manager == nil {
+		return nil, errors.New("health check failed: manager is not configured")
+	}
+	if m.manager.ODataID == "" {
+		return nil, errors.New("health check failed: manager has no @odata.id")
+	}
+	return &m.manager.Entity, nil
 }
 
-// isRetryableError determines if an error is worth retrying
-func isRetryableError(err error) bool {
-	if err == nil {
-		return false
+// ExecuteWithRetry executes an operation after checking iDRAC health. Network
+// and service availability errors are retried according to the monitor config.
+func (m *IDRACMonitor) ExecuteWithRetry(ctx context.Context, operation func() error) error {
+	if operation == nil {
+		return errors.New("operation is nil")
 	}
 
-	// Check for context timeout
+	attempts := m.maxRetries + 1
+	for attempt := 0; attempt < attempts; attempt++ {
+		if err := m.CheckHealth(ctx); err != nil {
+			if !isRetryableError(err) {
+				return err
+			}
+			if attempt == attempts-1 {
+				return m.handleUnhealthyIDRAC(attempts, err)
+			}
+			if err := m.waitForRetry(ctx, attempt); err != nil {
+				return err
+			}
+			continue
+		}
+
+		err := operation()
+		if err == nil {
+			return nil
+		}
+		if !isRetryableError(err) {
+			return err
+		}
+		if attempt == attempts-1 {
+			return fmt.Errorf("operation failed after %d attempts: %w", attempts, err)
+		}
+		if err := m.waitForRetry(ctx, attempt); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *IDRACMonitor) handleUnhealthyIDRAC(attempts int, healthErr error) error {
+	if !m.resetOnTimeout {
+		return fmt.Errorf("iDRAC unresponsive after %d attempts: %w", attempts, healthErr)
+	}
+	if m.manager == nil {
+		return fmt.Errorf("iDRAC unresponsive after %d attempts and reset is unavailable: %w", attempts, healthErr)
+	}
+	if err := m.manager.ResetiDRAC(GracefuliDRACReset); err != nil {
+		return fmt.Errorf("iDRAC unresponsive after %d attempts, reset also failed: %w", attempts, err)
+	}
+	return fmt.Errorf("iDRAC unresponsive after %d attempts; graceful reset performed: %w", attempts, healthErr)
+}
+
+func (m *IDRACMonitor) waitForRetry(ctx context.Context, attempt int) error {
+	delay := time.Duration(attempt+1) * m.retryInterval
+	if delay <= 0 {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			return nil
+		}
+	}
+
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
+// isRetryableError determines whether an operation error is transient.
+func isRetryableError(err error) bool {
+	if err == nil || errors.Is(err, context.Canceled) {
+		return false
+	}
 	if errors.Is(err, context.DeadlineExceeded) {
 		return true
 	}
 
-	// Check for HTTP timeout or connection errors
-	errStr := err.Error()
-	retryableErrors := []string{
-		"timeout",
-		"connection refused",
-		"connection reset",
-		"no such host",
-		"network is unreachable",
-		"i/o timeout",
+	var redfishErr *schemas.Error
+	if errors.As(err, &redfishErr) {
+		status := redfishErr.HTTPReturnedStatusCode
+		return status == http.StatusRequestTimeout || status == http.StatusTooManyRequests || status >= http.StatusInternalServerError
 	}
 
-	for _, retryable := range retryableErrors {
-		if containsIgnoreCase(errStr, retryable) {
-			return true
-		}
+	var networkErr net.Error
+	if errors.As(err, &networkErr) && networkErr.Timeout() {
+		return true
 	}
 
-	return false
-}
-
-// containsIgnoreCase checks if a string contains a substring (case insensitive)
-func containsIgnoreCase(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || containsIgnoreCase(s[1:], substr) || (s != "" && substr != "" && toLower(s[0]) == toLower(substr[0]) && containsIgnoreCase(s[1:], substr[1:])))
-}
-
-// toLower converts a byte to lowercase
-func toLower(b byte) byte {
-	if b >= 'A' && b <= 'Z' {
-		return b + ('a' - 'A')
-	}
-	return b
+	return errors.Is(err, syscall.ECONNREFUSED) ||
+		errors.Is(err, syscall.ECONNRESET) ||
+		errors.Is(err, syscall.ENETUNREACH) ||
+		errors.Is(err, syscall.EHOSTUNREACH)
 }
