@@ -204,6 +204,10 @@ func (xul *xmlUpdateList) parseFromXML() UpdateList {
 
 // validateInstallFromRepoBody validates required fields in InstallFromRepoBody
 func validateInstallFromRepoBody(b *InstallFromRepoBody) error {
+	if b == nil {
+		return errors.New("request body is required")
+	}
+
 	if b.IPAddress == "" {
 		return errors.New("IPAddress is required")
 	}
@@ -255,7 +259,12 @@ func (sis *SoftwareInstallationService) InstallFromRepository(b *InstallFromRepo
 		return nil, err
 	}
 
-	return GetJob(sis.GetClient(), res.Header.Get("Location"))
+	location := res.Header.Get("Location")
+	if location == "" {
+		return nil, errors.New("install from repository response is missing Location header")
+	}
+
+	return GetJob(sis.GetClient(), location)
 }
 
 // Queries BMC for package list of available updates

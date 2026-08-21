@@ -147,6 +147,10 @@ func (m *Manager) IDRACCardService() (*IDRACCardService, error) {
 
 // validateImportSystemConfigurationBody validates required fields in ImportSystemConfigurationBody
 func validateImportSystemConfigurationBody(b *ImportSystemConfigurationBody) error {
+	if b == nil {
+		return errors.New("request body is required")
+	}
+
 	if b.ShareParameters.Target == "" {
 		return errors.New("ShareParameters.Target is required")
 	}
@@ -211,5 +215,10 @@ func (m *Manager) ImportSystemConfiguration(b *ImportSystemConfigurationBody) (*
 		return nil, err
 	}
 
-	return schemas.GetTask(m.GetClient(), res.Header.Get("Location"))
+	location := res.Header.Get("Location")
+	if location == "" {
+		return nil, errors.New("import system configuration response is missing Location header")
+	}
+
+	return schemas.GetTask(m.GetClient(), location)
 }
