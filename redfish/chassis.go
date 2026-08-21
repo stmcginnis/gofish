@@ -280,7 +280,7 @@ type Chassis struct {
 	// reflect the implementation of the locating function. Modifying this property may modify the
 	// LocationIndicatorActive in the resource that represents the functional view of this Chassis, such as a
 	// ComputerSystem resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	logServices             string
 	// Manufacturer shall contain the name of the
 	// organization responsible for producing the chassis. This organization
