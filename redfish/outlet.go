@@ -108,7 +108,7 @@ type Outlet struct {
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource. A write to this property shall update the value of IndicatorLED in this resource, if supported, to
 	// reflect the implementation of the locating function.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// NominalVoltage shall contain the nominal voltage for this outlet, in volt units.
 	NominalVoltage NominalVoltage
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the

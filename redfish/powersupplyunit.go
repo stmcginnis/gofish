@@ -97,7 +97,7 @@ type PowerSupplyUnit struct {
 	// The location of the power supply.
 	Location common.Location
 	// An indicator allowing an operator to physically locate this resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// The manufacturer of this power supply.
 	Manufacturer string
 	// The link to the power supply metrics resource associated with this power supply.

@@ -55,7 +55,7 @@ func TestHeater(t *testing.T) {
 	assertEquals(t, "/redfish/v1/Systems/437XR1138R2/Processors/CPU1", result.processors[0])
 	assertEquals(t, "/redfish/v1/Chassis/1U/ThermalSubsystem/Heaters/CPU1Heater/Metrics", result.metrics)
 
-	if result.LocationIndicatorActive {
+	if result.LocationIndicatorActive == nil || *result.LocationIndicatorActive {
 		t.Error("Expected location indicator not to be active")
 	}
 

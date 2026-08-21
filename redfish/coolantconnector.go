@@ -75,7 +75,7 @@ type CoolantConnector struct {
 	HeatRemovedkW SensorExcerpt
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// RatedFlowLitersPerMinute shall contain the rated liquid flow, in liters per minute units, for this loop
 	// interface.
 	RatedFlowLitersPerMinute float64

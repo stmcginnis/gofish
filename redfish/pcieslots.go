@@ -43,7 +43,7 @@ type PCIeSlot struct {
 	// Location is the location of the PCIe slot.
 	Location common.Location
 	// LocationIndicatorActive is an indicator allowing an operator to physically locate this resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// PCIeType is the PCIe specification supported by this slot.
 	PCIeType PCIeTypes
 	// SlotType is the PCIe slot type for this slot

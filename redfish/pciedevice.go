@@ -221,7 +221,7 @@ type PCIeDevice struct {
 	FirmwareVersion string
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// Manufacturer shall be the name of the organization responsible for
 	// producing the PCIe device. This organization might be the entity from
 	// whom the PCIe device is purchased, but this is not necessarily true.
