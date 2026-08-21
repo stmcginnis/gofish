@@ -6,6 +6,8 @@ package dell
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -320,4 +322,79 @@ func TestDellManager(t *testing.T) {
 			t.Errorf("DellServiceLinks[%d]: expected %s, got %s", i, want, got)
 		}
 	}
+}
+
+func TestImportSystemConfiguration(t *testing.T) {
+	const (
+		actionURI = "/redfish/v1/Managers/iDRAC.Embedded.1/Actions/Oem/EID_674_Manager.ImportSystemConfiguration"
+		taskURI   = "/redfish/v1/TaskService/Tasks/JID_123"
+	)
+
+	validBody := &ImportSystemConfigurationBody{
+		ImportBuffer: "<SystemConfiguration/>",
+		ShareParameters: ShareParameters{
+			ShareType: LocalISCShareType,
+			Target:    "ALL",
+		},
+	}
+
+	t.Run("missing request body", func(t *testing.T) {
+		client := &schemas.TestClient{}
+		manager := newDellManagerForImport(client, actionURI)
+
+		_, err := manager.ImportSystemConfiguration(nil)
+		if err == nil || !strings.Contains(err.Error(), "request body is required") {
+			t.Fatalf("expected request body validation error, got %v", err)
+		}
+		if calls := client.CapturedCalls(); len(calls) != 0 {
+			t.Fatalf("expected no API calls, got %d", len(calls))
+		}
+	})
+
+	t.Run("missing Location header", func(t *testing.T) {
+		client := &schemas.TestClient{CustomReturnForActions: map[string][]any{
+			http.MethodPost: {
+				&http.Response{StatusCode: http.StatusAccepted, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(""))},
+			},
+		}}
+		manager := newDellManagerForImport(client, actionURI)
+
+		_, err := manager.ImportSystemConfiguration(validBody)
+		if err == nil || !strings.Contains(err.Error(), "missing Location header") {
+			t.Fatalf("expected missing Location header error, got %v", err)
+		}
+		if calls := client.CapturedCalls(); len(calls) != 1 || calls[0].Action != http.MethodPost {
+			t.Fatalf("expected only the action POST, got %#v", calls)
+		}
+	})
+
+	t.Run("follows task Location", func(t *testing.T) {
+		client := &schemas.TestClient{CustomReturnForActions: map[string][]any{
+			http.MethodPost: {
+				&http.Response{StatusCode: http.StatusAccepted, Header: http.Header{"Location": []string{taskURI}}, Body: io.NopCloser(strings.NewReader(""))},
+			},
+			http.MethodGet: {
+				&http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(`{"Id":"JID_123","TaskState":"Running"}`))},
+			},
+		}}
+		manager := newDellManagerForImport(client, actionURI)
+
+		task, err := manager.ImportSystemConfiguration(validBody)
+		if err != nil {
+			t.Fatalf("unexpected import error: %v", err)
+		}
+		if task.ID != "JID_123" || task.TaskState != schemas.RunningTaskState {
+			t.Fatalf("unexpected task: %#v", task)
+		}
+		calls := client.CapturedCalls()
+		if len(calls) != 2 || calls[0].URL != actionURI || calls[1].URL != taskURI {
+			t.Fatalf("unexpected API calls: %#v", calls)
+		}
+	})
+}
+
+func newDellManagerForImport(client schemas.Client, actionURI string) *Manager {
+	manager := schemas.Manager{}
+	manager.SetClient(client)
+	return &Manager{Manager: manager, importSystemConfigTarget: actionURI}
 }
