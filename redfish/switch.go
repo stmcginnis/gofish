@@ -59,7 +59,7 @@ type Switch struct {
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource. A write to this property shall update the value of IndicatorLED in this resource, if supported, to
 	// reflect the implementation of the locating function.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// LogServices shall contain a link to a resource collection of type LogServiceCollection.
 	logServices string
 	// Manufacturer shall contain the name of the organization responsible for producing the switch. This organization

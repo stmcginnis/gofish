@@ -56,7 +56,7 @@ func TestFan(t *testing.T) {
 	assertEquals(t, "Chassis Fan Bay 1", result.Location.PartLocation.ServiceLabel)
 	assertEquals(t, "/redfish/v1/Chassis/1U/Sensors/FanBay1", result.SpeedPercent.DataSourceURI)
 
-	if !result.LocationIndicatorActive {
+	if result.LocationIndicatorActive == nil || !*result.LocationIndicatorActive {
 		t.Error("Expected location indicator to be active")
 	}
 

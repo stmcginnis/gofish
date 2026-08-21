@@ -76,7 +76,7 @@ type CoolingLoop struct {
 	Description string
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// PrimaryCoolantConnectors shall contain a link to a resource collection of type CoolantConnectorCollection that
 	// contains the primary coolant connectors for this equipment.
 	primaryCoolantConnectors string

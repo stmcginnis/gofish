@@ -40,7 +40,7 @@ type FabricAdapter struct {
 	Location common.Location
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// Manufacturer shall contain a value that represents the manufacturer of the fabric adapter.
 	Manufacturer string
 	// Model shall contain the information about how the manufacturer refers to this fabric adapter.

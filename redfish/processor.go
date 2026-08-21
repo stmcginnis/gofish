@@ -439,7 +439,7 @@ type Processor struct {
 	// associated processor.
 	Location common.Location
 	// (v1.10+) An indicator allowing an operator to physically locate this resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// Manufacturer shall contain a string which identifies
 	// the manufacturer of the processor.
 	Manufacturer string

@@ -294,7 +294,7 @@ type Memory struct {
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource. A write to this property shall update the value of IndicatorLED in this resource, if supported, to
 	// reflect the implementation of the locating function.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// Log shall contain a link to a resource of type LogService.
 	log string
 	// LogicalSizeMiB shall be the total size of the logical memory in MiB.
