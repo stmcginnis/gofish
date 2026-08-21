@@ -35,6 +35,8 @@ type PowerSubsystem struct {
 	CapacityWatts float64
 	// Description provides a description of this resource.
 	Description string
+	// LocationIndicatorActive in the resource that represents the functional view of this Chassis, such as a PowerSubsystem
+	LocationIndicatorActive *bool
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`

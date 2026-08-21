@@ -819,7 +819,7 @@ type ComputerSystem struct {
 	// resource. A write to this property shall update the value of IndicatorLED in this resource, if supported, to
 	// reflect the implementation of the locating function. Modifying this property may modify the
 	// LocationIndicatorActive in the containing Chassis resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// logServices shall be a link to a collection of type LogServiceCollection.
 	logServices string
 	// Manufacturer shall contain a value that represents the manufacturer of the system.
