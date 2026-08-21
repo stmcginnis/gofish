@@ -726,7 +726,7 @@ type Port struct {
 	// The location of the port.
 	Location common.Location
 	// An indicator allowing an operator to physically locate this resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// The maximum frame size supported by the port (bytes).
 	MaxFrameSize int
 	// The maximum speed of this port as currently configured.

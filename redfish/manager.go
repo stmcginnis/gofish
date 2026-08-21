@@ -272,7 +272,7 @@ type Manager struct {
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource. A write to this property shall update the value of IndicatorLED in this resource, if supported, to
 	// reflect the implementation of the locating function.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// LogServicesLink shall contain a reference to a collection of type
 	// LogServiceCollection which are for the use of this manager.
 	LogServicesLink common.Link `json:"LogServices"`

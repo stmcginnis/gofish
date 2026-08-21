@@ -36,7 +36,7 @@ type Fan struct {
 	Location common.Location
 	// LocationIndicatorActive shall contain the state of the indicator used to physically identify or locate this
 	// resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// Manufacturer shall contain the name of the organization responsible for producing the fan. This organization may
 	// be the entity from whom the fan is purchased, but this is not necessarily true.
 	Manufacturer string

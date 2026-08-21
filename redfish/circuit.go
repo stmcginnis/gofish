@@ -296,7 +296,7 @@ type Circuit struct {
 	// The state of the indicator LED, which identifies the circuit.
 	IndicatorLED common.IndicatorLED
 	// An indicator allowing an operator to physically locate this resource.
-	LocationIndicatorActive bool
+	LocationIndicatorActive *bool
 	// The nominal voltage for this circuit.
 	NominalVoltage NominalVoltage
 	// The number of ungrounded current-carrying conductors (phases)

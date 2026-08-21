@@ -36,6 +36,8 @@ type ThermalSubsystem struct {
 	heaters string
 	// LeakDetection shall contain a link to a resource collection of type LeakDetection.
 	leakDetection string
+	// LocationIndicatorActive in the resource that represents the functional view of this Chassis, such as a ThermalSubsystem
+	LocationIndicatorActive *bool
 	// Oem shall contain the OEM extensions. All values for properties that this object contains shall conform to the
 	// Redfish Specification-described requirements.
 	OEM json.RawMessage `json:"Oem"`
