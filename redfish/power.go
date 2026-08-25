@@ -366,6 +366,8 @@ type PowerSupply struct {
 	HotPluggable *bool `json:"HotPluggable,omitempty"`
 	// IndicatorLED is the state of the indicator LED for this power supply.
 	IndicatorLED common.IndicatorLED `json:"IndicatorLED,omitempty"`
+	// LocationIndicatorActive indicates whether the location indicator is active.
+	LocationIndicatorActive *bool `json:"LocationIndicatorActive,omitempty"`
 	// InputRanges contains the input ranges this power supply can use.
 	InputRanges []InputRange `json:"InputRanges,omitempty"`
 	// LastPowerOutputWatts is the average power output in Watts.
@@ -550,7 +552,7 @@ func (powersupply *PowerSupply) Update() error {
 
 // UpdateWithContext commits updates to this object's properties to the running system.
 func (powersupply *PowerSupply) UpdateWithContext(ctx context.Context) error {
-	readWriteFields := []string{"IndicatorLED"}
+	readWriteFields := []string{"IndicatorLED", "LocationIndicatorActive"}
 
 	return powersupply.UpdateFromRawDataWithContext(ctx, powersupply, powersupply.rawData, readWriteFields)
 }

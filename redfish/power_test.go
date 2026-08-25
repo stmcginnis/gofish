@@ -60,6 +60,7 @@ var powerBody = strings.NewReader(
 			"FirmwareVersion": "1.0",
 			"HotPluggable": true,
 			"IndicatorLED": "Lit",
+			"LocationIndicatorActive": true,
 			"InputRanges": [{
 					"InputType": "AC",
 					"MaximumFrequencyHz": 99.0,
@@ -635,6 +636,9 @@ func TestPower(t *testing.T) {
 	if result.PowerSupplies[0].IndicatorLED != common.LitIndicatorLED {
 		t.Errorf("Invalid PowerSupply IndicatorLED: %s",
 			result.PowerSupplies[0].IndicatorLED)
+	}
+	if result.PowerSupplies[0].LocationIndicatorActive == nil || !*result.PowerSupplies[0].LocationIndicatorActive {
+		t.Error("Invalid PowerSupply LocationIndicatorActive")
 	}
 
 	if result.PowerSupplies[0].assembly != "/Assembly" {
