@@ -88,6 +88,21 @@ var memoryBody = `{
 		"VendorID": "Generic"
 	}`
 
+var memoryBadBody = `{
+		"@odata.context": "/redfish/v1/$metadata#Memory.Memory",
+		"@odata.id": "/redfish/v1/Systems/System-1/Memory/NVRAM4",
+		"@odata.type": "#Memory.v1_2_0.Memory",
+		"Name": "Memory",
+		"Id": "NVRAM4",
+		"MemoryLocation": {
+			"Channel": "1",
+			"MemoryController": 2,
+			"Slot": 3,
+			"Socket": 4
+		},
+		"VendorID": "Inspur"
+	}`
+
 // TestMemory tests the parsing of Memory objects.
 func TestMemory(t *testing.T) {
 	var result Memory
@@ -154,5 +169,18 @@ func TestMemoryUpdate(t *testing.T) {
 
 	if !strings.Contains(calls[0].Payload, "SecurityState:Frozen") {
 		t.Errorf("Unexpected SecurityState update payload: %s", calls[0].Payload)
+	}
+}
+
+func TestBadMemory(t *testing.T) {
+	var result Memory
+	err := json.NewDecoder(strings.NewReader(memoryBadBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if *result.MemoryLocation.Channel != 1 {
+		t.Errorf("Invalid MemoryLocation channel conversion, expected 1, got %v", result.MemoryLocation.Channel)
 	}
 }

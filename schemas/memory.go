@@ -1007,6 +1007,26 @@ type MemoryLocation struct {
 	Socket *int `json:",omitempty"`
 }
 
+func (ml *MemoryLocation) UnmarshalJSON(b []byte) error {
+	type temp MemoryLocation
+	var tmp struct {
+		temp
+
+		// Workaround for Inspur and Kaytus bug
+		Channel any
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*ml = MemoryLocation(tmp.temp)
+	ml.Channel = toInt(tmp.Channel)
+
+	return nil
+}
+
 // PowerManagementPolicy shall contain properties that describe the power
 // management policy for this resource.
 type PowerManagementPolicy struct {
