@@ -46,6 +46,17 @@ var updatedBody = `{
   "@odata.etag": "\"deb0534b5f0661ee3e0ea15dc3d6023b\""
 }`
 
+var nullServerBody = `{
+  "@odata.type": "#Syslog.v1_0_1.Syslog",
+  "@odata.id": "/redfish/v1/Managers/1/Oem/Supermicro/Syslog",
+  "Id": "Syslog",
+  "Name": "Syslog",
+  "EnableSyslog": false,
+  "SyslogServer": null,
+  "SyslogPortNumber": 514,
+  "@odata.etag": "\"c0ffee393687bb1810b00fe52874e053\""
+}`
+
 // TestSyslog tests the parsing of Syslog objects.
 func TestSyslog(t *testing.T) {
 	var result Syslog
@@ -217,5 +228,25 @@ func TestNewSyslog(t *testing.T) {
 
 	if result.Port != 514 {
 		t.Errorf("Invalid port: %d", result.Port)
+	}
+}
+
+// TestSyslogNullServer tests the parsing of Syslog objects with a null SyslogServer
+func TestSyslogNullServer(t *testing.T) {
+	var result Syslog
+	if err := json.NewDecoder(strings.NewReader(nullServerBody)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	if result.Server != "" {
+		t.Errorf("Expected an empty server, got: %s", result.Server)
+	}
+
+	if len(result.Servers) != 0 {
+		t.Errorf("Expected no syslog server entries, got %d", len(result.Servers))
+	}
+
+	if result.serverCollection {
+		t.Error("A null SyslogServer should not be reported as a collection")
 	}
 }
