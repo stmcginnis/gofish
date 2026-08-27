@@ -54,7 +54,7 @@ func (i *Syslog) UnmarshalJSON(b []byte) error {
 	// Starting with BMC firmware versions Gen 13 1.10 and Gen 14 1.08 the
 	// SyslogServer changed from a singular string value to an array of
 	// SyslogServer entries.
-	if len(t.SyslogServer) != 0 {
+	if len(t.SyslogServer) != 0 && string(t.SyslogServer) != "null" {
 		var servers []SyslogServer
 		if err := json.Unmarshal(t.SyslogServer, &servers); err == nil {
 			i.Servers = servers
