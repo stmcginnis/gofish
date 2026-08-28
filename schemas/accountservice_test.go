@@ -6,6 +6,8 @@ package schemas
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -323,5 +325,79 @@ func TestAccountServiceUpdate(t *testing.T) {
 
 	if !strings.Contains(calls[0].Payload, "AccountLockoutCounterResetEnabled") {
 		t.Errorf("Unexpected update payload: %s", calls[0].Payload)
+	}
+}
+
+// TestAccountServiceCreateAccount checks the payload sent for both the simple
+// and the parameter-based account creation calls.
+func TestAccountServiceCreateAccount(t *testing.T) {
+	var result AccountService
+	if err := json.NewDecoder(strings.NewReader(accountServiceBody)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	createdAccount := func() *http.Response {
+		return &http.Response{
+			Status:     "201 Created",
+			StatusCode: 201,
+			Body:       io.NopCloser(strings.NewReader(`{"@odata.id": "/redfish/v1/AccountService/Accounts/3", "UserName": "gofish"}`)),
+		}
+	}
+
+	testClient := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodPost: {createdAccount()},
+		},
+	}
+	result.SetClient(testClient)
+	result.disableEtagMatch = true
+
+	if _, err := result.CreateAccount("gofish", "n0tmypassword", "Administrator"); err != nil {
+		t.Errorf("Error making CreateAccount call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 1 {
+		t.Fatalf("Expected one call to be made, captured: %v", calls)
+	}
+	if calls[0].URL != result.accounts {
+		t.Errorf("Unexpected create URL: %s", calls[0].URL)
+	}
+	for _, expected := range []string{"UserName:gofish", "Password:n0tmypassword", "RoleId:Administrator", "Enabled:true"} {
+		if !strings.Contains(calls[0].Payload, expected) {
+			t.Errorf("Expected %q in create payload: %s", expected, calls[0].Payload)
+		}
+	}
+	// Unset optional properties should not be sent.
+	if strings.Contains(calls[0].Payload, "PasswordChangeRequired") {
+		t.Errorf("Unset properties should be omitted from create payload: %s", calls[0].Payload)
+	}
+
+	testClient.Reset()
+	testClient.CustomReturnForActions[http.MethodPost] = []any{createdAccount()}
+	passwordChangeRequired := true
+	_, err := result.CreateAccountParams(&CreateAccountParameters{
+		UserName:               "gofish",
+		Password:               "n0tmypassword",
+		RoleID:                 "Administrator",
+		PasswordChangeRequired: &passwordChangeRequired,
+		AccountTypes:           []AccountTypes{RedfishAccountTypes},
+		OEM:                    map[string]any{"Contoso": map[string]any{"Widget": true}},
+	})
+	if err != nil {
+		t.Errorf("Error making CreateAccountParams call: %s", err)
+	}
+
+	calls = testClient.CapturedCalls()
+	if len(calls) != 1 {
+		t.Fatalf("Expected one call to be made, captured: %v", calls)
+	}
+	for _, expected := range []string{"PasswordChangeRequired:true", "AccountTypes:[Redfish]", "Oem:map[Contoso:map[Widget:true]]"} {
+		if !strings.Contains(calls[0].Payload, expected) {
+			t.Errorf("Expected %q in create payload: %s", expected, calls[0].Payload)
+		}
+	}
+	if strings.Contains(calls[0].Payload, "Enabled") {
+		t.Errorf("Unset properties should be omitted from create payload: %s", calls[0].Payload)
 	}
 }
