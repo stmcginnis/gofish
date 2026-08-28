@@ -558,3 +558,46 @@ func Example_mountVirtualMedia() {
 		}
 	}
 }
+
+// Example_createAccount demonstrates creating a Redfish user account with
+// optional properties, including vendor-specific settings in the Oem object.
+// Properties left unset are not sent, so the service applies its own defaults.
+func Example_createAccount() {
+	c, err := gofish.Connect(gofish.ClientConfig{
+		Endpoint: "https://bmc-ip",
+		Username: "my-username",
+		Password: "my-password",
+		Insecure: true,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer c.Logout()
+
+	accountService, err := c.Service.AccountService()
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	account, err := accountService.CreateAccountParams(&schemas.CreateAccountParameters{
+		UserName:               "gofish",
+		Password:               "s3cur3-p@ssw0rd",
+		RoleID:                 "Administrator",
+		Enabled:                gofish.ToRef(true),
+		PasswordChangeRequired: gofish.ToRef(true),
+		AccountTypes:           []schemas.AccountTypes{schemas.RedfishAccountTypes, schemas.IPMIAccountTypes},
+		// Oem takes any vendor-specific structure the service expects.
+		OEM: map[string]any{
+			"Contoso": map[string]any{
+				"LoginShell": "/bin/bash",
+			},
+		},
+	})
+	if err != nil {
+		log.Printf("error creating account: %v", err)
+		return
+	}
+
+	fmt.Printf("Created account %s with role %s\n", account.UserName, account.RoleID)
+}
