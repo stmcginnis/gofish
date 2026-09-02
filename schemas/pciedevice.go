@@ -610,6 +610,10 @@ func (p *PCIeInterface) UnmarshalJSON(b []byte) error {
 	type temp PCIeInterface
 	var t struct {
 		temp
+
+		// Workaround for vendors returning LanesInUse/MaxLanes as strings.
+		LanesInUse any
+		MaxLanes   any
 	}
 
 	err := json.Unmarshal(b, &t)
@@ -618,6 +622,8 @@ func (p *PCIeInterface) UnmarshalJSON(b []byte) error {
 	}
 
 	*p = PCIeInterface(t.temp)
+	p.LanesInUse = toInt(t.LanesInUse)
+	p.MaxLanes = toInt(t.MaxLanes)
 	return nil
 }
 

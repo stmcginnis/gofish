@@ -92,6 +92,19 @@ var (
 			"Health": "OK"
 		}
 	}`
+	pcieDeviceBadBody = `{
+		"@odata.context": "/redfish/v1/$metadata#PCIeDevice.PCIeDevice",
+		"@odata.type": "#PCIeDevice.v1_3_1.PCIeDevice",
+		"@odata.id": "/redfish/v1/PCIeDevice",
+		"Id": "PCIeDevice-1",
+		"Name": "PCIeDeviceOne",
+		"PCIeInterface": {
+			"LanesInUse": "16",
+			"MaxLanes": "32",
+			"MaxPCIeType": "Gen4",
+			"PCIeType": "Gen4"
+		}
+	}`
 )
 
 // TestPCIeDevice tests the parsing of PCIeDevice objects.
@@ -155,6 +168,25 @@ func TestOldPCIeDevice(t *testing.T) {
 
 	if len(result.pCIeFunctionsLink) != 2 {
 		t.Errorf("Invalid PCIeFunctions count: %d", len(result.pCIeFunctions))
+	}
+}
+
+// TestBadPCIeDevice tests the parsing of PCIeDevice objects with LanesInUse
+// and MaxLanes returned as strings instead of ints.
+func TestBadPCIeDevice(t *testing.T) {
+	var result PCIeDevice
+	err := json.NewDecoder(strings.NewReader(pcieDeviceBadBody)).Decode(&result)
+
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	if *result.PCIeInterface.LanesInUse != 16 {
+		t.Errorf("Invalid lanes in use conversion, expected 16, got %v", result.PCIeInterface.LanesInUse)
+	}
+
+	if *result.PCIeInterface.MaxLanes != 32 {
+		t.Errorf("Invalid max lanes conversion, expected 32, got %v", result.PCIeInterface.MaxLanes)
 	}
 }
 
