@@ -291,8 +291,8 @@ func TestComputerSystem(t *testing.T) { //nolint
 		t.Errorf("Received invalid uefi target boot source: %s", result.Boot.UefiTargetBootSourceOverride)
 	}
 
-	if result.Boot.HTTPBootURI != "http://localhost/boot.efi" {
-		t.Errorf("Received invalid http boot uri: %s", result.Boot.HTTPBootURI)
+	if result.Boot.HTTPBootURI == nil || *result.Boot.HTTPBootURI != "http://localhost/boot.efi" {
+		t.Errorf("Received invalid http boot uri: %v", result.Boot.HTTPBootURI)
 	}
 
 	if result.ProcessorSummary.Status.State != EnabledState {
