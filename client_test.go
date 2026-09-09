@@ -6,9 +6,11 @@ package gofish
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -234,4 +236,63 @@ func TestClientRunRawRequestNoURL(t *testing.T) {
 	if err.Error() != "unable to execute request, no target provided" {
 		t.Errorf("Unexpected error response: %s", err.Error())
 	}
+}
+
+// TestConnectLeavesDefaultTransportTLSConfigAlone verifies that building the
+// default HTTP client does not mutate the tls.Config held by
+// http.DefaultTransport. Programs that install their own config there (a custom
+// root CA pool, for example) would otherwise have InsecureSkipVerify turned on
+// under them, and concurrent Connect calls would race on the shared config.
+func TestConnectLeavesDefaultTransportTLSConfigAlone(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte("{}")) //nolint
+	}))
+	defer ts.Close()
+
+	defaultTransport := http.DefaultTransport.(*http.Transport)
+	original := defaultTransport.TLSClientConfig
+	defer func() { defaultTransport.TLSClientConfig = original }()
+
+	shared := &tls.Config{MinVersion: tls.VersionTLS12}
+	defaultTransport.TLSClientConfig = shared
+
+	// No HTTPClient, so gofish builds its own transport seeded from the default.
+	_, err := Connect(ClientConfig{Endpoint: ts.URL, Insecure: true})
+	if err != nil {
+		t.Fatalf("connect failed: %v", err)
+	}
+
+	if shared.InsecureSkipVerify {
+		t.Error("InsecureSkipVerify was set on http.DefaultTransport's tls.Config")
+	}
+	if len(shared.NextProtos) != 0 {
+		t.Errorf("NextProtos on http.DefaultTransport's tls.Config was modified: %v", shared.NextProtos)
+	}
+}
+
+// TestConcurrentConnectNoTLSConfigRace exercises the same shared-config path
+// from several goroutines so `go test -race` catches a regression.
+func TestConcurrentConnectNoTLSConfigRace(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte("{}")) //nolint
+	}))
+	defer ts.Close()
+
+	defaultTransport := http.DefaultTransport.(*http.Transport)
+	original := defaultTransport.TLSClientConfig
+	defer func() { defaultTransport.TLSClientConfig = original }()
+
+	defaultTransport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
+
+	var wg sync.WaitGroup
+	for i := 0; i < 8; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := Connect(ClientConfig{Endpoint: ts.URL, Insecure: true}); err != nil {
+				t.Errorf("connect failed: %v", err)
+			}
+		}()
+	}
+	wg.Wait()
 }
