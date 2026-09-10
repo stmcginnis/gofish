@@ -48,6 +48,13 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 		return "string", false, false
 	}
 
+	// HttpBootUri is nullable in the schema, and callers need to be able to PATCH an
+	// explicit empty value to clear it - a plain string can't be distinguished from
+	// "absent" under omitempty, so this is a pointer despite being a string type.
+	if propName == "HttpBootUri" {
+		return "string", true, false
+	}
+
 	stringTypes := []string{
 		"ID",
 		"Id",

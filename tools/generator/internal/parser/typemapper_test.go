@@ -212,6 +212,16 @@ func TestMapType_MultiType(t *testing.T) {
 			wantArray: false,
 		},
 		{
+			name:     "HttpBootUri special-cased to pointer string",
+			propName: "HttpBootUri",
+			prop: &schema.JSONProperty{
+				Type: []any{"string", "null"},
+			},
+			wantType:  "string",
+			wantPtr:   true,
+			wantArray: false,
+		},
+		{
 			name:     "lowercase multi-type does not become Link",
 			propName: "currentValue",
 			prop: &schema.JSONProperty{
