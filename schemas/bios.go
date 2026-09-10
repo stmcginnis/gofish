@@ -182,9 +182,16 @@ func (bi *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime 
 
 // UpdateBiosAttributesApplyAtWithTask is used to update attribute values and set apply time
 // together. It returns a TaskMonitorInfo when the service processes the update asynchronously.
+//
+// Only attributes whose requested value differs from the resource's currently reported value are
+// included in the PATCH; the rest are silently omitted. That's a reasonable default for the
+// common case of writing back a subset of a freshly read attribute map, but it means a caller
+// that needs an attribute explicitly included regardless of whether it happens to match the
+// current value - e.g. resubmitting a previously read pending/staged attribute set after a
+// conflict, where an omitted "unchanged" attribute would be dropped from what's actually staged
+// rather than left as previously staged - cannot rely on this method. Use
+// UpdateBiosAttributesExactApplyAtWithTask instead in that case.
 func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, applyTime SettingsApplyTime) (*TaskMonitorInfo, error) {
-	payload := make(map[string]any)
-
 	// Get a representation of the object's original state so we can find what
 	// to update.
 	original := new(Bios)
@@ -193,6 +200,7 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 		return nil, err
 	}
 
+	payload := make(map[string]any)
 	for key := range attrs {
 		if strings.HasPrefix(key, "BootTypeOrder") ||
 			original.Attributes[key] != attrs[key] {
@@ -200,6 +208,34 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 		}
 	}
 
+	return bi.patchAttributesApplyAt(payload, applyTime)
+}
+
+// UpdateBiosAttributesExactApplyAt is used to update attribute values and set apply time
+// together, like UpdateBiosAttributesApplyAt, but every key in attrs is always included in the
+// PATCH - see UpdateBiosAttributesExactApplyAtWithTask.
+func (bi *Bios) UpdateBiosAttributesExactApplyAt(attrs SettingsAttributes, applyTime SettingsApplyTime) error {
+	_, err := bi.UpdateBiosAttributesExactApplyAtWithTask(attrs, applyTime)
+	return err
+}
+
+// UpdateBiosAttributesExactApplyAtWithTask is UpdateBiosAttributesApplyAtWithTask without the
+// diff against the resource's currently reported state: every key in attrs is always included in
+// the PATCH, regardless of whether its value already matches what the resource currently
+// reports. It returns a TaskMonitorInfo when the service processes the update asynchronously.
+func (bi *Bios) UpdateBiosAttributesExactApplyAtWithTask(attrs SettingsAttributes, applyTime SettingsApplyTime) (*TaskMonitorInfo, error) {
+	payload := make(map[string]any, len(attrs))
+	for key, val := range attrs {
+		payload[key] = val
+	}
+
+	return bi.patchAttributesApplyAt(payload, applyTime)
+}
+
+// patchAttributesApplyAt PATCHes payload onto the Bios resource's settings target, requesting
+// applyTime if given. It always fetches a fresh ETag first and sends it as If-Match, but skips
+// the PATCH itself (returning a nil TaskMonitorInfo and error) if payload is empty.
+func (bi *Bios) patchAttributesApplyAt(payload map[string]any, applyTime SettingsApplyTime) (*TaskMonitorInfo, error) {
 	resp, err := bi.client.Get(bi.settingsTarget)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
@@ -229,4 +265,10 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 // UpdateBiosAttributes is used to update attribute values.
 func (b *Bios) UpdateBiosAttributes(attrs SettingsAttributes) error {
 	return b.UpdateBiosAttributesApplyAt(attrs, "")
+}
+
+// UpdateBiosAttributesExact is used to update attribute values, like UpdateBiosAttributes, but
+// every key in attrs is always included in the PATCH - see UpdateBiosAttributesExactApplyAt.
+func (b *Bios) UpdateBiosAttributesExact(attrs SettingsAttributes) error {
+	return b.UpdateBiosAttributesExactApplyAt(attrs, "")
 }

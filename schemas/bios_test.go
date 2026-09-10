@@ -325,3 +325,150 @@ func TestUpdateBiosAttributesApplyAtWithTaskSync(t *testing.T) {
 		t.Errorf("Expected no TaskMonitorInfo for a synchronous update, got: %v", taskInfo)
 	}
 }
+
+// TestUpdateBiosAttributesApplyAtOmitsUnchangedAttributes documents that
+// UpdateBiosAttributesApplyAt silently omits any requested attribute whose value already
+// matches what the resource currently reports - callers that need an attribute explicitly
+// included regardless should use UpdateBiosAttributesExactApplyAt instead.
+func TestUpdateBiosAttributesApplyAtOmitsUnchangedAttributes(t *testing.T) {
+	var result Bios
+	err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	result.SetClient(testClient)
+
+	// BootMode is already "Uefi" in biosBody.
+	update := SettingsAttributes{"BootMode": "Uefi", "AssetTag": "test"}
+	err = result.UpdateBiosAttributesApplyAt(update, "")
+	if err != nil {
+		t.Errorf("Error making UpdateBiosAttributesApplyAt call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 2 {
+		t.Fatalf("Expected two calls to be made, captured: %v", calls)
+	}
+
+	if strings.Contains(calls[1].Payload, "BootMode") {
+		t.Errorf("Expected the unchanged BootMode attribute to be omitted, payload: %s", calls[1].Payload)
+	}
+	if !strings.Contains(calls[1].Payload, "AssetTag") {
+		t.Errorf("Expected the changed AssetTag attribute to be included, payload: %s", calls[1].Payload)
+	}
+}
+
+// TestUpdateBiosAttributesExactApplyAt tests that UpdateBiosAttributesExactApplyAt includes
+// every requested attribute, even ones whose value already matches what the resource currently
+// reports - unlike UpdateBiosAttributesApplyAt (see
+// TestUpdateBiosAttributesApplyAtOmitsUnchangedAttributes).
+func TestUpdateBiosAttributesExactApplyAt(t *testing.T) {
+	var result Bios
+	err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	result.SetClient(testClient)
+
+	// BootMode is already "Uefi" in biosBody.
+	update := SettingsAttributes{"BootMode": "Uefi", "AssetTag": "test"}
+	err = result.UpdateBiosAttributesExactApplyAt(update, AtMaintenanceWindowStartSettingsApplyTime)
+	if err != nil {
+		t.Errorf("Error making UpdateBiosAttributesExactApplyAt call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 2 {
+		t.Fatalf("Expected two calls to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[1].Payload, "BootMode") {
+		t.Errorf("Expected the unchanged BootMode attribute to be included, payload: %s", calls[1].Payload)
+	}
+	if !strings.Contains(calls[1].Payload, "AssetTag") {
+		t.Errorf("Expected the changed AssetTag attribute to be included, payload: %s", calls[1].Payload)
+	}
+	if !strings.Contains(calls[1].Payload, "@Redfish.SettingsApplyTime") {
+		t.Error("Expected 'SettingsApplyTime' to be present")
+	}
+}
+
+// TestUpdateBiosAttributesExactApplyAtWithTask tests that
+// UpdateBiosAttributesExactApplyAtWithTask returns a TaskMonitorInfo when the service processes
+// the update asynchronously.
+func TestUpdateBiosAttributesExactApplyAtWithTask(t *testing.T) {
+	var result Bios
+	err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{
+		CustomReturnForActions: map[string][]any{
+			http.MethodPatch: {
+				&http.Response{
+					StatusCode: http.StatusAccepted,
+					Header:     http.Header{"Location": []string{"/redfish/v1/TaskService/Tasks/1"}},
+					Body:       io.NopCloser(bytes.NewBufferString("")),
+				},
+			},
+		},
+	}
+	result.SetClient(testClient)
+
+	update := SettingsAttributes{"BootMode": "Uefi"}
+	taskInfo, err := result.UpdateBiosAttributesExactApplyAtWithTask(update, AtMaintenanceWindowStartSettingsApplyTime)
+	if err != nil {
+		t.Errorf("Error making UpdateBiosAttributesExactApplyAtWithTask call: %s", err)
+	}
+
+	if taskInfo == nil {
+		t.Fatal("Expected a TaskMonitorInfo to be returned, got nil")
+	}
+	if taskInfo.TaskMonitor != "/redfish/v1/TaskService/Tasks/1" {
+		t.Errorf("Unexpected task monitor URI: %s", taskInfo.TaskMonitor)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 2 {
+		t.Errorf("Expected two calls to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[1].Payload, "BootMode") {
+		t.Errorf("Expected the unchanged BootMode attribute to be included, payload: %s", calls[1].Payload)
+	}
+}
+
+// TestUpdateBiosAttributesExact tests the UpdateBiosAttributesExact call.
+func TestUpdateBiosAttributesExact(t *testing.T) {
+	var result Bios
+	err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result)
+	if err != nil {
+		t.Errorf("Error decoding JSON: %s", err)
+	}
+
+	testClient := &TestClient{}
+	result.SetClient(testClient)
+
+	update := SettingsAttributes{"BootMode": "Uefi"}
+	err = result.UpdateBiosAttributesExact(update)
+	if err != nil {
+		t.Errorf("Error making UpdateBiosAttributesExact call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 2 {
+		t.Errorf("Expected two calls to be made, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[1].Payload, "BootMode") {
+		t.Errorf("Expected the unchanged BootMode attribute to be included, payload: %s", calls[1].Payload)
+	}
+	if strings.Contains(calls[1].Payload, "@Redfish.SettingsApplyTime") {
+		t.Error("Expected 'SettingsApplyTime' to not be present")
+	}
+}
