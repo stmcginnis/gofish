@@ -9,6 +9,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 )
 
@@ -182,28 +183,47 @@ func (bi *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime 
 
 // UpdateBiosAttributesApplyAtWithTask is used to update attribute values and set apply time
 // together. It returns a TaskMonitorInfo when the service processes the update asynchronously.
+//
+// Only attributes whose requested value differs from the current value reported by the settings
+// target are sent. For a resource with a separate settings object that target holds the pending
+// attribute values, which can differ from the applied values in bi.Attributes, so requesting the
+// applied value for an attribute that has something else staged is sent as the change it is.
 func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, applyTime SettingsApplyTime) (*TaskMonitorInfo, error) {
-	payload := make(map[string]any)
-
-	// Get a representation of the object's original state so we can find what
-	// to update.
-	original := new(Bios)
-	err := original.UnmarshalJSON(bi.rawData)
-	if err != nil {
-		return nil, err
-	}
-
-	for key := range attrs {
-		if strings.HasPrefix(key, "BootTypeOrder") ||
-			original.Attributes[key] != attrs[key] {
-			payload[key] = attrs[key]
-		}
-	}
-
 	resp, err := bi.client.Get(bi.settingsTarget)
 	defer DeferredCleanupHTTPResponse(resp)
 	if err != nil {
 		return nil, err
+	}
+
+	// The update is written to the settings target, so its attributes are what the requested
+	// values are compared against. A target that does not report them leaves this empty and
+	// every attribute falls back to the applied values below.
+	var settings struct {
+		Attributes SettingsAttributes
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&settings)
+
+	// Get a representation of the object's original state so we can find what
+	// to update.
+	original := new(Bios)
+	err = original.UnmarshalJSON(bi.rawData)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := make(map[string]any)
+	for key, val := range attrs {
+		current, ok := settings.Attributes[key]
+		if !ok {
+			// Nothing staged for this attribute, so compare against the applied value.
+			current = original.Attributes[key]
+		}
+
+		// DeepEqual rather than !=, which panics on the slice-valued attributes that some
+		// implementations report.
+		if strings.HasPrefix(key, "BootTypeOrder") || !reflect.DeepEqual(current, val) {
+			payload[key] = val
+		}
 	}
 
 	// If there are no allowed updates, there is nothing to send.
