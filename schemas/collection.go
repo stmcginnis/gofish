@@ -6,6 +6,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -131,32 +132,9 @@ func CollectListGeneric[T any, PT interface {
 	*T
 	SchemaObject
 }](get func(PT, ...QueryGroupOption), c Client, link string, queryOpts ...QueryGroupOption) error {
-	collection, err := GetResourceCollection[T, PT](c, link, queryOpts...)
-	if err != nil {
-		// allow for auto-fallback from $expand to regular
-		// this will only run on the first query, not future pages
-		builtOpts := BuildQueryGroup(c, queryOpts...).QueryCollection
-		if builtOpts.expand != ExpandNone && builtOpts.expandFallback {
-			queryWithoutExpand := queryOpts
-			queryWithoutExpand = append(queryWithoutExpand,
-				WithCollectionQueryOpts(WithExpand(ExpandNone)))
-			collection, err = GetResourceCollection[T, PT](c, link, queryWithoutExpand...)
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-
-	CollectResourceCollection(get, collection.Members, queryOpts...)
-	if collection.MembersNextLink != "" {
-		err := CollectListGeneric(get, c, collection.MembersNextLink)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return walkCollectionPages[T](c, link, func(members []PT) {
+		CollectResourceCollection(get, members)
+	}, queryOpts...)
 }
 
 // CollectCollection will retrieve a collection of entities from the Redfish service
@@ -247,40 +225,53 @@ func GetCollectionObjects[T any, PT interface {
 	return result, collectionError
 }
 
-// collectMembers gathers all member entities of a collection in the order the
-// service returned them, following pagination and falling back from $expand to
-// a plain query if the expanded request fails.
+// collectMembers gathers all member entities in source order, retaining
+// successfully read pages when a later page fails.
 func collectMembers[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, link string, queryOpts ...QueryGroupOption) ([]PT, error) {
-	collection, err := GetResourceCollection[T, PT](c, link, queryOpts...)
-	if err != nil {
-		// allow for auto-fallback from $expand to regular
-		// this will only run on the first query, not future pages
-		builtOpts := BuildQueryGroup(c, queryOpts...).QueryCollection
-		if builtOpts.expand != ExpandNone && builtOpts.expandFallback {
+	var members []PT
+	err := walkCollectionPages[T](c, link, func(page []PT) {
+		members = append(members, page...)
+	}, queryOpts...)
+	return members, err
+}
+
+// walkCollectionPages visits each page once, without limiting collection size.
+func walkCollectionPages[T any, PT interface {
+	*T
+	SchemaObject
+}](c Client, link string, visit func([]PT), queryOpts ...QueryGroupOption) error {
+	seen := make(map[string]bool)
+	for {
+		if seen[link] {
+			return errors.New("collection pagination loop")
+		}
+		seen[link] = true
+
+		collection, err := GetResourceCollection[T, PT](c, link, queryOpts...)
+		if err != nil {
+			builtOpts := BuildQueryGroup(c, queryOpts...).QueryCollection
+			if builtOpts.expand == ExpandNone || !builtOpts.expandFallback {
+				return err
+			}
 			queryWithoutExpand := queryOpts
-			queryWithoutExpand = append(queryWithoutExpand,
-				WithCollectionQueryOpts(WithExpand(ExpandNone)))
+			queryWithoutExpand = append(queryWithoutExpand, WithCollectionQueryOpts(WithExpand(ExpandNone)))
 			collection, err = GetResourceCollection[T, PT](c, link, queryWithoutExpand...)
 			if err != nil {
-				return nil, err
+				return err
 			}
-		} else {
-			return nil, err
 		}
-	}
 
-	members := collection.Members
-	if collection.MembersNextLink != "" {
-		next, err := collectMembers[T, PT](c, collection.MembersNextLink)
-		members = append(members, next...)
-		if err != nil {
-			return members, err
+		visit(collection.Members)
+		if collection.MembersNextLink == "" {
+			return nil
 		}
+		link = collection.MembersNextLink
+		// Follow continuation links without carrying the caller's first-page options.
+		queryOpts = nil
 	}
-	return members, nil
 }
 
 // resolveMember turns a collection member entity into a fully populated object.
