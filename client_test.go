@@ -10,6 +10,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -267,6 +268,90 @@ func TestConnectLeavesDefaultTransportTLSConfigAlone(t *testing.T) {
 	}
 	if len(shared.NextProtos) != 0 {
 		t.Errorf("NextProtos on http.DefaultTransport's tls.Config was modified: %v", shared.NextProtos)
+	}
+}
+
+// autoExpandServiceRoot is a minimal ServiceRoot advertising all three $expand
+// dialects, $levels support, and a MaxLevels cap - enough to exercise every
+// branch of AutoExpand/AutoExpandLevels.
+const autoExpandServiceRoot = `{
+	"ProtocolFeaturesSupported": {
+		"ExpandQuery": {
+			"ExpandAll": true,
+			"Levels": true,
+			"Links": true,
+			"MaxLevels": 2,
+			"NoLinks": true
+		}
+	}
+}`
+
+func connectWithAutoExpand(t *testing.T, body string, levels uint) *APIClient {
+	t.Helper()
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte(body)) //nolint
+	}))
+	t.Cleanup(ts.Close)
+
+	client, err := Connect(ClientConfig{
+		Endpoint:         ts.URL,
+		Insecure:         true,
+		AutoExpand:       true,
+		AutoExpandLevels: levels,
+	})
+	if err != nil {
+		t.Fatalf("connect failed: %v", err)
+	}
+
+	return client
+}
+
+// TestAutoExpandLevelsAppliesLevelsWhenAdvertised asks for a level-2 expand
+// against a service that advertises Levels support up to MaxLevels 2: the
+// built collection query should carry both $expand and $levels.
+func TestAutoExpandLevelsAppliesLevelsWhenAdvertised(t *testing.T) {
+	client := connectWithAutoExpand(t, autoExpandServiceRoot, 2)
+
+	query := schemas.BuildQuery(client, "/redfish/v1/Chassis", true)
+	if !strings.Contains(query, "$expand=.") {
+		t.Errorf("expected $expand=. in query, got %q", query)
+	}
+	if !strings.Contains(query, "$levels=2") {
+		t.Errorf("expected $levels=2 in query, got %q", query)
+	}
+}
+
+// TestAutoExpandLevelsClampsToMaxLevels asks for a level deeper than the
+// service's advertised MaxLevels: the built query should be clamped down to
+// MaxLevels rather than requesting a depth the service didn't advertise.
+func TestAutoExpandLevelsClampsToMaxLevels(t *testing.T) {
+	client := connectWithAutoExpand(t, autoExpandServiceRoot, 5)
+
+	query := schemas.BuildQuery(client, "/redfish/v1/Chassis", true)
+	if !strings.Contains(query, "$levels=2") {
+		t.Errorf("expected $levels clamped to MaxLevels=2, got %q", query)
+	}
+}
+
+// TestAutoExpandLevelsIgnoredWithoutLevelsSupport asks for a level-2 expand
+// against a service that supports $expand but not $levels: the built query
+// should carry $expand alone, with no $levels term.
+func TestAutoExpandLevelsIgnoredWithoutLevelsSupport(t *testing.T) {
+	const body = `{
+		"ProtocolFeaturesSupported": {
+			"ExpandQuery": {"NoLinks": true}
+		}
+	}`
+
+	client := connectWithAutoExpand(t, body, 2)
+
+	query := schemas.BuildQuery(client, "/redfish/v1/Chassis", true)
+	if !strings.Contains(query, "$expand=.") {
+		t.Errorf("expected $expand=. in query, got %q", query)
+	}
+	if strings.Contains(query, "$levels") {
+		t.Errorf("expected no $levels in query since the service doesn't support it, got %q", query)
 	}
 }
 

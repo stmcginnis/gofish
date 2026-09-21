@@ -108,6 +108,11 @@ type ClientConfig struct {
 
 	// AutoExpand enables $expand if supported and automatically falls back if $expand fails.
 	AutoExpand bool
+
+	// AutoExpandLevels sets how many levels deep $expand should inline resources,
+	// when the BMC's ServiceRoot says it supports $levels. Has no effect unless
+	// AutoExpand is also true. Leave at 0 for the default: one level deep.
+	AutoExpandLevels uint
 }
 
 // setupClientWithConfig setups the client using the client config
@@ -207,9 +212,18 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 		}
 
 		if expand != schemas.ExpandNone {
+			queryOpts := []schemas.QueryOption{schemas.WithExpand(expand), schemas.WithExpandFallback(true)}
+
+			if levels := config.AutoExpandLevels; levels > 0 && protocolFeats.ExpandQuery.Levels {
+				if maxLevels := protocolFeats.ExpandQuery.MaxLevels; maxLevels > 0 && levels > maxLevels {
+					levels = maxLevels
+				}
+
+				queryOpts = append(queryOpts, schemas.WithExpandLevel(int(levels)))
+			}
+
 			client.Settings.DefaultQueryOptions = append(client.Settings.DefaultQueryOptions,
-				schemas.WithCollectionQueryOpts(schemas.WithExpand(expand),
-					schemas.WithExpandFallback(true)))
+				schemas.WithCollectionQueryOpts(queryOpts...))
 		}
 	}
 

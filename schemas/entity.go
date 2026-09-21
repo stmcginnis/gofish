@@ -479,6 +479,28 @@ func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string, op
 	return DecodeGenericEntity[T, PT](c, resp)
 }
 
+// ResolveOrGet returns link's resolved value, if the service already
+// inlined it (e.g. via $expand) - consumed exactly once via Swap, so a later
+// call for the same field always falls through to a live GetObject. Mirrors
+// GetObject's behavior of returning (nil, nil) for an unset (empty uri),
+// never-resolved link.
+func ResolveOrGet[T any, PT GenericSchemaObjectPointer[T]](
+	c Client, link ResolvedLink[T], opts ...QueryGroupOption,
+) (*T, error) {
+	if link.resolved != nil {
+		if r := link.resolved.Swap(nil); r != nil {
+			PT(r).SetClient(c)
+			return r, nil
+		}
+	}
+
+	if link.uri == "" {
+		return nil, nil
+	}
+
+	return GetObject[T, PT](c, link.uri, opts...)
+}
+
 // Reload re-fetches obj from its own @odata.id using obj's client and the given
 // headers, returning a freshly decoded instance. It is the building block for
 // conditional GETs: pass an "If-None-Match" header and, when the service replies

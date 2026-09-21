@@ -54,7 +54,15 @@ type {{ .Name }} struct {
 {{- end }}
 {{- range .Properties }}
 {{ .Description }}
+{{- if and .IsLink .LinkType (not .IsArray) (not .IsCollection) }}
+	//
+	// Holds both the link URI and, if the service inlined it (e.g. via
+	// $expand), the decoded value - {{ .GetterMethod }}() consumes that
+	// value exactly once, so a second call always does a live GET.
+	{{ .Name }} {{ $pkg }}ResolvedLink[{{ .LinkType }}]
+{{- else }}
 	{{ .Name }} {{ .TypeString }} {{ .JSONTag }}
+{{- end }}
 {{- end }}
 {{- range .Actions }}
 	// {{ .TargetField }} is the URL to send {{ .Name }} requests.
@@ -104,8 +112,10 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 {{- if and .IsLink .LinkType }}
 {{- if .IsArray }}
 		{{ .GetterMethod }} {{ $pkg }}Links `json:"{{ .JSONName }}"`
-{{- else }}
+{{- else if .IsCollection }}
 		{{ .GetterMethod }} {{ $pkg }}Link `json:"{{ .JSONName }}"`
+{{- else }}
+		{{ .GetterMethod }} {{ $pkg }}ResolvedLink[{{ .LinkType }}] `json:"{{ .JSONName }}"`
 {{- end }}
 {{- end }}
 {{- end }}
@@ -133,8 +143,10 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 {{- if and .IsLink .LinkType }}
 {{- if .IsArray }}
 	{{ $receiverName }}.{{ .Name }} = tmp.{{ .GetterMethod }}.ToStrings()
-{{- else }}
+{{- else if .IsCollection }}
 	{{ $receiverName }}.{{ .Name }} = tmp.{{ .GetterMethod }}.String()
+{{- else }}
+	{{ $receiverName }}.{{ .Name }} = tmp.{{ .GetterMethod }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -289,12 +301,12 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}({{ $client }})
 }
 {{- else }}
 
-// {{ .GetterMethod }} gets the {{ .GetterMethod }} linked resource.
+// {{ .GetterMethod }} gets the {{ .GetterMethod }} linked resource. If the
+// service already inlined it (e.g. via $expand), that content is returned
+// directly, once, with no additional request; a second call always fetches
+// live, since the inlined data reflects only when the parent was decoded.
 func ({{ $receiverName }} *{{ $structName }}) {{ .GetterMethod }}({{ $client }}) (*{{ .LinkType }}, error) {
-	if {{ $receiverName }}.{{ .Name }} == "" {
-		return nil, nil
-	}
-	return {{ $pkg }}GetObject[{{ .LinkType }}]({{ $getClient }}, {{ $receiverName }}.{{ .Name }})
+	return {{ $pkg }}ResolveOrGet[{{ .LinkType }}]({{ $getClient }}, {{ $receiverName }}.{{ .Name }})
 }
 {{- end }}
 {{- end }}
