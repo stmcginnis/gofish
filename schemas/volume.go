@@ -497,7 +497,8 @@ type Volume struct {
 	// IOStatistics property.
 	//
 	// Version added: v1.9.0
-	metrics string
+	metrics ResolvedLink[VolumeMetrics]
+
 	// Model shall represents a specific storage volume implementation.
 	//
 	// Version added: v1.1.0
@@ -695,9 +696,9 @@ func (v *Volume) UnmarshalJSON(b []byte) error {
 		temp
 		Actions        vActions
 		Links          vLinks
-		AllocatedPools Link  `json:"AllocatedPools"`
-		Connections    Links `json:"Connections"`
-		Metrics        Link  `json:"Metrics"`
+		AllocatedPools Link                        `json:"AllocatedPools"`
+		Connections    Links                       `json:"Connections"`
+		Metrics        ResolvedLink[VolumeMetrics] `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -736,7 +737,7 @@ func (v *Volume) UnmarshalJSON(b []byte) error {
 	v.storageGroups = tmp.Links.StorageGroups.ToStrings()
 	v.allocatedPools = tmp.AllocatedPools.String()
 	v.connections = tmp.Connections.ToStrings()
-	v.metrics = tmp.Metrics.String()
+	v.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	v.RawData = b
@@ -1088,10 +1089,7 @@ func (v *Volume) Connections() ([]*Connection, error) {
 
 // Metrics gets the Metrics linked resource.
 func (v *Volume) Metrics() (*VolumeMetrics, error) {
-	if v.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[VolumeMetrics](v.client, v.metrics)
+	return ResolveOrGet[VolumeMetrics](v.client, v.metrics)
 }
 
 // ALUA represents the ALUA type.

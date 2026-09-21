@@ -144,7 +144,8 @@ type NetworkDeviceFunction struct {
 	// this network function.
 	//
 	// Version added: v1.6.0
-	metrics string
+	metrics ResolvedLink[NetworkDeviceFunctionMetrics]
+
 	// NetDevFuncCapabilities shall contain an array of capabilities for this
 	// network device function.
 	NetDevFuncCapabilities []NetworkDeviceTechnology
@@ -225,11 +226,11 @@ func (n *NetworkDeviceFunction) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links                          nLinks
-		AllowDeny                      Link  `json:"AllowDeny"`
-		AssignablePhysicalNetworkPorts Links `json:"AssignablePhysicalNetworkPorts"`
-		AssignablePhysicalPorts        Links `json:"AssignablePhysicalPorts"`
-		Metrics                        Link  `json:"Metrics"`
-		PhysicalPortAssignment         Link  `json:"PhysicalPortAssignment"`
+		AllowDeny                      Link                                       `json:"AllowDeny"`
+		AssignablePhysicalNetworkPorts Links                                      `json:"AssignablePhysicalNetworkPorts"`
+		AssignablePhysicalPorts        Links                                      `json:"AssignablePhysicalPorts"`
+		Metrics                        ResolvedLink[NetworkDeviceFunctionMetrics] `json:"Metrics"`
+		PhysicalPortAssignment         Link                                       `json:"PhysicalPortAssignment"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -251,7 +252,8 @@ func (n *NetworkDeviceFunction) UnmarshalJSON(b []byte) error {
 	n.allowDeny = tmp.AllowDeny.String()
 	n.assignablePhysicalNetworkPorts = tmp.AssignablePhysicalNetworkPorts.ToStrings()
 	n.assignablePhysicalPorts = tmp.AssignablePhysicalPorts.ToStrings()
-	n.metrics = tmp.Metrics.String()
+	n.metrics = tmp.Metrics
+
 	if tmp.Links.PhysicalPortAssignment.String() == "" {
 		n.physicalPortAssignment = tmp.PhysicalPortAssignment.String()
 	}
@@ -353,10 +355,7 @@ func (n *NetworkDeviceFunction) AssignablePhysicalPorts() ([]*NetworkPort, error
 
 // Metrics gets the Metrics linked resource.
 func (n *NetworkDeviceFunction) Metrics() (*NetworkDeviceFunctionMetrics, error) {
-	if n.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[NetworkDeviceFunctionMetrics](n.client, n.metrics)
+	return ResolveOrGet[NetworkDeviceFunctionMetrics](n.client, n.metrics)
 }
 
 // PhysicalPortAssignment gets the PhysicalPortAssignment linked resource.

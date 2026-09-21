@@ -54,7 +54,8 @@ type Switch struct {
 	// 'EnvironmentMetrics' that specifies the environment metrics for this switch.
 	//
 	// Version added: v1.6.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// FirmwareVersion shall contain the firmware version as defined by the
 	// manufacturer for the associated switch.
 	//
@@ -105,7 +106,8 @@ type Switch struct {
 	// Metrics shall contain a link to the metrics associated with this switch.
 	//
 	// Version added: v1.7.0
-	metrics string
+	metrics ResolvedLink[SwitchMetrics]
+
 	// Model shall contain the manufacturer-provided model information of this
 	// switch.
 	Model string
@@ -127,7 +129,8 @@ type Switch struct {
 	PowerState PowerState
 	// Redundancy shall contain an array that shows how this switch is grouped with
 	// other switches for form redundancy sets.
-	redundancy string
+	redundancy ResolvedLink[Redundancy]
+
 	// RedundancyCount
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// SKU shall contain the SKU number for this switch.
@@ -186,12 +189,12 @@ func (s *Switch) UnmarshalJSON(b []byte) error {
 		temp
 		Actions            sActions
 		Links              sLinks
-		Certificates       Link `json:"Certificates"`
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		LogServices        Link `json:"LogServices"`
-		Metrics            Link `json:"Metrics"`
-		Ports              Link `json:"Ports"`
-		Redundancy         Link `json:"Redundancy"`
+		Certificates       Link                             `json:"Certificates"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		LogServices        Link                             `json:"LogServices"`
+		Metrics            ResolvedLink[SwitchMetrics]      `json:"Metrics"`
+		Ports              Link                             `json:"Ports"`
+		Redundancy         ResolvedLink[Redundancy]         `json:"Redundancy"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -208,11 +211,13 @@ func (s *Switch) UnmarshalJSON(b []byte) error {
 	s.managedBy = tmp.Links.ManagedBy.ToStrings()
 	s.pCIeDevice = tmp.Links.PCIeDevice.String()
 	s.certificates = tmp.Certificates.String()
-	s.environmentMetrics = tmp.EnvironmentMetrics.String()
+	s.environmentMetrics = tmp.EnvironmentMetrics
+
 	s.logServices = tmp.LogServices.String()
-	s.metrics = tmp.Metrics.String()
+	s.metrics = tmp.Metrics
+
 	s.ports = tmp.Ports.String()
-	s.redundancy = tmp.Redundancy.String()
+	s.redundancy = tmp.Redundancy
 
 	// This is a read/write object, so we need to save the raw object data for later
 	s.RawData = b
@@ -295,10 +300,7 @@ func (s *Switch) Certificates() ([]*Certificate, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (s *Switch) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if s.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](s.client, s.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](s.client, s.environmentMetrics)
 }
 
 // LogServices gets the LogServices collection.
@@ -311,10 +313,7 @@ func (s *Switch) LogServices() ([]*LogService, error) {
 
 // Metrics gets the Metrics linked resource.
 func (s *Switch) Metrics() (*SwitchMetrics, error) {
-	if s.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[SwitchMetrics](s.client, s.metrics)
+	return ResolveOrGet[SwitchMetrics](s.client, s.metrics)
 }
 
 // Ports gets the Ports collection.
@@ -327,10 +326,7 @@ func (s *Switch) Ports() ([]*Port, error) {
 
 // Redundancy gets the Redundancy linked resource.
 func (s *Switch) Redundancy() (*Redundancy, error) {
-	if s.redundancy == "" {
-		return nil, nil
-	}
-	return GetObject[Redundancy](s.client, s.redundancy)
+	return ResolveOrGet[Redundancy](s.client, s.redundancy)
 }
 
 // CXL shall contain CXL-specific properties for a switch.

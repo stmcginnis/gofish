@@ -424,7 +424,8 @@ type PowerSupply struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.5.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// EfficiencyPercent shall contain the measured power efficiency, as a
 	// percentage, of the associated power supply.
 	//
@@ -537,10 +538,10 @@ func (p *PowerSupply) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Actions              pActions
-		Assembly             Link  `json:"Assembly"`
-		Redundancy           Links `json:"Redundancy"`
-		RelatedItem          Links `json:"RelatedItem"`
-		MemberID             any   `json:"MemberId"`
+		Assembly             ResolvedLink[Assembly] `json:"Assembly"`
+		Redundancy           Links                  `json:"Redundancy"`
+		RelatedItem          Links                  `json:"RelatedItem"`
+		MemberID             any                    `json:"MemberId"`
 		LineInputVoltage     any
 		LastPowerOutputWatts any
 		PowerInputWatts      any
@@ -556,7 +557,8 @@ func (p *PowerSupply) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	p.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
-	p.assembly = tmp.Assembly.String()
+	p.assembly = tmp.Assembly
+
 	p.redundancy = tmp.Redundancy.ToStrings()
 	p.relatedItem = tmp.RelatedItem.ToStrings()
 
@@ -615,10 +617,7 @@ func (p *PowerSupply) PowerSupplyReset(memberID string, resetType ResetType) (*T
 
 // Assembly gets the Assembly linked resource.
 func (p *PowerSupply) Assembly() (*Assembly, error) {
-	if p.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](p.client, p.assembly)
+	return ResolveOrGet[Assembly](p.client, p.assembly)
 }
 
 // Redundancy gets the Redundancy linked resources.

@@ -568,7 +568,8 @@ type ComputerSystem struct {
 	// settings for this system.
 	//
 	// Version added: v1.1.0
-	bios string
+	bios ResolvedLink[Bios]
+
 	// BiosVersion shall contain the version string of the currently installed and
 	// running BIOS for x86 systems. For other systems, the property may contain a
 	// version string that represents the primary system firmware.
@@ -734,7 +735,8 @@ type ComputerSystem struct {
 	// that contains operating system information for this system.
 	//
 	// Version added: v1.21.0
-	operatingSystem string
+	operatingSystem ResolvedLink[OperatingSystem]
+
 	// PCIeDevices shall contain an array of links to resources of type
 	// 'PCIeDevice'.
 	//
@@ -795,7 +797,8 @@ type ComputerSystem struct {
 	// system.
 	//
 	// Version added: v1.5.0
-	redundancy string
+	redundancy ResolvedLink[Redundancy]
+
 	// RedundancyCount
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// SKU shall contain the SKU for the system.
@@ -803,7 +806,8 @@ type ComputerSystem struct {
 	// SecureBoot shall contain a link to a resource of type 'SecureBoot'.
 	//
 	// Version added: v1.1.0
-	secureBoot string
+	secureBoot ResolvedLink[SecureBoot]
+
 	// SerialConsole shall contain information about the serial console services of
 	// this system.
 	//
@@ -948,26 +952,26 @@ func (c *ComputerSystem) UnmarshalJSON(b []byte) error {
 		temp
 		Actions             cActions
 		Links               cLinks
-		Bios                Link     `json:"Bios"`
-		Certificates        Link     `json:"Certificates"`
-		EthernetInterfaces  Link     `json:"EthernetInterfaces"`
-		FabricAdapters      Link     `json:"FabricAdapters"`
-		GraphicsControllers Link     `json:"GraphicsControllers"`
-		LogServices         Link     `json:"LogServices"`
-		Memory              Link     `json:"Memory"`
-		MemoryDomains       Link     `json:"MemoryDomains"`
-		NetworkInterfaces   Link     `json:"NetworkInterfaces"`
-		OperatingSystem     Link     `json:"OperatingSystem"`
-		PCIeDevices         Links    `json:"PCIeDevices"`
-		PCIeFunctions       Links    `json:"PCIeFunctions"`
-		Processors          Link     `json:"Processors"`
-		Redundancy          Link     `json:"Redundancy"`
-		SecureBoot          Link     `json:"SecureBoot"`
-		SimpleStorage       Link     `json:"SimpleStorage"`
-		Storage             Link     `json:"Storage"`
-		USBControllers      Link     `json:"USBControllers"`
-		VirtualMedia        Link     `json:"VirtualMedia"`
-		Settings            Settings `json:"@Redfish.Settings"`
+		Bios                ResolvedLink[Bios]            `json:"Bios"`
+		Certificates        Link                          `json:"Certificates"`
+		EthernetInterfaces  Link                          `json:"EthernetInterfaces"`
+		FabricAdapters      Link                          `json:"FabricAdapters"`
+		GraphicsControllers Link                          `json:"GraphicsControllers"`
+		LogServices         Link                          `json:"LogServices"`
+		Memory              Link                          `json:"Memory"`
+		MemoryDomains       Link                          `json:"MemoryDomains"`
+		NetworkInterfaces   Link                          `json:"NetworkInterfaces"`
+		OperatingSystem     ResolvedLink[OperatingSystem] `json:"OperatingSystem"`
+		PCIeDevices         Links                         `json:"PCIeDevices"`
+		PCIeFunctions       Links                         `json:"PCIeFunctions"`
+		Processors          Link                          `json:"Processors"`
+		Redundancy          ResolvedLink[Redundancy]      `json:"Redundancy"`
+		SecureBoot          ResolvedLink[SecureBoot]      `json:"SecureBoot"`
+		SimpleStorage       Link                          `json:"SimpleStorage"`
+		Storage             Link                          `json:"Storage"`
+		USBControllers      Link                          `json:"USBControllers"`
+		VirtualMedia        Link                          `json:"VirtualMedia"`
+		Settings            Settings                      `json:"@Redfish.Settings"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -1007,7 +1011,8 @@ func (c *ComputerSystem) UnmarshalJSON(b []byte) error {
 	c.supplyingComputerSystems = tmp.Links.SupplyingComputerSystems.ToStrings()
 	c.trustedComponents = tmp.Links.TrustedComponents.ToStrings()
 	c.virtualMachines = tmp.Links.VirtualMachines.ToStrings()
-	c.bios = tmp.Bios.String()
+	c.bios = tmp.Bios
+
 	c.certificates = tmp.Certificates.String()
 	c.ethernetInterfaces = tmp.EthernetInterfaces.String()
 	c.fabricAdapters = tmp.FabricAdapters.String()
@@ -1016,12 +1021,15 @@ func (c *ComputerSystem) UnmarshalJSON(b []byte) error {
 	c.memory = tmp.Memory.String()
 	c.memoryDomains = tmp.MemoryDomains.String()
 	c.networkInterfaces = tmp.NetworkInterfaces.String()
-	c.operatingSystem = tmp.OperatingSystem.String()
+	c.operatingSystem = tmp.OperatingSystem
+
 	c.pCIeDevices = tmp.PCIeDevices.ToStrings()
 	c.pCIeFunctions = tmp.PCIeFunctions.ToStrings()
 	c.processors = tmp.Processors.String()
-	c.redundancy = tmp.Redundancy.String()
-	c.secureBoot = tmp.SecureBoot.String()
+	c.redundancy = tmp.Redundancy
+
+	c.secureBoot = tmp.SecureBoot
+
 	c.simpleStorage = tmp.SimpleStorage.String()
 	c.storage = tmp.Storage.String()
 	c.uSBControllers = tmp.USBControllers.String()
@@ -1422,10 +1430,7 @@ func (c *ComputerSystem) VirtualMachines() ([]*ComputerSystem, error) {
 
 // Bios gets the Bios linked resource.
 func (c *ComputerSystem) Bios() (*Bios, error) {
-	if c.bios == "" {
-		return nil, nil
-	}
-	return GetObject[Bios](c.client, c.bios)
+	return ResolveOrGet[Bios](c.client, c.bios)
 }
 
 // BootOptions gets all BootOption items for this system.
@@ -1501,10 +1506,7 @@ func (c *ComputerSystem) NetworkInterfaces() ([]*NetworkInterface, error) {
 
 // OperatingSystem gets the OperatingSystem linked resource.
 func (c *ComputerSystem) OperatingSystem() (*OperatingSystem, error) {
-	if c.operatingSystem == "" {
-		return nil, nil
-	}
-	return GetObject[OperatingSystem](c.client, c.operatingSystem)
+	return ResolveOrGet[OperatingSystem](c.client, c.operatingSystem)
 }
 
 // PCIeDevices gets the PCIeDevices linked resources.
@@ -1527,18 +1529,12 @@ func (c *ComputerSystem) Processors() ([]*Processor, error) {
 
 // Redundancy gets the Redundancy linked resource.
 func (c *ComputerSystem) Redundancy() (*Redundancy, error) {
-	if c.redundancy == "" {
-		return nil, nil
-	}
-	return GetObject[Redundancy](c.client, c.redundancy)
+	return ResolveOrGet[Redundancy](c.client, c.redundancy)
 }
 
 // SecureBoot gets the SecureBoot linked resource.
 func (c *ComputerSystem) SecureBoot() (*SecureBoot, error) {
-	if c.secureBoot == "" {
-		return nil, nil
-	}
-	return GetObject[SecureBoot](c.client, c.secureBoot)
+	return ResolveOrGet[SecureBoot](c.client, c.secureBoot)
 }
 
 // SimpleStorage gets the SimpleStorage collection.

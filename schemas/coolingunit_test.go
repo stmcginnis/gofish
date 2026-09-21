@@ -78,7 +78,7 @@ func TestCoolingUnit(t *testing.T) {
 	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/SecondaryCoolantConnectors", result.secondaryCoolantConnectors)
 	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/Pumps", result.pumps)
 	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/Filters", result.filters)
-	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/EnvironmentMetrics", result.environmentMetrics)
-	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/LeakDetection", result.leakDetection)
+	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/EnvironmentMetrics", result.environmentMetrics.uri)
+	assertEquals(t, "/redfish/v1/ThermalEquipment/CDUs/1/LeakDetection", result.leakDetection.uri)
 	assertEquals(t, "/redfish/v1/Facilities/Room237", result.facility)
 }

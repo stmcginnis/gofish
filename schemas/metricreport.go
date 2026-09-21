@@ -25,7 +25,8 @@ type MetricReport struct {
 	Context string
 	// MetricReportDefinition shall contain a link to a resource of type
 	// 'MetricReportDefinition'.
-	metricReportDefinition string
+	metricReportDefinition ResolvedLink[MetricReportDefinition]
+
 	// MetricValues shall be metric values for this metric report.
 	MetricValues []MetricValue
 	// ODataContext is the odata context.
@@ -55,7 +56,7 @@ func (m *MetricReport) UnmarshalJSON(b []byte) error {
 	type temp MetricReport
 	var tmp struct {
 		temp
-		MetricReportDefinition Link `json:"MetricReportDefinition"`
+		MetricReportDefinition ResolvedLink[MetricReportDefinition] `json:"MetricReportDefinition"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -66,7 +67,7 @@ func (m *MetricReport) UnmarshalJSON(b []byte) error {
 	*m = MetricReport(tmp.temp)
 
 	// Extract the links to other entities for later
-	m.metricReportDefinition = tmp.MetricReportDefinition.String()
+	m.metricReportDefinition = tmp.MetricReportDefinition
 
 	return nil
 }
@@ -84,10 +85,7 @@ func ListReferencedMetricReports(c Client, link string) ([]*MetricReport, error)
 
 // MetricReportDefinition gets the MetricReportDefinition linked resource.
 func (m *MetricReport) MetricReportDefinition() (*MetricReportDefinition, error) {
-	if m.metricReportDefinition == "" {
-		return nil, nil
-	}
-	return GetObject[MetricReportDefinition](m.client, m.metricReportDefinition)
+	return ResolveOrGet[MetricReportDefinition](m.client, m.metricReportDefinition)
 }
 
 // MetricValue shall contain properties that capture a metric value and other

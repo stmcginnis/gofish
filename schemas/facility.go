@@ -33,13 +33,15 @@ type Facility struct {
 	// facility.
 	//
 	// Version added: v1.1.0
-	ambientMetrics string
+	ambientMetrics ResolvedLink[EnvironmentMetrics]
+
 	// EnvironmentMetrics shall contain a link to a resource of type
 	// 'EnvironmentMetrics' that specifies the environment metrics for this
 	// facility.
 	//
 	// Version added: v1.1.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// FacilityType shall contain the type of location this resource represents.
 	FacilityType FacilityType
 	// Location shall contain the location information of the associated facility.
@@ -107,9 +109,9 @@ func (f *Facility) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links              fLinks
-		AmbientMetrics     Link `json:"AmbientMetrics"`
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		PowerDomains       Link `json:"PowerDomains"`
+		AmbientMetrics     ResolvedLink[EnvironmentMetrics] `json:"AmbientMetrics"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		PowerDomains       Link                             `json:"PowerDomains"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -133,8 +135,10 @@ func (f *Facility) UnmarshalJSON(b []byte) error {
 	f.rackPDUs = tmp.Links.RackPDUs.ToStrings()
 	f.switchgear = tmp.Links.Switchgear.ToStrings()
 	f.transferSwitches = tmp.Links.TransferSwitches.ToStrings()
-	f.ambientMetrics = tmp.AmbientMetrics.String()
-	f.environmentMetrics = tmp.EnvironmentMetrics.String()
+	f.ambientMetrics = tmp.AmbientMetrics
+
+	f.environmentMetrics = tmp.EnvironmentMetrics
+
 	f.powerDomains = tmp.PowerDomains.String()
 
 	return nil
@@ -221,18 +225,12 @@ func (f *Facility) TransferSwitches() ([]*PowerDistribution, error) {
 
 // AmbientMetrics gets the AmbientMetrics linked resource.
 func (f *Facility) AmbientMetrics() (*EnvironmentMetrics, error) {
-	if f.ambientMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](f.client, f.ambientMetrics)
+	return ResolveOrGet[EnvironmentMetrics](f.client, f.ambientMetrics)
 }
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (f *Facility) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if f.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](f.client, f.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](f.client, f.environmentMetrics)
 }
 
 // PowerDomains gets the PowerDomains collection.

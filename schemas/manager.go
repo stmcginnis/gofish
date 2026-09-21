@@ -235,7 +235,8 @@ type Manager struct {
 	// manager.
 	//
 	// Version added: v1.14.0
-	managerDiagnosticData string
+	managerDiagnosticData ResolvedLink[ManagerDiagnosticData]
+
 	// ManagerType shall describe the function of this manager. The
 	// 'ManagementController' value shall be used if none of the other enumerations
 	// apply.
@@ -260,7 +261,8 @@ type Manager struct {
 	// NetworkProtocol shall contain a link to a resource of type
 	// 'ManagerNetworkProtocol', which represents the network services for this
 	// manager.
-	networkProtocol string
+	networkProtocol ResolvedLink[ManagerNetworkProtocol]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -295,7 +297,8 @@ type Manager struct {
 	ReadyToRemove bool
 	// Redundancy shall show how this manager is grouped with other managers for
 	// form redundancy sets.
-	redundancy string
+	redundancy ResolvedLink[Redundancy]
+
 	// RedundancyCount
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// RemoteAccountService shall contain a link to the account service resource
@@ -303,7 +306,8 @@ type Manager struct {
 	// only be present when providing aggregation of a remote manager.
 	//
 	// Version added: v1.5.0
-	remoteAccountService string
+	remoteAccountService ResolvedLink[AccountService]
+
 	// RemoteRedfishServiceURI shall contain the URI of the Redfish service root
 	// for the remote manager that this resource represents. This property shall
 	// only be present when providing aggregation of Redfish services.
@@ -319,7 +323,8 @@ type Manager struct {
 	// that contains the security policy settings for this manager.
 	//
 	// Version added: v1.16.0
-	securityPolicy string
+	securityPolicy ResolvedLink[SecurityPolicy]
+
 	// SerialConsole shall contain information about the serial console service of
 	// this manager.
 	//
@@ -476,20 +481,20 @@ func (m *Manager) UnmarshalJSON(b []byte) error {
 		temp
 		Actions               mActions
 		Links                 mLinks
-		Certificates          Link `json:"Certificates"`
-		DedicatedNetworkPorts Link `json:"DedicatedNetworkPorts"`
-		EthernetInterfaces    Link `json:"EthernetInterfaces"`
-		HostInterfaces        Link `json:"HostInterfaces"`
-		LogServices           Link `json:"LogServices"`
-		ManagerDiagnosticData Link `json:"ManagerDiagnosticData"`
-		NetworkProtocol       Link `json:"NetworkProtocol"`
-		Redundancy            Link `json:"Redundancy"`
-		RemoteAccountService  Link `json:"RemoteAccountService"`
-		SecurityPolicy        Link `json:"SecurityPolicy"`
-		SerialInterfaces      Link `json:"SerialInterfaces"`
-		SharedNetworkPorts    Link `json:"SharedNetworkPorts"`
-		USBPorts              Link `json:"USBPorts"`
-		VirtualMedia          Link `json:"VirtualMedia"`
+		Certificates          Link                                 `json:"Certificates"`
+		DedicatedNetworkPorts Link                                 `json:"DedicatedNetworkPorts"`
+		EthernetInterfaces    Link                                 `json:"EthernetInterfaces"`
+		HostInterfaces        Link                                 `json:"HostInterfaces"`
+		LogServices           Link                                 `json:"LogServices"`
+		ManagerDiagnosticData ResolvedLink[ManagerDiagnosticData]  `json:"ManagerDiagnosticData"`
+		NetworkProtocol       ResolvedLink[ManagerNetworkProtocol] `json:"NetworkProtocol"`
+		Redundancy            ResolvedLink[Redundancy]             `json:"Redundancy"`
+		RemoteAccountService  ResolvedLink[AccountService]         `json:"RemoteAccountService"`
+		SecurityPolicy        ResolvedLink[SecurityPolicy]         `json:"SecurityPolicy"`
+		SerialInterfaces      Link                                 `json:"SerialInterfaces"`
+		SharedNetworkPorts    Link                                 `json:"SharedNetworkPorts"`
+		USBPorts              Link                                 `json:"USBPorts"`
+		VirtualMedia          Link                                 `json:"VirtualMedia"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -525,11 +530,16 @@ func (m *Manager) UnmarshalJSON(b []byte) error {
 	m.ethernetInterfaces = tmp.EthernetInterfaces.String()
 	m.hostInterfaces = tmp.HostInterfaces.String()
 	m.logServices = tmp.LogServices.String()
-	m.managerDiagnosticData = tmp.ManagerDiagnosticData.String()
-	m.networkProtocol = tmp.NetworkProtocol.String()
-	m.redundancy = tmp.Redundancy.String()
-	m.remoteAccountService = tmp.RemoteAccountService.String()
-	m.securityPolicy = tmp.SecurityPolicy.String()
+	m.managerDiagnosticData = tmp.ManagerDiagnosticData
+
+	m.networkProtocol = tmp.NetworkProtocol
+
+	m.redundancy = tmp.Redundancy
+
+	m.remoteAccountService = tmp.RemoteAccountService
+
+	m.securityPolicy = tmp.SecurityPolicy
+
 	m.serialInterfaces = tmp.SerialInterfaces.String()
 	m.sharedNetworkPorts = tmp.SharedNetworkPorts.String()
 	m.uSBPorts = tmp.USBPorts.String()
@@ -861,42 +871,27 @@ func (m *Manager) LogServices() ([]*LogService, error) {
 
 // ManagerDiagnosticData gets the ManagerDiagnosticData linked resource.
 func (m *Manager) ManagerDiagnosticData() (*ManagerDiagnosticData, error) {
-	if m.managerDiagnosticData == "" {
-		return nil, nil
-	}
-	return GetObject[ManagerDiagnosticData](m.client, m.managerDiagnosticData)
+	return ResolveOrGet[ManagerDiagnosticData](m.client, m.managerDiagnosticData)
 }
 
 // NetworkProtocol gets the NetworkProtocol linked resource.
 func (m *Manager) NetworkProtocol() (*ManagerNetworkProtocol, error) {
-	if m.networkProtocol == "" {
-		return nil, nil
-	}
-	return GetObject[ManagerNetworkProtocol](m.client, m.networkProtocol)
+	return ResolveOrGet[ManagerNetworkProtocol](m.client, m.networkProtocol)
 }
 
 // Redundancy gets the Redundancy linked resource.
 func (m *Manager) Redundancy() (*Redundancy, error) {
-	if m.redundancy == "" {
-		return nil, nil
-	}
-	return GetObject[Redundancy](m.client, m.redundancy)
+	return ResolveOrGet[Redundancy](m.client, m.redundancy)
 }
 
 // RemoteAccountService gets the RemoteAccountService linked resource.
 func (m *Manager) RemoteAccountService() (*AccountService, error) {
-	if m.remoteAccountService == "" {
-		return nil, nil
-	}
-	return GetObject[AccountService](m.client, m.remoteAccountService)
+	return ResolveOrGet[AccountService](m.client, m.remoteAccountService)
 }
 
 // SecurityPolicy gets the SecurityPolicy linked resource.
 func (m *Manager) SecurityPolicy() (*SecurityPolicy, error) {
-	if m.securityPolicy == "" {
-		return nil, nil
-	}
-	return GetObject[SecurityPolicy](m.client, m.securityPolicy)
+	return ResolveOrGet[SecurityPolicy](m.client, m.securityPolicy)
 }
 
 // SerialInterfaces gets the SerialInterfaces collection.

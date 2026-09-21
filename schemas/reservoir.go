@@ -29,7 +29,8 @@ const (
 type Reservoir struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// CapacityLiters shall contain the capacity of the reservoir in liter units.
 	CapacityLiters *float64 `json:",omitempty"`
 	// Coolant shall contain details regarding the coolant contained or used by
@@ -102,8 +103,8 @@ func (r *Reservoir) UnmarshalJSON(b []byte) error {
 	type temp Reservoir
 	var tmp struct {
 		temp
-		Assembly Link `json:"Assembly"`
-		Filters  Link `json:"Filters"`
+		Assembly ResolvedLink[Assembly] `json:"Assembly"`
+		Filters  Link                   `json:"Filters"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -114,7 +115,8 @@ func (r *Reservoir) UnmarshalJSON(b []byte) error {
 	*r = Reservoir(tmp.temp)
 
 	// Extract the links to other entities for later
-	r.assembly = tmp.Assembly.String()
+	r.assembly = tmp.Assembly
+
 	r.filters = tmp.Filters.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
@@ -146,10 +148,7 @@ func ListReferencedReservoirs(c Client, link string) ([]*Reservoir, error) {
 
 // Assembly gets the Assembly linked resource.
 func (r *Reservoir) Assembly() (*Assembly, error) {
-	if r.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](r.client, r.assembly)
+	return ResolveOrGet[Assembly](r.client, r.assembly)
 }
 
 // Filters gets the Filters collection.

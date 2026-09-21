@@ -132,7 +132,8 @@ type PCIeDevice struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.2.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall contain an identifying string that tracks the PCIe device for
 	// inventory purposes.
 	AssetTag string
@@ -153,7 +154,8 @@ type PCIeDevice struct {
 	// device.
 	//
 	// Version added: v1.7.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// FirmwareVersion shall contain the firmware version of the PCIe device.
 	FirmwareVersion string
 	// LocationIndicatorActive shall contain the state of the indicator used to
@@ -249,10 +251,10 @@ func (p *PCIeDevice) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links              pLinks
-		Assembly           Link `json:"Assembly"`
-		CXLLogicalDevices  Link `json:"CXLLogicalDevices"`
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		PCIeFunctions      Link `json:"PCIeFunctions"`
+		Assembly           ResolvedLink[Assembly]           `json:"Assembly"`
+		CXLLogicalDevices  Link                             `json:"CXLLogicalDevices"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		PCIeFunctions      Link                             `json:"PCIeFunctions"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -268,9 +270,11 @@ func (p *PCIeDevice) UnmarshalJSON(b []byte) error {
 	p.pCIeFunctionsLink = tmp.Links.PCIeFunctions.ToStrings()
 	p.processors = tmp.Links.Processors.ToStrings()
 	p.switch_ = tmp.Links.Switch.String()
-	p.assembly = tmp.Assembly.String()
+	p.assembly = tmp.Assembly
+
 	p.cXLLogicalDevices = tmp.CXLLogicalDevices.String()
-	p.environmentMetrics = tmp.EnvironmentMetrics.String()
+	p.environmentMetrics = tmp.EnvironmentMetrics
+
 	p.pCIeFunctions = tmp.PCIeFunctions.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
@@ -326,10 +330,7 @@ func (p *PCIeDevice) Switch() (*Switch, error) {
 
 // Assembly gets the Assembly linked resource.
 func (p *PCIeDevice) Assembly() (*Assembly, error) {
-	if p.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](p.client, p.assembly)
+	return ResolveOrGet[Assembly](p.client, p.assembly)
 }
 
 // CXLLogicalDevices gets the CXLLogicalDevices collection.
@@ -342,10 +343,7 @@ func (p *PCIeDevice) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (p *PCIeDevice) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if p.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](p.client, p.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](p.client, p.environmentMetrics)
 }
 
 // PCIeFunctions gets the PCIeFunctions collection.

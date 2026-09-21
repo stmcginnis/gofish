@@ -32,7 +32,8 @@ type TelemetryService struct {
 	Entity
 	// LogService shall contain a link to a resource of type 'LogService' that this
 	// telemetry service uses.
-	logService string
+	logService ResolvedLink[LogService]
+
 	// MaxReports shall contain the maximum number of metric reports that this
 	// service supports.
 	MaxReports *int `json:",omitempty"`
@@ -113,12 +114,12 @@ func (t *TelemetryService) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Actions                 tActions
-		LogService              Link `json:"LogService"`
-		MetricDefinitions       Link `json:"MetricDefinitions"`
-		MetricReportDefinitions Link `json:"MetricReportDefinitions"`
-		MetricReports           Link `json:"MetricReports"`
-		TelemetryData           Link `json:"TelemetryData"`
-		Triggers                Link `json:"Triggers"`
+		LogService              ResolvedLink[LogService] `json:"LogService"`
+		MetricDefinitions       Link                     `json:"MetricDefinitions"`
+		MetricReportDefinitions Link                     `json:"MetricReportDefinitions"`
+		MetricReports           Link                     `json:"MetricReports"`
+		TelemetryData           Link                     `json:"TelemetryData"`
+		Triggers                Link                     `json:"Triggers"`
 		// Bug in Supermicro implementation
 		SupportedCollectionFuntions []CollectionFunction
 	}
@@ -137,7 +138,8 @@ func (t *TelemetryService) UnmarshalJSON(b []byte) error {
 	t.resetMetricReportDefinitionsToDefaultsTarget = tmp.Actions.ResetMetricReportDefinitionsToDefaults.Target
 	t.resetTriggersToDefaultsTarget = tmp.Actions.ResetTriggersToDefaults.Target
 	t.submitTestMetricReportTarget = tmp.Actions.SubmitTestMetricReport.Target
-	t.logService = tmp.LogService.String()
+	t.logService = tmp.LogService
+
 	t.metricDefinitions = tmp.MetricDefinitions.String()
 	t.metricReportDefinitions = tmp.MetricReportDefinitions.String()
 	t.metricReports = tmp.MetricReports.String()
@@ -284,10 +286,7 @@ func (t *TelemetryService) SubmitTestMetricReport(generatedMetricReportValues []
 
 // LogService gets the LogService linked resource.
 func (t *TelemetryService) LogService() (*LogService, error) {
-	if t.logService == "" {
-		return nil, nil
-	}
-	return GetObject[LogService](t.client, t.logService)
+	return ResolveOrGet[LogService](t.client, t.logService)
 }
 
 // MetricDefinitions gets the MetricDefinitions collection.

@@ -48,8 +48,8 @@ func TestCertificateService(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.certificateLocations != "/redfish/v1/CertificateService/CertificateLocations" {
+	if result.certificateLocations.uri != "/redfish/v1/CertificateService/CertificateLocations" {
 		t.Errorf("Received invalid certificate locations: %s",
-			result.certificateLocations)
+			result.certificateLocations.uri)
 	}
 }

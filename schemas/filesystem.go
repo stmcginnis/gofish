@@ -145,7 +145,8 @@ type FileSystem struct {
 	// IOStatistics property.
 	//
 	// Version added: v1.4.0
-	metrics string
+	metrics ResolvedLink[FileSystemMetrics]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -213,8 +214,8 @@ func (f *FileSystem) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links          fLinks
-		ExportedShares Link `json:"ExportedShares"`
-		Metrics        Link `json:"Metrics"`
+		ExportedShares Link                            `json:"ExportedShares"`
+		Metrics        ResolvedLink[FileSystemMetrics] `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -229,7 +230,7 @@ func (f *FileSystem) UnmarshalJSON(b []byte) error {
 	f.replicaCollection = tmp.Links.ReplicaCollection.ToStrings()
 	f.spareResourceSets = tmp.Links.SpareResourceSets.ToStrings()
 	f.exportedShares = tmp.ExportedShares.String()
-	f.metrics = tmp.Metrics.String()
+	f.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	f.RawData = b
@@ -295,8 +296,5 @@ func (f *FileSystem) ExportedShares() ([]*FileShare, error) {
 
 // Metrics gets the Metrics linked resource.
 func (f *FileSystem) Metrics() (*FileSystemMetrics, error) {
-	if f.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[FileSystemMetrics](f.client, f.metrics)
+	return ResolveOrGet[FileSystemMetrics](f.client, f.metrics)
 }

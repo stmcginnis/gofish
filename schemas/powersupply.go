@@ -43,7 +43,8 @@ const (
 type PowerSupplyUnit struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// Certificates shall contain a link to a resource collection of type
 	// 'CertificateCollection' that contains certificates for device identity and
 	// attestation.
@@ -102,7 +103,8 @@ type PowerSupplyUnit struct {
 	// the power supply is purchased, but this is not necessarily true.
 	Manufacturer string
 	// Metrics shall contain a link to a resource of type 'PowerSupplyMetrics'.
-	metrics string
+	metrics ResolvedLink[PowerSupplyMetrics]
+
 	// Model shall contain the model information as defined by the manufacturer for
 	// this power supply.
 	Model string
@@ -197,9 +199,9 @@ func (p *PowerSupplyUnit) UnmarshalJSON(b []byte) error {
 		temp
 		Actions      pActions
 		Links        pLinks
-		Assembly     Link `json:"Assembly"`
-		Certificates Link `json:"Certificates"`
-		Metrics      Link `json:"Metrics"`
+		Assembly     ResolvedLink[Assembly]           `json:"Assembly"`
+		Certificates Link                             `json:"Certificates"`
+		Metrics      ResolvedLink[PowerSupplyMetrics] `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -214,9 +216,10 @@ func (p *PowerSupplyUnit) UnmarshalJSON(b []byte) error {
 	p.outlet = tmp.Links.Outlet.String()
 	p.powerOutlets = tmp.Links.PowerOutlets.ToStrings()
 	p.poweringChassis = tmp.Links.PoweringChassis.ToStrings()
-	p.assembly = tmp.Assembly.String()
+	p.assembly = tmp.Assembly
+
 	p.certificates = tmp.Certificates.String()
-	p.metrics = tmp.Metrics.String()
+	p.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	p.RawData = b
@@ -283,10 +286,7 @@ func (p *PowerSupplyUnit) PoweringChassis() ([]*Chassis, error) {
 
 // Assembly gets the Assembly linked resource.
 func (p *PowerSupplyUnit) Assembly() (*Assembly, error) {
-	if p.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](p.client, p.assembly)
+	return ResolveOrGet[Assembly](p.client, p.assembly)
 }
 
 // Certificates gets the Certificates collection.
@@ -299,10 +299,7 @@ func (p *PowerSupplyUnit) Certificates() ([]*Certificate, error) {
 
 // Metrics gets the Metrics linked resource.
 func (p *PowerSupplyUnit) Metrics() (*PowerSupplyMetrics, error) {
-	if p.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[PowerSupplyMetrics](p.client, p.metrics)
+	return ResolveOrGet[PowerSupplyMetrics](p.client, p.metrics)
 }
 
 // EfficiencyRating shall describe an efficiency rating for a power supply.

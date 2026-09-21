@@ -16,7 +16,8 @@ import (
 type Filter struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// DeltaLiquidPressurekPa shall contain the pressure, in kilopascal units, for
 	// the difference in pressure between the intake and outflow connections on the
 	// filter. The value of the 'DataSourceUri' property, if present, shall
@@ -98,7 +99,7 @@ func (f *Filter) UnmarshalJSON(b []byte) error {
 	type temp Filter
 	var tmp struct {
 		temp
-		Assembly Link `json:"Assembly"`
+		Assembly ResolvedLink[Assembly] `json:"Assembly"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -109,7 +110,7 @@ func (f *Filter) UnmarshalJSON(b []byte) error {
 	*f = Filter(tmp.temp)
 
 	// Extract the links to other entities for later
-	f.assembly = tmp.Assembly.String()
+	f.assembly = tmp.Assembly
 
 	// This is a read/write object, so we need to save the raw object data for later
 	f.RawData = b
@@ -142,8 +143,5 @@ func ListReferencedFilters(c Client, link string) ([]*Filter, error) {
 
 // Assembly gets the Assembly linked resource.
 func (f *Filter) Assembly() (*Assembly, error) {
-	if f.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](f.client, f.assembly)
+	return ResolveOrGet[Assembly](f.client, f.assembly)
 }

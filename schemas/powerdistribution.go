@@ -84,7 +84,8 @@ type PowerDistribution struct {
 	Manufacturer string
 	// Metrics shall contain a link to a resource of type
 	// 'PowerDistributionMetrics'.
-	metrics string
+	metrics ResolvedLink[PowerDistributionMetrics]
+
 	// Model shall contain the manufacturer-provided model information of this
 	// equipment.
 	Model string
@@ -209,15 +210,15 @@ func (p *PowerDistribution) UnmarshalJSON(b []byte) error {
 		temp
 		Actions       pActions
 		Links         pLinks
-		Branches      Link `json:"Branches"`
-		Feeders       Link `json:"Feeders"`
-		Mains         Link `json:"Mains"`
-		Metrics       Link `json:"Metrics"`
-		OutletGroups  Link `json:"OutletGroups"`
-		Outlets       Link `json:"Outlets"`
-		PowerSupplies Link `json:"PowerSupplies"`
-		Sensors       Link `json:"Sensors"`
-		Subfeeds      Link `json:"Subfeeds"`
+		Branches      Link                                   `json:"Branches"`
+		Feeders       Link                                   `json:"Feeders"`
+		Mains         Link                                   `json:"Mains"`
+		Metrics       ResolvedLink[PowerDistributionMetrics] `json:"Metrics"`
+		OutletGroups  Link                                   `json:"OutletGroups"`
+		Outlets       Link                                   `json:"Outlets"`
+		PowerSupplies Link                                   `json:"PowerSupplies"`
+		Sensors       Link                                   `json:"Sensors"`
+		Subfeeds      Link                                   `json:"Subfeeds"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -236,7 +237,8 @@ func (p *PowerDistribution) UnmarshalJSON(b []byte) error {
 	p.branches = tmp.Branches.String()
 	p.feeders = tmp.Feeders.String()
 	p.mains = tmp.Mains.String()
-	p.metrics = tmp.Metrics.String()
+	p.metrics = tmp.Metrics
+
 	p.outletGroups = tmp.OutletGroups.String()
 	p.outlets = tmp.Outlets.String()
 	p.powerSupplies = tmp.PowerSupplies.String()
@@ -359,10 +361,7 @@ func (p *PowerDistribution) Mains() ([]*Circuit, error) {
 
 // Metrics gets the Metrics linked resource.
 func (p *PowerDistribution) Metrics() (*PowerDistributionMetrics, error) {
-	if p.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[PowerDistributionMetrics](p.client, p.metrics)
+	return ResolveOrGet[PowerDistributionMetrics](p.client, p.metrics)
 }
 
 // OutletGroups gets the OutletGroups collection.

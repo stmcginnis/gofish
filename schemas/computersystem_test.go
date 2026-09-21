@@ -374,8 +374,8 @@ func TestComputerSystem(t *testing.T) { //nolint
 		t.Errorf("Received invalid Managers reference: %s", result.managedBy[0])
 	}
 
-	if result.operatingSystem != "/redfish/v1/Systems/1/OperatingSystem" {
-		t.Errorf("Received invalid OperatingSystem reference: %s", result.operatingSystem)
+	if result.operatingSystem.uri != "/redfish/v1/Systems/1/OperatingSystem" {
+		t.Errorf("Received invalid OperatingSystem reference: %s", result.operatingSystem.uri)
 	}
 	if result.Boot.AllowableBootSourceOverrideTargetValues[0] != NoneBootSource {
 		t.Errorf("Received invalid AllowablebootSourceOverrideTargetValue: %s", result.Boot.AllowableBootSourceOverrideTargetValues[0])

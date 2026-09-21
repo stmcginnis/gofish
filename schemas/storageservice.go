@@ -39,23 +39,27 @@ type StorageService struct {
 	// capabilities of this service.
 	//
 	// Version added: v1.2.0
-	dataProtectionLoSCapabilities string
+	dataProtectionLoSCapabilities ResolvedLink[DataProtectionLoSCapabilities]
+
 	// DataSecurityLoSCapabilities shall reference the data security capabilities
 	// of this service.
 	//
 	// Version added: v1.2.0
-	dataSecurityLoSCapabilities string
+	dataSecurityLoSCapabilities ResolvedLink[DataSecurityLoSCapabilities]
+
 	// DataStorageLoSCapabilities shall reference the data storage capabilities of
 	// this service.
 	//
 	// Version added: v1.2.0
-	dataStorageLoSCapabilities string
+	dataStorageLoSCapabilities ResolvedLink[DataStorageLoSCapabilities]
+
 	// DefaultClassOfService shall reference the default class of service for
 	// entities allocated by this storage service. This default may be overridden
 	// by the DefaultClassOfService property values within contained StoragePools.
 	//
 	// Version added: v1.2.0
-	defaultClassOfService string
+	defaultClassOfService ResolvedLink[ClassOfService]
+
 	// Drives is a collection that indicates all the drives managed by this storage
 	// service.
 	drives string
@@ -70,12 +74,14 @@ type StorageService struct {
 	// capabilities of this service.
 	//
 	// Version added: v1.2.0
-	iOConnectivityLoSCapabilities string
+	iOConnectivityLoSCapabilities ResolvedLink[IOConnectivityLoSCapabilities]
+
 	// IOPerformanceLoSCapabilities shall reference the IO performance capabilities
 	// of this service.
 	//
 	// Version added: v1.2.0
-	iOPerformanceLoSCapabilities string
+	iOPerformanceLoSCapabilities ResolvedLink[IOPerformanceLoSCapabilities]
+
 	// IOStatistics shall represent IO statistics for this StorageService.
 	//
 	// Version added: v1.2.0
@@ -98,7 +104,8 @@ type StorageService struct {
 	// in the IOStatistics property.
 	//
 	// Version added: v1.7.0
-	metrics string
+	metrics ResolvedLink[StorageServiceMetrics]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -109,7 +116,8 @@ type StorageService struct {
 	OEM json.RawMessage `json:"Oem"`
 	// Redundancy shall contain the redundancy information for the storage
 	// subsystem.
-	redundancy string
+	redundancy ResolvedLink[Redundancy]
+
 	// RedundancyCount
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// ServerEndpointGroups shall reference a EndpointGroup.
@@ -166,28 +174,28 @@ func (s *StorageService) UnmarshalJSON(b []byte) error {
 		temp
 		Actions                       sActions
 		Links                         sLinks
-		ClassesOfService              Link  `json:"ClassesOfService"`
-		ClientEndpointGroups          Link  `json:"ClientEndpointGroups"`
-		Connections                   Link  `json:"Connections"`
-		ConsistencyGroups             Link  `json:"ConsistencyGroups"`
-		DataProtectionLoSCapabilities Link  `json:"DataProtectionLoSCapabilities"`
-		DataSecurityLoSCapabilities   Link  `json:"DataSecurityLoSCapabilities"`
-		DataStorageLoSCapabilities    Link  `json:"DataStorageLoSCapabilities"`
-		DefaultClassOfService         Link  `json:"DefaultClassOfService"`
-		Drives                        Link  `json:"Drives"`
-		EndpointGroups                Link  `json:"EndpointGroups"`
-		Endpoints                     Link  `json:"Endpoints"`
-		FileSystems                   Link  `json:"FileSystems"`
-		IOConnectivityLoSCapabilities Link  `json:"IOConnectivityLoSCapabilities"`
-		IOPerformanceLoSCapabilities  Link  `json:"IOPerformanceLoSCapabilities"`
-		Metrics                       Link  `json:"Metrics"`
-		Redundancy                    Link  `json:"Redundancy"`
-		ServerEndpointGroups          Link  `json:"ServerEndpointGroups"`
-		SpareResourceSets             Links `json:"SpareResourceSets"`
-		StorageGroups                 Link  `json:"StorageGroups"`
-		StoragePools                  Link  `json:"StoragePools"`
-		StorageSubsystems             Links `json:"StorageSubsystems"`
-		Volumes                       Link  `json:"Volumes"`
+		ClassesOfService              Link                                        `json:"ClassesOfService"`
+		ClientEndpointGroups          Link                                        `json:"ClientEndpointGroups"`
+		Connections                   Link                                        `json:"Connections"`
+		ConsistencyGroups             Link                                        `json:"ConsistencyGroups"`
+		DataProtectionLoSCapabilities ResolvedLink[DataProtectionLoSCapabilities] `json:"DataProtectionLoSCapabilities"`
+		DataSecurityLoSCapabilities   ResolvedLink[DataSecurityLoSCapabilities]   `json:"DataSecurityLoSCapabilities"`
+		DataStorageLoSCapabilities    ResolvedLink[DataStorageLoSCapabilities]    `json:"DataStorageLoSCapabilities"`
+		DefaultClassOfService         ResolvedLink[ClassOfService]                `json:"DefaultClassOfService"`
+		Drives                        Link                                        `json:"Drives"`
+		EndpointGroups                Link                                        `json:"EndpointGroups"`
+		Endpoints                     Link                                        `json:"Endpoints"`
+		FileSystems                   Link                                        `json:"FileSystems"`
+		IOConnectivityLoSCapabilities ResolvedLink[IOConnectivityLoSCapabilities] `json:"IOConnectivityLoSCapabilities"`
+		IOPerformanceLoSCapabilities  ResolvedLink[IOPerformanceLoSCapabilities]  `json:"IOPerformanceLoSCapabilities"`
+		Metrics                       ResolvedLink[StorageServiceMetrics]         `json:"Metrics"`
+		Redundancy                    ResolvedLink[Redundancy]                    `json:"Redundancy"`
+		ServerEndpointGroups          Link                                        `json:"ServerEndpointGroups"`
+		SpareResourceSets             Links                                       `json:"SpareResourceSets"`
+		StorageGroups                 Link                                        `json:"StorageGroups"`
+		StoragePools                  Link                                        `json:"StoragePools"`
+		StorageSubsystems             Links                                       `json:"StorageSubsystems"`
+		Volumes                       Link                                        `json:"Volumes"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -204,18 +212,26 @@ func (s *StorageService) UnmarshalJSON(b []byte) error {
 	s.clientEndpointGroups = tmp.ClientEndpointGroups.String()
 	s.connections = tmp.Connections.String()
 	s.consistencyGroups = tmp.ConsistencyGroups.String()
-	s.dataProtectionLoSCapabilities = tmp.DataProtectionLoSCapabilities.String()
-	s.dataSecurityLoSCapabilities = tmp.DataSecurityLoSCapabilities.String()
-	s.dataStorageLoSCapabilities = tmp.DataStorageLoSCapabilities.String()
-	s.defaultClassOfService = tmp.DefaultClassOfService.String()
+	s.dataProtectionLoSCapabilities = tmp.DataProtectionLoSCapabilities
+
+	s.dataSecurityLoSCapabilities = tmp.DataSecurityLoSCapabilities
+
+	s.dataStorageLoSCapabilities = tmp.DataStorageLoSCapabilities
+
+	s.defaultClassOfService = tmp.DefaultClassOfService
+
 	s.drives = tmp.Drives.String()
 	s.endpointGroups = tmp.EndpointGroups.String()
 	s.endpoints = tmp.Endpoints.String()
 	s.fileSystems = tmp.FileSystems.String()
-	s.iOConnectivityLoSCapabilities = tmp.IOConnectivityLoSCapabilities.String()
-	s.iOPerformanceLoSCapabilities = tmp.IOPerformanceLoSCapabilities.String()
-	s.metrics = tmp.Metrics.String()
-	s.redundancy = tmp.Redundancy.String()
+	s.iOConnectivityLoSCapabilities = tmp.IOConnectivityLoSCapabilities
+
+	s.iOPerformanceLoSCapabilities = tmp.IOPerformanceLoSCapabilities
+
+	s.metrics = tmp.Metrics
+
+	s.redundancy = tmp.Redundancy
+
 	s.serverEndpointGroups = tmp.ServerEndpointGroups.String()
 	s.spareResourceSets = tmp.SpareResourceSets.ToStrings()
 	s.storageGroups = tmp.StorageGroups.String()
@@ -318,34 +334,22 @@ func (s *StorageService) ConsistencyGroups() ([]*ConsistencyGroup, error) {
 
 // DataProtectionLoSCapabilities gets the DataProtectionLoSCapabilities linked resource.
 func (s *StorageService) DataProtectionLoSCapabilities() (*DataProtectionLoSCapabilities, error) {
-	if s.dataProtectionLoSCapabilities == "" {
-		return nil, nil
-	}
-	return GetObject[DataProtectionLoSCapabilities](s.client, s.dataProtectionLoSCapabilities)
+	return ResolveOrGet[DataProtectionLoSCapabilities](s.client, s.dataProtectionLoSCapabilities)
 }
 
 // DataSecurityLoSCapabilities gets the DataSecurityLoSCapabilities linked resource.
 func (s *StorageService) DataSecurityLoSCapabilities() (*DataSecurityLoSCapabilities, error) {
-	if s.dataSecurityLoSCapabilities == "" {
-		return nil, nil
-	}
-	return GetObject[DataSecurityLoSCapabilities](s.client, s.dataSecurityLoSCapabilities)
+	return ResolveOrGet[DataSecurityLoSCapabilities](s.client, s.dataSecurityLoSCapabilities)
 }
 
 // DataStorageLoSCapabilities gets the DataStorageLoSCapabilities linked resource.
 func (s *StorageService) DataStorageLoSCapabilities() (*DataStorageLoSCapabilities, error) {
-	if s.dataStorageLoSCapabilities == "" {
-		return nil, nil
-	}
-	return GetObject[DataStorageLoSCapabilities](s.client, s.dataStorageLoSCapabilities)
+	return ResolveOrGet[DataStorageLoSCapabilities](s.client, s.dataStorageLoSCapabilities)
 }
 
 // DefaultClassOfService gets the DefaultClassOfService linked resource.
 func (s *StorageService) DefaultClassOfService() (*ClassOfService, error) {
-	if s.defaultClassOfService == "" {
-		return nil, nil
-	}
-	return GetObject[ClassOfService](s.client, s.defaultClassOfService)
+	return ResolveOrGet[ClassOfService](s.client, s.defaultClassOfService)
 }
 
 // Drives gets the Drives collection.
@@ -382,34 +386,22 @@ func (s *StorageService) FileSystems() ([]*FileSystem, error) {
 
 // IOConnectivityLoSCapabilities gets the IOConnectivityLoSCapabilities linked resource.
 func (s *StorageService) IOConnectivityLoSCapabilities() (*IOConnectivityLoSCapabilities, error) {
-	if s.iOConnectivityLoSCapabilities == "" {
-		return nil, nil
-	}
-	return GetObject[IOConnectivityLoSCapabilities](s.client, s.iOConnectivityLoSCapabilities)
+	return ResolveOrGet[IOConnectivityLoSCapabilities](s.client, s.iOConnectivityLoSCapabilities)
 }
 
 // IOPerformanceLoSCapabilities gets the IOPerformanceLoSCapabilities linked resource.
 func (s *StorageService) IOPerformanceLoSCapabilities() (*IOPerformanceLoSCapabilities, error) {
-	if s.iOPerformanceLoSCapabilities == "" {
-		return nil, nil
-	}
-	return GetObject[IOPerformanceLoSCapabilities](s.client, s.iOPerformanceLoSCapabilities)
+	return ResolveOrGet[IOPerformanceLoSCapabilities](s.client, s.iOPerformanceLoSCapabilities)
 }
 
 // Metrics gets the Metrics linked resource.
 func (s *StorageService) Metrics() (*StorageServiceMetrics, error) {
-	if s.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[StorageServiceMetrics](s.client, s.metrics)
+	return ResolveOrGet[StorageServiceMetrics](s.client, s.metrics)
 }
 
 // Redundancy gets the Redundancy linked resource.
 func (s *StorageService) Redundancy() (*Redundancy, error) {
-	if s.redundancy == "" {
-		return nil, nil
-	}
-	return GetObject[Redundancy](s.client, s.redundancy)
+	return ResolveOrGet[Redundancy](s.client, s.redundancy)
 }
 
 // ServerEndpointGroups gets the ServerEndpointGroups collection.

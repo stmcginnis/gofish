@@ -52,7 +52,8 @@ type JobService struct {
 	jobs string
 	// Log shall contain a link to a resource of type 'LogService' that this job
 	// service uses.
-	log string
+	log ResolvedLink[LogService]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -88,10 +89,10 @@ func (j *JobService) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Actions      jActions
-		JobDocuments Link `json:"JobDocuments"`
-		JobExecutors Link `json:"JobExecutors"`
-		Jobs         Link `json:"Jobs"`
-		Log          Link `json:"Log"`
+		JobDocuments Link                     `json:"JobDocuments"`
+		JobExecutors Link                     `json:"JobExecutors"`
+		Jobs         Link                     `json:"Jobs"`
+		Log          ResolvedLink[LogService] `json:"Log"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -106,7 +107,7 @@ func (j *JobService) UnmarshalJSON(b []byte) error {
 	j.jobDocuments = tmp.JobDocuments.String()
 	j.jobExecutors = tmp.JobExecutors.String()
 	j.jobs = tmp.Jobs.String()
-	j.log = tmp.Log.String()
+	j.log = tmp.Log
 
 	// This is a read/write object, so we need to save the raw object data for later
 	j.RawData = b
@@ -172,10 +173,7 @@ func (j *JobService) Jobs() ([]*Job, error) {
 
 // Log gets the Log linked resource.
 func (j *JobService) Log() (*LogService, error) {
-	if j.log == "" {
-		return nil, nil
-	}
-	return GetObject[LogService](j.client, j.log)
+	return ResolveOrGet[LogService](j.client, j.log)
 }
 
 // JobServiceCapabilities shall contain properties that describe the
