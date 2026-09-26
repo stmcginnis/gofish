@@ -372,8 +372,6 @@ const (
 
 // Volume shall be used to represent a volume, virtual disk, logical disk, LUN,
 // or other logical storage for a Redfish implementation.
-//
-//nolint:dupl
 type SFVolume struct {
 	Entity
 	// ALUA shall identify the ALUA properties for this volume.
