@@ -9,13 +9,14 @@ import (
 	"sync/atomic"
 )
 
-// ResolvedLink holds a singleton link's URI plus, if the service inlined
-// real content for it (e.g. via $expand), the decoded value - consumed
-// exactly once by ResolveOrGet. Built by ResolveLink; the zero value (a
-// bare, never-set link) behaves like an empty URI with nothing resolved.
+// ResolvedLink holds a singleton link's URI plus, if the service may have
+// inlined real content for it (e.g. via $expand), the raw JSON of that
+// content decodes it and decides whether it is genuinely an expanded object.
+// The zero value (a bare, never-set link) behaves like an empty URI with
+// nothing inlined.
 type ResolvedLink[T any] struct {
-	uri      string
-	resolved *atomic.Pointer[T]
+	uri     string
+	inlined *atomic.Pointer[json.RawMessage]
 }
 
 // URI returns the link's URI, or "" if it was never set. Exported so
@@ -36,12 +37,18 @@ func (r *ResolvedLink[T]) UnmarshalJSON(raw []byte) error {
 }
 
 // ResolveLink parses a Link-shaped JSON value into a ResolvedLink[T]: the
-// URI is always populated when present, and resolved is set only if the raw
-// JSON carried real content beyond "@odata.id"/"href".
+// URI is always populated when present, and the raw JSON is retained only
+// when it carries something beyond "@odata.id"/"href" and so might be an
+// $expand-inlined object.
 //
-// Exported (despite living next to other generated-code helpers) because
-// some generated types live in package gofish, not package schemas, and call
-// this as schemas.ResolveLink.
+// This check is deliberately permissive: a decorated link (an "@odata.type"
+// or "@odata.etag" alongside the URI) carries no real content but still
+// gets retained here. ResolveOrGet makes the authoritative call, using the
+// same test resolveMember applies to collection members, and falls back to
+// a live fetch for anything that is not a fully populated object.
+//
+// Exported so that generated types in package gofish, rather than package schemas,
+// can call this as schemas.ResolveLink.
 func ResolveLink[T any](raw json.RawMessage) ResolvedLink[T] {
 	if len(raw) == 0 {
 		return ResolvedLink[T]{}
@@ -61,11 +68,13 @@ func ResolveLink[T any](raw json.RawMessage) ResolvedLink[T] {
 
 	for key := range obj {
 		if key != "@odata.id" && key != "href" {
-			entity := new(T)
-			if json.Unmarshal(raw, entity) == nil {
-				link.resolved = new(atomic.Pointer[T])
-				link.resolved.Store(entity)
-			}
+			// encoding/json may reuse raw's backing array after this
+			// returns, so keep our own copy.
+			buf := make(json.RawMessage, len(raw))
+			copy(buf, raw)
+
+			link.inlined = new(atomic.Pointer[json.RawMessage])
+			link.inlined.Store(&buf)
 
 			break
 		}
