@@ -67,17 +67,19 @@ func ResolveLink[T any](raw json.RawMessage) ResolvedLink[T] {
 	}
 
 	for key := range obj {
-		if key != "@odata.id" && key != "href" {
-			// encoding/json may reuse raw's backing array after this
-			// returns, so keep our own copy.
-			buf := make(json.RawMessage, len(raw))
-			copy(buf, raw)
-
-			link.inlined = new(atomic.Pointer[json.RawMessage])
-			link.inlined.Store(&buf)
-
-			break
+		if key == "@odata.id" || key == "href" {
+			continue
 		}
+
+		// encoding/json may reuse raw's backing array after this
+		// returns, so keep our own copy.
+		buf := make(json.RawMessage, len(raw))
+		copy(buf, raw)
+
+		link.inlined = new(atomic.Pointer[json.RawMessage])
+		link.inlined.Store(&buf)
+
+		break
 	}
 
 	return link
