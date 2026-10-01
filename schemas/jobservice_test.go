@@ -58,8 +58,8 @@ func TestJobService(t *testing.T) {
 		t.Errorf("Received invalid jobs link: %s", result.jobs)
 	}
 
-	if result.log != "/redfish/v1/JobService/Log" {
-		t.Errorf("Received invalid log link: %s", result.log)
+	if result.log.uri != "/redfish/v1/JobService/Log" {
+		t.Errorf("Received invalid log link: %s", result.log.uri)
 	}
 
 	if !result.ServiceCapabilities.Scheduling ||

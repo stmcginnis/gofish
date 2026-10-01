@@ -25,16 +25,19 @@ type CertificateService struct {
 	// configurations for this service.
 	//
 	// Version added: v1.2.0
-	certificateEnrollments string
+	certificateEnrollments ResolvedLink[CertificateEnrollment]
+
 	// CertificateLocations shall contain a link to a resource of type
 	// 'CertificateLocations'.
-	certificateLocations string
+	certificateLocations ResolvedLink[CertificateLocations]
+
 	// EnrollmentCACertificates shall contain a link to a resource collection of
 	// type 'CertificateCollection' that contains the server certificates for the
 	// automatic certificate enrollment servers.
 	//
 	// Version added: v1.2.0
-	enrollmentCACertificates string
+	enrollmentCACertificates ResolvedLink[Certificate]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -59,9 +62,9 @@ func (c *CertificateService) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Actions                  cActions
-		CertificateEnrollments   Link `json:"CertificateEnrollments"`
-		CertificateLocations     Link `json:"CertificateLocations"`
-		EnrollmentCACertificates Link `json:"EnrollmentCACertificates"`
+		CertificateEnrollments   ResolvedLink[CertificateEnrollment] `json:"CertificateEnrollments"`
+		CertificateLocations     ResolvedLink[CertificateLocations]  `json:"CertificateLocations"`
+		EnrollmentCACertificates ResolvedLink[Certificate]           `json:"EnrollmentCACertificates"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -74,9 +77,11 @@ func (c *CertificateService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	c.generateCSRTarget = tmp.Actions.GenerateCSR.Target
 	c.replaceCertificateTarget = tmp.Actions.ReplaceCertificate.Target
-	c.certificateEnrollments = tmp.CertificateEnrollments.String()
-	c.certificateLocations = tmp.CertificateLocations.String()
-	c.enrollmentCACertificates = tmp.EnrollmentCACertificates.String()
+	c.certificateEnrollments = tmp.CertificateEnrollments
+
+	c.certificateLocations = tmp.CertificateLocations
+
+	c.enrollmentCACertificates = tmp.EnrollmentCACertificates
 
 	return nil
 }
@@ -225,26 +230,17 @@ func (c *CertificateService) ReplaceCertificate(params *CertificateServiceReplac
 
 // CertificateEnrollments gets the CertificateEnrollments linked resource.
 func (c *CertificateService) CertificateEnrollments() (*CertificateEnrollment, error) {
-	if c.certificateEnrollments == "" {
-		return nil, nil
-	}
-	return GetObject[CertificateEnrollment](c.client, c.certificateEnrollments)
+	return ResolveOrGet[CertificateEnrollment](c.client, c.certificateEnrollments)
 }
 
 // CertificateLocations gets the CertificateLocations linked resource.
 func (c *CertificateService) CertificateLocations() (*CertificateLocations, error) {
-	if c.certificateLocations == "" {
-		return nil, nil
-	}
-	return GetObject[CertificateLocations](c.client, c.certificateLocations)
+	return ResolveOrGet[CertificateLocations](c.client, c.certificateLocations)
 }
 
 // EnrollmentCACertificates gets the EnrollmentCACertificates linked resource.
 func (c *CertificateService) EnrollmentCACertificates() (*Certificate, error) {
-	if c.enrollmentCACertificates == "" {
-		return nil, nil
-	}
-	return GetObject[Certificate](c.client, c.enrollmentCACertificates)
+	return ResolveOrGet[Certificate](c.client, c.enrollmentCACertificates)
 }
 
 // AutomaticCertificateEnrollment shall contain the configuration and status of

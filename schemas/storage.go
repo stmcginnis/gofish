@@ -254,7 +254,8 @@ type Storage struct {
 	// represents the metrics associated with this storage subsystem.
 	//
 	// Version added: v1.18.0
-	metrics string
+	metrics ResolvedLink[StorageMetrics]
+
 	// NVMeSubsystemProperties shall contain information specific to NVMe
 	// subsystems. This property shall only be present if this resource represents
 	// an NVMe subsystem.
@@ -270,7 +271,8 @@ type Storage struct {
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
 	// Redundancy shall contain redundancy information for the storage subsystem.
-	redundancy string
+	redundancy ResolvedLink[Redundancy]
+
 	// RedundancyCount
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// Status shall contain any status or health properties of the resource.
@@ -379,17 +381,17 @@ func (s *Storage) UnmarshalJSON(b []byte) error {
 		temp
 		Actions           sActions
 		Links             sLinks
-		Connections       Link  `json:"Connections"`
-		ConsistencyGroups Link  `json:"ConsistencyGroups"`
-		Controllers       Link  `json:"Controllers"`
-		Drives            Links `json:"Drives"`
-		EndpointGroups    Link  `json:"EndpointGroups"`
-		FileSystems       Link  `json:"FileSystems"`
-		Metrics           Link  `json:"Metrics"`
-		Redundancy        Link  `json:"Redundancy"`
-		StorageGroups     Link  `json:"StorageGroups"`
-		StoragePools      Link  `json:"StoragePools"`
-		Volumes           Link  `json:"Volumes"`
+		Connections       Link                         `json:"Connections"`
+		ConsistencyGroups Link                         `json:"ConsistencyGroups"`
+		Controllers       Link                         `json:"Controllers"`
+		Drives            Links                        `json:"Drives"`
+		EndpointGroups    Link                         `json:"EndpointGroups"`
+		FileSystems       Link                         `json:"FileSystems"`
+		Metrics           ResolvedLink[StorageMetrics] `json:"Metrics"`
+		Redundancy        ResolvedLink[Redundancy]     `json:"Redundancy"`
+		StorageGroups     Link                         `json:"StorageGroups"`
+		StoragePools      Link                         `json:"StoragePools"`
+		Volumes           Link                         `json:"Volumes"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -424,8 +426,10 @@ func (s *Storage) UnmarshalJSON(b []byte) error {
 	s.drives = tmp.Drives.ToStrings()
 	s.endpointGroups = tmp.EndpointGroups.String()
 	s.fileSystems = tmp.FileSystems.String()
-	s.metrics = tmp.Metrics.String()
-	s.redundancy = tmp.Redundancy.String()
+	s.metrics = tmp.Metrics
+
+	s.redundancy = tmp.Redundancy
+
 	s.storageGroups = tmp.StorageGroups.String()
 	s.storagePools = tmp.StoragePools.String()
 	s.volumes = tmp.Volumes.String()
@@ -757,18 +761,12 @@ func (s *Storage) FileSystems() ([]*FileSystem, error) {
 
 // Metrics gets the Metrics linked resource.
 func (s *Storage) Metrics() (*StorageMetrics, error) {
-	if s.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[StorageMetrics](s.client, s.metrics)
+	return ResolveOrGet[StorageMetrics](s.client, s.metrics)
 }
 
 // Redundancy gets the Redundancy linked resource.
 func (s *Storage) Redundancy() (*Redundancy, error) {
-	if s.redundancy == "" {
-		return nil, nil
-	}
-	return GetObject[Redundancy](s.client, s.redundancy)
+	return ResolveOrGet[Redundancy](s.client, s.redundancy)
 }
 
 // StorageGroups gets the StorageGroups collection.
@@ -979,7 +977,8 @@ type StorageStorageController struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.4.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall track the storage controller for inventory purposes.
 	AssetTag string
 	// CacheSummary shall contain properties that describe the cache memory for
@@ -1137,11 +1136,11 @@ func (s *StorageStorageController) UnmarshalJSON(b []byte) error {
 		temp
 		Actions                      sActions
 		Links                        sLinks
-		Assembly                     Link  `json:"Assembly"`
-		Certificates                 Link  `json:"Certificates"`
-		Ports                        Link  `json:"Ports"`
-		SupportedControllerProtocols Links `json:"SupportedControllerProtocols"`
-		SupportedDeviceProtocols     Links `json:"SupportedDeviceProtocols"`
+		Assembly                     ResolvedLink[Assembly] `json:"Assembly"`
+		Certificates                 Link                   `json:"Certificates"`
+		Ports                        Link                   `json:"Ports"`
+		SupportedControllerProtocols Links                  `json:"SupportedControllerProtocols"`
+		SupportedDeviceProtocols     Links                  `json:"SupportedDeviceProtocols"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -1170,7 +1169,8 @@ func (s *StorageStorageController) UnmarshalJSON(b []byte) error {
 	s.simpleStorage = tmp.Links.SimpleStorage.String()
 	s.storageServices = tmp.Links.StorageServices.ToStrings()
 	s.unassignedVolumes = tmp.Links.UnassignedVolumes.ToStrings()
-	s.assembly = tmp.Assembly.String()
+	s.assembly = tmp.Assembly
+
 	s.certificates = tmp.Certificates.String()
 	s.ports = tmp.Ports.String()
 
@@ -1451,10 +1451,7 @@ func (s *StorageStorageController) UnassignedVolumes() ([]*Volume, error) {
 
 // Assembly gets the Assembly linked resource.
 func (s *StorageStorageController) Assembly() (*Assembly, error) {
-	if s.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](s.client, s.assembly)
+	return ResolveOrGet[Assembly](s.client, s.assembly)
 }
 
 // Certificates gets the Certificates collection.

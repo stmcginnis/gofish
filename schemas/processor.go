@@ -257,11 +257,13 @@ type Processor struct {
 	// processor.
 	//
 	// Version added: v1.9.0
-	appliedOperatingConfig string
+	appliedOperatingConfig ResolvedLink[OperatingConfig]
+
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.2.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// BaseSpeedMHz shall contain the base (nominal) clock speed of the processor
 	// in MHz.
 	//
@@ -292,7 +294,8 @@ type Processor struct {
 	// processor.
 	//
 	// Version added: v1.11.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// FPGA shall contain an object containing properties for processors of type
 	// 'FPGA'.
 	//
@@ -575,16 +578,16 @@ func (p *Processor) UnmarshalJSON(b []byte) error {
 		temp
 		Actions                pActions
 		Links                  pLinks
-		AccelerationFunctions  Link `json:"AccelerationFunctions"`
-		AppliedOperatingConfig Link `json:"AppliedOperatingConfig"`
-		Assembly               Link `json:"Assembly"`
-		CacheMemory            Link `json:"CacheMemory"`
-		Certificates           Link `json:"Certificates"`
-		EnvironmentMetrics     Link `json:"EnvironmentMetrics"`
-		Metrics                Link `json:"Metrics"`
-		OperatingConfigs       Link `json:"OperatingConfigs"`
-		Ports                  Link `json:"Ports"`
-		SubProcessors          Link `json:"SubProcessors"`
+		AccelerationFunctions  Link                             `json:"AccelerationFunctions"`
+		AppliedOperatingConfig ResolvedLink[OperatingConfig]    `json:"AppliedOperatingConfig"`
+		Assembly               ResolvedLink[Assembly]           `json:"Assembly"`
+		CacheMemory            Link                             `json:"CacheMemory"`
+		Certificates           Link                             `json:"Certificates"`
+		EnvironmentMetrics     ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		Metrics                Link                             `json:"Metrics"`
+		OperatingConfigs       Link                             `json:"OperatingConfigs"`
+		Ports                  Link                             `json:"Ports"`
+		SubProcessors          Link                             `json:"SubProcessors"`
 
 		MaxSpeedMHz any
 		Socket      any // ZTE bug
@@ -610,11 +613,14 @@ func (p *Processor) UnmarshalJSON(b []byte) error {
 	p.pCIeDevice = tmp.Links.PCIeDevice.String()
 	p.pCIeFunctions = tmp.Links.PCIeFunctions.ToStrings()
 	p.accelerationFunctions = tmp.AccelerationFunctions.String()
-	p.appliedOperatingConfig = tmp.AppliedOperatingConfig.String()
-	p.assembly = tmp.Assembly.String()
+	p.appliedOperatingConfig = tmp.AppliedOperatingConfig
+
+	p.assembly = tmp.Assembly
+
 	p.cacheMemory = tmp.CacheMemory.String()
 	p.certificates = tmp.Certificates.String()
-	p.environmentMetrics = tmp.EnvironmentMetrics.String()
+	p.environmentMetrics = tmp.EnvironmentMetrics
+
 	p.metrics = tmp.Metrics.String()
 	p.operatingConfigs = tmp.OperatingConfigs.String()
 	p.ports = tmp.Ports.String()
@@ -745,18 +751,12 @@ func (p *Processor) AccelerationFunctions() ([]*AccelerationFunction, error) {
 
 // AppliedOperatingConfig gets the AppliedOperatingConfig linked resource.
 func (p *Processor) AppliedOperatingConfig() (*OperatingConfig, error) {
-	if p.appliedOperatingConfig == "" {
-		return nil, nil
-	}
-	return GetObject[OperatingConfig](p.client, p.appliedOperatingConfig)
+	return ResolveOrGet[OperatingConfig](p.client, p.appliedOperatingConfig)
 }
 
 // Assembly gets the Assembly linked resource.
 func (p *Processor) Assembly() (*Assembly, error) {
-	if p.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](p.client, p.assembly)
+	return ResolveOrGet[Assembly](p.client, p.assembly)
 }
 
 // CacheMemory gets the CacheMemory collection.
@@ -777,10 +777,7 @@ func (p *Processor) Certificates() ([]*Certificate, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (p *Processor) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if p.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](p.client, p.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](p.client, p.environmentMetrics)
 }
 
 // Metrics gets the Metrics linked resource.

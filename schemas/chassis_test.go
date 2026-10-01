@@ -194,8 +194,8 @@ func TestChassis(t *testing.T) {
 		t.Errorf("Received invalid health status: %s", result.Status.Health)
 	}
 
-	if result.assembly != "/redfish/v1/Chassis/Chassis-1/Assembly" {
-		t.Errorf("Received invalid assembly reference: %s", result.assembly)
+	if result.assembly.uri != "/redfish/v1/Chassis/Chassis-1/Assembly" {
+		t.Errorf("Received invalid assembly reference: %s", result.assembly.uri)
 	}
 
 	if result.controls != "/redfish/v1/Chassis/Chassis-1/Controls" {
@@ -206,12 +206,12 @@ func TestChassis(t *testing.T) {
 		t.Errorf("Received invalid drive reference: %s", result.drives)
 	}
 
-	if result.thermal != "/redfish/v1/Chassis/Chassis-1/Thermal" {
-		t.Errorf("Received invalid thermal reference: %s", result.thermal)
+	if result.thermal.uri != "/redfish/v1/Chassis/Chassis-1/Thermal" {
+		t.Errorf("Received invalid thermal reference: %s", result.thermal.uri)
 	}
 
-	if result.power != "/redfish/v1/Chassis/Chassis-1/Power" {
-		t.Errorf("Received invalid power reference: %s", result.power)
+	if result.power.uri != "/redfish/v1/Chassis/Chassis-1/Power" {
+		t.Errorf("Received invalid power reference: %s", result.power.uri)
 	}
 
 	if len(result.computerSystems) != 1 {

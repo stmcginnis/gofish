@@ -59,7 +59,8 @@ const (
 type Battery struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// BatteryChemistryType shall contain the chemistry of the battery. This
 	// property shall only be present if the 'EnergyStorageType' property contains
 	// 'Battery'.
@@ -117,7 +118,8 @@ type Battery struct {
 	// of this battery in amp units.
 	MaxDischargeRateAmps *float64 `json:",omitempty"`
 	// Metrics shall contain a link to a resource of type 'BatteryMetrics'.
-	metrics string
+	metrics ResolvedLink[BatteryMetrics]
+
 	// Model shall contain the model information as defined by the manufacturer for
 	// this battery.
 	Model string
@@ -198,8 +200,8 @@ func (ba *Battery) UnmarshalJSON(b []byte) error {
 		temp
 		Actions  baActions
 		Links    baLinks
-		Assembly Link `json:"Assembly"`
-		Metrics  Link `json:"Metrics"`
+		Assembly ResolvedLink[Assembly]       `json:"Assembly"`
+		Metrics  ResolvedLink[BatteryMetrics] `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -215,8 +217,9 @@ func (ba *Battery) UnmarshalJSON(b []byte) error {
 	ba.selfTestTarget = tmp.Actions.SelfTest.Target
 	ba.memory = tmp.Links.Memory.ToStrings()
 	ba.storageControllers = tmp.Links.StorageControllers.ToStrings()
-	ba.assembly = tmp.Assembly.String()
-	ba.metrics = tmp.Metrics.String()
+	ba.assembly = tmp.Assembly
+
+	ba.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	ba.RawData = b
@@ -295,16 +298,10 @@ func (ba *Battery) StorageControllers() ([]*StorageController, error) {
 
 // Assembly gets the Assembly linked resource.
 func (ba *Battery) Assembly() (*Assembly, error) {
-	if ba.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](ba.client, ba.assembly)
+	return ResolveOrGet[Assembly](ba.client, ba.assembly)
 }
 
 // Metrics gets the Metrics linked resource.
 func (ba *Battery) Metrics() (*BatteryMetrics, error) {
-	if ba.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[BatteryMetrics](ba.client, ba.metrics)
+	return ResolveOrGet[BatteryMetrics](ba.client, ba.metrics)
 }

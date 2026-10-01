@@ -113,7 +113,8 @@ const (
 type Cable struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall track the cable for inventory purposes.
 	AssetTag string
 	// CableClass shall contain the cable class for this cable.
@@ -202,7 +203,7 @@ func (c *Cable) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links    cLinks
-		Assembly Link `json:"Assembly"`
+		Assembly ResolvedLink[Assembly] `json:"Assembly"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -219,7 +220,7 @@ func (c *Cable) UnmarshalJSON(b []byte) error {
 	c.upstreamChassis = tmp.Links.UpstreamChassis.ToStrings()
 	c.upstreamPorts = tmp.Links.UpstreamPorts.ToStrings()
 	c.upstreamResources = tmp.Links.UpstreamResources.ToStrings()
-	c.assembly = tmp.Assembly.String()
+	c.assembly = tmp.Assembly
 
 	// This is a read/write object, so we need to save the raw object data for later
 	c.RawData = b
@@ -295,8 +296,5 @@ func (c *Cable) UpstreamResources() ([]*Entity, error) {
 
 // Assembly gets the Assembly linked resource.
 func (c *Cable) Assembly() (*Assembly, error) {
-	if c.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](c.client, c.assembly)
+	return ResolveOrGet[Assembly](c.client, c.assembly)
 }

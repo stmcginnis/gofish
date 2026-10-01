@@ -191,7 +191,8 @@ type Chassis struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.6.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall contain an identifying string that tracks the chassis for
 	// inventory purposes. Modifying this property may modify the 'AssetTag' in the
 	// resource that represents the functional view of this chassis, such as a
@@ -240,7 +241,8 @@ type Chassis struct {
 	// double-counting.
 	//
 	// Version added: v1.15.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// EnvironmentalClass shall contain the ASHRAE Environmental Class for this
 	// chassis, as defined by ASHRAE Thermal Guidelines for Data Processing
 	// Environments. These classes define respective environmental limits that
@@ -391,7 +393,8 @@ type Chassis struct {
 	// The 'PCIeSlots' schema has been deprecated in favor of the 'PCIeDevice'
 	// schema. Empty PCIe slots are represented by 'PCIeDevice' resources using the
 	// 'Absent' value of the 'State' property within 'Status'.
-	pCIeSlots string
+	pCIeSlots ResolvedLink[PCIeSlots]
+
 	// PartNumber shall contain a part number assigned by the organization that is
 	// responsible for producing or manufacturing the chassis.
 	PartNumber string
@@ -406,7 +409,8 @@ type Chassis struct {
 	// Deprecated: v1.15.0
 	// This link has been deprecated in favor of the 'PowerSubsystem' link
 	// property.
-	power string
+	power ResolvedLink[Power]
+
 	// PowerState shall contain the power state of the chassis.
 	//
 	// Version added: v1.0.1
@@ -415,7 +419,8 @@ type Chassis struct {
 	// that represents the power subsystem information for this chassis.
 	//
 	// Version added: v1.15.0
-	powerSubsystem string
+	powerSubsystem ResolvedLink[PowerSubsystem]
+
 	// PoweredByParent shall indicate whether the chassis receives power from the
 	// chassis that contains it. The value 'true' shall indicate that the
 	// containing chassis provides power. The value 'false' shall indicate the
@@ -484,7 +489,8 @@ type Chassis struct {
 	// Deprecated: v1.15.0
 	// This link has been deprecated in favor of the 'ThermalSubsystem' link
 	// property.
-	thermal string
+	thermal ResolvedLink[Thermal]
+
 	// ThermalDirection shall indicate the general direction of the thermal
 	// management path through the chassis.
 	//
@@ -504,7 +510,8 @@ type Chassis struct {
 	// this chassis.
 	//
 	// Version added: v1.15.0
-	thermalSubsystem string
+	thermalSubsystem ResolvedLink[ThermalSubsystem]
+
 	// TrustedComponents shall contain a link to a resource collection of type
 	// 'TrustedComponentCollection'.
 	//
@@ -629,26 +636,26 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 		temp
 		Actions            cActions
 		Links              cLinks
-		Assembly           Link `json:"Assembly"`
-		Certificates       Link `json:"Certificates"`
-		Controls           Link `json:"Controls"`
+		Assembly           ResolvedLink[Assembly] `json:"Assembly"`
+		Certificates       Link                   `json:"Certificates"`
+		Controls           Link                   `json:"Controls"`
 		Drives             Link
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		FabricAdapters     Link `json:"FabricAdapters"`
-		LeakDetectors      Link `json:"LeakDetectors"`
-		LogServices        Link `json:"LogServices"`
-		MediaControllers   Link `json:"MediaControllers"`
-		Memory             Link `json:"Memory"`
-		MemoryDomains      Link `json:"MemoryDomains"`
-		NetworkAdapters    Link `json:"NetworkAdapters"`
-		PCIeDevices        Link `json:"PCIeDevices"`
-		PCIeSlots          Link `json:"PCIeSlots"`
-		Power              Link `json:"Power"`
-		PowerSubsystem     Link `json:"PowerSubsystem"`
-		Sensors            Link `json:"Sensors"`
-		Thermal            Link `json:"Thermal"`
-		ThermalSubsystem   Link `json:"ThermalSubsystem"`
-		TrustedComponents  Link `json:"TrustedComponents"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		FabricAdapters     Link                             `json:"FabricAdapters"`
+		LeakDetectors      Link                             `json:"LeakDetectors"`
+		LogServices        Link                             `json:"LogServices"`
+		MediaControllers   Link                             `json:"MediaControllers"`
+		Memory             Link                             `json:"Memory"`
+		MemoryDomains      Link                             `json:"MemoryDomains"`
+		NetworkAdapters    Link                             `json:"NetworkAdapters"`
+		PCIeDevices        Link                             `json:"PCIeDevices"`
+		PCIeSlots          ResolvedLink[PCIeSlots]          `json:"PCIeSlots"`
+		Power              ResolvedLink[Power]              `json:"Power"`
+		PowerSubsystem     ResolvedLink[PowerSubsystem]     `json:"PowerSubsystem"`
+		Sensors            Link                             `json:"Sensors"`
+		Thermal            ResolvedLink[Thermal]            `json:"Thermal"`
+		ThermalSubsystem   ResolvedLink[ThermalSubsystem]   `json:"ThermalSubsystem"`
+		TrustedComponents  Link                             `json:"TrustedComponents"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -685,10 +692,12 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 	c.resourceBlocks = tmp.Links.ResourceBlocks.ToStrings()
 	c.storage = tmp.Links.Storage.ToStrings()
 	c.switches = tmp.Links.Switches.ToStrings()
-	c.assembly = tmp.Assembly.String()
+	c.assembly = tmp.Assembly
+
 	c.certificates = tmp.Certificates.String()
 	c.controls = tmp.Controls.String()
-	c.environmentMetrics = tmp.EnvironmentMetrics.String()
+	c.environmentMetrics = tmp.EnvironmentMetrics
+
 	c.fabricAdapters = tmp.FabricAdapters.String()
 	c.leakDetectors = tmp.LeakDetectors.String()
 	c.logServices = tmp.LogServices.String()
@@ -698,12 +707,17 @@ func (c *Chassis) UnmarshalJSON(b []byte) error {
 	c.networkAdapters = tmp.NetworkAdapters.String()
 	c.pCIeDevices = tmp.PCIeDevices.String()
 	c.linkedPCIeDevices = tmp.Links.PCIeDevices.ToStrings()
-	c.pCIeSlots = tmp.PCIeSlots.String()
-	c.power = tmp.Power.String()
-	c.powerSubsystem = tmp.PowerSubsystem.String()
+	c.pCIeSlots = tmp.PCIeSlots
+
+	c.power = tmp.Power
+
+	c.powerSubsystem = tmp.PowerSubsystem
+
 	c.sensors = tmp.Sensors.String()
-	c.thermal = tmp.Thermal.String()
-	c.thermalSubsystem = tmp.ThermalSubsystem.String()
+	c.thermal = tmp.Thermal
+
+	c.thermalSubsystem = tmp.ThermalSubsystem
+
 	c.trustedComponents = tmp.TrustedComponents.String()
 	if c.DrivesCount == 0 && tmp.Links.DrivesCount > 0 {
 		c.DrivesCount = tmp.Links.DrivesCount
@@ -929,10 +943,7 @@ func (c *Chassis) Switches() ([]*Switch, error) {
 
 // Assembly gets the Assembly linked resource.
 func (c *Chassis) Assembly() (*Assembly, error) {
-	if c.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](c.client, c.assembly)
+	return ResolveOrGet[Assembly](c.client, c.assembly)
 }
 
 // Certificates gets the Certificates collection.
@@ -953,10 +964,7 @@ func (c *Chassis) Controls() ([]*Control, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (c *Chassis) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if c.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](c.client, c.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](c.client, c.environmentMetrics)
 }
 
 // FabricAdapters gets the FabricAdapters collection.
@@ -1030,26 +1038,17 @@ func (c *Chassis) PCIeDevices() ([]*PCIeDevice, error) {
 
 // PCIeSlots gets the PCIeSlots linked resource.
 func (c *Chassis) PCIeSlots() (*PCIeSlots, error) {
-	if c.pCIeSlots == "" {
-		return nil, nil
-	}
-	return GetObject[PCIeSlots](c.client, c.pCIeSlots)
+	return ResolveOrGet[PCIeSlots](c.client, c.pCIeSlots)
 }
 
 // Power gets the Power linked resource.
 func (c *Chassis) Power() (*Power, error) {
-	if c.power == "" {
-		return nil, nil
-	}
-	return GetObject[Power](c.client, c.power)
+	return ResolveOrGet[Power](c.client, c.power)
 }
 
 // PowerSubsystem gets the PowerSubsystem linked resource.
 func (c *Chassis) PowerSubsystem() (*PowerSubsystem, error) {
-	if c.powerSubsystem == "" {
-		return nil, nil
-	}
-	return GetObject[PowerSubsystem](c.client, c.powerSubsystem)
+	return ResolveOrGet[PowerSubsystem](c.client, c.powerSubsystem)
 }
 
 // Sensors gets the Sensors collection.
@@ -1062,18 +1061,12 @@ func (c *Chassis) Sensors() ([]*Sensor, error) {
 
 // Thermal gets the Thermal linked resource.
 func (c *Chassis) Thermal() (*Thermal, error) {
-	if c.thermal == "" {
-		return nil, nil
-	}
-	return GetObject[Thermal](c.client, c.thermal)
+	return ResolveOrGet[Thermal](c.client, c.thermal)
 }
 
 // ThermalSubsystem gets the ThermalSubsystem linked resource.
 func (c *Chassis) ThermalSubsystem() (*ThermalSubsystem, error) {
-	if c.thermalSubsystem == "" {
-		return nil, nil
-	}
-	return GetObject[ThermalSubsystem](c.client, c.thermalSubsystem)
+	return ResolveOrGet[ThermalSubsystem](c.client, c.thermalSubsystem)
 }
 
 // TrustedComponents gets the TrustedComponents collection.

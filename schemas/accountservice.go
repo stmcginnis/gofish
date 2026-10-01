@@ -347,7 +347,8 @@ type AccountService struct {
 	// complete a requested operation on a URI associated with this service.
 	//
 	// Version added: v1.1.0
-	privilegeMap string
+	privilegeMap ResolvedLink[PrivilegeRegistry]
+
 	// RequireChangePasswordAction shall indicate whether clients are required to
 	// invoke the 'ChangePassword' action to modify the 'Password' property in
 	// 'ManagerAccount' resources. If 'true', services shall reject 'PATCH' and
@@ -405,10 +406,10 @@ func (a *AccountService) UnmarshalJSON(b []byte) error {
 	type temp AccountService
 	var tmp struct {
 		temp
-		Accounts                           Link `json:"Accounts"`
-		AdditionalExternalAccountProviders Link `json:"AdditionalExternalAccountProviders"`
-		PrivilegeMap                       Link `json:"PrivilegeMap"`
-		Roles                              Link `json:"Roles"`
+		Accounts                           Link                            `json:"Accounts"`
+		AdditionalExternalAccountProviders Link                            `json:"AdditionalExternalAccountProviders"`
+		PrivilegeMap                       ResolvedLink[PrivilegeRegistry] `json:"PrivilegeMap"`
+		Roles                              Link                            `json:"Roles"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -421,7 +422,8 @@ func (a *AccountService) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	a.accounts = tmp.Accounts.String()
 	a.additionalExternalAccountProviders = tmp.AdditionalExternalAccountProviders.String()
-	a.privilegeMap = tmp.PrivilegeMap.String()
+	a.privilegeMap = tmp.PrivilegeMap
+
 	a.roles = tmp.Roles.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
@@ -480,10 +482,7 @@ func (a *AccountService) AdditionalExternalAccountProviders() ([]*ExternalAccoun
 
 // PrivilegeMap gets the PrivilegeMap linked resource.
 func (a *AccountService) PrivilegeMap() (*PrivilegeRegistry, error) {
-	if a.privilegeMap == "" {
-		return nil, nil
-	}
-	return GetObject[PrivilegeRegistry](a.client, a.privilegeMap)
+	return ResolveOrGet[PrivilegeRegistry](a.client, a.privilegeMap)
 }
 
 // Roles gets the Roles collection.

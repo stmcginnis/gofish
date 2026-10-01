@@ -229,7 +229,8 @@ type UpdateService struct {
 	// key-pair is not available.
 	//
 	// Version added: v1.13.0
-	publicIdentitySSHKey string
+	publicIdentitySSHKey ResolvedLink[Key]
+
 	// RemoteServerCertificates shall contain a link to a resource collection of
 	// type 'CertificateCollection' that represents the server certificates for the
 	// server referenced by the 'ImageURI' parameter in 'SimpleUpdate'. If
@@ -279,7 +280,8 @@ type UpdateService struct {
 	// service.
 	//
 	// Version added: v1.16.0
-	updateServiceCapabilities string
+	updateServiceCapabilities ResolvedLink[UpdateServiceCapabilities]
+
 	// VerifyRemoteServerCertificate shall indicate whether the service will verify
 	// the certificate of the server referenced by the 'ImageURI' parameter in
 	// 'SimpleUpdate' prior to sending the transfer request with the certificates
@@ -329,14 +331,14 @@ func (u *UpdateService) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Actions                   uActions
-		ClientCertificates        Link `json:"ClientCertificates"`
-		FirmwareInventory         Link `json:"FirmwareInventory"`
-		LocalImageStore           Link `json:"LocalImageStore"`
-		PublicIdentitySSHKey      Link `json:"PublicIdentitySSHKey"`
-		RemoteServerCertificates  Link `json:"RemoteServerCertificates"`
-		RemoteServerSSHKeys       Link `json:"RemoteServerSSHKeys"`
-		SoftwareInventory         Link `json:"SoftwareInventory"`
-		UpdateServiceCapabilities Link `json:"UpdateServiceCapabilities"`
+		ClientCertificates        Link                                    `json:"ClientCertificates"`
+		FirmwareInventory         Link                                    `json:"FirmwareInventory"`
+		LocalImageStore           Link                                    `json:"LocalImageStore"`
+		PublicIdentitySSHKey      ResolvedLink[Key]                       `json:"PublicIdentitySSHKey"`
+		RemoteServerCertificates  Link                                    `json:"RemoteServerCertificates"`
+		RemoteServerSSHKeys       Link                                    `json:"RemoteServerSSHKeys"`
+		SoftwareInventory         Link                                    `json:"SoftwareInventory"`
+		UpdateServiceCapabilities ResolvedLink[UpdateServiceCapabilities] `json:"UpdateServiceCapabilities"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -355,11 +357,12 @@ func (u *UpdateService) UnmarshalJSON(b []byte) error {
 	u.clientCertificates = tmp.ClientCertificates.String()
 	u.firmwareInventory = tmp.FirmwareInventory.String()
 	u.localImageStore = tmp.LocalImageStore.String()
-	u.publicIdentitySSHKey = tmp.PublicIdentitySSHKey.String()
+	u.publicIdentitySSHKey = tmp.PublicIdentitySSHKey
+
 	u.remoteServerCertificates = tmp.RemoteServerCertificates.String()
 	u.remoteServerSSHKeys = tmp.RemoteServerSSHKeys.String()
 	u.softwareInventory = tmp.SoftwareInventory.String()
-	u.updateServiceCapabilities = tmp.UpdateServiceCapabilities.String()
+	u.updateServiceCapabilities = tmp.UpdateServiceCapabilities
 
 	// This is a read/write object, so we need to save the raw object data for later
 	u.RawData = b
@@ -564,10 +567,7 @@ func (u *UpdateService) LocalImageStore() ([]*SoftwareInventory, error) {
 
 // PublicIdentitySSHKey gets the PublicIdentitySSHKey linked resource.
 func (u *UpdateService) PublicIdentitySSHKey() (*Key, error) {
-	if u.publicIdentitySSHKey == "" {
-		return nil, nil
-	}
-	return GetObject[Key](u.client, u.publicIdentitySSHKey)
+	return ResolveOrGet[Key](u.client, u.publicIdentitySSHKey)
 }
 
 // RemoteServerCertificates gets the RemoteServerCertificates collection.
@@ -596,10 +596,7 @@ func (u *UpdateService) SoftwareInventory() ([]*SoftwareInventory, error) {
 
 // UpdateServiceCapabilities gets the UpdateServiceCapabilities linked resource.
 func (u *UpdateService) UpdateServiceCapabilities() (*UpdateServiceCapabilities, error) {
-	if u.updateServiceCapabilities == "" {
-		return nil, nil
-	}
-	return GetObject[UpdateServiceCapabilities](u.client, u.updateServiceCapabilities)
+	return ResolveOrGet[UpdateServiceCapabilities](u.client, u.updateServiceCapabilities)
 }
 
 // HTTPPushURIApplyTime shall contain settings for when to apply

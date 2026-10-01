@@ -104,8 +104,8 @@ func TestDrive(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.assembly != "/redfish/v1/Assembly/Assembly-1" {
-		t.Errorf("Incorrect assembly link: %s", result.assembly)
+	if result.assembly.uri != "/redfish/v1/Assembly/Assembly-1" {
+		t.Errorf("Incorrect assembly link: %s", result.assembly.uri)
 	}
 
 	if *result.BlockSizeBytes != 512 {

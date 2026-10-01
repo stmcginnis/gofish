@@ -241,7 +241,8 @@ type Memory struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.4.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// BaseModuleType shall contain the base module type of the memory device.
 	BaseModuleType BaseModuleType
 	// BusWidthBits shall contain the bus width, in bits.
@@ -297,7 +298,8 @@ type Memory struct {
 	// 'EnvironmentMetrics' that specifies the environment metrics for this memory.
 	//
 	// Version added: v1.11.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// ErrorCorrection shall contain the error correction scheme supported for this
 	// memory device.
 	ErrorCorrection ErrorCorrection
@@ -337,7 +339,8 @@ type Memory struct {
 	// Log shall contain a link to a resource of type 'LogService'.
 	//
 	// Version added: v1.13.0
-	log string
+	log ResolvedLink[LogService]
+
 	// LogicalSizeMiB shall contain the total size of the logical memory in MiB.
 	//
 	// Version added: v1.4.0
@@ -378,7 +381,8 @@ type Memory struct {
 	// represents.
 	MemoryType MemoryType
 	// Metrics The link to the metrics associated with this memory device.
-	metrics string
+	metrics ResolvedLink[MemoryMetrics]
+
 	// Model shall indicate the model information as provided by the manufacturer
 	// of this memory.
 	//
@@ -615,11 +619,11 @@ func (m *Memory) UnmarshalJSON(b []byte) error {
 		temp
 		Actions            mActions
 		Links              mLinks
-		Assembly           Link `json:"Assembly"`
-		Certificates       Link `json:"Certificates"`
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		Log                Link `json:"Log"`
-		Metrics            Link `json:"Metrics"`
+		Assembly           ResolvedLink[Assembly]           `json:"Assembly"`
+		Certificates       Link                             `json:"Certificates"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		Log                ResolvedLink[LogService]         `json:"Log"`
+		Metrics            ResolvedLink[MemoryMetrics]      `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -648,11 +652,14 @@ func (m *Memory) UnmarshalJSON(b []byte) error {
 	m.memoryMediaSources = tmp.Links.MemoryMediaSources.ToStrings()
 	m.memoryRegionMediaSources = tmp.Links.MemoryRegionMediaSources.ToStrings()
 	m.processors = tmp.Links.Processors.ToStrings()
-	m.assembly = tmp.Assembly.String()
+	m.assembly = tmp.Assembly
+
 	m.certificates = tmp.Certificates.String()
-	m.environmentMetrics = tmp.EnvironmentMetrics.String()
-	m.log = tmp.Log.String()
-	m.metrics = tmp.Metrics.String()
+	m.environmentMetrics = tmp.EnvironmentMetrics
+
+	m.log = tmp.Log
+
+	m.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	m.RawData = b
@@ -920,10 +927,7 @@ func (m *Memory) Processors() ([]*Processor, error) {
 
 // Assembly gets the Assembly linked resource.
 func (m *Memory) Assembly() (*Assembly, error) {
-	if m.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](m.client, m.assembly)
+	return ResolveOrGet[Assembly](m.client, m.assembly)
 }
 
 // Certificates gets the Certificates collection.
@@ -936,26 +940,17 @@ func (m *Memory) Certificates() ([]*Certificate, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (m *Memory) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if m.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](m.client, m.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](m.client, m.environmentMetrics)
 }
 
 // Log gets the Log linked resource.
 func (m *Memory) Log() (*LogService, error) {
-	if m.log == "" {
-		return nil, nil
-	}
-	return GetObject[LogService](m.client, m.log)
+	return ResolveOrGet[LogService](m.client, m.log)
 }
 
 // Metrics gets the Metrics linked resource.
 func (m *Memory) Metrics() (*MemoryMetrics, error) {
-	if m.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[MemoryMetrics](m.client, m.metrics)
+	return ResolveOrGet[MemoryMetrics](m.client, m.metrics)
 }
 
 // MemoryCXL shall contain CXL-specific properties for a memory device.

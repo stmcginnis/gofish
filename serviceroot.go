@@ -17,12 +17,14 @@ import (
 type Service struct {
 	schemas.Entity
 	// AccountService shall contain a link to a resource of type 'AccountService'.
-	accountService string
+	accountService schemas.ResolvedLink[schemas.AccountService]
+
 	// AggregationService shall contain a link to a resource of type
 	// 'AggregationService'.
 	//
 	// Version added: v1.8.0
-	aggregationService string
+	aggregationService schemas.ResolvedLink[schemas.AggregationService]
+
 	// AutomationNodes shall contain a link to a resource collection of type
 	// 'AutomationNodeCollection'.
 	//
@@ -37,7 +39,8 @@ type Service struct {
 	// 'CertificateService'.
 	//
 	// Version added: v1.5.0
-	certificateService string
+	certificateService schemas.ResolvedLink[schemas.CertificateService]
+
 	// Chassis shall contain a link to a resource collection of type
 	// 'ChassisCollection'.
 	chassis string
@@ -50,9 +53,11 @@ type Service struct {
 	// 'CompositionService'.
 	//
 	// Version added: v1.2.0
-	compositionService string
+	compositionService schemas.ResolvedLink[schemas.CompositionService]
+
 	// EventService shall contain a link to a resource of type 'EventService'.
-	eventService string
+	eventService schemas.ResolvedLink[schemas.EventService]
+
 	// Fabrics shall contain a link to a resource collection of type
 	// 'FabricCollection'.
 	//
@@ -69,15 +74,18 @@ type Service struct {
 	// JobService shall contain a link to a resource of type 'JobService'.
 	//
 	// Version added: v1.4.0
-	jobService string
+	jobService schemas.ResolvedLink[schemas.JobService]
+
 	// KeyService shall contain a link to a resource of type 'KeyService'.
 	//
 	// Version added: v1.11.0
-	keyService string
+	keyService schemas.ResolvedLink[schemas.KeyService]
+
 	// LicenseService shall contain a link to a resource of type 'LicenseService'.
 	//
 	// Version added: v1.12.0
-	licenseService string
+	licenseService schemas.ResolvedLink[schemas.LicenseService]
+
 	// Managers shall contain a link to a resource collection of type
 	// 'ManagerCollection'.
 	managers string
@@ -97,7 +105,8 @@ type Service struct {
 	// PowerEquipment shall contain a link to a resource of type 'PowerEquipment'.
 	//
 	// Version added: v1.6.0
-	powerEquipment string
+	powerEquipment schemas.ResolvedLink[schemas.PowerEquipment]
+
 	// Product shall include the name of the product represented by this Redfish
 	// service.
 	//
@@ -129,7 +138,8 @@ type Service struct {
 	// 'ServiceConditions'.
 	//
 	// Version added: v1.13.0
-	serviceConditions string
+	serviceConditions schemas.ResolvedLink[schemas.ServiceConditions]
+
 	// ServiceIdentification shall contain a vendor-provided or user-provided value
 	// that identifies and associates a discovered Redfish service with a
 	// particular product instance. The value of the property shall contain the
@@ -154,7 +164,8 @@ type Service struct {
 	// Version added: v1.20.0
 	ServiceUseNotification string
 	// SessionService shall contain a link to a resource of type 'SessionService'.
-	sessionService string
+	sessionService schemas.ResolvedLink[schemas.SessionService]
+
 	// Storage shall contain a link to a resource collection of type
 	// 'StorageCollection'.
 	//
@@ -176,17 +187,20 @@ type Service struct {
 	// 'ComputerSystemCollection'.
 	systems string
 	// Tasks shall contain a link to a resource of type 'TaskService'.
-	tasks string
+	tasks schemas.ResolvedLink[schemas.TaskService]
+
 	// TelemetryService shall contain a link to a resource of type
 	// 'TelemetryService'.
 	//
 	// Version added: v1.4.0
-	telemetryService string
+	telemetryService schemas.ResolvedLink[schemas.TelemetryService]
+
 	// ThermalEquipment shall contain a link to a resource of type
 	// 'ThermalEquipment'.
 	//
 	// Version added: v1.16.0
-	thermalEquipment string
+	thermalEquipment schemas.ResolvedLink[schemas.ThermalEquipment]
+
 	// UUID shall contain the identifier of the Redfish service instance. If SSDP
 	// is used, this value shall contain the same UUID returned in an HTTP '200 OK'
 	// response from an SSDP 'M-SEARCH' request during discovery. RFC4122 describes
@@ -197,7 +211,8 @@ type Service struct {
 	// UpdateService shall contain a link to a resource of type 'UpdateService'.
 	//
 	// Version added: v1.1.0
-	updateService string
+	updateService schemas.ResolvedLink[schemas.UpdateService]
+
 	// Vendor shall include the name of the manufacturer or vendor represented by
 	// this Redfish service. If this property is supported, the vendor name shall
 	// not be included in the 'Product' property value.
@@ -220,37 +235,37 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links              sLinks
-		AccountService     schemas.Link `json:"AccountService"`
-		AggregationService schemas.Link `json:"AggregationService"`
-		AutomationNodes    schemas.Link `json:"AutomationNodes"`
-		Cables             schemas.Link `json:"Cables"`
-		CertificateService schemas.Link `json:"CertificateService"`
-		Chassis            schemas.Link `json:"Chassis"`
-		ComponentIntegrity schemas.Link `json:"ComponentIntegrity"`
-		CompositionService schemas.Link `json:"CompositionService"`
-		EventService       schemas.Link `json:"EventService"`
-		Fabrics            schemas.Link `json:"Fabrics"`
-		Facilities         schemas.Link `json:"Facilities"`
-		JSONSchemas        schemas.Link `json:"JsonSchemas"`
-		JobService         schemas.Link `json:"JobService"`
-		KeyService         schemas.Link `json:"KeyService"`
-		LicenseService     schemas.Link `json:"LicenseService"`
-		Managers           schemas.Link `json:"Managers"`
-		NVMeDomains        schemas.Link `json:"NVMeDomains"`
-		PowerEquipment     schemas.Link `json:"PowerEquipment"`
-		RegisteredClients  schemas.Link `json:"RegisteredClients"`
-		Registries         schemas.Link `json:"Registries"`
-		ResourceBlocks     schemas.Link `json:"ResourceBlocks"`
-		ServiceConditions  schemas.Link `json:"ServiceConditions"`
-		SessionService     schemas.Link `json:"SessionService"`
-		Storage            schemas.Link `json:"Storage"`
-		StorageServices    schemas.Link `json:"StorageServices"`
-		StorageSystems     schemas.Link `json:"StorageSystems"`
-		Systems            schemas.Link `json:"Systems"`
-		Tasks              schemas.Link `json:"Tasks"`
-		TelemetryService   schemas.Link `json:"TelemetryService"`
-		ThermalEquipment   schemas.Link `json:"ThermalEquipment"`
-		UpdateService      schemas.Link `json:"UpdateService"`
+		AccountService     schemas.ResolvedLink[schemas.AccountService]     `json:"AccountService"`
+		AggregationService schemas.ResolvedLink[schemas.AggregationService] `json:"AggregationService"`
+		AutomationNodes    schemas.Link                                     `json:"AutomationNodes"`
+		Cables             schemas.Link                                     `json:"Cables"`
+		CertificateService schemas.ResolvedLink[schemas.CertificateService] `json:"CertificateService"`
+		Chassis            schemas.Link                                     `json:"Chassis"`
+		ComponentIntegrity schemas.Link                                     `json:"ComponentIntegrity"`
+		CompositionService schemas.ResolvedLink[schemas.CompositionService] `json:"CompositionService"`
+		EventService       schemas.ResolvedLink[schemas.EventService]       `json:"EventService"`
+		Fabrics            schemas.Link                                     `json:"Fabrics"`
+		Facilities         schemas.Link                                     `json:"Facilities"`
+		JSONSchemas        schemas.Link                                     `json:"JsonSchemas"`
+		JobService         schemas.ResolvedLink[schemas.JobService]         `json:"JobService"`
+		KeyService         schemas.ResolvedLink[schemas.KeyService]         `json:"KeyService"`
+		LicenseService     schemas.ResolvedLink[schemas.LicenseService]     `json:"LicenseService"`
+		Managers           schemas.Link                                     `json:"Managers"`
+		NVMeDomains        schemas.Link                                     `json:"NVMeDomains"`
+		PowerEquipment     schemas.ResolvedLink[schemas.PowerEquipment]     `json:"PowerEquipment"`
+		RegisteredClients  schemas.Link                                     `json:"RegisteredClients"`
+		Registries         schemas.Link                                     `json:"Registries"`
+		ResourceBlocks     schemas.Link                                     `json:"ResourceBlocks"`
+		ServiceConditions  schemas.ResolvedLink[schemas.ServiceConditions]  `json:"ServiceConditions"`
+		SessionService     schemas.ResolvedLink[schemas.SessionService]     `json:"SessionService"`
+		Storage            schemas.Link                                     `json:"Storage"`
+		StorageServices    schemas.Link                                     `json:"StorageServices"`
+		StorageSystems     schemas.Link                                     `json:"StorageSystems"`
+		Systems            schemas.Link                                     `json:"Systems"`
+		Tasks              schemas.ResolvedLink[schemas.TaskService]        `json:"Tasks"`
+		TelemetryService   schemas.ResolvedLink[schemas.TelemetryService]   `json:"TelemetryService"`
+		ThermalEquipment   schemas.ResolvedLink[schemas.ThermalEquipment]   `json:"ThermalEquipment"`
+		UpdateService      schemas.ResolvedLink[schemas.UpdateService]      `json:"UpdateService"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -263,37 +278,51 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	s.managerProvidingService = tmp.Links.ManagerProvidingService.String()
 	s.sessions = tmp.Links.Sessions.String()
-	s.accountService = tmp.AccountService.String()
-	s.aggregationService = tmp.AggregationService.String()
+	s.accountService = tmp.AccountService
+
+	s.aggregationService = tmp.AggregationService
+
 	s.automationNodes = tmp.AutomationNodes.String()
 	s.cables = tmp.Cables.String()
-	s.certificateService = tmp.CertificateService.String()
+	s.certificateService = tmp.CertificateService
+
 	s.chassis = tmp.Chassis.String()
 	s.componentIntegrity = tmp.ComponentIntegrity.String()
-	s.compositionService = tmp.CompositionService.String()
-	s.eventService = tmp.EventService.String()
+	s.compositionService = tmp.CompositionService
+
+	s.eventService = tmp.EventService
+
 	s.fabrics = tmp.Fabrics.String()
 	s.facilities = tmp.Facilities.String()
 	s.jSONSchemas = tmp.JSONSchemas.String()
-	s.jobService = tmp.JobService.String()
-	s.keyService = tmp.KeyService.String()
-	s.licenseService = tmp.LicenseService.String()
+	s.jobService = tmp.JobService
+
+	s.keyService = tmp.KeyService
+
+	s.licenseService = tmp.LicenseService
+
 	s.managers = tmp.Managers.String()
 	s.nVMeDomains = tmp.NVMeDomains.String()
-	s.powerEquipment = tmp.PowerEquipment.String()
+	s.powerEquipment = tmp.PowerEquipment
+
 	s.registeredClients = tmp.RegisteredClients.String()
 	s.registries = tmp.Registries.String()
 	s.resourceBlocks = tmp.ResourceBlocks.String()
-	s.serviceConditions = tmp.ServiceConditions.String()
-	s.sessionService = tmp.SessionService.String()
+	s.serviceConditions = tmp.ServiceConditions
+
+	s.sessionService = tmp.SessionService
+
 	s.storage = tmp.Storage.String()
 	s.storageServices = tmp.StorageServices.String()
 	s.storageSystems = tmp.StorageSystems.String()
 	s.systems = tmp.Systems.String()
-	s.tasks = tmp.Tasks.String()
-	s.telemetryService = tmp.TelemetryService.String()
-	s.thermalEquipment = tmp.ThermalEquipment.String()
-	s.updateService = tmp.UpdateService.String()
+	s.tasks = tmp.Tasks
+
+	s.telemetryService = tmp.TelemetryService
+
+	s.thermalEquipment = tmp.ThermalEquipment
+
+	s.updateService = tmp.UpdateService
 
 	return nil
 }
@@ -334,18 +363,12 @@ func (s *Service) Sessions() (*schemas.Session, error) {
 
 // AccountService gets the AccountService linked resource.
 func (s *Service) AccountService() (*schemas.AccountService, error) {
-	if s.accountService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.AccountService](s.GetClient(), s.accountService)
+	return schemas.ResolveOrGet[schemas.AccountService](s.GetClient(), s.accountService)
 }
 
 // AggregationService gets the AggregationService linked resource.
 func (s *Service) AggregationService() (*schemas.AggregationService, error) {
-	if s.aggregationService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.AggregationService](s.GetClient(), s.aggregationService)
+	return schemas.ResolveOrGet[schemas.AggregationService](s.GetClient(), s.aggregationService)
 }
 
 // AutomationNodes gets the AutomationNodes collection.
@@ -366,10 +389,7 @@ func (s *Service) Cables() ([]*schemas.Cable, error) {
 
 // CertificateService gets the CertificateService linked resource.
 func (s *Service) CertificateService() (*schemas.CertificateService, error) {
-	if s.certificateService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.CertificateService](s.GetClient(), s.certificateService)
+	return schemas.ResolveOrGet[schemas.CertificateService](s.GetClient(), s.certificateService)
 }
 
 // Chassis gets the Chassis collection.
@@ -390,18 +410,12 @@ func (s *Service) ComponentIntegrity() ([]*schemas.ComponentIntegrity, error) {
 
 // CompositionService gets the CompositionService linked resource.
 func (s *Service) CompositionService() (*schemas.CompositionService, error) {
-	if s.compositionService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.CompositionService](s.GetClient(), s.compositionService)
+	return schemas.ResolveOrGet[schemas.CompositionService](s.GetClient(), s.compositionService)
 }
 
 // EventService gets the EventService linked resource.
 func (s *Service) EventService() (*schemas.EventService, error) {
-	if s.eventService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.EventService](s.GetClient(), s.eventService)
+	return schemas.ResolveOrGet[schemas.EventService](s.GetClient(), s.eventService)
 }
 
 // Fabrics gets the Fabrics collection.
@@ -430,26 +444,17 @@ func (s *Service) JSONSchemas() ([]*schemas.JSONSchemaFile, error) {
 
 // JobService gets the JobService linked resource.
 func (s *Service) JobService() (*schemas.JobService, error) {
-	if s.jobService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.JobService](s.GetClient(), s.jobService)
+	return schemas.ResolveOrGet[schemas.JobService](s.GetClient(), s.jobService)
 }
 
 // KeyService gets the KeyService linked resource.
 func (s *Service) KeyService() (*schemas.KeyService, error) {
-	if s.keyService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.KeyService](s.GetClient(), s.keyService)
+	return schemas.ResolveOrGet[schemas.KeyService](s.GetClient(), s.keyService)
 }
 
 // LicenseService gets the LicenseService linked resource.
 func (s *Service) LicenseService() (*schemas.LicenseService, error) {
-	if s.licenseService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.LicenseService](s.GetClient(), s.licenseService)
+	return schemas.ResolveOrGet[schemas.LicenseService](s.GetClient(), s.licenseService)
 }
 
 // Managers gets the Managers collection.
@@ -470,10 +475,7 @@ func (s *Service) NVMeDomains() ([]*schemas.NVMeDomain, error) {
 
 // PowerEquipment gets the PowerEquipment linked resource.
 func (s *Service) PowerEquipment() (*schemas.PowerEquipment, error) {
-	if s.powerEquipment == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.PowerEquipment](s.GetClient(), s.powerEquipment)
+	return schemas.ResolveOrGet[schemas.PowerEquipment](s.GetClient(), s.powerEquipment)
 }
 
 // RegisteredClients gets the RegisteredClients collection.
@@ -502,18 +504,12 @@ func (s *Service) ResourceBlocks() ([]*schemas.ResourceBlock, error) {
 
 // ServiceConditions gets the ServiceConditions linked resource.
 func (s *Service) ServiceConditions() (*schemas.ServiceConditions, error) {
-	if s.serviceConditions == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.ServiceConditions](s.GetClient(), s.serviceConditions)
+	return schemas.ResolveOrGet[schemas.ServiceConditions](s.GetClient(), s.serviceConditions)
 }
 
 // SessionService gets the SessionService linked resource.
 func (s *Service) SessionService() (*schemas.SessionService, error) {
-	if s.sessionService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.SessionService](s.GetClient(), s.sessionService)
+	return schemas.ResolveOrGet[schemas.SessionService](s.GetClient(), s.sessionService)
 }
 
 // Storage gets the Storage collection.
@@ -550,34 +546,22 @@ func (s *Service) Systems() ([]*schemas.ComputerSystem, error) {
 
 // Tasks gets the Tasks linked resource.
 func (s *Service) Tasks() (*schemas.TaskService, error) {
-	if s.tasks == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.TaskService](s.GetClient(), s.tasks)
+	return schemas.ResolveOrGet[schemas.TaskService](s.GetClient(), s.tasks)
 }
 
 // TelemetryService gets the TelemetryService linked resource.
 func (s *Service) TelemetryService() (*schemas.TelemetryService, error) {
-	if s.telemetryService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.TelemetryService](s.GetClient(), s.telemetryService)
+	return schemas.ResolveOrGet[schemas.TelemetryService](s.GetClient(), s.telemetryService)
 }
 
 // ThermalEquipment gets the ThermalEquipment linked resource.
 func (s *Service) ThermalEquipment() (*schemas.ThermalEquipment, error) {
-	if s.thermalEquipment == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.ThermalEquipment](s.GetClient(), s.thermalEquipment)
+	return schemas.ResolveOrGet[schemas.ThermalEquipment](s.GetClient(), s.thermalEquipment)
 }
 
 // UpdateService gets the UpdateService linked resource.
 func (s *Service) UpdateService() (*schemas.UpdateService, error) {
-	if s.updateService == "" {
-		return nil, nil
-	}
-	return schemas.GetObject[schemas.UpdateService](s.GetClient(), s.updateService)
+	return schemas.ResolveOrGet[schemas.UpdateService](s.GetClient(), s.updateService)
 }
 
 // CreateSession creates a new session and returns the token and id

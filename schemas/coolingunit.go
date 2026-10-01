@@ -45,7 +45,8 @@ const (
 type CoolingUnit struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall contain the user-assigned asset tag, which is an identifying
 	// string that tracks the equipment for inventory purposes.
 	AssetTag string
@@ -70,7 +71,8 @@ type CoolingUnit struct {
 	// EnvironmentMetrics shall contain a link to a resource of type
 	// 'EnvironmentMetrics' that specifies the environment metrics for this
 	// equipment.
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// EquipmentType shall contain the type of equipment this resource represents.
 	EquipmentType CoolingEquipmentType
 	// FilterRedundancy shall contain redundancy information for the groups of
@@ -90,7 +92,8 @@ type CoolingUnit struct {
 	// detection inside a particular 'Chassis' resource, populating the
 	// 'LeakDetection' resource under 'ThermalSubsystem' for the relevant 'Chassis'
 	// is the preferred approach.
-	leakDetection string
+	leakDetection ResolvedLink[LeakDetection]
+
 	// Location shall contain the location information of the associated equipment.
 	Location Location
 	// Manufacturer shall contain the name of the organization responsible for
@@ -189,14 +192,14 @@ func (c *CoolingUnit) UnmarshalJSON(b []byte) error {
 		temp
 		Actions                    cActions
 		Links                      cLinks
-		Assembly                   Link `json:"Assembly"`
-		EnvironmentMetrics         Link `json:"EnvironmentMetrics"`
-		Filters                    Link `json:"Filters"`
-		LeakDetection              Link `json:"LeakDetection"`
-		PrimaryCoolantConnectors   Link `json:"PrimaryCoolantConnectors"`
-		Pumps                      Link `json:"Pumps"`
-		Reservoirs                 Link `json:"Reservoirs"`
-		SecondaryCoolantConnectors Link `json:"SecondaryCoolantConnectors"`
+		Assembly                   ResolvedLink[Assembly]           `json:"Assembly"`
+		EnvironmentMetrics         ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		Filters                    Link                             `json:"Filters"`
+		LeakDetection              ResolvedLink[LeakDetection]      `json:"LeakDetection"`
+		PrimaryCoolantConnectors   Link                             `json:"PrimaryCoolantConnectors"`
+		Pumps                      Link                             `json:"Pumps"`
+		Reservoirs                 Link                             `json:"Reservoirs"`
+		SecondaryCoolantConnectors Link                             `json:"SecondaryCoolantConnectors"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -212,10 +215,13 @@ func (c *CoolingUnit) UnmarshalJSON(b []byte) error {
 	c.chassis = tmp.Links.Chassis.ToStrings()
 	c.facility = tmp.Links.Facility.String()
 	c.managedBy = tmp.Links.ManagedBy.ToStrings()
-	c.assembly = tmp.Assembly.String()
-	c.environmentMetrics = tmp.EnvironmentMetrics.String()
+	c.assembly = tmp.Assembly
+
+	c.environmentMetrics = tmp.EnvironmentMetrics
+
 	c.filters = tmp.Filters.String()
-	c.leakDetection = tmp.LeakDetection.String()
+	c.leakDetection = tmp.LeakDetection
+
 	c.primaryCoolantConnectors = tmp.PrimaryCoolantConnectors.String()
 	c.pumps = tmp.Pumps.String()
 	c.reservoirs = tmp.Reservoirs.String()
@@ -315,18 +321,12 @@ func (c *CoolingUnit) ManagedBy() ([]*Manager, error) {
 
 // Assembly gets the Assembly linked resource.
 func (c *CoolingUnit) Assembly() (*Assembly, error) {
-	if c.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](c.client, c.assembly)
+	return ResolveOrGet[Assembly](c.client, c.assembly)
 }
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (c *CoolingUnit) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if c.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](c.client, c.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](c.client, c.environmentMetrics)
 }
 
 // Filters gets the Filters collection.
@@ -339,10 +339,7 @@ func (c *CoolingUnit) Filters() ([]*Filter, error) {
 
 // LeakDetection gets the LeakDetection linked resource.
 func (c *CoolingUnit) LeakDetection() (*LeakDetection, error) {
-	if c.leakDetection == "" {
-		return nil, nil
-	}
-	return GetObject[LeakDetection](c.client, c.leakDetection)
+	return ResolveOrGet[LeakDetection](c.client, c.leakDetection)
 }
 
 // PrimaryCoolantConnectors gets the PrimaryCoolantConnectors collection.

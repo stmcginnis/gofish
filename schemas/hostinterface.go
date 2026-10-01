@@ -104,11 +104,13 @@ type HostInterface struct {
 	// ManagerEthernetInterface shall contain a link to a resource of type
 	// 'EthernetInterface' that represents the network interface that this manager
 	// uses as the host interface.
-	managerEthernetInterface string
+	managerEthernetInterface ResolvedLink[EthernetInterface]
+
 	// NetworkProtocol shall contain a link to a resource of type
 	// 'ManagerNetworkProtocol' that represents the network services for this
 	// manager.
-	networkProtocol string
+	networkProtocol ResolvedLink[ManagerNetworkProtocol]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -146,9 +148,9 @@ func (h *HostInterface) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links                    hLinks
-		HostEthernetInterfaces   Link `json:"HostEthernetInterfaces"`
-		ManagerEthernetInterface Link `json:"ManagerEthernetInterface"`
-		NetworkProtocol          Link `json:"NetworkProtocol"`
+		HostEthernetInterfaces   Link                                 `json:"HostEthernetInterfaces"`
+		ManagerEthernetInterface ResolvedLink[EthernetInterface]      `json:"ManagerEthernetInterface"`
+		NetworkProtocol          ResolvedLink[ManagerNetworkProtocol] `json:"NetworkProtocol"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -165,8 +167,9 @@ func (h *HostInterface) UnmarshalJSON(b []byte) error {
 	h.firmwareAuthRole = tmp.Links.FirmwareAuthRole.String()
 	h.kernelAuthRole = tmp.Links.KernelAuthRole.String()
 	h.hostEthernetInterfaces = tmp.HostEthernetInterfaces.String()
-	h.managerEthernetInterface = tmp.ManagerEthernetInterface.String()
-	h.networkProtocol = tmp.NetworkProtocol.String()
+	h.managerEthernetInterface = tmp.ManagerEthernetInterface
+
+	h.networkProtocol = tmp.NetworkProtocol
 
 	// This is a read/write object, so we need to save the raw object data for later
 	h.RawData = b
@@ -247,18 +250,12 @@ func (h *HostInterface) HostEthernetInterfaces() ([]*EthernetInterface, error) {
 
 // ManagerEthernetInterface gets the ManagerEthernetInterface linked resource.
 func (h *HostInterface) ManagerEthernetInterface() (*EthernetInterface, error) {
-	if h.managerEthernetInterface == "" {
-		return nil, nil
-	}
-	return GetObject[EthernetInterface](h.client, h.managerEthernetInterface)
+	return ResolveOrGet[EthernetInterface](h.client, h.managerEthernetInterface)
 }
 
 // NetworkProtocol gets the NetworkProtocol linked resource.
 func (h *HostInterface) NetworkProtocol() (*ManagerNetworkProtocol, error) {
-	if h.networkProtocol == "" {
-		return nil, nil
-	}
-	return GetObject[ManagerNetworkProtocol](h.client, h.networkProtocol)
+	return ResolveOrGet[ManagerNetworkProtocol](h.client, h.networkProtocol)
 }
 
 // CredentialBootstrapping shall contain settings for the Redfish Host Interface

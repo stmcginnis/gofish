@@ -133,7 +133,8 @@ type Endpoint struct {
 	PciID PciID `json:"PciId"`
 	// Redundancy shall show how this endpoint is grouped with other endpoints for
 	// form redundancy sets.
-	redundancy string
+	redundancy ResolvedLink[Redundancy]
+
 	// RedundancyCount
 	RedundancyCount int `json:"Redundancy@odata.count"`
 	// Status shall contain any status or health properties of the resource.
@@ -172,7 +173,7 @@ func (e *Endpoint) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links      eLinks
-		Redundancy Link `json:"Redundancy"`
+		Redundancy ResolvedLink[Redundancy] `json:"Redundancy"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -191,7 +192,7 @@ func (e *Endpoint) UnmarshalJSON(b []byte) error {
 	e.networkDeviceFunction = tmp.Links.NetworkDeviceFunction.ToStrings()
 	e.ports = tmp.Links.Ports.ToStrings()
 	e.zones = tmp.Links.Zones.ToStrings()
-	e.redundancy = tmp.Redundancy.String()
+	e.redundancy = tmp.Redundancy
 
 	return nil
 }
@@ -249,10 +250,7 @@ func (e *Endpoint) Zones() ([]*Zone, error) {
 
 // Redundancy gets the Redundancy linked resource.
 func (e *Endpoint) Redundancy() (*Redundancy, error) {
-	if e.redundancy == "" {
-		return nil, nil
-	}
-	return GetObject[Redundancy](e.client, e.redundancy)
+	return ResolveOrGet[Redundancy](e.client, e.redundancy)
 }
 
 // ConnectedEntity shall represent a remote resource that is connected to a

@@ -43,7 +43,8 @@ type CXLLogicalDevice struct {
 	// associated CXL logical device.
 	Identifiers []Identifier
 	// Log shall contain a link to a resource of type 'LogService'.
-	log string
+	log ResolvedLink[LogService]
+
 	// MemoryRegions shall contain a link to a resource collection of type
 	// 'MemoryRegionCollection' that represents the memory regions associated with
 	// this CXL logical device.
@@ -117,8 +118,8 @@ func (c *CXLLogicalDevice) UnmarshalJSON(b []byte) error {
 		temp
 		Actions       cActions
 		Links         cLinks
-		Log           Link `json:"Log"`
-		MemoryRegions Link `json:"MemoryRegions"`
+		Log           ResolvedLink[LogService] `json:"Log"`
+		MemoryRegions Link                     `json:"MemoryRegions"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -139,7 +140,8 @@ func (c *CXLLogicalDevice) UnmarshalJSON(b []byte) error {
 	c.memoryDomains = tmp.Links.MemoryDomains.ToStrings()
 	c.pCIeFunctions = tmp.Links.PCIeFunctions.ToStrings()
 	c.PCIeFunctionsCount = tmp.Links.PCIeFunctionsCount
-	c.log = tmp.Log.String()
+	c.log = tmp.Log
+
 	c.memoryRegions = tmp.MemoryRegions.String()
 
 	return nil
@@ -261,10 +263,7 @@ func (c *CXLLogicalDevice) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // Log gets the Log linked resource.
 func (c *CXLLogicalDevice) Log() (*LogService, error) {
-	if c.log == "" {
-		return nil, nil
-	}
-	return GetObject[LogService](c.client, c.log)
+	return ResolveOrGet[LogService](c.client, c.log)
 }
 
 // MemoryRegions gets the MemoryRegions collection.

@@ -117,7 +117,8 @@ type MetricReportDefinition struct {
 	// MetricReport shall contain a link to a resource of type 'MetricReport' that
 	// represents the most recent metric report produced by this metric report
 	// definition.
-	metricReport string
+	metricReport ResolvedLink[MetricReport]
+
 	// MetricReportDefinitionEnabled shall indicate whether the generation of new
 	// metric reports is enabled.
 	//
@@ -201,7 +202,7 @@ func (m *MetricReportDefinition) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links        mLinks
-		MetricReport Link `json:"MetricReport"`
+		MetricReport ResolvedLink[MetricReport] `json:"MetricReport"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -213,7 +214,7 @@ func (m *MetricReportDefinition) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	m.triggers = tmp.Links.Triggers.ToStrings()
-	m.metricReport = tmp.MetricReport.String()
+	m.metricReport = tmp.MetricReport
 
 	// This is a read/write object, so we need to save the raw object data for later
 	m.RawData = b
@@ -255,10 +256,7 @@ func (m *MetricReportDefinition) Triggers() ([]*Triggers, error) {
 
 // MetricReport gets the MetricReport linked resource.
 func (m *MetricReportDefinition) MetricReport() (*MetricReport, error) {
-	if m.metricReport == "" {
-		return nil, nil
-	}
-	return GetObject[MetricReport](m.client, m.metricReport)
+	return ResolveOrGet[MetricReport](m.client, m.metricReport)
 }
 
 // Metric shall specify a set of metrics to include in the metric report. The

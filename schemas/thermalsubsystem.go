@@ -56,7 +56,8 @@ type ThermalSubsystem struct {
 	// the relevant equipment is the preferred approach.
 	//
 	// Version added: v1.3.0
-	leakDetection string
+	leakDetection ResolvedLink[LeakDetection]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -73,7 +74,8 @@ type ThermalSubsystem struct {
 	// Status shall contain any status or health properties of the resource.
 	Status Status
 	// ThermalMetrics shall contain a link to a resource of type 'ThermalMetrics'.
-	thermalMetrics string
+	thermalMetrics ResolvedLink[ThermalMetrics]
+
 	// RawData holds the original serialized JSON so we can compare updates.
 	RawData []byte
 }
@@ -83,13 +85,13 @@ func (t *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 	type temp ThermalSubsystem
 	var tmp struct {
 		temp
-		CoolantConnectors Link `json:"CoolantConnectors"`
-		Fans              Link `json:"Fans"`
-		Filters           Link `json:"Filters"`
-		Heaters           Link `json:"Heaters"`
-		LeakDetection     Link `json:"LeakDetection"`
-		Pumps             Link `json:"Pumps"`
-		ThermalMetrics    Link `json:"ThermalMetrics"`
+		CoolantConnectors Link                         `json:"CoolantConnectors"`
+		Fans              Link                         `json:"Fans"`
+		Filters           Link                         `json:"Filters"`
+		Heaters           Link                         `json:"Heaters"`
+		LeakDetection     ResolvedLink[LeakDetection]  `json:"LeakDetection"`
+		Pumps             Link                         `json:"Pumps"`
+		ThermalMetrics    ResolvedLink[ThermalMetrics] `json:"ThermalMetrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -104,9 +106,10 @@ func (t *ThermalSubsystem) UnmarshalJSON(b []byte) error {
 	t.fans = tmp.Fans.String()
 	t.filters = tmp.Filters.String()
 	t.heaters = tmp.Heaters.String()
-	t.leakDetection = tmp.LeakDetection.String()
+	t.leakDetection = tmp.LeakDetection
+
 	t.pumps = tmp.Pumps.String()
-	t.thermalMetrics = tmp.ThermalMetrics.String()
+	t.thermalMetrics = tmp.ThermalMetrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	t.RawData = b
@@ -168,10 +171,7 @@ func (t *ThermalSubsystem) Heaters() ([]*Heater, error) {
 
 // LeakDetection gets the LeakDetection linked resource.
 func (t *ThermalSubsystem) LeakDetection() (*LeakDetection, error) {
-	if t.leakDetection == "" {
-		return nil, nil
-	}
-	return GetObject[LeakDetection](t.client, t.leakDetection)
+	return ResolveOrGet[LeakDetection](t.client, t.leakDetection)
 }
 
 // Pumps gets the Pumps collection.
@@ -184,8 +184,5 @@ func (t *ThermalSubsystem) Pumps() ([]*Pump, error) {
 
 // ThermalMetrics gets the ThermalMetrics linked resource.
 func (t *ThermalSubsystem) ThermalMetrics() (*ThermalMetrics, error) {
-	if t.thermalMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[ThermalMetrics](t.client, t.thermalMetrics)
+	return ResolveOrGet[ThermalMetrics](t.client, t.thermalMetrics)
 }

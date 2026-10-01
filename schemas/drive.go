@@ -196,7 +196,8 @@ type Drive struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.3.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall track the drive for inventory purposes.
 	AssetTag string
 	// BlockSecurityIDEnabled shall indicate if establishment of a TCG-defined
@@ -241,7 +242,8 @@ type Drive struct {
 	// 'EnvironmentMetrics' that specifies the environment metrics for this drive.
 	//
 	// Version added: v1.12.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// FailurePredicted shall indicate whether this drive currently predicts a
 	// manufacturer-defined failure.
 	FailurePredicted bool
@@ -304,7 +306,8 @@ type Drive struct {
 	// Metrics shall contain a link to the metrics associated with this drive.
 	//
 	// Version added: v1.17.0
-	metrics string
+	metrics ResolvedLink[DriveMetrics]
+
 	// Model shall contain the name by which the manufacturer generally refers to
 	// the drive.
 	Model string
@@ -476,10 +479,10 @@ func (d *Drive) UnmarshalJSON(b []byte) error {
 		temp
 		Actions            dActions
 		Links              dLinks
-		Assembly           Link `json:"Assembly"`
-		Certificates       Link `json:"Certificates"`
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		Metrics            Link `json:"Metrics"`
+		Assembly           ResolvedLink[Assembly]           `json:"Assembly"`
+		Certificates       Link                             `json:"Certificates"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		Metrics            ResolvedLink[DriveMetrics]       `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -507,10 +510,12 @@ func (d *Drive) UnmarshalJSON(b []byte) error {
 	d.storage = tmp.Links.Storage.String()
 	d.storagePools = tmp.Links.StoragePools.ToStrings()
 	d.volumes = tmp.Links.Volumes.ToStrings()
-	d.assembly = tmp.Assembly.String()
+	d.assembly = tmp.Assembly
+
 	d.certificates = tmp.Certificates.String()
-	d.environmentMetrics = tmp.EnvironmentMetrics.String()
-	d.metrics = tmp.Metrics.String()
+	d.environmentMetrics = tmp.EnvironmentMetrics
+
+	d.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	d.RawData = b
@@ -770,10 +775,7 @@ func (d *Drive) Volumes() ([]*Volume, error) {
 
 // Assembly gets the Assembly linked resource.
 func (d *Drive) Assembly() (*Assembly, error) {
-	if d.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](d.client, d.assembly)
+	return ResolveOrGet[Assembly](d.client, d.assembly)
 }
 
 // Certificates gets the Certificates collection.
@@ -786,18 +788,12 @@ func (d *Drive) Certificates() ([]*Certificate, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (d *Drive) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if d.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](d.client, d.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](d.client, d.environmentMetrics)
 }
 
 // Metrics gets the Metrics linked resource.
 func (d *Drive) Metrics() (*DriveMetrics, error) {
-	if d.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[DriveMetrics](d.client, d.metrics)
+	return ResolveOrGet[DriveMetrics](d.client, d.metrics)
 }
 
 // NVMe shall contain NVMe-specific properties of a drive.

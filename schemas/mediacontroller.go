@@ -27,7 +27,8 @@ type MediaController struct {
 	// controller.
 	//
 	// Version added: v1.2.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// Manufacturer shall contain the manufacturer of the media controller.
 	Manufacturer string
 	// MediaControllerType shall contain the type of media controller.
@@ -80,8 +81,8 @@ func (m *MediaController) UnmarshalJSON(b []byte) error {
 		temp
 		Actions            mActions
 		Links              mLinks
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		Ports              Link `json:"Ports"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		Ports              Link                             `json:"Ports"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -95,7 +96,8 @@ func (m *MediaController) UnmarshalJSON(b []byte) error {
 	m.resetTarget = tmp.Actions.Reset.Target
 	m.endpoints = tmp.Links.Endpoints.ToStrings()
 	m.memoryDomains = tmp.Links.MemoryDomains.ToStrings()
-	m.environmentMetrics = tmp.EnvironmentMetrics.String()
+	m.environmentMetrics = tmp.EnvironmentMetrics
+
 	m.ports = tmp.Ports.String()
 
 	return nil
@@ -139,10 +141,7 @@ func (m *MediaController) MemoryDomains() ([]*MemoryDomain, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (m *MediaController) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if m.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](m.client, m.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](m.client, m.environmentMetrics)
 }
 
 // Ports gets the Ports collection.

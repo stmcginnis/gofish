@@ -116,32 +116,32 @@ func TestServiceRoot(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.accountService != "/redfish/v1/Accounts" {
-		t.Errorf("Invalid AccountService link: %s", result.accountService)
+	if result.accountService.URI() != "/redfish/v1/Accounts" {
+		t.Errorf("Invalid AccountService link: %s", result.accountService.URI())
 	}
 
-	if result.certificateService != "/redfish/v1/Certificates" {
-		t.Errorf("Invalid CertificateService link: %s", result.certificateService)
+	if result.certificateService.URI() != "/redfish/v1/Certificates" {
+		t.Errorf("Invalid CertificateService link: %s", result.certificateService.URI())
 	}
 
 	if result.chassis != "/redfish/v1/Chassis" {
 		t.Errorf("Invalid Chassis link: %s", result.chassis)
 	}
 
-	if result.compositionService != "/redfish/v1/Compositions" {
-		t.Errorf("Invalid CompositionService link: %s", result.compositionService)
+	if result.compositionService.URI() != "/redfish/v1/Compositions" {
+		t.Errorf("Invalid CompositionService link: %s", result.compositionService.URI())
 	}
 
-	if result.eventService != "/redfish/v1/Events" {
-		t.Errorf("Invalid EventService link: %s", result.eventService)
+	if result.eventService.URI() != "/redfish/v1/Events" {
+		t.Errorf("Invalid EventService link: %s", result.eventService.URI())
 	}
 
 	if result.fabrics != "/redfish/v1/Fabrics" {
 		t.Errorf("Invalid Fabrics link: %s", result.fabrics)
 	}
 
-	if result.jobService != "/redfish/v1/Jobs" {
-		t.Errorf("Invalid JobService link: %s", result.jobService)
+	if result.jobService.URI() != "/redfish/v1/Jobs" {
+		t.Errorf("Invalid JobService link: %s", result.jobService.URI())
 	}
 
 	if result.jSONSchemas != "/redfish/v1/JsonSchemas" {
@@ -168,8 +168,8 @@ func TestServiceRoot(t *testing.T) {
 		t.Errorf("Invalid ResourceBlocks link: %s", result.resourceBlocks)
 	}
 
-	if result.sessionService != "/redfish/v1/SessionService" {
-		t.Errorf("Invalid SessionService link: %s", result.sessionService)
+	if result.sessionService.URI() != "/redfish/v1/SessionService" {
+		t.Errorf("Invalid SessionService link: %s", result.sessionService.URI())
 	}
 
 	if result.storageServices != "/redfish/v1/StorageServices" {
@@ -184,16 +184,16 @@ func TestServiceRoot(t *testing.T) {
 		t.Errorf("Invalid Systems link: %s", result.systems)
 	}
 
-	if result.tasks != "/redfish/v1/Tasks" {
-		t.Errorf("Invalid Tasks link: %s", result.tasks)
+	if result.tasks.URI() != "/redfish/v1/Tasks" {
+		t.Errorf("Invalid Tasks link: %s", result.tasks.URI())
 	}
 
-	if result.telemetryService != "/redfish/v1/TelemetryService" {
-		t.Errorf("Invalid TelemetryService link: %s", result.telemetryService)
+	if result.telemetryService.URI() != "/redfish/v1/TelemetryService" {
+		t.Errorf("Invalid TelemetryService link: %s", result.telemetryService.URI())
 	}
 
-	if result.updateService != "/redfish/v1/UpdateService" {
-		t.Errorf("Invalid UpdateService link: %s", result.updateService)
+	if result.updateService.URI() != "/redfish/v1/UpdateService" {
+		t.Errorf("Invalid UpdateService link: %s", result.updateService.URI())
 	}
 }
 

@@ -47,7 +47,8 @@ const (
 type StorageController struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall track the storage controller for inventory purposes.
 	AssetTag string
 	// CacheSummary shall contain properties that describe the cache memory for
@@ -67,7 +68,8 @@ type StorageController struct {
 	// storage controller.
 	//
 	// Version added: v1.2.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// FirmwareVersion shall contain the firmware version as defined by the
 	// manufacturer for the associated storage controller.
 	FirmwareVersion string
@@ -104,7 +106,8 @@ type StorageController struct {
 	// controller.
 	//
 	// Version added: v1.7.0
-	metrics string
+	metrics ResolvedLink[StorageControllerMetrics]
+
 	// Model shall contain the name by which the manufacturer generally refers to
 	// the storage controller.
 	Model string
@@ -197,11 +200,11 @@ func (s *StorageController) UnmarshalJSON(b []byte) error {
 		temp
 		Actions            sActions
 		Links              sLinks
-		Assembly           Link `json:"Assembly"`
-		Certificates       Link `json:"Certificates"`
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		Metrics            Link `json:"Metrics"`
-		Ports              Link `json:"Ports"`
+		Assembly           ResolvedLink[Assembly]                 `json:"Assembly"`
+		Certificates       Link                                   `json:"Certificates"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics]       `json:"EnvironmentMetrics"`
+		Metrics            ResolvedLink[StorageControllerMetrics] `json:"Metrics"`
+		Ports              Link                                   `json:"Ports"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -223,10 +226,13 @@ func (s *StorageController) UnmarshalJSON(b []byte) error {
 	s.nVMeDiscoveredSubsystems = tmp.Links.NVMeDiscoveredSubsystems.ToStrings()
 	s.networkDeviceFunctions = tmp.Links.NetworkDeviceFunctions.ToStrings()
 	s.pCIeFunctions = tmp.Links.PCIeFunctions.ToStrings()
-	s.assembly = tmp.Assembly.String()
+	s.assembly = tmp.Assembly
+
 	s.certificates = tmp.Certificates.String()
-	s.environmentMetrics = tmp.EnvironmentMetrics.String()
-	s.metrics = tmp.Metrics.String()
+	s.environmentMetrics = tmp.EnvironmentMetrics
+
+	s.metrics = tmp.Metrics
+
 	s.ports = tmp.Ports.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
@@ -427,10 +433,7 @@ func (s *StorageController) PCIeFunctions() ([]*PCIeFunction, error) {
 
 // Assembly gets the Assembly linked resource.
 func (s *StorageController) Assembly() (*Assembly, error) {
-	if s.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](s.client, s.assembly)
+	return ResolveOrGet[Assembly](s.client, s.assembly)
 }
 
 // Certificates gets the Certificates collection.
@@ -443,18 +446,12 @@ func (s *StorageController) Certificates() ([]*Certificate, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (s *StorageController) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if s.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](s.client, s.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](s.client, s.environmentMetrics)
 }
 
 // Metrics gets the Metrics linked resource.
 func (s *StorageController) Metrics() (*StorageControllerMetrics, error) {
-	if s.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[StorageControllerMetrics](s.client, s.metrics)
+	return ResolveOrGet[StorageControllerMetrics](s.client, s.metrics)
 }
 
 // Ports gets the Ports collection.

@@ -112,7 +112,8 @@ type ThermalFan struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.4.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// FanName shall contain the name of the fan.
 	//
 	// Deprecated: v1.1.0
@@ -239,9 +240,9 @@ func (f *ThermalFan) UnmarshalJSON(b []byte) error {
 	type temp ThermalFan
 	var tmp struct {
 		temp
-		Assembly    Link  `json:"Assembly"`
-		Redundancy  Link  `json:"Redundancy"`
-		RelatedItem Links `json:"RelatedItem"`
+		Assembly    ResolvedLink[Assembly] `json:"Assembly"`
+		Redundancy  Link                   `json:"Redundancy"`
+		RelatedItem Links                  `json:"RelatedItem"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -252,7 +253,8 @@ func (f *ThermalFan) UnmarshalJSON(b []byte) error {
 	*f = ThermalFan(tmp.temp)
 
 	// Extract the links to other entities for later
-	f.assembly = tmp.Assembly.String()
+	f.assembly = tmp.Assembly
+
 	f.redundancy = tmp.Redundancy.String()
 	f.relatedItem = tmp.RelatedItem.ToStrings()
 
@@ -284,10 +286,7 @@ func ListReferencedThermalFans(c Client, link string) ([]*ThermalFan, error) {
 
 // Assembly gets the Assembly linked resource.
 func (f *ThermalFan) Assembly() (*Assembly, error) {
-	if f.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](f.client, f.assembly)
+	return ResolveOrGet[Assembly](f.client, f.assembly)
 }
 
 // Redundancy gets the Redundancy linked resource.

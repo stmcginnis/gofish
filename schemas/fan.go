@@ -18,7 +18,8 @@ import (
 type Fan struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// FanDiameterMm shall contain the diameter of the fan assembly in millimeter
 	// units.
 	//
@@ -120,7 +121,7 @@ func (f *Fan) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links    fLinks
-		Assembly Link `json:"Assembly"`
+		Assembly ResolvedLink[Assembly] `json:"Assembly"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -132,7 +133,7 @@ func (f *Fan) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	f.coolingChassis = tmp.Links.CoolingChassis.ToStrings()
-	f.assembly = tmp.Assembly.String()
+	f.assembly = tmp.Assembly
 
 	// This is a read/write object, so we need to save the raw object data for later
 	f.RawData = b
@@ -167,8 +168,5 @@ func (f *Fan) CoolingChassis() ([]*Chassis, error) {
 
 // Assembly gets the Assembly linked resource.
 func (f *Fan) Assembly() (*Assembly, error) {
-	if f.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](f.client, f.assembly)
+	return ResolveOrGet[Assembly](f.client, f.assembly)
 }

@@ -479,6 +479,40 @@ func GetObject[T any, PT GenericSchemaObjectPointer[T]](c Client, uri string, op
 	return DecodeGenericEntity[T, PT](c, resp)
 }
 
+// ResolveOrGet returns link's value, decoding it in place when the service
+// inlined it (e.g. via $expand) and fetching it from the link's URI otherwise.
+//
+// Any inlined JSON is consumed exactly once via Swap, so a later call for the
+// same field always falls through to a live GetObject. The decoded payload is
+// handed to resolveMember, the same helper that decides whether a collection
+// member arrived expanded or as a bare link.
+//
+// A payload that is not actually a populated object, e.g. a link decorated with only an "@odata.type",
+// still results in a fetch rather than a hollow object. Mirrors GetObject's behavior
+// of returning (nil, nil) for an unset (empty uri), never-inlined link.
+func ResolveOrGet[T any, PT GenericSchemaObjectPointer[T]](
+	c Client, link ResolvedLink[T], opts ...QueryGroupOption,
+) (*T, error) {
+	if link.inlined != nil {
+		if raw := link.inlined.Swap(nil); raw != nil {
+			entity := PT(new(T))
+			if json.Unmarshal(*raw, entity) == nil {
+				// An inconclusive result (no ID and no @odata.id, as when the
+				// URI came from "href") falls through to the uri path below.
+				if item, _, err := resolveMember[T, PT](c, entity, opts...); item != nil || err != nil {
+					return item, err
+				}
+			}
+		}
+	}
+
+	if link.uri == "" {
+		return nil, nil
+	}
+
+	return GetObject[T, PT](c, link.uri, opts...)
+}
+
 // Reload re-fetches obj from its own @odata.id using obj's client and the given
 // headers, returning a freshly decoded instance. It is the building block for
 // conditional GETs: pass an "If-None-Match" header and, when the service replies

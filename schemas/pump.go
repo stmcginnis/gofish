@@ -38,7 +38,8 @@ const (
 type Pump struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// AssetTag shall contain the user-assigned asset tag, which is an identifying
 	// string that tracks the equipment for inventory purposes.
 	AssetTag string
@@ -131,8 +132,8 @@ func (p *Pump) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Actions  pActions
-		Assembly Link `json:"Assembly"`
-		Filters  Link `json:"Filters"`
+		Assembly ResolvedLink[Assembly] `json:"Assembly"`
+		Filters  Link                   `json:"Filters"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -144,7 +145,8 @@ func (p *Pump) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	p.setModeTarget = tmp.Actions.SetMode.Target
-	p.assembly = tmp.Assembly.String()
+	p.assembly = tmp.Assembly
+
 	p.filters = tmp.Filters.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
@@ -191,10 +193,7 @@ func (p *Pump) SetMode(mode PumpMode) (*TaskMonitorInfo, error) {
 
 // Assembly gets the Assembly linked resource.
 func (p *Pump) Assembly() (*Assembly, error) {
-	if p.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](p.client, p.assembly)
+	return ResolveOrGet[Assembly](p.client, p.assembly)
 }
 
 // Filters gets the Filters collection.

@@ -82,7 +82,8 @@ type AutomationNode struct {
 	// Instrumentation shall contain a link to a resource of type
 	// 'AutomationInstrumentation' that represents the instrumentation for this
 	// automation node.
-	instrumentation string
+	instrumentation ResolvedLink[AutomationInstrumentation]
+
 	// MotionAxis shall contain the primary axis of motion for this motion-related
 	// node.
 	MotionAxis MotionAxisType
@@ -151,7 +152,7 @@ func (a *AutomationNode) UnmarshalJSON(b []byte) error {
 		temp
 		Actions         aActions
 		Links           aLinks
-		Instrumentation Link `json:"Instrumentation"`
+		Instrumentation ResolvedLink[AutomationInstrumentation] `json:"Instrumentation"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -173,7 +174,7 @@ func (a *AutomationNode) UnmarshalJSON(b []byte) error {
 	a.pidFeedbackSensor = tmp.Links.PidFeedbackSensor.String()
 	a.positionSensor = tmp.Links.PositionSensor.String()
 	a.velocitySensor = tmp.Links.VelocitySensor.String()
-	a.instrumentation = tmp.Instrumentation.String()
+	a.instrumentation = tmp.Instrumentation
 
 	// This is a read/write object, so we need to save the raw object data for later
 	a.RawData = b
@@ -303,8 +304,5 @@ func (a *AutomationNode) VelocitySensor() (*Sensor, error) {
 
 // Instrumentation gets the Instrumentation linked resource.
 func (a *AutomationNode) Instrumentation() (*AutomationInstrumentation, error) {
-	if a.instrumentation == "" {
-		return nil, nil
-	}
-	return GetObject[AutomationInstrumentation](a.client, a.instrumentation)
+	return ResolveOrGet[AutomationInstrumentation](a.client, a.instrumentation)
 }

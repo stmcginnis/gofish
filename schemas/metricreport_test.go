@@ -51,7 +51,7 @@ func TestMetricReport(t *testing.T) {
 
 	assertEquals(t, "AvgPlatformPowerUsage", result.ID)
 	assertEquals(t, "Average Platform Power Usage metric report", result.Name)
-	assertEquals(t, "/redfish/v1/TelemetryService/MetricReportDefinitions/AvgPlatformPowerUsage", result.metricReportDefinition)
+	assertEquals(t, "/redfish/v1/TelemetryService/MetricReportDefinitions/AvgPlatformPowerUsage", result.metricReportDefinition.uri)
 	assertEquals(t, "AverageConsumedWatts", result.MetricValues[0].MetricID)
 	assertEquals(t, "94", result.MetricValues[1].MetricValue)
 	assertEquals(t, "/redfish/v1/Chassis/Tray_1/Power#/0/PowerConsumedWatts", result.MetricValues[2].MetricProperty)

@@ -16,7 +16,8 @@ import (
 type Heater struct {
 	Entity
 	// Assembly shall contain a link to a resource of type 'Assembly'.
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// HotPluggable shall indicate whether the device can be inserted or removed
 	// while the underlying equipment otherwise remains in its current operational
 	// state. Hot-pluggable devices can become operable without altering the
@@ -35,7 +36,8 @@ type Heater struct {
 	// heater is purchased, but this is not necessarily true.
 	Manufacturer string
 	// Metrics shall contain a link to a resource of type 'HeaterMetrics'.
-	metrics string
+	metrics ResolvedLink[HeaterMetrics]
+
 	// Model shall contain the model information as defined by the manufacturer for
 	// this heater.
 	Model string
@@ -88,8 +90,8 @@ func (h *Heater) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Links    hLinks
-		Assembly Link `json:"Assembly"`
-		Metrics  Link `json:"Metrics"`
+		Assembly ResolvedLink[Assembly]      `json:"Assembly"`
+		Metrics  ResolvedLink[HeaterMetrics] `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -105,8 +107,9 @@ func (h *Heater) UnmarshalJSON(b []byte) error {
 	h.networkAdapters = tmp.Links.NetworkAdapters.ToStrings()
 	h.processors = tmp.Links.Processors.ToStrings()
 	h.storageControllers = tmp.Links.StorageControllers.ToStrings()
-	h.assembly = tmp.Assembly.String()
-	h.metrics = tmp.Metrics.String()
+	h.assembly = tmp.Assembly
+
+	h.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	h.RawData = b
@@ -161,16 +164,10 @@ func (h *Heater) StorageControllers() ([]*StorageController, error) {
 
 // Assembly gets the Assembly linked resource.
 func (h *Heater) Assembly() (*Assembly, error) {
-	if h.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](h.client, h.assembly)
+	return ResolveOrGet[Assembly](h.client, h.assembly)
 }
 
 // Metrics gets the Metrics linked resource.
 func (h *Heater) Metrics() (*HeaterMetrics, error) {
-	if h.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[HeaterMetrics](h.client, h.metrics)
+	return ResolveOrGet[HeaterMetrics](h.client, h.metrics)
 }

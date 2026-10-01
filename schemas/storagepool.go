@@ -163,7 +163,8 @@ type StoragePool struct {
 	// IOStatistics property.
 	//
 	// Version added: v1.9.0
-	metrics string
+	metrics ResolvedLink[StoragePoolMetrics]
+
 	// NVMeEnduranceGroupProperties shall contain properties to use when
 	// StoragePool is used to describe an NVMe Endurance Group.
 	//
@@ -268,10 +269,10 @@ func (s *StoragePool) UnmarshalJSON(b []byte) error {
 		temp
 		Actions          sActions
 		Links            sLinks
-		AllocatedPools   Link `json:"AllocatedPools"`
-		AllocatedVolumes Link `json:"AllocatedVolumes"`
-		ClassesOfService Link `json:"ClassesOfService"`
-		Metrics          Link `json:"Metrics"`
+		AllocatedPools   Link                             `json:"AllocatedPools"`
+		AllocatedVolumes Link                             `json:"AllocatedVolumes"`
+		ClassesOfService Link                             `json:"ClassesOfService"`
+		Metrics          ResolvedLink[StoragePoolMetrics] `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -293,7 +294,7 @@ func (s *StoragePool) UnmarshalJSON(b []byte) error {
 	s.allocatedPools = tmp.AllocatedPools.String()
 	s.allocatedVolumes = tmp.AllocatedVolumes.String()
 	s.classesOfService = tmp.ClassesOfService.String()
-	s.metrics = tmp.Metrics.String()
+	s.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	s.RawData = b
@@ -465,10 +466,7 @@ func (s *StoragePool) ClassesOfService() ([]*ClassOfService, error) {
 
 // Metrics gets the Metrics linked resource.
 func (s *StoragePool) Metrics() (*StoragePoolMetrics, error) {
-	if s.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[StoragePoolMetrics](s.client, s.metrics)
+	return ResolveOrGet[StoragePoolMetrics](s.client, s.metrics)
 }
 
 // EndGrpLifetime This contains properties for the Endurance Group Lifetime

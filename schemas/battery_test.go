@@ -69,7 +69,7 @@ func TestBattery(t *testing.T) {
 	assertEquals(t, "Module1", result.ID)
 	assertEquals(t, "Battery 1", result.Name)
 	assertEquals(t, "RKS-440DC", result.Model)
-	assertEquals(t, "/redfish/v1/Chassis/1U/PowerSubsystem/Batteries/Module1/Metrics", result.metrics)
+	assertEquals(t, "/redfish/v1/Chassis/1U/PowerSubsystem/Batteries/Module1/Metrics", result.metrics.uri)
 	assertEquals(t, "Idle", string(result.ChargeState))
 
 	if !result.HotPluggable {

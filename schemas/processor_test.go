@@ -397,8 +397,8 @@ func TestProcessor(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.assembly != "/redfish/v1/Chassis/System.Embedded.1/Assembly" {
-		t.Errorf("Invalid assembly link: %s", result.assembly)
+	if result.assembly.uri != "/redfish/v1/Chassis/System.Embedded.1/Assembly" {
+		t.Errorf("Invalid assembly link: %s", result.assembly.uri)
 	}
 
 	if result.cacheMemory != "/redfish/v1/Systems/System.Embedded.1/Processors/CPU.Socket.2/CacheMemory" {
@@ -435,8 +435,8 @@ func TestMaxSpeedMHzString(t *testing.T) {
 		t.Errorf("Received invalid name: %s", result.Name)
 	}
 
-	if result.assembly != "/redfish/v1/Chassis/System.Embedded.1/Assembly" {
-		t.Errorf("Invalid assembly link: %s", result.assembly)
+	if result.assembly.uri != "/redfish/v1/Chassis/System.Embedded.1/Assembly" {
+		t.Errorf("Invalid assembly link: %s", result.assembly.uri)
 	}
 
 	if result.FPGA.FPGAType != DiscreteFPGAType {

@@ -20,7 +20,8 @@ type NetworkAdapter struct {
 	// Assembly shall contain a link to a resource of type 'Assembly'.
 	//
 	// Version added: v1.1.0
-	assembly string
+	assembly ResolvedLink[Assembly]
+
 	// Certificates shall contain a link to a resource collection of type
 	// 'CertificateCollection' that contains certificates for device identity and
 	// attestation.
@@ -35,7 +36,8 @@ type NetworkAdapter struct {
 	// adapter.
 	//
 	// Version added: v1.7.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// Identifiers shall contain a list of all known durable names for the network
 	// adapter.
 	//
@@ -66,7 +68,8 @@ type NetworkAdapter struct {
 	// that contains the metrics associated with this adapter.
 	//
 	// Version added: v1.7.0
-	metrics string
+	metrics ResolvedLink[NetworkAdapterMetrics]
+
 	// Model shall contain the information about how the manufacturer refers to
 	// this network adapter.
 	Model string
@@ -135,14 +138,14 @@ func (n *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		temp
 		Actions                nActions
-		Assembly               Link `json:"Assembly"`
-		Certificates           Link `json:"Certificates"`
-		EnvironmentMetrics     Link `json:"EnvironmentMetrics"`
-		Metrics                Link `json:"Metrics"`
-		NetworkDeviceFunctions Link `json:"NetworkDeviceFunctions"`
-		NetworkPorts           Link `json:"NetworkPorts"`
-		Ports                  Link `json:"Ports"`
-		Processors             Link `json:"Processors"`
+		Assembly               ResolvedLink[Assembly]              `json:"Assembly"`
+		Certificates           Link                                `json:"Certificates"`
+		EnvironmentMetrics     ResolvedLink[EnvironmentMetrics]    `json:"EnvironmentMetrics"`
+		Metrics                ResolvedLink[NetworkAdapterMetrics] `json:"Metrics"`
+		NetworkDeviceFunctions Link                                `json:"NetworkDeviceFunctions"`
+		NetworkPorts           Link                                `json:"NetworkPorts"`
+		Ports                  Link                                `json:"Ports"`
+		Processors             Link                                `json:"Processors"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -155,10 +158,13 @@ func (n *NetworkAdapter) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	n.resetTarget = tmp.Actions.Reset.Target
 	n.resetSettingsToDefaultTarget = tmp.Actions.ResetSettingsToDefault.Target
-	n.assembly = tmp.Assembly.String()
+	n.assembly = tmp.Assembly
+
 	n.certificates = tmp.Certificates.String()
-	n.environmentMetrics = tmp.EnvironmentMetrics.String()
-	n.metrics = tmp.Metrics.String()
+	n.environmentMetrics = tmp.EnvironmentMetrics
+
+	n.metrics = tmp.Metrics
+
 	n.networkDeviceFunctions = tmp.NetworkDeviceFunctions.String()
 	n.networkPorts = tmp.NetworkPorts.String()
 	n.ports = tmp.Ports.String()
@@ -219,10 +225,7 @@ func (n *NetworkAdapter) ResetSettingsToDefault() (*TaskMonitorInfo, error) {
 
 // Assembly gets the Assembly linked resource.
 func (n *NetworkAdapter) Assembly() (*Assembly, error) {
-	if n.assembly == "" {
-		return nil, nil
-	}
-	return GetObject[Assembly](n.client, n.assembly)
+	return ResolveOrGet[Assembly](n.client, n.assembly)
 }
 
 // Certificates gets the Certificates collection.
@@ -235,18 +238,12 @@ func (n *NetworkAdapter) Certificates() ([]*Certificate, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (n *NetworkAdapter) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if n.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](n.client, n.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](n.client, n.environmentMetrics)
 }
 
 // Metrics gets the Metrics linked resource.
 func (n *NetworkAdapter) Metrics() (*NetworkAdapterMetrics, error) {
-	if n.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[NetworkAdapterMetrics](n.client, n.metrics)
+	return ResolveOrGet[NetworkAdapterMetrics](n.client, n.metrics)
 }
 
 // NetworkDeviceFunctions gets the NetworkDeviceFunctions collection.

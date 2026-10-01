@@ -431,7 +431,8 @@ type Port struct {
 	// or any attached small form-factor pluggable (SFP) device.
 	//
 	// Version added: v1.4.0
-	environmentMetrics string
+	environmentMetrics ResolvedLink[EnvironmentMetrics]
+
 	// Ethernet shall contain Ethernet-specific properties of the port.
 	//
 	// Version added: v1.3.0
@@ -529,7 +530,8 @@ type Port struct {
 	// represent the combined metrics from all associated physical ports.
 	//
 	// Version added: v1.2.0
-	metrics string
+	metrics ResolvedLink[PortMetrics]
+
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -616,8 +618,8 @@ func (p *Port) UnmarshalJSON(b []byte) error {
 		temp
 		Actions            pActions
 		Links              pLinks
-		EnvironmentMetrics Link `json:"EnvironmentMetrics"`
-		Metrics            Link `json:"Metrics"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		Metrics            ResolvedLink[PortMetrics]        `json:"Metrics"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -637,8 +639,9 @@ func (p *Port) UnmarshalJSON(b []byte) error {
 	p.connectedSwitchPorts = tmp.Links.ConnectedSwitchPorts.ToStrings()
 	p.connectedSwitches = tmp.Links.ConnectedSwitches.ToStrings()
 	p.ethernetInterfaces = tmp.Links.EthernetInterfaces.ToStrings()
-	p.environmentMetrics = tmp.EnvironmentMetrics.String()
-	p.metrics = tmp.Metrics.String()
+	p.environmentMetrics = tmp.EnvironmentMetrics
+
+	p.metrics = tmp.Metrics
 
 	// This is a read/write object, so we need to save the raw object data for later
 	p.RawData = b
@@ -737,18 +740,12 @@ func (p *Port) EthernetInterfaces() ([]*EthernetInterface, error) {
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
 func (p *Port) EnvironmentMetrics() (*EnvironmentMetrics, error) {
-	if p.environmentMetrics == "" {
-		return nil, nil
-	}
-	return GetObject[EnvironmentMetrics](p.client, p.environmentMetrics)
+	return ResolveOrGet[EnvironmentMetrics](p.client, p.environmentMetrics)
 }
 
 // Metrics gets the Metrics linked resource.
 func (p *Port) Metrics() (*PortMetrics, error) {
-	if p.metrics == "" {
-		return nil, nil
-	}
-	return GetObject[PortMetrics](p.client, p.metrics)
+	return ResolveOrGet[PortMetrics](p.client, p.metrics)
 }
 
 // CXLPort shall contain CXL-specific properties for a port.
