@@ -56,9 +56,9 @@ type {{ .Name }} struct {
 {{ .Description }}
 {{- if and .IsLink .LinkType (not .IsArray) (not .IsCollection) }}
 	//
-	// Holds both the link URI and, if the service inlined it (e.g. via
-	// $expand), the decoded value - {{ .GetterMethod }}() consumes that
-	// value exactly once, so a second call always does a live GET.
+	// Holds the link URI and, if the service inlined the resource (e.g. via
+	// $expand), its raw JSON - {{ .GetterMethod }}() consumes that JSON
+	// exactly once, so a second call always does a live GET.
 	{{ .Name }} {{ $pkg }}ResolvedLink[{{ .LinkType }}]
 {{- else }}
 	{{ .Name }} {{ .TypeString }} {{ .JSONTag }}

@@ -8,6 +8,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -352,6 +353,25 @@ func TestAutoExpandLevelsIgnoredWithoutLevelsSupport(t *testing.T) {
 	}
 	if strings.Contains(query, "$levels") {
 		t.Errorf("expected no $levels in query since the service doesn't support it, got %q", query)
+	}
+}
+
+// TestAutoExpandLevelsBoundsConversion asks for a nonsensical depth against a
+// service that advertises $levels without the MaxLevels the spec requires, so
+// nothing clamps it. The depth must still come out positive rather than
+// wrapping negative on the way to an int.
+func TestAutoExpandLevelsBoundsConversion(t *testing.T) {
+	const body = `{
+		"ProtocolFeaturesSupported": {
+			"ExpandQuery": {"NoLinks": true, "Levels": true}
+		}
+	}`
+
+	client := connectWithAutoExpand(t, body, math.MaxUint)
+
+	query := schemas.BuildQuery(client, "/redfish/v1/Chassis", true)
+	if !strings.Contains(query, "$levels=2147483647") {
+		t.Errorf("expected $levels bounded to MaxInt32, got %q", query)
 	}
 }
 

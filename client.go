@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"mime/multipart"
 	"net/http"
 	"net/http/httputil"
@@ -109,9 +110,15 @@ type ClientConfig struct {
 	// AutoExpand enables $expand if supported and automatically falls back if $expand fails.
 	AutoExpand bool
 
-	// AutoExpandLevels sets how many levels deep $expand should inline resources,
-	// when the BMC's ServiceRoot says it supports $levels. Has no effect unless
-	// AutoExpand is also true. Leave at 0 for the default: one level deep.
+	// AutoExpandLevels sets how many levels deep $expand should inline
+	// resources, when the BMC's ServiceRoot says it supports $levels. The
+	// value is clamped to the MaxLevels the service advertises. Has no effect
+	// unless AutoExpand is also true. At 0 no $levels is sent and the service
+	// picks its own depth.
+	//
+	// Each inlined resource is retained as raw JSON on its parent until the
+	// matching getter consumes it, so a deep expand holds roughly the size of
+	// the expanded response in memory.
 	AutoExpandLevels uint
 }
 
@@ -219,7 +226,11 @@ func setupClientWithConfig(ctx context.Context, config *ClientConfig) (c *APICli
 					levels = maxLevels
 				}
 
-				queryOpts = append(queryOpts, schemas.WithExpandLevel(int(levels)))
+				// The spec requires MaxLevels whenever Levels is true, so a
+				// service that omits it leaves levels unclamped above. Bound
+				// the conversion: a value that wraps negative is silently
+				// dropped by BuildQuery instead of being sent.
+				queryOpts = append(queryOpts, schemas.WithExpandLevel(int(min(levels, math.MaxInt32))))
 			}
 
 			client.Settings.DefaultQueryOptions = append(client.Settings.DefaultQueryOptions,
