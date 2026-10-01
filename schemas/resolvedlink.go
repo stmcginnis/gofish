@@ -9,11 +9,11 @@ import (
 	"sync/atomic"
 )
 
-// ResolvedLink holds a singleton link's URI plus, if the service may have
+// ResolvedLink holds a singleton link's URI plus, when the service may have
 // inlined real content for it (e.g. via $expand), the raw JSON of that
-// content decodes it and decides whether it is genuinely an expanded object.
-// The zero value (a bare, never-set link) behaves like an empty URI with
-// nothing inlined.
+// content. ResolveOrGet decodes the retained JSON and decides whether it is
+// genuinely an expanded object or merely a decorated link. The zero value (a
+// bare, never-set link) behaves like an empty URI with nothing inlined.
 type ResolvedLink[T any] struct {
 	uri     string
 	inlined *atomic.Pointer[json.RawMessage]
