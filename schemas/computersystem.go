@@ -1866,6 +1866,25 @@ type IPMIHostInterface struct {
 	ServiceEnabled bool
 }
 
+// UnmarshalJSON unmarshals an IPMIHostInterface object from the raw JSON.
+// Some BMCs emit a bare bool rather than the object the schema defines.
+func (i *IPMIHostInterface) UnmarshalJSON(b []byte) error {
+	var enabled bool
+	if err := json.Unmarshal(b, &enabled); err == nil {
+		i.ServiceEnabled = enabled
+		return nil
+	}
+
+	type temp IPMIHostInterface
+	var t temp
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	*i = IPMIHostInterface(t)
+	return nil
+}
+
 // IdlePowerSaver shall contain the idle power saver settings of a computer
 // system.
 type IdlePowerSaver struct {
