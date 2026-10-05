@@ -1867,21 +1867,21 @@ type IPMIHostInterface struct {
 }
 
 // UnmarshalJSON unmarshals an IPMIHostInterface object from the raw JSON.
-// Some BMCs emit a bare bool rather than the object the schema defines.
 func (i *IPMIHostInterface) UnmarshalJSON(b []byte) error {
-	var enabled bool
-	if err := json.Unmarshal(b, &enabled); err == nil {
-		i.ServiceEnabled = enabled
+	type temp IPMIHostInterface
+	var t temp
+	err := json.Unmarshal(b, &t)
+	if err == nil {
+		*i = IPMIHostInterface(t)
 		return nil
 	}
 
-	type temp IPMIHostInterface
-	var t temp
-	if err := json.Unmarshal(b, &t); err != nil {
+	// Some BMCs emit a bare bool rather than the object the schema defines.
+	var enabled bool
+	if json.Unmarshal(b, &enabled) != nil {
 		return err
 	}
-
-	*i = IPMIHostInterface(t)
+	i.ServiceEnabled = enabled
 	return nil
 }
 
