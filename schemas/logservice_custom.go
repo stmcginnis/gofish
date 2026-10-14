@@ -10,42 +10,6 @@ import (
 	"fmt"
 )
 
-// UnmarshalJSON unmarshals a LogService object from the raw JSON.
-func (l *LogService) UnmarshalJSON(b []byte) error {
-	type temp LogService
-	type lActions struct {
-		ClearLog              ActionTarget `json:"#LogService.ClearLog"`
-		CollectDiagnosticData ActionTarget `json:"#LogService.CollectDiagnosticData"`
-		DownloadRawLog        ActionTarget `json:"#LogService.DownloadRawLog"`
-		PushDiagnosticData    ActionTarget `json:"#LogService.PushDiagnosticData"`
-	}
-	var tmp struct {
-		temp
-		Actions lActions
-		Entries Link `json:"Entries"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*l = LogService(tmp.temp)
-
-	// Extract the links to other entities for later
-	l.clearLogTarget = tmp.Actions.ClearLog.Target
-	l.collectDiagnosticDataTarget = tmp.Actions.CollectDiagnosticData.Target
-	l.collectDiagnosticInfoTarget = tmp.Actions.CollectDiagnosticData.ActionInfoTarget
-	l.downloadRawLogTarget = tmp.Actions.DownloadRawLog.Target
-	l.pushDiagnosticDataTarget = tmp.Actions.PushDiagnosticData.Target
-	l.entries = tmp.Entries.String()
-
-	// This is a read/write object, so we need to save the raw object data for later
-	l.RawData = b
-
-	return nil
-}
-
 // SupportsCollectDiagnosticData indicates if the CollectDiagnosticData action is supported.
 func (l *LogService) SupportsCollectDiagnosticData() bool {
 	return l.collectDiagnosticDataTarget != ""
@@ -126,4 +90,20 @@ func (l *LogService) CollectDiagnosticDataActionInfo() (*ActionInfo, error) {
 	}
 
 	return GetObject[ActionInfo](l.GetClient(), l.collectDiagnosticInfoTarget)
+}
+
+// postUnmarshal records the ActionInfo URI for CollectDiagnosticData.
+func (l *LogService) postUnmarshal(b []byte) error {
+	var t struct {
+		Actions struct {
+			CollectDiagnosticData ActionTarget `json:"#LogService.CollectDiagnosticData"`
+		}
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	l.collectDiagnosticInfoTarget = t.Actions.CollectDiagnosticData.ActionInfoTarget
+
+	return nil
 }

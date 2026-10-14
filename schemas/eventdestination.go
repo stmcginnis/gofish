@@ -446,6 +446,41 @@ type EventDestination struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a EventDestination object from the raw JSON.
+func (e *EventDestination) UnmarshalJSON(b []byte) error {
+	type temp EventDestination
+	type eActions struct {
+		ResumeSubscription  ActionTarget `json:"#EventDestination.ResumeSubscription"`
+		SuspendSubscription ActionTarget `json:"#EventDestination.SuspendSubscription"`
+	}
+	var tmp struct {
+		temp
+		Actions                eActions
+		Certificates           Link `json:"Certificates"`
+		ClientCertificates     Link `json:"ClientCertificates"`
+		LenientOriginResources any  `json:"OriginResources"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*e = EventDestination(tmp.temp)
+
+	// Extract the links to other entities for later
+	e.resumeSubscriptionTarget = tmp.Actions.ResumeSubscription.Target
+	e.suspendSubscriptionTarget = tmp.Actions.SuspendSubscription.Target
+	e.certificates = tmp.Certificates.String()
+	e.clientCertificates = tmp.ClientCertificates.String()
+	e.OriginResources = linkURIs(tmp.LenientOriginResources)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	e.RawData = b
+
+	return nil
+}
+
 // Update commits updates to this object's properties to the running system.
 func (e *EventDestination) Update() error {
 	readWriteFields := []string{

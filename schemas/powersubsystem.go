@@ -105,6 +105,38 @@ type PowerSubsystem struct {
 	powerBrakeTemperatureSensor string
 }
 
+// UnmarshalJSON unmarshals a PowerSubsystem object from the raw JSON.
+func (p *PowerSubsystem) UnmarshalJSON(b []byte) error {
+	type temp PowerSubsystem
+	type pLinks struct {
+		PowerBrakeLoadPercentSensor Link `json:"PowerBrakeLoadPercentSensor"`
+		PowerBrakeTemperatureSensor Link `json:"PowerBrakeTemperatureSensor"`
+	}
+	var tmp struct {
+		temp
+		Links             pLinks
+		LenientAllocation any  `json:"Allocation"`
+		Batteries         Link `json:"Batteries"`
+		PowerSupplies     Link `json:"PowerSupplies"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PowerSubsystem(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.powerBrakeLoadPercentSensor = tmp.Links.PowerBrakeLoadPercentSensor.String()
+	p.powerBrakeTemperatureSensor = tmp.Links.PowerBrakeTemperatureSensor.String()
+	p.batteries = tmp.Batteries.String()
+	p.powerSupplies = tmp.PowerSupplies.String()
+	p.Allocation = powerAllocation(tmp.LenientAllocation)
+
+	return nil
+}
+
 // GetPowerSubsystem will get a PowerSubsystem instance from the service.
 func GetPowerSubsystem(c Client, uri string) (*PowerSubsystem, error) {
 	return GetObject[PowerSubsystem](c, uri)

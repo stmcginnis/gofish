@@ -96,7 +96,8 @@ type {{ .Name }} struct {
 	RawData []byte
 {{- end }}
 }
-{{- if and (or (and .IsEntity (gt (len .ReadWriteProperties) 0)) .HasActions .HasLinks .HasLinkProperties) (not (hand (printf "%s.UnmarshalJSON" .Name))) }}
+{{- $hook := hand (printf "%s.postUnmarshal" .Name) }}
+{{- if and (or (and .IsEntity (gt (len .ReadWriteProperties) 0)) .HasActions .HasLinks .HasLinkProperties .HasLenient $hook) (not (hand (printf "%s.UnmarshalJSON" .Name))) }}
 
 // UnmarshalJSON unmarshals a {{ .Name }} object from the raw JSON.
 func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
@@ -111,7 +112,8 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 {{- if .HasLinks }}
 	type {{ .ReceiverName }}Links struct {
 {{- range .Links }}
-{{- if .IsArray }}
+{{- if .Overridden }}
+{{- else if .IsArray }}
 		{{ .Name }} {{ $pkg }}Links `json:"{{ .JSONName }}"`
 {{- else }}
 		{{ .Name }} {{ $pkg }}Link `json:"{{ .JSONName }}"`
@@ -128,7 +130,11 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 		Links {{ .ReceiverName }}Links
 {{- end }}
 {{- range .Properties }}
-{{- if and .IsLink .LinkType }}
+{{- if .Lenient }}
+		Lenient{{ .Name }} any `json:"{{ .JSONName }}"`
+{{- else if .Shadow }}
+		Shadow{{ .JSONName }} json.RawMessage `json:"{{ .JSONName }}"`
+{{- else if and .IsLink .LinkType }}
 {{- if .IsArray }}
 		{{ .GetterMethod }} {{ $pkg }}Links `json:"{{ .JSONName }}"`
 {{- else if .IsCollection }}
@@ -149,10 +155,13 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 {{- range .Actions }}
+{{- if not .TargetOverridden }}
 	{{ $receiverName }}.{{ .TargetField }} = tmp.Actions.{{ .Name }}.Target
 {{- end }}
+{{- end }}
 {{- range .Links }}
-{{- if .IsArray }}
+{{- if .Overridden }}
+{{- else if .IsArray }}
 	{{ $receiverName }}.{{ .FieldName }} = tmp.Links.{{ .Name }}.ToStrings()
 {{- else }}
 	{{ $receiverName }}.{{ .FieldName }} = tmp.Links.{{ .Name }}.String()
@@ -169,13 +178,23 @@ func ({{ .ReceiverName }} *{{ .Name }}) UnmarshalJSON(b []byte) error {
 {{- end }}
 {{- end }}
 {{- end }}
+{{- range .Properties }}
+{{- if .Lenient }}
+	{{ $receiverName }}.{{ .Name }} = {{ .Lenient }}(tmp.Lenient{{ .Name }})
+{{- end }}
+{{- end }}
 {{- if and .IsEntity (gt (len .ReadWriteProperties) 0) }}
 
 	// This is a read/write object, so we need to save the raw object data for later
 	{{ .ReceiverName }}.RawData = b
 {{- end }}
+{{- if $hook }}
+
+	return {{ .ReceiverName }}.postUnmarshal(b)
+{{- else }}
 
 	return nil
+{{- end }}
 }
 {{- end }}
 {{- if and .IsEntity (gt (len .ReadWriteProperties) 0) (not (hand (printf "%s.Update" .Name))) }}
@@ -227,7 +246,7 @@ type {{ .ParamStructName }} struct {
 {{- end }}
 }
 {{- end }}
-{{- if not (hand (printf "%s.%s" $structName .Name)) }}
+{{- if not (or .TargetOverridden (hand (printf "%s.%s" $structName .Name))) }}
 
 {{ .Description }}
 {{- if not .UseParamStruct }}
@@ -297,7 +316,7 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .P
 {{- end }}
 {{- end }}
 {{- range .Links }}
-{{- if hand (printf "%s.%s" $structName .Name) }}
+{{- if or .Overridden (hand (printf "%s.%s" $structName .Name)) }}
 {{- else if .IsArray }}
 
 // {{ .Name }} gets the {{ .Name }} linked resources.

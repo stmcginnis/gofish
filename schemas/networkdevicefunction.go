@@ -215,6 +215,54 @@ type NetworkDeviceFunction struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a NetworkDeviceFunction object from the raw JSON.
+func (n *NetworkDeviceFunction) UnmarshalJSON(b []byte) error {
+	type temp NetworkDeviceFunction
+	type nLinks struct {
+		Endpoints                     Links `json:"Endpoints"`
+		EthernetInterface             Link  `json:"EthernetInterface"`
+		EthernetInterfaces            Links `json:"EthernetInterfaces"`
+		OffloadProcessors             Links `json:"OffloadProcessors"`
+		OffloadSystem                 Link  `json:"OffloadSystem"`
+		PCIeFunction                  Link  `json:"PCIeFunction"`
+		PhysicalNetworkPortAssignment Link  `json:"PhysicalNetworkPortAssignment"`
+	}
+	var tmp struct {
+		temp
+		Links                          nLinks
+		AllowDeny                      Link                                       `json:"AllowDeny"`
+		AssignablePhysicalNetworkPorts Links                                      `json:"AssignablePhysicalNetworkPorts"`
+		AssignablePhysicalPorts        Links                                      `json:"AssignablePhysicalPorts"`
+		Metrics                        ResolvedLink[NetworkDeviceFunctionMetrics] `json:"Metrics"`
+		ShadowPhysicalPortAssignment   json.RawMessage                            `json:"PhysicalPortAssignment"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*n = NetworkDeviceFunction(tmp.temp)
+
+	// Extract the links to other entities for later
+	n.endpoints = tmp.Links.Endpoints.ToStrings()
+	n.ethernetInterface = tmp.Links.EthernetInterface.String()
+	n.ethernetInterfaces = tmp.Links.EthernetInterfaces.ToStrings()
+	n.offloadProcessors = tmp.Links.OffloadProcessors.ToStrings()
+	n.offloadSystem = tmp.Links.OffloadSystem.String()
+	n.pCIeFunction = tmp.Links.PCIeFunction.String()
+	n.physicalNetworkPortAssignment = tmp.Links.PhysicalNetworkPortAssignment.String()
+	n.allowDeny = tmp.AllowDeny.String()
+	n.assignablePhysicalNetworkPorts = tmp.AssignablePhysicalNetworkPorts.ToStrings()
+	n.assignablePhysicalPorts = tmp.AssignablePhysicalPorts.ToStrings()
+	n.metrics = tmp.Metrics
+
+	// This is a read/write object, so we need to save the raw object data for later
+	n.RawData = b
+
+	return n.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (n *NetworkDeviceFunction) Update() error {
 	readWriteFields := []string{

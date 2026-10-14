@@ -1030,6 +1030,27 @@ type MemoryLocation struct {
 	Socket *int `json:",omitempty"`
 }
 
+// UnmarshalJSON unmarshals a MemoryLocation object from the raw JSON.
+func (m *MemoryLocation) UnmarshalJSON(b []byte) error {
+	type temp MemoryLocation
+	var tmp struct {
+		temp
+		LenientChannel any `json:"Channel"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MemoryLocation(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.Channel = toInt(tmp.LenientChannel)
+
+	return nil
+}
+
 // PowerManagementPolicy shall contain properties that describe the power
 // management policy for this resource.
 type PowerManagementPolicy struct {

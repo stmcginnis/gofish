@@ -413,6 +413,33 @@ type ThermalFan struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a ThermalFan object from the raw JSON.
+func (t *ThermalFan) UnmarshalJSON(b []byte) error {
+	type temp ThermalFan
+	var tmp struct {
+		temp
+		Assembly         ResolvedLink[Assembly] `json:"Assembly"`
+		ShadowRedundancy json.RawMessage        `json:"Redundancy"`
+		RelatedItem      Links                  `json:"RelatedItem"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*t = ThermalFan(tmp.temp)
+
+	// Extract the links to other entities for later
+	t.assembly = tmp.Assembly
+	t.relatedItem = tmp.RelatedItem.ToStrings()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	t.RawData = b
+
+	return t.postUnmarshal(b)
+}
+
 // GetThermalFan will get a ThermalFan instance from the service.
 func GetThermalFan(c Client, uri string) (*ThermalFan, error) {
 	return GetObject[ThermalFan](c, uri)

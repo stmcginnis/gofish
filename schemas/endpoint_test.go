@@ -150,3 +150,16 @@ func TestEndpoint(t *testing.T) {
 		t.Errorf("Received durable name format: %s", result.Identifiers[0].DurableNameFormat)
 	}
 }
+
+// PciID.FunctionNumber is accepted as a number or a numeric string.
+func TestPciIDFunctionNumber(t *testing.T) {
+	for _, body := range []string{`{"FunctionNumber": 2}`, `{"FunctionNumber": "2"}`} {
+		var result PciID
+		if err := json.Unmarshal([]byte(body), &result); err != nil {
+			t.Fatalf("Error decoding %s: %s", body, err)
+		}
+		if result.FunctionNumber == nil || *result.FunctionNumber != 2 {
+			t.Errorf("Invalid FunctionNumber from %s: %v", body, result.FunctionNumber)
+		}
+	}
+}

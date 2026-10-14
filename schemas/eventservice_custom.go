@@ -11,37 +11,6 @@ import (
 	"time"
 )
 
-// UnmarshalJSON unmarshals a EventService object from the raw JSON.
-func (e *EventService) UnmarshalJSON(b []byte) error {
-	type temp EventService
-	type eActions struct {
-		SubmitTestEvent       ActionTarget `json:"#EventService.SubmitTestEvent"`
-		TestEventSubscription ActionTarget `json:"#EventService.TestEventSubscription"`
-	}
-	var tmp struct {
-		temp
-		Actions       eActions
-		Subscriptions Link `json:"Subscriptions"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*e = EventService(tmp.temp)
-
-	// Extract the links to other entities for later
-	e.SubmitTestEventTarget = tmp.Actions.SubmitTestEvent.Target
-	e.testEventSubscriptionTarget = tmp.Actions.TestEventSubscription.Target
-	e.SubscriptionsLink = strings.TrimSpace(tmp.Subscriptions.String())
-
-	// This is a read/write object, so we need to save the raw object data for later
-	e.RawData = b
-
-	return nil
-}
-
 // Deprecated: (v1.5) EventType-based eventing is DEPRECATED in the Redfish schema
 // in favor of using RegistryPrefix and ResourceTypes
 func (e *EventService) CreateEventSubscription(
@@ -178,4 +147,23 @@ func (e *EventService) GetEventSubscription(uri string) (*EventDestination, erro
 		return nil, errors.New("uri should not be empty")
 	}
 	return GetEventDestination(e.GetClient(), uri)
+}
+
+// postUnmarshal records the exported SubmitTestEventTarget and
+// SubscriptionsLink fields.
+func (e *EventService) postUnmarshal(b []byte) error {
+	var t struct {
+		Actions struct {
+			SubmitTestEvent ActionTarget `json:"#EventService.SubmitTestEvent"`
+		}
+		Subscriptions Link
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	e.SubmitTestEventTarget = t.Actions.SubmitTestEvent.Target
+	e.SubscriptionsLink = strings.TrimSpace(t.Subscriptions.String())
+
+	return nil
 }

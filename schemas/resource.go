@@ -650,6 +650,27 @@ type PartLocation struct {
 	ServiceLabel string
 }
 
+// UnmarshalJSON unmarshals a PartLocation object from the raw JSON.
+func (p *PartLocation) UnmarshalJSON(b []byte) error {
+	type temp PartLocation
+	var tmp struct {
+		temp
+		LenientLocationOrdinalValue any `json:"LocationOrdinalValue"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PartLocation(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.LocationOrdinalValue = locationOrdinal(tmp.LenientLocationOrdinalValue)
+
+	return nil
+}
+
 // PhysicalAddress shall contain a physical address for a resource.
 type PhysicalAddress struct {
 	// City shall contain the city, township, or shi (JP) location for this

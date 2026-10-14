@@ -167,6 +167,34 @@ type EventService struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a EventService object from the raw JSON.
+func (e *EventService) UnmarshalJSON(b []byte) error {
+	type temp EventService
+	type eActions struct {
+		SubmitTestEvent       ActionTarget `json:"#EventService.SubmitTestEvent"`
+		TestEventSubscription ActionTarget `json:"#EventService.TestEventSubscription"`
+	}
+	var tmp struct {
+		temp
+		Actions eActions
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*e = EventService(tmp.temp)
+
+	// Extract the links to other entities for later
+	e.testEventSubscriptionTarget = tmp.Actions.TestEventSubscription.Target
+
+	// This is a read/write object, so we need to save the raw object data for later
+	e.RawData = b
+
+	return e.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (e *EventService) Update() error {
 	readWriteFields := []string{

@@ -392,8 +392,6 @@ var FieldOverrides = map[string]string{
 	"Temperature.LowerThresholdUser":                             "LowerThresholdUser *float32 `json:\",omitempty\"`",
 	"Temperature.UpperThresholdUser":                             "UpperThresholdUser *float32 `json:\",omitempty\"`",
 	"ThermalFan.redundancy":                                      "redundancy string",
-	"TrustedComponent.tPMClearTarget":                            "tpmClearTarget string",
-	"TrustedComponent.tPMGetEventLogTarget":                      "tpmGetEventLogTarget string",
 	"VLAN.VLANID":                                                "VLANID uint16 `json:\"VLANId\"`",
 	"VLAN.VLANPriority":                                          "VLANPriority uint8",
 	"VLanNetworkInterface.VLANID":                                "VLANID uint16 `json:\"VLANId\"`",
@@ -482,6 +480,47 @@ var ExtraFields = map[string][]string{
 	"VirtualMediaInsertMediaParameters": {
 		"// MediaType is not part of the current schema, but some vendors require it.\n\tMediaType VirtualMediaType `json:\",omitempty\"`",
 	},
+}
+
+// LenientFields decodes a field through a converter instead of its declared
+// type, keyed "Type.Field" by Go names. The generated UnmarshalJSON reads the
+// JSON value as any and assigns converter(value), so a vendor sending, say, a
+// number as a string no longer fails the whole decode. The converter is a
+// func(any) T in the schemas package, where T is the field's type: toInt,
+// toFloat32 and parseString in utils.go, or a type-specific one in a
+// *_custom.go file.
+var LenientFields = map[string]string{
+	"EventDestination.OriginResources":  "linkURIs",
+	"MappedVolume.LogicalUnitNumber":    "parseString",
+	"MemoryLocation.Channel":            "toInt",
+	"PartLocation.LocationOrdinalValue": "locationOrdinal",
+	"PciID.FunctionNumber":              "toInt",
+	"Power.PowerControl":                "powerControls",
+	"PowerControl.MemberID":             "parseString",
+	"PowerControl.PowerAllocatedWatts":  "toFloat32",
+	"PowerControl.PowerAvailableWatts":  "toFloat32",
+	"PowerControl.PowerCapacityWatts":   "toFloat32",
+	"PowerControl.PowerConsumedWatts":   "toFloat32",
+	"PowerMetric.IntervalInMin":         "roundedUint",
+	"PowerMetric.MaxConsumedWatts":      "toFloat32",
+	"PowerMetric.MinConsumedWatts":      "toFloat32",
+	"PowerSubsystem.Allocation":         "powerAllocation",
+	"PowerSupply.LastPowerOutputWatts":  "toFloat32",
+	"PowerSupply.LineInputVoltage":      "toFloat32",
+	"PowerSupply.MemberID":              "parseString",
+	"PowerSupply.PowerInputWatts":       "toFloat32",
+	"PowerSupply.PowerOutputWatts":      "toFloat32",
+	"Processor.MaxSpeedMHz":             "toInt",
+	"Processor.Socket":                  "parseString",
+	"SensorArrayExcerpt.Reading":        "toFloat64",
+	"Voltage.LowerThresholdCritical":    "toFloat32",
+	"Voltage.LowerThresholdFatal":       "toFloat32",
+	"Voltage.LowerThresholdNonCritical": "toFloat32",
+	"Voltage.MemberID":                  "parseString",
+	"Voltage.ReadingVolts":              "toFloat32",
+	"Voltage.UpperThresholdCritical":    "toFloat32",
+	"Voltage.UpperThresholdFatal":       "toFloat32",
+	"Voltage.UpperThresholdNonCritical": "toFloat32",
 }
 
 // PluralNames overrides the default "<Type>s" plural used in ListReferenced<Plural>.

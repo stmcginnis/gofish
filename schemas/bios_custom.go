@@ -10,51 +10,6 @@ import (
 	"strings"
 )
 
-// UnmarshalJSON unmarshals a Bios object from the raw JSON.
-func (bi *Bios) UnmarshalJSON(b []byte) error {
-	type temp Bios
-	type biActions struct {
-		ChangePassword ActionTarget `json:"#Bios.ChangePassword"`
-		ResetBios      ActionTarget `json:"#Bios.ResetBios"`
-	}
-	type biLinks struct {
-		ActiveSoftwareImage Link  `json:"ActiveSoftwareImage"`
-		SoftwareImages      Links `json:"SoftwareImages"`
-	}
-	var tmp struct {
-		temp
-		Actions  biActions
-		Links    biLinks
-		Settings Settings `json:"@Redfish.Settings"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*bi = Bios(tmp.temp)
-
-	// Extract the links to other entities for later
-	bi.changePasswordTarget = tmp.Actions.ChangePassword.Target
-	bi.resetBiosTarget = tmp.Actions.ResetBios.Target
-	bi.settingsApplyTimes = tmp.Settings.SupportedApplyTimes
-	bi.activeSoftwareImage = tmp.Links.ActiveSoftwareImage.String()
-	bi.softwareImages = tmp.Links.SoftwareImages.ToStrings()
-
-	// Some implementations use a @Redfish.Settings object to direct settings updates to a
-	// different URL than the object being updated. Others don't, so handle both.
-	bi.settingsTarget = tmp.Settings.SettingsObject
-	if bi.settingsTarget == "" {
-		bi.settingsTarget = bi.ODataID
-	}
-
-	// This is a read/write object, so we need to save the raw object data for later
-	bi.rawData = b
-
-	return nil
-}
-
 // AllowedAttributeUpdateApplyTimes returns the set of allowed apply times to request when
 // setting the Bios attribute values.
 func (bi *Bios) AllowedAttributeUpdateApplyTimes() []SettingsApplyTime {
@@ -144,4 +99,24 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 // UpdateBiosAttributes is used to update attribute values.
 func (b *Bios) UpdateBiosAttributes(attrs SettingsAttributes) error {
 	return b.UpdateBiosAttributesApplyAt(attrs, "")
+}
+
+// postUnmarshal records the settings resource from @Redfish.Settings and keeps
+// the raw payload for UpdateBiosAttributes.
+func (bi *Bios) postUnmarshal(b []byte) error {
+	var t struct {
+		Settings Settings `json:"@Redfish.Settings"`
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	bi.settingsApplyTimes = t.Settings.SupportedApplyTimes
+	bi.settingsTarget = t.Settings.SettingsObject
+	if bi.settingsTarget == "" {
+		bi.settingsTarget = bi.ODataID
+	}
+	bi.rawData = b
+
+	return nil
 }

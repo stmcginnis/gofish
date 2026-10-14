@@ -418,3 +418,24 @@ type PciID struct {
 	// VendorID shall contain the PCI Vendor ID of the PCIe device function.
 	VendorID string `json:"VendorId"`
 }
+
+// UnmarshalJSON unmarshals a PciID object from the raw JSON.
+func (p *PciID) UnmarshalJSON(b []byte) error {
+	type temp PciID
+	var tmp struct {
+		temp
+		LenientFunctionNumber any `json:"FunctionNumber"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PciID(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.FunctionNumber = toInt(tmp.LenientFunctionNumber)
+
+	return nil
+}

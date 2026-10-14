@@ -113,6 +113,32 @@ type Power struct {
 	powerSupplyResetTarget string
 }
 
+// UnmarshalJSON unmarshals a Power object from the raw JSON.
+func (p *Power) UnmarshalJSON(b []byte) error {
+	type temp Power
+	type pActions struct {
+		PowerSupplyReset ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
+	var tmp struct {
+		temp
+		Actions             pActions
+		LenientPowerControl any `json:"PowerControl"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = Power(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+	p.PowerControl = powerControls(tmp.LenientPowerControl)
+
+	return nil
+}
+
 // GetPower will get a Power instance from the service.
 func GetPower(c Client, uri string) (*Power, error) {
 	return GetObject[Power](c, uri)
@@ -237,6 +263,42 @@ type PowerControl struct {
 	powerSupplyResetTarget string
 }
 
+// UnmarshalJSON unmarshals a PowerControl object from the raw JSON.
+func (p *PowerControl) UnmarshalJSON(b []byte) error {
+	type temp PowerControl
+	type pActions struct {
+		PowerSupplyReset ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
+	var tmp struct {
+		temp
+		Actions                    pActions
+		LenientMemberID            any   `json:"MemberId"`
+		LenientPowerAllocatedWatts any   `json:"PowerAllocatedWatts"`
+		LenientPowerAvailableWatts any   `json:"PowerAvailableWatts"`
+		LenientPowerCapacityWatts  any   `json:"PowerCapacityWatts"`
+		LenientPowerConsumedWatts  any   `json:"PowerConsumedWatts"`
+		RelatedItem                Links `json:"RelatedItem"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PowerControl(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+	p.relatedItem = tmp.RelatedItem.ToStrings()
+	p.MemberID = parseString(tmp.LenientMemberID)
+	p.PowerAllocatedWatts = toFloat32(tmp.LenientPowerAllocatedWatts)
+	p.PowerAvailableWatts = toFloat32(tmp.LenientPowerAvailableWatts)
+	p.PowerCapacityWatts = toFloat32(tmp.LenientPowerCapacityWatts)
+	p.PowerConsumedWatts = toFloat32(tmp.LenientPowerConsumedWatts)
+
+	return nil
+}
+
 // GetPowerControl will get a PowerControl instance from the service.
 func GetPowerControl(c Client, uri string) (*PowerControl, error) {
 	return GetObject[PowerControl](c, uri)
@@ -304,6 +366,31 @@ type PowerMetric struct {
 	// MinConsumedWatts shall represent the minimum power level, in watt units,
 	// that occurred within the last 'IntervalInMin' minutes.
 	MinConsumedWatts *float32 `json:",omitempty"`
+}
+
+// UnmarshalJSON unmarshals a PowerMetric object from the raw JSON.
+func (p *PowerMetric) UnmarshalJSON(b []byte) error {
+	type temp PowerMetric
+	var tmp struct {
+		temp
+		LenientIntervalInMin    any `json:"IntervalInMin"`
+		LenientMaxConsumedWatts any `json:"MaxConsumedWatts"`
+		LenientMinConsumedWatts any `json:"MinConsumedWatts"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PowerMetric(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.IntervalInMin = roundedUint(tmp.LenientIntervalInMin)
+	p.MaxConsumedWatts = toFloat32(tmp.LenientMaxConsumedWatts)
+	p.MinConsumedWatts = toFloat32(tmp.LenientMinConsumedWatts)
+
+	return nil
 }
 
 // PowerSupply Details of a power supplies associated with this system or
@@ -421,6 +508,48 @@ type PowerSupply struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a PowerSupply object from the raw JSON.
+func (p *PowerSupply) UnmarshalJSON(b []byte) error {
+	type temp PowerSupply
+	type pActions struct {
+		PowerSupplyReset ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
+	var tmp struct {
+		temp
+		Actions                     pActions
+		Assembly                    ResolvedLink[Assembly] `json:"Assembly"`
+		LenientLastPowerOutputWatts any                    `json:"LastPowerOutputWatts"`
+		LenientLineInputVoltage     any                    `json:"LineInputVoltage"`
+		LenientMemberID             any                    `json:"MemberId"`
+		LenientPowerInputWatts      any                    `json:"PowerInputWatts"`
+		LenientPowerOutputWatts     any                    `json:"PowerOutputWatts"`
+		ShadowRedundancy            json.RawMessage        `json:"Redundancy"`
+		RelatedItem                 Links                  `json:"RelatedItem"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PowerSupply(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+	p.assembly = tmp.Assembly
+	p.relatedItem = tmp.RelatedItem.ToStrings()
+	p.LastPowerOutputWatts = toFloat32(tmp.LenientLastPowerOutputWatts)
+	p.LineInputVoltage = toFloat32(tmp.LenientLineInputVoltage)
+	p.MemberID = parseString(tmp.LenientMemberID)
+	p.PowerInputWatts = toFloat32(tmp.LenientPowerInputWatts)
+	p.PowerOutputWatts = toFloat32(tmp.LenientPowerOutputWatts)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.RawData = b
+
+	return p.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (p *PowerSupply) Update() error {
 	readWriteFields := []string{
@@ -535,6 +664,48 @@ type Voltage struct {
 	UpperThresholdNonCritical *float32 `json:",omitempty"`
 	// powerSupplyResetTarget is the URL to send PowerSupplyReset requests.
 	powerSupplyResetTarget string
+}
+
+// UnmarshalJSON unmarshals a Voltage object from the raw JSON.
+func (v *Voltage) UnmarshalJSON(b []byte) error {
+	type temp Voltage
+	type vActions struct {
+		PowerSupplyReset ActionTarget `json:"#Power.PowerSupplyReset"`
+	}
+	var tmp struct {
+		temp
+		Actions                          vActions
+		LenientLowerThresholdCritical    any   `json:"LowerThresholdCritical"`
+		LenientLowerThresholdFatal       any   `json:"LowerThresholdFatal"`
+		LenientLowerThresholdNonCritical any   `json:"LowerThresholdNonCritical"`
+		LenientMemberID                  any   `json:"MemberId"`
+		LenientReadingVolts              any   `json:"ReadingVolts"`
+		RelatedItem                      Links `json:"RelatedItem"`
+		LenientUpperThresholdCritical    any   `json:"UpperThresholdCritical"`
+		LenientUpperThresholdFatal       any   `json:"UpperThresholdFatal"`
+		LenientUpperThresholdNonCritical any   `json:"UpperThresholdNonCritical"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*v = Voltage(tmp.temp)
+
+	// Extract the links to other entities for later
+	v.powerSupplyResetTarget = tmp.Actions.PowerSupplyReset.Target
+	v.relatedItem = tmp.RelatedItem.ToStrings()
+	v.LowerThresholdCritical = toFloat32(tmp.LenientLowerThresholdCritical)
+	v.LowerThresholdFatal = toFloat32(tmp.LenientLowerThresholdFatal)
+	v.LowerThresholdNonCritical = toFloat32(tmp.LenientLowerThresholdNonCritical)
+	v.MemberID = parseString(tmp.LenientMemberID)
+	v.ReadingVolts = toFloat32(tmp.LenientReadingVolts)
+	v.UpperThresholdCritical = toFloat32(tmp.LenientUpperThresholdCritical)
+	v.UpperThresholdFatal = toFloat32(tmp.LenientUpperThresholdFatal)
+	v.UpperThresholdNonCritical = toFloat32(tmp.LenientUpperThresholdNonCritical)
+
+	return nil
 }
 
 // GetVoltage will get a Voltage instance from the service.

@@ -274,6 +274,56 @@ type PCIeDevice struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a PCIeDevice object from the raw JSON.
+func (p *PCIeDevice) UnmarshalJSON(b []byte) error {
+	type temp PCIeDevice
+	type pActions struct {
+		CXLReferenceDCMemory ActionTarget `json:"#PCIeDevice.CXLReferenceDCMemory"`
+	}
+	type pLinks struct {
+		Chassis            Links `json:"Chassis"`
+		ConnectedPCIePorts Links `json:"ConnectedPCIePorts"`
+		FabricAdapters     Links `json:"FabricAdapters"`
+		Processors         Links `json:"Processors"`
+		Switch             Link  `json:"Switch"`
+	}
+	var tmp struct {
+		temp
+		Actions            pActions
+		Links              pLinks
+		Assembly           ResolvedLink[Assembly]           `json:"Assembly"`
+		CXLLogicalDevices  Link                             `json:"CXLLogicalDevices"`
+		Certificates       Link                             `json:"Certificates"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		PCIeFunctions      Link                             `json:"PCIeFunctions"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PCIeDevice(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.cXLReferenceDCMemoryTarget = tmp.Actions.CXLReferenceDCMemory.Target
+	p.chassis = tmp.Links.Chassis.ToStrings()
+	p.connectedPCIePorts = tmp.Links.ConnectedPCIePorts.ToStrings()
+	p.fabricAdapters = tmp.Links.FabricAdapters.ToStrings()
+	p.processors = tmp.Links.Processors.ToStrings()
+	p.switch_ = tmp.Links.Switch.String()
+	p.assembly = tmp.Assembly
+	p.cXLLogicalDevices = tmp.CXLLogicalDevices.String()
+	p.certificates = tmp.Certificates.String()
+	p.environmentMetrics = tmp.EnvironmentMetrics
+	p.pCIeFunctions = tmp.PCIeFunctions.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.RawData = b
+
+	return p.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (p *PCIeDevice) Update() error {
 	readWriteFields := []string{

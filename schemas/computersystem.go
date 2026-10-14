@@ -1018,6 +1018,114 @@ type ComputerSystem struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
+func (c *ComputerSystem) UnmarshalJSON(b []byte) error {
+	type temp ComputerSystem
+	type cActions struct {
+		AddResourceBlock                   ActionTarget `json:"#ComputerSystem.AddResourceBlock"`
+		Decommission                       ActionTarget `json:"#ComputerSystem.Decommission"`
+		ExportConfiguration                ActionTarget `json:"#ComputerSystem.ExportConfiguration"`
+		GraphicalConsoleGetOneTimeURL      ActionTarget `json:"#ComputerSystem.GraphicalConsoleGetOneTimeURL"`
+		GraphicalConsoleSetOneTimePassword ActionTarget `json:"#ComputerSystem.GraphicalConsoleSetOneTimePassword"`
+		GraphicalConsoleSetPassword        ActionTarget `json:"#ComputerSystem.GraphicalConsoleSetPassword"`
+		RemoveResourceBlock                ActionTarget `json:"#ComputerSystem.RemoveResourceBlock"`
+		Reset                              ActionTarget `json:"#ComputerSystem.Reset"`
+		SetDefaultBootOrder                ActionTarget `json:"#ComputerSystem.SetDefaultBootOrder"`
+	}
+	type cLinks struct {
+		Chassis                         Links `json:"Chassis"`
+		ConsumingComputerSystems        Links `json:"ConsumingComputerSystems"`
+		CooledBy                        Links `json:"CooledBy"`
+		Endpoints                       Links `json:"Endpoints"`
+		HostingComputerSystem           Link  `json:"HostingComputerSystem"`
+		ManagedBy                       Links `json:"ManagedBy"`
+		OffloadedNetworkDeviceFunctions Links `json:"OffloadedNetworkDeviceFunctions"`
+		PoweredBy                       Links `json:"PoweredBy"`
+		ResourceBlocks                  Links `json:"ResourceBlocks"`
+		SupplyingComputerSystems        Links `json:"SupplyingComputerSystems"`
+		TrustedComponents               Links `json:"TrustedComponents"`
+		VirtualMachines                 Links `json:"VirtualMachines"`
+	}
+	var tmp struct {
+		temp
+		Actions             cActions
+		Links               cLinks
+		Bios                ResolvedLink[Bios]            `json:"Bios"`
+		Certificates        Link                          `json:"Certificates"`
+		EthernetInterfaces  Link                          `json:"EthernetInterfaces"`
+		FabricAdapters      Link                          `json:"FabricAdapters"`
+		GraphicsControllers Link                          `json:"GraphicsControllers"`
+		LogServices         Link                          `json:"LogServices"`
+		Memory              Link                          `json:"Memory"`
+		MemoryDomains       Link                          `json:"MemoryDomains"`
+		NetworkInterfaces   Link                          `json:"NetworkInterfaces"`
+		OperatingSystem     ResolvedLink[OperatingSystem] `json:"OperatingSystem"`
+		PCIeDevices         Links                         `json:"PCIeDevices"`
+		PCIeFunctions       Links                         `json:"PCIeFunctions"`
+		Processors          Link                          `json:"Processors"`
+		Redundancy          ResolvedLink[Redundancy]      `json:"Redundancy"`
+		SecureBoot          ResolvedLink[SecureBoot]      `json:"SecureBoot"`
+		SimpleStorage       Link                          `json:"SimpleStorage"`
+		Storage             Link                          `json:"Storage"`
+		USBControllers      Link                          `json:"USBControllers"`
+		VirtualMedia        Link                          `json:"VirtualMedia"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*c = ComputerSystem(tmp.temp)
+
+	// Extract the links to other entities for later
+	c.addResourceBlockTarget = tmp.Actions.AddResourceBlock.Target
+	c.decommissionTarget = tmp.Actions.Decommission.Target
+	c.exportConfigurationTarget = tmp.Actions.ExportConfiguration.Target
+	c.graphicalConsoleGetOneTimeURLTarget = tmp.Actions.GraphicalConsoleGetOneTimeURL.Target
+	c.graphicalConsoleSetOneTimePasswordTarget = tmp.Actions.GraphicalConsoleSetOneTimePassword.Target
+	c.graphicalConsoleSetPasswordTarget = tmp.Actions.GraphicalConsoleSetPassword.Target
+	c.removeResourceBlockTarget = tmp.Actions.RemoveResourceBlock.Target
+	c.resetTarget = tmp.Actions.Reset.Target
+	c.setDefaultBootOrderTarget = tmp.Actions.SetDefaultBootOrder.Target
+	c.chassis = tmp.Links.Chassis.ToStrings()
+	c.consumingComputerSystems = tmp.Links.ConsumingComputerSystems.ToStrings()
+	c.cooledBy = tmp.Links.CooledBy.ToStrings()
+	c.endpoints = tmp.Links.Endpoints.ToStrings()
+	c.hostingComputerSystem = tmp.Links.HostingComputerSystem.String()
+	c.managedBy = tmp.Links.ManagedBy.ToStrings()
+	c.offloadedNetworkDeviceFunctions = tmp.Links.OffloadedNetworkDeviceFunctions.ToStrings()
+	c.poweredBy = tmp.Links.PoweredBy.ToStrings()
+	c.resourceBlocks = tmp.Links.ResourceBlocks.ToStrings()
+	c.supplyingComputerSystems = tmp.Links.SupplyingComputerSystems.ToStrings()
+	c.trustedComponents = tmp.Links.TrustedComponents.ToStrings()
+	c.virtualMachines = tmp.Links.VirtualMachines.ToStrings()
+	c.bios = tmp.Bios
+	c.certificates = tmp.Certificates.String()
+	c.ethernetInterfaces = tmp.EthernetInterfaces.String()
+	c.fabricAdapters = tmp.FabricAdapters.String()
+	c.graphicsControllers = tmp.GraphicsControllers.String()
+	c.logServices = tmp.LogServices.String()
+	c.memory = tmp.Memory.String()
+	c.memoryDomains = tmp.MemoryDomains.String()
+	c.networkInterfaces = tmp.NetworkInterfaces.String()
+	c.operatingSystem = tmp.OperatingSystem
+	c.pCIeDevices = tmp.PCIeDevices.ToStrings()
+	c.pCIeFunctions = tmp.PCIeFunctions.ToStrings()
+	c.processors = tmp.Processors.String()
+	c.redundancy = tmp.Redundancy
+	c.secureBoot = tmp.SecureBoot
+	c.simpleStorage = tmp.SimpleStorage.String()
+	c.storage = tmp.Storage.String()
+	c.uSBControllers = tmp.USBControllers.String()
+	c.virtualMedia = tmp.VirtualMedia.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	c.RawData = b
+
+	return c.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (c *ComputerSystem) Update() error {
 	readWriteFields := []string{
@@ -1991,6 +2099,26 @@ type HostedServices struct {
 	//
 	// Version added: v1.2.0
 	storageServices string
+}
+
+// UnmarshalJSON unmarshals a HostedServices object from the raw JSON.
+func (h *HostedServices) UnmarshalJSON(b []byte) error {
+	type temp HostedServices
+	var tmp struct {
+		temp
+		ShadowStorageServices json.RawMessage `json:"StorageServices"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*h = HostedServices(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	return h.postUnmarshal(b)
 }
 
 // IPMIHostInterface shall describe the in-band IPMI service for a computer

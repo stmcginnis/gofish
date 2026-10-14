@@ -315,6 +315,41 @@ type LogService struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a LogService object from the raw JSON.
+func (l *LogService) UnmarshalJSON(b []byte) error {
+	type temp LogService
+	type lActions struct {
+		ClearLog              ActionTarget `json:"#LogService.ClearLog"`
+		CollectDiagnosticData ActionTarget `json:"#LogService.CollectDiagnosticData"`
+		DownloadRawLog        ActionTarget `json:"#LogService.DownloadRawLog"`
+		PushDiagnosticData    ActionTarget `json:"#LogService.PushDiagnosticData"`
+	}
+	var tmp struct {
+		temp
+		Actions lActions
+		Entries Link `json:"Entries"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*l = LogService(tmp.temp)
+
+	// Extract the links to other entities for later
+	l.clearLogTarget = tmp.Actions.ClearLog.Target
+	l.collectDiagnosticDataTarget = tmp.Actions.CollectDiagnosticData.Target
+	l.downloadRawLogTarget = tmp.Actions.DownloadRawLog.Target
+	l.pushDiagnosticDataTarget = tmp.Actions.PushDiagnosticData.Target
+	l.entries = tmp.Entries.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	l.RawData = b
+
+	return l.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (l *LogService) Update() error {
 	readWriteFields := []string{

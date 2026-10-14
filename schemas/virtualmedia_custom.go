@@ -9,43 +9,6 @@ import (
 	"errors"
 )
 
-// UnmarshalJSON unmarshals a VirtualMedia object from the raw JSON.
-func (v *VirtualMedia) UnmarshalJSON(b []byte) error {
-	type temp VirtualMedia
-	type vActions struct {
-		EjectMedia  ActionTarget `json:"#VirtualMedia.EjectMedia"`
-		InsertMedia ActionTarget `json:"#VirtualMedia.InsertMedia"`
-	}
-	var tmp struct {
-		temp
-		Actions            vActions
-		Certificates       Link `json:"Certificates"`
-		ClientCertificates Link `json:"ClientCertificates"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*v = VirtualMedia(tmp.temp)
-
-	// Extract the links to other entities for later
-	v.certificates = tmp.Certificates.String()
-	v.clientCertificates = tmp.ClientCertificates.String()
-
-	v.ejectMedia = tmp.Actions.EjectMedia
-	v.insertMedia = tmp.Actions.InsertMedia
-
-	v.SupportsMediaEject = v.ejectMedia.Target != ""
-	v.SupportsMediaInsert = v.insertMedia.Target != ""
-
-	// This is a read/write object, so we need to save the raw object data for later
-	v.RawData = b
-
-	return nil
-}
-
 // EjectMediaActionInfo provides the ActionInfo, if supported, for an EjectMedia Action
 func (v *VirtualMedia) EjectMediaActionInfo() (*ActionInfo, error) {
 	if v.insertMedia.ActionInfoTarget == "" {
@@ -103,4 +66,25 @@ func (v *VirtualMedia) InsertMedia(params *VirtualMediaInsertMediaParameters) (*
 		v.insertMedia.Target, params, v.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
+}
+
+// postUnmarshal records the EjectMedia and InsertMedia actions, including
+// whether the service supports them.
+func (v *VirtualMedia) postUnmarshal(b []byte) error {
+	var t struct {
+		Actions struct {
+			EjectMedia  ActionTarget `json:"#VirtualMedia.EjectMedia"`
+			InsertMedia ActionTarget `json:"#VirtualMedia.InsertMedia"`
+		}
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	v.ejectMedia = t.Actions.EjectMedia
+	v.insertMedia = t.Actions.InsertMedia
+	v.SupportsMediaEject = v.ejectMedia.Target != ""
+	v.SupportsMediaInsert = v.insertMedia.Target != ""
+
+	return nil
 }

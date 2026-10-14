@@ -10,109 +10,6 @@ import (
 	"fmt"
 )
 
-// UnmarshalJSON unmarshals a Manager object from the raw JSON.
-func (m *Manager) UnmarshalJSON(b []byte) error {
-	type temp Manager
-	type mActions struct {
-		ForceFailover       ActionTarget `json:"#Manager.ForceFailover"`
-		ModifyRedundancySet ActionTarget `json:"#Manager.ModifyRedundancySet"`
-		Reset               struct {
-			ActionTarget
-			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
-		} `json:"#Manager.Reset"`
-		ResetToDefaults struct {
-			ActionTarget
-			AllowedResetTypes []ResetToDefaultsType `json:"ResetType@Redfish.AllowableValues"`
-		} `json:"#Manager.ResetToDefaults"`
-		UpdateSecurityMode ActionTarget `json:"#Manager.UpdateSecurityMode"`
-	}
-	type mLinks struct {
-		ActiveSoftwareImage Link            `json:"ActiveSoftwareImage"`
-		ManagedBy           Links           `json:"ManagedBy"`
-		ManagerForChassis   Links           `json:"ManagerForChassis"`
-		ManagerForFabrics   Links           `json:"ManagerForFabrics"`
-		ManagerForManagers  Links           `json:"ManagerForManagers"`
-		ManagerForServers   Links           `json:"ManagerForServers"`
-		ManagerForSwitches  Links           `json:"ManagerForSwitches"`
-		ManagerInChassis    Link            `json:"ManagerInChassis"`
-		SelectedNetworkPort Link            `json:"SelectedNetworkPort"`
-		SoftwareImages      Links           `json:"SoftwareImages"`
-		OEM                 json.RawMessage `json:"Oem"`
-	}
-	var tmp struct {
-		temp
-		Actions               mActions
-		Links                 mLinks
-		Certificates          Link                                 `json:"Certificates"`
-		DedicatedNetworkPorts Link                                 `json:"DedicatedNetworkPorts"`
-		EthernetInterfaces    Link                                 `json:"EthernetInterfaces"`
-		HostInterfaces        Link                                 `json:"HostInterfaces"`
-		LogServices           Link                                 `json:"LogServices"`
-		ManagerDiagnosticData ResolvedLink[ManagerDiagnosticData]  `json:"ManagerDiagnosticData"`
-		NetworkProtocol       ResolvedLink[ManagerNetworkProtocol] `json:"NetworkProtocol"`
-		Redundancy            ResolvedLink[Redundancy]             `json:"Redundancy"`
-		RemoteAccountService  ResolvedLink[AccountService]         `json:"RemoteAccountService"`
-		SecurityPolicy        ResolvedLink[SecurityPolicy]         `json:"SecurityPolicy"`
-		SerialInterfaces      Link                                 `json:"SerialInterfaces"`
-		SharedNetworkPorts    Link                                 `json:"SharedNetworkPorts"`
-		USBPorts              Link                                 `json:"USBPorts"`
-		VirtualMedia          Link                                 `json:"VirtualMedia"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*m = Manager(tmp.temp)
-
-	// Extract the links to other entities for later
-	m.forceFailoverTarget = tmp.Actions.ForceFailover.Target
-	m.modifyRedundancySetTarget = tmp.Actions.ModifyRedundancySet.Target
-	m.resetTarget = tmp.Actions.Reset.Target
-	m.SupportedResetTypes = tmp.Actions.Reset.AllowedResetTypes
-	m.resetActionInfo = tmp.Actions.Reset.ActionInfoTarget
-	m.resetToDefaultsTarget = tmp.Actions.ResetToDefaults.Target
-	m.SupportedResetToDefaultsTypes = tmp.Actions.ResetToDefaults.AllowedResetTypes
-	m.resetToDefaultsActionInfoTarget = tmp.Actions.ResetToDefaults.ActionInfoTarget
-	m.updateSecurityModeTarget = tmp.Actions.UpdateSecurityMode.Target
-	m.activeSoftwareImage = tmp.Links.ActiveSoftwareImage.String()
-	m.managedBy = tmp.Links.ManagedBy.ToStrings()
-	m.managerForChassis = tmp.Links.ManagerForChassis.ToStrings()
-	m.managerForFabrics = tmp.Links.ManagerForFabrics.ToStrings()
-	m.managerForManagers = tmp.Links.ManagerForManagers.ToStrings()
-	m.managerForServers = tmp.Links.ManagerForServers.ToStrings()
-	m.managerForSwitches = tmp.Links.ManagerForSwitches.ToStrings()
-	m.managerInChassis = tmp.Links.ManagerInChassis.String()
-	m.selectedNetworkPort = tmp.Links.SelectedNetworkPort.String()
-	m.softwareImages = tmp.Links.SoftwareImages.ToStrings()
-	m.OEMLinks = tmp.Links.OEM
-	m.certificates = tmp.Certificates.String()
-	m.dedicatedNetworkPorts = tmp.DedicatedNetworkPorts.String()
-	m.ethernetInterfaces = tmp.EthernetInterfaces.String()
-	m.hostInterfaces = tmp.HostInterfaces.String()
-	m.logServices = tmp.LogServices.String()
-	m.managerDiagnosticData = tmp.ManagerDiagnosticData
-
-	m.networkProtocol = tmp.NetworkProtocol
-
-	m.redundancy = tmp.Redundancy
-
-	m.remoteAccountService = tmp.RemoteAccountService
-
-	m.securityPolicy = tmp.SecurityPolicy
-
-	m.serialInterfaces = tmp.SerialInterfaces.String()
-	m.sharedNetworkPorts = tmp.SharedNetworkPorts.String()
-	m.uSBPorts = tmp.USBPorts.String()
-	m.virtualMedia = tmp.VirtualMedia.String()
-
-	// This is a read/write object, so we need to save the raw object data for later
-	m.RawData = b
-
-	return nil
-}
-
 // GetSupportedResetTypes returns any reset types that the Manager declares as supported
 // via either ActionInfo or AllowableValues.
 func (m *Manager) GetSupportedResetTypes() ([]ResetType, error) {
@@ -235,4 +132,35 @@ func (m *Manager) ResetToDefaultsActionInfo() (*ActionInfo, error) {
 	}
 
 	return GetObject[ActionInfo](m.GetClient(), m.resetToDefaultsActionInfoTarget)
+}
+
+// postUnmarshal records the allowed reset types, their ActionInfo URIs, and the
+// OEM section of Links.
+func (m *Manager) postUnmarshal(b []byte) error {
+	var t struct {
+		Actions struct {
+			Reset struct {
+				ActionTarget
+				AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
+			} `json:"#Manager.Reset"`
+			ResetToDefaults struct {
+				ActionTarget
+				AllowedResetTypes []ResetToDefaultsType `json:"ResetType@Redfish.AllowableValues"`
+			} `json:"#Manager.ResetToDefaults"`
+		}
+		Links struct {
+			OEM json.RawMessage `json:"Oem"`
+		}
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	m.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
+	m.resetActionInfo = t.Actions.Reset.ActionInfoTarget
+	m.SupportedResetToDefaultsTypes = t.Actions.ResetToDefaults.AllowedResetTypes
+	m.resetToDefaultsActionInfoTarget = t.Actions.ResetToDefaults.ActionInfoTarget
+	m.OEMLinks = t.Links.OEM
+
+	return nil
 }

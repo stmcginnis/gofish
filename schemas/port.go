@@ -1740,6 +1740,55 @@ type PortGenZ struct {
 	vCAT string
 }
 
+// UnmarshalJSON unmarshals a PortGenZ object from the raw JSON.
+func (p *PortGenZ) UnmarshalJSON(b []byte) error {
+	type temp PortGenZ
+	var tmp struct {
+		temp
+		LPRT Link `json:"LPRT"`
+		MPRT Link `json:"MPRT"`
+		VCAT Link `json:"VCAT"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = PortGenZ(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.lPRT = tmp.LPRT.String()
+	p.mPRT = tmp.MPRT.String()
+	p.vCAT = tmp.VCAT.String()
+
+	return nil
+}
+
+// LPRT gets the LPRT collection.
+func (p *PortGenZ) LPRT(client Client) ([]*RouteEntry, error) {
+	if p.lPRT == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[RouteEntry](client, p.lPRT)
+}
+
+// MPRT gets the MPRT collection.
+func (p *PortGenZ) MPRT(client Client) ([]*RouteEntry, error) {
+	if p.mPRT == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[RouteEntry](client, p.mPRT)
+}
+
+// VCAT gets the VCAT collection.
+func (p *PortGenZ) VCAT(client Client) ([]*VCATEntry, error) {
+	if p.vCAT == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[VCATEntry](client, p.vCAT)
+}
+
 // PortUALink shall contain information about UALink port management.
 type PortUALink struct {
 	// AuthenticationModeEnabled shall indicate whether UALink-defined

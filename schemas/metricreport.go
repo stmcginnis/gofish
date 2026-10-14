@@ -52,6 +52,25 @@ type MetricReport struct {
 	Timestamp string
 }
 
+// UnmarshalJSON unmarshals a MetricReport object from the raw JSON.
+func (m *MetricReport) UnmarshalJSON(b []byte) error {
+	type temp MetricReport
+	var tmp struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MetricReport(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	return m.postUnmarshal(b)
+}
+
 // GetMetricReport will get a MetricReport instance from the service.
 func GetMetricReport(c Client, uri string) (*MetricReport, error) {
 	return GetObject[MetricReport](c, uri)

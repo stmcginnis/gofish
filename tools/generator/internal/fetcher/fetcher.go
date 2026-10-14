@@ -6,12 +6,14 @@ package fetcher
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -78,11 +80,8 @@ func (f *Fetcher) cloneAndFindSchemas(name, repoURL, tag string, tagFilter func(
 	}
 
 	cloneDir := filepath.Join(f.tempDir, name)
-
-	cmd := exec.Command("git", "clone", "--depth", "1", "--branch", tag, repoURL, cloneDir)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", "", fmt.Errorf("failed to clone %s repository: %w\n%s", name, err, string(output))
+	if err := cloneSchemas(repoURL, tag, cloneDir); err != nil {
+		return "", "", fmt.Errorf("failed to clone %s repository: %w", name, err)
 	}
 
 	schemaDir := filepath.Join(cloneDir, "json-schema")
@@ -96,6 +95,46 @@ func (f *Fetcher) cloneAndFindSchemas(name, repoURL, tag string, tagFilter func(
 	}
 
 	return schemaDir, tag, nil
+}
+
+// cloneAttempts and cloneRetryDelay bound the retries of a failed clone. The
+// publication repositories are large, and a transfer from a CI runner
+// occasionally dies with "early EOF".
+var (
+	cloneAttempts   = 3
+	cloneRetryDelay = 10 * time.Second
+)
+
+// cloneSchemas shallow-clones repoURL at tag into dir, checking out only the
+// json-schema directory, and retries a failed clone.
+func cloneSchemas(repoURL, tag, dir string) error {
+	var err error
+	for attempt := 1; attempt <= cloneAttempts; attempt++ {
+		if attempt > 1 {
+			log.Printf("Clone of %s failed, retrying (%d/%d): %v", repoURL, attempt, cloneAttempts, err)
+			time.Sleep(cloneRetryDelay * time.Duration(attempt-1))
+		}
+		if err = os.RemoveAll(dir); err != nil {
+			return err
+		}
+		if err = run("git", "-c", "advice.detachedHead=false", "clone", "--quiet", "--depth", "1",
+			"--branch", tag, "--filter=blob:none", "--sparse", repoURL, dir); err != nil {
+			continue
+		}
+		if err = run("git", "-C", dir, "sparse-checkout", "set", "--no-cone", "json-schema/"); err == nil {
+			return nil
+		}
+	}
+	return err
+}
+
+// run runs a command and includes its output in the returned error.
+func run(name string, args ...string) error {
+	output, err := exec.Command(name, args...).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s %s: %w\n%s", name, strings.Join(args, " "), err, output)
+	}
+	return nil
 }
 
 // latestTag returns the highest version tag from the remote repository that
