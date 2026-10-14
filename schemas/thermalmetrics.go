@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ThermalMetrics.v1_3_2.json
-// 2023.2 - #ThermalMetrics.v1_3_2.ThermalMetrics
+// http://redfish.dmtf.org/schemas/v1/ThermalMetrics.v1_3_3.json
+// 2023.2 - #ThermalMetrics.v1_3_3.ThermalMetrics
 
 package schemas
 
@@ -27,7 +27,8 @@ type ThermalMetrics struct {
 	// difference in pressure between the air intake and the air exhaust of this
 	// chassis. The value of the 'DataSourceUri' property, if present, shall
 	// reference a resource of type 'Sensor' with the 'ReadingType' property
-	// containing the value 'PressurekPa'.
+	// containing the value 'PressurekPa', and the 'ReadingBasis' property
+	// containing the value 'Delta'.
 	//
 	// Version added: v1.2.0
 	DeltaPressurekPa SensorExcerpt

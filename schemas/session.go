@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Session.v1_8_0.json
-// 2024.4 - #Session.v1_8_0.Session
+// http://redfish.dmtf.org/schemas/v1/Session.v1_9_0.json
+// 2026.2 - #Session.v1_9_0.Session
 
 package schemas
 
@@ -115,6 +115,14 @@ type Session struct {
 	//
 	// Version added: v1.6.0
 	Token string
+	// UserAuthenticationSource shall contain source of authentication for the
+	// user, specified by the 'UserName' property, associated with the session. For
+	// local users, this property shall contain '/redfish/v1/AccountService'. For
+	// users managed by external account providers, this property shall contain the
+	// member of the 'ServiceAddresses' property that authenticated the user.
+	//
+	// Version added: v1.9.0
+	UserAuthenticationSource string
 	// UserName shall contain the username that matches an account recognized by
 	// the account service. When a creating a session through a Redfish host
 	// interface using an 'AuthNone' role, the property shall contain an empty

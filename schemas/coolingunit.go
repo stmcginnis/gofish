@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/CoolingUnit.v1_5_0.json
-// 2025.4 - #CoolingUnit.v1_5_0.CoolingUnit
+// http://redfish.dmtf.org/schemas/v1/CoolingUnit.v1_6_0.json
+// 2026.2 - #CoolingUnit.v1_6_0.CoolingUnit
 
 package schemas
 
@@ -126,7 +126,11 @@ type CoolingUnit struct {
 	PartNumber string
 	// PrimaryCoolantConnectors shall contain a link to a resource collection of
 	// type 'CoolantConnectorCollection' that contains the primary coolant
-	// connectors for this equipment.
+	// connectors for this equipment. Equipment with connections to a single
+	// cooling loop or redundant group shall use this resource collection for its
+	// coolant connectors. Equipment with connections to multiple cooling loops
+	// shall use this resource collection for connections to the primary side or
+	// upstream cooling loop.
 	primaryCoolantConnectors string
 	// ProductionDate shall contain the date of production or manufacture for this
 	// equipment.
@@ -148,11 +152,20 @@ type CoolingUnit struct {
 	reservoirs string
 	// SecondaryCoolantConnectors shall contain a link to a resource collection of
 	// type 'CoolantConnectorCollection' that contains the secondary coolant
-	// connectors for this equipment.
+	// connectors for this equipment. This property shall not be present in
+	// resources describing equipment with coolant connections to a single cooling
+	// loop. Equipment with connections to multiple cooling loops shall use this
+	// resource collection to describe connections to the secondary side or
+	// downstream cooling loops.
 	secondaryCoolantConnectors string
 	// SerialNumber shall contain a manufacturer-allocated number that identifies
 	// the equipment.
 	SerialNumber string
+	// SparePartNumber shall contain the spare or replacement part number as
+	// defined by the manufacturer for this equipment.
+	//
+	// Version added: v1.6.0
+	SparePartNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status Status
 	// UserLabel shall contain a user-assigned label used to identify this

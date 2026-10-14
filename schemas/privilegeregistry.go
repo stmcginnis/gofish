@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/PrivilegeRegistry.v1_2_0.json
-// 2025.3 - #PrivilegeRegistry.v1_2_0.PrivilegeRegistry
+// http://redfish.dmtf.org/schemas/v1/PrivilegeRegistry.v1_3_0.json
+// 2026.2 - #PrivilegeRegistry.v1_3_0.PrivilegeRegistry
 
 package schemas
 
@@ -48,6 +48,22 @@ func ListReferencedPrivilegeRegistrys(c Client, link string) ([]*PrivilegeRegist
 	return GetCollectionObjects[PrivilegeRegistry](c, link)
 }
 
+// ActionPrivilege shall describe the specific privileges required to complete
+// an action.
+type ActionPrivilege struct {
+	// ActionName shall contain the action name, such as '#Manager.Reset'. The
+	// value shall follow the format of the action property name defined in the
+	// 'Actions property' clause of the Redfish Specification.
+	//
+	// Version added: v1.3.0
+	ActionName string
+	// Privileges shall contain the privilege required to complete the action
+	// specified by the 'ActionName' property.
+	//
+	// Version added: v1.3.0
+	Privileges []OperationPrivilege
+}
+
 // Mapping shall describe a mapping between a resource type and the relevant
 // privileges that accesses the resource.
 type Mapping struct {
@@ -70,6 +86,12 @@ type Mapping struct {
 // OperationMap shall describe the specific privileges required to complete a
 // set of HTTP operations.
 type OperationMap struct {
+	// ActionPrivileges shall contain the privilege required to complete specific
+	// actions. If not present or if the action is not found in this property, the
+	// 'POST' property shall specify the privilege required.
+	//
+	// Version added: v1.3.0
+	ActionPrivileges []ActionPrivilege
 	// DELETE shall contain the privilege required to complete an HTTP 'DELETE'
 	// operation.
 	DELETE []OperationPrivilege
@@ -93,6 +115,12 @@ type OperationMap struct {
 // OperationPrivilege shall describe the privileges required to complete a
 // specific HTTP operation.
 type OperationPrivilege struct {
+	// OEM shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	//
+	// Version added: v1.3.0
+	OEM json.RawMessage `json:"Oem"`
 	// Privilege shall contain an array of privileges that are required to complete
 	// a specific HTTP operation on a resource. This set of strings match zero or
 	// more strings in the 'PrivilegesUsed' and 'OEMPrivilegesUsed' properties.

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/PortMetrics.v1_8_1.json
-// 2025.3 - #PortMetrics.v1_8_1.PortMetrics
+// http://redfish.dmtf.org/schemas/v1/PortMetrics.v1_9_1.json
+// 2026.1 - #PortMetrics.v1_9_1.PortMetrics
 
 package schemas
 
@@ -48,6 +48,10 @@ type PortMetrics struct {
 	//
 	// Version added: v1.8.0
 	PCIeMetrics PCIeMetrics
+	// PoE shall contain the Power over Ethernet (PoE) metrics for this port.
+	//
+	// Version added: v1.9.0
+	PoE PoEMetrics
 	// RXBytes shall contain the total number of bytes received on a port since
 	// reset, including host and remote management passthrough traffic, and
 	// inclusive of all protocol overhead.
@@ -442,6 +446,29 @@ type Networking struct {
 	TXUnicastFrames *int `json:",omitempty"`
 }
 
+// PoEMetrics shall describe the Power over Ethernet (PoE) metrics for a port.
+type PoEMetrics struct {
+	// CurrentAmps shall contain the current being delivered or consumed on this
+	// port.
+	//
+	// Version added: v1.9.0
+	CurrentAmps *float64 `json:",omitempty"`
+	// NegotiatedPowerWatts shall contain the maximum power negotiated during PoE
+	// classification on this port.
+	//
+	// Version added: v1.9.0
+	NegotiatedPowerWatts *float64 `json:",omitempty"`
+	// PowerWatts shall contain the current power delivered or consumed on this
+	// port.
+	//
+	// Version added: v1.9.0
+	PowerWatts *float64 `json:",omitempty"`
+	// VoltageVolts shall contain the current voltage measured on this port.
+	//
+	// Version added: v1.9.0
+	VoltageVolts *float64 `json:",omitempty"`
+}
+
 // SAS shall describe physical (phy) related metrics for Serial Attached SCSI
 // (SAS).
 type SAS struct {
@@ -494,9 +521,9 @@ type Transceiver struct {
 	//
 	// Version added: v1.1.0
 	TXOutputPowerMilliWatts *float64 `json:",omitempty"`
-	// WavelengthNanometers shall contain the laser wavelength, in nanometers, for
-	// the transceiver. This property shall not be present for non-optic
-	// transceiver mediums.
+	// WavelengthNanometers shall contain the laser wavelength for the transceiver,
+	// in nanometer units, as a string representation of the number. This property
+	// shall not be present for non-optic transceiver mediums.
 	//
 	// Version added: v1.7.0
 	WavelengthNanometers string

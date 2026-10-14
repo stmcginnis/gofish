@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/swordfish/v1/VolumeMetrics.v1_2_0.json
-// 1.2.8 - #VolumeMetrics.v1_2_0.VolumeMetrics
+// http://redfish.dmtf.org/schemas/swordfish/v1/VolumeMetrics.v1_3_0.json
+// 1.2.9 - #VolumeMetrics.v1_3_0.VolumeMetrics
 
 package schemas
 
@@ -43,6 +43,15 @@ type VolumeMetrics struct {
 	//
 	// Version added: v1.1.0
 	IOStatistics IOStatistics
+	// LifetimeStartDateTime shall contain the date and time when the volume
+	// started accumulating data for properties maintained for the lifetime of the
+	// volume, such as, but not limited to 'CorrectableIOReadErrorCount' and
+	// 'CorrectableIOWriteErrorCount'. Lifetime counts are noted in the
+	// LongDescription for relevant properties. This might contain the same value
+	// as the creation date of the volume.
+	//
+	// Version added: v1.3.0
+	LifetimeStartDateTime string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.

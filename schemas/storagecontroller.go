@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/StorageController.v1_11_0.json
-// 2025.4 - #StorageController.v1_11_0.StorageController
+// http://redfish.dmtf.org/schemas/v1/StorageController.v1_12_0.json
+// 2026.1 - #StorageController.v1_12_0.StorageController
 
 package schemas
 
@@ -640,25 +640,46 @@ type NVMeControllerProperties struct {
 // NVMeSMARTCriticalWarnings shall contain the NVMe SMART Critical Warnings for
 // a storage controller.
 type NVMeSMARTCriticalWarnings struct {
-	// MediaInReadOnly shall indicate the media has been placed in read-only mode.
-	// This is not set when the read-only condition of the media is a result of a
-	// change in the write protection state of a namespace.
+	// IndeterminatePersonalityStatus shall indicate that a request to change the
+	// settings of a personality did not complete successfully and the NVM
+	// subsystem was not able to revert to the previous personality, as defined by
+	// the 'Indeterminate Personality State (IPS)' flag in the NVMe Base
+	// Specification.
+	//
+	// Version added: v1.12.0
+	IndeterminatePersonalityStatus bool
+	// MediaInReadOnly shall indicate the media has been placed in read-only mode,
+	// as defined by the 'All Media Read-Only (AMRO)' flag in the NVMe Base
+	// Specification. This is not set when the read-only condition of the media is
+	// a result of a change in the write protection state of a namespace.
 	MediaInReadOnly bool
 	// OverallSubsystemDegraded shall indicate that the NVM subsystem reliability
-	// has been compromised.
+	// has been compromised, as defined by the 'NVM Subsystem Degraded Reliability
+	// (NDR)' flag in the NVMe Base Specification.
 	OverallSubsystemDegraded bool
 	// PMRUnreliable shall indicate that the Persistent Memory Region has become
-	// unreliable. PCIe memory reads can return invalid data or generate poisoned
-	// PCIe TLP(s). Persistent Memory Region memory writes might not update memory
-	// or might update memory with undefined data. The Persistent Memory Region
-	// might also have become non-persistent.
+	// read-only or unreliable, as defined by the 'Persistent Memory Region
+	// Read-Only (PMRRO)' flag in the NVMe Base Specification. PCIe memory reads
+	// can return invalid data or generate poisoned PCIe TLP(s). Persistent Memory
+	// Region memory writes might not update memory or might update memory with
+	// undefined data. The Persistent Memory Region might also have become
+	// non-persistent.
 	PMRUnreliable bool
 	// PowerBackupFailed shall indicate that the volatile memory backup device has
-	// failed.
+	// failed, as defined by the 'Volatile Memory Backup Failed (VMBF)' flag in the
+	// NVMe Base Specification.
 	PowerBackupFailed bool
 	// SpareCapacityWornOut shall indicate that the available spare capacity has
-	// fallen below the threshold.
+	// fallen below the threshold, as defined by the 'Available Spare Capacity
+	// Below Threshold (ASCBT)' flag in the NVMe Base Specification.
 	SpareCapacityWornOut bool
+	// TemperatureThresholdCondition shall indicate that a temperature in the NVM
+	// subsystem is either above a upper temperature limit or below a lower
+	// temperature limit, as defined by the 'Temperature Threshold Condition (TTC)'
+	// flag in the NVMe Base Specification.
+	//
+	// Version added: v1.12.0
+	TemperatureThresholdCondition bool
 }
 
 // SecurityReceiveResponse shall contain the security data transferred from a

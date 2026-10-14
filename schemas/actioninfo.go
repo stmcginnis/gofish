@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ActionInfo.v1_5_0.json
-// 2025.3 - #ActionInfo.v1_5_0.ActionInfo
+// http://redfish.dmtf.org/schemas/v1/ActionInfo.v1_6_0.json
+// 2026.1 - #ActionInfo.v1_6_0.ActionInfo
 
 package schemas
 
@@ -117,6 +117,11 @@ type ActionInfoParameter struct {
 	//
 	// Version added: v1.2.0
 	ArraySizeMinimum *int `json:",omitempty"`
+	// ConditionalRequirement shall contain information about the conditions that
+	// make this parameter required.
+	//
+	// Version added: v1.6.0
+	ConditionalRequirement string
 	// DataType shall contain the JSON property type for this parameter.
 	DataType ParameterTypes
 	// DefaultValue shall contain the default value for this parameter if the

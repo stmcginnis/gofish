@@ -2,13 +2,37 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/SoftwareInventory.v1_13_0.json
-// 2025.3 - #SoftwareInventory.v1_13_0.SoftwareInventory
+// http://redfish.dmtf.org/schemas/v1/SoftwareInventory.v1_15_0.json
+// 2026.2 - #SoftwareInventory.v1_15_0.SoftwareInventory
 
 package schemas
 
 import (
 	"encoding/json"
+)
+
+type ImageState string
+
+const (
+	// ActiveImageState shall indicate the software image is currently running on
+	// all targets. The 'StagedTargets' and 'ArmedTargets' properties in 'Links'
+	// shall contain empty arrays if present.
+	ActiveImageState ImageState = "Active"
+	// StagedImageState shall indicate the software image is queued for activation
+	// on the next 'Activate' action request on all targets. The 'ActiveTargets'
+	// and 'ArmedTargets' properties in 'Links' shall contain empty arrays if
+	// present.
+	StagedImageState ImageState = "Staged"
+	// ArmedImageState shall indicate the software image will become active on the
+	// next reset or applicable trigger on all targets. The 'ActiveTargets' and
+	// 'StagedTargets' properties in 'Links' shall contain empty arrays if present.
+	ArmedImageState ImageState = "Armed"
+	// TargetSpecificImageState shall indicate the software image is in different
+	// states for different targets.
+	TargetSpecificImageState ImageState = "TargetSpecific"
+	// OEMImageState shall indicate the software image is in an OEM-defined state.
+	// The 'OEMImageState' property shall contain the image state.
+	OEMImageState ImageState = "OEM"
 )
 
 type ReleaseType string
@@ -46,8 +70,8 @@ const (
 // this Redfish service manages.
 type SoftwareInventory struct {
 	Entity
-	// Active shall indicate that the software image is currently in use on one or
-	// more devices.
+	// Active shall indicate that this software image is currently running on one
+	// or more targets.
 	//
 	// Version added: v1.12.0
 	Active bool
@@ -55,6 +79,11 @@ type SoftwareInventory struct {
 	//
 	// Version added: v1.7.0
 	AdditionalVersions AdditionalVersions
+	// Armed shall indicate that this software image will become active on the next
+	// reset or applicable trigger on one or more targets.
+	//
+	// Version added: v1.15.0
+	Armed bool
 	// AssociatedPhysicalContext shall contain a description of the physical
 	// context for the software inventory data.
 	//
@@ -67,6 +96,10 @@ type SoftwareInventory struct {
 	//
 	// Version added: v1.13.0
 	ImageDataURI string
+	// ImageState shall contain the state of the image.
+	//
+	// Version added: v1.15.0
+	ImageState ImageState
 	// LowestSupportedVersion shall represent the lowest supported version of this
 	// software. This string is formatted using the same format used for the
 	// 'Version' property.
@@ -94,6 +127,11 @@ type SoftwareInventory struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// OEMImageState shall contain the OEM-defined state of the image. This
+	// property shall be present if 'ImageState' is 'OEM'.
+	//
+	// Version added: v1.15.0
+	OEMImageState string
 	// RelatedItem shall contain an array of links to resources or objects that
 	// represent devices to which this software inventory applies.
 	//
@@ -130,8 +168,8 @@ type SoftwareInventory struct {
 	//
 	// Version added: v1.1.0
 	SoftwareID string `json:"SoftwareId"`
-	// Staged shall indicate that the software image is ready to be activated to
-	// one or more devices.
+	// Staged shall indicate that this software image is queued for activation on
+	// the next 'Activate' action request on one or more targets.
 	//
 	// Version added: v1.12.0
 	Staged bool
@@ -163,8 +201,12 @@ type SoftwareInventory struct {
 	WriteProtected bool
 	// activateTarget is the URL to send Activate requests.
 	activateTarget string
+	// cancelTarget is the URL to send Cancel requests.
+	cancelTarget string
 	// activeTargets are the URIs for ActiveTargets.
 	activeTargets []string
+	// armedTargets are the URIs for ArmedTargets.
+	armedTargets []string
 	// stagedTargets are the URIs for StagedTargets.
 	stagedTargets []string
 	// RawData holds the original serialized JSON so we can compare updates.
@@ -176,9 +218,11 @@ func (s *SoftwareInventory) UnmarshalJSON(b []byte) error {
 	type temp SoftwareInventory
 	type sActions struct {
 		Activate ActionTarget `json:"#SoftwareInventory.Activate"`
+		Cancel   ActionTarget `json:"#SoftwareInventory.Cancel"`
 	}
 	type sLinks struct {
 		ActiveTargets Links `json:"ActiveTargets"`
+		ArmedTargets  Links `json:"ArmedTargets"`
 		StagedTargets Links `json:"StagedTargets"`
 	}
 	var tmp struct {
@@ -197,7 +241,9 @@ func (s *SoftwareInventory) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	s.activateTarget = tmp.Actions.Activate.Target
+	s.cancelTarget = tmp.Actions.Cancel.Target
 	s.activeTargets = tmp.Links.ActiveTargets.ToStrings()
+	s.armedTargets = tmp.Links.ArmedTargets.ToStrings()
 	s.stagedTargets = tmp.Links.StagedTargets.ToStrings()
 	s.relatedItem = tmp.RelatedItem.ToStrings()
 
@@ -242,9 +288,32 @@ func (s *SoftwareInventory) Activate(targets []Entity) (*TaskMonitorInfo, error)
 	return taskInfo, err
 }
 
+// This action shall cancel the pending activation of this software inventory
+// instance. The software image shall remain in inventory but shall no longer
+// be armed for activation. If no pending activation exists for this instance,
+// the service shall return an appropriate error.
+// targets - This parameter shall contain an array of target devices for which
+// to cancel the pending activation of this software image. If not specified,
+// the service shall cancel the pending activation for all applicable devices.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (s *SoftwareInventory) Cancel(targets []Entity) (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	payload["Targets"] = targets
+	resp, taskInfo, err := PostWithTask(s.client,
+		s.cancelTarget, payload, s.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
 // ActiveTargets gets the ActiveTargets linked resources.
 func (s *SoftwareInventory) ActiveTargets() ([]*Entity, error) {
 	return GetObjects[Entity](s.client, s.activeTargets)
+}
+
+// ArmedTargets gets the ArmedTargets linked resources.
+func (s *SoftwareInventory) ArmedTargets() ([]*Entity, error) {
+	return GetObjects[Entity](s.client, s.armedTargets)
 }
 
 // StagedTargets gets the StagedTargets linked resources.

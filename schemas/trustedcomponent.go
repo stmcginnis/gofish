@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/TrustedComponent.v1_4_0.json
-// 2025.2 - #TrustedComponent.v1_4_0.TrustedComponent
+// http://redfish.dmtf.org/schemas/v1/TrustedComponent.v1_5_0.json
+// 2026.1 - #TrustedComponent.v1_5_0.TrustedComponent
 
 package schemas
 
@@ -72,8 +72,10 @@ type TrustedComponent struct {
 	// UUID shall contain a universally unique identifier number for the trusted
 	// component.
 	UUID string
-	// tPMGetEventLogTarget is the URL to send TPMGetEventLog requests.
-	tPMGetEventLogTarget string
+	// tpmClearTarget is the URL to send TPMClear requests.
+	tpmClearTarget string
+	// tpmGetEventLogTarget is the URL to send TPMGetEventLog requests.
+	tpmGetEventLogTarget string
 	// activeSoftwareImage is the URI for ActiveSoftwareImage.
 	activeSoftwareImage string
 	// componentIntegrity are the URIs for ComponentIntegrity.
@@ -92,6 +94,7 @@ type TrustedComponent struct {
 func (t *TrustedComponent) UnmarshalJSON(b []byte) error {
 	type temp TrustedComponent
 	type tActions struct {
+		TPMClear       ActionTarget `json:"#TrustedComponent.TPMClear"`
 		TPMGetEventLog ActionTarget `json:"#TrustedComponent.TPMGetEventLog"`
 	}
 	type tLinks struct {
@@ -117,7 +120,8 @@ func (t *TrustedComponent) UnmarshalJSON(b []byte) error {
 	*t = TrustedComponent(tmp.temp)
 
 	// Extract the links to other entities for later
-	t.tPMGetEventLogTarget = tmp.Actions.TPMGetEventLog.Target
+	t.tpmClearTarget = tmp.Actions.TPMClear.Target
+	t.tpmGetEventLogTarget = tmp.Actions.TPMGetEventLog.Target
 	t.activeSoftwareImage = tmp.Links.ActiveSoftwareImage.String()
 	t.componentIntegrity = tmp.Links.ComponentIntegrity.ToStrings()
 	t.componentsProtected = tmp.Links.ComponentsProtected.ToStrings()
@@ -140,11 +144,23 @@ func ListReferencedTrustedComponents(c Client, link string) ([]*TrustedComponent
 	return GetCollectionObjects[TrustedComponent](c, link)
 }
 
+// This action shall reset all user-accessible TPM settings to factory
+// defaults.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (t *TrustedComponent) TPMClear() (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	resp, taskInfo, err := PostWithTask(t.client,
+		t.tpmClearTarget, payload, t.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
 // This action shall return the event log for TPM 2.0 devices.
 func (t *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
 	payload := make(map[string]any)
 
-	resp, err := t.PostWithResponse(t.tPMGetEventLogTarget, payload)
+	resp, err := t.PostWithResponse(t.tpmGetEventLogTarget, payload)
 	if err != nil {
 		return nil, err
 	}

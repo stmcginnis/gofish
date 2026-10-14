@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ResolutionStep.v1_0_1.json
-// 2023.3 - #ResolutionStep.v1_0_1
+// http://redfish.dmtf.org/schemas/v1/ResolutionStep.v1_1_0.json
+// 2026.1 - #ResolutionStep.v1_1_0
 
 package schemas
 
@@ -30,6 +30,8 @@ const (
 	CollectDiagnosticDataResolutionType ResolutionType = "CollectDiagnosticData"
 	// OEMResolutionType Perform an OEM-defined resolution step.
 	OEMResolutionType ResolutionType = "OEM"
+	// RetryOperationResolutionType Retry the requested operation.
+	RetryOperationResolutionType ResolutionType = "RetryOperation"
 )
 
 // ResolutionStep shall describe a recommended step of the service-defined

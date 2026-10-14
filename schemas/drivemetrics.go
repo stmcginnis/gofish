@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/DriveMetrics.v1_3_0.json
-// 2025.3 - #DriveMetrics.v1_3_0.DriveMetrics
+// http://redfish.dmtf.org/schemas/v1/DriveMetrics.v1_4_0.json
+// 2026.1 - #DriveMetrics.v1_4_0.DriveMetrics
 
 package schemas
 
@@ -49,9 +49,25 @@ type DriveMetrics struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// PowerCyclesLifetime shall contain the number of times the drive has been
+	// power cycled over its lifetime. The value shall match the definition of the
+	// NVMe 'Power Cycles' SMART metric. Services shall convert SMART data or other
+	// data sources for this metric from non-NVMe drives to the NVMe 'Power Cycles'
+	// definition. See the 'NVMeSMARTMetrics' object in the
+	// 'StorageControllerMetrics' resource.
+	//
+	// Version added: v1.4.0
+	PowerCyclesLifetime *int `json:",omitempty"`
 	// PowerOnHours shall contain the number of power-on hours for the lifetime of
 	// the drive.
 	PowerOnHours *float64 `json:",omitempty"`
+	// PredictedMediaLifeLeftPercent shall contain an indicator of the percentage,
+	// typically '0' to '100', of life remaining in the drive's media. The value of
+	// the 'DataSourceUri' property, if present, shall reference a resource of type
+	// 'Sensor' with the 'ReadingType' property containing the value 'Percent'.
+	//
+	// Version added: v1.4.0
+	PredictedMediaLifeLeftPercent SensorLowerCriticalExcerpt
 	// ReadIOKiBytes shall contain the total number of kibibytes read from the time
 	// of last reset or wrap.
 	//

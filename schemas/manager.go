@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Manager.v1_24_0.json
-// 2025.4 - #Manager.v1_24_0.Manager
+// http://redfish.dmtf.org/schemas/v1/Manager.v1_25_0.json
+// 2026.1 - #Manager.v1_25_0.Manager
 
 package schemas
 
@@ -46,6 +46,9 @@ const (
 	// PTPDateTimeSource The date and time source is a Precision Time Protocol
 	// (PTP) server.
 	PTPDateTimeSource DateTimeSource = "PTP"
+	// DHCPDateTimeSource The date and time source is a Network Time Protocol (NTP)
+	// server whose address was provided via DHCP server.
+	DHCPDateTimeSource DateTimeSource = "DHCP"
 )
 
 type ManagerType string
@@ -94,6 +97,11 @@ const (
 	// PreserveNetworkResetToDefaultsType Reset all settings except network
 	// settings to factory defaults.
 	PreserveNetworkResetToDefaultsType ResetToDefaultsType = "PreserveNetwork"
+	// SensorThresholdsResetToDefaultsType shall reset the thresholds for all
+	// Sensor resources controlled by this manager to the factory default values.
+	// This action shall be the equivalent of performing the 'ResetThresholds'
+	// action on each relevant 'Sensor' resources.
+	SensorThresholdsResetToDefaultsType ResetToDefaultsType = "SensorThresholds"
 )
 
 type SecurityModeTypes string

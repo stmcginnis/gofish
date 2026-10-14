@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/EventDestination.v1_16_0.json
-// 2025.4 - #EventDestination.v1_16_0.EventDestination
+// http://redfish.dmtf.org/schemas/v1/EventDestination.v1_17_1.json
+// 2026.1 - #EventDestination.v1_17_1.EventDestination
 
 package schemas
 
@@ -32,14 +32,17 @@ const (
 	// suspended or terminated, and attempts at delivery of future events shall
 	// continue regardless of the number of retries. The interval between retries
 	// remains constant and is specified by the 'DeliveryRetryIntervalSeconds'
-	// property in the event service.
+	// property in the event service. The 'DeliveryRetryAttempts' property in the
+	// event service shall not affect subscriptions configured with this policy.
 	RetryForeverDeliveryRetryPolicy DeliveryRetryPolicy = "RetryForever"
 	// RetryForeverWithBackoffDeliveryRetryPolicy shall indicate the subscription
 	// is not suspended or terminated, and attempts at delivery of future events
 	// shall continue regardless of the number of retries. Retry attempts are
 	// issued over time according to a service-defined backoff algorithm. The
 	// backoff algorithm may insert an increasing amount of delay between retry
-	// attempts and may reach a maximum.
+	// attempts and may reach a maximum. The 'DeliveryRetryAttempts' property in
+	// the event service shall not affect subscriptions configured with this
+	// policy.
 	RetryForeverWithBackoffDeliveryRetryPolicy DeliveryRetryPolicy = "RetryForeverWithBackoff"
 )
 

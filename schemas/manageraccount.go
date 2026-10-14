@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ManagerAccount.v1_14_1.json
-// 2025.2 - #ManagerAccount.v1_14_1.ManagerAccount
+// http://redfish.dmtf.org/schemas/v1/ManagerAccount.v1_14_2.json
+// 2025.2 - #ManagerAccount.v1_14_2.ManagerAccount
 
 package schemas
 
@@ -88,7 +88,9 @@ type ManagerAccount struct {
 	EmailAddress string
 	// Enabled shall indicate whether an account is enabled. If 'true', the account
 	// is enabled and the user can log in. If 'false', the account is disabled and,
-	// in the future, the user cannot log in.
+	// in the future, the user cannot log in. If this property is modified to
+	// 'false', any currently open sessions for this account should be
+	// automatically closed by the service.
 	Enabled bool
 	// HostBootstrapAccount shall indicate whether this account is a bootstrap
 	// account created by the Redfish Host Interface Specification-defined
@@ -105,7 +107,8 @@ type ManagerAccount struct {
 	// account because the 'AccountLockoutThreshold' was exceeded. To manually
 	// unlock the account before the lockout duration period, an administrator
 	// shall be able to change the property to 'false' to clear the lockout
-	// condition.
+	// condition. If this property is modified to 'true', any currently open
+	// sessions for this account should be automatically closed by the service.
 	Locked bool
 	// MFABypass shall contain the multi-factor authentication bypass settings for
 	// this account.
@@ -317,7 +320,9 @@ func (m *ManagerAccount) ClearSecretKey() (*TaskMonitorInfo, error) {
 
 // This action shall randomly generate a new secret key for RFC6238-defined
 // Time-based One-Time Password (TOTP) multi-factor authentication for this
-// account.
+// account. The service may require a client to invoke the
+// 'VerifyTimeBasedOneTimePassword' action after receiving the secret key to
+// apply the new secret key to the account.
 func (m *ManagerAccount) GenerateSecretKey() (*GenerateSecretKeyResponse, error) {
 	payload := make(map[string]any)
 

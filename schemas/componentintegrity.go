@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ComponentIntegrity.v1_3_2.json
-// 2024.3 - #ComponentIntegrity.v1_3_2.ComponentIntegrity
+// http://redfish.dmtf.org/schemas/v1/ComponentIntegrity.v1_5_0.json
+// 2026.2 - #ComponentIntegrity.v1_5_0.ComponentIntegrity
 
 package schemas
 
@@ -38,23 +38,51 @@ const (
 type DMTFmeasurementTypes string
 
 const (
-	// ImmutableROMDMTFmeasurementTypes Immutable ROM.
+	// ImmutableROMDMTFmeasurementTypes shall indicate the measurement is for an
+	// immutable ROM, as defined by entry '0x0' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
 	ImmutableROMDMTFmeasurementTypes DMTFmeasurementTypes = "ImmutableROM"
-	// MutableFirmwareDMTFmeasurementTypes Mutable firmware or any mutable code.
+	// MutableFirmwareDMTFmeasurementTypes shall indicate the measurement is for
+	// mutable firmware, as defined by entry '0x1' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
 	MutableFirmwareDMTFmeasurementTypes DMTFmeasurementTypes = "MutableFirmware"
-	// HardwareConfigurationDMTFmeasurementTypes Hardware configuration, such as
-	// straps.
+	// HardwareConfigurationDMTFmeasurementTypes shall indicate the measurement is
+	// for hardware configuration, as defined by entry '0x2' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
 	HardwareConfigurationDMTFmeasurementTypes DMTFmeasurementTypes = "HardwareConfiguration"
-	// FirmwareConfigurationDMTFmeasurementTypes Firmware configuration, such as
-	// configurable firmware policy.
+	// FirmwareConfigurationDMTFmeasurementTypes shall indicate the measurement is
+	// for firmware configuration, as defined by entry '0x3' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
 	FirmwareConfigurationDMTFmeasurementTypes DMTFmeasurementTypes = "FirmwareConfiguration"
-	// MutableFirmwareVersionDMTFmeasurementTypes Mutable firmware version.
+	// MutableFirmwareVersionDMTFmeasurementTypes shall indicate the measurement is
+	// for a version number of mutable firmware, as defined by entry '0x6' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
 	MutableFirmwareVersionDMTFmeasurementTypes DMTFmeasurementTypes = "MutableFirmwareVersion"
-	// MutableFirmwareSecurityVersionNumberDMTFmeasurementTypes Mutable firmware
-	// security version number.
+	// MutableFirmwareSecurityVersionNumberDMTFmeasurementTypes shall indicate the
+	// measurement is for a security version number of mutable firmware, as defined
+	// by entry '0x7' in the 'DMTFSpecMeasurementValueType values' table of
+	// DSP0274.
 	MutableFirmwareSecurityVersionNumberDMTFmeasurementTypes DMTFmeasurementTypes = "MutableFirmwareSecurityVersionNumber"
-	// MeasurementManifestDMTFmeasurementTypes Measurement Manifest.
+	// MeasurementManifestDMTFmeasurementTypes shall indicate the measurement is
+	// for a freeform measurement manifest, as defined by entry '0x4' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
 	MeasurementManifestDMTFmeasurementTypes DMTFmeasurementTypes = "MeasurementManifest"
+	// DebugAndDeviceModeDMTFmeasurementTypes shall indicate the measurement is for
+	// a structured representation of debug and device mode, as defined by entry
+	// '0x5' in the 'DMTFSpecMeasurementValueType values' table of DSP0274.
+	DebugAndDeviceModeDMTFmeasurementTypes DMTFmeasurementTypes = "DebugAndDeviceMode"
+	// HashExtendMeasurementDMTFmeasurementTypes shall indicate the measurement is
+	// for a hash-extend measurement, as defined by entry '0x8' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
+	HashExtendMeasurementDMTFmeasurementTypes DMTFmeasurementTypes = "HashExtendMeasurement"
+	// InformationalDMTFmeasurementTypes shall indicate the measurement is
+	// informational, as defined by entry '0x9' in the
+	// 'DMTFSpecMeasurementValueType values' table of DSP0274.
+	InformationalDMTFmeasurementTypes DMTFmeasurementTypes = "Informational"
+	// StructuredMeasurementManifestDMTFmeasurementTypes shall indicate the
+	// measurement is for a structured measurement manifest, as defined by entry
+	// '0xA' in the 'DMTFSpecMeasurementValueType values' table of DSP0274.
+	StructuredMeasurementManifestDMTFmeasurementTypes DMTFmeasurementTypes = "StructuredMeasurementManifest"
 )
 
 type MeasurementSpecification string
@@ -224,38 +252,45 @@ func ListReferencedComponentIntegritys(c Client, link string) ([]*ComponentInteg
 	return GetCollectionObjects[ComponentIntegrity](c, link)
 }
 
+// ComponentIntegritySPDMGetSignedMeasurementsParameters holds the parameters for the SPDMGetSignedMeasurements action.
+type ComponentIntegritySPDMGetSignedMeasurementsParameters struct {
+	// MeasurementIndices shall contain an array of indices that identify the
+	// measurement blocks to sign. This array shall contain one or more unique
+	// values between '0' to '254', inclusive, or contain a single value of '255'.
+	// If not provided by the client, the value shall be assumed to be an array
+	// containing a single value of '255'.
+	MeasurementIndices []int `json:"MeasurementIndices,omitempty"`
+	// Nonce shall contain a 32-byte hex-encoded string that is signed with the
+	// measurements. If not provided by the client, the SPDM Requester shall
+	// generate the nonce. The value should be unique and generated using a random
+	// or a pseudo-random generator. The SPDM Requester shall send this value to
+	// the SPDM Responder in the SPDM 'GET_MEASUREMENTS' request.
+	Nonce string `json:"Nonce,omitempty"`
+	// RawBitstream shall indicate whether the 'RawBitStreamRequested' parameter
+	// for SPDM 'GET_MEASUREMENTS' requests is set. The SPDM Responder may return a
+	// hash if it is unable to produce a raw bitstream. If the SPDM version is 1.0
+	// or 1.1, this parameter shall be ignored. If this parameter is not provided
+	// or supported, the value shall be 'false'.
+	RawBitstream bool `json:"RawBitstream,omitempty"`
+	// SlotID shall contain the SPDM slot identifier for the certificate containing
+	// the private key to generate the signature over the measurements. If not
+	// provided by the client, the value shall be assumed to be '0'. The SPDM
+	// Requester shall send this value to the SPDM Responder in the SPDM
+	// 'GET_MEASUREMENTS' request.
+	SlotID int `json:"SlotId,omitempty"`
+}
+
 // This action shall generate a cryptographic signed statement over the given
 // nonce and measurements corresponding to the SPDM Responder. This action
 // shall not be present if the 'ComponentIntegrityType' property does not
 // contain the value 'SPDM'. The SPDM Requester shall issue one or more SPDM
 // 'GET_MEASUREMENTS' requests for each of the requested measurement indices to
-// the SPDM Responder. When the SPDM 'GET_MEASUREMENTS' requests are made for
-// version 1.2, the parameter 'RawBitStreamRequested' shall contain '0'. The
-// SPDM Requester shall provide the nonce for the action to the SPDM Responder
-// in the last SPDM 'GET_MEASUREMENTS' request. The SPDM Requester shall
-// request a signature in the last SPDM 'GET_MEASUREMENTS' request.
-// measurementIndices - This parameter shall contain an array of indices that
-// identify the measurement blocks to sign. This array shall contain one or
-// more unique values between '0' to '254', inclusive, or contain a single
-// value of '255'. If not provided by the client, the value shall be assumed to
-// be an array containing a single value of '255'.
-// nonce - This parameter shall contain a 32-byte hex-encoded string that is
-// signed with the measurements. If not provided by the client, the SPDM
-// Requester shall generate the nonce. The value should be unique and generated
-// using a random or a pseudo-random generator. The SPDM Requester shall send
-// this value to the SPDM Responder in the SPDM 'GET_MEASUREMENTS' request.
-// slotID - This parameter shall contain the SPDM slot identifier for the
-// certificate containing the private key to generate the signature over the
-// measurements. If not provided by the client, the value shall be assumed to
-// be '0'. The SPDM Requester shall send this value to the SPDM Responder in
-// the SPDM 'GET_MEASUREMENTS' request.
-func (c *ComponentIntegrity) SPDMGetSignedMeasurements(measurementIndices []int, nonce string, slotID int) (*SPDMGetSignedMeasurementsResponse, error) {
-	payload := make(map[string]any)
-	payload["MeasurementIndices"] = measurementIndices
-	payload["Nonce"] = nonce
-	payload["SlotId"] = slotID
-
-	resp, err := c.PostWithResponse(c.sPDMGetSignedMeasurementsTarget, payload)
+// the SPDM Responder. The SPDM Requester shall provide the nonce for the
+// action to the SPDM Responder in the last SPDM 'GET_MEASUREMENTS' request.
+// The SPDM Requester shall request a signature in the last SPDM
+// 'GET_MEASUREMENTS' request.
+func (c *ComponentIntegrity) SPDMGetSignedMeasurements(params *ComponentIntegritySPDMGetSignedMeasurementsParameters) (*SPDMGetSignedMeasurementsResponse, error) {
+	resp, err := c.PostWithResponse(c.sPDMGetSignedMeasurementsTarget, params)
 	if err != nil {
 		return nil, err
 	}
@@ -389,6 +424,17 @@ type CommunicationInfo struct {
 // SPDMGetSignedMeasurementsResponse shall contain the SPDM signed measurements
 // from an SPDM Responder.
 type SPDMGetSignedMeasurementsResponse struct {
+	// AdditionalSigningAlgorithms shall contain an array of additional asymmetric
+	// signing algorithms negotiated between the SPDM Requester and the SPDM
+	// Responder. The allowable values for this property shall be the asymmetric
+	// key signature algorithm names found in the 'SPDM Asymmetric Signature
+	// Reference Information' table in DSP0274. If the algorithm is an extended
+	// algorithm, this property shall contain the value 'OEM'. This property shall
+	// not be present if only one asymmetric signing algorithm is negotiated. The
+	// first asymmetric signing algorithm shall not appear in this property.
+	//
+	// Version added: v1.4.0
+	AdditionalSigningAlgorithms []string
 	// Certificate shall contain a link to a resource of type 'Certificate' that
 	// represents the certificate corresponding to the SPDM slot identifier that
 	// can be used to validate the signature. This property shall not be present if
@@ -412,10 +458,10 @@ type SPDMGetSignedMeasurementsResponse struct {
 	PublicKey string
 	// SignedMeasurements shall contain the cryptographic signed statement over the
 	// given nonce and measurement blocks corresponding to the requested
-	// measurement indices. If the SPDM version is 1.2, this value shall be a
-	// concatenation of SPDM 'VCA' and 'GET_MEASUREMENTS' requests and responses
-	// exchanged between the SPDM Requester and the SPDM Responder. If SPDM version
-	// is 1.0 or 1.1, this value shall be a concatenation of SPDM
+	// measurement indices. If the SPDM version is 1.2, 1.3, or 1.4, this value
+	// shall be a concatenation of SPDM 'VCA' and 'GET_MEASUREMENTS' requests and
+	// responses exchanged between the SPDM Requester and the SPDM Responder. If
+	// the SPDM version is 1.0 or 1.1, this value shall be a concatenation of SPDM
 	// 'GET_MEASUREMENTS' requests and responses exchanged between the SPDM
 	// Requester and the SPDM Responder. The last 'MEASUREMENTS' response shall
 	// contain a signature generated over the 'L2' string by the SPDM Responder.
@@ -680,6 +726,14 @@ type SPDMsingleMeasurement struct {
 // SingleSessionInfo shall contain information about a single communication
 // channel or session between two components.
 type SingleSessionInfo struct {
+	// SessionAlgorithm shall contain the algorithm the session is using to secure
+	// the communication channel between the SPDM Requester and the SPDM Responder.
+	// The allowable values for this property shall be the asymmetric signature
+	// algorithm names found in the 'SPDM Asymmetric Signature Reference
+	// Information' table in DSP0274.
+	//
+	// Version added: v1.4.0
+	SessionAlgorithm string
 	// SessionID shall contain the unique identifier for the active session or
 	// communication channel between two components.
 	SessionID *int `json:"SessionId,omitempty"`

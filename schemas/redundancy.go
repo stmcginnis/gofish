@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Redundancy.v1_7_0.json
-// 2025.3 - #Redundancy.v1_7_0
+// http://redfish.dmtf.org/schemas/v1/Redundancy.v1_7_1.json
+// 2025.3 - #Redundancy.v1_7_1
 
 package schemas
 
@@ -139,6 +139,8 @@ func (r *Redundancy) UnmarshalJSON(b []byte) error {
 // Update commits updates to this object's properties to the running system.
 func (r *Redundancy) Update() error {
 	readWriteFields := []string{
+		"MinNumNeeded",
+		"MinNumNeededForFaultTolerance",
 		"Mode",
 		"RedundancyEnabled",
 	}

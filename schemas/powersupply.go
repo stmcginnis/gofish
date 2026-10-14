@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/PowerSupply.v1_6_0.json
-// 2024.1 - #PowerSupply.v1_6_0.PowerSupply
+// http://redfish.dmtf.org/schemas/v1/PowerSupply.v1_8_0.json
+// 2026.2 - #PowerSupply.v1_8_0.PowerSupply
 
 package schemas
 
@@ -34,6 +34,8 @@ const (
 	ACorDCPowerSupplyUnitType PowerSupplyUnitType = "ACorDC"
 	// DCRegulatorPowerSupplyUnitType Direct Current (DC) voltage regulator.
 	DCRegulatorPowerSupplyUnitType PowerSupplyUnitType = "DCRegulator"
+	// PSUPowerSupplyUnitType Power supply unit (PSU).
+	PSUPowerSupplyUnitType PowerSupplyUnitType = "PSU"
 )
 
 // PowerSupplyUnit shall represent a power supply unit for a Redfish implementation.
@@ -332,4 +334,15 @@ type OutputRail struct {
 	// PhysicalContext shall contain a description of the device or region within
 	// the chassis to which this power rail applies.
 	PhysicalContext PhysicalContext
+	// VoltageControl shall contain the desired output voltage, in volt units, for
+	// this output rail. The value of the 'DataSourceUri' property, if present,
+	// shall reference a resource of type 'Control' with the 'ControlType' property
+	// containing the value 'Voltage'. A 'ControlMode' value of 'Override' shall
+	// indicate the user has selected a desired output voltage, while a value of
+	// 'Automatic' shall indicate the output voltage reflects the value of
+	// 'NominalVoltage'. Changing the value of 'ControlMode' to 'Automatic' should
+	// change the value of 'SetPoint' to match the 'NominalVoltage'.
+	//
+	// Version added: v1.7.0
+	VoltageControl ControlExcerpt
 }

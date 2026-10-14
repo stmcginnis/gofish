@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/SecurityPolicy.v1_0_3.json
-// 2022.2 - #SecurityPolicy.v1_0_3.SecurityPolicy
+// http://redfish.dmtf.org/schemas/v1/SecurityPolicy.v1_1_0.json
+// 2026.2 - #SecurityPolicy.v1_1_0.SecurityPolicy
 
 package schemas
 
@@ -18,6 +18,12 @@ import (
 // resource will follow the values of the properties in the 'TLS' property.
 type SecurityPolicy struct {
 	Entity
+	// AllowDeny shall contain a link to a resource collection of type
+	// 'AllowDenyCollection' that contains the permissions for packets leaving and
+	// arriving at the manager on any interface.
+	//
+	// Version added: v1.1.0
+	allowDeny string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -47,6 +53,7 @@ func (s *SecurityPolicy) UnmarshalJSON(b []byte) error {
 	type temp SecurityPolicy
 	var tmp struct {
 		temp
+		AllowDeny Link `json:"AllowDeny"`
 	}
 
 	err := json.Unmarshal(b, &tmp)
@@ -57,6 +64,7 @@ func (s *SecurityPolicy) UnmarshalJSON(b []byte) error {
 	*s = SecurityPolicy(tmp.temp)
 
 	// Extract the links to other entities for later
+	s.allowDeny = tmp.AllowDeny.String()
 
 	// This is a read/write object, so we need to save the raw object data for later
 	s.RawData = b
@@ -82,6 +90,14 @@ func GetSecurityPolicy(c Client, uri string) (*SecurityPolicy, error) {
 // a provided reference.
 func ListReferencedSecurityPolicys(c Client, link string) ([]*SecurityPolicy, error) {
 	return GetCollectionObjects[SecurityPolicy](c, link)
+}
+
+// AllowDeny gets the AllowDeny collection.
+func (s *SecurityPolicy) AllowDeny() ([]*AllowDeny, error) {
+	if s.allowDeny == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[AllowDeny](s.client, s.allowDeny)
 }
 
 // SPDMAlgorithmSet shall contain SPDM algorithm settings.

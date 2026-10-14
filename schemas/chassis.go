@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Chassis.v1_28_0.json
-// 2025.3 - #Chassis.v1_28_0.Chassis
+// http://redfish.dmtf.org/schemas/v1/Chassis.v1_29_0.json
+// 2026.2 - #Chassis.v1_29_0.Chassis
 
 package schemas
 
@@ -148,6 +148,12 @@ const (
 type RackMountWidth string
 
 const (
+	// OpenRackRackMountWidth shall conform to the Open Compute Project Open Rack
+	// V3 Base Specification.
+	OpenRackRackMountWidth RackMountWidth = "OpenRack"
+	// OpenRackWideRackMountWidth shall conform to the Open Compute Project Open
+	// Rack Wide Base Specification.
+	OpenRackWideRackMountWidth RackMountWidth = "OpenRackWide"
 	// OpenURackMountWidth shall conform to the Open Rack standard for 21-inch
 	// racks.
 	OpenURackMountWidth RackMountWidth = "OpenU"
@@ -429,6 +435,11 @@ type Chassis struct {
 	//
 	// Version added: v1.20.0
 	PoweredByParent bool
+	// ProductionDate shall contain the date of production or manufacture for this
+	// chassis.
+	//
+	// Version added: v1.29.0
+	ProductionDate string
 	// RackMountCapacityUnits shall contain the amount of space, in 'RackUnits' and
 	// including fractional units, contained within this chassis that are usable to
 	// hold rack-mountable equipment. This property shall not be present if

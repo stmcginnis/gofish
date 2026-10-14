@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ProcessorMetrics.v1_7_0.json
-// 2025.3 - #ProcessorMetrics.v1_7_0.ProcessorMetrics
+// http://redfish.dmtf.org/schemas/v1/ProcessorMetrics.v1_7_1.json
+// 2025.3 - #ProcessorMetrics.v1_7_1.ProcessorMetrics
 
 package schemas
 
@@ -23,10 +23,10 @@ type ProcessorMetrics struct {
 	// This property has been deprecated in favor of the 'OperatingSpeedMHz'
 	// property.
 	AverageFrequencyMHz *float64 `json:",omitempty"`
-	// BandwidthPercent shall contain the bandwidth usage of the processor as a
-	// percentage, typically '0' to '100'. When this resource is subordinate to the
-	// 'ProcessorSummary' object, this property shall be the CPU utilization over
-	// all processors as a percentage.
+	// BandwidthPercent shall contain the processor utilization as a percentage,
+	// typically '0' to '100'. When this resource is subordinate to the
+	// 'ProcessorSummary' object, this property shall be the processor utilization
+	// over all processors as a percentage.
 	BandwidthPercent *float64 `json:",omitempty"`
 	// Cache shall contain properties that describe this processor's cache. When
 	// this resource is subordinate to the 'ProcessorSummary' object, this property

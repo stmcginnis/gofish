@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Bios.v1_2_3.json
-// 2021.1 - #Bios.v1_2_3.Bios
+// http://redfish.dmtf.org/schemas/v1/Bios.v1_3_0.json
+// 2026.1 - #Bios.v1_3_0.Bios
 
 package schemas
 
@@ -32,6 +32,11 @@ type Bios struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// Passwords shall contain the list of BIOS passwords specific to the
+	// manufacturer or provider.
+	//
+	// Version added: v1.3.0
+	Passwords Passwords
 	// ResetBiosToDefaultsPending shall indicate whether there is a pending request
 	// to reset the BIOS attributes to default values. A successful completion of
 	// the 'ResetBios' action shall set this property to 'true'. Applying the
@@ -117,7 +122,8 @@ func ListReferencedBioss(c Client, link string) ([]*Bios, error) {
 // This action shall change the selected BIOS password.
 // newPassword - This parameter shall contain the new BIOS password.
 // oldPassword - This parameter shall contain the existing BIOS password to
-// change.
+// change. Services may reject the action request if this parameter is not
+// provided or the value supplied does not match the current password.
 // passwordName - This parameter shall contain the name of the BIOS password to
 // change. For instance, 'AdminPassword' or 'UserPassword'.
 //
@@ -249,4 +255,32 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 // UpdateBiosAttributes is used to update attribute values.
 func (b *Bios) UpdateBiosAttributes(attrs SettingsAttributes) error {
 	return b.UpdateBiosAttributesApplyAt(attrs, "")
+}
+
+// Password shall contain information about a BIOS password specific to the
+// manufacturer or provider.
+type Password struct {
+	// Name is the name of the resource or array element.
+	//
+	// Version added: v1.3.0
+	Name string
+	// Set shall contain 'true' if a valid value was provided for this password.
+	// Otherwise, the property shall contain 'false'.
+	//
+	// Version added: v1.3.0
+	Set bool
+}
+
+// Passwords shall contain the list of BIOS passwords specific to the
+// manufacturer or provider.
+type Passwords struct {
+	// Boot shall contain information about the password that allows the system to
+	// boot to an operating system.
+	//
+	// Version added: v1.3.0
+	Boot Password
+	// Setup shall contain information about the password to enter the setup menu.
+	//
+	// Version added: v1.3.0
+	Setup Password
 }

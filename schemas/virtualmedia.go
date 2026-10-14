@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/VirtualMedia.v1_6_5.json
-// 2022.3 - #VirtualMedia.v1_6_5.VirtualMedia
+// http://redfish.dmtf.org/schemas/v1/VirtualMedia.v1_7_0.json
+// 2026.2 - #VirtualMedia.v1_7_0.VirtualMedia
 
 package schemas
 
@@ -129,6 +129,13 @@ type VirtualMedia struct {
 	//
 	// Version added: v1.6.0
 	EjectTimeout string
+	// HTTPHeaders shall contain an object consisting of the names and values of
+	// HTTP headers to send when accessing the URI specified by the 'Image'
+	// property if the transfer protocol is HTTP or HTTPS. This property shall be
+	// an empty object in responses.
+	//
+	// Version added: v1.7.0
+	HTTPHeaders HTTPHeaderProperty
 	// Image shall contain the URI of the media attached to the virtual media. This
 	// value may specify an absolute URI to remote media or a relative URI to media
 	// local to the implementation. A service may allow a relative URI to reference
@@ -308,6 +315,10 @@ func (v *VirtualMedia) EjectMedia() (*TaskMonitorInfo, error) {
 
 // VirtualMediaInsertMediaParameters holds the parameters for the InsertMedia action.
 type VirtualMediaInsertMediaParameters struct {
+	// HTTPHeaders shall contain an object consisting of the names and values of
+	// HTTP headers to send when accessing the URI specified by the 'Image'
+	// parameter if the transfer protocol is HTTP or HTTPS.
+	HTTPHeaders HTTPHeaderProperty `json:"HTTPHeaders,omitempty"`
 	// Image shall contain the URI of the media to be attached to the virtual
 	// media. This parameter may specify an absolute URI to remote media or a
 	// relative URI to media local to the implementation. A service may allow a

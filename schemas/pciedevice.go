@@ -2,13 +2,26 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/PCIeDevice.v1_21_0.json
-// 2025.4 - #PCIeDevice.v1_21_0.PCIeDevice
+// http://redfish.dmtf.org/schemas/v1/PCIeDevice.v1_23_0.json
+// 2026.2 - #PCIeDevice.v1_23_0.PCIeDevice
 
 package schemas
 
 import (
 	"encoding/json"
+)
+
+type CXLDeviceClass string
+
+const (
+	// SLDCXLDeviceClass Single logical device (SLD) CXL device.
+	SLDCXLDeviceClass CXLDeviceClass = "SLD"
+	// MLDCXLDeviceClass Multi-logical device (MLD) CXL device.
+	MLDCXLDeviceClass CXLDeviceClass = "MLD"
+	// MHSLDCXLDeviceClass Multi-headed single logical device (MH-SLD) CXL device.
+	MHSLDCXLDeviceClass CXLDeviceClass = "MH_SLD"
+	// MHMLDCXLDeviceClass Multi-headed multi-logical device (MH-MLD) CXL device.
+	MHMLDCXLDeviceClass CXLDeviceClass = "MH_MLD"
 )
 
 type CXLDeviceType string
@@ -37,6 +50,9 @@ const (
 	// TagBasedCXLDynamicCapacityPolicies shall indicate the CXL
 	// Specification-defined tag-based release policy.
 	TagBasedCXLDynamicCapacityPolicies CXLDynamicCapacityPolicies = "TagBased"
+	// EnableSharedAccessCXLDynamicCapacityPolicies shall indicate the CXL
+	// Specification-defined enable shared access add capacity policy.
+	EnableSharedAccessCXLDynamicCapacityPolicies CXLDynamicCapacityPolicies = "EnableSharedAccess"
 )
 
 type CXLProtocolVersion string
@@ -146,6 +162,14 @@ type PCIeDevice struct {
 	//
 	// Version added: v1.11.0
 	cXLLogicalDevices string
+	// Certificates shall contain a link to a resource collection of type
+	// 'CertificateCollection' that contains certificates for device identity and
+	// attestation. This property shall not be present if a more specific resource
+	// for this PCIe device is present in the service, such as a networking PCIe
+	// device represented as a 'NetworkAdapter' resource.
+	//
+	// Version added: v1.22.0
+	certificates string
 	// DeviceType shall contain the device type of the PCIe device such as
 	// 'SingleFunction' or 'MultiFunction'.
 	DeviceType DeviceType
@@ -224,12 +248,16 @@ type PCIeDevice struct {
 	//
 	// Version added: v1.5.0
 	UUID string
+	// cXLReferenceDCMemoryTarget is the URL to send CXLReferenceDCMemory requests.
+	cXLReferenceDCMemoryTarget string
 	// chassis are the URIs for Chassis.
 	chassis []string
 	// connectedPCIePorts are the URIs for ConnectedPCIePorts.
 	connectedPCIePorts []string
 	// pCIeFunctions are the URIs for PCIeFunctions.
 	pCIeFunctionsLink []string
+	// fabricAdapters are the URIs for FabricAdapters.
+	fabricAdapters []string
 	// processors are the URIs for Processors.
 	processors []string
 	// switch_ is the URI for Switch.
@@ -241,18 +269,24 @@ type PCIeDevice struct {
 // UnmarshalJSON unmarshals a PCIeDevice object from the raw JSON.
 func (p *PCIeDevice) UnmarshalJSON(b []byte) error {
 	type temp PCIeDevice
+	type pActions struct {
+		CXLReferenceDCMemory ActionTarget `json:"#PCIeDevice.CXLReferenceDCMemory"`
+	}
 	type pLinks struct {
 		Chassis            Links `json:"Chassis"`
 		ConnectedPCIePorts Links `json:"ConnectedPCIePorts"`
 		PCIeFunctions      Links `json:"PCIeFunctions"`
+		FabricAdapters     Links `json:"FabricAdapters"`
 		Processors         Links `json:"Processors"`
 		Switch             Link  `json:"Switch"`
 	}
 	var tmp struct {
 		temp
+		Actions            pActions
 		Links              pLinks
 		Assembly           ResolvedLink[Assembly]           `json:"Assembly"`
 		CXLLogicalDevices  Link                             `json:"CXLLogicalDevices"`
+		Certificates       Link                             `json:"Certificates"`
 		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
 		PCIeFunctions      Link                             `json:"PCIeFunctions"`
 	}
@@ -265,14 +299,17 @@ func (p *PCIeDevice) UnmarshalJSON(b []byte) error {
 	*p = PCIeDevice(tmp.temp)
 
 	// Extract the links to other entities for later
+	p.cXLReferenceDCMemoryTarget = tmp.Actions.CXLReferenceDCMemory.Target
 	p.chassis = tmp.Links.Chassis.ToStrings()
 	p.connectedPCIePorts = tmp.Links.ConnectedPCIePorts.ToStrings()
 	p.pCIeFunctionsLink = tmp.Links.PCIeFunctions.ToStrings()
+	p.fabricAdapters = tmp.Links.FabricAdapters.ToStrings()
 	p.processors = tmp.Links.Processors.ToStrings()
 	p.switch_ = tmp.Links.Switch.String()
 	p.assembly = tmp.Assembly
 
 	p.cXLLogicalDevices = tmp.CXLLogicalDevices.String()
+	p.certificates = tmp.Certificates.String()
 	p.environmentMetrics = tmp.EnvironmentMetrics
 
 	p.pCIeFunctions = tmp.PCIeFunctions.String()
@@ -305,6 +342,30 @@ func ListReferencedPCIeDevices(c Client, link string) ([]*PCIeDevice, error) {
 	return GetCollectionObjects[PCIeDevice](c, link)
 }
 
+// This action shall update a reference to CXL dynamic capacity memory.
+// Indicating CXL dynamic capacity memory is referenced by a CXL Fabric Manager
+// prevents the tagged, sharable capacity from being sanitized, freed, or
+// reallocated, regardless of whether it is currently assigned to any logical
+// device.
+// fMReference - This parameter shall indicate whether a CXL Fabric Manager is
+// referencing the memory extents with the specified tag. If 'false', a CXL
+// Fabric Manager is no longer referencing the memory extents with the
+// specified tag. If 'true', a CXL Fabric Manager is no longer referencing the
+// memory extents with the specified tag.
+// tag - This parameter shall contain the tag of the memory extents to
+// reference.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (p *PCIeDevice) CXLReferenceDCMemory(fMReference bool, tag string) (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	payload["FMReference"] = fMReference
+	payload["Tag"] = tag
+	resp, taskInfo, err := PostWithTask(p.client,
+		p.cXLReferenceDCMemoryTarget, payload, p.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
 // Chassis gets the Chassis linked resources.
 func (p *PCIeDevice) Chassis() ([]*Chassis, error) {
 	return GetObjects[Chassis](p.client, p.chassis)
@@ -313,6 +374,11 @@ func (p *PCIeDevice) Chassis() ([]*Chassis, error) {
 // ConnectedPCIePorts gets the ConnectedPCIePorts linked resources.
 func (p *PCIeDevice) ConnectedPCIePorts() ([]*Port, error) {
 	return GetObjects[Port](p.client, p.connectedPCIePorts)
+}
+
+// FabricAdapters gets the FabricAdapters linked resources.
+func (p *PCIeDevice) FabricAdapters() ([]*FabricAdapter, error) {
+	return GetObjects[FabricAdapter](p.client, p.fabricAdapters)
 }
 
 // Processors gets the Processors linked resources.
@@ -339,6 +405,14 @@ func (p *PCIeDevice) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
 		return nil, nil
 	}
 	return GetCollectionObjects[CXLLogicalDevice](p.client, p.cXLLogicalDevices)
+}
+
+// Certificates gets the Certificates collection.
+func (p *PCIeDevice) Certificates() ([]*Certificate, error) {
+	if p.certificates == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[Certificate](p.client, p.certificates)
 }
 
 // EnvironmentMetrics gets the EnvironmentMetrics linked resource.
@@ -370,6 +444,11 @@ type CXLDevice struct {
 	//
 	// Version added: v1.18.0
 	CurrentProtocolVersion CXLProtocolVersion
+	// DeviceClass shall contain the class of this device as defined in the CXL
+	// Specification.
+	//
+	// Version added: v1.23.0
+	DeviceClass CXLDeviceClass
 	// DeviceType shall contain the CXL device type.
 	//
 	// Version added: v1.11.0
@@ -441,6 +520,11 @@ type CXLDynamicCapacity struct {
 	//
 	// Version added: v1.12.0
 	MemoryBlockSizesSupported []CXLRegionBlockSizes
+	// MemoryExtents shall contain a link to a resource collection of type
+	// 'MemoryExtentCollection'.
+	//
+	// Version added: v1.22.0
+	memoryExtents string
 	// ReleaseCapacityPoliciesSupported shall contain the CXL Specification-defined
 	// dynamic capacity policies that are supported by this CXL device when dynamic
 	// capacity is released.
@@ -457,6 +541,35 @@ type CXLDynamicCapacity struct {
 	//
 	// Version added: v1.12.0
 	TotalDynamicCapacityMiB *int `json:",omitempty"`
+}
+
+// UnmarshalJSON unmarshals a CXLDynamicCapacity object from the raw JSON.
+func (c *CXLDynamicCapacity) UnmarshalJSON(b []byte) error {
+	type temp CXLDynamicCapacity
+	var tmp struct {
+		temp
+		MemoryExtents Link `json:"MemoryExtents"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*c = CXLDynamicCapacity(tmp.temp)
+
+	// Extract the links to other entities for later
+	c.memoryExtents = tmp.MemoryExtents.String()
+
+	return nil
+}
+
+// MemoryExtents gets the MemoryExtents collection.
+func (c *CXLDynamicCapacity) MemoryExtents(client Client) ([]*MemoryExtent, error) {
+	if c.memoryExtents == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[MemoryExtent](client, c.memoryExtents)
 }
 
 // CXLRegionBlockSizes shall contain the set of memory block sizes supported by
@@ -507,11 +620,21 @@ type PCIeErrors struct {
 	//
 	// Version added: v1.15.0
 	BadTLPCount *int `json:",omitempty"`
+	// CDRErrorsPerLane shall contain an array of Clock Data Recovery (CDR) error
+	// counts, indexed by the lane number.
+	//
+	// Version added: v1.22.0
+	CDRErrorsPerLane []*int
 	// CorrectableErrorCount shall contain the total number of PCIe correctable
 	// errors for this device.
 	//
 	// Version added: v1.8.0
 	CorrectableErrorCount *int `json:",omitempty"`
+	// DLLPCRCErrorCount shall contain the total number of Data Link Layer Packet
+	// (DLLP) CRC errors.
+	//
+	// Version added: v1.22.0
+	DLLPCRCErrorCount *int `json:",omitempty"`
 	// FatalErrorCount shall contain the total number of PCIe fatal errors for this
 	// device.
 	//
@@ -523,11 +646,22 @@ type PCIeErrors struct {
 	//
 	// Version added: v1.21.0
 	FlowControlTimeoutErrors *int `json:",omitempty"`
+	// FramingErrorCount shall contain the total number of framing errors that
+	// caused a transition from L0 to the recovery state.
+	//
+	// Version added: v1.22.0
+	FramingErrorCount *int `json:",omitempty"`
 	// L0ToRecoveryCount shall contain the total number of times the PCIe link
 	// transitioned from L0 to the recovery state for this device.
 	//
 	// Version added: v1.8.0
 	L0ToRecoveryCount *int `json:",omitempty"`
+	// LinkDownCount shall contain the total number of times the port training
+	// state machine has failed the link error recovery process, resulting in the
+	// link being downed since reset.
+	//
+	// Version added: v1.22.0
+	LinkDownCount *int `json:",omitempty"`
 	// NAKReceivedCount shall contain the total number of NAKs issued on the PCIe
 	// link by the receiver. A NAK is issued by the receiver when it detects that a
 	// TLP from this device was missed. This could be because this device did not
@@ -561,6 +695,11 @@ type PCIeErrors struct {
 	//
 	// Version added: v1.8.0
 	ReplayRolloverCount *int `json:",omitempty"`
+	// TrainingSequenceErrorCount shall contain the total number of training
+	// sequence errors that caused a transition from L0 to the recovery state.
+	//
+	// Version added: v1.22.0
+	TrainingSequenceErrorCount *int `json:",omitempty"`
 	// UnsupportedRequestCount shall contain the total number of PCIe unsupported
 	// requests received by this device.
 	//
@@ -633,6 +772,16 @@ type PCIeMetrics struct {
 	//
 	// Version added: v1.20.0
 	CompletionCreditExhaustionDrops *int `json:",omitempty"`
+	// InboundCompletionTLPBytes shall contain the total data payload in bytes
+	// transferred through inbound completion transaction layer packets (TLPs).
+	//
+	// Version added: v1.22.0
+	InboundCompletionTLPBytes *int `json:",omitempty"`
+	// InboundCompletionTLPCount shall contain the total number of inbound
+	// completion transaction layer packets (TLPs).
+	//
+	// Version added: v1.22.0
+	InboundCompletionTLPCount *int `json:",omitempty"`
 	// NPCreditExhaustionDrops shall contain the total number of of read requests
 	// dropped due to non-posted credit exhaustion.
 	//

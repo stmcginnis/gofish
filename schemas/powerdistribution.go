@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/PowerDistribution.v1_6_0.json
-// 2025.4 - #PowerDistribution.v1_6_0.PowerDistribution
+// http://redfish.dmtf.org/schemas/v1/PowerDistribution.v1_7_0.json
+// 2026.2 - #PowerDistribution.v1_7_0.PowerDistribution
 
 package schemas
 
@@ -121,11 +121,34 @@ type PowerDistribution struct {
 	//
 	// Version added: v1.4.0
 	PowerCapacityVA *uint `json:",omitempty"`
+	// PowerCycleDelaySeconds shall contain the number of seconds to delay power on
+	// after a 'PowerControl' action to cycle power. The value '0' shall indicate
+	// no delay to power on.
+	//
+	// Version added: v1.7.0
+	PowerCycleDelaySeconds *float64 `json:",omitempty"`
 	// PowerDistributionRedundancy shall contain redundancy information for the
 	// groups of power distribution units.
 	//
 	// Version added: v1.6.0
 	PowerDistributionRedundancy []RedundantGroup
+	// PowerOnDelaySeconds shall contain the number of seconds to delay power up
+	// after a power cycle or a 'PowerControl' action. The value '0' shall indicate
+	// no delay to power up.
+	//
+	// Version added: v1.7.0
+	PowerOnDelaySeconds *float64 `json:",omitempty"`
+	// PowerRestoreDelaySeconds shall contain the number of seconds to delay power
+	// on after a power fault. The value '0' shall indicate no delay to power on.
+	//
+	// Version added: v1.7.0
+	PowerRestoreDelaySeconds *float64 `json:",omitempty"`
+	// PowerRestorePolicy shall contain the desired power state of the equipment
+	// when input power is applied. The value 'LastState' shall return the
+	// equipment to the power state it was in when input power was lost.
+	//
+	// Version added: v1.7.0
+	PowerRestorePolicy PowerRestorePolicyTypes
 	// PowerSupplies shall contain a link to a resource collection of type
 	// 'PowerSupplyCollection'.
 	//
@@ -158,6 +181,11 @@ type PowerDistribution struct {
 	// SerialNumber shall contain a manufacturer-allocated number that identifies
 	// the equipment.
 	SerialNumber string
+	// SparePartNumber shall contain the spare or replacement part number as
+	// defined by the manufacturer for this equipment.
+	//
+	// Version added: v1.7.0
+	SparePartNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status Status
 	// Subfeeds shall contain a link to a resource collection of type
@@ -182,6 +210,8 @@ type PowerDistribution struct {
 	Version string
 	// exportConfigurationTarget is the URL to send ExportConfiguration requests.
 	exportConfigurationTarget string
+	// powerControlTarget is the URL to send PowerControl requests.
+	powerControlTarget string
 	// transferControlTarget is the URL to send TransferControl requests.
 	transferControlTarget string
 	// chassis are the URIs for Chassis.
@@ -199,6 +229,7 @@ func (p *PowerDistribution) UnmarshalJSON(b []byte) error {
 	type temp PowerDistribution
 	type pActions struct {
 		ExportConfiguration ActionTarget `json:"#PowerDistribution.ExportConfiguration"`
+		PowerControl        ActionTarget `json:"#PowerDistribution.PowerControl"`
 		TransferControl     ActionTarget `json:"#PowerDistribution.TransferControl"`
 	}
 	type pLinks struct {
@@ -230,6 +261,7 @@ func (p *PowerDistribution) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	p.exportConfigurationTarget = tmp.Actions.ExportConfiguration.Target
+	p.powerControlTarget = tmp.Actions.PowerControl.Target
 	p.transferControlTarget = tmp.Actions.TransferControl.Target
 	p.chassis = tmp.Links.Chassis.ToStrings()
 	p.facility = tmp.Links.Facility.String()
@@ -255,6 +287,10 @@ func (p *PowerDistribution) UnmarshalJSON(b []byte) error {
 func (p *PowerDistribution) Update() error {
 	readWriteFields := []string{
 		"AssetTag",
+		"PowerCycleDelaySeconds",
+		"PowerOnDelaySeconds",
+		"PowerRestoreDelaySeconds",
+		"PowerRestorePolicy",
 		"UserLabel",
 	}
 
@@ -301,6 +337,20 @@ type PowerDistributionExportConfigurationParameters struct {
 func (p *PowerDistribution) ExportConfiguration(params *PowerDistributionExportConfigurationParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(p.client,
 		p.exportConfigurationTarget, params, p.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// This action shall control the power state of the equipment.
+// powerState - This parameter shall contain the desired power state of the
+// equipment.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (p *PowerDistribution) PowerControl(powerState PowerState) (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	payload["PowerState"] = powerState
+	resp, taskInfo, err := PostWithTask(p.client,
+		p.powerControlTarget, payload, p.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

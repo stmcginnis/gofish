@@ -2,13 +2,40 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/UpdateServiceCapabilities.v1_0_0.json
-// 2025.2 - #UpdateServiceCapabilities.v1_0_0.UpdateServiceCapabilities
+// http://redfish.dmtf.org/schemas/v1/UpdateServiceCapabilities.v1_1_0.json
+// 2026.2 - #UpdateServiceCapabilities.v1_1_0.UpdateServiceCapabilities
 
 package schemas
 
 import (
 	"encoding/json"
+)
+
+type AllowableTargetReferenceType string
+
+const (
+	// SoftwareInventoryAllowableTargetReferenceType shall indicate that the
+	// service accepts URIs that reference 'SoftwareInventory' resources as valid
+	// values for the 'Targets' parameter.
+	SoftwareInventoryAllowableTargetReferenceType AllowableTargetReferenceType = "SoftwareInventory"
+	// DeviceResourceAllowableTargetReferenceType shall indicate that the service
+	// accepts URIs that reference device resources, such as 'NetworkAdapter',
+	// 'Processor', 'Storage', or 'Drive' resources, as valid values for the
+	// 'Targets' parameter.
+	DeviceResourceAllowableTargetReferenceType AllowableTargetReferenceType = "DeviceResource"
+	// ResourceCollectionAllowableTargetReferenceType shall indicate that the
+	// service accepts URIs that reference resource collections, such as
+	// 'NetworkAdapterCollection', 'ProcessorCollection', 'StorageCollection', or
+	// 'DriveCollection' resources, as valid values for the 'Targets' parameter.
+	ResourceCollectionAllowableTargetReferenceType AllowableTargetReferenceType = "ResourceCollection"
+	// AggregateAllowableTargetReferenceType shall indicate that the service
+	// accepts URIs that reference 'Aggregate' resources as valid values for the
+	// 'Targets' parameter.
+	AggregateAllowableTargetReferenceType AllowableTargetReferenceType = "Aggregate"
+	// ComputerSystemAllowableTargetReferenceType shall indicate that the service
+	// accepts URIs that reference 'ComputerSystem' resources as valid values for
+	// the 'Targets' parameter.
+	ComputerSystemAllowableTargetReferenceType AllowableTargetReferenceType = "ComputerSystem"
 )
 
 // UpdateServiceCapabilities shall represent the update service capabilities for
@@ -19,10 +46,36 @@ type UpdateServiceCapabilities struct {
 	// can specify in the 'Targets' parameter for 'SimpleUpdate' or
 	// 'MultipartHttpPushUri' update requests with 'Stage' set to 'true'.
 	AllowableStaging []string
+	// AllowableTargetReferenceTypes shall contain an array that indicates the
+	// types of URI references that the service accepts as valid values in the
+	// 'Targets' parameter for 'SimpleUpdate' or 'MultipartHttpPushUri' update
+	// requests. If this property is not present, the 'AllowableTargets' property
+	// contains the exact set of URIs that are allowed in the 'Targets' parameter.
+	//
+	// Version added: v1.1.0
+	AllowableTargetReferenceTypes []AllowableTargetReferenceType
 	// AllowableTargets shall contain an array of the allowable URIs that a client
 	// can specify in the 'Targets' parameter for 'SimpleUpdate' or
 	// 'MultipartHttpPushUri' update requests.
 	AllowableTargets []string
+	// ExcludeTargetsParameterSupported shall indicate whether the service supports
+	// the 'ExcludeTargets' parameter in 'SimpleUpdate' action requests and
+	// 'MultipartHttpPushUri' update requests.
+	//
+	// Version added: v1.1.0
+	ExcludeTargetsParameterSupported bool
+	// ForceUpdateParameterSupported shall indicate whether the service supports
+	// the 'ForceUpdate' parameter in 'SimpleUpdate' action requests and
+	// 'MultipartHttpPushUri' update requests.
+	//
+	// Version added: v1.1.0
+	ForceUpdateParameterSupported bool
+	// LocalImageParameterSupported shall indicate whether the service supports the
+	// 'LocalImage' parameter in 'SimpleUpdate' action requests and
+	// 'MultipartHttpPushUri' update requests.
+	//
+	// Version added: v1.1.0
+	LocalImageParameterSupported bool
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -31,6 +84,18 @@ type UpdateServiceCapabilities struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// StageParameterSupported shall indicate whether the service supports the
+	// 'Stage' parameter in 'SimpleUpdate' action requests and
+	// 'MultipartHttpPushUri' update requests.
+	//
+	// Version added: v1.1.0
+	StageParameterSupported bool
+	// TargetsParameterSupported shall indicate whether the service supports the
+	// 'Targets' parameter in 'SimpleUpdate' action requests and
+	// 'MultipartHttpPushUri' update requests.
+	//
+	// Version added: v1.1.0
+	TargetsParameterSupported bool
 }
 
 // GetUpdateServiceCapabilities will get a UpdateServiceCapabilities instance from the service.

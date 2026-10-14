@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/SecureBoot.v1_1_2.json
-// 2020.1 - #SecureBoot.v1_1_2.SecureBoot
+// http://redfish.dmtf.org/schemas/v1/SecureBoot.v1_2_1.json
+// 2026.1 - #SecureBoot.v1_2_1.SecureBoot
 
 package schemas
 
@@ -69,6 +69,14 @@ type SecureBoot struct {
 	//
 	// Version added: v1.1.0
 	secureBootDatabases string
+	// SecureBootDesiredMode shall contain the desired UEFI Secure Boot mode, as
+	// defined in the UEFI Specification, to be applied on the next boot. Services
+	// shall reject modification requests that contain unsupported state
+	// transitions, such as transitioning from 'DeployedMode' to 'AuditMode'. See
+	// the 'Secure Boot Modes' figure in the UEFI Specification for more details.
+	//
+	// Version added: v1.2.0
+	SecureBootDesiredMode SecureBootModeType
 	// SecureBootEnable shall indicate whether the UEFI Secure Boot takes effect on
 	// next boot. This property can be enabled in UEFI boot mode only.
 	SecureBootEnable bool
@@ -113,6 +121,7 @@ func (s *SecureBoot) UnmarshalJSON(b []byte) error {
 // Update commits updates to this object's properties to the running system.
 func (s *SecureBoot) Update() error {
 	readWriteFields := []string{
+		"SecureBootDesiredMode",
 		"SecureBootEnable",
 	}
 

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/MemoryChunks.v1_6_2.json
-// 2023.2 - #MemoryChunks.v1_6_2.MemoryChunks
+// http://redfish.dmtf.org/schemas/v1/MemoryChunks.v1_7_0.json
+// 2026.1 - #MemoryChunks.v1_7_0.MemoryChunks
 
 package schemas
 
@@ -99,6 +99,8 @@ type MemoryChunks struct {
 	cXLLogicalDevices []string
 	// endpoints are the URIs for Endpoints.
 	endpoints []string
+	// memoryExtent is the URI for MemoryExtent.
+	memoryExtent string
 	// memoryRegions are the URIs for MemoryRegions.
 	memoryRegions []string
 	// RawData holds the original serialized JSON so we can compare updates.
@@ -111,6 +113,7 @@ func (m *MemoryChunks) UnmarshalJSON(b []byte) error {
 	type mLinks struct {
 		CXLLogicalDevices Links `json:"CXLLogicalDevices"`
 		Endpoints         Links `json:"Endpoints"`
+		MemoryExtent      Link  `json:"MemoryExtent"`
 		MemoryRegions     Links `json:"MemoryRegions"`
 	}
 	var tmp struct {
@@ -128,6 +131,7 @@ func (m *MemoryChunks) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	m.cXLLogicalDevices = tmp.Links.CXLLogicalDevices.ToStrings()
 	m.endpoints = tmp.Links.Endpoints.ToStrings()
+	m.memoryExtent = tmp.Links.MemoryExtent.String()
 	m.memoryRegions = tmp.Links.MemoryRegions.ToStrings()
 
 	// This is a read/write object, so we need to save the raw object data for later
@@ -166,6 +170,14 @@ func (m *MemoryChunks) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
 // Endpoints gets the Endpoints linked resources.
 func (m *MemoryChunks) Endpoints() ([]*Endpoint, error) {
 	return GetObjects[Endpoint](m.client, m.endpoints)
+}
+
+// MemoryExtent gets the MemoryExtent linked resource.
+func (m *MemoryChunks) MemoryExtent() (*MemoryExtent, error) {
+	if m.memoryExtent == "" {
+		return nil, nil
+	}
+	return GetObject[MemoryExtent](m.client, m.memoryExtent)
 }
 
 // MemoryRegions gets the MemoryRegions linked resources.

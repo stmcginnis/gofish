@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Filter.v1_1_0.json
-// 2025.2 - #Filter.v1_1_0.Filter
+// http://redfish.dmtf.org/schemas/v1/Filter.v1_1_1.json
+// 2025.2 - #Filter.v1_1_1.Filter
 
 package schemas
 
@@ -22,7 +22,8 @@ type Filter struct {
 	// the difference in pressure between the intake and outflow connections on the
 	// filter. The value of the 'DataSourceUri' property, if present, shall
 	// reference a resource of type 'Sensor' with the 'ReadingType' property
-	// containing the value 'PressurekPa'.
+	// containing the value 'PressurekPa', and the 'ReadingBasis' property
+	// containing the value 'Delta'.
 	//
 	// Version added: v1.1.0
 	DeltaLiquidPressurekPa SensorExcerpt

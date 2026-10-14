@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/HostInterface.v1_3_3.json
-// 2020.3 - #HostInterface.v1_3_3.HostInterface
+// http://redfish.dmtf.org/schemas/v1/HostInterface.v1_4_0.json
+// 2026.2 - #HostInterface.v1_4_0.HostInterface
 
 package schemas
 
@@ -273,6 +273,21 @@ type CredentialBootstrapping struct {
 	//
 	// Version added: v1.3.0
 	Enabled bool
+	// ExpirationWindowEnabled shall indicate whether credential bootstraping is
+	// automatically disabled for this interface after a period of time. If
+	// 'Enabled' in 'CredentialBootstrapping' contains 'true' when the system
+	// firmware transitions to the operating system and this property contains
+	// 'true', the service shall set 'Enabled' in 'CredentialBootstrapping' to
+	// 'false' when the interval specified by 'ExirationWindowMinutes' expires .
+	//
+	// Version added: v1.4.0
+	ExpirationWindowEnabled bool
+	// ExpirationWindowMinutes shall contain the time window, in minutes, during
+	// which credential bootstrapping remains enabled after the system firmware
+	// transitions to the operating system.
+	//
+	// Version added: v1.4.0
+	ExpirationWindowMinutes *uint `json:",omitempty"`
 	// RoleID shall contain the 'Id' property of the 'Role' resource that is used
 	// for the bootstrap account created for this interface.
 	//

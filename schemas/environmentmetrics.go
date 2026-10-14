@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/EnvironmentMetrics.v1_5_0.json
-// 2025.2 - #EnvironmentMetrics.v1_5_0.EnvironmentMetrics
+// http://redfish.dmtf.org/schemas/v1/EnvironmentMetrics.v1_7_0.json
+// 2026.2 - #EnvironmentMetrics.v1_7_0.EnvironmentMetrics
 
 package schemas
 
@@ -36,6 +36,13 @@ type EnvironmentMetrics struct {
 	//
 	// Version added: v1.4.0
 	AmbientTemperatureCelsius SensorExcerpt
+	// BarometricPressureMm shall contain the barometric pressure, in millimeters
+	// of a mercury column units. The 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Barometric'.
+	//
+	// Version added: v1.7.0
+	BarometricPressureMm SensorExcerpt
 	// CurrentAmps shall contain the current, in ampere units, for this device. The
 	// value of the 'DataSourceUri' property, if present, shall reference a
 	// resource of type 'Sensor' with the 'ReadingType' property containing the
@@ -50,6 +57,14 @@ type EnvironmentMetrics struct {
 	//
 	// Version added: v1.1.0
 	DewPointCelsius SensorExcerpt
+	// DewPointProximityCelsius shall contain the difference, in degrees Celsius,
+	// between the temperature and the dew point. The 'DataSourceUri' property, if
+	// present, shall reference a resource of type 'Sensor' with the 'ReadingType'
+	// property containing the value 'Temperature', and the 'ReadingBasis' property
+	// containing the value 'Delta'.
+	//
+	// Version added: v1.6.0
+	DewPointProximityCelsius SensorExcerpt
 	// EnergyJoules shall contain the total energy, in joule units, for this
 	// resource. The value of the 'DataSourceUri' property, if present, shall
 	// reference a resource of type 'Sensor' with the 'ReadingType' property

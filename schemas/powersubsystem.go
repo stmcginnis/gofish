@@ -2,13 +2,46 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/PowerSubsystem.v1_1_3.json
-// 2021.2 - #PowerSubsystem.v1_1_3.PowerSubsystem
+// http://redfish.dmtf.org/schemas/v1/PowerSubsystem.v1_2_0.json
+// 2026.2 - #PowerSubsystem.v1_2_0.PowerSubsystem
 
 package schemas
 
 import (
 	"encoding/json"
+)
+
+type PowerBrakeReason string
+
+const (
+	// LoadPercentPowerBrakeReason shall indicate the power brake is applied
+	// because the load percent sensor reading exceeded the configured threshold.
+	LoadPercentPowerBrakeReason PowerBrakeReason = "LoadPercent"
+	// TemperaturePowerBrakeReason shall indicate the power brake is applied
+	// because the temperature sensor reading exceeded the configured threshold.
+	TemperaturePowerBrakeReason PowerBrakeReason = "Temperature"
+	// LossOfCommsPowerBrakeReason shall indicate the power brake is applied
+	// because communications with the power equipment have been lost.
+	LossOfCommsPowerBrakeReason PowerBrakeReason = "LossOfComms"
+	// ExternalSignalPowerBrakeReason shall indicate the power brake is applied due
+	// to the receipt of a signal or command from an external source. In large
+	// deployments, this value may be used to indicate the power brake was
+	// triggered from a rack-scale power management system.
+	ExternalSignalPowerBrakeReason PowerBrakeReason = "ExternalSignal"
+)
+
+type ThresholdLevel string
+
+const (
+	// DisabledThresholdLevel shall indicate the associated sensor is not used to
+	// apply the power brake.
+	DisabledThresholdLevel ThresholdLevel = "Disabled"
+	// UpperCautionThresholdLevel shall indicate the power brake is applied when
+	// the associated sensor reading exceeds the upper caution threshold.
+	UpperCautionThresholdLevel ThresholdLevel = "UpperCaution"
+	// UpperCriticalThresholdLevel shall indicate the power brake is applied when
+	// the associated sensor reading exceeds the upper critical threshold.
+	UpperCriticalThresholdLevel ThresholdLevel = "UpperCritical"
 )
 
 // PowerSubsystem shall represent a power subsystem for a Redfish
@@ -25,9 +58,19 @@ type PowerSubsystem struct {
 	//
 	// Version added: v1.1.0
 	batteries string
-	// CapacityWatts shall represent the total power capacity that can be allocated
-	// to this subsystem.
+	// CapacityWatts shall represent the total amount of power that this subsystem
+	// can draw, either from power supplies or other physically installed means of
+	// power delivery. This value does not take into account the status or health
+	// of power delivery components.
 	CapacityWatts *float64 `json:",omitempty"`
+	// MaxRampRateWattsPerSecond shall contain the maximum AC power ramp rate
+	// settings for this subsystem, including the desired ramp rate and the
+	// allowable range, in watts per second. The value of the 'DataSourceUri'
+	// property, if present, shall reference a resource of type 'Control' with the
+	// 'ControlType' property containing the value of 'Power'.
+	//
+	// Version added: v1.2.0
+	MaxRampRateWattsPerSecond ControlSingleExcerpt
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.
@@ -36,6 +79,15 @@ type PowerSubsystem struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// PowerBrake shall contain the emergency power brake settings for this
+	// subsystem. Equipment that implements power brake control, such as a power
+	// shelf, monitors associated sensors and applies the power brake when
+	// configured conditions are met. Equipment that receives the power brake, such
+	// as a server, shall report when the power brake is applied and shall
+	// immediately limit power consumption while it is applied.
+	//
+	// Version added: v1.2.0
+	PowerBrake PowerBrake
 	// PowerSupplies shall contain a link to a resource collection of type
 	// 'PowerSupplyCollection'.
 	powerSupplies string
@@ -45,13 +97,22 @@ type PowerSubsystem struct {
 	PowerSupplyRedundancy []RedundantGroup
 	// Status shall contain any status or health properties of the resource.
 	Status Status
+	// powerBrakeLoadPercentSensor is the URI for PowerBrakeLoadPercentSensor.
+	powerBrakeLoadPercentSensor string
+	// powerBrakeTemperatureSensor is the URI for PowerBrakeTemperatureSensor.
+	powerBrakeTemperatureSensor string
 }
 
 // UnmarshalJSON unmarshals a PowerSubsystem object from the raw JSON.
 func (p *PowerSubsystem) UnmarshalJSON(b []byte) error {
 	type temp PowerSubsystem
+	type pLinks struct {
+		PowerBrakeLoadPercentSensor Link `json:"PowerBrakeLoadPercentSensor"`
+		PowerBrakeTemperatureSensor Link `json:"PowerBrakeTemperatureSensor"`
+	}
 	var tmp struct {
 		temp
+		Links         pLinks
 		Batteries     Link `json:"Batteries"`
 		PowerSupplies Link `json:"PowerSupplies"`
 	}
@@ -112,6 +173,8 @@ func (p *PowerSubsystem) UnmarshalJSON(b []byte) error {
 	*p = PowerSubsystem(tmp.temp)
 
 	// Extract the links to other entities for later
+	p.powerBrakeLoadPercentSensor = tmp.Links.PowerBrakeLoadPercentSensor.String()
+	p.powerBrakeTemperatureSensor = tmp.Links.PowerBrakeTemperatureSensor.String()
 	p.batteries = tmp.Batteries.String()
 	p.powerSupplies = tmp.PowerSupplies.String()
 
@@ -127,6 +190,22 @@ func GetPowerSubsystem(c Client, uri string) (*PowerSubsystem, error) {
 // a provided reference.
 func ListReferencedPowerSubsystems(c Client, link string) ([]*PowerSubsystem, error) {
 	return GetCollectionObjects[PowerSubsystem](c, link)
+}
+
+// PowerBrakeLoadPercentSensor gets the PowerBrakeLoadPercentSensor linked resource.
+func (p *PowerSubsystem) PowerBrakeLoadPercentSensor() (*Sensor, error) {
+	if p.powerBrakeLoadPercentSensor == "" {
+		return nil, nil
+	}
+	return GetObject[Sensor](p.client, p.powerBrakeLoadPercentSensor)
+}
+
+// PowerBrakeTemperatureSensor gets the PowerBrakeTemperatureSensor linked resource.
+func (p *PowerSubsystem) PowerBrakeTemperatureSensor() (*Sensor, error) {
+	if p.powerBrakeTemperatureSensor == "" {
+		return nil, nil
+	}
+	return GetObject[Sensor](p.client, p.powerBrakeTemperatureSensor)
 }
 
 // Batteries gets the Batteries collection.
@@ -154,4 +233,36 @@ type PowerAllocation struct {
 	// RequestedWatts shall represent the amount of power, in watt units, that the
 	// subsystem currently requests to be budgeted for future use.
 	RequestedWatts *float64 `json:",omitempty"`
+}
+
+// PowerBrake shall contain properties that describe the emergency power brake.
+type PowerBrake struct {
+	// Applied shall indicate whether the emergency power brake is currently
+	// applied. The value 'true' shall indicate the power brake is applied. For
+	// equipment that receives the power brake, this shall indicate the equipment
+	// is subject to an applied power brake. The value 'false' shall indicate the
+	// power brake is not applied.
+	//
+	// Version added: v1.2.0
+	Applied bool
+	// Enabled shall indicate whether the emergency power brake is enabled for this
+	// equipment. The value 'true' shall indicate the power brake is enabled. The
+	// value 'false' shall indicate the emergency power brake is disabled.
+	//
+	// Version added: v1.2.0
+	Enabled bool
+	// LoadPercentThreshold shall contain the threshold level of the associated
+	// load percent sensor at which the emergency power brake is applied. This
+	// property shall not be present on equipment that only receives the power
+	// brake.
+	//
+	// Version added: v1.2.0
+	LoadPercentThreshold ThresholdLevel
+	// TemperatureThreshold shall contain the threshold level of the associated
+	// temperature sensor at which the emergency power brake is applied. This
+	// property shall not be present on equipment that only receives the power
+	// brake.
+	//
+	// Version added: v1.2.0
+	TemperatureThreshold ThresholdLevel
 }
