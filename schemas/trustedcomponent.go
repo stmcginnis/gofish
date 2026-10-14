@@ -73,9 +73,11 @@ type TrustedComponent struct {
 	TrustedComponentType TrustedComponentType
 	// UUID shall contain a universally unique identifier number for the trusted
 	// component.
-	UUID                 string
-	tpmClearTarget       string
-	tpmGetEventLogTarget string
+	UUID string
+	// tPMClearTarget is the URL to send TPMClear requests.
+	tPMClearTarget string
+	// tPMGetEventLogTarget is the URL to send TPMGetEventLog requests.
+	tPMGetEventLogTarget string
 	// activeSoftwareImage is the URI for ActiveSoftwareImage.
 	activeSoftwareImage string
 	// componentIntegrity are the URIs for ComponentIntegrity.
@@ -90,6 +92,49 @@ type TrustedComponent struct {
 	softwareImages []string
 }
 
+// UnmarshalJSON unmarshals a TrustedComponent object from the raw JSON.
+func (t *TrustedComponent) UnmarshalJSON(b []byte) error {
+	type temp TrustedComponent
+	type tActions struct {
+		TPMClear       ActionTarget `json:"#TrustedComponent.TPMClear"`
+		TPMGetEventLog ActionTarget `json:"#TrustedComponent.TPMGetEventLog"`
+	}
+	type tLinks struct {
+		ActiveSoftwareImage Link  `json:"ActiveSoftwareImage"`
+		ComponentIntegrity  Links `json:"ComponentIntegrity"`
+		ComponentsProtected Links `json:"ComponentsProtected"`
+		IntegratedInto      Link  `json:"IntegratedInto"`
+		Owner               Link  `json:"Owner"`
+		SoftwareImages      Links `json:"SoftwareImages"`
+	}
+	var tmp struct {
+		temp
+		Actions      tActions
+		Links        tLinks
+		Certificates Link `json:"Certificates"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*t = TrustedComponent(tmp.temp)
+
+	// Extract the links to other entities for later
+	t.tPMClearTarget = tmp.Actions.TPMClear.Target
+	t.tPMGetEventLogTarget = tmp.Actions.TPMGetEventLog.Target
+	t.activeSoftwareImage = tmp.Links.ActiveSoftwareImage.String()
+	t.componentIntegrity = tmp.Links.ComponentIntegrity.ToStrings()
+	t.componentsProtected = tmp.Links.ComponentsProtected.ToStrings()
+	t.integratedInto = tmp.Links.IntegratedInto.String()
+	t.owner = tmp.Links.Owner.String()
+	t.softwareImages = tmp.Links.SoftwareImages.ToStrings()
+	t.certificates = tmp.Certificates.String()
+
+	return nil
+}
+
 // GetTrustedComponent will get a TrustedComponent instance from the service.
 func GetTrustedComponent(c Client, uri string) (*TrustedComponent, error) {
 	return GetObject[TrustedComponent](c, uri)
@@ -99,6 +144,41 @@ func GetTrustedComponent(c Client, uri string) (*TrustedComponent, error) {
 // a provided reference.
 func ListReferencedTrustedComponents(c Client, link string) ([]*TrustedComponent, error) {
 	return GetCollectionObjects[TrustedComponent](c, link)
+}
+
+// This action shall reset all user-accessible TPM settings to factory
+// defaults.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (t *TrustedComponent) TPMClear() (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	resp, taskInfo, err := PostWithTask(t.client,
+		t.tPMClearTarget, payload, t.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// This action shall return the event log for TPM 2.0 devices.
+func (t *TrustedComponent) TPMGetEventLog() (*TPMGetEventLogResponse, error) {
+	payload := make(map[string]any)
+
+	resp, err := t.PostWithResponse(t.tPMGetEventLogTarget, payload)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, CleanupHTTPResponse(resp)
+	}
+
+	var result TPMGetEventLogResponse
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 // ActiveSoftwareImage gets the ActiveSoftwareImage linked resource.

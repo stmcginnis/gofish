@@ -60,6 +60,9 @@ type StructData struct {
 	HasLinkProperties   bool
 	// ExtraFields are hand-maintained field declarations from config.ExtraFields.
 	ExtraFields []string
+	// HasLenient is set when any property is decoded through a converter
+	// (config.LenientFields).
+	HasLenient bool
 }
 
 // ActionData represents an action for the template
@@ -122,6 +125,13 @@ type PropertyData struct {
 	VersionAdded string
 	// Override replaces the generated field declaration (config.FieldOverrides).
 	Override string
+	// Shadow is set for a link property overridden to string or []string:
+	// UnmarshalJSON decodes its JSON object into a throwaway field so it cannot
+	// fail the decode, and a hand-written postUnmarshal fills the field.
+	Shadow bool
+	// Lenient names the converter that sets this field from its JSON value
+	// decoded as any (config.LenientFields).
+	Lenient string
 }
 
 // Generator handles code generation
@@ -462,12 +472,17 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		}
 		if overridden {
 			// The replacement is a plain field; any accessor is hand-written.
+			pd.Shadow = pd.IsLink && isURIStorage(override)
 			pd.IsLink, pd.IsCollection, pd.LinkType = false, false, ""
+		}
+		if conv, ok := config.LenientFields[structName+"."+pd.Name]; ok && !pd.IsLink && !pd.Shadow {
+			pd.Lenient = conv
+			sd.HasLenient = true
 		}
 		sd.Properties = append(sd.Properties, pd)
 
 		// Check if this property is a link with a getter
-		if pd.IsLink && pd.LinkType != "" {
+		if pd.IsLink && pd.LinkType != "" || pd.Shadow {
 			sd.HasLinkProperties = true
 		}
 	}
@@ -583,6 +598,14 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 	sd.ExtraFields = config.ExtraFields[structName]
 
 	return sd
+}
+
+// isURIStorage reports whether a field declaration ("name type `tag`") stores
+// link URIs as string or []string, which the property's JSON object cannot
+// decode into.
+func isURIStorage(decl string) bool {
+	fields := strings.Fields(decl)
+	return len(fields) >= 2 && (fields[1] == "string" || fields[1] == "[]string")
 }
 
 // buildTypeString builds the type string for a property

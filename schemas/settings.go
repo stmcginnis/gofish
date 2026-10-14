@@ -101,6 +101,27 @@ type Settings struct {
 	Time string
 }
 
+// UnmarshalJSON unmarshals a Settings object from the raw JSON.
+func (s *Settings) UnmarshalJSON(b []byte) error {
+	type temp Settings
+	var tmp struct {
+		temp
+		ShadowMaintenanceWindowResource json.RawMessage `json:"MaintenanceWindowResource"`
+		ShadowSettingsObject            json.RawMessage `json:"SettingsObject"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*s = Settings(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	return s.postUnmarshal(b)
+}
+
 // MaintenanceWindow shall indicate that a resource has a maintenance window
 // assignment for applying settings or operations. Other resources can link to
 // this object to convey a common control surface for the configuration of the

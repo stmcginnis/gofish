@@ -577,6 +577,79 @@ type Processor struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a Processor object from the raw JSON.
+func (p *Processor) UnmarshalJSON(b []byte) error {
+	type temp Processor
+	type pActions struct {
+		Reset           ActionTarget `json:"#Processor.Reset"`
+		ResetToDefaults ActionTarget `json:"#Processor.ResetToDefaults"`
+	}
+	type pLinks struct {
+		Chassis                Link  `json:"Chassis"`
+		ConnectedProcessors    Links `json:"ConnectedProcessors"`
+		Endpoints              Links `json:"Endpoints"`
+		FabricAdapters         Links `json:"FabricAdapters"`
+		GraphicsController     Link  `json:"GraphicsController"`
+		Memory                 Links `json:"Memory"`
+		NetworkDeviceFunctions Links `json:"NetworkDeviceFunctions"`
+		PCIeDevice             Link  `json:"PCIeDevice"`
+		PCIeFunctions          Links `json:"PCIeFunctions"`
+	}
+	var tmp struct {
+		temp
+		Actions                pActions
+		Links                  pLinks
+		AccelerationFunctions  Link                             `json:"AccelerationFunctions"`
+		AppliedOperatingConfig ResolvedLink[OperatingConfig]    `json:"AppliedOperatingConfig"`
+		Assembly               ResolvedLink[Assembly]           `json:"Assembly"`
+		CacheMemory            Link                             `json:"CacheMemory"`
+		Certificates           Link                             `json:"Certificates"`
+		EnvironmentMetrics     ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		LenientMaxSpeedMHz     any                              `json:"MaxSpeedMHz"`
+		ShadowMetrics          json.RawMessage                  `json:"Metrics"`
+		OperatingConfigs       Link                             `json:"OperatingConfigs"`
+		Ports                  Link                             `json:"Ports"`
+		LenientSocket          any                              `json:"Socket"`
+		SubProcessors          Link                             `json:"SubProcessors"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = Processor(tmp.temp)
+
+	// Extract the links to other entities for later
+	p.resetTarget = tmp.Actions.Reset.Target
+	p.resetToDefaultsTarget = tmp.Actions.ResetToDefaults.Target
+	p.chassis = tmp.Links.Chassis.String()
+	p.connectedProcessors = tmp.Links.ConnectedProcessors.ToStrings()
+	p.endpoints = tmp.Links.Endpoints.ToStrings()
+	p.fabricAdapters = tmp.Links.FabricAdapters.ToStrings()
+	p.graphicsController = tmp.Links.GraphicsController.String()
+	p.memory = tmp.Links.Memory.ToStrings()
+	p.networkDeviceFunctions = tmp.Links.NetworkDeviceFunctions.ToStrings()
+	p.pCIeDevice = tmp.Links.PCIeDevice.String()
+	p.pCIeFunctions = tmp.Links.PCIeFunctions.ToStrings()
+	p.accelerationFunctions = tmp.AccelerationFunctions.String()
+	p.appliedOperatingConfig = tmp.AppliedOperatingConfig
+	p.assembly = tmp.Assembly
+	p.cacheMemory = tmp.CacheMemory.String()
+	p.certificates = tmp.Certificates.String()
+	p.environmentMetrics = tmp.EnvironmentMetrics
+	p.operatingConfigs = tmp.OperatingConfigs.String()
+	p.ports = tmp.Ports.String()
+	p.subProcessors = tmp.SubProcessors.String()
+	p.MaxSpeedMHz = toInt(tmp.LenientMaxSpeedMHz)
+	p.Socket = parseString(tmp.LenientSocket)
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.RawData = b
+
+	return p.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (p *Processor) Update() error {
 	readWriteFields := []string{
@@ -1034,6 +1107,26 @@ type ProcessorMemorySummary struct {
 	//
 	// Version added: v1.11.0
 	TotalMemorySizeMiB *int `json:",omitempty"`
+}
+
+// UnmarshalJSON unmarshals a ProcessorMemorySummary object from the raw JSON.
+func (p *ProcessorMemorySummary) UnmarshalJSON(b []byte) error {
+	type temp ProcessorMemorySummary
+	var tmp struct {
+		temp
+		ShadowMetrics json.RawMessage `json:"Metrics"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = ProcessorMemorySummary(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	return p.postUnmarshal(b)
 }
 
 // ProcessorUALink shall contain information about UALink fabric and port

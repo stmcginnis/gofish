@@ -5,33 +5,19 @@
 package schemas
 
 import (
-	"encoding/json"
 	"strconv"
 )
 
-func (p *PartLocation) UnmarshalJSON(b []byte) error {
-	type temp PartLocation
-	var t struct {
-		temp
-		// Some implementations incorrectly have this as a string, e.g. "1" instead of 1.
-		LocationOrdinalValue any
-	}
-
-	err := json.Unmarshal(b, &t)
-	if err != nil {
-		return err
-	}
-
+// locationOrdinal converts LocationOrdinalValue, which some services send as a
+// string. A missing value is 0, as in earlier releases.
+func locationOrdinal(v any) *int {
 	i := 0
-	if t.LocationOrdinalValue != nil {
-		i, err = strconv.Atoi(parseString(t.LocationOrdinalValue))
+	if v != nil {
+		n, err := strconv.Atoi(parseString(v))
 		if err != nil {
-			return err
+			return nil
 		}
+		i = n
 	}
-
-	*p = PartLocation(t.temp)
-	p.LocationOrdinalValue = &i
-
-	return nil
+	return &i
 }

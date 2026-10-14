@@ -6,35 +6,6 @@ package schemas
 
 import "encoding/json"
 
-// UnmarshalJSON unmarshals a Fan object from the raw JSON.
-func (f *ThermalFan) UnmarshalJSON(b []byte) error {
-	type temp ThermalFan
-	var tmp struct {
-		temp
-		Assembly    ResolvedLink[Assembly] `json:"Assembly"`
-		Redundancy  Link                   `json:"Redundancy"`
-		RelatedItem Links                  `json:"RelatedItem"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*f = ThermalFan(tmp.temp)
-
-	// Extract the links to other entities for later
-	f.assembly = tmp.Assembly
-
-	f.redundancy = tmp.Redundancy.String()
-	f.relatedItem = tmp.RelatedItem.ToStrings()
-
-	// This is a read/write object, so we need to save the raw object data for later
-	f.RawData = b
-
-	return nil
-}
-
 // Update commits updates to this object's properties to the running system.
 func (f *ThermalFan) Update() error {
 	readWriteFields := []string{
@@ -60,4 +31,18 @@ func (f *ThermalFan) Redundancy() (*Redundancy, error) {
 // RelatedItem gets the RelatedItem linked resources.
 func (f *ThermalFan) RelatedItem() ([]*Entity, error) {
 	return GetObjects[Entity](f.client, f.relatedItem)
+}
+
+// postUnmarshal records the Redundancy link.
+func (f *ThermalFan) postUnmarshal(b []byte) error {
+	var t struct {
+		Redundancy Link
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	f.redundancy = t.Redundancy.String()
+
+	return nil
 }

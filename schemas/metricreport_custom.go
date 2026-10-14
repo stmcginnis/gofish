@@ -6,28 +6,21 @@ package schemas
 
 import "encoding/json"
 
-// UnmarshalJSON unmarshals a MetricReport object from the raw JSON.
-func (m *MetricReport) UnmarshalJSON(b []byte) error {
-	type temp MetricReport
-	var tmp struct {
-		temp
-		MetricReportDefinition ResolvedLink[MetricReportDefinition] `json:"MetricReportDefinition"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*m = MetricReport(tmp.temp)
-
-	// Extract the links to other entities for later
-	m.metricReportDefinition = tmp.MetricReportDefinition
-
-	return nil
-}
-
 // MetricReportDefinition gets the MetricReportDefinition linked resource.
 func (m *MetricReport) MetricReportDefinition() (*MetricReportDefinition, error) {
 	return ResolveOrGet[MetricReportDefinition](m.client, m.metricReportDefinition)
+}
+
+// postUnmarshal records the MetricReportDefinition link.
+func (m *MetricReport) postUnmarshal(b []byte) error {
+	var t struct {
+		MetricReportDefinition ResolvedLink[MetricReportDefinition]
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	m.metricReportDefinition = t.MetricReportDefinition
+
+	return nil
 }

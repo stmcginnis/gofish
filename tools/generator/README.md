@@ -54,6 +54,7 @@ naming or typing decision, and a hand-written file for behavior.
 | `SkipDefinitions` | Drop a definition entirely, keyed `"Schema.Definition"`. |
 | `FieldOverrides` | Replace a generated field declaration, keyed `"Type.field"` by Go names, or drop it with `""`. Works for schema properties, `Links` fields, action target fields and action parameter struct fields. The overridden field gets no link handling or getter, so the type usually needs a hand-written `UnmarshalJSON`. |
 | `ExtraFields` | Append hand-maintained fields to a generated struct or parameter struct. Hand-written code populates them. |
+| `LenientFields` | Decode a field through a converter, keyed `"Type.Field"`, for vendors that send the wrong JSON type (a number as a string, an object where the schema has an array). The converter is a `func(any) T` in package `schemas`: `toInt`, `toFloat32`, `toFloat64` and `parseString` in `utils.go`, or a type-specific one in the type's `*_custom.go`. |
 | `PluralNames` | Override the `<Type>s` plural in `ListReferenced<Plural>`. |
 | `NonLinkTypes` (`internal/parser/typemapper.go`) | Treat a property as an embedded object rather than a link. |
 
@@ -64,10 +65,43 @@ replace or extend generated code. The generator scans every file without the
 generated marker and does not emit any type, function, method or constant
 declared there. To change a generated method, copy it into the matching
 `<schema>_custom.go`, edit it there, and regenerate; the generated copy
-disappears. Vendor workarounds, such as accepting a string where the schema
-says integer, belong in a custom `UnmarshalJSON` with a test that uses the
-vendor's payload, so a regeneration that drops the workaround fails a test.
+disappears.
 
-Keep custom files to what the generator cannot express. A custom
-`UnmarshalJSON` does not pick up links or actions added by later schema
-versions, so review custom files for the type when its schema changes.
+To decode more than the generated `UnmarshalJSON` does, define a
+`postUnmarshal` hook instead of replacing `UnmarshalJSON`:
+
+```go
+// postUnmarshal records the allowed reset types.
+func (c *Chassis) postUnmarshal(b []byte) error {
+	var t struct {
+		Actions struct {
+			Reset struct {
+				AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
+			} `json:"#Chassis.Reset"`
+		}
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+	c.SupportedResetTypes = t.Actions.Reset.AllowedResetTypes
+	return nil
+}
+```
+
+The generated `UnmarshalJSON` decodes the type, fills every link and action
+target, and then returns `postUnmarshal(b)`. Links and actions that later
+schema versions add keep working without touching the hook. A link property
+overridden to `string` or `[]string` is skipped by the generated decode, so the
+hook must fill it.
+
+When a vendor sends a field with the wrong JSON type, add a `LenientFields`
+entry rather than replacing `UnmarshalJSON`; the rest of the type keeps its
+generated decoding. Replace `UnmarshalJSON` only when the payload is wrong as a
+whole, such as `IPMIHostInterface` sent as a bare bool or `PCIeInterface` sent
+as `[]`. A replacement has to fill every link and action target itself and
+does not pick up ones added by later schema versions, so keep replacements to
+types without links.
+
+Every vendor workaround needs a test that decodes the vendor's payload and
+checks the corrected values, so a regeneration or refactor that drops it fails
+a test.

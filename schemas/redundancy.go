@@ -112,6 +112,30 @@ type Redundancy struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a Redundancy object from the raw JSON.
+func (r *Redundancy) UnmarshalJSON(b []byte) error {
+	type temp Redundancy
+	var tmp struct {
+		temp
+		ActiveRedundancySet Links `json:"ActiveRedundancySet"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*r = Redundancy(tmp.temp)
+
+	// Extract the links to other entities for later
+	r.activeRedundancySet = tmp.ActiveRedundancySet.ToStrings()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	r.RawData = b
+
+	return r.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (r *Redundancy) Update() error {
 	readWriteFields := []string{

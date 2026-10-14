@@ -333,3 +333,25 @@ type MappedVolume struct {
 	// Volume shall reference a mapped Volume.
 	volume string
 }
+
+// UnmarshalJSON unmarshals a MappedVolume object from the raw JSON.
+func (m *MappedVolume) UnmarshalJSON(b []byte) error {
+	type temp MappedVolume
+	var tmp struct {
+		temp
+		LenientLogicalUnitNumber any             `json:"LogicalUnitNumber"`
+		ShadowVolume             json.RawMessage `json:"Volume"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MappedVolume(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.LogicalUnitNumber = parseString(tmp.LenientLogicalUnitNumber)
+
+	return m.postUnmarshal(b)
+}

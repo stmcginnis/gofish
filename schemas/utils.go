@@ -67,3 +67,17 @@ func toInt(val any) *int {
 	ret := int(*toFloat32(val))
 	return &ret
 }
+
+// toFloat64 converts a JSON number or numeric string to a float64. It returns
+// nil for a missing value or a string that is not a number.
+func toFloat64(val any) *float64 {
+	switch v := val.(type) {
+	case float64:
+		return &v
+	case string:
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			return &f
+		}
+	}
+	return nil
+}

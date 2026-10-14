@@ -11,135 +11,6 @@ import (
 	"strings"
 )
 
-// UnmarshalJSON unmarshals a ComputerSystem object from the raw JSON.
-//
-//nolint:funlen
-func (c *ComputerSystem) UnmarshalJSON(b []byte) error {
-	type temp ComputerSystem
-	type cActions struct {
-		AddResourceBlock                   ActionTarget `json:"#ComputerSystem.AddResourceBlock"`
-		Decommission                       ActionTarget `json:"#ComputerSystem.Decommission"`
-		ExportConfiguration                ActionTarget `json:"#ComputerSystem.ExportConfiguration"`
-		GraphicalConsoleGetOneTimeURL      ActionTarget `json:"#ComputerSystem.GraphicalConsoleGetOneTimeURL"`
-		GraphicalConsoleSetOneTimePassword ActionTarget `json:"#ComputerSystem.GraphicalConsoleSetOneTimePassword"`
-		GraphicalConsoleSetPassword        ActionTarget `json:"#ComputerSystem.GraphicalConsoleSetPassword"`
-		RemoveResourceBlock                ActionTarget `json:"#ComputerSystem.RemoveResourceBlock"`
-		Reset                              struct {
-			ActionTarget
-			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
-		} `json:"#ComputerSystem.Reset"`
-		SetDefaultBootOrder ActionTarget `json:"#ComputerSystem.SetDefaultBootOrder"`
-	}
-	type cLinks struct {
-		Chassis                         Links `json:"Chassis"`
-		ConsumingComputerSystems        Links `json:"ConsumingComputerSystems"`
-		CooledBy                        Links `json:"CooledBy"`
-		Endpoints                       Links `json:"Endpoints"`
-		HostingComputerSystem           Link  `json:"HostingComputerSystem"`
-		ManagedBy                       Links `json:"ManagedBy"`
-		OffloadedNetworkDeviceFunctions Links `json:"OffloadedNetworkDeviceFunctions"`
-		PoweredBy                       Links `json:"PoweredBy"`
-		ResourceBlocks                  Links `json:"ResourceBlocks"`
-		SupplyingComputerSystems        Links `json:"SupplyingComputerSystems"`
-		TrustedComponents               Links `json:"TrustedComponents"`
-		VirtualMachines                 Links `json:"VirtualMachines"`
-	}
-	var tmp struct {
-		temp
-		Actions             cActions
-		Links               cLinks
-		Bios                ResolvedLink[Bios]            `json:"Bios"`
-		Certificates        Link                          `json:"Certificates"`
-		EthernetInterfaces  Link                          `json:"EthernetInterfaces"`
-		FabricAdapters      Link                          `json:"FabricAdapters"`
-		GraphicsControllers Link                          `json:"GraphicsControllers"`
-		LogServices         Link                          `json:"LogServices"`
-		Memory              Link                          `json:"Memory"`
-		MemoryDomains       Link                          `json:"MemoryDomains"`
-		NetworkInterfaces   Link                          `json:"NetworkInterfaces"`
-		OperatingSystem     ResolvedLink[OperatingSystem] `json:"OperatingSystem"`
-		PCIeDevices         Links                         `json:"PCIeDevices"`
-		PCIeFunctions       Links                         `json:"PCIeFunctions"`
-		Processors          Link                          `json:"Processors"`
-		Redundancy          ResolvedLink[Redundancy]      `json:"Redundancy"`
-		SecureBoot          ResolvedLink[SecureBoot]      `json:"SecureBoot"`
-		SimpleStorage       Link                          `json:"SimpleStorage"`
-		Storage             Link                          `json:"Storage"`
-		USBControllers      Link                          `json:"USBControllers"`
-		VirtualMedia        Link                          `json:"VirtualMedia"`
-		Settings            Settings                      `json:"@Redfish.Settings"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*c = ComputerSystem(tmp.temp)
-
-	// Extract the links to other entities for later
-	c.addResourceBlockTarget = tmp.Actions.AddResourceBlock.Target
-	c.decommissionTarget = tmp.Actions.Decommission.Target
-	c.exportConfigurationTarget = tmp.Actions.ExportConfiguration.Target
-	c.graphicalConsoleGetOneTimeURLTarget = tmp.Actions.GraphicalConsoleGetOneTimeURL.Target
-	c.graphicalConsoleSetOneTimePasswordTarget = tmp.Actions.GraphicalConsoleSetOneTimePassword.Target
-	c.graphicalConsoleSetPasswordTarget = tmp.Actions.GraphicalConsoleSetPassword.Target
-	c.removeResourceBlockTarget = tmp.Actions.RemoveResourceBlock.Target
-	c.resetTarget = tmp.Actions.Reset.Target
-	c.resetActionInfoTarget = tmp.Actions.Reset.ActionInfoTarget
-	c.supportedResetTypes = tmp.Actions.Reset.AllowedResetTypes
-
-	// Some implementations use a @Redfish.Settings object to direct settings updates to a
-	// different URL than the object being updated. Others don't, so handle both.
-	c.settingsTarget = tmp.Settings.SettingsObject
-	if c.settingsTarget == "" {
-		c.settingsTarget = c.ODataID
-	}
-	c.SettingsApplyTimes = tmp.Settings.SupportedApplyTimes
-
-	c.setDefaultBootOrderTarget = tmp.Actions.SetDefaultBootOrder.Target
-	c.chassis = tmp.Links.Chassis.ToStrings()
-	c.consumingComputerSystems = tmp.Links.ConsumingComputerSystems.ToStrings()
-	c.cooledBy = tmp.Links.CooledBy.ToStrings()
-	c.endpoints = tmp.Links.Endpoints.ToStrings()
-	c.hostingComputerSystem = tmp.Links.HostingComputerSystem.String()
-	c.managedBy = tmp.Links.ManagedBy.ToStrings()
-	c.offloadedNetworkDeviceFunctions = tmp.Links.OffloadedNetworkDeviceFunctions.ToStrings()
-	c.poweredBy = tmp.Links.PoweredBy.ToStrings()
-	c.resourceBlocks = tmp.Links.ResourceBlocks.ToStrings()
-	c.supplyingComputerSystems = tmp.Links.SupplyingComputerSystems.ToStrings()
-	c.trustedComponents = tmp.Links.TrustedComponents.ToStrings()
-	c.virtualMachines = tmp.Links.VirtualMachines.ToStrings()
-	c.bios = tmp.Bios
-
-	c.certificates = tmp.Certificates.String()
-	c.ethernetInterfaces = tmp.EthernetInterfaces.String()
-	c.fabricAdapters = tmp.FabricAdapters.String()
-	c.graphicsControllers = tmp.GraphicsControllers.String()
-	c.logServices = tmp.LogServices.String()
-	c.memory = tmp.Memory.String()
-	c.memoryDomains = tmp.MemoryDomains.String()
-	c.networkInterfaces = tmp.NetworkInterfaces.String()
-	c.operatingSystem = tmp.OperatingSystem
-
-	c.pCIeDevices = tmp.PCIeDevices.ToStrings()
-	c.pCIeFunctions = tmp.PCIeFunctions.ToStrings()
-	c.processors = tmp.Processors.String()
-	c.redundancy = tmp.Redundancy
-
-	c.secureBoot = tmp.SecureBoot
-
-	c.simpleStorage = tmp.SimpleStorage.String()
-	c.storage = tmp.Storage.String()
-	c.uSBControllers = tmp.USBControllers.String()
-	c.virtualMedia = tmp.VirtualMedia.String()
-
-	// This is a read/write object, so we need to save the raw object data for later
-	c.RawData = b
-
-	return nil
-}
-
 // If @Redfish.Settings is present, PATCH goes to the System resource first.
 // Falls back to the Settings URI with ETag concurrency control only if the
 // direct PATCH fails (e.g., Dell iDRAC10 returns read-only).
@@ -316,27 +187,6 @@ func (c *ComputerSystem) BootOptions() ([]*BootOption, error) {
 		c.Boot.bootOptions)
 }
 
-// UnmarshalJSON unmarshals a HostedServices object from the raw JSON.
-func (h *HostedServices) UnmarshalJSON(b []byte) error {
-	type temp HostedServices
-	var tmp struct {
-		temp
-		StorageServices Link `json:"StorageServices"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*h = HostedServices(tmp.temp)
-
-	// Extract the links to other entities for later
-	h.storageServices = tmp.StorageServices.String()
-
-	return nil
-}
-
 // StorageServices gets the StorageServices linked resource.
 func (h *HostedServices) StorageServices(client Client) (*StorageService, error) {
 	if h.storageServices == "" {
@@ -361,5 +211,46 @@ func (i *IPMIHostInterface) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	i.ServiceEnabled = enabled
+	return nil
+}
+
+// postUnmarshal records the allowed reset types and the settings resource from
+// @Redfish.Settings.
+func (c *ComputerSystem) postUnmarshal(b []byte) error {
+	var t struct {
+		Actions struct {
+			Reset struct {
+				ActionTarget
+				AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
+			} `json:"#ComputerSystem.Reset"`
+		}
+		Settings Settings `json:"@Redfish.Settings"`
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	c.resetActionInfoTarget = t.Actions.Reset.ActionInfoTarget
+	c.supportedResetTypes = t.Actions.Reset.AllowedResetTypes
+	c.settingsTarget = t.Settings.SettingsObject
+	if c.settingsTarget == "" {
+		c.settingsTarget = c.ODataID
+	}
+	c.SettingsApplyTimes = t.Settings.SupportedApplyTimes
+
+	return nil
+}
+
+// postUnmarshal records the StorageServices link.
+func (h *HostedServices) postUnmarshal(b []byte) error {
+	var t struct {
+		StorageServices Link
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	h.storageServices = t.StorageServices.String()
+
 	return nil
 }

@@ -14,29 +14,6 @@ import (
 // types and adds some basic helper methods to make accessing values easier.
 type SettingsAttributes map[string]any
 
-// UnmarshalJSON unmarshals a Settings object from the raw JSON.
-func (s *Settings) UnmarshalJSON(b []byte) error {
-	type temp Settings
-	var tmp struct {
-		temp
-		MaintenanceWindowResource Link `json:"MaintenanceWindowResource"`
-		SettingsObject            Link `json:"SettingsObject"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		return err
-	}
-
-	*s = Settings(tmp.temp)
-
-	// Extract the links to other entities for later
-	s.maintenanceWindowResource = tmp.MaintenanceWindowResource.String()
-	s.SettingsObject = tmp.SettingsObject.String()
-
-	return nil
-}
-
 // MaintenanceWindowResource gets the MaintenanceWindowResource linked resource.
 func (s *Settings) MaintenanceWindowResource(client Client) (*Entity, error) {
 	if s.maintenanceWindowResource == "" {
@@ -78,4 +55,20 @@ func (sa SettingsAttributes) Bool(name string) bool {
 	return (maybeBool == "true" ||
 		maybeBool == "1" ||
 		maybeBool == "enabled")
+}
+
+// postUnmarshal records the SettingsObject and MaintenanceWindowResource links.
+func (s *Settings) postUnmarshal(b []byte) error {
+	var t struct {
+		MaintenanceWindowResource Link
+		SettingsObject            Link
+	}
+	if err := json.Unmarshal(b, &t); err != nil {
+		return err
+	}
+
+	s.maintenanceWindowResource = t.MaintenanceWindowResource.String()
+	s.SettingsObject = t.SettingsObject.String()
+
+	return nil
 }

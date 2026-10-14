@@ -206,3 +206,62 @@ type FabricAdapterGenZ struct {
 	// SSDT structure.
 	sSDT string
 }
+
+// UnmarshalJSON unmarshals a FabricAdapterGenZ object from the raw JSON.
+func (f *FabricAdapterGenZ) UnmarshalJSON(b []byte) error {
+	type temp FabricAdapterGenZ
+	var tmp struct {
+		temp
+		MSDT          Link `json:"MSDT"`
+		RequestorVCAT Link `json:"RequestorVCAT"`
+		ResponderVCAT Link `json:"ResponderVCAT"`
+		SSDT          Link `json:"SSDT"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*f = FabricAdapterGenZ(tmp.temp)
+
+	// Extract the links to other entities for later
+	f.mSDT = tmp.MSDT.String()
+	f.requestorVCAT = tmp.RequestorVCAT.String()
+	f.responderVCAT = tmp.ResponderVCAT.String()
+	f.sSDT = tmp.SSDT.String()
+
+	return nil
+}
+
+// MSDT gets the MSDT collection.
+func (f *FabricAdapterGenZ) MSDT(client Client) ([]*RouteEntry, error) {
+	if f.mSDT == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[RouteEntry](client, f.mSDT)
+}
+
+// RequestorVCAT gets the RequestorVCAT collection.
+func (f *FabricAdapterGenZ) RequestorVCAT(client Client) ([]*VCATEntry, error) {
+	if f.requestorVCAT == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[VCATEntry](client, f.requestorVCAT)
+}
+
+// ResponderVCAT gets the ResponderVCAT collection.
+func (f *FabricAdapterGenZ) ResponderVCAT(client Client) ([]*VCATEntry, error) {
+	if f.responderVCAT == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[VCATEntry](client, f.responderVCAT)
+}
+
+// SSDT gets the SSDT collection.
+func (f *FabricAdapterGenZ) SSDT(client Client) ([]*RouteEntry, error) {
+	if f.sSDT == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[RouteEntry](client, f.sSDT)
+}

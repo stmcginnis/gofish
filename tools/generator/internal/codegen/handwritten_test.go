@@ -20,6 +20,8 @@ func TestHandwrittenDeclarationsAreSkipped(t *testing.T) {
 type Custom struct{}
 
 func (w *Widget) UnmarshalJSON(b []byte) error { return nil }
+
+func (g *Gadget) postUnmarshal(b []byte) error { return nil }
 `
 	generated := "package schemas\n\n" + GeneratedMarker + "\n\ntype Ignored struct{}\n"
 	if err := os.WriteFile(filepath.Join(dir, "widget_custom.go"), []byte(hand), 0o600); err != nil {
@@ -61,5 +63,17 @@ func (w *Widget) UnmarshalJSON(b []byte) error { return nil }
 	}
 	if !strings.Contains(code, "func (w *Widget) Chassis()") || !strings.Contains(code, GeneratedMarker) {
 		t.Error("expected the Chassis getter and the generated-file marker")
+	}
+
+	// A hand-written postUnmarshal hook is called at the end of the generated
+	// UnmarshalJSON, which is generated even for a type with no links.
+	code, err = gen.Generate("Gadget", schema.PackageSchemas, []*schema.Definition{
+		{Name: "Gadget", OriginalName: "Gadget", Properties: []*schema.Property{{Name: "Size", JSONName: "Size", Type: "int"}}},
+	}, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(code, "func (g *Gadget) UnmarshalJSON") || !strings.Contains(code, "return g.postUnmarshal(b)") {
+		t.Errorf("expected UnmarshalJSON calling postUnmarshal, got:\n%s", code)
 	}
 }

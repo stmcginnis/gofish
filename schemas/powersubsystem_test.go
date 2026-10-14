@@ -125,3 +125,19 @@ func TestPowerSubsystemNVWorkaround(t *testing.T) {
 		t.Errorf("Error decoding JSON: %s", err)
 	}
 }
+
+// Some NVIDIA services send non-numeric Allocation watt values; those decode as
+// 0 rather than failing the whole resource.
+func TestPowerSubsystemNonNumericAllocation(t *testing.T) {
+	var result PowerSubsystem
+	body := `{
+		"@odata.id": "/redfish/v1/Chassis/1/PowerSubsystem",
+		"Id": "PowerSubsystem",
+		"Allocation": {"AllocatedWatts": "N/A", "RequestedWatts": 1200}
+	}`
+	if err := json.NewDecoder(strings.NewReader(body)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+	assertEquals(t, "0", fmt.Sprintf("%.0f", *result.Allocation.AllocatedWatts))
+	assertEquals(t, "1200", fmt.Sprintf("%.0f", *result.Allocation.RequestedWatts))
+}

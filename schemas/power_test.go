@@ -1022,3 +1022,38 @@ func TestCiscoPower(t *testing.T) {
 		t.Errorf("Expected UpperThresholdCritical to be 14.0: %v", voltage.UpperThresholdCritical)
 	}
 }
+
+// Some services send PowerControl as a single object instead of an array, and
+// send watt readings as strings.
+func TestPowerControlLenient(t *testing.T) {
+	var result Power
+	body := `{
+		"@odata.id": "/redfish/v1/Chassis/1/Power",
+		"Id": "Power",
+		"PowerControl": {"MemberId": 0, "PowerConsumedWatts": "344"}
+	}`
+	if err := json.NewDecoder(strings.NewReader(body)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+	if len(result.PowerControl) != 1 {
+		t.Fatalf("Expected 1 PowerControl, got %d", len(result.PowerControl))
+	}
+	if result.PowerControl[0].MemberID != "0" {
+		t.Errorf("Invalid MemberID: %s", result.PowerControl[0].MemberID)
+	}
+	if *result.PowerControl[0].PowerConsumedWatts != 344 {
+		t.Errorf("Invalid PowerConsumedWatts: %f", *result.PowerControl[0].PowerConsumedWatts)
+	}
+}
+
+// A Power resource without PowerControl decodes with no PowerControl entries.
+func TestPowerWithoutPowerControl(t *testing.T) {
+	var result Power
+	body := `{"@odata.id": "/redfish/v1/Chassis/1/Power", "Id": "Power", "Voltages": []}`
+	if err := json.NewDecoder(strings.NewReader(body)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+	if len(result.PowerControl) != 0 {
+		t.Errorf("Expected no PowerControl, got %d", len(result.PowerControl))
+	}
+}

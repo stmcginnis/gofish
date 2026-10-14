@@ -214,6 +214,37 @@ type VirtualMedia struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a VirtualMedia object from the raw JSON.
+func (v *VirtualMedia) UnmarshalJSON(b []byte) error {
+	type temp VirtualMedia
+	type vActions struct {
+		EjectMedia  ActionTarget `json:"#VirtualMedia.EjectMedia"`
+		InsertMedia ActionTarget `json:"#VirtualMedia.InsertMedia"`
+	}
+	var tmp struct {
+		temp
+		Actions            vActions
+		Certificates       Link `json:"Certificates"`
+		ClientCertificates Link `json:"ClientCertificates"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*v = VirtualMedia(tmp.temp)
+
+	// Extract the links to other entities for later
+	v.certificates = tmp.Certificates.String()
+	v.clientCertificates = tmp.ClientCertificates.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	v.RawData = b
+
+	return v.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (v *VirtualMedia) Update() error {
 	readWriteFields := []string{

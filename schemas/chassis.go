@@ -627,6 +627,114 @@ type Chassis struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a Chassis object from the raw JSON.
+func (c *Chassis) UnmarshalJSON(b []byte) error {
+	type temp Chassis
+	type cActions struct {
+		Reset ActionTarget `json:"#Chassis.Reset"`
+	}
+	type cLinks struct {
+		AutomationNodes       Links `json:"AutomationNodes"`
+		Cables                Links `json:"Cables"`
+		ComputerSystems       Links `json:"ComputerSystems"`
+		ConnectedCoolingLoops Links `json:"ConnectedCoolingLoops"`
+		ContainedBy           Link  `json:"ContainedBy"`
+		Contains              Links `json:"Contains"`
+		CooledBy              Links `json:"CooledBy"`
+		CoolingUnits          Links `json:"CoolingUnits"`
+		Facility              Link  `json:"Facility"`
+		Fans                  Links `json:"Fans"`
+		ManagedBy             Links `json:"ManagedBy"`
+		ManagersInChassis     Links `json:"ManagersInChassis"`
+		PowerDistribution     Link  `json:"PowerDistribution"`
+		PowerOutlets          Links `json:"PowerOutlets"`
+		PowerSupplies         Links `json:"PowerSupplies"`
+		PoweredBy             Links `json:"PoweredBy"`
+		Processors            Links `json:"Processors"`
+		ResourceBlocks        Links `json:"ResourceBlocks"`
+		Storage               Links `json:"Storage"`
+		Switches              Links `json:"Switches"`
+	}
+	var tmp struct {
+		temp
+		Actions            cActions
+		Links              cLinks
+		Assembly           ResolvedLink[Assembly]           `json:"Assembly"`
+		Certificates       Link                             `json:"Certificates"`
+		Controls           Link                             `json:"Controls"`
+		EnvironmentMetrics ResolvedLink[EnvironmentMetrics] `json:"EnvironmentMetrics"`
+		FabricAdapters     Link                             `json:"FabricAdapters"`
+		LeakDetectors      Link                             `json:"LeakDetectors"`
+		LogServices        Link                             `json:"LogServices"`
+		MediaControllers   Link                             `json:"MediaControllers"`
+		Memory             Link                             `json:"Memory"`
+		MemoryDomains      Link                             `json:"MemoryDomains"`
+		NetworkAdapters    Link                             `json:"NetworkAdapters"`
+		PCIeDevices        Link                             `json:"PCIeDevices"`
+		PCIeSlots          ResolvedLink[PCIeSlots]          `json:"PCIeSlots"`
+		Power              ResolvedLink[Power]              `json:"Power"`
+		PowerSubsystem     ResolvedLink[PowerSubsystem]     `json:"PowerSubsystem"`
+		Sensors            Link                             `json:"Sensors"`
+		Thermal            ResolvedLink[Thermal]            `json:"Thermal"`
+		ThermalSubsystem   ResolvedLink[ThermalSubsystem]   `json:"ThermalSubsystem"`
+		TrustedComponents  Link                             `json:"TrustedComponents"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*c = Chassis(tmp.temp)
+
+	// Extract the links to other entities for later
+	c.resetTarget = tmp.Actions.Reset.Target
+	c.automationNodes = tmp.Links.AutomationNodes.ToStrings()
+	c.cables = tmp.Links.Cables.ToStrings()
+	c.computerSystems = tmp.Links.ComputerSystems.ToStrings()
+	c.connectedCoolingLoops = tmp.Links.ConnectedCoolingLoops.ToStrings()
+	c.containedBy = tmp.Links.ContainedBy.String()
+	c.contains = tmp.Links.Contains.ToStrings()
+	c.cooledBy = tmp.Links.CooledBy.ToStrings()
+	c.coolingUnits = tmp.Links.CoolingUnits.ToStrings()
+	c.facility = tmp.Links.Facility.String()
+	c.fans = tmp.Links.Fans.ToStrings()
+	c.managedBy = tmp.Links.ManagedBy.ToStrings()
+	c.managersInChassis = tmp.Links.ManagersInChassis.ToStrings()
+	c.powerDistribution = tmp.Links.PowerDistribution.String()
+	c.powerOutlets = tmp.Links.PowerOutlets.ToStrings()
+	c.powerSupplies = tmp.Links.PowerSupplies.ToStrings()
+	c.poweredBy = tmp.Links.PoweredBy.ToStrings()
+	c.processors = tmp.Links.Processors.ToStrings()
+	c.resourceBlocks = tmp.Links.ResourceBlocks.ToStrings()
+	c.storage = tmp.Links.Storage.ToStrings()
+	c.switches = tmp.Links.Switches.ToStrings()
+	c.assembly = tmp.Assembly
+	c.certificates = tmp.Certificates.String()
+	c.controls = tmp.Controls.String()
+	c.environmentMetrics = tmp.EnvironmentMetrics
+	c.fabricAdapters = tmp.FabricAdapters.String()
+	c.leakDetectors = tmp.LeakDetectors.String()
+	c.logServices = tmp.LogServices.String()
+	c.mediaControllers = tmp.MediaControllers.String()
+	c.memory = tmp.Memory.String()
+	c.memoryDomains = tmp.MemoryDomains.String()
+	c.networkAdapters = tmp.NetworkAdapters.String()
+	c.pCIeDevices = tmp.PCIeDevices.String()
+	c.pCIeSlots = tmp.PCIeSlots
+	c.power = tmp.Power
+	c.powerSubsystem = tmp.PowerSubsystem
+	c.sensors = tmp.Sensors.String()
+	c.thermal = tmp.Thermal
+	c.thermalSubsystem = tmp.ThermalSubsystem
+	c.trustedComponents = tmp.TrustedComponents.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	c.RawData = b
+
+	return c.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (c *Chassis) Update() error {
 	readWriteFields := []string{

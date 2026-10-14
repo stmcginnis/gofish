@@ -782,6 +782,27 @@ type SensorArrayExcerpt struct {
 	Reading *float64 `json:",omitempty"`
 }
 
+// UnmarshalJSON unmarshals a SensorArrayExcerpt object from the raw JSON.
+func (s *SensorArrayExcerpt) UnmarshalJSON(b []byte) error {
+	type temp SensorArrayExcerpt
+	var tmp struct {
+		temp
+		LenientReading any `json:"Reading"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*s = SensorArrayExcerpt(tmp.temp)
+
+	// Extract the links to other entities for later
+	s.Reading = toFloat64(tmp.LenientReading)
+
+	return nil
+}
+
 // SensorCurrentExcerpt shall represent a sensor for a Redfish implementation.
 type SensorCurrentExcerpt struct {
 	// CrestFactor shall contain the ratio of the peak measurement divided by the

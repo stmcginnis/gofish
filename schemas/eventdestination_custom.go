@@ -5,7 +5,6 @@
 package schemas
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -26,56 +25,6 @@ type subscriptionPayload struct {
 	Oem                 any                      `json:"Oem,omitempty"`
 	Protocol            EventDestinationProtocol `json:"Protocol,omitempty"`
 	Context             string                   `json:"Context,omitempty"`
-}
-
-// UnmarshalJSON unmarshals a EventDestination object from the raw JSON.
-func (e *EventDestination) UnmarshalJSON(b []byte) error {
-	type temp EventDestination
-	type eActions struct {
-		ResumeSubscription  ActionTarget `json:"#EventDestination.ResumeSubscription"`
-		SuspendSubscription ActionTarget `json:"#EventDestination.SuspendSubscription"`
-	}
-	var tmp struct {
-		temp
-		Actions            eActions
-		Certificates       Link `json:"Certificates"`
-		ClientCertificates Link `json:"ClientCertificates"`
-	}
-
-	err := json.Unmarshal(b, &tmp)
-	if err != nil {
-		// Workaround for the OriginResources actually being an idref
-		var x struct {
-			temp
-			OriginResources    Links
-			Certificates       Link
-			ClientCertificates Link
-		}
-
-		err2 := json.Unmarshal(b, &x)
-		if err2 != nil {
-			// That didn't work either, just return the original error
-			return err
-		}
-
-		tmp.temp = x.temp
-		tmp.Certificates = x.Certificates
-		tmp.ClientCertificates = x.ClientCertificates
-		tmp.OriginResources = x.OriginResources.ToStrings()
-	}
-
-	*e = EventDestination(tmp.temp)
-
-	// Extract the links to other entities for later
-	e.resumeSubscriptionTarget = tmp.Actions.ResumeSubscription.Target
-	e.suspendSubscriptionTarget = tmp.Actions.SuspendSubscription.Target
-	e.certificates = tmp.Certificates.String()
-	e.clientCertificates = tmp.ClientCertificates.String()
-
-	// This is a read/write object, so we need to save the raw object data for later
-	e.RawData = b
-
-	return nil
 }
 
 // validateCreateEventDestinationParams will validate
@@ -266,4 +215,25 @@ func DeleteEventDestination(c Client, uri string) error {
 	defer DeferredCleanupHTTPResponse(resp)
 
 	return err
+}
+
+// linkURIs converts OriginResources, which the schema defines as URIs but
+// some services send as links ({"@odata.id": ...}).
+func linkURIs(v any) []string {
+	items, ok := v.([]any)
+	if !ok {
+		return nil
+	}
+	uris := make([]string, 0, len(items))
+	for _, item := range items {
+		switch x := item.(type) {
+		case string:
+			uris = append(uris, x)
+		case map[string]any:
+			if id, ok := x["@odata.id"].(string); ok {
+				uris = append(uris, id)
+			}
+		}
+	}
+	return uris
 }

@@ -471,6 +471,92 @@ type Manager struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a Manager object from the raw JSON.
+func (m *Manager) UnmarshalJSON(b []byte) error {
+	type temp Manager
+	type mActions struct {
+		ForceFailover       ActionTarget `json:"#Manager.ForceFailover"`
+		ModifyRedundancySet ActionTarget `json:"#Manager.ModifyRedundancySet"`
+		Reset               ActionTarget `json:"#Manager.Reset"`
+		ResetToDefaults     ActionTarget `json:"#Manager.ResetToDefaults"`
+		UpdateSecurityMode  ActionTarget `json:"#Manager.UpdateSecurityMode"`
+	}
+	type mLinks struct {
+		ActiveSoftwareImage Link  `json:"ActiveSoftwareImage"`
+		ManagedBy           Links `json:"ManagedBy"`
+		ManagerForChassis   Links `json:"ManagerForChassis"`
+		ManagerForFabrics   Links `json:"ManagerForFabrics"`
+		ManagerForManagers  Links `json:"ManagerForManagers"`
+		ManagerForServers   Links `json:"ManagerForServers"`
+		ManagerForSwitches  Links `json:"ManagerForSwitches"`
+		ManagerInChassis    Link  `json:"ManagerInChassis"`
+		SelectedNetworkPort Link  `json:"SelectedNetworkPort"`
+		SoftwareImages      Links `json:"SoftwareImages"`
+	}
+	var tmp struct {
+		temp
+		Actions               mActions
+		Links                 mLinks
+		Certificates          Link                                 `json:"Certificates"`
+		DedicatedNetworkPorts Link                                 `json:"DedicatedNetworkPorts"`
+		EthernetInterfaces    Link                                 `json:"EthernetInterfaces"`
+		HostInterfaces        Link                                 `json:"HostInterfaces"`
+		LogServices           Link                                 `json:"LogServices"`
+		ManagerDiagnosticData ResolvedLink[ManagerDiagnosticData]  `json:"ManagerDiagnosticData"`
+		NetworkProtocol       ResolvedLink[ManagerNetworkProtocol] `json:"NetworkProtocol"`
+		Redundancy            ResolvedLink[Redundancy]             `json:"Redundancy"`
+		RemoteAccountService  ResolvedLink[AccountService]         `json:"RemoteAccountService"`
+		SecurityPolicy        ResolvedLink[SecurityPolicy]         `json:"SecurityPolicy"`
+		SerialInterfaces      Link                                 `json:"SerialInterfaces"`
+		SharedNetworkPorts    Link                                 `json:"SharedNetworkPorts"`
+		USBPorts              Link                                 `json:"USBPorts"`
+		VirtualMedia          Link                                 `json:"VirtualMedia"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = Manager(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.forceFailoverTarget = tmp.Actions.ForceFailover.Target
+	m.modifyRedundancySetTarget = tmp.Actions.ModifyRedundancySet.Target
+	m.resetTarget = tmp.Actions.Reset.Target
+	m.resetToDefaultsTarget = tmp.Actions.ResetToDefaults.Target
+	m.updateSecurityModeTarget = tmp.Actions.UpdateSecurityMode.Target
+	m.activeSoftwareImage = tmp.Links.ActiveSoftwareImage.String()
+	m.managedBy = tmp.Links.ManagedBy.ToStrings()
+	m.managerForChassis = tmp.Links.ManagerForChassis.ToStrings()
+	m.managerForFabrics = tmp.Links.ManagerForFabrics.ToStrings()
+	m.managerForManagers = tmp.Links.ManagerForManagers.ToStrings()
+	m.managerForServers = tmp.Links.ManagerForServers.ToStrings()
+	m.managerForSwitches = tmp.Links.ManagerForSwitches.ToStrings()
+	m.managerInChassis = tmp.Links.ManagerInChassis.String()
+	m.selectedNetworkPort = tmp.Links.SelectedNetworkPort.String()
+	m.softwareImages = tmp.Links.SoftwareImages.ToStrings()
+	m.certificates = tmp.Certificates.String()
+	m.dedicatedNetworkPorts = tmp.DedicatedNetworkPorts.String()
+	m.ethernetInterfaces = tmp.EthernetInterfaces.String()
+	m.hostInterfaces = tmp.HostInterfaces.String()
+	m.logServices = tmp.LogServices.String()
+	m.managerDiagnosticData = tmp.ManagerDiagnosticData
+	m.networkProtocol = tmp.NetworkProtocol
+	m.redundancy = tmp.Redundancy
+	m.remoteAccountService = tmp.RemoteAccountService
+	m.securityPolicy = tmp.SecurityPolicy
+	m.serialInterfaces = tmp.SerialInterfaces.String()
+	m.sharedNetworkPorts = tmp.SharedNetworkPorts.String()
+	m.uSBPorts = tmp.USBPorts.String()
+	m.virtualMedia = tmp.VirtualMedia.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	m.RawData = b
+
+	return m.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (m *Manager) Update() error {
 	readWriteFields := []string{

@@ -105,6 +105,55 @@ type TelemetryService struct {
 	RawData []byte
 }
 
+// UnmarshalJSON unmarshals a TelemetryService object from the raw JSON.
+func (t *TelemetryService) UnmarshalJSON(b []byte) error {
+	type temp TelemetryService
+	type tActions struct {
+		ClearMetricReports                     ActionTarget `json:"#TelemetryService.ClearMetricReports"`
+		ClearTelemetryData                     ActionTarget `json:"#TelemetryService.ClearTelemetryData"`
+		CollectTelemetryData                   ActionTarget `json:"#TelemetryService.CollectTelemetryData"`
+		ResetMetricReportDefinitionsToDefaults ActionTarget `json:"#TelemetryService.ResetMetricReportDefinitionsToDefaults"`
+		ResetTriggersToDefaults                ActionTarget `json:"#TelemetryService.ResetTriggersToDefaults"`
+		SubmitTestMetricReport                 ActionTarget `json:"#TelemetryService.SubmitTestMetricReport"`
+	}
+	var tmp struct {
+		temp
+		Actions                 tActions
+		LogService              ResolvedLink[LogService] `json:"LogService"`
+		MetricDefinitions       Link                     `json:"MetricDefinitions"`
+		MetricReportDefinitions Link                     `json:"MetricReportDefinitions"`
+		MetricReports           Link                     `json:"MetricReports"`
+		TelemetryData           Link                     `json:"TelemetryData"`
+		Triggers                Link                     `json:"Triggers"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*t = TelemetryService(tmp.temp)
+
+	// Extract the links to other entities for later
+	t.clearMetricReportsTarget = tmp.Actions.ClearMetricReports.Target
+	t.clearTelemetryDataTarget = tmp.Actions.ClearTelemetryData.Target
+	t.collectTelemetryDataTarget = tmp.Actions.CollectTelemetryData.Target
+	t.resetMetricReportDefinitionsToDefaultsTarget = tmp.Actions.ResetMetricReportDefinitionsToDefaults.Target
+	t.resetTriggersToDefaultsTarget = tmp.Actions.ResetTriggersToDefaults.Target
+	t.submitTestMetricReportTarget = tmp.Actions.SubmitTestMetricReport.Target
+	t.logService = tmp.LogService
+	t.metricDefinitions = tmp.MetricDefinitions.String()
+	t.metricReportDefinitions = tmp.MetricReportDefinitions.String()
+	t.metricReports = tmp.MetricReports.String()
+	t.telemetryData = tmp.TelemetryData.String()
+	t.triggers = tmp.Triggers.String()
+
+	// This is a read/write object, so we need to save the raw object data for later
+	t.RawData = b
+
+	return t.postUnmarshal(b)
+}
+
 // Update commits updates to this object's properties to the running system.
 func (t *TelemetryService) Update() error {
 	readWriteFields := []string{
@@ -269,6 +318,25 @@ type CollectTelemetryDataResponse struct {
 	telemetryData []string
 }
 
+// UnmarshalJSON unmarshals a CollectTelemetryDataResponse object from the raw JSON.
+func (c *CollectTelemetryDataResponse) UnmarshalJSON(b []byte) error {
+	type temp CollectTelemetryDataResponse
+	var tmp struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*c = CollectTelemetryDataResponse(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	return c.postUnmarshal(b)
+}
+
 // TelemetryMetricValue shall contain properties that capture a metric value and
 // other associated information.
 type TelemetryMetricValue struct {
@@ -297,4 +365,24 @@ type TelemetryMetricValue struct {
 	//
 	// Version added: v1.1.0
 	Timestamp string
+}
+
+// UnmarshalJSON unmarshals a TelemetryMetricValue object from the raw JSON.
+func (t *TelemetryMetricValue) UnmarshalJSON(b []byte) error {
+	type temp TelemetryMetricValue
+	var tmp struct {
+		temp
+		ShadowMetricDefinition json.RawMessage `json:"MetricDefinition"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*t = TelemetryMetricValue(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	return t.postUnmarshal(b)
 }

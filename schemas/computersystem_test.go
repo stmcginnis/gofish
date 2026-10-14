@@ -736,3 +736,20 @@ func TestSystemSupportedResetTypes(t *testing.T) {
 		t.Errorf("Expected 3 reset types to be returned, got %d", len(resetTypes))
 	}
 }
+
+// Some BMCs send IPMIHostInterface as a bare bool instead of an object.
+func TestIPMIHostInterfaceBool(t *testing.T) {
+	for body, want := range map[string]bool{
+		`{"ServiceEnabled": true}`: true,
+		`true`:                     true,
+		`false`:                    false,
+	} {
+		var result IPMIHostInterface
+		if err := json.Unmarshal([]byte(body), &result); err != nil {
+			t.Fatalf("Error decoding %s: %s", body, err)
+		}
+		if result.ServiceEnabled != want {
+			t.Errorf("ServiceEnabled from %s = %t, want %t", body, result.ServiceEnabled, want)
+		}
+	}
+}

@@ -63,6 +63,39 @@ type Bios struct {
 	rawData []byte
 }
 
+// UnmarshalJSON unmarshals a Bios object from the raw JSON.
+func (bi *Bios) UnmarshalJSON(b []byte) error {
+	type temp Bios
+	type biActions struct {
+		ChangePassword ActionTarget `json:"#Bios.ChangePassword"`
+		ResetBios      ActionTarget `json:"#Bios.ResetBios"`
+	}
+	type biLinks struct {
+		ActiveSoftwareImage Link  `json:"ActiveSoftwareImage"`
+		SoftwareImages      Links `json:"SoftwareImages"`
+	}
+	var tmp struct {
+		temp
+		Actions biActions
+		Links   biLinks
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*bi = Bios(tmp.temp)
+
+	// Extract the links to other entities for later
+	bi.changePasswordTarget = tmp.Actions.ChangePassword.Target
+	bi.resetBiosTarget = tmp.Actions.ResetBios.Target
+	bi.activeSoftwareImage = tmp.Links.ActiveSoftwareImage.String()
+	bi.softwareImages = tmp.Links.SoftwareImages.ToStrings()
+
+	return bi.postUnmarshal(b)
+}
+
 // GetBios will get a Bios instance from the service.
 func GetBios(c Client, uri string) (*Bios, error) {
 	return GetObject[Bios](c, uri)
