@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Circuit.v1_9_0.json
-// 2025.4 - #Circuit.v1_9_0.Circuit
+// http://redfish.dmtf.org/schemas/v1/Circuit.v1_10_0.json
+// 2026.2 - #Circuit.v1_10_0.Circuit
 
 package schemas
 
@@ -101,6 +101,10 @@ const (
 	// DC48VNominalVoltageType shall indicate the device supports a nominal voltage
 	// of 48VDC.
 	DC48VNominalVoltageType NominalVoltageType = "DC48V"
+	// OpenRackV3NominalVoltageType shall indicate the device supports a nominal
+	// voltage range of 46-52VDC as specified by the Open Compute Project Open Rack
+	// V3 Base Specification.
+	OpenRackV3NominalVoltageType NominalVoltageType = "OpenRackV3"
 	// DC240VNominalVoltageType shall indicate the device supports a nominal
 	// voltage of 240VDC.
 	DC240VNominalVoltageType NominalVoltageType = "DC240V"
@@ -266,6 +270,23 @@ const (
 	Field400V3P5W32APlugType PlugType = "Field_400V_3P5W_32A"
 )
 
+type PowerFlowDirection string
+
+const (
+	// SourcePowerFlowDirection shall indicate that power normally flows into the
+	// equipment from this circuit as a source, input, or import.
+	SourcePowerFlowDirection PowerFlowDirection = "Source"
+	// LoadPowerFlowDirection shall indicate that power normally flows out from the
+	// equipment to this circuit as a load, output, or export.
+	LoadPowerFlowDirection PowerFlowDirection = "Load"
+	// BidirectionalPowerFlowDirection shall indicate that power normally flows in
+	// either direction depending on the mode of the equipment. This value
+	// typically represents an energy storage unit that contains a single
+	// electrical connection serving as both a source or import, as well as a load
+	// or export circuit.
+	BidirectionalPowerFlowDirection PowerFlowDirection = "Bidirectional"
+)
+
 // Circuit shall be used to represent an electrical circuit for a Redfish
 // implementation.
 type Circuit struct {
@@ -399,6 +420,11 @@ type Circuit struct {
 	// 'true' shall indicate that the circuit can be powered on, and 'false' shall
 	// indicate that the circuit cannot be powered.
 	PowerEnabled bool
+	// PowerFlowDirection shall contain the nominal flow of power from the
+	// perspective of the owning equipment.
+	//
+	// Version added: v1.10.0
+	PowerFlowDirection PowerFlowDirection
 	// PowerLoadPercent shall contain the power load, in percent units, for this
 	// circuit that represents the 'Total' 'ElectricalContext' for this circuit.
 	//

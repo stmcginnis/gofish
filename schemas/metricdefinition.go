@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/MetricDefinition.v1_3_5.json
-// 2022.1 - #MetricDefinition.v1_3_5.MetricDefinition
+// http://redfish.dmtf.org/schemas/v1/MetricDefinition.v1_3_6.json
+// 2022.1 - #MetricDefinition.v1_3_6.MetricDefinition
 
 package schemas
 
@@ -200,8 +200,8 @@ type MetricDefinition struct {
 	// reading. The property is not meaningful when the 'MetricType' property is
 	// 'Discrete'.
 	Precision *int `json:",omitempty"`
-	// SensingInterval shall specify the time interval between when a metric is
-	// updated.
+	// SensingInterval shall specify the frequency at which metric values are
+	// included in any 'MetricReport' referencing this metric.
 	SensingInterval string
 	// TimestampAccuracy shall specify the expected + or - variability of the
 	// timestamp.

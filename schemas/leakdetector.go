@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/LeakDetector.v1_6_0.json
-// 2025.4 - #LeakDetector.v1_6_0.LeakDetector
+// http://redfish.dmtf.org/schemas/v1/LeakDetector.v1_6_1.json
+// 2025.4 - #LeakDetector.v1_6_1.LeakDetector
 
 package schemas
 
@@ -221,6 +221,10 @@ type LeakDetectorArrayExcerpt struct {
 	//
 	// Version added: v1.2.0
 	DeviceName string
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// PhysicalContext shall contain a description of the affected component or
 	// region within the equipment to which this leak detector applies.
 	PhysicalContext PhysicalContext
@@ -243,4 +247,8 @@ type LeakDetectorExcerpt struct {
 	// itself, such as a short or a disconnected cable, the 'Conditions' property
 	// in 'Status' should indicate the type of fault detected.
 	DetectorState DetectorState
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 }

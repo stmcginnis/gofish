@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/VCATEntry.v1_0_3.json
-// 2019.4 - #VCATEntry.v1_0_3.VCATEntry
+// http://redfish.dmtf.org/schemas/v1/VCATEntry.v1_1_0.json
+// 2026.2 - #VCATEntry.v1_1_0.VCATEntry
 
 package schemas
 

@@ -2,13 +2,42 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ManagerNetworkProtocol.v1_12_0.json
-// 2025.2 - #ManagerNetworkProtocol.v1_12_0.ManagerNetworkProtocol
+// http://redfish.dmtf.org/schemas/v1/ManagerNetworkProtocol.v1_14_0.json
+// 2026.2 - #ManagerNetworkProtocol.v1_14_0.ManagerNetworkProtocol
 
 package schemas
 
 import (
 	"encoding/json"
+)
+
+type IPv6AddressGenerationMode string
+
+const (
+	// StablePrivacyIPv6AddressGenerationMode shall indicate stable privacy address
+	// generation.
+	StablePrivacyIPv6AddressGenerationMode IPv6AddressGenerationMode = "StablePrivacy"
+	// EUI64IPv6AddressGenerationMode shall indicate EUI-64 address generation.
+	EUI64IPv6AddressGenerationMode IPv6AddressGenerationMode = "EUI64"
+)
+
+type NTPState string
+
+const (
+	// SynchronizedNTPState shall indicate that the manager successfully
+	// synchronized its clock with at least one configured or network-supplied NTP
+	// server.
+	SynchronizedNTPState NTPState = "Synchronized"
+	// NotSynchronizedNTPState shall indicate that the NTP client is enabled and
+	// has contacted a server, but none of the configured or network-supplied NTP
+	// servers are synchronized.
+	NotSynchronizedNTPState NTPState = "NotSynchronized"
+	// DisabledNTPState shall indicate that NTP is not enabled, so no
+	// synchronization is being attempted.
+	DisabledNTPState NTPState = "Disabled"
+	// UnreachableNTPState shall indicate that the NTP client is enabled, but none
+	// of the configured or network-supplied NTP servers are reachable.
+	UnreachableNTPState NTPState = "Unreachable"
 )
 
 type NotifyIPv6Scope string
@@ -34,6 +63,27 @@ const (
 	// LimitedSNMPCommunityAccessMode shall indicate the RFC1157-defined READ-ONLY
 	// access mode.
 	LimitedSNMPCommunityAccessMode SNMPCommunityAccessMode = "Limited"
+)
+
+type SSHPreferredAuthentication string
+
+const (
+	// PasswordSSHPreferredAuthentication Password-based SSH authentication as
+	// defined in RFC4252.
+	PasswordSSHPreferredAuthentication SSHPreferredAuthentication = "Password"
+	// PublicKeySSHPreferredAuthentication Public key-based SSH authentication as
+	// defined in RFC4252.
+	PublicKeySSHPreferredAuthentication SSHPreferredAuthentication = "PublicKey"
+	// KeyboardInteractiveSSHPreferredAuthentication Keyboard-interactive
+	// authentication as defined in RFC4256.
+	KeyboardInteractiveSSHPreferredAuthentication SSHPreferredAuthentication = "KeyboardInteractive"
+	// GSSAPIWithMICSSHPreferredAuthentication Generic Security Service Application
+	// Program Interface (GSS-API)-based authentication with a Message Integrity
+	// Code (MIC) as defined in RFC4462.
+	GSSAPIWithMICSSHPreferredAuthentication SSHPreferredAuthentication = "GSSAPIWithMIC"
+	// HostBasedSSHPreferredAuthentication Host-based authentication as defined in
+	// RFC4252.
+	HostBasedSSHPreferredAuthentication SSHPreferredAuthentication = "HostBased"
 )
 
 // ManagerNetworkProtocol shall represent the network service settings for the
@@ -76,6 +126,12 @@ type ManagerNetworkProtocol struct {
 	// default 'Port' property value should be '623' for compatibility with
 	// established client implementations.
 	IPMI ProtocolSetting
+	// IPv6AddressGenerationMode shall contain the IPv6 address generation mode.
+	// The configuration of this property shall apply to all Ethernet interfaces on
+	// this manager.
+	//
+	// Version added: v1.13.0
+	IPv6AddressGenerationMode IPv6AddressGenerationMode
 	// KVMIP shall contain the KVM-IP (Keyboard, Video, Mouse over IP) protocol
 	// settings for the manager. If multiple systems are supported by this manager,
 	// these properties, if present, apply to all instances of KVM-IP controlled by
@@ -127,7 +183,7 @@ type ManagerNetworkProtocol struct {
 	// SSH shall contain the Secure Shell (SSH) protocol settings for the manager.
 	// The default value should be '22' for compatibility with established client
 	// implementations.
-	SSH ProtocolSetting
+	SSH SSHProtocol
 	// Status shall contain any status or health properties of the resource.
 	Status Status
 	// Telnet shall contain the Telnet protocol settings for this manager. The
@@ -146,6 +202,39 @@ type ManagerNetworkProtocol struct {
 	//
 	// Version added: v1.11.0
 	MDNS ProtocolSetting
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
+}
+
+// UnmarshalJSON unmarshals a ManagerNetworkProtocol object from the raw JSON.
+func (m *ManagerNetworkProtocol) UnmarshalJSON(b []byte) error {
+	type temp ManagerNetworkProtocol
+	var tmp struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = ManagerNetworkProtocol(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	// This is a read/write object, so we need to save the raw object data for later
+	m.RawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (m *ManagerNetworkProtocol) Update() error {
+	readWriteFields := []string{
+		"IPv6AddressGenerationMode",
+	}
+
+	return m.UpdateFromRawData(m, m.RawData, readWriteFields)
 }
 
 // GetManagerNetworkProtocol will get a ManagerNetworkProtocol instance from the service.
@@ -195,7 +284,12 @@ type HTTPSProtocolSettings struct {
 	certificates string
 	// Port shall contain the port assigned to the protocol.
 	Port *uint `json:",omitempty"`
-	// ProtocolEnabled shall indicate whether the protocol is enabled.
+	// ProtocolEnabled shall indicate whether the protocol is currently enabled or
+	// otherwise in use by this manager. Related properties are configuration
+	// settings for this protocol. Services should allow clients to update those
+	// configuration settings regardless of whether the protocol is enabled or
+	// disabled. Updates to those configuration settings should not affect or
+	// update the value of this property.
 	ProtocolEnabled bool
 }
 
@@ -253,7 +347,12 @@ type ModbusProtocol struct {
 	NumberOfConnectedClients *uint `json:",omitempty"`
 	// Port shall contain the port assigned to the protocol.
 	Port *uint `json:",omitempty"`
-	// ProtocolEnabled shall indicate whether the protocol is enabled.
+	// ProtocolEnabled shall indicate whether the protocol is currently enabled or
+	// otherwise in use by this manager. Related properties are configuration
+	// settings for this protocol. Services should allow clients to update those
+	// configuration settings regardless of whether the protocol is enabled or
+	// disabled. Updates to those configuration settings should not affect or
+	// update the value of this property.
 	ProtocolEnabled bool
 	// ReadOnly shall indicate if the Modbus TCP server protocol interface is read
 	// only. If 'true', the Modbus TCP server service on this manager shall reject
@@ -285,23 +384,48 @@ type NTPProtocol struct {
 	//
 	// Version added: v1.2.0
 	NTPServers []string
+	// NTPState shall contain the synchronization state of the NTP service on this
+	// manager.
+	//
+	// Version added: v1.14.0
+	NTPState NTPState
 	// NetworkSuppliedServers shall contain the NTP servers supplied by other
 	// network protocols to this manager. DHCP is an example of a protocol that can
 	// supply NTP servers to this manager.
 	//
 	// Version added: v1.9.0
 	NetworkSuppliedServers []string
+	// NotSynchronizedServers shall contain the addresses of NTP servers that the
+	// manager can reach but is not synchronized.
+	//
+	// Version added: v1.14.0
+	NotSynchronizedServers []string
 	// Port shall contain the port assigned to the protocol.
 	Port *uint `json:",omitempty"`
-	// ProtocolEnabled shall indicate whether the protocol is enabled.
+	// ProtocolEnabled shall indicate whether the protocol is currently enabled or
+	// otherwise in use by this manager. Related properties are configuration
+	// settings for this protocol. Services should allow clients to update those
+	// configuration settings regardless of whether the protocol is enabled or
+	// disabled. Updates to those configuration settings should not affect or
+	// update the value of this property.
 	ProtocolEnabled bool
+	// UnreachableServers shall contain the addresses of NTP servers that the
+	// manager is unable to reach.
+	//
+	// Version added: v1.14.0
+	UnreachableServers []string
 }
 
 // ProtocolSetting shall describe information about a protocol setting for a manager.
 type ProtocolSetting struct {
 	// Port shall contain the port assigned to the protocol.
 	Port *uint `json:",omitempty"`
-	// ProtocolEnabled shall indicate whether the protocol is enabled.
+	// ProtocolEnabled shall indicate whether the protocol is currently enabled or
+	// otherwise in use by this manager. Related properties are configuration
+	// settings for this protocol. Services should allow clients to update those
+	// configuration settings regardless of whether the protocol is enabled or
+	// disabled. Updates to those configuration settings should not affect or
+	// update the value of this property.
 	ProtocolEnabled bool
 }
 
@@ -392,9 +516,11 @@ type SNMPCommunity struct {
 // SNMPProtocol shall describe information about a protocol setting for a
 // manager.
 type SNMPProtocol struct {
-	// AuthenticationProtocol shall contain the SNMP authentication protocol used
+	// AuthenticationProtocol shall contain the SNMPv3 authentication protocol used
 	// to access this manager. When the property contains the value 'Account', the
-	// SNMP settings in each manager account are used for authentication.
+	// SNMP settings in each manager account are used for authentication. SNMPv1
+	// and SNMPv2c protocols, if enabled, use community string-based
+	// authentication.
 	//
 	// Version added: v1.5.0
 	AuthenticationProtocol SNMPAuthenticationProtocols
@@ -444,7 +570,12 @@ type SNMPProtocol struct {
 	HideCommunityStrings bool
 	// Port shall contain the port assigned to the protocol.
 	Port *uint `json:",omitempty"`
-	// ProtocolEnabled shall indicate whether the protocol is enabled.
+	// ProtocolEnabled shall indicate whether the protocol is currently enabled or
+	// otherwise in use by this manager. Related properties are configuration
+	// settings for this protocol. Services should allow clients to update those
+	// configuration settings regardless of whether the protocol is enabled or
+	// disabled. Updates to those configuration settings should not affect or
+	// update the value of this property.
 	ProtocolEnabled bool
 	// TrapPort shall contain the port assigned to SNMP traps.
 	//
@@ -469,6 +600,32 @@ type SSDProtocol struct {
 	NotifyTTL *uint `json:",omitempty"`
 	// Port shall contain the port assigned to the protocol.
 	Port *uint `json:",omitempty"`
-	// ProtocolEnabled shall indicate whether the protocol is enabled.
+	// ProtocolEnabled shall indicate whether the protocol is currently enabled or
+	// otherwise in use by this manager. Related properties are configuration
+	// settings for this protocol. Services should allow clients to update those
+	// configuration settings regardless of whether the protocol is enabled or
+	// disabled. Updates to those configuration settings should not affect or
+	// update the value of this property.
+	ProtocolEnabled bool
+}
+
+// SSHProtocol shall describe information about a protocol setting for a
+// manager.
+type SSHProtocol struct {
+	// Port shall contain the port assigned to the protocol.
+	Port *uint `json:",omitempty"`
+	// PreferredAuthentications shall contain the SSH authentication methods that
+	// are permitted and the order in which they are preferred to be attempted. The
+	// first entry is the most preferred method. Methods not listed shall be
+	// considered disallowed.
+	//
+	// Version added: v1.13.0
+	PreferredAuthentications []SSHPreferredAuthentication
+	// ProtocolEnabled shall indicate whether the protocol is currently enabled or
+	// otherwise in use by this manager. Related properties are configuration
+	// settings for this protocol. Services should allow clients to update those
+	// configuration settings regardless of whether the protocol is enabled or
+	// disabled. Updates to those configuration settings should not affect or
+	// update the value of this property.
 	ProtocolEnabled bool
 }

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Sensor.v1_12_0.json
-// 2025.4 - #Sensor.v1_12_0.Sensor
+// http://redfish.dmtf.org/schemas/v1/Sensor.v1_14_0.json
+// 2026.2 - #Sensor.v1_14_0.Sensor
 
 package schemas
 
@@ -258,6 +258,16 @@ const (
 	// the valve is completely open, and a value of '0' shall indicate the valve is
 	// completely closed.
 	ValveReadingType ReadingType = "Valve"
+	// TurbidityReadingType shall indicate the turbidity of a liquid, in
+	// Nephelometric Turbidity Unit (NTU). The 'ReadingUnits' property shall
+	// contain '[NTU]'.
+	TurbidityReadingType ReadingType = "Turbidity"
+	// LiquidConductivityReadingType shall indicate the conductivity of a liquid,
+	// mS/cm units. The 'ReadingUnits' property shall contain 'mS/cm'.
+	LiquidConductivityReadingType ReadingType = "LiquidConductivity"
+	// pHReadingType shall indicate the acidity or alkalinity, of a liquid, in pH
+	// units. The 'ReadingUnits' property shall contain '[pH]'.
+	PHReadingType ReadingType = "pH"
 )
 
 type ThresholdActivation string
@@ -621,6 +631,8 @@ type Sensor struct {
 	VoltageType SensorVoltageType
 	// resetMetricsTarget is the URL to send ResetMetrics requests.
 	resetMetricsTarget string
+	// resetThresholdsToDefaultsTarget is the URL to send ResetThresholdsToDefaults requests.
+	resetThresholdsToDefaultsTarget string
 	// resetToDefaultsTarget is the URL to send ResetToDefaults requests.
 	resetToDefaultsTarget string
 	// associatedControls are the URIs for AssociatedControls.
@@ -633,8 +645,9 @@ type Sensor struct {
 func (s *Sensor) UnmarshalJSON(b []byte) error {
 	type temp Sensor
 	type sActions struct {
-		ResetMetrics    ActionTarget `json:"#Sensor.ResetMetrics"`
-		ResetToDefaults ActionTarget `json:"#Sensor.ResetToDefaults"`
+		ResetMetrics              ActionTarget `json:"#Sensor.ResetMetrics"`
+		ResetThresholdsToDefaults ActionTarget `json:"#Sensor.ResetThresholdsToDefaults"`
+		ResetToDefaults           ActionTarget `json:"#Sensor.ResetToDefaults"`
 	}
 	type sLinks struct {
 		AssociatedControls Links `json:"AssociatedControls"`
@@ -655,6 +668,7 @@ func (s *Sensor) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	s.resetMetricsTarget = tmp.Actions.ResetMetrics.Target
+	s.resetThresholdsToDefaultsTarget = tmp.Actions.ResetThresholdsToDefaults.Target
 	s.resetToDefaultsTarget = tmp.Actions.ResetToDefaults.Target
 	s.associatedControls = tmp.Links.AssociatedControls.ToStrings()
 	s.relatedItem = tmp.RelatedItem.ToStrings()
@@ -705,6 +719,18 @@ func (s *Sensor) ResetMetrics() (*TaskMonitorInfo, error) {
 	return taskInfo, err
 }
 
+// This action shall reset the values of writable properties in 'Thresholds' in
+// this resource to their default values as specified by the manufacturer.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (s *Sensor) ResetThresholdsToDefaults() (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	resp, taskInfo, err := PostWithTask(s.client,
+		s.resetThresholdsToDefaultsTarget, payload, s.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
 // This action shall reset the values of writable properties in this resource
 // to their default values as specified by the manufacturer.
 //
@@ -738,6 +764,10 @@ type SensorArrayExcerpt struct {
 	//
 	// Version added: v1.2.0
 	DeviceName string
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// PhysicalContext shall contain a description of the affected component or
 	// region within the equipment to which this sensor measurement applies.
 	PhysicalContext PhysicalContext
@@ -791,6 +821,10 @@ type SensorCurrentExcerpt struct {
 	// DataSourceURI shall contain a URI to the resource that provides the source
 	// of the excerpt contained within this copy.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the sensor value. This property shall not be returned
 	// if the 'Enabled' property is supported and contains 'false'.
 	Reading *float64 `json:",omitempty"`
@@ -819,6 +853,10 @@ type SensorEnergykWhExcerpt struct {
 	//
 	// Version added: v1.1.0
 	LifetimeReading *float64 `json:",omitempty"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// ReactivekVARh shall contain the reactive energy, in kilovolt-ampere-hours
 	// (reactive) units, for an electrical energy measurement. This property can
 	// appear in sensors with a 'ReadingType' containing 'EnergykWh', and shall not
@@ -840,6 +878,10 @@ type SensorExcerpt struct {
 	// DataSourceURI shall contain a URI to the resource that provides the source
 	// of the excerpt contained within this copy.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the sensor value. This property shall not be returned
 	// if the 'Enabled' property is supported and contains 'false'.
 	Reading *float64 `json:",omitempty"`
@@ -856,6 +898,10 @@ type SensorFanArrayExcerpt struct {
 	//
 	// Version added: v1.2.0
 	DeviceName string
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// PhysicalContext shall contain a description of the affected component or
 	// region within the equipment to which this sensor measurement applies.
 	PhysicalContext PhysicalContext
@@ -879,6 +925,10 @@ type SensorFanExcerpt struct {
 	// DataSourceURI shall contain a URI to the resource that provides the source
 	// of the excerpt contained within this copy.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the sensor value. This property shall not be returned
 	// if the 'Enabled' property is supported and contains 'false'.
 	Reading *float64 `json:",omitempty"`
@@ -887,6 +937,24 @@ type SensorFanExcerpt struct {
 	//
 	// Version added: v1.2.0
 	SpeedRPM *float64 `json:",omitempty"`
+}
+
+// SensorLowerCriticalExcerpt shall represent a sensor for a Redfish
+// implementation.
+type SensorLowerCriticalExcerpt struct {
+	// DataSourceURI shall contain a URI to the resource that provides the source
+	// of the excerpt contained within this copy.
+	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// Reading shall contain the sensor value. This property shall not be returned
+	// if the 'Enabled' property is supported and contains 'false'.
+	Reading *float64 `json:",omitempty"`
+	// Thresholds shall contain the set of thresholds that derive a sensor's health
+	// and operational range.
+	Thresholds ThresholdsSensorLowerCriticalExcerpt
 }
 
 // SensorPowerArrayExcerpt shall represent a sensor for a Redfish
@@ -900,6 +968,10 @@ type SensorPowerArrayExcerpt struct {
 	// DataSourceURI shall contain a URI to the resource that provides the source
 	// of the excerpt contained within this copy.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// PhaseAngleDegrees shall contain the phase angle, in degree units, between
 	// the current and voltage waveforms for an electrical measurement. This
 	// property can appear in sensors with a 'ReadingType' containing 'Power', and
@@ -941,6 +1013,10 @@ type SensorPowerExcerpt struct {
 	// DataSourceURI shall contain a URI to the resource that provides the source
 	// of the excerpt contained within this copy.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// PhaseAngleDegrees shall contain the phase angle, in degree units, between
 	// the current and voltage waveforms for an electrical measurement. This
 	// property can appear in sensors with a 'ReadingType' containing 'Power', and
@@ -969,6 +1045,10 @@ type SensorPumpExcerpt struct {
 	// DataSourceURI shall contain a URI to the resource that provides the source
 	// of the excerpt contained within this copy.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the sensor value. This property shall not be returned
 	// if the 'Enabled' property is supported and contains 'false'.
 	Reading *float64 `json:",omitempty"`
@@ -990,6 +1070,10 @@ type SensorVoltageExcerpt struct {
 	// DataSourceURI shall contain a URI to the resource that provides the source
 	// of the excerpt contained within this copy.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the sensor value. This property shall not be returned
 	// if the 'Enabled' property is supported and contains 'false'.
 	Reading *float64 `json:",omitempty"`
@@ -1030,6 +1114,20 @@ type Threshold struct {
 	//
 	// Version added: v1.7.0
 	HysteresisReading *float64 `json:",omitempty"`
+	// Reading shall indicate the reading for this sensor that activates the
+	// threshold. The value of the property shall use the same units as the
+	// 'Reading' property.
+	Reading *float64 `json:",omitempty"`
+}
+
+// ThresholdSensorExcerpt shall contain the properties for an individual
+// threshold for this sensor.
+type ThresholdSensorExcerpt struct {
+}
+
+// ThresholdSensorLowerCriticalExcerpt shall contain the properties for an
+// individual threshold for this sensor.
+type ThresholdSensorLowerCriticalExcerpt struct {
 	// Reading shall indicate the reading for this sensor that activates the
 	// threshold. The value of the property shall use the same units as the
 	// 'Reading' property.
@@ -1107,4 +1205,29 @@ type Thresholds struct {
 	// the normal range and is fatal. The value of the property shall use the same
 	// units as the 'Reading' property.
 	UpperFatal Threshold
+}
+
+// ThresholdsSensorExcerpt shall contain the set of thresholds that derive a
+// sensor's health and operational range.
+type ThresholdsSensorExcerpt struct {
+}
+
+// ThresholdsSensorLowerCriticalExcerpt shall contain the set of thresholds that
+// derive a sensor's health and operational range.
+type ThresholdsSensorLowerCriticalExcerpt struct {
+	// LowerCritical shall contain the value at which the 'Reading' property is
+	// below the normal range but is not yet fatal. The value of the property shall
+	// use the same units as the 'Reading' property.
+	LowerCritical ThresholdSensorLowerCriticalExcerpt
+	// LowerCriticalUser shall contain a user-defined value at which the 'Reading'
+	// property is considered below the normal range but is not yet fatal. The
+	// value of the property shall use the same units as the 'Reading' property.
+	// The 'Reading' property shall be considered below normal range if either the
+	// 'LowerCritical' or 'LowerCriticalUser' threshold has been violated. This
+	// property is used to provide an additional, user-defined threshold value when
+	// the 'LowerCritical' threshold is implemented as read-only to reflect a
+	// service-defined value that cannot be changed.
+	//
+	// Version added: v1.2.0
+	LowerCriticalUser ThresholdSensorLowerCriticalExcerpt
 }

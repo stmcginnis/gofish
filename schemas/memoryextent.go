@@ -1,0 +1,92 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
+// http://redfish.dmtf.org/schemas/v1/MemoryExtent.v1_0_0.json
+// 2026.1 - #MemoryExtent.v1_0_0.MemoryExtent
+
+package schemas
+
+import (
+	"encoding/json"
+)
+
+// MemoryExtent shall represent a CXL dynamic capacity memory extent in a
+// Redfish implementation.
+type MemoryExtent struct {
+	Entity
+	// ExtentOffsetMiB shall contain the offset of the memory extent in the device
+	// address range in mebibytes (MiB).
+	ExtentOffsetMiB int
+	// ExtentSizeMiB shall contain the size of the memory extent in mebibytes
+	// (MiB).
+	ExtentSizeMiB int
+	// FMReferencedExtent shall indicate whether this memory extent is referenced
+	// by the CXL Fabric Manager. If 'true', this memory extent cannot be
+	// sanitized, freed, or reallocated, regardless of whether it is currently
+	// assigned to any logical device.
+	FMReferencedExtent bool
+	// MemoryChunks shall contain the set of memory chunks that provide capacity
+	// for this memory extent.
+	MemoryChunks []MemoryChunk
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// SequenceNumber shall contain the sequence number instructing host on the
+	// relative order the extents have to be placed in the host adjacent virtual
+	// address space.
+	SequenceNumber *int `json:",omitempty"`
+	// Status shall contain any status or health properties of the resource.
+	Status Status
+	// Tag shall contain an opaque context attached to each extent to track usage
+	// of each extent or map extent to specific processes, transactions, or
+	// workloads on the host.
+	Tag string
+	// memoryRegions are the URIs for MemoryRegions.
+	memoryRegions []string
+}
+
+// UnmarshalJSON unmarshals a MemoryExtent object from the raw JSON.
+func (m *MemoryExtent) UnmarshalJSON(b []byte) error {
+	type temp MemoryExtent
+	type mLinks struct {
+		MemoryRegions Links `json:"MemoryRegions"`
+	}
+	var tmp struct {
+		temp
+		Links mLinks
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MemoryExtent(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.memoryRegions = tmp.Links.MemoryRegions.ToStrings()
+
+	return nil
+}
+
+// GetMemoryExtent will get a MemoryExtent instance from the service.
+func GetMemoryExtent(c Client, uri string) (*MemoryExtent, error) {
+	return GetObject[MemoryExtent](c, uri)
+}
+
+// ListReferencedMemoryExtents gets the collection of MemoryExtent from
+// a provided reference.
+func ListReferencedMemoryExtents(c Client, link string) ([]*MemoryExtent, error) {
+	return GetCollectionObjects[MemoryExtent](c, link)
+}
+
+// MemoryRegions gets the MemoryRegions linked resources.
+func (m *MemoryExtent) MemoryRegions() ([]*MemoryRegion, error) {
+	return GetObjects[MemoryRegion](m.client, m.memoryRegions)
+}

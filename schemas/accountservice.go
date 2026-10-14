@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/AccountService.v1_18_1.json
-// 2025.1 - #AccountService.v1_18_1.AccountService
+// http://redfish.dmtf.org/schemas/v1/AccountService.v1_19_0.json
+// 2026.2 - #AccountService.v1_19_0.AccountService
 
 package schemas
 
@@ -31,7 +31,8 @@ const (
 	// to the LDAP servers for the service. If the scheme is not specified,
 	// services shall assume it is 'ldaps://'. If the port is not specified,
 	// services shall assume it is '636'. For example, 'ldaps://contoso.com:636' or
-	// 'contoso.com'.
+	// 'contoso.com'. If 'ldap://' is specified as the scheme, services shall
+	// upgrade to an encrypted connection with 'STARTTLS'.
 	LDAPServiceAccountProviderTypes AccountProviderTypes = "LDAPService"
 	// OEMAccountProviderTypes is an OEM-specific external authentication or
 	// directory service.
@@ -654,6 +655,11 @@ type Authentication struct {
 	//
 	// Version added: v1.3.0
 	KerberosKeytab string
+	// KerberosKeytabSet shall contain 'true' if a valid value was provided for the
+	// 'KerberosKeytab' property. Otherwise, the property shall contain 'false'.
+	//
+	// Version added: v1.19.0
+	KerberosKeytabSet bool
 	// OEM shall contain the OEM extensions. All values for properties contained in
 	// this object shall conform to the Redfish Specification-described
 	// requirements.
@@ -665,11 +671,21 @@ type Authentication struct {
 	//
 	// Version added: v1.3.0
 	Password string
+	// PasswordSet shall contain 'true' if a valid value was provided for the
+	// 'Password' property. Otherwise, the property shall contain 'false'.
+	//
+	// Version added: v1.19.0
+	PasswordSet bool
 	// Token shall contain the token for this service. A 'PATCH' or 'PUT' operation
 	// writes the token. The value shall be 'null' in responses.
 	//
 	// Version added: v1.3.0
 	Token string
+	// TokenSet shall contain 'true' if a valid value was provided for the 'Token'
+	// property. Otherwise, the property shall contain 'false'.
+	//
+	// Version added: v1.19.0
+	TokenSet bool
 	// Username shall contain the username for this service.
 	//
 	// Version added: v1.3.0

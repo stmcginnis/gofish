@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/MessageRegistry.v1_7_0.json
-// 2025.3 - #MessageRegistry.v1_7_0.MessageRegistry
+// http://redfish.dmtf.org/schemas/v1/MessageRegistry.v1_9_0.json
+// 2026.2 - #MessageRegistry.v1_9_0.MessageRegistry
 
 package schemas
 
@@ -37,7 +37,9 @@ const (
 // implementation.
 type MessageRegistry struct {
 	Entity
-	// Language shall contain an RFC5646-conformant language code.
+	// Language shall contain an RFC5646-conformant language code. If the
+	// 'ReferencedRegistry' property is not present, this property shall be
+	// required.
 	Language string
 	// Messages shall contain the message keys contained in the message registry.
 	// The message keys are the suffix of the 'MessageId' and shall be unique
@@ -49,13 +51,26 @@ type MessageRegistry struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
-	// OwningEntity shall represent the publisher of this message registry.
+	// OwningEntity shall represent the publisher of this message registry. If the
+	// 'ReferencedRegistry' property is not present, this property shall be
+	// required.
 	OwningEntity string
+	// ReferencedRegistry shall contain the name of the registry from which this
+	// message is copied by reference. The contents of this message shall be as
+	// described in the source registry. This property should not be present if the
+	// message does not originate from another registry. If this property is
+	// present, the only other property that may be present is 'VersionAdded'.
+	//
+	// Version added: v1.9.0
+	ReferencedRegistry string
 	// RegistryPrefix shall contain the Redfish Specification-defined prefix used
 	// in forming and decoding 'MessageId' values that uniquely identifies all
-	// messages that belong to this message registry.
+	// messages that belong to this message registry. If the 'ReferencedRegistry'
+	// property is not present, this property shall be required.
 	RegistryPrefix string
-	// RegistryVersion shall contain the version of this message registry.
+	// RegistryVersion shall contain the version of this message registry. If the
+	// 'ReferencedRegistry' property is not present, this property shall be
+	// required.
 	RegistryVersion string
 	// Release shall contain the version of the release bundle that first included
 	// this revision of the message registry file. Message registry files from the
@@ -302,6 +317,14 @@ type MessageRegistryMessage struct {
 	Deprecated string
 	// Description provides a description of this resource.
 	Description string
+	// Example shall contain an example of the 'Message' text with all argument
+	// values populated according to the definitions of 'MessageArgs'. This
+	// property should not be present if the value of 'NumberOfArgs' contains '0'.
+	// Services can omit or replace this property with a value more applicable to
+	// the implementation.
+	//
+	// Version added: v1.8.0
+	Example string
 	// LongDescription shall contain the normative language that describes this
 	// message's usage in a Redfish implementation.
 	//
@@ -318,16 +341,22 @@ type MessageRegistryMessage struct {
 	MapsToGeneralMessages []string
 	// Message shall contain the message to display. If a %integer is included in
 	// part of the string, it shall represent a string substitution for any
-	// 'MessageArgs' that accompany the message, in order.
+	// 'MessageArgs' that accompany the message, in order. If the
+	// 'ReferencedRegistry' property is not present, this property shall be
+	// required.
 	Message string
 	// MessageSeverity shall contain the severity of the message. Services can
 	// replace the severity defined in the message registry with a value more
-	// applicable to the implementation in message payloads and event payloads.
+	// applicable to the implementation in message payloads and event payloads. If
+	// the 'ReferencedRegistry' property is not present, this property shall be
+	// required.
 	//
 	// Version added: v1.4.0
 	MessageSeverity string
 	// NumberOfArgs shall contain the number of arguments that are substituted for
-	// the locations marked with %<integer> in the message.
+	// the locations marked with %<integer> in the message. If the
+	// 'ReferencedRegistry' property is not present, this property shall be
+	// required.
 	NumberOfArgs uint
 	// OEM shall contain the OEM extensions. All values for properties contained in
 	// this object shall conform to the Redfish Specification-described
@@ -347,13 +376,15 @@ type MessageRegistryMessage struct {
 	ReplacedBy string
 	// Resolution shall contain the resolution of the message. Services can replace
 	// the resolution defined in the message registry with a more specific
-	// resolution in message payloads.
+	// resolution in message payloads. If the 'ReferencedRegistry' property is not
+	// present, this property shall be required.
 	Resolution string
 	// Severity shall contain the severity of the condition resulting in the
 	// message, as defined in the 'Status' clause of the Redfish Specification.
 	// Services can replace the severity defined in the message registry with a
 	// value more applicable to the implementation in message payloads and event
-	// payloads.
+	// payloads. If the 'ReferencedRegistry' property is not present, this property
+	// shall be required.
 	//
 	// Deprecated: v1.4.0
 	// This property has been deprecated in favor of 'MessageSeverity', which ties

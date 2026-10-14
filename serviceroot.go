@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ServiceRoot.v1_20_0.json
-// 2025.4 - #ServiceRoot.v1_20_0.ServiceRoot
+// http://redfish.dmtf.org/schemas/v1/ServiceRoot.v1_22_0.json
+// 2026.2 - #ServiceRoot.v1_22_0.ServiceRoot
 
 package gofish
 
@@ -102,6 +102,14 @@ type Service struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// PolicyService shall contain a link to a resource of type 'PolicyService'.
+	//
+	// Version added: v1.22.0
+	//
+	// Holds the link URI and, if the service inlined the resource (e.g. via
+	// $expand), its raw JSON - PolicyService() consumes that JSON
+	// exactly once, so a second call always does a live GET.
+	policyService schemas.ResolvedLink[schemas.PolicyService]
 	// PowerEquipment shall contain a link to a resource of type 'PowerEquipment'.
 	//
 	// Version added: v1.6.0
@@ -252,6 +260,7 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 		LicenseService     schemas.ResolvedLink[schemas.LicenseService]     `json:"LicenseService"`
 		Managers           schemas.Link                                     `json:"Managers"`
 		NVMeDomains        schemas.Link                                     `json:"NVMeDomains"`
+		PolicyService      schemas.ResolvedLink[schemas.PolicyService]      `json:"PolicyService"`
 		PowerEquipment     schemas.ResolvedLink[schemas.PowerEquipment]     `json:"PowerEquipment"`
 		RegisteredClients  schemas.Link                                     `json:"RegisteredClients"`
 		Registries         schemas.Link                                     `json:"Registries"`
@@ -303,6 +312,7 @@ func (s *Service) UnmarshalJSON(b []byte) error {
 
 	s.managers = tmp.Managers.String()
 	s.nVMeDomains = tmp.NVMeDomains.String()
+	s.policyService = tmp.PolicyService
 	s.powerEquipment = tmp.PowerEquipment
 
 	s.registeredClients = tmp.RegisteredClients.String()
@@ -473,7 +483,18 @@ func (s *Service) NVMeDomains() ([]*schemas.NVMeDomain, error) {
 	return schemas.GetCollectionObjects[schemas.NVMeDomain](s.GetClient(), s.nVMeDomains)
 }
 
-// PowerEquipment gets the PowerEquipment linked resource.
+// PolicyService gets the PolicyService linked resource. If the
+// service already inlined it (e.g. via $expand), that content is returned
+// directly, once, with no additional request; a second call always fetches
+// live, since the inlined data reflects only when the parent was decoded.
+func (s *Service) PolicyService() (*schemas.PolicyService, error) {
+	return schemas.ResolveOrGet[schemas.PolicyService](s.GetClient(), s.policyService)
+}
+
+// PowerEquipment gets the PowerEquipment linked resource. If the
+// service already inlined it (e.g. via $expand), that content is returned
+// directly, once, with no additional request; a second call always fetches
+// live, since the inlined data reflects only when the parent was decoded.
 func (s *Service) PowerEquipment() (*schemas.PowerEquipment, error) {
 	return schemas.ResolveOrGet[schemas.PowerEquipment](s.GetClient(), s.powerEquipment)
 }
@@ -631,6 +652,21 @@ type Expand struct {
 // ProtocolFeaturesSupported shall contain information about protocol features
 // that the service supports.
 type ProtocolFeaturesSupported struct {
+	// Alias shall indicate whether this service supports redirction using resource
+	// alias values prefixed with a '~' in URI segments, as defined in the
+	// 'Resource aliases' clause of the Redfish Specification.
+	//
+	// Version added: v1.22.0
+	Alias bool
+	// ClientContextQuery shall indicate whether this service supports the
+	// 'clientcontext' query parameter for stateless incremental retrieval from
+	// resource collections, as described in the Redfish Specification. This
+	// parameter is currently defined for 'LogEntryCollection' resource collections
+	// and is designed to be extensible to other resource collections in future
+	// versions.
+	//
+	// Version added: v1.21.0
+	ClientContextQuery bool
 	// DeepOperations shall contain information about deep operations that the
 	// service supports.
 	//

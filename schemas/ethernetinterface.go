@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/EthernetInterface.v1_12_4.json
-// 2023.3 - #EthernetInterface.v1_12_4.EthernetInterface
+// http://redfish.dmtf.org/schemas/v1/EthernetInterface.v1_12_6.json
+// 2023.3 - #EthernetInterface.v1_12_6.EthernetInterface
 
 package schemas
 
@@ -136,7 +136,7 @@ type EthernetInterface struct {
 	// Version added: v1.6.0
 	EthernetInterfaceType EthernetDeviceType
 	// FQDN shall contain the fully qualified domain name that DNS obtains for this
-	// interface.
+	// interface. Modifying this property may modify the 'HostName' property.
 	FQDN string
 	// FullDuplex shall indicate whether full-duplex mode is enabled on the
 	// Ethernet connection for this interface.
@@ -149,8 +149,9 @@ type EthernetInterface struct {
 	// contains this interface. If this interface is subordinate to a 'Manager'
 	// resource, modifying this property may modify the 'HostName' of the
 	// 'ManagerNetworkProtocol' resource of the 'Manager' resource that contains
-	// this interface. Services should ignore this property in modification
-	// requests if 'FQDN' is also provided in the same request.
+	// this interface. Modifying this property may modify the 'FQDN' property.
+	// Services should ignore this property in modification requests if 'FQDN' is
+	// also provided in the same request.
 	HostName string
 	// IPv4Addresses shall contain an array of objects that represent the IPv4
 	// connection characteristics currently in use by this interface for any value
@@ -248,7 +249,7 @@ type EthernetInterface struct {
 	// 'AutoNeg' property is 'false'.
 	SpeedMbps *int `json:",omitempty"`
 	// StatelessAddressAutoConfig shall contain the IPv4 and IPv6 stateless address
-	// automatic configuration (SLAAC) properties for this interface.
+	// automatic configuration properties for this interface.
 	//
 	// Version added: v1.4.0
 	StatelessAddressAutoConfig StatelessAddressAutoConfiguration
@@ -525,10 +526,10 @@ type IPv6AddressPolicyEntry struct {
 }
 
 // StatelessAddressAutoConfiguration shall describe the IPv4 and IPv6 stateless
-// address autoconfiguration (SLAAC) for this interface.
+// address autoconfiguration for this interface.
 type StatelessAddressAutoConfiguration struct {
-	// IPv4AutoConfigEnabled shall indicate whether IPv4 stateless address
-	// autoconfiguration (SLAAC) is enabled for this interface.
+	// IPv4AutoConfigEnabled shall indicate whether RFC3927-defined IPv4 stateless,
+	// link-local addressing is enabled for this interface.
 	//
 	// Version added: v1.4.0
 	IPv4AutoConfigEnabled bool

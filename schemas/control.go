@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Control.v1_7_0.json
-// 2025.2 - #Control.v1_7_0.Control
+// http://redfish.dmtf.org/schemas/v1/Control.v1_8_1.json
+// 2026.1 - #Control.v1_8_1.Control
 
 package schemas
 
@@ -14,13 +14,22 @@ import (
 type ControlMode string
 
 const (
-	// AutomaticControlMode Automatically adjust control to meet the set point.
+	// AutomaticControlMode shall indicate that the system or equipment will
+	// automatically make operational adjustments to the set point.
 	AutomaticControlMode ControlMode = "Automatic"
-	// OverrideControlMode User override of the automatic set point value.
+	// OverrideControlMode shall indicate that the user controls the value of the
+	// 'SetPoint' property, which shall override any automatic adjustment by the
+	// service. In this mode, the system or equipment shall automatically make
+	// operational adjustments to meet the user-defined set point, and shall not
+	// modify the 'SetPoint' value.
 	OverrideControlMode ControlMode = "Override"
-	// ManualControlMode No automatic adjustments are made to the control.
+	// ManualControlMode shall indicate that the control is manually operated with
+	// no ability to make set point adjustments through this interface. This value
+	// generally indicates a physical control that only allows monitoring of the
+	// set point, and therefore the 'SetPoint' property for this control is likely
+	// read-only.
 	ManualControlMode ControlMode = "Manual"
-	// DisabledControlMode The control has been disabled.
+	// DisabledControlMode shall indicate that the control is disabled.
 	DisabledControlMode ControlMode = "Disabled"
 )
 
@@ -91,6 +100,10 @@ const (
 	// of liquid per unit of time, in liters per minute units, that flows through a
 	// particular junction. The 'SetPointUnits' property shall contain 'L/min'.
 	LiquidFlowLPMControlType ControlType = "LiquidFlowLPM"
+	// VoltageControlType shall indicate a control used to select a operating
+	// voltage, in volts units, of a device. The 'SetPointUnits' property shall
+	// contain 'V'.
+	VoltageControlType ControlType = "Voltage"
 )
 
 type ControlImplementationType string
@@ -352,6 +365,10 @@ type ControlExcerpt struct {
 	// implemented, meaning the excerpt represents the only available data, this
 	// property shall not be present.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the value of the 'Reading' property of the 'Sensor'
 	// resource directly associated with this control. This property shall not be
 	// present if multiple sensors are associated with a single control.
@@ -363,6 +380,24 @@ type ControlLoop struct {
 	// CoefficientUpdateTime shall contain the date and time that any of the
 	// coefficients for the control loop were last changed.
 	CoefficientUpdateTime string
+	// Differential shall contain the coefficient for the differential factor in a
+	// control loop.
+	Differential *float64 `json:",omitempty"`
+	// Integral shall contain the coefficient for the integral factor in a control
+	// loop.
+	Integral *float64 `json:",omitempty"`
+	// Proportional shall contain the coefficient for the proportional factor in a
+	// control loop.
+	Proportional *float64 `json:",omitempty"`
+}
+
+// ControlLoopControlExcerpt shall describe the details of a control loop.
+type ControlLoopControlExcerpt struct {
+}
+
+// ControlLoopControlSingleLoopExcerpt shall describe the details of a control
+// loop.
+type ControlLoopControlSingleLoopExcerpt struct {
 	// Differential shall contain the coefficient for the differential factor in a
 	// control loop.
 	Differential *float64 `json:",omitempty"`
@@ -392,6 +427,10 @@ type ControlNodeExcerpt struct {
 	// implemented, meaning the excerpt represents the only available data, this
 	// property shall not be present.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the value of the 'Reading' property of the 'Sensor'
 	// resource directly associated with this control. This property shall not be
 	// present if multiple sensors are associated with a single control.
@@ -435,6 +474,10 @@ type ControlRangeExcerpt struct {
 	// implemented, meaning the excerpt represents the only available data, this
 	// property shall not be present.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the value of the 'Reading' property of the 'Sensor'
 	// resource directly associated with this control. This property shall not be
 	// present if multiple sensors are associated with a single control.
@@ -474,6 +517,10 @@ type ControlSingleExcerpt struct {
 	//
 	// Version added: v1.3.0
 	DefaultSetPoint *float64 `json:",omitempty"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the value of the 'Reading' property of the 'Sensor'
 	// resource directly associated with this control. This property shall not be
 	// present if multiple sensors are associated with a single control.
@@ -498,7 +545,7 @@ type ControlSingleLoopExcerpt struct {
 	AllowableMin *float64 `json:",omitempty"`
 	// ControlLoop shall contain the details for the control loop described by this
 	// resource.
-	ControlLoop ControlLoop
+	ControlLoop ControlLoopControlSingleLoopExcerpt
 	// ControlMode shall contain the operating mode of the control.
 	ControlMode ControlMode
 	// DataSourceURI shall contain a URI to the resource that provides the source
@@ -506,6 +553,10 @@ type ControlSingleLoopExcerpt struct {
 	// implemented, meaning the excerpt represents the only available data, this
 	// property shall not be present.
 	DataSourceURI string `json:"DataSourceUri"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
 	// Reading shall contain the value of the 'Reading' property of the 'Sensor'
 	// resource directly associated with this control. This property shall not be
 	// present if multiple sensors are associated with a single control.

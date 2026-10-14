@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Settings.v1_4_0.json
-// 2024.1 - #Settings.v1_4_0
+// http://redfish.dmtf.org/schemas/v1/Settings.v1_5_0.json
+// 2026.1 - #Settings.v1_5_0
 
 package schemas
 
@@ -33,6 +33,10 @@ const (
 	// 'MaintenanceWindowStartTime' and 'MaintenanceWindowDurationInSeconds'
 	// properties, and if a reset occurs within the maintenance window.
 	InMaintenanceWindowOnResetSettingsApplyTime SettingsApplyTime = "InMaintenanceWindowOnReset"
+	// DeferredSettingsApplyTime shall indicate the values within the settings resource are
+	// not applied until the user sets the 'ApplyTime' property to a different
+	// value.
+	DeferredSettingsApplyTime SettingsApplyTime = "Deferred"
 )
 
 type OperationApplyTime string

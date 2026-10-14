@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Processor.v1_22_0.json
-// 2025.4 - #Processor.v1_22_0.Processor
+// http://redfish.dmtf.org/schemas/v1/Processor.v1_24_0.json
+// 2026.2 - #Processor.v1_24_0.Processor
 
 package schemas
 
@@ -104,6 +104,11 @@ const (
 	HBM2EProcessorMemoryType ProcessorMemoryType = "HBM2E"
 	// HBM3ProcessorMemoryType The third generation of High Bandwidth Memory.
 	HBM3ProcessorMemoryType ProcessorMemoryType = "HBM3"
+	// HBM3EProcessorMemoryType is an updated version of the third generation of
+	// High Bandwidth Memory.
+	HBM3EProcessorMemoryType ProcessorMemoryType = "HBM3E"
+	// HBM4ProcessorMemoryType The fourth generation of High Bandwidth Memory.
+	HBM4ProcessorMemoryType ProcessorMemoryType = "HBM4"
 	// SGRAMProcessorMemoryType Synchronous graphics RAM.
 	SGRAMProcessorMemoryType ProcessorMemoryType = "SGRAM"
 	// GDDRProcessorMemoryType Synchronous graphics random-access memory.
@@ -312,6 +317,11 @@ type Processor struct {
 	//
 	// Version added: v1.7.0
 	FirmwareVersion string
+	// HardwareSecurityVersion shall contain the security version of the processor
+	// hardware.
+	//
+	// Version added: v1.24.0
+	HardwareSecurityVersion string
 	// HighSpeedCoreIDs shall contain an array of core identifiers corresponding to
 	// the cores that have been configured with the higher clock speed from the
 	// operating configuration applied to this processor.
@@ -1127,4 +1137,9 @@ type ProcessorUALink struct {
 	//
 	// Version added: v1.22.0
 	AcceleratorID uint
+	// MaxSupportedAcceleratorID shall contain the maximum value allowed for the
+	// Source and Destination Accelerator ID on this processor.
+	//
+	// Version added: v1.24.0
+	MaxSupportedAcceleratorID int
 }

@@ -1,0 +1,284 @@
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
+// http://redfish.dmtf.org/schemas/v1/Policy.v1_0_0.json
+// 2026.2 - #Policy.v1_0_0.Policy
+
+package schemas
+
+import (
+	"encoding/json"
+)
+
+type PolicyConditionType string
+
+const (
+	// AndPolicyConditionType shall indicate that this condition requires all conditions
+	// in the 'SubordinateConditions' property to evaluate to true at the same time
+	// before this condition triggers. This condition shall contain the
+	// 'SubordinateConditions' property. All other properties in this condition
+	// shall be omitted.
+	AndPolicyConditionType PolicyConditionType = "And"
+	// OrPolicyConditionType shall indicate that this condition requires any condition in
+	// the 'SubordinateConditions' property to evaluate to true before this
+	// condition triggers. This condition shall contain the 'SubordinateConditions'
+	// property. All other properties in this condition shall be omitted.
+	OrPolicyConditionType PolicyConditionType = "Or"
+	// ComparePolicyConditionType shall indicate that the 'Resource' and 'Property'
+	// values are used to determine the data to read and compare to the 'Value'
+	// property. This condition shall not contain the 'SubordinateConditions'
+	// property.
+	ComparePolicyConditionType PolicyConditionType = "Compare"
+	// ReadPolicyConditionType shall indicate that the 'Resource' and 'Property' values
+	// to determine the data to read. This condition shall not contain the
+	// 'SubordinateConditions' and 'Value' properties. This condition shall be
+	// subordinate to another condition.
+	ReadPolicyConditionType PolicyConditionType = "Read"
+	// SumPolicyConditionType shall indicate that the values specified by each member of
+	// 'SubordinateConditions' are added, and then compared using the 'Operator'
+	// and 'Value' properties. This condition shall not contain the 'Property' or
+	// 'Resource' properties. If the result of the subordinate conditions cannot be
+	// converted to a number then the value for that condition shall be '0'.
+	SumPolicyConditionType PolicyConditionType = "Sum"
+	// AveragePolicyConditionType shall indicate that the values specified by each member
+	// of 'SubordinateConditions' are averaged, by performing an arithmetic mean,
+	// and then compared using the 'Operator' and 'Value' properties. This
+	// condition shall not contain the 'Property' or 'Resource' properties. If the
+	// result of the subordinate conditions cannot be converted to a number then
+	// the value for that condition shall be '0'.
+	AveragePolicyConditionType PolicyConditionType = "Average"
+	// EventPolicyConditionType shall indicate that the condition evaluates to true when
+	// the message specified in the 'Value' property is emitted by the service. If
+	// the 'Resource' property is specified and is not an empty string, then the
+	// condition shall only evaluate to true if the event was emitted with the
+	// resource referenced by 'OriginOfCondition'. If the 'MessageId' specified by
+	// the 'Value' property does not specify the version of the message, then it
+	// shall apply to all versions of the message.
+	EventPolicyConditionType PolicyConditionType = "Event"
+)
+
+type HTTPVerb string
+
+const (
+	// GETHTTPVerb shall indicate that the response sends an HTTP 'GET' operation
+	// as specified in RFC2616.
+	GETHTTPVerb HTTPVerb = "GET"
+	// PATCHHTTPVerb shall indicate that the response sends an HTTP 'PATCH'
+	// operation as specified in RFC2616.
+	PATCHHTTPVerb HTTPVerb = "PATCH"
+	// POSTHTTPVerb shall indicate that the response sends an HTTP 'POST' operation
+	// as specified in RFC2616.
+	POSTHTTPVerb HTTPVerb = "POST"
+	// DELETEHTTPVerb shall indicate that the response sends an HTTP 'DELETE'
+	// operation as specified in RFC2616.
+	DELETEHTTPVerb HTTPVerb = "DELETE"
+)
+
+type Operator string
+
+const (
+	// EqualOperator shall indicate that the condition evaluates to true if the
+	// value calculated exactly matches the value specified by the condition.
+	EqualOperator Operator = "Equal"
+	// NotEqualOperator shall indicate that the condition evaluates to true if the
+	// value calculated does not match the value specified by the condition.
+	NotEqualOperator Operator = "NotEqual"
+	// GreaterThanOperator shall indicate that the condition evaluates to true if
+	// the value calculated is greater than the value specified by the condition.
+	// If both values evaluate to numbers, the service shall perform numeric
+	// comparison. Otherwise, the service shall perform string comparison.
+	GreaterThanOperator Operator = "GreaterThan"
+	// LessThanOperator shall indicate that the condition evaluates to true if the
+	// value calculated is less than the value specified by the condition. If both
+	// values evaluate to numbers, the service shall perform numeric comparison.
+	// Otherwise, the service shall perform string comparison.
+	LessThanOperator Operator = "LessThan"
+	// GreaterThanOrEqualOperator shall indicate that the condition evaluates to
+	// true if the value calculated is greater than or equal to the value specified
+	// by the condition. If both values evaluate to numbers, the service shall
+	// perform numeric comparison. Otherwise, the service shall perform string
+	// comparison.
+	GreaterThanOrEqualOperator Operator = "GreaterThanOrEqual"
+	// LessThanOrEqualOperator shall indicate that the condition evaluates to true
+	// if the value calculated is less than or equal to the value specified by the
+	// condition. If both values evaluate to numbers, the service shall perform
+	// numeric comparison. Otherwise, the service shall perform string comparison.
+	LessThanOrEqualOperator Operator = "LessThanOrEqual"
+)
+
+type ResponseAction string
+
+const (
+	// RecheckResponseAction shall indicate that the response causes the policy
+	// condition to be reevaluated. If the condition is still true after this
+	// reevaluation, then the response actions shall continue. If the condition is
+	// no longer true, then the response actions shall stop at this point.
+	RecheckResponseAction ResponseAction = "Recheck"
+	// EventResponseAction shall indicate that the response sends the event
+	// specified by the parameters in the 'Event' property of the response.
+	EventResponseAction ResponseAction = "Event"
+	// ResetResponseAction shall indicate that the response performs a 'Reset'
+	// action on the resource specified by the 'Resource' property with the
+	// specified 'ResetType'.
+	ResetResponseAction ResponseAction = "Reset"
+	// HTTPResponseAction shall indicate that the response performs an HTTP/HTTPS
+	// operation as specified by the 'HTTP' property.
+	HTTPResponseAction ResponseAction = "HTTP"
+	// OEMResponseAction shall indicate that the response performs an OEM-defined
+	// operation as specified by the 'Oem' property.
+	OEMResponseAction ResponseAction = "OEM"
+)
+
+// Policy shall be used to represent a policy for a Redfish implementation.
+type Policy struct {
+	Entity
+	// Enabled shall indicate the service performs the actions specified by this
+	// policy. The value 'false' shall indicate the service takes no actions
+	// specified by this policy.
+	Enabled bool
+	// ODataContext is the odata context.
+	ODataContext string `json:"@odata.context"`
+	// ODataType is the odata type.
+	ODataType string `json:"@odata.type"`
+	// OEM shall contain the OEM extensions. All values for properties that this
+	// object contains shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// Predefined shall indicate whether the policy is predefined by Redfish or an
+	// OEM as contrasted with a client-defined policy. If this property is not
+	// present, the value should be assumed to be 'false'.
+	Predefined bool
+	// Response shall contain a list of responses to perform when the policy
+	// condition is triggered. Services shall perform the responses sequentially.
+	Response []PolicyResponse
+	// TriggerCondition shall contain the condition that causes the service to
+	// perform the actions of this policy.
+	TriggerCondition PolicyCondition
+	// RawData holds the original serialized JSON so we can compare updates.
+	RawData []byte
+}
+
+// UnmarshalJSON unmarshals a Policy object from the raw JSON.
+func (p *Policy) UnmarshalJSON(b []byte) error {
+	type temp Policy
+	var tmp struct {
+		temp
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*p = Policy(tmp.temp)
+
+	// Extract the links to other entities for later
+
+	// This is a read/write object, so we need to save the raw object data for later
+	p.RawData = b
+
+	return nil
+}
+
+// Update commits updates to this object's properties to the running system.
+func (p *Policy) Update() error {
+	readWriteFields := []string{
+		"Enabled",
+	}
+
+	return p.UpdateFromRawData(p, p.RawData, readWriteFields)
+}
+
+// GetPolicy will get a Policy instance from the service.
+func GetPolicy(c Client, uri string) (*Policy, error) {
+	return GetObject[Policy](c, uri)
+}
+
+// ListReferencedPolicys gets the collection of Policy from
+// a provided reference.
+func ListReferencedPolicys(c Client, link string) ([]*Policy, error) {
+	return GetCollectionObjects[Policy](c, link)
+}
+
+// PolicyCondition shall contain properties that describe conditions for a policy.
+type PolicyCondition struct {
+	// CompareValue shall contain the value for the comparison operator to compare
+	// against for conditions with an operator.
+	CompareValue string
+	// Operator shall contain the comparison operator for condition types that
+	// require comparisons.
+	Operator Operator
+	// PropertyPath shall contain the property path from which to obtain data. The
+	// value shall follow RFC6901-defined JSON pointer notation rules.
+	PropertyPath string
+	// ResourcePath shall contain the URI to a Redfish resource from which to
+	// obtain data. If the resource is of type 'Sensor' and the 'Property' is not
+	// present, the 'Reading' property from the 'Sensor' reading shall be used.
+	ResourcePath string
+	// SubordinateConditions shall contain an array of subordinate conditions that
+	// are evaluated to determine the status of this condition.
+	SubordinateConditions []PolicyCondition
+	// Type shall contain the type of this condition.
+	Type PolicyConditionType
+}
+
+// EventResponse shall contain properties that describe the event to send as a
+// response.
+type EventResponse struct {
+	// MessageArgs shall contain the message arguments to send as the 'MessageArgs'
+	// property in the event.
+	MessageArgs []string
+	// MessageID shall contain the identifier of the message to send as the
+	// 'MessageId' property in the event. If the value is in the
+	// 'MessageRegistryPrefix.MessageKey' format, the service shall use the highest
+	// version of the message supported by the service. If the value is in the
+	// 'MessageRegistryPrefix.MajorVersion.MinorVersion.MessageKey' format, the
+	// service shall use the exact value in the event response.
+	MessageID string `json:"MessageId"`
+	// MessageOriginOfCondition shall contain the origin of condition to send as
+	// the 'OriginOfCondition' property in the event. If this property is not
+	// specified or is an empty string, the origin of condition shall be the URI of
+	// this policy.
+	MessageOriginOfCondition string
+}
+
+// HTTPResponse shall contain properties that describe the HTTP/HTTPS operation
+// to perform as a response.
+type HTTPResponse struct {
+	// Body shall contain the body of HTTP/HTTPS operation to send.
+	Body string
+	// Headers shall contain an object consisting of the names and values of HTTP
+	// headers to include when performing the HTTP operation. This property shall
+	// be an empty object in responses.
+	Headers HTTPHeaderProperty
+	// Operation shall contain the type of HTTP operation to perform.
+	Operation HTTPVerb
+}
+
+// PolicyResponse shall contain properties that describe response to a policy.
+type PolicyResponse struct {
+	// DelaySeconds shall contain the number of seconds to wait before performing
+	// the response action.
+	DelaySeconds *uint `json:",omitempty"`
+	// Event shall contain the event parameters for a response if 'ResponseAction'
+	// contains 'Event'. If 'ResponseAction' does not contain 'Event', this
+	// property shall be ignored.
+	Event EventResponse
+	// HTTP shall contain the HTTP/HTTPS parameters for a response if
+	// 'ResponseAction' contains 'HTTP'. If 'ResponseAction' does not contain
+	// 'HTTP', this property shall be ignored.
+	HTTP HTTPResponse
+	// OEM shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	OEM json.RawMessage `json:"Oem"`
+	// ResetType shall contain the type of reset to perform if 'ResponseAction'
+	// contains 'Reset'. If 'ResponseAction' does not contain 'Reset', this
+	// property shall be ignored.
+	ResetType ResetType
+	// ResponseAction shall contain the action type of this response.
+	ResponseAction ResponseAction
+	// TargetURI shall contain the URI on which to perform the response action.
+	TargetURI string
+}

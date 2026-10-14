@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Resource.v1_23_0.json
-// 2025.3 - #Resource.v1_23_0
+// http://redfish.dmtf.org/schemas/v1/Resource.v1_25_0.json
+// 2026.2 - #Resource.v1_25_0
 
 package schemas
 
@@ -189,6 +189,14 @@ const (
 	PoweringOffPowerState PowerState = "PoweringOff"
 	// PausedPowerState The resource is paused.
 	PausedPowerState PowerState = "Paused"
+	// SleepingPowerState shall indicate the resource is in a low-power state and
+	// its state is preserved in memory. For ACPI devices, this shall equate to the
+	// S3 sleep state.
+	SleepingPowerState PowerState = "Sleeping"
+	// HibernatingPowerState shall indicate the resource is in a low-power state
+	// and its state is preserved in non-volatile memory. For ACPI devices, this
+	// shall equate to the S4 sleep state.
+	HibernatingPowerState PowerState = "Hibernating"
 )
 
 // RackUnits is Enumeration literals shall name the type of rack unit in use.
@@ -306,6 +314,16 @@ const (
 	// Redfish service is affected by this type of reset, the service shall send
 	// the action response before resetting to prevent client timeouts.
 	FullPowerCycleResetType ResetType = "FullPowerCycle"
+	// SleepResetType shall indicate the resource will have any state information
+	// written to memory and then transition to a low-power sleep state. Upon
+	// successful completion, the 'PowerState' property, if supported, shall
+	// contain the value 'Sleeping'.
+	SleepResetType ResetType = "Sleep"
+	// HibernateResetType shall indicate the resource will have any state
+	// information written to persistent memory and then transition to a power off
+	// state. Upon successful completion, the 'PowerState' property, if supported,
+	// shall contain the value 'Hibernating'.
+	HibernateResetType ResetType = "Hibernate"
 )
 
 type State string
@@ -400,9 +418,12 @@ type Condition struct {
 	Severity Health
 	// Timestamp shall indicate the time the condition occurred.
 	Timestamp string
-	// UserAuthenticationSource shall contain the URL to the authentication service
-	// that is associated with the username property. This should be used for
-	// conditions that result from a user action.
+	// UserAuthenticationSource shall contain source of authentication for the
+	// user, specified by the 'Username' property, associated with the condition.
+	// For local users, this property shall contain '/redfish/v1/AccountService'.
+	// For users managed by external account providers, this property shall contain
+	// the member of the 'ServiceAddresses' property that authenticated the user.
+	// This should be used for conditions that result from a user action.
 	//
 	// Version added: v1.20.0
 	UserAuthenticationSource string
@@ -412,6 +433,13 @@ type Condition struct {
 	//
 	// Version added: v1.20.0
 	Username string
+	// VendorCode shall contain a vendor-defined code or identifier equivalent to
+	// this condition or 'MessageId' value. This value allows clients to map a
+	// 'MessageId' value to a legacy or vendor-specific value for the same
+	// condition or error message.
+	//
+	// Version added: v1.25.0
+	VendorCode string
 }
 
 // UnmarshalJSON unmarshals a Condition object from the raw JSON.

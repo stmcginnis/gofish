@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Memory.v1_23_0.json
-// 2025.4 - #Memory.v1_23_0.Memory
+// http://redfish.dmtf.org/schemas/v1/Memory.v1_24_0.json
+// 2026.1 - #Memory.v1_24_0.Memory
 
 package schemas
 
@@ -118,6 +118,11 @@ const (
 	HBM2EMemoryDeviceType MemoryDeviceType = "HBM2E"
 	// HBM3MemoryDeviceType The third generation of High Bandwidth Memory.
 	HBM3MemoryDeviceType MemoryDeviceType = "HBM3"
+	// HBM3EMemoryDeviceType is an updated version of the third generation of High
+	// Bandwidth Memory.
+	HBM3EMemoryDeviceType MemoryDeviceType = "HBM3E"
+	// HBM4MemoryDeviceType The fourth generation of High Bandwidth Memory.
+	HBM4MemoryDeviceType MemoryDeviceType = "HBM4"
 	// GDDRMemoryDeviceType Synchronous graphics random-access memory.
 	GDDRMemoryDeviceType MemoryDeviceType = "GDDR"
 	// GDDR2MemoryDeviceType Double data rate type two synchronous graphics

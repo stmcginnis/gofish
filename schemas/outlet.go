@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Outlet.v1_4_4.json
-// 2021.4 - #Outlet.v1_4_4.Outlet
+// http://redfish.dmtf.org/schemas/v1/Outlet.v1_5_0.json
+// 2026.1 - #Outlet.v1_5_0.Outlet
 
 package schemas
 
@@ -54,9 +54,17 @@ const (
 	// IEC60320C13ReceptacleType shall represent a receptacle that matches the IEC
 	// 60320 Sheet F C13 specified receptacle (250V; 10A per IEC, 15A per UL).
 	IEC60320C13ReceptacleType ReceptacleType = "IEC_60320_C13"
+	// IEC60320C15ReceptacleType shall represent a receptacle that matches the IEC
+	// 60320 C15 specified receptacle (250V; 10A per IEC, 15A per UL;
+	// high-temperature).
+	IEC60320C15ReceptacleType ReceptacleType = "IEC_60320_C15"
 	// IEC60320C19ReceptacleType shall represent a receptacle that matches the IEC
 	// 60320 Sheet J C19 specified receptacle (250V; 16A per IEC, 20A per UL).
 	IEC60320C19ReceptacleType ReceptacleType = "IEC_60320_C19"
+	// IEC60320C21ReceptacleType shall represent a receptacle that matches the IEC
+	// 60320 C21 specified receptacle (250V; 16A per IEC, 20A per UL;
+	// high-temperature).
+	IEC60320C21ReceptacleType ReceptacleType = "IEC_60320_C21"
 	// CEE7TypeEReceptacleType shall represent a receptacle that matches the French
 	// specified CEE 7/7 Type E receptacle (250V; 16A).
 	CEE7TypeEReceptacleType ReceptacleType = "CEE_7_Type_E"
@@ -75,6 +83,10 @@ const (
 	// BusConnectionReceptacleType shall represent a direct connection to an
 	// electrical bus.
 	BusConnectionReceptacleType ReceptacleType = "BusConnection"
+	// CombinationReceptacleType shall represent a receptacle that supports two or
+	// more receptacle types. The supported types shall be listed as the values of
+	// the 'OutletCombinationTypes' property.
+	CombinationReceptacleType ReceptacleType = "Combination"
 )
 
 type VoltageType string
@@ -147,6 +159,13 @@ type Outlet struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// OutletCombinationTypes shall contain an array of types of physical
+	// receptacles supported by this combination outlet, as defined by IEC, NEMA,
+	// or regional standards. This property shall only be present if 'OutletType'
+	// contains 'Combination'.
+	//
+	// Version added: v1.5.0
+	OutletCombinationTypes []ReceptacleType
 	// OutletType shall contain the type of physical receptacle used for this
 	// outlet, as defined by IEC, NEMA, or regional standards.
 	OutletType ReceptacleType

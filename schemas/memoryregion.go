@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/MemoryRegion.v1_0_3.json
-// 2023.2 - #MemoryRegion.v1_0_3.MemoryRegion
+// http://redfish.dmtf.org/schemas/v1/MemoryRegion.v1_1_0.json
+// 2026.1 - #MemoryRegion.v1_1_0.MemoryRegion
 
 package schemas
 
@@ -38,12 +38,21 @@ type MemoryRegion struct {
 	// field of 'Device Scoped Memory Affinity Structure' defined in the Coherent
 	// Device Attribute Table (CDAT) Specification.
 	HardwareManagedCoherencyRegion bool
+	// InterconnectSpecificDCManagement shall indicate whether the device supports
+	// changing the amount of host-visible memory capacity in a memory region at
+	// runtime as defined in the 'Flags' field of the 'Device Scoped Memory
+	// Affinity Structure' section of the Coherent Device Attribute Table (CDAT)
+	// Specification.
+	//
+	// Version added: v1.1.0
+	InterconnectSpecificDCManagement bool
 	// MemoryChunks shall contain the set of memory chunks providing capacity for
-	// this memory region.
+	// this memory region. CXL memory should use 'MemoryExtent' resources instead
+	// of this property.
 	MemoryChunks []MemoryChunk
 	// MemoryExtents shall contain the set of memory extents defining address
 	// ranges available for an access in dynamic capacity memory regions.
-	MemoryExtents []MemoryExtent
+	MemoryExtents []MemoryRegionExtent
 	// NonVolatileRegion shall indicate whether this memory region represents
 	// non-volatile memory as defined in the 'Flags' field of 'Device Scoped Memory
 	// Affinity Structure' defined in the Coherent Device Attribute Table (CDAT)
@@ -57,6 +66,13 @@ type MemoryRegion struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// ReadOnlyRegion shall indicate whether the memory region is read-only as
+	// defined in the 'Flags' field of the 'Device Scoped Memory Affinity
+	// Structure' section of the Coherent Device Attribute Table (CDAT)
+	// Specification.
+	//
+	// Version added: v1.1.0
+	ReadOnlyRegion bool
 	// RegionBaseOffsetMiB shall contain the offset of the memory region in the
 	// device address range in mebibytes (MiB).
 	RegionBaseOffsetMiB int
@@ -165,20 +181,76 @@ func (m *MemoryChunk) ChunkLink(client Client) (*MemoryChunks, error) {
 	return GetObject[MemoryChunks](client, m.chunkLink)
 }
 
-// MemoryExtent shall contain the definition of a memory extent identifying an
+// MemoryRegionExtent shall contain the definition of a memory extent identifying an
 // available address range in the dynamic capacity memory region.
-type MemoryExtent struct {
+type MemoryRegionExtent struct {
+	// ExtentLink shall contain a link to a resource of type 'MemoryExtent' that
+	// defines the CXL memory capacity.
+	//
+	// Version added: v1.1.0
+	//
+	// Holds the link URI and, if the service inlined the resource (e.g. via
+	// $expand), its raw JSON - ExtentLink() consumes that JSON
+	// exactly once, so a second call always does a live GET.
+	extentLink ResolvedLink[MemoryExtent]
 	// ExtentOffsetMiB shall be the offset of the memory extent within the memory
 	// region in mebibytes (MiB).
+	//
+	// Deprecated: v1.1.0
+	// This property has been deprecated in favor of the 'MemoryExtent' resource.
 	ExtentOffsetMiB int
 	// ExtentSizeMiB shall contain the size of the memory extent in MiB.
+	//
+	// Deprecated: v1.1.0
+	// This property has been deprecated in favor of the 'MemoryExtent' resource.
 	ExtentSizeMiB int
+	// Pending shall indicate whether the device received an acceptance of the
+	// memory extent from the host that own the memory region. The value 'true'
+	// indicates the device is waiting for acceptance.
+	//
+	// Version added: v1.1.0
+	Pending bool
 	// SequenceNumber shall contain the sequence number instructing host on the
 	// relative order the extents have to be placed in the host adjacent virtual
 	// address space.
+	//
+	// Deprecated: v1.1.0
+	// This property has been deprecated in favor of the 'MemoryExtent' resource.
 	SequenceNumber *int `json:",omitempty"`
 	// Tag shall contain an opaque context attached to each extent to track usage
 	// of each extent or map extent to specific processes, transactions, or
 	// workloads on the host.
+	//
+	// Deprecated: v1.1.0
+	// This property has been deprecated in favor of the 'MemoryExtent' resource.
 	Tag string
+}
+
+// UnmarshalJSON unmarshals a MemoryRegionExtent object from the raw JSON.
+func (m *MemoryRegionExtent) UnmarshalJSON(b []byte) error {
+	type temp MemoryRegionExtent
+	var tmp struct {
+		temp
+		ExtentLink ResolvedLink[MemoryExtent] `json:"ExtentLink"`
+	}
+
+	err := json.Unmarshal(b, &tmp)
+	if err != nil {
+		return err
+	}
+
+	*m = MemoryRegionExtent(tmp.temp)
+
+	// Extract the links to other entities for later
+	m.extentLink = tmp.ExtentLink
+
+	return nil
+}
+
+// ExtentLink gets the ExtentLink linked resource. If the
+// service already inlined it (e.g. via $expand), that content is returned
+// directly, once, with no additional request; a second call always fetches
+// live, since the inlined data reflects only when the parent was decoded.
+func (m *MemoryRegionExtent) ExtentLink(client Client) (*MemoryExtent, error) {
+	return ResolveOrGet[MemoryExtent](client, m.extentLink)
 }

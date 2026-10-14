@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Cable.v1_2_4.json
-// 2021.4 - #Cable.v1_2_4.Cable
+// http://redfish.dmtf.org/schemas/v1/Cable.v1_3_0.json
+// 2026.2 - #Cable.v1_3_0.Cable
 
 package schemas
 
@@ -155,6 +155,11 @@ type Cable struct {
 	// SerialNumber shall contain the manufacturer-allocated number that identifies
 	// the cable.
 	SerialNumber string
+	// SparePartNumber shall contain the spare or replacement part number as
+	// defined by the manufacturer for this cable.
+	//
+	// Version added: v1.3.0
+	SparePartNumber string
 	// Status shall contain any status or health properties of the resource.
 	Status Status
 	// UpstreamConnectorTypes shall contain an array of connector types this cable

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/CXLLogicalDevice.v1_3_0.json
-// 2025.3 - #CXLLogicalDevice.v1_3_0.CXLLogicalDevice
+// http://redfish.dmtf.org/schemas/v1/CXLLogicalDevice.v1_5_0.json
+// 2026.2 - #CXLLogicalDevice.v1_5_0.CXLLogicalDevice
 
 package schemas
 
@@ -39,6 +39,16 @@ const (
 // PCIe device.
 type CXLLogicalDevice struct {
 	Entity
+	// AvailableExtents shall contain the number of extents available on this
+	// logical device.
+	//
+	// Version added: v1.4.0
+	AvailableExtents int
+	// AvailableTags shall contain the number of tags available on this logical
+	// device.
+	//
+	// Version added: v1.4.0
+	AvailableTags int
 	// Identifiers shall contain a list of all known durable names for the
 	// associated CXL logical device.
 	Identifiers []Identifier
@@ -75,8 +85,22 @@ type CXLLogicalDevice struct {
 	SemanticsSupported []CXLSemantic
 	// Status shall contain any status or health properties of the resource.
 	Status Status
+	// TotalSupportedExtents shall contain the total number of extents that the
+	// device supports on this logical device.
+	//
+	// Version added: v1.4.0
+	TotalSupportedExtents int
+	// TotalSupportedTags shall contain the total number of tags that the device
+	// supports on this logical device.
+	//
+	// Version added: v1.4.0
+	TotalSupportedTags int
 	// disablePassphraseTarget is the URL to send DisablePassphrase requests.
 	disablePassphraseTarget string
+	// dynamicCapacityAddTarget is the URL to send DynamicCapacityAdd requests.
+	dynamicCapacityAddTarget string
+	// dynamicCapacityReleaseTarget is the URL to send DynamicCapacityRelease requests.
+	dynamicCapacityReleaseTarget string
 	// freezeSecurityStateTarget is the URL to send FreezeSecurityState requests.
 	freezeSecurityStateTarget string
 	// passphraseSecureEraseTarget is the URL to send PassphraseSecureErase requests.
@@ -95,17 +119,21 @@ type CXLLogicalDevice struct {
 	pCIeFunctions []string
 	// PCIeFunctionsCount is the number of PCIe functions assigned to this CXL logical device.
 	PCIeFunctionsCount int
+	// port is the URI for Port.
+	port string
 }
 
 // UnmarshalJSON unmarshals a CXLLogicalDevice object from the raw JSON.
 func (c *CXLLogicalDevice) UnmarshalJSON(b []byte) error {
 	type temp CXLLogicalDevice
 	type cActions struct {
-		DisablePassphrase     ActionTarget `json:"#CXLLogicalDevice.DisablePassphrase"`
-		FreezeSecurityState   ActionTarget `json:"#CXLLogicalDevice.FreezeSecurityState"`
-		PassphraseSecureErase ActionTarget `json:"#CXLLogicalDevice.PassphraseSecureErase"`
-		SetPassphrase         ActionTarget `json:"#CXLLogicalDevice.SetPassphrase"`
-		Unlock                ActionTarget `json:"#CXLLogicalDevice.Unlock"`
+		DisablePassphrase      ActionTarget `json:"#CXLLogicalDevice.DisablePassphrase"`
+		DynamicCapacityAdd     ActionTarget `json:"#CXLLogicalDevice.DynamicCapacityAdd"`
+		DynamicCapacityRelease ActionTarget `json:"#CXLLogicalDevice.DynamicCapacityRelease"`
+		FreezeSecurityState    ActionTarget `json:"#CXLLogicalDevice.FreezeSecurityState"`
+		PassphraseSecureErase  ActionTarget `json:"#CXLLogicalDevice.PassphraseSecureErase"`
+		SetPassphrase          ActionTarget `json:"#CXLLogicalDevice.SetPassphrase"`
+		Unlock                 ActionTarget `json:"#CXLLogicalDevice.Unlock"`
 	}
 	type cLinks struct {
 		Endpoints          Links `json:"Endpoints"`
@@ -113,6 +141,7 @@ func (c *CXLLogicalDevice) UnmarshalJSON(b []byte) error {
 		MemoryDomains      Links `json:"MemoryDomains"`
 		PCIeFunctions      Links `json:"PCIeFunctions"`
 		PCIeFunctionsCount int   `json:"PCIeFunctions@odata.count"`
+		Port               Link  `json:"Port"`
 	}
 	var tmp struct {
 		temp
@@ -131,6 +160,8 @@ func (c *CXLLogicalDevice) UnmarshalJSON(b []byte) error {
 
 	// Extract the links to other entities for later
 	c.disablePassphraseTarget = tmp.Actions.DisablePassphrase.Target
+	c.dynamicCapacityAddTarget = tmp.Actions.DynamicCapacityAdd.Target
+	c.dynamicCapacityReleaseTarget = tmp.Actions.DynamicCapacityRelease.Target
 	c.freezeSecurityStateTarget = tmp.Actions.FreezeSecurityState.Target
 	c.passphraseSecureEraseTarget = tmp.Actions.PassphraseSecureErase.Target
 	c.setPassphraseTarget = tmp.Actions.SetPassphrase.Target
@@ -140,6 +171,7 @@ func (c *CXLLogicalDevice) UnmarshalJSON(b []byte) error {
 	c.memoryDomains = tmp.Links.MemoryDomains.ToStrings()
 	c.pCIeFunctions = tmp.Links.PCIeFunctions.ToStrings()
 	c.PCIeFunctionsCount = tmp.Links.PCIeFunctionsCount
+	c.port = tmp.Links.Port.String()
 	c.log = tmp.Log
 
 	c.memoryRegions = tmp.MemoryRegions.String()
@@ -171,6 +203,70 @@ func (c *CXLLogicalDevice) DisablePassphrase(passphrase string, passphraseType P
 	payload["PassphraseType"] = passphraseType
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.disablePassphraseTarget, payload, c.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// CXLLogicalDeviceDynamicCapacityAddParameters holds the parameters for the DynamicCapacityAdd action.
+type CXLLogicalDeviceDynamicCapacityAddParameters struct {
+	// ExtentList shall contain an array of links to resources of type
+	// 'MemoryExtent' that represent the dynamic capacity to add. This parameter
+	// shall be required if 'Policy' contains 'Prescriptive'.
+	ExtentList []string `json:"ExtentList,omitempty"`
+	// Length shall contain the size of the dynamic capacity to add. This parameter
+	// shall be required if 'Policy' contains 'Free' or 'Contiguous'.
+	Length int `json:"Length,omitempty"`
+	// Policy shall contain the policy to apply to this operation.
+	Policy CXLDynamicCapacityPolicies `json:"Policy,omitempty"`
+	// RegionNumber shall contain the number of memory region for the new capacity.
+	// This parameter shall be required if 'Policy' contains 'Free', 'Contiguous',
+	// or 'EnableSharedAccess'.
+	RegionNumber int `json:"RegionNumber,omitempty"`
+	// Tag shall contain the tag assigned to the dynamic capacity to add. This
+	// parameter shall be required if 'Policy' contains 'Free', 'Contiguous', or
+	// 'EnableSharedAccess'.
+	Tag string `json:"Tag,omitempty"`
+}
+
+// This action shall add dynamic capacity to this CXL logical device.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (c *CXLLogicalDevice) DynamicCapacityAdd(params *CXLLogicalDeviceDynamicCapacityAddParameters) (*TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTask(c.client,
+		c.dynamicCapacityAddTarget, params, c.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// CXLLogicalDeviceDynamicCapacityReleaseParameters holds the parameters for the DynamicCapacityRelease action.
+type CXLLogicalDeviceDynamicCapacityReleaseParameters struct {
+	// ExtentList shall contain an array of links to resources of type
+	// 'MemoryExtent' that represent the dynamic capacity to release. This
+	// parameter shall be required if 'Policy' contains 'Prescriptive'.
+	ExtentList []string `json:"ExtentList,omitempty"`
+	// ForcedRemoval shall indicate whether to perform a forced removal of the
+	// dynamic capacity. If 'true', the device will not wait for a host response
+	// and the host immediately loses access to released capacity.
+	ForcedRemoval bool `json:"ForcedRemoval,omitempty"`
+	// Length shall contain the size of dynamic capacity to release. This parameter
+	// shall be required if 'Policy' contains 'TagBased'.
+	Length int `json:"Length,omitempty"`
+	// Policy shall contain the policy to apply to this operation.
+	Policy CXLDynamicCapacityPolicies `json:"Policy,omitempty"`
+	// SanitizeOnRelease shall indicate whether the dynamic capacity is sanitized
+	// after release.
+	SanitizeOnRelease bool `json:"SanitizeOnRelease,omitempty"`
+	// Tag shall contain the tag assigned to the dynamic capacity to release. This
+	// parameter shall be required if 'Policy' contains 'TagBased'.
+	Tag string `json:"Tag,omitempty"`
+}
+
+// This action shall release dynamic capacity from this CXL logical device.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (c *CXLLogicalDevice) DynamicCapacityRelease(params *CXLLogicalDeviceDynamicCapacityReleaseParameters) (*TaskMonitorInfo, error) {
+	resp, taskInfo, err := PostWithTask(c.client,
+		c.dynamicCapacityReleaseTarget, params, c.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -259,6 +355,14 @@ func (c *CXLLogicalDevice) MemoryDomains() ([]*MemoryDomain, error) {
 // PCIeFunctions gets the PCIeFunctions linked resources.
 func (c *CXLLogicalDevice) PCIeFunctions() ([]*PCIeFunction, error) {
 	return GetObjects[PCIeFunction](c.client, c.pCIeFunctions)
+}
+
+// Port gets the Port linked resource.
+func (c *CXLLogicalDevice) Port() (*Port, error) {
+	if c.port == "" {
+		return nil, nil
+	}
+	return GetObject[Port](c.client, c.port)
 }
 
 // Log gets the Log linked resource.

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Port.v1_18_0.json
-// 2025.4 - #Port.v1_18_0.Port
+// http://redfish.dmtf.org/schemas/v1/Port.v1_20_0.json
+// 2026.2 - #Port.v1_20_0.Port
 
 package schemas
 
@@ -229,6 +229,100 @@ const (
 	FiberOpticMediumType MediumType = "FiberOptic"
 )
 
+type PCIeReferenceClockMode string
+
+const (
+	// CommonClockPCIeReferenceClockMode shall indicate the devices on the PCIe
+	// link share the same reference clock.
+	CommonClockPCIeReferenceClockMode PCIeReferenceClockMode = "CommonClock"
+	// SeparateClockPCIeReferenceClockMode shall indicate each device on the PCIe
+	// link uses a separate reference clock.
+	SeparateClockPCIeReferenceClockMode PCIeReferenceClockMode = "SeparateClock"
+)
+
+type PartnerDeviceType string
+
+const (
+	// SwitchPartnerDeviceType shall indicate a switch device type.
+	SwitchPartnerDeviceType PartnerDeviceType = "Switch"
+	// EndpointPartnerDeviceType shall indicate an endpoint device type.
+	EndpointPartnerDeviceType PartnerDeviceType = "Endpoint"
+)
+
+type PartnerValidationState string
+
+const (
+	// DisabledPartnerValidationState shall indicate link partner validation is
+	// disabled.
+	DisabledPartnerValidationState PartnerValidationState = "Disabled"
+	// LinkDownPartnerValidationState shall indicate the link is down, which
+	// prevents link partner validation.
+	LinkDownPartnerValidationState PartnerValidationState = "LinkDown"
+	// DiscoveringPartnerValidationState shall indicate link partner validation is
+	// in progress.
+	DiscoveringPartnerValidationState PartnerValidationState = "Discovering"
+	// InvalidPartnerValidationState shall indicate link partnet validation
+	// completed and the discovered link partner is invalid.
+	InvalidPartnerValidationState PartnerValidationState = "Invalid"
+	// ValidatedPartnerValidationState shall indicate link partnet validation
+	// completed and the discovered link partner is valid.
+	ValidatedPartnerValidationState PartnerValidationState = "Validated"
+)
+
+type PoEDetectionStatus string
+
+const (
+	// DisabledPoEDetectionStatus shall indicate that the PoE detection is in the
+	// 'disabled' state, as defined in IEEE Std 802.3af Section 30.9.1.1.5.
+	DisabledPoEDetectionStatus PoEDetectionStatus = "Disabled"
+	// SearchingPoEDetectionStatus shall indicate that the PoE detection is in the
+	// 'searching' state, as defined in IEEE Std 802.3af Section 30.9.1.1.5.
+	SearchingPoEDetectionStatus PoEDetectionStatus = "Searching"
+	// DeliveringPowerPoEDetectionStatus shall indicate that the PoE detection is
+	// in the 'deliveringPower' state, as defined in IEEE Std 802.3af Section
+	// 30.9.1.1.5.
+	DeliveringPowerPoEDetectionStatus PoEDetectionStatus = "DeliveringPower"
+	// FaultPoEDetectionStatus shall indicate that the PoE detection is in the
+	// 'fault' state, as defined in IEEE Std 802.3af Section 30.9.1.1.5.
+	FaultPoEDetectionStatus PoEDetectionStatus = "Fault"
+	// TestPoEDetectionStatus shall indicate that the PoE detection is in the
+	// 'test' state, as defined in IEEE Std 802.3af Section 30.9.1.1.5.
+	TestPoEDetectionStatus PoEDetectionStatus = "Test"
+	// OtherFaultPoEDetectionStatus shall indicate that the PoE detection is in the
+	// 'otherFault' state, as defined in IEEE Std 802.3af Section 30.9.1.1.5.
+	OtherFaultPoEDetectionStatus PoEDetectionStatus = "OtherFault"
+)
+
+type PoEPowerMode string
+
+const (
+	// PSEPoEPowerMode shall indicate the port is providing power to a connected
+	// port.
+	PSEPoEPowerMode PoEPowerMode = "PSE"
+	// PDPoEPowerMode shall indicate the port is receiving power from a connected
+	// port.
+	PDPoEPowerMode PoEPowerMode = "PD"
+	// NonePoEPowerMode shall indicate the port is not currently transmitting or
+	// receiving power. This value does not indicate that this port does not
+	// support PoE.
+	NonePoEPowerMode PoEPowerMode = "None"
+)
+
+type PoEStandard string
+
+const (
+	// IEEE8023afPoEStandard shall indicate the port follows IEEE 802.3af-2003
+	// Power over Ethernet, supporting up to 15.4W.
+	IEEE8023afPoEStandard PoEStandard = "IEEE8023af"
+	// IEEE8023atPoEStandard shall indicate the port follows IEEE 802.3at-2009
+	// Power over Ethernet Plus, supporting up to 30W.
+	IEEE8023atPoEStandard PoEStandard = "IEEE8023at"
+	// IEEE8023btPoEStandard shall indicate the port follows IEEE 802.3bt-2018
+	// Power over Ethernet Plus Plus, supporting up to 60W (Type 3) or 100W (Type
+	// 4).
+	IEEE8023btPoEStandard PoEStandard = "IEEE8023bt"
+)
+
 type PortConnectionType string
 
 const (
@@ -360,6 +454,81 @@ const (
 	CMISTransceiverManagementInterfaceType TransceiverManagementInterfaceType = "CMIS"
 )
 
+type UALink128GExtendedSpeedMode string
+
+const (
+	// NoESMUALink128GExtendedSpeedMode shall indicate that the UALink 128G port is
+	// not operating in 'Extended Speed Mode', as defined in the UALink 128G Data
+	// Link Layer Specification.
+	NoESMUALink128GExtendedSpeedMode UALink128GExtendedSpeedMode = "NoESM"
+	// 104GUALink128GExtendedSpeedMode shall indicate that the UALink 128G port is
+	// operating in the '104G Extended Speed Mode', as defined in the UALink 128G
+	// Data Link Layer Specification.
+	V104GUALink128GExtendedSpeedMode UALink128GExtendedSpeedMode = "104G"
+	// 112GUALink128GExtendedSpeedMode shall indicate that the UALink 128G port is
+	// operating in the '112G Extended Speed Mode', as defined in the UALink 128G
+	// Data Link Layer Specification.
+	V112GUALink128GExtendedSpeedMode UALink128GExtendedSpeedMode = "112G"
+	// 120GUALink128GExtendedSpeedMode shall indicate that the UALink 128G port is
+	// operating in the '120G Extended Speed Mode', as defined in the UALink 128G
+	// Data Link Layer Specification.
+	V120GUALink128GExtendedSpeedMode UALink128GExtendedSpeedMode = "120G"
+	// 128GUALink128GExtendedSpeedMode shall indicate that the UALink 128G port is
+	// operating in the '128G Extended Speed Mode', as defined in the UALink 128G
+	// Data Link Layer Specification.
+	V128GUALink128GExtendedSpeedMode UALink128GExtendedSpeedMode = "128G"
+)
+
+type UALink200GCodewordInterleave string
+
+const (
+	// OneWayUALink200GCodewordInterleave shall indicate that the UALink 200G port
+	// is operating with 1-way interleave, as defined in the UALink 200G Data Link
+	// Layer Specification.
+	OneWayUALink200GCodewordInterleave UALink200GCodewordInterleave = "OneWay"
+	// TwoWayUALink200GCodewordInterleave shall indicate that the UALink 200G port
+	// is operating with 2-way interleave, as defined in the UALink 200G Data Link
+	// Layer Specification.
+	TwoWayUALink200GCodewordInterleave UALink200GCodewordInterleave = "TwoWay"
+	// FourWayUALink200GCodewordInterleave shall indicate that the UALink 200G port
+	// is operating with 4-way interleave, as defined in the UALink 200G Data Link
+	// Layer Specification.
+	FourWayUALink200GCodewordInterleave UALink200GCodewordInterleave = "FourWay"
+)
+
+type UALink200GSerialRate string
+
+const (
+	// 100GUALink200GSerialRate shall indicate that the UALink 200G port is
+	// operating at a serial rate of 100G, as defined in the UALink 200G Data Link
+	// Layer Specification.
+	V100GUALink200GSerialRate UALink200GSerialRate = "100G"
+	// 200GUALink200GSerialRate shall indicate that the UALink 200G port is
+	// operating at a serial rate of 200G, as defined in the UALink 200G Data Link
+	// Layer Specification.
+	V200GUALink200GSerialRate UALink200GSerialRate = "200G"
+)
+
+type UALinkDLState string
+
+const (
+	// IdleUALinkDLState shall indicate that the UALink Data Link (DL) layer
+	// transmitter on this port is sending idle.
+	IdleUALinkDLState UALinkDLState = "Idle"
+	// NOPUALinkDLState shall indicate that the UALink Data Link (DL) layer
+	// transmitter on this port is sending no-op (NOP) flits.
+	NOPUALinkDLState UALinkDLState = "NOP"
+	// FaultUALinkDLState shall indicate that the UALink Data Link (DL) layer on
+	// this port is in fault state.
+	FaultUALinkDLState UALinkDLState = "Fault"
+	// PowerDownUALinkDLState shall indicate that the UALink Data Link (DL) layer
+	// on this port is in powered down state.
+	PowerDownUALinkDLState UALinkDLState = "PowerDown"
+	// UpUALinkDLState shall indicate that the UALink Data Link (DL) layer on this
+	// port is in up state and may transmit payload flits.
+	UpUALinkDLState UALinkDLState = "Up"
+)
+
 type UALinkGeneration string
 
 const (
@@ -369,6 +538,63 @@ const (
 	// UALink200GUALinkGeneration The port conforms to UALink 200G Data Link Layer
 	// and Physical Layer requirements.
 	UALink200GUALinkGeneration UALinkGeneration = "UALink200G"
+)
+
+type UALinkPLState string
+
+const (
+	// IdleUALinkPLState shall indicate that the UALink Physical Layer (PL) on this
+	// port is idle.
+	IdleUALinkPLState UALinkPLState = "Idle"
+	// TrainingInProgressUALinkPLState shall indicate that the UALink Physical
+	// Layer (PL) on this port is actively attempting to train.
+	TrainingInProgressUALinkPLState UALinkPLState = "TrainingInProgress"
+	// TrainingFailedUALinkPLState shall indicate that the UALink Physical Layer
+	// (PL) training has failed on this port.
+	TrainingFailedUALinkPLState UALinkPLState = "TrainingFailed"
+	// TrainingTimeoutUALinkPLState shall indicate that the UALink Physical Layer
+	// (PL) training has timed out on this port.
+	TrainingTimeoutUALinkPLState UALinkPLState = "TrainingTimeout"
+	// UpUALinkPLState shall indicate that the UALink Physical Layer (PL) on this
+	// port is up and active.
+	UpUALinkPLState UALinkPLState = "Up"
+)
+
+type UALinkTLState string
+
+const (
+	// DropModeUALinkTLState shall indicate that the UALink Transaction Layer (TL)
+	// on this port is in 'Drop Mode'.
+	DropModeUALinkTLState UALinkTLState = "DropMode"
+	// EnabledUALinkTLState shall indicate that the UALink Transaction Layer (TL)
+	// on this port is enabled.
+	EnabledUALinkTLState UALinkTLState = "Enabled"
+)
+
+type UALinkUPLICompleterState string
+
+const (
+	// DropModeUALinkUPLICompleterState shall indicate that the UALink Protocol
+	// Level Interface (UPLI) Completer on this port is in 'Drop Mode'.
+	DropModeUALinkUPLICompleterState UALinkUPLICompleterState = "DropMode"
+	// EnabledUALinkUPLICompleterState shall indicate that the UALink Protocol
+	// Level Interface (UPLI) Completer on this port is enabled.
+	EnabledUALinkUPLICompleterState UALinkUPLICompleterState = "Enabled"
+)
+
+type UALinkUPLIOriginatorState string
+
+const (
+	// DropModeUALinkUPLIOriginatorState shall indicate that the UALink Protocol
+	// Level Interface (UPLI) Originator on this port is in 'Drop Mode'.
+	DropModeUALinkUPLIOriginatorState UALinkUPLIOriginatorState = "DropMode"
+	// IsolationModeUALinkUPLIOriginatorState shall indicate that the UALink
+	// Protocol Level Interface (UPLI) Originator on this port is in 'Isolation
+	// Mode'.
+	IsolationModeUALinkUPLIOriginatorState UALinkUPLIOriginatorState = "IsolationMode"
+	// EnabledUALinkUPLIOriginatorState shall indicate that the UALink Protocol
+	// Level Interface (UPLI) Originator on this port is enabled.
+	EnabledUALinkUPLIOriginatorState UALinkUPLIOriginatorState = "Enabled"
 )
 
 // Port This resource contains a simple port for a Redfish implementation.
@@ -492,6 +718,26 @@ type Port struct {
 	//
 	// Version added: v1.2.0
 	LinkNetworkTechnology LinkNetworkTechnology
+	// LinkPartnerExpected shall contain the expected link partner information
+	// received from the device connected to this port.
+	//
+	// Version added: v1.20.0
+	LinkPartnerExpected LinkPartnerExpected
+	// LinkPartnerReceived shall contain the link partner information received from
+	// the device connected to this port.
+	//
+	// Version added: v1.20.0
+	LinkPartnerReceived LinkPartnerReceived
+	// LinkPartnerTransmit shall contain the link partner information that is sent
+	// to the link partner of this port.
+	//
+	// Version added: v1.20.0
+	LinkPartnerTransmit LinkPartnerTransmit
+	// LinkPartnerValidation shall contain the link partner validation information
+	// for the device connected to this port.
+	//
+	// Version added: v1.20.0
+	LinkPartnerValidation LinkPartnerValidation
 	// LinkState shall contain the desired link state for this interface.
 	//
 	// Version added: v1.2.0
@@ -540,6 +786,10 @@ type Port struct {
 	// object contains shall conform to the Redfish Specification-described
 	// requirements.
 	OEM json.RawMessage `json:"Oem"`
+	// PCIe shall contain PCIe-specific properties of the port.
+	//
+	// Version added: v1.19.0
+	PCIe PCIeProperties
 	// PortID shall contain the hardware-defined identifier of this port. The
 	// human-readable name of this port is described in the 'ServiceLabel' property
 	// within 'Location' for this port.
@@ -580,10 +830,14 @@ type Port struct {
 	resetTarget string
 	// resetPPBTarget is the URL to send ResetPPB requests.
 	resetPPBTarget string
+	// resetTransceiversTarget is the URL to send ResetTransceivers requests.
+	resetTransceiversTarget string
 	// associatedEndpoints are the URIs for AssociatedEndpoints.
 	associatedEndpoints []string
 	// associatedPhysicalPorts are the URIs for AssociatedPhysicalPorts.
 	associatedPhysicalPorts []string
+	// cXLLogicalDevices are the URIs for CXLLogicalDevices.
+	cXLLogicalDevices []string
 	// cables are the URIs for Cables.
 	cables []string
 	// connectedPorts are the URIs for ConnectedPorts.
@@ -602,12 +856,14 @@ type Port struct {
 func (p *Port) UnmarshalJSON(b []byte) error {
 	type temp Port
 	type pActions struct {
-		Reset    ActionTarget `json:"#Port.Reset"`
-		ResetPPB ActionTarget `json:"#Port.ResetPPB"`
+		Reset             ActionTarget `json:"#Port.Reset"`
+		ResetPPB          ActionTarget `json:"#Port.ResetPPB"`
+		ResetTransceivers ActionTarget `json:"#Port.ResetTransceivers"`
 	}
 	type pLinks struct {
 		AssociatedEndpoints     Links `json:"AssociatedEndpoints"`
 		AssociatedPhysicalPorts Links `json:"AssociatedPhysicalPorts"`
+		CXLLogicalDevices       Links `json:"CXLLogicalDevices"`
 		Cables                  Links `json:"Cables"`
 		ConnectedPorts          Links `json:"ConnectedPorts"`
 		ConnectedSwitchPorts    Links `json:"ConnectedSwitchPorts"`
@@ -632,8 +888,10 @@ func (p *Port) UnmarshalJSON(b []byte) error {
 	// Extract the links to other entities for later
 	p.resetTarget = tmp.Actions.Reset.Target
 	p.resetPPBTarget = tmp.Actions.ResetPPB.Target
+	p.resetTransceiversTarget = tmp.Actions.ResetTransceivers.Target
 	p.associatedEndpoints = tmp.Links.AssociatedEndpoints.ToStrings()
 	p.associatedPhysicalPorts = tmp.Links.AssociatedPhysicalPorts.ToStrings()
+	p.cXLLogicalDevices = tmp.Links.CXLLogicalDevices.ToStrings()
 	p.cables = tmp.Links.Cables.ToStrings()
 	p.connectedPorts = tmp.Links.ConnectedPorts.ToStrings()
 	p.connectedSwitchPorts = tmp.Links.ConnectedSwitchPorts.ToStrings()
@@ -703,6 +961,18 @@ func (p *Port) ResetPPB() (*TaskMonitorInfo, error) {
 	return taskInfo, err
 }
 
+// This action shall reset all transceivers, such as a small form-factor
+// pluggable (SFP) devices, attached to this port.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (p *Port) ResetTransceivers() (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	resp, taskInfo, err := PostWithTask(p.client,
+		p.resetTransceiversTarget, payload, p.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
 // AssociatedEndpoints gets the AssociatedEndpoints linked resources.
 func (p *Port) AssociatedEndpoints() ([]*Endpoint, error) {
 	return GetObjects[Endpoint](p.client, p.associatedEndpoints)
@@ -711,6 +981,11 @@ func (p *Port) AssociatedEndpoints() ([]*Endpoint, error) {
 // AssociatedPhysicalPorts gets the AssociatedPhysicalPorts linked resources.
 func (p *Port) AssociatedPhysicalPorts() ([]*Port, error) {
 	return GetObjects[Port](p.client, p.associatedPhysicalPorts)
+}
+
+// CXLLogicalDevices gets the CXLLogicalDevices linked resources.
+func (p *Port) CXLLogicalDevices() ([]*CXLLogicalDevice, error) {
+	return GetObjects[CXLLogicalDevice](p.client, p.cXLLogicalDevices)
 }
 
 // Cables gets the Cables linked resources.
@@ -882,6 +1157,11 @@ type EthernetProperties struct {
 	//
 	// Version added: v1.4.0
 	LLDPTransmit LLDPTransmit
+	// PoE shall contain the Power over Ethernet (PoE) input and output power
+	// configuration on this port.
+	//
+	// Version added: v1.19.0
+	PoE PoE
 	// SupportedEthernetCapabilities shall contain an array of Ethernet
 	// capabilities supported by this port.
 	//
@@ -1298,7 +1578,13 @@ type LinkConfiguration struct {
 	// Version added: v1.3.0
 	AutoSpeedNegotiationCapable bool
 	// AutoSpeedNegotiationEnabled shall indicate whether the port is configured to
-	// autonegotiate speed.
+	// automatically select the highest link speed supported by both the port and
+	// its connected peer. When set to 'false', the port shall operate at the speed
+	// specified by the 'ConfiguredSpeedGbps' property. This property represents a
+	// user-provided setting and does not describe the underlying protocol or
+	// training mechanisms used to establish the link. For example, this property
+	// shall return 'false' if the PCIe target link speed is configured by system
+	// software and reflected in the ConfiguredSpeedGbps property.
 	//
 	// Version added: v1.3.0
 	AutoSpeedNegotiationEnabled bool
@@ -1320,6 +1606,166 @@ type LinkConfiguration struct {
 	//
 	// Version added: v1.16.0
 	LinkNetworkTechnology LinkNetworkTechnology
+}
+
+// LinkPartnerExpected shall contain the expected link partner information
+// received from the device connected to a port.
+type LinkPartnerExpected struct {
+	// DeviceType shall contain the expected type of device that is to be received
+	// from the link partner.
+	//
+	// Version added: v1.20.0
+	DeviceType PartnerDeviceType
+	// LinkPartnerID shall contain the expected identifier of the remote device to
+	// be received across the link from the link partner.
+	//
+	// Version added: v1.20.0
+	LinkPartnerID string `json:"LinkPartnerId"`
+	// PortID shall contain the expected identifier of the remote port to be
+	// received from the link partner.
+	//
+	// Version added: v1.20.0
+	PortID string `json:"PortId"`
+}
+
+// LinkPartnerReceived shall contain the link partner information received from
+// the device connected to a port.
+type LinkPartnerReceived struct {
+	// DeviceType shall contain the type of device of this device that is received
+	// from the link partner.
+	//
+	// Version added: v1.20.0
+	DeviceType PartnerDeviceType
+	// LinkPartnerID shall contain the identifier of the remote device received
+	// across the link from the link partner.
+	//
+	// Version added: v1.20.0
+	LinkPartnerID string `json:"LinkPartnerId"`
+	// PBRID shall contain the Port Based Routing (PBR) identifier, as defined by
+	// the Compute Express link (CXL) Specification, of this port that is received
+	// from the link partner.
+	//
+	// Version added: v1.20.0
+	PBRID *int `json:"PBRId,omitempty"`
+	// PortID shall contain the identifier of the remote port received from the
+	// link partner.
+	//
+	// Version added: v1.20.0
+	PortID string `json:"PortId"`
+	// PrimaryFMID shall contain the identifier of the primary fabric manager, as
+	// defined by the Compute Express Link (CXL) Specification, that manages this
+	// device that is received from the link partner.
+	//
+	// Version added: v1.20.0
+	PrimaryFMID string `json:"PrimaryFMId"`
+	// SecondaryFMID shall contain the identifier of the secondary fabric manager,
+	// as defined by the Compute Express Link (CXL) Specification, that manages
+	// this device that is received from the link partner.
+	//
+	// Version added: v1.20.0
+	SecondaryFMID string `json:"SecondaryFMId"`
+}
+
+// LinkPartnerTransmit shall contain the link partner information that is sent
+// to the link partner of a port.
+type LinkPartnerTransmit struct {
+	// DeviceType shall contain the type of device of this device that is
+	// transmitted to the link partner.
+	//
+	// Version added: v1.20.0
+	DeviceType PartnerDeviceType
+	// LinkPartnerID shall contain the identifier of the local device that contains
+	// this port. This identifier is transmitted to the link partner upon
+	// establishing the link.
+	//
+	// Version added: v1.20.0
+	LinkPartnerID string `json:"LinkPartnerId"`
+	// PBRID shall contain the Port Based Routing (PBR) identifier, as defined by
+	// the Compute Express Link (CXL) Specification, of this port that is
+	// transmitted to the link partner.
+	//
+	// Version added: v1.20.0
+	PBRID *int `json:"PBRId,omitempty"`
+	// PortID shall contain the local port identifier that is transmitted to the
+	// link partner.
+	//
+	// Version added: v1.20.0
+	PortID string `json:"PortId"`
+	// PrimaryFMID shall contain the identifier of the primary fabric manager, as
+	// defined by the Compute Express Link (CXL) Specification, that manages this
+	// device that is transmitted to the link partner.
+	//
+	// Version added: v1.20.0
+	PrimaryFMID string `json:"PrimaryFMId"`
+	// SecondaryFMID shall contain the identifier of the secondary fabric manager,
+	// as defined by the Compute Express Link (CXL) Specification, that manages
+	// this device that is transmitted to the link partner.
+	//
+	// Version added: v1.20.0
+	SecondaryFMID string `json:"SecondaryFMId"`
+}
+
+// LinkPartnerValidation shall contain the link partner validation information
+// for the device connected to a port.
+type LinkPartnerValidation struct {
+	// DeviceCheckEnabled shall indicate whether the device check is enabled for
+	// the link partner.
+	//
+	// Version added: v1.20.0
+	DeviceCheckEnabled bool
+	// PortCheckEnabled shall indicate whether the port check is enabled for the
+	// link partner.
+	//
+	// Version added: v1.20.0
+	PortCheckEnabled bool
+	// ValidationState shall contain the validation state of the link partner.
+	//
+	// Version added: v1.20.0
+	ValidationState PartnerValidationState
+}
+
+// PCIeProperties shall contain PCIe-specific port properties.
+type PCIeProperties struct {
+	// ReferenceClockMode shall contain the PCIe reference clock mode for this
+	// port.
+	//
+	// Version added: v1.19.0
+	ReferenceClockMode PCIeReferenceClockMode
+}
+
+// PoE shall contain the Power over Ethernet (PoE) configuration for a port.
+type PoE struct {
+	// CapablePowerWatts shall contain the maximum power supported by this port.
+	//
+	// Version added: v1.19.0
+	CapablePowerWatts *float64 `json:",omitempty"`
+	// ConfiguredPowerWatts shall contain the configured maximum power this port is
+	// allowed to negotiate.
+	//
+	// Version added: v1.19.0
+	ConfiguredPowerWatts *float64 `json:",omitempty"`
+	// DetectionStatus shall contain the current state of PoE detection and power
+	// delivery on this port.
+	//
+	// Version added: v1.19.0
+	DetectionStatus PoEDetectionStatus
+	// Enabled shall indicate whether PoE is enabled on this port.
+	//
+	// Version added: v1.19.0
+	Enabled bool
+	// PowerClass shall contain the power class, 0 through 8, negotiated by this
+	// port during PoE detection and classification.
+	//
+	// Version added: v1.19.0
+	PowerClass *uint `json:",omitempty"`
+	// PowerMode shall contain the current power mode of this port.
+	//
+	// Version added: v1.19.0
+	PowerMode PoEPowerMode
+	// Standard shall contain the IEEE 802.3 PoE standard in use by this port.
+	//
+	// Version added: v1.19.0
+	Standard PoEStandard
 }
 
 // QoSTelemetryCapabilities shall contain the quality of service telemetry
@@ -1413,11 +1859,42 @@ type PortUALink struct {
 	//
 	// Version added: v1.18.0
 	AuthenticationModeEnabled bool
+	// DLDownDelayMilliseconds shall contain the time delay, in milliseconds,
+	// before UALink Data Link (DL) layer is declared down and in the 'DL Fault'
+	// state.
+	//
+	// Version added: v1.20.0
+	DLDownDelayMilliseconds *uint `json:",omitempty"`
+	// DLState This property contains the operational UALink Data Link (DL) layer
+	// state of this port.
+	//
+	// Version added: v1.20.0
+	DLState UALinkDLState
 	// Generation This property contains the generation of the UALink Data Link
 	// Layer and Physical Layer of this port.
 	//
 	// Version added: v1.18.0
 	Generation UALinkGeneration
+	// LinkFoldingEnabled shall indicate whether the UALink-defined 'Link Folding'
+	// feature is enabled on the port.
+	//
+	// Version added: v1.20.0
+	LinkFoldingEnabled bool
+	// LinkFoldingSupported shall indicate whether the UALink-defined 'Link
+	// Folding' feature is supported on the port.
+	//
+	// Version added: v1.20.0
+	LinkFoldingSupported bool
+	// LinkResiliencyEnabled shall indicate whether the UALink-defined 'Link
+	// Resiliency' feature is enabled on the port.
+	//
+	// Version added: v1.20.0
+	LinkResiliencyEnabled bool
+	// LinkResiliencySupported shall indicate whether the UALink-defined 'Link
+	// Resiliency' feature is supported on the port.
+	//
+	// Version added: v1.20.0
+	LinkResiliencySupported bool
 	// NonStrictOrderingModeEnabled shall indicate whether UALink-defined
 	// non-strict ordering mode is enabled on the port. Non-strict ordering mode
 	// affects request and response delivery ordering and UPLI (UALink Protocol
@@ -1425,6 +1902,65 @@ type PortUALink struct {
 	//
 	// Version added: v1.18.0
 	NonStrictOrderingModeEnabled bool
+	// PLDLAdminEnabled shall indicate whether the UALink Physical Layer (PL) and
+	// UALink Data Link (DL) layer are enabled on the port, reflecting the UALink
+	// 'Configured PL/DL Admin State' attribute and enabling link partner
+	// discovery.
+	//
+	// Version added: v1.20.0
+	PLDLAdminEnabled bool
+	// PLState This property contains the operational UALink Physical Layer (PL)
+	// state of this port.
+	//
+	// Version added: v1.20.0
+	PLState UALinkPLState
+	// TLState This property contains the operational UALink Transaction Layer (TL)
+	// state of this port.
+	//
+	// Version added: v1.20.0
+	TLState UALinkTLState
+	// TLUPLIAdminEnabled shall indicate whether the UALink Transaction Layer (TL)
+	// and UALink Protocol Level Interface (UPLI) are enabled on the port,
+	// reflecting the UALink 'Configured TL/UPLI Admin State' attribute and
+	// enabling workload traffic.
+	//
+	// Version added: v1.20.0
+	TLUPLIAdminEnabled bool
+	// TXAckTimeoutNanoseconds shall contain the timeout for UALink transmission
+	// acknowledgement, in nanoseconds.
+	//
+	// Version added: v1.20.0
+	TXAckTimeoutNanoseconds *uint `json:",omitempty"`
+	// UALink128GExtendedSpeedMode This property contains the UALink 128G 'Extended
+	// Speed Mode' (ESM) of this port.
+	//
+	// Version added: v1.20.0
+	UALink128GExtendedSpeedMode UALink128GExtendedSpeedMode
+	// UALink200GCodewordInterleave This property contains the UALink 200G codeword
+	// interleave ratio of this port, as a function of serial rate and bifurcation.
+	//
+	// Version added: v1.20.0
+	UALink200GCodewordInterleave UALink200GCodewordInterleave
+	// UALink200GSerialRate This property contains the UALink 200G serial rate of
+	// this port.
+	//
+	// Version added: v1.20.0
+	UALink200GSerialRate UALink200GSerialRate
+	// UARTAdminEnabled shall indicate whether the UALink UART channel is enabled
+	// on the port, reflecting the UALink 'Configured UART Admin State' attribute.
+	//
+	// Version added: v1.20.0
+	UARTAdminEnabled bool
+	// UPLICompleterState This property contains the operational UALink Protocol
+	// Level Interface (UPLI) Completer state of this port.
+	//
+	// Version added: v1.20.0
+	UPLICompleterState UALinkUPLICompleterState
+	// UPLIOriginatorState This property contains the operational UALink Protocol
+	// Level Interface (UPLI) Originator state of this port.
+	//
+	// Version added: v1.20.0
+	UPLIOriginatorState UALinkUPLIOriginatorState
 	// UPLIWatchdogTimerMicroseconds shall contain time limit, in microseconds,
 	// before the UPLI watchdog timer expires, taking the UPLI originator of the
 	// port into isolation mode.

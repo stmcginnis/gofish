@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/LogEntry.v1_21_0.json
-// 2025.4 - #LogEntry.v1_21_0.LogEntry
+// http://redfish.dmtf.org/schemas/v1/LogEntry.v1_22_0.json
+// 2026.2 - #LogEntry.v1_22_0.LogEntry
 
 package schemas
 
@@ -624,9 +624,13 @@ type LogEntry struct {
 	//
 	// Version added: v1.13.0
 	SpecificEventExistsInGroup bool
-	// UserAuthenticationSource shall contain the URL to the authentication service
-	// that is associated with the username property. This should be used for audit
-	// logs that result from a user action.
+	// UserAuthenticationSource shall contain source of authentication for the
+	// user, specified by the 'Username' property, associated with the log entry.
+	// For local users, this property shall contain '/redfish/v1/AccountService'.
+	// For users managed by external account providers, this property shall contain
+	// the member of the 'ServiceAddresses' property that authenticated the user.
+	// This should be used for conditions that result from a user action. This
+	// should be used for audit logs that result from a user action.
 	//
 	// Version added: v1.17.0
 	UserAuthenticationSource string
@@ -635,6 +639,13 @@ type LogEntry struct {
 	//
 	// Version added: v1.17.0
 	Username string
+	// VendorCode shall contain a vendor-defined code or identifier equivalent to
+	// this log entry or 'MessageId' value. This value allows clients to map a
+	// 'MessageId' value to a legacy or vendor-specific value for the same
+	// condition or error message.
+	//
+	// Version added: v1.22.0
+	VendorCode string
 	// originOfCondition is the URI for OriginOfCondition.
 	originOfCondition string
 	// relatedItem are the URIs for RelatedItem.

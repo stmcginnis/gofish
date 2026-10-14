@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/swordfish/v1/StoragePoolMetrics.v1_1_0.json
-// 1.2.8 - #StoragePoolMetrics.v1_1_0.StoragePoolMetrics
+// http://redfish.dmtf.org/schemas/swordfish/v1/StoragePoolMetrics.v1_2_0.json
+// 1.2.9 - #StoragePoolMetrics.v1_2_0.StoragePoolMetrics
 
 package schemas
 
@@ -36,6 +36,15 @@ type StoragePoolMetrics struct {
 	DeduplicationSavingsBytes *int `json:",omitempty"`
 	// IOStatistics shall represent IO statistics for this storage pool.
 	IOStatistics IOStatistics
+	// LifetimeStartDateTime shall contain the date and time when the storage pool
+	// started accumulating data for properties maintained for the lifetime of the
+	// storage pool, such as, but not limited to 'CorrectableIOReadErrorCount' and
+	// 'CorrectableIOWriteErrorCount'. Lifetime counts are noted in the
+	// LongDescription for relevant properties. This might contain the same value
+	// as the creation date of the storage pool.
+	//
+	// Version added: v1.2.0
+	LifetimeStartDateTime string
 	// ODataContext is the odata context.
 	ODataContext string `json:"@odata.context"`
 	// ODataType is the odata type.

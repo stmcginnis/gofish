@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/CertificateEnrollment.v1_0_1.json
-// 2025.3 - #CertificateEnrollment.v1_0_1.CertificateEnrollment
+// http://redfish.dmtf.org/schemas/v1/CertificateEnrollment.v1_0_2.json
+// 2025.3 - #CertificateEnrollment.v1_0_2.CertificateEnrollment
 
 package schemas
 
@@ -252,13 +252,15 @@ type CSRParameters struct {
 	KeyBitLength *int `json:",omitempty"`
 	// KeyCurveID shall contain the curve ID to use with the key, if needed based
 	// on the 'KeyPairAlgorithm' property value. The allowable values for this
-	// property shall be the strings in the 'Name' field of the 'TPM_ECC_CURVE
-	// Constants' table within the 'Trusted Computing Group Algorithm Registry'.
+	// property shall be the strings in the 'Name' field of the 'TCG_ECC_CURVE
+	// Constants' table, formerly the 'TPM_ECC_CURVE Constants' table, within the
+	// 'Trusted Computing Group Algorithm Registry'.
 	KeyCurveID string `json:"KeyCurveId"`
 	// KeyPairAlgorithm shall contain the type of key-pair for use with signing
 	// algorithms. The allowable values for this property shall be the strings in
-	// the 'Algorithm Name' field of the 'TPM_ALG_ID Constants' table within the
-	// 'Trusted Computing Group Algorithm Registry'.
+	// the 'Algorithm Name' field of the 'TCG_ALG_ID Constants' table, formerly the
+	// 'TPM_ALG_ID Constants' table, within the 'Trusted Computing Group Algorithm
+	// Registry'.
 	KeyPairAlgorithm string
 	// KeyUsage shall contain the usage of the key contained in the certificate. If
 	// the client does not provide this value, the service can determine the

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Storage.v1_21_0.json
-// 2025.4 - #Storage.v1_21_0.Storage
+// http://redfish.dmtf.org/schemas/v1/Storage.v1_23_0.json
+// 2026.2 - #Storage.v1_23_0.Storage
 
 package schemas
 
@@ -125,6 +125,30 @@ const (
 	ProgrammedKeyNMVeUnfreezeAuthMode NMVeUnfreezeAuthMode = "ProgrammedKey"
 	// PhysicalIDNMVeUnfreezeAuthMode Physical Credential Authentication.
 	PhysicalIDNMVeUnfreezeAuthMode NMVeUnfreezeAuthMode = "PhysicalId"
+)
+
+type ReservationCapabilities string
+
+const (
+	// CompatibleReservationHandlingReservationCapabilities Indicates that the
+	// storage subsystem supports SPC-5-defined 'Reserve' and 'Release' commands.
+	CompatibleReservationHandlingReservationCapabilities ReservationCapabilities = "CompatibleReservationHandling"
+	// SpecifyInitiatorPortsReservationCapabilities Indicates that the storage
+	// subsystem supports initiator port-based reservation in the 'Persistent
+	// Reserve Out' command.
+	SpecifyInitiatorPortsReservationCapabilities ReservationCapabilities = "SpecifyInitiatorPorts"
+	// MultipleTargetPortsReservationCapabilities Indicates that the storage
+	// subsystem supports the 'Persistent Reserve Out' command on all target ports.
+	MultipleTargetPortsReservationCapabilities ReservationCapabilities = "MultipleTargetPorts"
+	// PersistThroughPowerLossReservationCapabilities Indicates that the storage
+	// subsystem supports persistent reservations preserved through resets or power
+	// loss.
+	PersistThroughPowerLossReservationCapabilities ReservationCapabilities = "PersistThroughPowerLoss"
+	// SupportClearReservationsOutOfBandReservationCapabilities Indicates that the
+	// storage subsystem supports the ability to clear reservations out of band for
+	// administrator use. If this capability is supported, the services should
+	// support the 'ClearReservations' action on corresponding 'Volume' resources.
+	SupportClearReservationsOutOfBandReservationCapabilities ReservationCapabilities = "SupportClearReservationsOutOfBand"
 )
 
 type StorageResetToDefaultsType string
@@ -275,6 +299,12 @@ type Storage struct {
 
 	// RedundancyCount
 	RedundancyCount int `json:"Redundancy@odata.count"`
+	// ReservationCapabilities shall indicate the reservation capabilities
+	// supported by this storage subsystem. Persistent reservations are not reset
+	// by hard resets, logical unit resets, or I_T nexus loss conditions.
+	//
+	// Version added: v1.23.0
+	ReservationCapabilities []ReservationCapabilities
 	// Status shall contain any status or health properties of the resource.
 	Status Status
 	// StorageControllers shall contain a set of the storage controllers that this
@@ -330,6 +360,8 @@ type Storage struct {
 	setEncryptionKeyTarget string
 	// setPersonalityKeyTarget is the URL to send SetPersonalityKey requests.
 	setPersonalityKeyTarget string
+	// setPredictedMediaLifeLeftThresholdTarget is the URL to send SetPredictedMediaLifeLeftThreshold requests.
+	setPredictedMediaLifeLeftThresholdTarget string
 	// unfreezePersonalityTarget is the URL to send UnfreezePersonality requests.
 	unfreezePersonalityTarget string
 	// blockSecurityIDUnsupportedDrives are the URIs for BlockSecurityIDUnsupportedDrives.
@@ -356,16 +388,17 @@ type Storage struct {
 func (s *Storage) UnmarshalJSON(b []byte) error {
 	type temp Storage
 	type sActions struct {
-		FreezePersonality             ActionTarget `json:"#Storage.FreezePersonality"`
-		GetPersonalityNonce           ActionTarget `json:"#Storage.GetPersonalityNonce"`
-		ImportForeignDrives           ActionTarget `json:"#Storage.ImportForeignDrives"`
-		RekeyExternalKey              ActionTarget `json:"#Storage.RekeyExternalKey"`
-		ResetToDefaults               ActionTarget `json:"#Storage.ResetToDefaults"`
-		RevertPersonalitiesToDefaults ActionTarget `json:"#Storage.RevertPersonalitiesToDefaults"`
-		SetControllerPassword         ActionTarget `json:"#Storage.SetControllerPassword"`
-		SetEncryptionKey              ActionTarget `json:"#Storage.SetEncryptionKey"`
-		SetPersonalityKey             ActionTarget `json:"#Storage.SetPersonalityKey"`
-		UnfreezePersonality           ActionTarget `json:"#Storage.UnfreezePersonality"`
+		FreezePersonality                  ActionTarget `json:"#Storage.FreezePersonality"`
+		GetPersonalityNonce                ActionTarget `json:"#Storage.GetPersonalityNonce"`
+		ImportForeignDrives                ActionTarget `json:"#Storage.ImportForeignDrives"`
+		RekeyExternalKey                   ActionTarget `json:"#Storage.RekeyExternalKey"`
+		ResetToDefaults                    ActionTarget `json:"#Storage.ResetToDefaults"`
+		RevertPersonalitiesToDefaults      ActionTarget `json:"#Storage.RevertPersonalitiesToDefaults"`
+		SetControllerPassword              ActionTarget `json:"#Storage.SetControllerPassword"`
+		SetEncryptionKey                   ActionTarget `json:"#Storage.SetEncryptionKey"`
+		SetPersonalityKey                  ActionTarget `json:"#Storage.SetPersonalityKey"`
+		SetPredictedMediaLifeLeftThreshold ActionTarget `json:"#Storage.SetPredictedMediaLifeLeftThreshold"`
+		UnfreezePersonality                ActionTarget `json:"#Storage.UnfreezePersonality"`
 	}
 	type sLinks struct {
 		BlockSecurityIDUnsupportedDrives        Links `json:"BlockSecurityIDUnsupportedDrives"`
@@ -411,6 +444,7 @@ func (s *Storage) UnmarshalJSON(b []byte) error {
 	s.setControllerPasswordTarget = tmp.Actions.SetControllerPassword.Target
 	s.setEncryptionKeyTarget = tmp.Actions.SetEncryptionKey.Target
 	s.setPersonalityKeyTarget = tmp.Actions.SetPersonalityKey.Target
+	s.setPredictedMediaLifeLeftThresholdTarget = tmp.Actions.SetPredictedMediaLifeLeftThreshold.Target
 	s.unfreezePersonalityTarget = tmp.Actions.UnfreezePersonality.Target
 	s.blockSecurityIDUnsupportedDrives = tmp.Links.BlockSecurityIDUnsupportedDrives.ToStrings()
 	s.blockSecurityIDUpdateUnsuccessfulDrives = tmp.Links.BlockSecurityIDUpdateUnsuccessfulDrives.ToStrings()
@@ -632,6 +666,22 @@ func (s *Storage) SetPersonalityKey(algorithm NMVePersonalityKeyAlgorithm, key s
 	payload["Key"] = key
 	resp, taskInfo, err := PostWithTask(s.client,
 		s.setPersonalityKeyTarget, payload, s.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// This action shall configure the 'PredictedMediaLifeLeftThreshold' for all
+// drives attached to this storage subsystem.
+// predictedMediaLifeLeftThreshold - This parameter shall contain the predicted
+// media life left threshold to be established for all drives attached to this
+// storage subsystem.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (s *Storage) SetPredictedMediaLifeLeftThreshold(predictedMediaLifeLeftThreshold int) (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	payload["PredictedMediaLifeLeftThreshold"] = predictedMediaLifeLeftThreshold
+	resp, taskInfo, err := PostWithTask(s.client,
+		s.setPredictedMediaLifeLeftThresholdTarget, payload, s.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1085,6 +1135,8 @@ type StorageStorageController struct {
 	setEncryptionKeyTarget string
 	// setPersonalityKeyTarget is the URL to send SetPersonalityKey requests.
 	setPersonalityKeyTarget string
+	// setPredictedMediaLifeLeftThresholdTarget is the URL to send SetPredictedMediaLifeLeftThreshold requests.
+	setPredictedMediaLifeLeftThresholdTarget string
 	// unfreezePersonalityTarget is the URL to send UnfreezePersonality requests.
 	unfreezePersonalityTarget string
 	// blockSecurityIDUnsupportedDrives are the URIs for BlockSecurityIDUnsupportedDrives.
@@ -1111,16 +1163,17 @@ type StorageStorageController struct {
 func (s *StorageStorageController) UnmarshalJSON(b []byte) error {
 	type temp StorageStorageController
 	type sActions struct {
-		FreezePersonality             ActionTarget `json:"#Storage.FreezePersonality"`
-		GetPersonalityNonce           ActionTarget `json:"#Storage.GetPersonalityNonce"`
-		ImportForeignDrives           ActionTarget `json:"#Storage.ImportForeignDrives"`
-		RekeyExternalKey              ActionTarget `json:"#Storage.RekeyExternalKey"`
-		ResetToDefaults               ActionTarget `json:"#Storage.ResetToDefaults"`
-		RevertPersonalitiesToDefaults ActionTarget `json:"#Storage.RevertPersonalitiesToDefaults"`
-		SetControllerPassword         ActionTarget `json:"#Storage.SetControllerPassword"`
-		SetEncryptionKey              ActionTarget `json:"#Storage.SetEncryptionKey"`
-		SetPersonalityKey             ActionTarget `json:"#Storage.SetPersonalityKey"`
-		UnfreezePersonality           ActionTarget `json:"#Storage.UnfreezePersonality"`
+		FreezePersonality                  ActionTarget `json:"#Storage.FreezePersonality"`
+		GetPersonalityNonce                ActionTarget `json:"#Storage.GetPersonalityNonce"`
+		ImportForeignDrives                ActionTarget `json:"#Storage.ImportForeignDrives"`
+		RekeyExternalKey                   ActionTarget `json:"#Storage.RekeyExternalKey"`
+		ResetToDefaults                    ActionTarget `json:"#Storage.ResetToDefaults"`
+		RevertPersonalitiesToDefaults      ActionTarget `json:"#Storage.RevertPersonalitiesToDefaults"`
+		SetControllerPassword              ActionTarget `json:"#Storage.SetControllerPassword"`
+		SetEncryptionKey                   ActionTarget `json:"#Storage.SetEncryptionKey"`
+		SetPersonalityKey                  ActionTarget `json:"#Storage.SetPersonalityKey"`
+		SetPredictedMediaLifeLeftThreshold ActionTarget `json:"#Storage.SetPredictedMediaLifeLeftThreshold"`
+		UnfreezePersonality                ActionTarget `json:"#Storage.UnfreezePersonality"`
 	}
 	type sLinks struct {
 		BlockSecurityIDUnsupportedDrives        Links `json:"BlockSecurityIDUnsupportedDrives"`
@@ -1160,6 +1213,7 @@ func (s *StorageStorageController) UnmarshalJSON(b []byte) error {
 	s.setControllerPasswordTarget = tmp.Actions.SetControllerPassword.Target
 	s.setEncryptionKeyTarget = tmp.Actions.SetEncryptionKey.Target
 	s.setPersonalityKeyTarget = tmp.Actions.SetPersonalityKey.Target
+	s.setPredictedMediaLifeLeftThresholdTarget = tmp.Actions.SetPredictedMediaLifeLeftThreshold.Target
 	s.unfreezePersonalityTarget = tmp.Actions.UnfreezePersonality.Target
 	s.blockSecurityIDUnsupportedDrives = tmp.Links.BlockSecurityIDUnsupportedDrives.ToStrings()
 	s.blockSecurityIDUpdateUnsuccessfulDrives = tmp.Links.BlockSecurityIDUpdateUnsuccessfulDrives.ToStrings()
@@ -1367,6 +1421,22 @@ func (s *StorageStorageController) SetPersonalityKey(algorithm NMVePersonalityKe
 	payload["Key"] = key
 	resp, taskInfo, err := PostWithTask(s.client,
 		s.setPersonalityKeyTarget, payload, s.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// This action shall configure the 'PredictedMediaLifeLeftThreshold' for all
+// drives attached to this storage subsystem.
+// predictedMediaLifeLeftThreshold - This parameter shall contain the predicted
+// media life left threshold to be established for all drives attached to this
+// storage subsystem.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (s *StorageStorageController) SetPredictedMediaLifeLeftThreshold(predictedMediaLifeLeftThreshold int) (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	payload["PredictedMediaLifeLeftThreshold"] = predictedMediaLifeLeftThreshold
+	resp, taskInfo, err := PostWithTask(s.client,
+		s.setPredictedMediaLifeLeftThresholdTarget, payload, s.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }

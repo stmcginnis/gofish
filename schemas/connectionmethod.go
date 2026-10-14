@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ConnectionMethod.v1_2_0.json
-// 2025.2 - #ConnectionMethod.v1_2_0.ConnectionMethod
+// http://redfish.dmtf.org/schemas/v1/ConnectionMethod.v1_3_0.json
+// 2026.1 - #ConnectionMethod.v1_3_0.ConnectionMethod
 
 package schemas
 
@@ -18,6 +18,12 @@ const (
 	RedfishConnectionMethodType ConnectionMethodType = "Redfish"
 	// SNMPConnectionMethodType shall indicate the connection method is SNMP.
 	SNMPConnectionMethodType ConnectionMethodType = "SNMP"
+	// SNMPv1ConnectionMethodType shall indicate the connection method is SNMPv1.
+	SNMPv1ConnectionMethodType ConnectionMethodType = "SNMPv1"
+	// SNMPv2cConnectionMethodType shall indicate the connection method is SNMPv2c.
+	SNMPv2cConnectionMethodType ConnectionMethodType = "SNMPv2c"
+	// SNMPv3ConnectionMethodType shall indicate the connection method is SNMPv3.
+	SNMPv3ConnectionMethodType ConnectionMethodType = "SNMPv3"
 	// IPMI15ConnectionMethodType shall indicate the connection method is IPMI 1.5.
 	IPMI15ConnectionMethodType ConnectionMethodType = "IPMI15"
 	// IPMI20ConnectionMethodType shall indicate the connection method is IPMI 2.0.

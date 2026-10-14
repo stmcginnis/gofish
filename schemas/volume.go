@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/swordfish/v1/Volume.v1_10_2.json
-// 1.2.6 - #Volume.v1_10_2.Volume
+// http://redfish.dmtf.org/schemas/swordfish/v1/Volume.v1_11_0.json
+// 1.2.9 - #Volume.v1_11_0.Volume
 
 package schemas
 
@@ -272,6 +272,41 @@ const (
 	AdaptiveReadAheadReadCachePolicyType ReadCachePolicyType = "AdaptiveReadAhead"
 	// OffReadCachePolicyType The read cache is disabled.
 	OffReadCachePolicyType ReadCachePolicyType = "Off"
+)
+
+// ReservationType is Indicate the possible type of reservations.
+type ReservationType string
+
+const (
+	// WriteExclusiveReservationType Reservation type that allows only the host
+	// holding the reservation to read and write to a shared namespace. Only one
+	// reservation holder is allowed. All other hosts have read-only access to the
+	// shared namespace.
+	WriteExclusiveReservationType ReservationType = "WriteExclusive"
+	// ExclusiveAccessReservationType Reservation type that allows only the host
+	// holding the reservation to read and write to a shared namespace. Only one
+	// reservation holder is allowed. All other hosts are denied access.
+	ExclusiveAccessReservationType ReservationType = "ExclusiveAccess"
+	// WriteExclusiveRegistrantsOnlyReservationType Reservation type that allows
+	// the host holding a reservation to read and write to a shared namespace. Only
+	// one reservation holder is allowed. Hosts that have registered are permitted
+	// read/write access. Hosts not holding registrations have read-only access.
+	WriteExclusiveRegistrantsOnlyReservationType ReservationType = "WriteExclusiveRegistrantsOnly"
+	// ExclusiveAccessRegistrantsOnlyReservationType Reservation type that allows
+	// the host holding a reservation to read and write to a shared namespace. Only
+	// one reservation holder is allowed. Hosts that have registered are permitted
+	// read/write access. Hosts not holding registrations are not permitted access.
+	ExclusiveAccessRegistrantsOnlyReservationType ReservationType = "ExclusiveAccessRegistrantsOnly"
+	// WriteExclusiveAllRegistrantsReservationType Reservation type that allows all
+	// hosts that have registered to act as reservation holder and to read and
+	// write to a shared namespace. Hosts not holding registrations have read-only
+	// access.
+	WriteExclusiveAllRegistrantsReservationType ReservationType = "WriteExclusiveAllRegistrants"
+	// ExclusiveAccessAllRegistrantsReservationType Reservation type that allows
+	// all hosts that have registered to act as reservation holder and to have read
+	// and write access to a shared namespace. Hosts not holding registrations are
+	// not permitted access.
+	ExclusiveAccessAllRegistrantsReservationType ReservationType = "ExclusiveAccessAllRegistrants"
 )
 
 type VolumeType string
@@ -570,6 +605,11 @@ type Volume struct {
 	//
 	// Version added: v1.9.0
 	ReplicationEnabled bool
+	// ReservationState shall indicate the currently configured reservations for
+	// this volume.
+	//
+	// Version added: v1.11.0
+	ReservationState ReservationState
 	// Status shall contain the status of the Volume.
 	Status Status
 	// StripSizeBytes The number of consecutively addressed virtual disk blocks
@@ -607,6 +647,8 @@ type Volume struct {
 	changeRAIDLayoutTarget string
 	// checkConsistencyTarget is the URL to send CheckConsistency requests.
 	checkConsistencyTarget string
+	// clearReservationsTarget is the URL to send ClearReservations requests.
+	clearReservationsTarget string
 	// createReplicaTargetTarget is the URL to send CreateReplicaTarget requests.
 	createReplicaTargetTarget string
 	// forceEnableTarget is the URL to send ForceEnable requests.
@@ -664,6 +706,7 @@ func (v *Volume) UnmarshalJSON(b []byte) error {
 		AssignReplicaTarget            ActionTarget `json:"#Volume.AssignReplicaTarget"`
 		ChangeRAIDLayout               ActionTarget `json:"#Volume.ChangeRAIDLayout"`
 		CheckConsistency               ActionTarget `json:"#Volume.CheckConsistency"`
+		ClearReservations              ActionTarget `json:"#Volume.ClearReservations"`
 		CreateReplicaTarget            ActionTarget `json:"#Volume.CreateReplicaTarget"`
 		ForceEnable                    ActionTarget `json:"#Volume.ForceEnable"`
 		Initialize                     ActionTarget `json:"#Volume.Initialize"`
@@ -710,6 +753,7 @@ func (v *Volume) UnmarshalJSON(b []byte) error {
 	v.assignReplicaTargetTarget = tmp.Actions.AssignReplicaTarget.Target
 	v.changeRAIDLayoutTarget = tmp.Actions.ChangeRAIDLayout.Target
 	v.checkConsistencyTarget = tmp.Actions.CheckConsistency.Target
+	v.clearReservationsTarget = tmp.Actions.ClearReservations.Target
 	v.createReplicaTargetTarget = tmp.Actions.CreateReplicaTarget.Target
 	v.forceEnableTarget = tmp.Actions.ForceEnable.Target
 	v.initializeTarget = tmp.Actions.Initialize.Target
@@ -837,6 +881,19 @@ func (v *Volume) CheckConsistency() (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	resp, taskInfo, err := PostWithTask(v.client,
 		v.checkConsistencyTarget, payload, v.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// This action shall request to clear any reservations held by the volume. This
+// command should only be performed by StorageAdministrators when host
+// applications using the reservations have encountered an unresolvable state.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (v *Volume) ClearReservations() (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	resp, taskInfo, err := PostWithTask(v.client,
+		v.clearReservationsTarget, payload, v.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1284,4 +1341,26 @@ func (o *Operation) AssociatedFeaturesRegistry(client Client) (*FeaturesRegistry
 		return nil, nil
 	}
 	return GetObject[FeaturesRegistry](client, o.associatedFeaturesRegistry)
+}
+
+// ReservationState Defines the ReservationState for this Volume.
+type ReservationState struct {
+	// RegisteredKeys shall identify the registered keys for the Volume. Hosts need
+	// to register a unique key to be able to reserve a volume for access. Key is
+	// 64-bit number. A volume can have 1 or more registered keys up to the
+	// supported maximum limit.
+	//
+	// Version added: v1.11.0
+	RegisteredKeys []*int
+	// ReservationHolder shall identify the registered keys for the Volume. Hosts
+	// need to register a unique key to be able to reserve a volume for access. Key
+	// is 64-bit number. A volume can have 1 or more registered keys up to the
+	// supported maximum limit.
+	//
+	// Version added: v1.11.0
+	ReservationHolder []*int
+	// ReservationType shall identify therReservation type for this Volume.
+	//
+	// Version added: v1.11.0
+	ReservationType ReservationType
 }

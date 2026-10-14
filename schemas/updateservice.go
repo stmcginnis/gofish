@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/UpdateService.v1_17_0.json
-// 2025.3 - #UpdateService.v1_17_0.UpdateService
+// http://redfish.dmtf.org/schemas/v1/UpdateService.v1_17_1.json
+// 2025.3 - #UpdateService.v1_17_1.UpdateService
 
 package schemas
 
@@ -160,7 +160,9 @@ type UpdateService struct {
 	// software image file shall be applied to each applicable element of the
 	// specified aggregate. If the target resource specifies a 'ComputerSystem'
 	// resource, the software image file shall be applied to the applicable
-	// components within the specified computer system.
+	// components within the specified computer system. If the provided software
+	// image is a bundle of multiple images, the service shall apply each software
+	// image as specified by this parameter.
 	//
 	// Version added: v1.2.0
 	//
@@ -473,9 +475,10 @@ type UpdateServiceSimpleUpdateParameters struct {
 	// parameter, the service shall default this value to 'false'.
 	ForceUpdate bool `json:"ForceUpdate,omitempty"`
 	// ImageURI shall contain an RFC3986-defined URI that links to a software image
-	// that the update service retrieves to install software in that image. This
-	// URI should contain a scheme that describes the transfer protocol. If the
-	// 'TransferProtocol' parameter is absent or not supported, and a transfer
+	// that the update service retrieves to install software in that image. The
+	// software image may contain multiple images if supported by the image format.
+	// This URI should contain a scheme that describes the transfer protocol. If
+	// the 'TransferProtocol' parameter is absent or not supported, and a transfer
 	// protocol is not specified by a scheme contained within this URI, the service
 	// shall use HTTP to get the image.
 	ImageURI string `json:"ImageURI,omitempty"`
@@ -503,7 +506,9 @@ type UpdateServiceSimpleUpdateParameters struct {
 	// file shall be applied to each applicable element of the specified aggregate.
 	// If the target resource specifies a 'ComputerSystem' resource, the software
 	// image file shall be applied to the applicable components within the
-	// specified computer system.
+	// specified computer system. If the provided software image is a bundle of
+	// multiple images, the service shall apply each software image as specified by
+	// this parameter.
 	Targets []string `json:"Targets,omitempty"`
 	// TransferProtocol shall contain the network protocol that the update service
 	// shall use to retrieve the software image located at the URI specified by the
@@ -705,7 +710,9 @@ type UpdateParameters struct {
 	// software image file shall be applied to each applicable element of the
 	// specified aggregate. If the target resource specifies a 'ComputerSystem'
 	// resource, the software image file shall be applied to the applicable
-	// components within the specified computer system.
+	// components within the specified computer system. If the provided software
+	// image is a bundle of multiple images, the service shall apply each software
+	// image as specified by this parameter.
 	//
 	// Version added: v1.6.0
 	Targets []string

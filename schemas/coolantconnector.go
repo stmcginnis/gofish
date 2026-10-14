@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/CoolantConnector.v1_3_0.json
-// 2025.3 - #CoolantConnector.v1_3_0.CoolantConnector
+// http://redfish.dmtf.org/schemas/v1/CoolantConnector.v1_5_0.json
+// 2026.2 - #CoolantConnector.v1_5_0.CoolantConnector
 
 package schemas
 
@@ -24,6 +24,15 @@ const (
 	InlineCoolantConnectorType CoolantConnectorType = "Inline"
 	// ClosedCoolantConnectorType is a closed or self-contained loop.
 	ClosedCoolantConnectorType CoolantConnectorType = "Closed"
+	// PairGroupMemberCoolantConnectorType is a member of a group of connection
+	// pairs.
+	PairGroupMemberCoolantConnectorType CoolantConnectorType = "PairGroupMember"
+	// SupplyGroupMemberCoolantConnectorType is a member of a group of supply
+	// connections.
+	SupplyGroupMemberCoolantConnectorType CoolantConnectorType = "SupplyGroupMember"
+	// ReturnGroupMemberCoolantConnectorType is a member of a group of return
+	// connections.
+	ReturnGroupMemberCoolantConnectorType CoolantConnectorType = "ReturnGroupMember"
 )
 
 type ValveState string
@@ -61,6 +70,22 @@ const (
 // implementation.
 type CoolantConnector struct {
 	Entity
+	// ConductivityMSPerCm shall contain the liquid conductivity of the coolant, in
+	// millisiemens per centimeter (mS/cm) units. The 'DataSourceUri' property, if
+	// present, shall reference a resource of type 'Sensor' with the 'ReadingType'
+	// property containing the value 'LiquidConductivity'.
+	//
+	// Version added: v1.5.0
+	ConductivityMSPerCm SensorExcerpt
+	// ConnectorGroup shall contain information for a group of coolant connectors
+	// that provide the full capacity represented by this coolant connector
+	// instance. The 'CoolantConnectorType' of each member in this group shall
+	// contain a value of 'SupplyGroupMember', 'ReturnGroupMember', or
+	// 'PairGroupMember', to align with the 'Supply', 'Return', or 'Pair' value of
+	// this resource.
+	//
+	// Version added: v1.4.0
+	ConnectorGroup RedundantGroup
 	// Coolant shall contain details regarding the coolant contained or used by
 	// this unit.
 	Coolant Coolant
@@ -89,13 +114,15 @@ type CoolantConnector struct {
 	// difference in pressure between the supply and outflow or return connection
 	// to the cooling loop. The value of the 'DataSourceUri' property, if present,
 	// shall reference a resource of type 'Sensor' with the 'ReadingType' property
-	// containing the value 'PressurekPa'.
+	// containing the value 'PressurekPa', and the 'ReadingBasis' property
+	// containing the value 'Delta'.
 	DeltaPressurekPa SensorExcerpt
 	// DeltaTemperatureCelsius shall contain the change in temperature, in degree
 	// Celsius units, between the supply connection and the outflow or return
 	// connection to the cooling loop. The value of the 'DataSourceUri' property,
 	// if present, shall reference a resource of type 'Sensor' with the
-	// 'ReadingType' property containing the value 'Temperature'.
+	// 'ReadingType' property containing the value 'Temperature', and the
+	// 'ReadingBasis' property containing the value 'Delta'.
 	DeltaTemperatureCelsius SensorExcerpt
 	// DeltaTemperatureControlCelsius shall contain the desired differential
 	// temperature, in degree Celsius units, of this coolant connector. The value
@@ -107,6 +134,14 @@ type CoolantConnector struct {
 	//
 	// Version added: v1.1.0
 	DeltaTemperatureControlCelsius ControlSingleLoopExcerpt
+	// DewPointProximityCelsius shall contain the difference, in degrees celsius,
+	// between the coolant temperature and the dew point. The 'DataSourceUri'
+	// property, if present, shall reference a resource of type 'Sensor' with the
+	// 'ReadingType' property containing the value 'Temperature', and the
+	// 'ReadingBasis' property containing the value 'Delta'.
+	//
+	// Version added: v1.4.0
+	DewPointProximityCelsius SensorExcerpt
 	// FlowControlLitersPerMinute shall contain the desired liquid flow rate, in
 	// liters per minute units, of this coolant connector. The value of the
 	// 'DataSourceUri' property, if present, shall reference a resource of type
@@ -227,6 +262,13 @@ type CoolantConnector struct {
 	//
 	// Version added: v1.1.0
 	SupplyTemperatureControlCelsius ControlSingleLoopExcerpt
+	// TurbidityNTU shall contain the turbidity of the coolant, in Nephelometric
+	// Turbidity Units (NTU). The 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Turbidity'.
+	//
+	// Version added: v1.5.0
+	TurbidityNTU SensorExcerpt
 	// ValvePositionControlPercent shall contain the desired valve position, in
 	// percent units, of this coolant connector. The value of the 'DataSourceUri'
 	// property, if present, shall reference a resource of type 'Control' with the
@@ -243,6 +285,12 @@ type CoolantConnector struct {
 	//
 	// Version added: v1.2.0
 	ValvePositionPercent SensorExcerpt
+	// PH shall contain the acidity or alkalinity of the coolant, in pH units. The
+	// 'DataSourceUri' property, if present, shall reference a resource of type
+	// 'Sensor' with the 'ReadingType' property containing the value 'pH'.
+	//
+	// Version added: v1.5.0
+	PH SensorExcerpt `json:"pH"`
 	// valveControlTarget is the URL to send ValveControl requests.
 	valveControlTarget string
 	// connectedChassis are the URIs for ConnectedChassis.

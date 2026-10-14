@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/AttributeRegistry.v1_4_0.json
-// 2025.3 - #AttributeRegistry.v1_4_0.AttributeRegistry
+// http://redfish.dmtf.org/schemas/v1/AttributeRegistry.v1_5_1.json
+// 2026.1 - #AttributeRegistry.v1_5_1.AttributeRegistry
 
 package schemas
 
@@ -50,6 +50,10 @@ const (
 	LSSMapFromCondition MapFromCondition = "LSS"
 	// LEQMapFromCondition The logical operation for 'Less than or Equal'.
 	LEQMapFromCondition MapFromCondition = "LEQ"
+	// BITANDMapFromCondition The logical operation for 'BITAND'.
+	BITANDMapFromCondition MapFromCondition = "BITAND"
+	// BITORMapFromCondition The logical operation for 'BITOR'.
+	BITORMapFromCondition MapFromCondition = "BITOR"
 )
 
 type MapFromProperty string
@@ -87,6 +91,8 @@ const (
 	ANDMapTerms MapTerms = "AND"
 	// ORMapTerms The operation used for logical 'OR' of dependency terms.
 	ORMapTerms MapTerms = "OR"
+	// NOTMapTerms The operation used for logical 'NOT' of dependency terms.
+	NOTMapTerms MapTerms = "NOT"
 )
 
 type MapToProperty string
@@ -198,9 +204,13 @@ type Attributes struct {
 	AttributeName string
 	// CurrentValue shall contain the placeholder of the current value for the
 	// attribute, to aid in evaluating dependencies. The evaluation results of the
-	// 'Dependencies' array may affect the current attribute value.
+	// 'Dependencies' array may affect the current attribute value. For attributes
+	// of the 'Enumeration' type, this property shall contain one of the values
+	// specified by the 'ValueName' property in the 'Value' array or 'null'.
 	CurrentValue any
-	// DefaultValue shall contain the default value for the attribute.
+	// DefaultValue shall contain the default value for the attribute. For
+	// attributes of the 'Enumeration' type, this property shall contain one of the
+	// values specified by the 'ValueName' property in the 'Value' array or 'null'.
 	DefaultValue any
 	// DisplayName shall contain the user-readable display string for the attribute
 	// in the defined language.
@@ -356,6 +366,11 @@ type MapFrom struct {
 	// dependency expression, they should be evaluated in array order, meaning they
 	// are evaluated left-to-right when displayed as a logic expression.
 	MapTerms MapTerms
+	// Subexpressions shall contain the subexpressions to use to evaluate this
+	// dependency expression term.
+	//
+	// Version added: v1.5.0
+	Subexpressions []MapFrom
 }
 
 // Menus shall describe an attribute's menu and its hierarchy.

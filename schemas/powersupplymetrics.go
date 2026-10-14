@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/PowerSupplyMetrics.v1_2_0.json
-// 2025.4 - #PowerSupplyMetrics.v1_2_0.PowerSupplyMetrics
+// http://redfish.dmtf.org/schemas/v1/PowerSupplyMetrics.v1_3_0.json
+// 2026.2 - #PowerSupplyMetrics.v1_3_0.PowerSupplyMetrics
 
 package schemas
 
@@ -15,6 +15,13 @@ import (
 // unit for a Redfish implementation.
 type PowerSupplyMetrics struct {
 	Entity
+	// ChargePercent shall contain the charge level, in percent units, for this
+	// power supply. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Percent'.
+	//
+	// Version added: v1.3.0
+	ChargePercent SensorExcerpt
 	// EnergykWh shall contain the total energy, in kilowatt-hour units, for this
 	// unit that represents the 'Total' 'ElectricalContext' sensor when multiple
 	// energy sensors exist. The value of the 'DataSourceUri' property, if present,
@@ -90,6 +97,13 @@ type PowerSupplyMetrics struct {
 	//
 	// Version added: v1.2.0
 	PolyPhaseVoltage VoltageSensors
+	// PowerLoadPercent shall contain the power load, in percent units, for this
+	// power supply. The value of the 'DataSourceUri' property, if present, shall
+	// reference a resource of type 'Sensor' with the 'ReadingType' property
+	// containing the value 'Percent'.
+	//
+	// Version added: v1.3.0
+	PowerLoadPercent SensorExcerpt
 	// RailCurrentAmps shall contain the output currents, in ampere units, for this
 	// power supply. The value of the 'DataSourceUri' property, if present, shall
 	// reference a resource of type 'Sensor' with the 'ReadingType' property

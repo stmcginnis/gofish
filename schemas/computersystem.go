@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/ComputerSystem.v1_27_0.json
-// 2025.4 - #ComputerSystem.v1_27_0.ComputerSystem
+// http://redfish.dmtf.org/schemas/v1/ComputerSystem.v1_29_0.json
+// 2026.2 - #ComputerSystem.v1_29_0.ComputerSystem
 
 package schemas
 
@@ -189,6 +189,38 @@ const (
 	ExpandableSystemCompositionUseCase CompositionUseCase = "ExpandableSystem"
 )
 
+type ConsoleAccessMode string
+
+const (
+	// ReadWriteConsoleAccessMode shall indicate full interactive access to the
+	// console with the ability to view the display and provide keyboard and mouse
+	// input.
+	ReadWriteConsoleAccessMode ConsoleAccessMode = "ReadWrite"
+	// ReadOnlyConsoleAccessMode shall indicate read-only access where the user can
+	// view the console display but cannot provide keyboard or mouse input. This
+	// mode is typically used for monitoring, observation, or troubleshooting
+	// scenarios.
+	ReadOnlyConsoleAccessMode ConsoleAccessMode = "ReadOnly"
+)
+
+type ConsoleAuthenticationMethod string
+
+const (
+	// ExplicitLoginConsoleAuthenticationMethod shall indicate that the console
+	// service requires explicit login with credentials that are independent of any
+	// other session. This is the typical authentication method for end-user access
+	// to HTML5 consoles and VNC password-based authentication.
+	ExplicitLoginConsoleAuthenticationMethod ConsoleAuthenticationMethod = "ExplicitLogin"
+	// OneTimeURLConsoleAuthenticationMethod shall indicate that the console
+	// requires a one-time URL obtained through the 'GraphicalConsoleGetOneTimeURL'
+	// action. The URL itself serves as the authentication credential.
+	OneTimeURLConsoleAuthenticationMethod ConsoleAuthenticationMethod = "OneTimeURL"
+	// OneTimePasswordConsoleAuthenticationMethod shall indicate that the console
+	// requires a one-time password obtained through the
+	// 'GraphicalConsoleSetOneTimePassword' action.
+	OneTimePasswordConsoleAuthenticationMethod ConsoleAuthenticationMethod = "OneTimePassword"
+)
+
 type DecommissionType string
 
 const (
@@ -223,7 +255,8 @@ const (
 	LogsDecommissionType DecommissionType = "Logs"
 	// TPMDecommissionType shall indicate the service resets all user-accessible
 	// TPM device settings to factory defaults. All sensitive data stored within
-	// the applicable TPMs shall be erased.
+	// the applicable TPMs shall be erased. This shall be equivalent to performing
+	// the 'TPMClear' action on each 'TrustedComponent' resource.
 	TPMDecommissionType DecommissionType = "TPM"
 )
 
@@ -279,6 +312,20 @@ const (
 	OemGraphicalConnectTypesSupported GraphicalConnectTypesSupported = "Oem" // from manager
 )
 
+type GraphicalConsoleType string
+
+const (
+	// VNCGraphicalConsoleType Virtual Network Computing (VNC) protocol, which uses
+	// the RFC6143-defined Remote Framebuffer (RFB) protocol as its base protocol.
+	VNCGraphicalConsoleType GraphicalConsoleType = "VNC"
+	// RDPGraphicalConsoleType Remote Desktop Protocol.
+	RDPGraphicalConsoleType GraphicalConsoleType = "RDP"
+	// HTML5GraphicalConsoleType HTML5 browser-based console.
+	HTML5GraphicalConsoleType GraphicalConsoleType = "HTML5"
+	// KVMIPGraphicalConsoleType Vendor-specific KVM-IP protocol.
+	KVMIPGraphicalConsoleType GraphicalConsoleType = "KVMIP"
+)
+
 // HostingRole is The enumerations of 'HostingRole' specify different features
 // that the hosting computer system supports.
 type HostingRole string
@@ -305,6 +352,13 @@ const (
 	// ContainerServerHostingRole The system hosts functionality that supports the
 	// system acting as a container server.
 	ContainerServerHostingRole HostingRole = "ContainerServer"
+)
+
+type ImageChecksumAlgorithm string
+
+const (
+	// SHA256ImageChecksumAlgorithm SHA-256 hash algorithm.
+	SHA256ImageChecksumAlgorithm ImageChecksumAlgorithm = "SHA256"
 )
 
 type InterfaceType string
@@ -558,7 +612,10 @@ const (
 )
 
 // ComputerSystem shall represent a computing system in the Redfish
-// Specification.
+// Specification. The 'ComputerSystem' is a singular entity containing all the
+// components, such as memory, CPU, and other devices, necessary to boot an
+// operating system and run user workloads. Services shall not split components
+// of a system across multiple 'ComputerSystem' resources.
 type ComputerSystem struct {
 	Entity
 	// AssetTag shall contain the system asset tag value. Modifying this property
@@ -576,6 +633,23 @@ type ComputerSystem struct {
 	BiosVersion string
 	// Boot shall contain the boot settings for this system.
 	Boot Boot
+	// BootImagePushURI shall contain a URI used to perform a multipart HTTP or
+	// HTTPS 'POST' of a virtual media image stored locally on the client. Services
+	// shall save the uploaded image in the 'LocalImageStore' resource collection
+	// subordinate to the 'UpdateService' resource. If no optional parameters are
+	// specified, the service shall immediately boot the system from the image upon
+	// successful upload and the image shall remain configured until the subsequent
+	// reboot. The parameters of this operation specify the retention policy of the
+	// provided image. If '@Redfish.OperationApplyTime' is not provided by the
+	// client, the value shall be assumed to be 'Immediate'. A client may specify
+	// 'OnReset' to defer the boot until a separate reset is initiated. Services
+	// may rate-limit requests to this URI to preserve the wear-leveling of the
+	// service's storage. The value of this property should not contain a URI of a
+	// Redfish resource. See the 'Redfish-defined URIs and relative reference
+	// rules' clause in the Redfish Specification.
+	//
+	// Version added: v1.28.0
+	BootImagePushURI string
 	// BootProgress shall contain the last boot progress state and time.
 	//
 	// Version added: v1.13.0
@@ -599,8 +673,8 @@ type ComputerSystem struct {
 	//
 	// Version added: v1.10.0
 	fabricAdapters string
-	// GraphicalConsole shall contain the information about the graphical console
-	// (KVM-IP) service of this system.
+	// GraphicalConsole shall contain information about the graphical console
+	// services of this system.
 	//
 	// Version added: v1.13.0
 	GraphicalConsole HostGraphicalConsole
@@ -791,6 +865,11 @@ type ComputerSystem struct {
 	// Processors shall contain a link to a resource collection of type
 	// 'ProcessorCollection'.
 	processors string
+	// ProductionDate shall contain the date of production or manufacture for this
+	// system.
+	//
+	// Version added: v1.29.0
+	ProductionDate string
 	// Redundancy shall contain a set of redundancy entities. Each entity specifies
 	// a kind and level of redundancy and a collection, or redundancy set, of other
 	// computer systems that provide the specified redundancy to this computer
@@ -869,12 +948,23 @@ type ComputerSystem struct {
 	//
 	// Version added: v1.13.0
 	VirtualMediaConfig ComputerVirtualMediaConfig
+	// Virtualization shall contain the information about the virtualization
+	// abilities of this system.
+	//
+	// Version added: v1.28.0
+	Virtualization Virtualization
 	// addResourceBlockTarget is the URL to send AddResourceBlock requests.
 	addResourceBlockTarget string
 	// decommissionTarget is the URL to send Decommission requests.
 	decommissionTarget string
 	// exportConfigurationTarget is the URL to send ExportConfiguration requests.
 	exportConfigurationTarget string
+	// graphicalConsoleGetOneTimeURLTarget is the URL to send GraphicalConsoleGetOneTimeURL requests.
+	graphicalConsoleGetOneTimeURLTarget string
+	// graphicalConsoleSetOneTimePasswordTarget is the URL to send GraphicalConsoleSetOneTimePassword requests.
+	graphicalConsoleSetOneTimePasswordTarget string
+	// graphicalConsoleSetPasswordTarget is the URL to send GraphicalConsoleSetPassword requests.
+	graphicalConsoleSetPasswordTarget string
 	// removeResourceBlockTarget is the URL to send RemoveResourceBlock requests.
 	removeResourceBlockTarget string
 	// resetTarget is the URL to send Reset requests.
@@ -924,11 +1014,14 @@ type ComputerSystem struct {
 func (c *ComputerSystem) UnmarshalJSON(b []byte) error {
 	type temp ComputerSystem
 	type cActions struct {
-		AddResourceBlock    ActionTarget `json:"#ComputerSystem.AddResourceBlock"`
-		Decommission        ActionTarget `json:"#ComputerSystem.Decommission"`
-		ExportConfiguration ActionTarget `json:"#ComputerSystem.ExportConfiguration"`
-		RemoveResourceBlock ActionTarget `json:"#ComputerSystem.RemoveResourceBlock"`
-		Reset               struct {
+		AddResourceBlock                   ActionTarget `json:"#ComputerSystem.AddResourceBlock"`
+		Decommission                       ActionTarget `json:"#ComputerSystem.Decommission"`
+		ExportConfiguration                ActionTarget `json:"#ComputerSystem.ExportConfiguration"`
+		GraphicalConsoleGetOneTimeURL      ActionTarget `json:"#ComputerSystem.GraphicalConsoleGetOneTimeURL"`
+		GraphicalConsoleSetOneTimePassword ActionTarget `json:"#ComputerSystem.GraphicalConsoleSetOneTimePassword"`
+		GraphicalConsoleSetPassword        ActionTarget `json:"#ComputerSystem.GraphicalConsoleSetPassword"`
+		RemoveResourceBlock                ActionTarget `json:"#ComputerSystem.RemoveResourceBlock"`
+		Reset                              struct {
 			ActionTarget
 			AllowedResetTypes []ResetType `json:"ResetType@Redfish.AllowableValues"`
 		} `json:"#ComputerSystem.Reset"`
@@ -985,6 +1078,9 @@ func (c *ComputerSystem) UnmarshalJSON(b []byte) error {
 	c.addResourceBlockTarget = tmp.Actions.AddResourceBlock.Target
 	c.decommissionTarget = tmp.Actions.Decommission.Target
 	c.exportConfigurationTarget = tmp.Actions.ExportConfiguration.Target
+	c.graphicalConsoleGetOneTimeURLTarget = tmp.Actions.GraphicalConsoleGetOneTimeURL.Target
+	c.graphicalConsoleSetOneTimePasswordTarget = tmp.Actions.GraphicalConsoleSetOneTimePassword.Target
+	c.graphicalConsoleSetPasswordTarget = tmp.Actions.GraphicalConsoleSetPassword.Target
 	c.removeResourceBlockTarget = tmp.Actions.RemoveResourceBlock.Target
 	c.resetTarget = tmp.Actions.Reset.Target
 	c.resetActionInfoTarget = tmp.Actions.Reset.ActionInfoTarget
@@ -1195,6 +1291,110 @@ type ComputerSystemExportConfigurationParameters struct {
 func (c *ComputerSystem) ExportConfiguration(params *ComputerSystemExportConfigurationParameters) (*TaskMonitorInfo, error) {
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.exportConfigurationTarget, params, c.Headers(), false)
+	defer DeferredCleanupHTTPResponse(resp)
+	return taskInfo, err
+}
+
+// This action shall generate and return a single-use URL that provides
+// time-limited access to the graphical console. The URL should expire after a
+// single use and validity for a new connection shall expire after a
+// service-defined time period. This action is typically used with HTML5
+// console services.
+// accessMode - This parameter shall contain the requested access mode for the
+// console session. If not provided, the service shall grant 'ReadWrite' access
+// if supported.
+// consoleType - This parameter shall contain the type of graphical console for
+// which to generate the single-use URL. If not provided, the service may
+// select a default console type.
+// validityPeriodSeconds - This parameter shall contain the number of seconds
+// for which the URL remains valid. If not provided, the service shall use an
+// implementation-specific default validity period.
+func (c *ComputerSystem) GraphicalConsoleGetOneTimeURL(accessMode ConsoleAccessMode, consoleType GraphicalConsoleType, validityPeriodSeconds uint) (*GraphicalConsoleGetOneTimeURLResponse, error) {
+	payload := make(map[string]any)
+	payload["AccessMode"] = accessMode
+	payload["ConsoleType"] = consoleType
+	payload["ValidityPeriodSeconds"] = validityPeriodSeconds
+
+	resp, err := c.PostWithResponse(c.graphicalConsoleGetOneTimeURLTarget, payload)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, CleanupHTTPResponse(resp)
+	}
+
+	var result GraphicalConsoleGetOneTimeURLResponse
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// ComputerSystemGraphicalConsoleSetOneTimePasswordParameters holds the parameters for the GraphicalConsoleSetOneTimePassword action.
+type ComputerSystemGraphicalConsoleSetOneTimePasswordParameters struct {
+	// AccessMode shall contain the access mode for sessions that authenticate
+	// using this password. If not provided, the service shall grant 'ReadWrite'
+	// access if supported.
+	AccessMode ConsoleAccessMode `json:"AccessMode,omitempty"`
+	// ConsoleType shall contain the type of graphical console for which to set the
+	// one-time password. If not provided, the service may select a default console
+	// type.
+	ConsoleType GraphicalConsoleType `json:"ConsoleType,omitempty"`
+	// Password shall contain the one-time password to set for the graphical
+	// console. If not provided, the service shall generate a random password.
+	Password string `json:"Password,omitempty"`
+	// ValidityPeriodSeconds shall contain the number of seconds for which the
+	// password should remain valid. If not provided, the service shall use an
+	// implementation-specific default validity period.
+	ValidityPeriodSeconds uint `json:"ValidityPeriodSeconds,omitempty"`
+}
+
+// This action shall set a one-time or single-use password for accessing the
+// graphical console. The password shall expire after a single successful
+// authentication or after a service-defined time period. This action is
+// typically used with VNC console services. The service may return an error if
+// it cannot rotate the password due to an in-progress session.
+func (c *ComputerSystem) GraphicalConsoleSetOneTimePassword(params *ComputerSystemGraphicalConsoleSetOneTimePasswordParameters) (*GraphicalConsoleSetOneTimePasswordResponse, error) {
+	resp, err := c.PostWithResponse(c.graphicalConsoleSetOneTimePasswordTarget, params)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, CleanupHTTPResponse(resp)
+	}
+
+	var result GraphicalConsoleSetOneTimePasswordResponse
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// This action shall set a persistent password for accessing the graphical
+// console. This action is typically used with VNC services where the Redfish
+// client is the authoritative manager and needs to establish or change the
+// console password. The password shall remain valid until explicitly changed
+// through another invocation of this action.
+// consoleType - This parameter shall contain the type of graphical console for
+// which to set the persistent password.
+// password - This parameter shall contain the persistent password to set for
+// the graphical console.
+//
+// If TaskMonitorInfo is not nil it can be used to monitor async tasks.
+func (c *ComputerSystem) GraphicalConsoleSetPassword(consoleType GraphicalConsoleType, password string) (*TaskMonitorInfo, error) {
+	payload := make(map[string]any)
+	payload["ConsoleType"] = consoleType
+	payload["Password"] = password
+	resp, taskInfo, err := PostWithTask(c.client,
+		c.graphicalConsoleSetPasswordTarget, payload, c.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
 	return taskInfo, err
 }
@@ -1714,6 +1914,54 @@ func (bo *Boot) Certificates(client Client) ([]*Certificate, error) {
 	return GetCollectionObjects[Certificate](client, bo.certificates)
 }
 
+// BootImageParameters shall contain the parameters for a push-based virtual
+// media upload and boot using the URI specified by the 'BootImagePushURI'
+// property.
+type BootImageParameters struct {
+	// DiscardOnEject shall indicate whether the service deletes the virtual media
+	// image from the resource collection referenced by the 'LocalImageStore'
+	// property upon ejection of the image. If the client does not provide this
+	// parameter, the service shall default this value to 'true'. If 'false', the
+	// image shall remain in the local image store after ejection and may be
+	// referenced by subsequent operations.
+	//
+	// Version added: v1.28.0
+	DiscardOnEject bool
+	// EjectOnReboot shall indicate whether the service automatically ejects the
+	// virtual media image and restores the previous boot configuration upon the
+	// subsequent reboot of the system. If the client does not provide this
+	// parameter, the service shall default this value to 'true'. If 'false', the
+	// pushed virtual media image shall remain configured as the boot source until
+	// explicitly ejected by the client.
+	//
+	// Version added: v1.28.0
+	EjectOnReboot bool
+	// ImageChecksum shall contain the hex-encoded checksum of the virtual media
+	// image computed using the algorithm specified by the 'ImageChecksumAlgorithm'
+	// parameter. If this parameter is provided, the 'ImageChecksumAlgorithm'
+	// parameter shall also be provided. If provided, the service shall validate
+	// the uploaded image against this checksum prior to configuring it as a boot
+	// source. If the checksum does not match, the service shall discard the image,
+	// shall not reboot the system, and shall return the HTTP '400 Bad Request'
+	// status code with the 'VerificationFailed' message from the Update Message
+	// Registry.
+	//
+	// Version added: v1.28.0
+	ImageChecksum string
+	// ImageChecksumAlgorithm shall contain the algorithm used to compute the value
+	// of the 'ImageChecksum' parameter. This parameter is required when the
+	// 'ImageChecksum' parameter is provided.
+	//
+	// Version added: v1.28.0
+	ImageChecksumAlgorithm ImageChecksumAlgorithm
+	// OEM shall contain the OEM extensions. All values for properties contained in
+	// this object shall conform to the Redfish Specification-described
+	// requirements.
+	//
+	// Version added: v1.28.0
+	OEM json.RawMessage `json:"Oem"`
+}
+
 // BootProgress shall contain the last boot progress state and time.
 type BootProgress struct {
 	// LastBootTimeSeconds shall contain the number of seconds that elapsed between
@@ -1756,14 +2004,179 @@ type Composition struct {
 	UseCases []CompositionUseCase
 }
 
-// HostGraphicalConsole shall describe a graphical console service for a
+// GraphicalConsoleGetOneTimeURLResponse shall contain the response from the
+// GraphicalConsoleGetOneTimeURL action.
+type GraphicalConsoleGetOneTimeURLResponse struct {
+	// AccessMode shall contain the access mode that was granted for the console
+	// session.
+	//
+	// Version added: v1.29.0
+	AccessMode ConsoleAccessMode
+	// ConsoleType shall contain the type of graphical console to which the URL
+	// provides access.
+	//
+	// Version added: v1.29.0
+	ConsoleType GraphicalConsoleType
+	// ConsoleURL shall contain the single-use HTTPS URL for accessing the
+	// graphical console. The URL serves as an authentication credential and shall
+	// use HTTPS to prevent exposure of the token in transit. This URL shall expire
+	// after a single use or after the specified validity period.
+	//
+	// Version added: v1.29.0
+	ConsoleURL string
+	// ValidUntil shall contain the date and time when the URL will expire and no
+	// longer be valid for accessing the graphical console.
+	//
+	// Version added: v1.29.0
+	ValidUntil string
+}
+
+// GraphicalConsoleProtocol shall describe a graphical console service for a
+// computer system.
+type GraphicalConsoleProtocol struct {
+	// AllowsSharedAccess shall indicate whether the console service allows
+	// multiple concurrent users to access the same console session. If 'true', the
+	// console supports shared or multiple concurrent sessions. If 'false', console
+	// access is exclusive to a single user at a time.
+	//
+	// Version added: v1.29.0
+	AllowsSharedAccess bool
+	// AuthenticationMethod shall contain the authentication method required for
+	// accessing the graphical console.
+	//
+	// Version added: v1.29.0
+	AuthenticationMethod ConsoleAuthenticationMethod
+	// HostName shall contain the hostname or IP address to use when connecting to
+	// the graphical console.
+	//
+	// Version added: v1.29.0
+	HostName string
+	// Port shall contain the port assigned to the service.
+	//
+	// Version added: v1.29.0
+	Port *uint `json:",omitempty"`
+	// ServiceEnabled shall indicate whether the protocol for the service is
+	// enabled.
+	//
+	// Version added: v1.29.0
+	ServiceEnabled bool
+	// SupportedAccessModes shall contain the access modes that this console
+	// service supports. If not present, only exclusive 'ReadWrite' access shall be
+	// assumed.
+	//
+	// Version added: v1.29.0
+	SupportedAccessModes []ConsoleAccessMode
+}
+
+// GraphicalConsoleSetOneTimePasswordResponse shall contain the response from
+// the GraphicalConsoleSetOneTimePassword action.
+type GraphicalConsoleSetOneTimePasswordResponse struct {
+	// AccessMode shall contain the access mode that was granted for sessions that
+	// authenticate using this password.
+	//
+	// Version added: v1.29.0
+	AccessMode ConsoleAccessMode
+	// ConsoleType shall contain the type of graphical console to which the
+	// password provides access.
+	//
+	// Version added: v1.29.0
+	ConsoleType GraphicalConsoleType
+	// Password shall contain the one-time password for accessing the graphical
+	// console. If the client provided a password in the action request, this value
+	// should match. If the service generated a password, this value shall contain
+	// the generated password.
+	//
+	// Version added: v1.29.0
+	Password string
+	// ValidUntil shall contain the date and time when the password will expire and
+	// no longer be valid for accessing the graphical console.
+	//
+	// Version added: v1.29.0
+	ValidUntil string
+}
+
+// HTML5Console shall describe an HTML5 graphical console service for a computer
+// system. HTML5 console services shall be served over HTTPS to protect session
+// credentials and console data in transit.
+type HTML5Console struct {
+	// AllowsSharedAccess shall indicate whether the console service allows
+	// multiple concurrent users to access the same console session. If 'true', the
+	// console supports shared or multiple concurrent sessions. If 'false', console
+	// access is exclusive to a single user at a time.
+	//
+	// Version added: v1.29.0
+	AllowsSharedAccess bool
+	// AuthenticationMethod shall contain the authentication method required for
+	// accessing the graphical console.
+	//
+	// Version added: v1.29.0
+	AuthenticationMethod ConsoleAuthenticationMethod
+	// ConsoleURI shall contain the URI at which to access the HTML5 graphical
+	// console. The value may be a relative path from the service root or a fully
+	// qualified URI. If the value is a relative path, clients shall prepend the
+	// scheme, host, and service root to form the complete URI. The resolved URI
+	// shall use HTTPS to protect session credentials and console data in transit.
+	// The URI shall provide access only to the graphical console and shall not
+	// provide access to other resources or management interfaces through the
+	// browser. For HTML5 consoles that support one-time URLs, use the
+	// 'GraphicalConsoleGetOneTimeURL' action instead of relying on this static
+	// URI.
+	//
+	// Version added: v1.29.0
+	ConsoleURI string
+	// HostName shall contain the hostname or IP address to use when connecting to
+	// the graphical console.
+	//
+	// Version added: v1.29.0
+	HostName string
+	// Port shall contain the port assigned to the service.
+	//
+	// Version added: v1.29.0
+	Port *uint `json:",omitempty"`
+	// ServiceEnabled shall indicate whether the protocol for the service is
+	// enabled.
+	//
+	// Version added: v1.29.0
+	ServiceEnabled bool
+	// SupportedAccessModes shall contain the access modes that this console
+	// service supports. If not present, only exclusive 'ReadWrite' access shall be
+	// assumed.
+	//
+	// Version added: v1.29.0
+	SupportedAccessModes []ConsoleAccessMode
+	// SupportsOneTimeURL shall indicate whether the HTML5 console service supports
+	// generating one-time URLs through the 'GraphicalConsoleGetOneTimeURL' action.
+	//
+	// Version added: v1.29.0
+	SupportsOneTimeURL bool
+}
+
+// HostGraphicalConsole shall describe the graphical console services for a
 // computer system.
 type HostGraphicalConsole struct {
 	// ConnectTypesSupported shall contain an array of the enumerations. 'KVMIP'
 	// shall be included if a vendor-defined KVM-IP protocol is supported.
 	//
 	// Version added: v1.13.0
+	//
+	// Deprecated: v1.29.0
+	// This property has been deprecated in favor of the protocol-specific
+	// properties.
 	ConnectTypesSupported []GraphicalConnectTypesSupported
+	// HTML5 shall contain connection details for a graphical console service that
+	// provides user access to the graphical console through an HTML5-capable web
+	// browser. The HTML5 console shall be served over HTTPS to protect session
+	// credentials and console data in transit.
+	//
+	// Version added: v1.29.0
+	HTML5 HTML5Console
+	// KVMIP shall contain connection details for a graphical console service that
+	// uses a vendor-specific Keyboard-Video-Mouse over IP protocol. Vendors should
+	// provide additional details about the protocol through OEM extensions or
+	// documentation.
+	//
+	// Version added: v1.29.0
+	KVMIP GraphicalConsoleProtocol
 	// MaxConcurrentSessions shall contain the maximum number of concurrent service
 	// sessions that this implementation supports.
 	//
@@ -1772,12 +2185,34 @@ type HostGraphicalConsole struct {
 	// Port shall contain the port assigned to the service.
 	//
 	// Version added: v1.13.0
+	//
+	// Deprecated: v1.29.0
+	// This property has been deprecated in favor of the 'Port' property in the
+	// protocol-specific properties.
 	Port *uint `json:",omitempty"`
+	// RDP shall contain connection details for a graphical console service that
+	// uses the Remote Desktop Protocol (RDP).
+	//
+	// Version added: v1.29.0
+	RDP GraphicalConsoleProtocol
 	// ServiceEnabled shall indicate whether the protocol for the service is
 	// enabled.
 	//
 	// Version added: v1.13.0
+	//
+	// Deprecated: v1.29.0
+	// This property has been deprecated in favor of the 'ServiceEnabled' property
+	// in the protocol-specific properties.
 	ServiceEnabled bool
+	// VNC shall contain connection details for a graphical console service that
+	// uses the Virtual Network Computing (VNC) protocol. VNC uses the
+	// RFC6143-defined Remote Framebuffer (RFB) protocol as its base protocol,
+	// which shall always be available for console session engagement when VNC is
+	// an available protocol. The service may additionally support extended
+	// encodings as indicated by the 'SupportedEncodings' property.
+	//
+	// Version added: v1.29.0
+	VNC VNCConsole
 }
 
 // HostSerialConsole shall describe the serial console services for a computer
@@ -2204,6 +2639,67 @@ type TrustedModules struct {
 	Status Status
 }
 
+// VNCConsole shall describe a VNC graphical console service for a computer
+// system.
+type VNCConsole struct {
+	// AllowsSharedAccess shall indicate whether the console service allows
+	// multiple concurrent users to access the same console session. If 'true', the
+	// console supports shared or multiple concurrent sessions. If 'false', console
+	// access is exclusive to a single user at a time.
+	//
+	// Version added: v1.29.0
+	AllowsSharedAccess bool
+	// AuthenticationMethod shall contain the authentication method required for
+	// accessing the graphical console.
+	//
+	// Version added: v1.29.0
+	AuthenticationMethod ConsoleAuthenticationMethod
+	// HostName shall contain the hostname or IP address to use when connecting to
+	// the graphical console.
+	//
+	// Version added: v1.29.0
+	HostName string
+	// Port shall contain the port assigned to the service.
+	//
+	// Version added: v1.29.0
+	Port *uint `json:",omitempty"`
+	// ServiceEnabled shall indicate whether the protocol for the service is
+	// enabled.
+	//
+	// Version added: v1.29.0
+	ServiceEnabled bool
+	// SupportedAccessModes shall contain the access modes that this console
+	// service supports. If not present, only exclusive 'ReadWrite' access shall be
+	// assumed.
+	//
+	// Version added: v1.29.0
+	SupportedAccessModes []ConsoleAccessMode
+	// SupportedEncodings shall contain the encoding methods supported by the VNC
+	// service. This property is informational and intended to provide integrators
+	// with context about the encoding capabilities of the VNC endpoint. Values may
+	// include well-known encoding names such as 'Raw', 'Tight', or 'ZRLE', as well
+	// as vendor-specific encoding names. The actual encoding used for a session is
+	// negotiated at the VNC protocol level between the client and server. The
+	// RFC6143-defined base RFB encoding is always expected to be available
+	// regardless of the values listed in this property.
+	//
+	// Version added: v1.29.0
+	SupportedEncodings []string
+	// SupportsOneTimePassword shall indicate whether the VNC service supports
+	// setting one-time or single-use passwords through the
+	// 'GraphicalConsoleSetOneTimePassword' action.
+	//
+	// Version added: v1.29.0
+	SupportsOneTimePassword bool
+	// SupportsPersistentPassword shall indicate whether the VNC service supports
+	// setting a persistent password through the 'GraphicalConsoleSetPassword'
+	// action. This is typically used when the service has a pre-configured VNC
+	// password that needs to be changed by the authoritative management system.
+	//
+	// Version added: v1.29.0
+	SupportsPersistentPassword bool
+}
+
 // ComputerVirtualMediaConfig shall describe a virtual media service for a computer
 // system.
 type ComputerVirtualMediaConfig struct {
@@ -2216,6 +2712,23 @@ type ComputerVirtualMediaConfig struct {
 	//
 	// Version added: v1.13.0
 	ServiceEnabled bool
+}
+
+// Virtualization shall describe the virtualization abilities for a computer
+// system.
+type Virtualization struct {
+	// CPUOffload shall indicate whether the CPUs of the system are providing
+	// offload for virtualization as opposed to relying solely on software
+	// virtualization.
+	//
+	// Version added: v1.28.0
+	CPUOffload bool
+	// DeviceIsolation shall indicate whether the system is providing hardware
+	// level isolation for devices external to the CPU to prevent cross virtual
+	// machine direct memory access (DMA) or similar memory access.
+	//
+	// Version added: v1.28.0
+	DeviceIsolation bool
 }
 
 // WatchdogTimer shall contain properties that describe the host watchdog timer

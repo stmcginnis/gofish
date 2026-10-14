@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
 
-// http://redfish.dmtf.org/schemas/v1/Event.v1_13_0.json
-// 2025.4 - #Event.v1_13_0.Event
+// http://redfish.dmtf.org/schemas/v1/Event.v1_14_0.json
+// 2026.2 - #Event.v1_14_0.Event
 
 package schemas
 
@@ -303,9 +303,13 @@ type EventRecord struct {
 	//
 	// Version added: v1.6.0
 	SpecificEventExistsInGroup bool
-	// UserAuthenticationSource shall contain the URL to the authentication service
-	// that is associated with the username property. This should be used for
-	// events that result from a user action.
+	// UserAuthenticationSource shall contain source of authentication for the
+	// user, specified by the 'Username' property, associated with the event
+	// record. For local users, this property shall contain
+	// '/redfish/v1/AccountService'. For users managed by external account
+	// providers, this property shall contain the member of the 'ServiceAddresses'
+	// property that authenticated the user. This should be used for events that
+	// result from a user action.
 	//
 	// Version added: v1.11.0
 	UserAuthenticationSource string
@@ -314,6 +318,13 @@ type EventRecord struct {
 	//
 	// Version added: v1.11.0
 	Username string
+	// VendorCode shall contain a vendor-defined code or identifier equivalent to
+	// this event or 'MessageId' value. This value allows clients to map a
+	// 'MessageId' value to a legacy or vendor-specific value for the same
+	// condition or error message.
+	//
+	// Version added: v1.14.0
+	VendorCode string
 }
 
 // UnmarshalJSON unmarshals a EventRecord object from the raw JSON.
