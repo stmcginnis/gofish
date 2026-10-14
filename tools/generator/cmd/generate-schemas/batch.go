@@ -9,11 +9,12 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
-	"sync"
 
 	"github.com/stmcginnis/gofish/tools/generator/internal/analyzer"
 	"github.com/stmcginnis/gofish/tools/generator/internal/codegen"
+	"github.com/stmcginnis/gofish/tools/generator/internal/config"
 	"github.com/stmcginnis/gofish/tools/generator/internal/parser"
 	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
 )
@@ -24,6 +25,10 @@ type BatchProcessor struct {
 	outputDir  string
 	verbose    bool
 	analyzer   *analyzer.DependencyAnalyzer
+
+	// Declarations provided by hand-written files in the output packages.
+	schemasHandwritten map[string]bool
+	rootHandwritten    map[string]bool
 }
 
 // NewBatchProcessor creates a new BatchProcessor
@@ -39,15 +44,26 @@ func NewBatchProcessor(schemaDirs []string, outputDir string, verbose bool) (*Ba
 		return nil, fmt.Errorf("failed to create schemas directory: %w", err)
 	}
 
+	schemasHandwritten, err := codegen.ScanHandwritten(schemasDir)
+	if err != nil {
+		return nil, err
+	}
+	rootHandwritten, err := codegen.ScanHandwritten(outputDir)
+	if err != nil {
+		return nil, err
+	}
+
 	return &BatchProcessor{
-		schemaDirs: schemaDirs,
-		outputDir:  outputDir,
-		verbose:    verbose,
+		schemaDirs:         schemaDirs,
+		outputDir:          outputDir,
+		verbose:            verbose,
+		schemasHandwritten: schemasHandwritten,
+		rootHandwritten:    rootHandwritten,
 	}, nil
 }
 
 // ProcessAll processes all schemas in the directories using two-pass approach
-func (bp *BatchProcessor) ProcessAll(parallel bool) error {
+func (bp *BatchProcessor) ProcessAll() error {
 	// Collect all base schema files from all directories
 	baseFiles := bp.collectBaseFiles()
 
@@ -70,15 +86,39 @@ func (bp *BatchProcessor) ProcessAll(parallel bool) error {
 		}
 	}
 
-	// PASS 2: Generate code
+	// PASS 2: Parse every schema so definitions shared between schemas can be
+	// assigned to a single owning file.
+	var units []*schemaUnit
+	failed := 0
+	for _, file := range baseFiles {
+		objectName := strings.TrimSuffix(filepath.Base(file), ".json")
+		unit, err := bp.parseOne(objectName, file)
+		if err != nil {
+			log.Printf("ERROR parsing %s: %v", objectName, err)
+			failed++
+			continue
+		}
+		if unit != nil {
+			units = append(units, unit)
+		}
+	}
+	assignOwners(units)
+
+	// PASS 3: Generate code
 	if bp.verbose {
-		log.Printf("Pass 2: Generating code...")
+		log.Printf("Generating code...")
+	}
+	for _, unit := range units {
+		if err := bp.generateOne(unit); err != nil {
+			log.Printf("ERROR generating %s: %v", unit.objectName, err)
+			failed++
+		}
 	}
 
-	if parallel {
-		return bp.processParallel(baseFiles)
+	if failed > 0 {
+		return fmt.Errorf("%d schemas failed", failed)
 	}
-	return bp.processSequential(baseFiles)
+	return nil
 }
 
 // collectBaseFiles collects all base schema files from schema directories
@@ -106,8 +146,9 @@ func (bp *BatchProcessor) collectBaseFiles() []string {
 				continue
 			}
 
-			// Skip odata and redfish-schema meta files
-			if strings.HasPrefix(basename, "odata") || basename == "redfish-schema" {
+			// Skip odata, redfish-schema and payload-annotation meta files
+			if strings.HasPrefix(basename, "odata") || strings.HasPrefix(basename, "redfish-schema") ||
+				strings.HasPrefix(basename, "redfish-payload-annotations") {
 				continue
 			}
 
@@ -118,71 +159,20 @@ func (bp *BatchProcessor) collectBaseFiles() []string {
 	return baseFiles
 }
 
-// processSequential processes schemas one at a time
-func (bp *BatchProcessor) processSequential(files []string) error {
-	success := 0
-	failed := 0
-
-	for _, file := range files {
-		objectName := strings.TrimSuffix(filepath.Base(file), ".json")
-
-		if err := bp.processOne(objectName, file); err != nil {
-			if bp.verbose {
-				log.Printf("ERROR processing %s: %v", objectName, err)
-			}
-			failed++
-		} else {
-			success++
-		}
-	}
-
-	if bp.verbose {
-		log.Printf("Completed: %d successful, %d failed", success, failed)
-	}
-	return nil
+// schemaUnit is one parsed schema waiting to be written to a Go file.
+type schemaUnit struct {
+	objectName  string
+	definitions []*schema.Definition
+	sfPrefix    bool
+	serviceRoot bool
 }
 
-// processParallel processes schemas in parallel
-func (bp *BatchProcessor) processParallel(files []string) error {
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	success := 0
-	failed := 0
-	maxWorkers := 8
-
-	semaphore := make(chan struct{}, maxWorkers)
-
-	for _, file := range files {
-		wg.Add(1)
-		go func(f string) {
-			defer wg.Done()
-
-			semaphore <- struct{}{}        // Acquire
-			defer func() { <-semaphore }() // Release
-
-			objectName := strings.TrimSuffix(filepath.Base(f), ".json")
-
-			if err := bp.processOne(objectName, f); err != nil {
-				if bp.verbose {
-					log.Printf("ERROR processing %s: %v", objectName, err)
-				}
-				mu.Lock()
-				failed++
-				mu.Unlock()
-			} else {
-				mu.Lock()
-				success++
-				mu.Unlock()
-			}
-		}(file)
+// goName returns the Go type name a definition is emitted as.
+func (u *schemaUnit) goName(def *schema.Definition) string {
+	if u.sfPrefix {
+		return "SF" + def.Name
 	}
-
-	wg.Wait()
-
-	if bp.verbose {
-		log.Printf("Completed: %d successful, %d failed", success, failed)
-	}
-	return nil
+	return def.Name
 }
 
 // isSwordfishBundle returns true if the file path indicates it's from the Swordfish bundle.
@@ -191,10 +181,10 @@ func isSwordfishBundle(filePath string) bool {
 	return strings.Contains(strings.ToLower(filePath), "swordfish")
 }
 
-// processOne processes a single schema
-func (bp *BatchProcessor) processOne(objectName, baseFile string) error {
+// parseOne parses a single schema. It returns nil for schemas that are skipped.
+func (bp *BatchProcessor) parseOne(objectName, baseFile string) (*schemaUnit, error) {
 	if bp.verbose {
-		log.Printf("Processing %s...", objectName)
+		log.Printf("Parsing %s...", objectName)
 	}
 
 	// Determine the content origin from this specific file
@@ -202,92 +192,219 @@ func (bp *BatchProcessor) processOne(objectName, baseFile string) error {
 
 	// For skip decisions, use bundle path (Swordfish directory means skip duplicates)
 	// This handles cases where SNIA schemas are included in the Redfish bundle
-	bundleIsSwordfish := isSwordfishBundle(baseFile)
-	if bundleIsSwordfish {
+	if isSwordfishBundle(baseFile) {
 		action, hasConflict := schema.SchemaConflicts[objectName]
 		if hasConflict && action == schema.ConflictSkipSwordfish {
 			if bp.verbose {
 				log.Printf("  Skipping %s (Swordfish bundle duplicate)", objectName)
 			}
-			return nil
+			return nil, nil
 		}
 	}
 
 	// The baseFile's directory is the schema directory for this file
 	schemaDir := filepath.Dir(baseFile)
 
-	// Resolve latest version
 	versionFile, err := parser.ResolveLatestVersion(baseFile, schemaDir)
 	if err != nil {
-		return fmt.Errorf("failed to resolve version: %w", err)
+		return nil, fmt.Errorf("failed to resolve version: %w", err)
 	}
 
 	// Parse schema (both base and versioned to merge definitions)
 	p := parser.NewParser(schemaDir)
 	definitions, err := p.ParseSchemaWithBase(baseFile, versionFile)
 	if err != nil {
-		return fmt.Errorf("failed to parse schema: %w", err)
+		return nil, fmt.Errorf("failed to parse schema: %w", err)
 	}
 
-	// Each call gets its own Generator to avoid race conditions during parallel processing
+	kept := definitions[:0]
+	for _, def := range definitions {
+		if !config.SkipDefinitions[objectName+"."+def.OriginalName] {
+			kept = append(kept, def)
+		}
+	}
+
+	return &schemaUnit{
+		objectName:  objectName,
+		definitions: kept,
+		sfPrefix:    schema.NeedsSFPrefix(objectName, contentOrigin),
+		serviceRoot: objectName == "ServiceRoot",
+	}, nil
+}
+
+// assignOwners removes definitions that more than one schema emits under the
+// same Go name, keeping the copy in the owning schema. The owner is, in order:
+// the TypeOwners entry, the schema whose main type it is, Resource, or the
+// first schema alphabetically. Copies that differ from the owner's and have no
+// TypeOwners entry are reported, because each reference now resolves to the
+// owner's version.
+func assignOwners(units []*schemaUnit) {
+	defining := map[string][]*schemaUnit{}
+	defsByUnit := map[*schemaUnit]map[string]*schema.Definition{}
+	for _, u := range units {
+		// ServiceRoot is generated into the gofish package, so it cannot share
+		// types with the schemas package.
+		if u.serviceRoot {
+			continue
+		}
+		defsByUnit[u] = map[string]*schema.Definition{}
+		for _, def := range u.definitions {
+			name := u.goName(def)
+			if _, dup := defsByUnit[u][name]; dup {
+				continue
+			}
+			defsByUnit[u][name] = def
+			defining[name] = append(defining[name], u)
+		}
+	}
+
+	names := make([]string, 0, len(defining))
+	for name := range defining {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	owners := map[string]*schemaUnit{}
+	for _, name := range names {
+		us := defining[name]
+		if len(us) < 2 {
+			continue
+		}
+		sort.Slice(us, func(i, j int) bool { return us[i].objectName < us[j].objectName })
+		owner := pickOwner(name, us, defsByUnit)
+		owners[name] = owner
+
+		if _, configured := config.TypeOwners[name]; !configured {
+			want := signature(defsByUnit[owner][name])
+			for _, u := range us {
+				if u != owner && signature(defsByUnit[u][name]) != want {
+					log.Printf("WARNING: %s in %s differs from the copy in %s, which is used for both; "+
+						"add a TypeRenames or TypeOwners entry", name, u.objectName, owner.objectName)
+				}
+			}
+		}
+		unionEnumValues(defsByUnit[owner][name], us, name, defsByUnit)
+	}
+
+	for _, u := range units {
+		kept := u.definitions[:0]
+		for _, def := range u.definitions {
+			if owner, shared := owners[u.goName(def)]; shared && owner != u && !u.serviceRoot {
+				continue
+			}
+			kept = append(kept, def)
+		}
+		u.definitions = kept
+	}
+}
+
+// pickOwner chooses the schema that emits shared type name. us is sorted by
+// schema name.
+func pickOwner(name string, us []*schemaUnit, defsByUnit map[*schemaUnit]map[string]*schema.Definition) *schemaUnit {
+	configured, hasConfig := config.TypeOwners[name]
+	var resource *schemaUnit
+	for _, u := range us {
+		if hasConfig && u.objectName == configured {
+			return u
+		}
+		if defsByUnit[u][name].OriginalName == u.objectName {
+			return u
+		}
+		if u.objectName == "Resource" {
+			resource = u
+		}
+	}
+	if hasConfig {
+		log.Printf("WARNING: TypeOwners[%s] = %s, which does not define it", name, configured)
+	}
+	if resource != nil {
+		return resource
+	}
+	return us[0]
+}
+
+// unionEnumValues adds values that other copies of a shared enum define to
+// the owner's copy, so every schema's values stay available.
+func unionEnumValues(owner *schema.Definition, us []*schemaUnit, name string, defsByUnit map[*schemaUnit]map[string]*schema.Definition) {
+	if !owner.IsEnum {
+		return
+	}
+	seen := map[string]bool{}
+	for _, v := range owner.EnumValues {
+		seen[v.Value] = true
+	}
+	for _, u := range us {
+		def := defsByUnit[u][name]
+		if !def.IsEnum {
+			continue
+		}
+		for _, v := range def.EnumValues {
+			if !seen[v.Value] {
+				seen[v.Value] = true
+				owner.EnumValues = append(owner.EnumValues, v)
+			}
+		}
+	}
+}
+
+// signature summarizes a definition's shape so duplicate copies can be compared.
+func signature(def *schema.Definition) string {
+	var parts []string
+	for _, v := range def.EnumValues {
+		parts = append(parts, v.Value)
+	}
+	for _, p := range def.Properties {
+		parts = append(parts, p.JSONName+":"+p.Type)
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, ",")
+}
+
+// generateOne writes the Go file for a parsed schema.
+func (bp *BatchProcessor) generateOne(u *schemaUnit) error {
+	if bp.verbose {
+		log.Printf("Generating %s...", u.objectName)
+	}
+
+	// Each call gets its own Generator to avoid shared template state
 	gen, err := codegen.NewGenerator()
 	if err != nil {
 		return fmt.Errorf("failed to create generator: %w", err)
 	}
+	if u.serviceRoot {
+		gen.SetHandwritten(bp.rootHandwritten)
+	} else {
+		gen.SetHandwritten(bp.schemasHandwritten)
+	}
 
 	// Special case: ServiceRoot goes to root with "gofish" package, renamed to "Service"
-	if objectName == "ServiceRoot" {
-		for _, def := range definitions {
+	if u.serviceRoot {
+		for _, def := range u.definitions {
 			def.Package = "gofish"
 		}
 		typeRenames := map[string]string{"ServiceRoot": "Service"}
-		code, err := gen.Generate(objectName, "gofish", definitions, false, typeRenames)
+		code, err := gen.Generate(u.objectName, "gofish", u.definitions, false, typeRenames)
 		if err != nil {
 			return fmt.Errorf("failed to generate code: %w", err)
 		}
-		outputFile := filepath.Join(bp.outputDir, strings.ToLower(objectName)+".go")
-		if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
-			return fmt.Errorf("failed to write file: %w", err)
-		}
-		if bp.verbose {
-			log.Printf("Generated %s", filepath.Base(outputFile))
-		}
-		return nil
+		outputFile := filepath.Join(bp.outputDir, strings.ToLower(u.objectName)+".go")
+		return os.WriteFile(outputFile, []byte(code), 0644)
 	}
 
-	// Determine if this schema needs SF prefix based on actual file content origin
-	sfPrefix := schema.NeedsSFPrefix(objectName, contentOrigin)
-
-	// All other schemas go to the schemas package
 	pkgType := schema.PackageSchemas
-
-	// Set package type on all definitions
-	for _, def := range definitions {
+	for _, def := range u.definitions {
 		def.Package = pkgType
 	}
 
-	// Generate code
-	code, err := gen.Generate(objectName, pkgType, definitions, sfPrefix, nil)
+	code, err := gen.Generate(u.objectName, pkgType, u.definitions, u.sfPrefix, nil)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}
 
-	// Write output to schemas/ directory
 	// SF-prefixed schemas use filename sf<name>.go
-	outputDir := filepath.Join(bp.outputDir, "schemas")
-	filename := strings.ToLower(objectName) + ".go"
-	if sfPrefix {
+	filename := strings.ToLower(u.objectName) + ".go"
+	if u.sfPrefix {
 		filename = "sf" + filename
 	}
-	outputFile := filepath.Join(outputDir, filename)
-
-	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
-	}
-
-	if bp.verbose {
-		log.Printf("Generated schemas/%s", filepath.Base(outputFile))
-	}
-
-	return nil
+	return os.WriteFile(filepath.Join(bp.outputDir, "schemas", filename), []byte(code), 0644)
 }

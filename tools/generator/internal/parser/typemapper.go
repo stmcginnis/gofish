@@ -5,8 +5,10 @@
 package parser
 
 import (
+	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/stmcginnis/gofish/tools/generator/internal/config"
 	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
@@ -27,6 +29,8 @@ var NonLinkTypes = []string{
 // TypeMapper handles conversion from JSON Schema types to Go types
 type TypeMapper struct {
 	commonTypes map[string]string
+	// schemaName is the schema being parsed; local "#/definitions/" refs resolve against it.
+	schemaName string
 }
 
 // NewTypeMapper creates a new TypeMapper
@@ -94,7 +98,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 			case "count":
 				return "int", false, false
 			case "idRef":
-				return qualifyRefType("Entity", prop.Ref), false, false
+				return tm.qualifyRefType("Entity", prop.Ref), false, false
 			}
 		}
 
@@ -102,7 +106,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 			return "string", false, false
 		}
 
-		return qualifyRefType(refType, prop.Ref), false, false
+		return tm.qualifyRefType(refType, prop.Ref), false, false
 	}
 
 	// Handle items (arrays)
@@ -116,7 +120,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 				case "count":
 					return "int", false, true
 				case "idRef":
-					return qualifyRefType("Entity", prop.Items.Ref), false, true
+					return tm.qualifyRefType("Entity", prop.Items.Ref), false, true
 				}
 			}
 
@@ -124,13 +128,13 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 				return "string", false, true
 			}
 
-			return qualifyRefType(itemType, prop.Items.Ref), false, true
+			return tm.qualifyRefType(itemType, prop.Items.Ref), false, true
 		}
 		if len(prop.Items.AnyOf) > 0 {
 			for _, anyOfItem := range prop.Items.AnyOf {
 				if ref, ok := anyOfItem["$ref"]; ok {
 					itemType := extractRefType(ref)
-					return qualifyRefType(itemType, ref), false, true
+					return tm.qualifyRefType(itemType, ref), false, true
 				}
 			}
 		}
@@ -148,7 +152,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 					case "count":
 						return "int", false, false
 					case "idRef":
-						return qualifyRefType("Entity", ref), false, false
+						return tm.qualifyRefType("Entity", ref), false, false
 					}
 				}
 
@@ -156,7 +160,7 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 					return "string", false, false
 				}
 
-				return qualifyRefType(refType, ref), false, false
+				return tm.qualifyRefType(refType, ref), false, false
 			}
 		}
 	}
@@ -203,8 +207,14 @@ func (tm *TypeMapper) MapType(propName string, prop *schema.JSONProperty) (goTyp
 	}
 }
 
-func qualifyRefType(typeName, _ string) string {
-	return cleanIdentifier(typeName)
+// qualifyRefType returns the Go type name for a definition referenced by ref,
+// applying any configured rename for the schema the definition lives in.
+func (tm *TypeMapper) qualifyRefType(typeName, ref string) string {
+	schemaName := extractSchemaNameFromRef(ref)
+	if schemaName == "" {
+		schemaName = tm.schemaName
+	}
+	return goTypeName(schemaName, typeName)
 }
 
 // extractSchemaNameFromRef extracts the schema name from a $ref URL.
@@ -276,6 +286,52 @@ func extractTypeAndNullable(typeVal any) (string, bool) {
 	}
 }
 
+// SchemaDirs lists every schema directory being generated, so references can be
+// resolved across the Redfish and Swordfish bundles.
+var SchemaDirs []string
+
+var (
+	resourceCacheMu sync.Mutex
+	resourceCache   = map[string]bool{}
+)
+
+// isResource reports whether name can be referenced by @odata.id: its base
+// schema lists idRef as an alternative. Common objects such as Schedule or
+// Message share their schema's name but are always embedded, not linked.
+func isResource(name string) bool {
+	resourceCacheMu.Lock()
+	defer resourceCacheMu.Unlock()
+	if v, ok := resourceCache[name]; ok {
+		return v
+	}
+	v := lookupResource(name)
+	resourceCache[name] = v
+	return v
+}
+
+func lookupResource(name string) bool {
+	for _, dir := range SchemaDirs {
+		raw, err := schema.ReadAndParseSchema(filepath.Join(dir, name+".json"))
+		if err != nil {
+			continue
+		}
+		defs, _ := raw["definitions"].(map[string]any)
+		def, _ := defs[name].(map[string]any)
+		anyOf, _ := def["anyOf"].([]any)
+		hasIDRef := false
+		for _, item := range anyOf {
+			if m, ok := item.(map[string]any); ok {
+				if ref, _ := m["$ref"].(string); strings.Contains(ref, "idRef") {
+					hasIDRef = true
+				}
+			}
+		}
+		return hasIDRef
+	}
+	// Unknown schemas keep the previous behavior.
+	return true
+}
+
 // IsLinkProperty checks if a property is a link to another resource
 func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
 	if slices.Contains(NonLinkTypes, propName) {
@@ -311,7 +367,7 @@ func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
 			schemaName := extractSchemaNameFromRef(prop.Ref)
 			typeName := extractRefType(prop.Ref)
 			if schemaName != "" && schemaName == typeName {
-				return true
+				return isResource(typeName)
 			}
 		}
 	}
@@ -326,7 +382,7 @@ func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
 			schemaName := extractSchemaNameFromRef(prop.Items.Ref)
 			typeName := extractRefType(prop.Items.Ref)
 			if schemaName != "" && schemaName == typeName {
-				return true
+				return isResource(typeName)
 			}
 
 			// Check if the description indicates these are links

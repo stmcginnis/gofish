@@ -45,3 +45,23 @@ jobs:
       uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9
       with:
         version: v2.12.2
+
+  generated:
+    name: Generated code
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: tools/generator/go.mod
+
+    # Regenerates from the pinned schema bundles and fails if the committed
+    # schemas differ, so generator changes ship with their output.
+    - name: Check generated code is current
+      run: make check-generate
+
+    - name: Test generator
+      working-directory: tools/generator
+      run: go test ./...

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/stmcginnis/gofish/tools/generator/internal/config"
 	"github.com/stmcginnis/gofish/tools/generator/internal/schema"
 )
 
@@ -57,6 +58,8 @@ type StructData struct {
 	HasActions          bool
 	HasLinks            bool
 	HasLinkProperties   bool
+	// ExtraFields are hand-maintained field declarations from config.ExtraFields.
+	ExtraFields []string
 }
 
 // ActionData represents an action for the template
@@ -69,6 +72,10 @@ type ActionData struct {
 	ResponseType    string
 	UseParamStruct  bool   // true when action has >3 parameters
 	ParamStructName string // e.g., "CertificateServiceGenerateCSRParameters"
+	// TargetOverridden is set when config.FieldOverrides replaces the target
+	// field with TargetOverride (empty to drop it).
+	TargetOverridden bool
+	TargetOverride   string
 }
 
 // ActionParameterData represents an action parameter for the template
@@ -82,6 +89,7 @@ type ActionParameterData struct {
 	FieldName        string // PascalCase Go field name for parameter structs
 	FieldDescription string // Pre-formatted godoc comment for parameter struct fields
 	JSONTag          string // JSON struct tag (with omitempty for optional)
+	Override         string // Replacement field declaration (config.FieldOverrides)
 }
 
 // LinkData represents a link for the template
@@ -92,6 +100,10 @@ type LinkData struct {
 	FieldName   string
 	Type        string
 	IsArray     bool
+	// Overridden is set when config.FieldOverrides replaces the field with
+	// Override (empty to drop it).
+	Overridden bool
+	Override   string
 }
 
 // PropertyData represents a property for the template
@@ -108,11 +120,14 @@ type PropertyData struct {
 	IsArray      bool
 	IsCollection bool // Indicates if this is a collection link
 	VersionAdded string
+	// Override replaces the generated field declaration (config.FieldOverrides).
+	Override string
 }
 
 // Generator handles code generation
 type Generator struct {
 	tmpl        *template.Template
+	handwritten map[string]bool // Declarations already provided by hand-written files
 	packageType schema.PackageType
 	sfPrefix    bool              // True if type names should be prefixed with "SF"
 	typeRenames map[string]string // Map of original type name to new name
@@ -153,14 +168,32 @@ func (g *Generator) normalizeTypeForPackage(typeName string) string {
 
 // NewGenerator creates a new Generator
 func NewGenerator() (*Generator, error) {
-	tmpl, err := template.New("source").Parse(sourceTemplate)
+	g := &Generator{}
+	funcs := template.FuncMap{
+		// hand reports whether a hand-written file already declares name
+		// ("Type", "Type.Method" or "Func"), in which case it is not generated.
+		"hand":        func(name string) bool { return g.handwritten[name] },
+		"extraFields": func(name string) []string { return config.ExtraFields[name] },
+		"plural": func(name string) string {
+			if p, ok := config.PluralNames[name]; ok {
+				return p
+			}
+			return name + "s"
+		},
+	}
+	tmpl, err := template.New("source").Funcs(funcs).Parse(sourceTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse template: %w", err)
 	}
+	g.tmpl = tmpl
+	return g, nil
+}
 
-	return &Generator{
-		tmpl: tmpl,
-	}, nil
+// SetHandwritten sets the declarations that hand-written files in the target
+// package provide. Matching types, functions, methods and constants are not
+// generated.
+func (g *Generator) SetHandwritten(names map[string]bool) {
+	g.handwritten = names
 }
 
 // Generate generates Go source code from definitions.
@@ -225,6 +258,9 @@ func (g *Generator) Generate(objectName string, packageType schema.PackageType, 
 
 	// Process all definitions
 	for _, def := range definitions {
+		if g.handwritten[g.applyTypeRename(g.applySFPrefix(def.Name))] {
+			continue
+		}
 		if def.IsEnum {
 			enumData := g.buildEnumData(def)
 			data.Enums = append(data.Enums, enumData)
@@ -302,6 +338,10 @@ func (g *Generator) buildEnumData(def *schema.Definition) *EnumData {
 		// e.g., "RAID10RAIDType" -> "RAID10SFRAIDType"
 		if g.sfPrefix && strings.HasSuffix(name, def.Name) {
 			name = strings.TrimSuffix(name, def.Name) + enumName
+		}
+
+		if g.handwritten[name] {
+			continue
 		}
 
 		evd := &EnumValueData{
@@ -400,7 +440,13 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 			prop.JSONTag = ""
 		}
 
+		override, overridden := config.FieldOverrides[structName+"."+fieldName]
+		if overridden && override == "" {
+			continue
+		}
+
 		pd := &PropertyData{
+			Override:     override,
 			Name:         fieldName,
 			TypeString:   typeStr,
 			Description:  prop.Description,
@@ -413,6 +459,10 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 			IsArray:      prop.IsArray,
 			IsCollection: prop.IsCollection,
 			VersionAdded: prop.VersionAdded,
+		}
+		if overridden {
+			// The replacement is a plain field; any accessor is hand-written.
+			pd.IsLink, pd.IsCollection, pd.LinkType = false, false, ""
 		}
 		sd.Properties = append(sd.Properties, pd)
 
@@ -436,6 +486,7 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 			TargetField:  strings.ToLower(action.Name[:1]) + action.Name[1:] + "Target",
 			ResponseType: action.ResponseType,
 		}
+		ad.TargetOverride, ad.TargetOverridden = config.FieldOverrides[structName+"."+ad.TargetField]
 
 		// Sort parameters by the order they are defined in the schema
 		sort.Slice(action.Parameters, func(i, j int) bool {
@@ -465,6 +516,7 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 				} else {
 					pd.JSONTag = fmt.Sprintf("`json:%q`", pd.OriginalName+",omitempty")
 				}
+				pd.Override = config.FieldOverrides[ad.ParamStructName+"."+pd.FieldName]
 			}
 		}
 
@@ -486,10 +538,20 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 		}
 	}
 
+	propNames := make(map[string]bool)
+	for _, prop := range def.Properties {
+		propNames[prop.Name] = true
+	}
+
 	// Build link data
 	for _, link := range def.Links {
 		// Skip deprecated links that have been superseded by a top-level property
 		if link.Deprecated && propLinkNames[link.Name] {
+			continue
+		}
+		// A non-link property of the same name owns the exported name, so a
+		// getter for the Links entry would not compile.
+		if propNames[link.Name] && !propLinkNames[link.Name] {
 			continue
 		}
 
@@ -514,9 +576,11 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 			Type:        linkType,
 			IsArray:     link.IsArray,
 		}
+		ld.Override, ld.Overridden = config.FieldOverrides[structName+"."+fieldName]
 		sd.Links = append(sd.Links, ld)
 	}
 	sd.HasLinks = len(sd.Links) > 0
+	sd.ExtraFields = config.ExtraFields[structName]
 
 	return sd
 }

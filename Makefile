@@ -29,10 +29,19 @@ fmt:
                 golangci-lint fmt .
 
 OUTPUT_DIR ?= ../..
+# Schema bundles the committed code is generated from. Bump these to update.
+REDFISH_TAG ?= 2026.2
+SWORDFISH_TAG ?= v1.2.9_Release
 
 generate:
 	cd tools/generator && \
-    go run ./cmd/generate-schemas --output-dir $(OUTPUT_DIR)
+    go run ./cmd/generate-schemas --output-dir $(OUTPUT_DIR) \
+		--redfish-tag $(REDFISH_TAG) --swordfish-tag $(SWORDFISH_TAG)
+
+# Fails if regenerating changes or adds any file under schemas/ or serviceroot.go.
+check-generate: generate
+	git diff --exit-code -- schemas serviceroot.go
+	test -z "$$(git status --porcelain -- schemas serviceroot.go)"
 
 clean:
 	go clean

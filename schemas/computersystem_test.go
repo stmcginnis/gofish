@@ -330,9 +330,9 @@ func TestComputerSystem(t *testing.T) { //nolint
 			result.TrustedModules[0].InterfaceTypeSelection)
 	}
 
-	if result.ProcessorSummary.metrics != "/redfish/v1/Systems/System-1/ProcessorSummary/ProcessorMetrics" {
+	if result.ProcessorSummary.metrics.URI() != "/redfish/v1/Systems/System-1/ProcessorSummary/ProcessorMetrics" {
 		t.Errorf("Received invalid processor summary metrics: %s",
-			result.ProcessorSummary.metrics)
+			result.ProcessorSummary.metrics.URI())
 	}
 
 	if result.processors != "/redfish/v1/Systems/System-1/Processors" {

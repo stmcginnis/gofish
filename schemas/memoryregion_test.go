@@ -60,7 +60,7 @@ func TestMemoryRegion(t *testing.T) {
 	assertEquals(t, "Dynamic Memory Region 1", result.Name)
 	assertEquals(t, "Dynamic", string(result.RegionType))
 	assertEquals(t, "User Defined Tag", result.MemoryExtents[0].Tag)
-	assertEquals(t, "/redfish/v1/Chassis/1/MemoryDomains/1/MemoryChunks/1", result.MemoryChunks[0].chunkLink)
+	assertEquals(t, "/redfish/v1/Chassis/1/MemoryDomains/1/MemoryChunks/1", result.MemoryChunks[0].chunkLink.URI())
 
 	if result.RegionNumber != 0 {
 		t.Errorf("Unexpected region number: %d", result.RegionNumber)

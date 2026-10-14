@@ -248,3 +248,17 @@ func TestMapType_MultiType(t *testing.T) {
 		})
 	}
 }
+
+func TestQualifyRefTypeAppliesSchemaRenames(t *testing.T) {
+	tm := &TypeMapper{schemaName: "Settings"}
+	if got := tm.qualifyRefType("ApplyTime", "#/definitions/ApplyTime"); got != "SettingsApplyTime" {
+		t.Errorf("local ref = %q, want SettingsApplyTime", got)
+	}
+	tm.schemaName = "ComputerSystem"
+	if got := tm.qualifyRefType("ApplyTime", "http://redfish.dmtf.org/schemas/v1/Settings.json#/definitions/ApplyTime"); got != "SettingsApplyTime" {
+		t.Errorf("external ref = %q, want SettingsApplyTime", got)
+	}
+	if got := tm.qualifyRefType("iSCSIBoot", "#/definitions/iSCSIBoot"); got != "ISCSIBoot" {
+		t.Errorf("lowercase name = %q, want exported ISCSIBoot", got)
+	}
+}

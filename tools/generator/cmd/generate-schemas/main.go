@@ -20,15 +20,19 @@ import (
 
 func main() {
 	var (
-		objectName string
-		localPath  string
-		outputDir  string
-		verbose    bool
+		objectName   string
+		localPath    string
+		outputDir    string
+		redfishTag   string
+		swordfishTag string
+		verbose      bool
 	)
 
 	flag.StringVar(&objectName, "object", "", "Generate specific schema object only (optional)")
 	flag.StringVar(&localPath, "local", "", "Use local schema files instead of downloading (for testing)")
 	flag.StringVar(&outputDir, "output-dir", ".", "Base output directory (creates schemas subdir)")
+	flag.StringVar(&redfishTag, "redfish-tag", "", "DMTF Redfish-Publications tag to generate from (default: latest)")
+	flag.StringVar(&swordfishTag, "swordfish-tag", "", "SNIA Swordfish-Publications tag to generate from (default: latest _Release)")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose logging")
 	flag.Parse()
 
@@ -59,10 +63,11 @@ func main() {
 		defer f.Cleanup()
 
 		// Fetch Redfish schemas
-		redfishDir, err := f.FetchRedfish()
+		redfishDir, tag, err := f.FetchRedfish(redfishTag)
 		if err != nil {
 			log.Fatalf("Failed to fetch Redfish schemas: %v", err)
 		}
+		log.Printf("Using Redfish schemas from tag %s", tag)
 		schemaDirs = append(schemaDirs, redfishDir)
 
 		if verbose {
@@ -70,16 +75,18 @@ func main() {
 		}
 
 		// Fetch Swordfish schemas
-		swordfishDir, err := f.FetchSwordfish()
+		swordfishDir, tag, err := f.FetchSwordfish(swordfishTag)
 		if err != nil {
-			log.Printf("Warning: Failed to fetch Swordfish schemas: %v", err)
-		} else {
-			schemaDirs = append(schemaDirs, swordfishDir)
-			if verbose {
-				log.Printf("Downloaded Swordfish schemas to: %s", swordfishDir)
-			}
+			log.Fatalf("Failed to fetch Swordfish schemas: %v", err)
+		}
+		log.Printf("Using Swordfish schemas from tag %s", tag)
+		schemaDirs = append(schemaDirs, swordfishDir)
+		if verbose {
+			log.Printf("Downloaded Swordfish schemas to: %s", swordfishDir)
 		}
 	}
+
+	parser.SchemaDirs = schemaDirs
 
 	// Single object mode
 	if objectName != "" {
@@ -111,7 +118,7 @@ func main() {
 		log.Fatalf("Failed to create batch processor: %v", err)
 	}
 
-	if err := processor.ProcessAll(true); err != nil {
+	if err := processor.ProcessAll(); err != nil {
 		log.Fatalf("Batch processing failed: %v", err)
 	}
 
