@@ -51,6 +51,7 @@ const (
 // the duplicate. Schedule has different DMTF vs SNIA versions that need SF prefix.
 var SchemaConflicts = map[string]ConflictAction{
 	"EndpointGroup": ConflictSkipSwordfish,
+	"Location":      ConflictPrefixSwordfish, // Swordfish Location vs Resource.Location
 	"Schedule":      ConflictPrefixSwordfish,
 	"Volume":        ConflictSkipSwordfish, // Both bundles have same SNIA schema
 }

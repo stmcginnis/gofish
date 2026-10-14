@@ -54,6 +54,6 @@ func TestEvent(t *testing.T) {
 	assertEquals(t, "A cable has been removed from network adapter '1' port '1'.", result.Events[0].Message)
 	assertEquals(t, "NetworkDevice.1.0.CableRemoved", result.Events[0].MessageID)
 	assertEquals(t, "1", result.Events[0].MessageArgs[0])
-	assertEquals(t, "/redfish/v1/Systems/1/EthernetInterfaces/1", result.Events[0].originOfCondition)
-	assertEquals(t, "/redfish/v1/Managers/BMC/LogServices/EventLog/Entries/532", result.Events[0].logEntry)
+	assertEquals(t, "/redfish/v1/Systems/1/EthernetInterfaces/1", result.Events[0].originOfCondition.URI())
+	assertEquals(t, "/redfish/v1/Managers/BMC/LogServices/EventLog/Entries/532", result.Events[0].logEntry.URI())
 }

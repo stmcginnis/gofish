@@ -68,7 +68,7 @@ func TestMemoryChunks(t *testing.T) {
 	assertEquals(t, "1", result.ID)
 	assertEquals(t, "Memory Chunk - Whole System", result.Name)
 	assertEquals(t, "Volatile", string(result.AddressRangeType))
-	assertEquals(t, "/redfish/v1/Systems/2/Memory/4", result.InterleaveSets[3].memory)
+	assertEquals(t, "/redfish/v1/Systems/2/Memory/4", result.InterleaveSets[3].memory.URI())
 
 	if result.IsSpare {
 		t.Error("Expected not to be a spare")

@@ -23,6 +23,7 @@ import (
 type Parser struct {
 	typeMapper *TypeMapper
 	schemaDir  string
+	schemaName string // Schema being parsed, e.g. "Storage" for Storage.v1_20_0.json
 	rawSchema  []byte // Raw JSON for extracting key order
 }
 
@@ -82,6 +83,8 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 
 	// Store raw schema for extracting key order
 	p.rawSchema = data
+	p.schemaName = SchemaNameFromFile(schemaFile)
+	p.typeMapper.schemaName = p.schemaName
 
 	var rawSchema map[string]any
 	if err := json.Unmarshal(data, &rawSchema); err != nil {
@@ -140,9 +143,11 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 		isObject := (hasType && typeVal == "object") || hasProps
 
 		if isObject {
-			// Skip action definitions (have target and title properties)
+			// Skip action definitions (have target and title properties) and
+			// containers that only hold actions; the actions are parsed onto
+			// the resource itself.
 			if props, ok := defMap["properties"].(map[string]any); ok {
-				if p.isActionDefinition(props) {
+				if p.isActionDefinition(props) || isActionsContainer(defName, props) {
 					continue
 				}
 			}
@@ -162,7 +167,7 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 			if defMap, ok := defData.(map[string]any); ok {
 				if propsData, ok := defMap["properties"].(map[string]any); ok {
 					// Parse Actions if this definition has an Actions property
-					if _, hasActions := propsData["Actions"]; hasActions {
+					if isContainerRef(propsData["Actions"]) {
 						if actionsDefData, ok := defsMap["Actions"]; ok {
 							if actionsDefMap, ok := actionsDefData.(map[string]any); ok {
 								def.Actions = p.parseActions(actionsDefMap, defsMap)
@@ -171,7 +176,7 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 					}
 
 					// Parse Links if this definition has a Links property
-					if _, hasLinks := propsData["Links"]; hasLinks {
+					if isContainerRef(propsData["Links"]) {
 						if linksDefData, ok := defsMap["Links"]; ok {
 							if linksDefMap, ok := linksDefData.(map[string]any); ok {
 								def.Links = p.parseLinks(linksDefMap)
@@ -189,11 +194,11 @@ func (p *Parser) ParseSchema(schemaFile string) ([]*schema.Definition, error) {
 // parseEnumDefinition parses an enum type definition
 func (p *Parser) parseEnumDefinition(name string, defMap map[string]any, enumVals []any, version string) *schema.Definition {
 	def := &schema.Definition{
-		Name:         cleanIdentifier(name),
+		Name:         goTypeName(p.schemaName, name),
 		OriginalName: name,
 		IsEnum:       true,
 		Version:      version,
-		Description:  p.formatEnumDescription(cleanIdentifier(name), defMap),
+		Description:  p.formatEnumDescription(goTypeName(p.schemaName, name), defMap),
 	}
 
 	// Parse enum values
@@ -229,7 +234,7 @@ func (p *Parser) parseEnumDefinition(name string, defMap map[string]any, enumVal
 
 // parseObjectDefinition parses an object type definition
 func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, version string) *schema.Definition {
-	cleanName := cleanIdentifier(name)
+	cleanName := goTypeName(p.schemaName, name)
 	def := &schema.Definition{
 		Name:         cleanName,
 		OriginalName: name,
@@ -253,8 +258,8 @@ func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, versi
 			continue
 		}
 
-		// Skip Actions and Links - they will be handled separately
-		if propName == "Actions" || propName == "Links" {
+		// Skip Actions and Links objects - they are handled separately
+		if (propName == "Actions" || propName == "Links") && isContainerRef(propData) {
 			continue
 		}
 
@@ -278,6 +283,22 @@ func (p *Parser) parseObjectDefinition(name string, defMap map[string]any, versi
 			}
 		}
 	}
+
+	// "X@odata.count" maps to the Go name XCount; drop it when the schema also
+	// defines an XCount property.
+	names := map[string]int{}
+	for _, prop := range def.Properties {
+		names[prop.Name]++
+	}
+	kept := def.Properties[:0]
+	for _, prop := range def.Properties {
+		if names[prop.Name] > 1 && strings.HasSuffix(prop.JSONName, "@odata.count") {
+			names[prop.Name]--
+			continue
+		}
+		kept = append(kept, prop)
+	}
+	def.Properties = kept
 
 	// Sort properties by name for consistency
 	sort.Slice(def.Properties, func(i, j int) bool {
@@ -399,6 +420,32 @@ func (p *Parser) shouldSkipDefinition(name string) bool {
 	}
 
 	return slices.Contains(config.ExcludedDefinitions, name)
+}
+
+// isContainerRef reports whether an "Actions" or "Links" property is an
+// object, as opposed to a plain value such as the boolean
+// ProtocolFeaturesSupported.ExpandQuery.Links.
+func isContainerRef(prop any) bool {
+	m, ok := prop.(map[string]any)
+	if !ok {
+		return false
+	}
+	t, hasType := m["type"].(string)
+	return !hasType || t == "object"
+}
+
+// isActionsContainer reports whether a definition such as "FanActions" or
+// "FanOemActions" only groups action properties ("#Type.Action" or "Oem").
+func isActionsContainer(name string, props map[string]any) bool {
+	if !strings.HasSuffix(name, "Actions") {
+		return false
+	}
+	for prop := range props {
+		if prop != "Oem" && !strings.HasPrefix(prop, "#") {
+			return false
+		}
+	}
+	return true
 }
 
 func (p *Parser) isActionDefinition(props map[string]any) bool {
@@ -536,6 +583,31 @@ func cleanDescription(desc string) string {
 		desc = "is a" + desc[1:]
 	}
 	return desc
+}
+
+// SchemaNameFromFile returns the schema name for a schema file path, e.g.
+// "Storage" for ".../Storage.v1_20_0.json".
+func SchemaNameFromFile(schemaFile string) string {
+	name, _, _ := strings.Cut(filepath.Base(schemaFile), ".")
+	return name
+}
+
+// goTypeName returns the Go type name for definition defName in schemaName:
+// the configured rename if there is one, otherwise the cleaned definition name
+// with its first letter upper-cased so it is exported.
+func goTypeName(schemaName, defName string) string {
+	if renamed, ok := config.TypeRenames[schemaName+"."+defName]; ok {
+		return renamed
+	}
+	return exported(cleanIdentifier(defName))
+}
+
+// exported upper-cases the first letter of name.
+func exported(name string) string {
+	if name == "" {
+		return name
+	}
+	return strings.ToUpper(name[:1]) + name[1:]
 }
 
 func cleanIdentifier(name string) string {
@@ -798,7 +870,7 @@ func (p *Parser) parseActions(actionsMap map[string]any, defsMap map[string]any)
 							// Extract response type from ref like "#/definitions/GenerateCSRResponse"
 							parts := strings.Split(ref, "/")
 							if len(parts) > 0 {
-								action.ResponseType = cleanIdentifier(parts[len(parts)-1])
+								action.ResponseType = goTypeName(p.schemaName, parts[len(parts)-1])
 							}
 						}
 					}
