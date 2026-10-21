@@ -134,3 +134,35 @@ func TestCollectionPaginationExpandFallback(t *testing.T) {
 		})
 	}
 }
+
+func TestCollectionPaginationExistingExpand(t *testing.T) {
+	for _, callback := range []bool{false, true} {
+		t.Run(fmt.Sprintf("callback=%v", callback), func(t *testing.T) {
+			var calls []string
+			client := &collectionPageClient{get: func(uri string) (*http.Response, error) {
+				calls = append(calls, uri)
+				switch uri {
+				case "/logs?$expand=*":
+					return collectionPageResponse(`{"Members":[{"Id":"first"}],"Members@odata.nextLink":"/logs?$expand=*&$skip=1"}`), nil
+				case "/logs?$expand=*&$skip=1":
+					return collectionPageResponse(`{"Members":[{"Id":"second"}]}`), nil
+				default:
+					return nil, fmt.Errorf("unexpected request %q", uri)
+				}
+			}}
+			client.Settings.DefaultQueryOptions = []QueryGroupOption{
+				WithCollectionQueryOpts(WithExpand(ExpandOptionAsterisk)),
+			}
+			ids, err := readCollectionPages(client, callback)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if want := []string{"first", "second"}; !reflect.DeepEqual(ids, want) {
+				t.Errorf("expected %v, got %v", want, ids)
+			}
+			if want := []string{"/logs?$expand=*", "/logs?$expand=*&$skip=1"}; !reflect.DeepEqual(calls, want) {
+				t.Errorf("expected requests %v, got %v", want, calls)
+			}
+		})
+	}
+}
