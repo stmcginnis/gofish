@@ -4,7 +4,11 @@
 
 package schemas
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+	"strings"
+)
 
 type Query struct {
 	expand         ExpandOption
@@ -77,7 +81,7 @@ func BuildQueryGroup(c Client, opts ...QueryGroupOption) *QueryGroup {
 	return queryGroup
 }
 
-func BuildQuery(c Client, url string, collection bool, opts ...QueryGroupOption) string {
+func BuildQuery(c Client, uri string, collection bool, opts ...QueryGroupOption) string {
 	queryGroup := BuildQueryGroup(c, opts...)
 
 	q := queryGroup.QueryResource
@@ -93,9 +97,18 @@ func BuildQuery(c Client, url string, collection bool, opts ...QueryGroupOption)
 		}
 	}
 
-	if queryOpts != "" {
-		url = url + "?" + queryOpts
+	if queryOpts == "" {
+		return uri
 	}
 
-	return url
+	_, rawQuery, hasQuery := strings.Cut(uri, "?")
+	if !hasQuery {
+		return uri + "?" + queryOpts
+	}
+	// A URI that already carries $expand, such as a nextLink the service built,
+	// keeps the service's choice.
+	if values, _ := url.ParseQuery(rawQuery); values.Has("$expand") {
+		return uri
+	}
+	return uri + "&" + queryOpts
 }
