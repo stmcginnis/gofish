@@ -25,6 +25,10 @@ func (bi *Bios) AllowedAttributeUpdateApplyTimes() []SettingsApplyTime {
 	return bi.settingsApplyTimes
 }
 
+func (bi *Bios) ReportedAttributeUpdateApplyTimes() []SettingsApplyTime {
+	return bi.settingsApplyTimes
+}
+
 // UpdateBiosAttributesApplyAt is used to update attribute values and set apply time together
 func (bi *Bios) UpdateBiosAttributesApplyAt(attrs SettingsAttributes, applyTime SettingsApplyTime) error {
 	_, err := bi.UpdateBiosAttributesApplyAtWithTask(attrs, applyTime)

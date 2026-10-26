@@ -9,9 +9,56 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 )
+
+func TestBiosReportedAttributeUpdateApplyTimes(t *testing.T) {
+	tests := []struct {
+		name string
+		body string
+		want []SettingsApplyTime
+	}{
+		{name: "missing settings", body: `{}`},
+		{name: "missing apply times", body: `{"@Redfish.Settings": {}}`},
+		{name: "null apply times", body: `{"@Redfish.Settings": {"SupportedApplyTimes": null}}`},
+		{
+			name: "empty apply times",
+			body: `{"@Redfish.Settings": {"SupportedApplyTimes": []}}`,
+			want: []SettingsApplyTime{},
+		},
+		{
+			name: "reported apply times",
+			body: `{"@Redfish.Settings": {"SupportedApplyTimes": ["OnReset", "Immediate"]}}`,
+			want: []SettingsApplyTime{OnResetSettingsApplyTime, ImmediateSettingsApplyTime},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var bios Bios
+			if err := json.Unmarshal([]byte(tt.body), &bios); err != nil {
+				t.Fatalf("Decode BIOS: %v", err)
+			}
+			if got := bios.ReportedAttributeUpdateApplyTimes(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Reported apply times = %#v, want %#v", got, tt.want)
+			}
+			allowed := tt.want
+			if len(allowed) == 0 {
+				allowed = []SettingsApplyTime{
+					ImmediateSettingsApplyTime,
+					OnResetSettingsApplyTime,
+					AtMaintenanceWindowStartSettingsApplyTime,
+					InMaintenanceWindowOnResetSettingsApplyTime,
+				}
+			}
+			if got := bios.AllowedAttributeUpdateApplyTimes(); !reflect.DeepEqual(got, allowed) {
+				t.Errorf("Allowed apply times = %#v, want %#v", got, allowed)
+			}
+		})
+	}
+}
 
 var biosBody = `{
 		"@Redfish.Settings": {
