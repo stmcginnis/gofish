@@ -269,10 +269,6 @@ func walkCollectionPages[T any, PT interface {
 			return nil
 		}
 		link = collection.MembersNextLink
-		// Follow the next link as the service sent it. Clearing the caller's
-		// options is not enough: AutoExpand lives in the client's default
-		// options, and BuildQuery would append "?$expand=..." onto a next link
-		// that already has a query string. ExpandNone overrides that default.
 		queryOpts = []QueryGroupOption{WithCollectionQueryOpts(WithExpand(ExpandNone))}
 	}
 }
