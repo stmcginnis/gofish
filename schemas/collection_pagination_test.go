@@ -167,9 +167,6 @@ func TestCollectionPaginationExistingExpand(t *testing.T) {
 	}
 }
 
-// TestCollectionPaginationAutoExpandNextLink guards against reapplying the
-// client's default $expand onto Members@odata.nextLink. A next link already
-// has a query string, so appending "?$expand=." makes a URL the service rejects.
 func TestCollectionPaginationAutoExpandNextLink(t *testing.T) {
 	for _, callback := range []bool{false, true} {
 		t.Run(fmt.Sprintf("callback=%v", callback), func(t *testing.T) {
