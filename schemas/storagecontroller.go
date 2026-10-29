@@ -276,7 +276,7 @@ func ListReferencedStorageControllers(c Client, link string) ([]*StorageControll
 // namespaces - This parameter shall contain an array of links to resources of
 // type 'Volume' that represent the namespaces or volumes to attach to the
 // storage controller.
-func (s *StorageController) AttachNamespaces(namespaces []string) (*AttachDetachNamespacesResponse, error) {
+func (s *StorageController) AttachNamespaces(namespaces []Link) (*AttachDetachNamespacesResponse, error) {
 	payload := make(map[string]any)
 	payload["Namespaces"] = namespaces
 
@@ -306,7 +306,7 @@ func (s *StorageController) AttachNamespaces(namespaces []string) (*AttachDetach
 // namespaces - This parameter shall contain an array of links to resources of
 // type 'Volume' that represent the namespaces or volumes to detach from the
 // storage controller.
-func (s *StorageController) DetachNamespaces(namespaces []string) (*AttachDetachNamespacesResponse, error) {
+func (s *StorageController) DetachNamespaces(namespaces []Link) (*AttachDetachNamespacesResponse, error) {
 	payload := make(map[string]any)
 	payload["Namespaces"] = namespaces
 

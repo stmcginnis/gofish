@@ -231,3 +231,53 @@ func TestParseActionParametersFallbackOrder(t *testing.T) {
 		t.Fatalf("Expected alphabetical order, got %s then %s", params[0].OriginalName, params[1].OriginalName)
 	}
 }
+
+func TestParseActionParametersResourceLinks(t *testing.T) {
+	p := NewParser("/tmp")
+	p.rawSchema = []byte(`{}`)
+
+	paramsMap := map[string]any{
+		// A reference to a resource collection is sent as a link object.
+		"CertificateCollection": map[string]any{
+			"$ref": "http://redfish.dmtf.org/schemas/v1/CertificateCollection.json#/definitions/CertificateCollection",
+		},
+		// A reference to a standalone resource is a link too, even though the name ends in Uri.
+		"CertificateUri": map[string]any{
+			"$ref": "http://redfish.dmtf.org/schemas/v1/Certificate.json#/definitions/Certificate",
+		},
+		// An array of resource references is an array of links.
+		"Targets": map[string]any{
+			"type":  "array",
+			"items": map[string]any{"$ref": "http://redfish.dmtf.org/schemas/v1/SoftwareInventory.json#/definitions/SoftwareInventory"},
+		},
+		// A URI-valued string stays a string.
+		"ImageURI": map[string]any{
+			"type":   "string",
+			"format": "uri-reference",
+		},
+		// An enum reference keeps its type.
+		"ResetType": map[string]any{
+			"$ref": "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/ResetType",
+		},
+	}
+
+	params := p.parseActionParameters("Missing", paramsMap)
+
+	got := make(map[string]string, len(params))
+	for _, param := range params {
+		got[param.OriginalName] = param.Type
+	}
+
+	want := map[string]string{
+		"CertificateCollection": "Link",
+		"CertificateUri":        "Link",
+		"Targets":               "[]Link",
+		"ImageURI":              "string",
+		"ResetType":             "ResetType",
+	}
+	for name, wantType := range want {
+		if got[name] != wantType {
+			t.Errorf("parameter %s: type %q, want %q", name, got[name], wantType)
+		}
+	}
+}

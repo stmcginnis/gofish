@@ -1168,7 +1168,7 @@ func ListReferencedComputerSystems(c Client, link string) ([]*ComputerSystem, er
 // Required' status code to reject the request.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (c *ComputerSystem) AddResourceBlock(computerSystemETag string, resourceBlock string, resourceBlockETag string) (*TaskMonitorInfo, error) {
+func (c *ComputerSystem) AddResourceBlock(computerSystemETag string, resourceBlock Link, resourceBlockETag string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ComputerSystemETag"] = computerSystemETag
 	payload["ResourceBlock"] = resourceBlock
@@ -1363,7 +1363,7 @@ func (c *ComputerSystem) GraphicalConsoleSetPassword(consoleType GraphicalConsol
 // Required' status code to reject the request.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (c *ComputerSystem) RemoveResourceBlock(computerSystemETag string, resourceBlock string, resourceBlockETag string) (*TaskMonitorInfo, error) {
+func (c *ComputerSystem) RemoveResourceBlock(computerSystemETag string, resourceBlock Link, resourceBlockETag string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ComputerSystemETag"] = computerSystemETag
 	payload["ResourceBlock"] = resourceBlock

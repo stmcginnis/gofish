@@ -114,7 +114,7 @@ type CertificateServiceGenerateCSRParameters struct {
 	// CertificateCollection shall contain a link to a resource collection of type
 	// 'CertificateCollection' where the certificate is installed after the
 	// certificate authority (CA) signs the certificate.
-	CertificateCollection string `json:"CertificateCollection,omitempty"`
+	CertificateCollection Link `json:"CertificateCollection,omitempty"`
 	// ChallengePassword shall contain the challenge password to apply to the
 	// certificate for revocation requests as defined by the RFC2985
 	// 'challengePassword' attribute.
@@ -218,7 +218,7 @@ type CertificateServiceReplaceCertificateParameters struct {
 	CertificateType CertificateType `json:"CertificateType,omitempty"`
 	// CertificateURI shall contain a link to a resource of type 'Certificate' that
 	// is being replaced.
-	CertificateURI string `json:"CertificateUri,omitempty"`
+	CertificateURI Link `json:"CertificateUri,omitempty"`
 	// Password shall contain the password for the certificate contained in the
 	// 'CertificateString' parameter. This parameter shall be required if the
 	// 'CertificateType' parameter contains 'PKCS12' and the client-provided

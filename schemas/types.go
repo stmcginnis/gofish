@@ -36,6 +36,14 @@ func (l *Link) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// MarshalJSON marshals a Link as a resource reference object ({"@odata.id": "..."}), the
+// form Redfish services expect for link-valued action parameters.
+func (l Link) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		ODataID string `json:"@odata.id"`
+	}{ODataID: string(l)})
+}
+
 func (l Link) String() string {
 	return string(l)
 }

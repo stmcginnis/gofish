@@ -317,7 +317,7 @@ type ComponentIntegrityTPMGetSignedMeasurementsParameters struct {
 	// TPM that represents the TPM's attestation key for the 'signHandle' parameter
 	// of the 'TPM2_Quote' command defined in the Trusted Platform Module Library
 	// Specification.
-	Certificate string `json:"Certificate,omitempty"`
+	Certificate Link `json:"Certificate,omitempty"`
 	// Nonce shall contain a set of bytes as a hex-encoded string that is signed
 	// with the measurements. Services shall reject the action request if the
 	// number of bytes provided is larger than the value specified by the

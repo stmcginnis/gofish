@@ -186,7 +186,7 @@ func ListReferencedZones(c Client, link string) ([]*Zone, error) {
 // reject the request.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (z *Zone) AddEndpoint(endpoint string, endpointETag string, zoneETag string) (*TaskMonitorInfo, error) {
+func (z *Zone) AddEndpoint(endpoint Link, endpointETag string, zoneETag string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Endpoint"] = endpoint
 	payload["EndpointETag"] = endpointETag
@@ -211,7 +211,7 @@ func (z *Zone) AddEndpoint(endpoint string, endpointETag string, zoneETag string
 // reject the request.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (z *Zone) RemoveEndpoint(endpoint string, endpointETag string, zoneETag string) (*TaskMonitorInfo, error) {
+func (z *Zone) RemoveEndpoint(endpoint Link, endpointETag string, zoneETag string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Endpoint"] = endpoint
 	payload["EndpointETag"] = endpointETag

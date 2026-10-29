@@ -214,7 +214,7 @@ type CXLLogicalDeviceDynamicCapacityAddParameters struct {
 	// ExtentList shall contain an array of links to resources of type
 	// 'MemoryExtent' that represent the dynamic capacity to add. This parameter
 	// shall be required if 'Policy' contains 'Prescriptive'.
-	ExtentList []string `json:"ExtentList,omitempty"`
+	ExtentList []Link `json:"ExtentList,omitempty"`
 	// Length shall contain the size of the dynamic capacity to add. This parameter
 	// shall be required if 'Policy' contains 'Free' or 'Contiguous'.
 	Length int `json:"Length,omitempty"`
@@ -245,7 +245,7 @@ type CXLLogicalDeviceDynamicCapacityReleaseParameters struct {
 	// ExtentList shall contain an array of links to resources of type
 	// 'MemoryExtent' that represent the dynamic capacity to release. This
 	// parameter shall be required if 'Policy' contains 'Prescriptive'.
-	ExtentList []string `json:"ExtentList,omitempty"`
+	ExtentList []Link `json:"ExtentList,omitempty"`
 	// ForcedRemoval shall indicate whether to perform a forced removal of the
 	// dynamic capacity. If 'true', the device will not wait for a host response
 	// and the host immediately loses access to released capacity.

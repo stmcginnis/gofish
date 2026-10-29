@@ -853,7 +853,7 @@ func (v *Volume) AssignReplicaTarget(replicaType ReplicaType, replicaUpdateMode 
 // VolumeChangeRAIDLayoutParameters holds the parameters for the ChangeRAIDLayout action.
 type VolumeChangeRAIDLayoutParameters struct {
 	// Drives shall contain an array of the drives to be used by the volume.
-	Drives []string `json:"Drives,omitempty"`
+	Drives []Link `json:"Drives,omitempty"`
 	// MediaSpanCount shall contain the requested number of media elements used per
 	// span in the secondary RAID for a hierarchical RAID type.
 	MediaSpanCount int `json:"MediaSpanCount,omitempty"`

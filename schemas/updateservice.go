@@ -411,7 +411,7 @@ func ListReferencedUpdateServices(c Client, link string) ([]*UpdateService, erro
 // software image on all applicable devices.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (u *UpdateService) Activate(targets []string) (*TaskMonitorInfo, error) {
+func (u *UpdateService) Activate(targets []Link) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Targets"] = targets
 	resp, taskInfo, err := PostWithTask(u.client,

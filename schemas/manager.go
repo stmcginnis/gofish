@@ -590,7 +590,7 @@ func ListReferencedManagers(c Client, link string) ([]*Manager, error) {
 // newManager - This parameter shall contain the manager to which to fail over.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (m *Manager) ForceFailover(newManager string) (*TaskMonitorInfo, error) {
+func (m *Manager) ForceFailover(newManager Link) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["NewManager"] = newManager
 	resp, taskInfo, err := PostWithTask(m.client,
@@ -607,7 +607,7 @@ func (m *Manager) ForceFailover(newManager string) (*TaskMonitorInfo, error) {
 // the redundancy set.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (m *Manager) ModifyRedundancySet(add []string, remove []string) (*TaskMonitorInfo, error) {
+func (m *Manager) ModifyRedundancySet(add []Link, remove []Link) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Add"] = add
 	payload["Remove"] = remove

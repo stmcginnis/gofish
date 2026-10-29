@@ -113,7 +113,7 @@ type JobDocumentSubmitJobParameters struct {
 	HidePayload bool `json:"HidePayload,omitempty"`
 	// JobCreator shall contain a link to a resource of type 'Job' that represents
 	// the job that is submitting this job.
-	JobCreator string `json:"JobCreator,omitempty"`
+	JobCreator Link `json:"JobCreator,omitempty"`
 	// Parameters shall contain the list of parameters for the new job that are
 	// specific to this job document. Services shall reject requests containing
 	// parameters that do not meet the requirements specified by the
@@ -121,7 +121,7 @@ type JobDocumentSubmitJobParameters struct {
 	Parameters []any `json:"Parameters,omitempty"`
 	// PreferredExecutors shall contain an array of links to resources of type
 	// 'JobExecutor' that represent the preferred executors to run this job.
-	PreferredExecutors []string `json:"PreferredExecutors,omitempty"`
+	PreferredExecutors []Link `json:"PreferredExecutors,omitempty"`
 	// StartTime shall contain the date and time when the job is scheduled to
 	// start.
 	StartTime string `json:"StartTime,omitempty"`

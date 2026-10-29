@@ -121,7 +121,7 @@ type LicenseServiceInstallParameters struct {
 	// such as remote Redfish services. This parameter shall only be present in
 	// aggregators when the 'AuthorizationScope' property contains 'Service' or
 	// 'Capacity'.
-	TargetServices []string `json:"TargetServices,omitempty"`
+	TargetServices []Link `json:"TargetServices,omitempty"`
 	// TransferProtocol shall contain the network protocol that the license service
 	// shall use to retrieve the license file located at the 'LicenseFileURI'.
 	// Services should ignore this parameter if the URI provided in

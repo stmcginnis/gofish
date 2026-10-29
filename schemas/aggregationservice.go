@@ -132,7 +132,7 @@ func (a *AggregationService) Reset(params *AggregationServiceResetParameters) (*
 // type 'ComputerSystem'.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (a *AggregationService) SetDefaultBootOrder(systems []string) (*TaskMonitorInfo, error) {
+func (a *AggregationService) SetDefaultBootOrder(systems []Link) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["Systems"] = systems
 	resp, taskInfo, err := PostWithTask(a.client,

@@ -129,7 +129,7 @@ func TestAggregationServiceSetDefaultBootOrder(t *testing.T) {
 	testClient := &TestClient{}
 	result.SetClient(testClient)
 
-	_, err = result.SetDefaultBootOrder([]string{"/link/system/1"})
+	_, err = result.SetDefaultBootOrder([]Link{"/link/system/1"})
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}
@@ -140,7 +140,7 @@ func TestAggregationServiceSetDefaultBootOrder(t *testing.T) {
 		t.Errorf("Expected one call to be made, captured: %#v", calls)
 	}
 
-	if !strings.Contains(calls[0].Payload, "/link/system/1") {
-		t.Errorf("Target system not found in payload: %s", calls[0].Payload)
+	if !strings.Contains(calls[0].Payload, "Systems:[map[@odata.id:/link/system/1]]") {
+		t.Errorf("Target system not sent as a link in payload: %s", calls[0].Payload)
 	}
 }
