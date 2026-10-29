@@ -243,9 +243,6 @@ func walkCollectionPages[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, link string, visit func([]PT), queryOpts ...QueryGroupOption) error {
-	// Continuation pages drop the caller's options. If a page needed the
-	// expand fallback, later pages skip $expand too (Dell iDRAC returns 404
-	// when $expand is appended to a nextLink).
 	seen := make(map[string]bool)
 	var nextOpts []QueryGroupOption
 	for {
