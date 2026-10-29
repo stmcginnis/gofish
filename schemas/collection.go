@@ -249,7 +249,7 @@ func walkCollectionPages[T any, PT interface {
 			return errors.New("collection pagination loop")
 		}
 		seen[link] = true
-
+		var nextOpts []QueryGroupOption
 		collection, err := GetResourceCollection[T, PT](c, link, queryOpts...)
 		if err != nil {
 			builtOpts := BuildQueryGroup(c, queryOpts...).QueryCollection
@@ -262,6 +262,8 @@ func walkCollectionPages[T any, PT interface {
 			if err != nil {
 				return err
 			}
+			nextOpts = []QueryGroupOption{WithCollectionQueryOpts(WithExpand(ExpandNone))}
+
 		}
 
 		visit(collection.Members)
@@ -269,7 +271,7 @@ func walkCollectionPages[T any, PT interface {
 			return nil
 		}
 		link = collection.MembersNextLink
-		queryOpts = []QueryGroupOption{WithCollectionQueryOpts(WithExpand(ExpandNone))}
+		queryOpts = nextOpts
 	}
 }
 
