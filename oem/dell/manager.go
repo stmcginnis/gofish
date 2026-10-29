@@ -16,6 +16,7 @@ type Manager struct {
 	schemas.Manager
 
 	importSystemConfigTarget string
+	exportSystemConfigTarget string
 	iDRACCardService         string
 
 	// DellServiceLinks are the links to the Dell attribute resources found under
@@ -104,6 +105,7 @@ func FromManager(manager *schemas.Manager) (*Manager, error) {
 
 	type oemActions struct {
 		ImportSystemConfiguration schemas.ActionTarget `json:"#OemManager.ImportSystemConfiguration,omitempty"`
+		ExportSystemConfiguration schemas.ActionTarget `json:"#OemManager.ExportSystemConfiguration,omitempty"`
 	}
 	var tmp struct {
 		Actions struct {
@@ -117,6 +119,7 @@ func FromManager(manager *schemas.Manager) (*Manager, error) {
 	}
 
 	m.importSystemConfigTarget = tmp.Actions.Oem.ImportSystemConfiguration.Target
+	m.exportSystemConfigTarget = tmp.Actions.Oem.ExportSystemConfiguration.Target
 
 	type oemLinks struct {
 		Dell struct {
