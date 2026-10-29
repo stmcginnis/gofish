@@ -317,7 +317,7 @@ type ComponentIntegrityTPMGetSignedMeasurementsParameters struct {
 	// TPM that represents the TPM's attestation key for the 'signHandle' parameter
 	// of the 'TPM2_Quote' command defined in the Trusted Platform Module Library
 	// Specification.
-	Certificate Link `json:"Certificate,omitempty"`
+	Certificate string `json:"Certificate,omitempty"`
 	// Nonce shall contain a set of bytes as a hex-encoded string that is signed
 	// with the measurements. Services shall reject the action request if the
 	// number of bytes provided is larger than the value specified by the
@@ -341,6 +341,19 @@ type ComponentIntegrityTPMGetSignedMeasurementsParameters struct {
 	// 'inScheme' parameter of the 'TPM2_Quote' command defined in the Trusted
 	// Platform Module Library Specification.
 	Scheme string `json:"Scheme,omitempty"`
+}
+
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p ComponentIntegrityTPMGetSignedMeasurementsParameters) MarshalJSON() ([]byte, error) {
+	type plain ComponentIntegrityTPMGetSignedMeasurementsParameters
+	return json.Marshal(struct {
+		plain
+		Certificate *LinkObject `json:"Certificate,omitempty"`
+	}{
+		plain:       plain(p),
+		Certificate: NewLinkObject(p.Certificate),
+	})
 }
 
 // This action shall generate a cryptographic signed statement over the given

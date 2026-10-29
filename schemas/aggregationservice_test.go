@@ -129,7 +129,7 @@ func TestAggregationServiceSetDefaultBootOrder(t *testing.T) {
 	testClient := &TestClient{}
 	result.SetClient(testClient)
 
-	_, err = result.SetDefaultBootOrder([]Link{"/link/system/1"})
+	_, err = result.SetDefaultBootOrder([]string{"/link/system/1"})
 	if err != nil {
 		t.Errorf("Error making Reset call: %s", err)
 	}

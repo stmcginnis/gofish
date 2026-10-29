@@ -853,7 +853,7 @@ func (v *Volume) AssignReplicaTarget(replicaType ReplicaType, replicaUpdateMode 
 // VolumeChangeRAIDLayoutParameters holds the parameters for the ChangeRAIDLayout action.
 type VolumeChangeRAIDLayoutParameters struct {
 	// Drives shall contain an array of the drives to be used by the volume.
-	Drives []Link `json:"Drives,omitempty"`
+	Drives []string `json:"Drives,omitempty"`
 	// MediaSpanCount shall contain the requested number of media elements used per
 	// span in the secondary RAID for a hierarchical RAID type.
 	MediaSpanCount int `json:"MediaSpanCount,omitempty"`
@@ -862,6 +862,19 @@ type VolumeChangeRAIDLayoutParameters struct {
 	// StripSizeBytes shall contain the number of blocks (bytes) requested for the
 	// strip size.
 	StripSizeBytes int `json:"StripSizeBytes,omitempty"`
+}
+
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p VolumeChangeRAIDLayoutParameters) MarshalJSON() ([]byte, error) {
+	type plain VolumeChangeRAIDLayoutParameters
+	return json.Marshal(struct {
+		plain
+		Drives []LinkObject `json:"Drives,omitempty"`
+	}{
+		plain:  plain(p),
+		Drives: NewLinkObjects(p.Drives),
+	})
 }
 
 // This action shall request the system to change the RAID layout of the

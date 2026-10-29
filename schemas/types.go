@@ -36,16 +36,37 @@ func (l *Link) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// MarshalJSON marshals a Link as a resource reference object ({"@odata.id": "..."}), the
-// form Redfish services expect for link-valued action parameters.
-func (l Link) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		ODataID string `json:"@odata.id"`
-	}{ODataID: string(l)})
-}
-
 func (l Link) String() string {
 	return string(l)
+}
+
+// LinkObject is a resource reference as it appears in a request body:
+// {"@odata.id": "/redfish/v1/..."}. Action parameters that the schema defines as
+// references to a resource or collection are sent in this form; the generated
+// code builds it from the URI string the caller passes.
+type LinkObject struct {
+	ODataID string `json:"@odata.id"`
+}
+
+// NewLinkObject returns the reference object for uri, or nil for an empty uri so
+// that an optional parameter is omitted.
+func NewLinkObject(uri string) *LinkObject {
+	if uri == "" {
+		return nil
+	}
+	return &LinkObject{ODataID: uri}
+}
+
+// NewLinkObjects returns the reference objects for uris, or nil for none.
+func NewLinkObjects(uris []string) []LinkObject {
+	if len(uris) == 0 {
+		return nil
+	}
+	out := make([]LinkObject, 0, len(uris))
+	for _, uri := range uris {
+		out = append(out, LinkObject{ODataID: uri})
+	}
+	return out
 }
 
 // Links are a collection of Link references

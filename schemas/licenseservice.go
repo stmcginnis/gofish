@@ -121,7 +121,7 @@ type LicenseServiceInstallParameters struct {
 	// such as remote Redfish services. This parameter shall only be present in
 	// aggregators when the 'AuthorizationScope' property contains 'Service' or
 	// 'Capacity'.
-	TargetServices []Link `json:"TargetServices,omitempty"`
+	TargetServices []string `json:"TargetServices,omitempty"`
 	// TransferProtocol shall contain the network protocol that the license service
 	// shall use to retrieve the license file located at the 'LicenseFileURI'.
 	// Services should ignore this parameter if the URI provided in
@@ -132,6 +132,19 @@ type LicenseServiceInstallParameters struct {
 	// Username shall contain the username to access the URI specified by the
 	// 'LicenseFileURI' parameter.
 	Username string `json:"Username,omitempty"`
+}
+
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p LicenseServiceInstallParameters) MarshalJSON() ([]byte, error) {
+	type plain LicenseServiceInstallParameters
+	return json.Marshal(struct {
+		plain
+		TargetServices []LinkObject `json:"TargetServices,omitempty"`
+	}{
+		plain:          plain(p),
+		TargetServices: NewLinkObjects(p.TargetServices),
+	})
 }
 
 // This action shall install one or more licenses from a remote file. The

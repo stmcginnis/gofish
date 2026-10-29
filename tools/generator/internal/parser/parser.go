@@ -1086,13 +1086,16 @@ func (p *Parser) parseActionParameters(actionDefName string, paramsMap map[strin
 		propJSON := mapToJSONProperty(paramMap)
 		isLink := IsLinkProperty(paramName, propJSON)
 
-		// A parameter that references a resource or a collection is sent as a link
-		// object ({"@odata.id": ...}); Link marshals that way. URI-valued strings
-		// (format uri, names ending in URI) stay strings below.
+		// A parameter that references a resource or a collection stays a URI string
+		// for the caller but is sent as a link object ({"@odata.id": ...}); the
+		// generated code wraps it. URI-valued strings (format uri, names ending in
+		// URI) are plain strings in the body.
 		if IsResourceLinkProperty(propJSON) {
-			param.Type = "Link"
-			if propJSON.Items != nil {
-				param.Type = "[]Link"
+			param.IsLink = true
+			param.IsArray = propJSON.Items != nil
+			param.Type = "string"
+			if param.IsArray {
+				param.Type = "[]string"
 			}
 			params = append(params, param)
 			continue

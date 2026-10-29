@@ -114,7 +114,7 @@ type CertificateServiceGenerateCSRParameters struct {
 	// CertificateCollection shall contain a link to a resource collection of type
 	// 'CertificateCollection' where the certificate is installed after the
 	// certificate authority (CA) signs the certificate.
-	CertificateCollection Link `json:"CertificateCollection,omitempty"`
+	CertificateCollection string `json:"CertificateCollection,omitempty"`
 	// ChallengePassword shall contain the challenge password to apply to the
 	// certificate for revocation requests as defined by the RFC2985
 	// 'challengePassword' attribute.
@@ -179,6 +179,19 @@ type CertificateServiceGenerateCSRParameters struct {
 	UnstructuredName string `json:"UnstructuredName,omitempty"`
 }
 
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p CertificateServiceGenerateCSRParameters) MarshalJSON() ([]byte, error) {
+	type plain CertificateServiceGenerateCSRParameters
+	return json.Marshal(struct {
+		plain
+		CertificateCollection *LinkObject `json:"CertificateCollection,omitempty"`
+	}{
+		plain:                 plain(p),
+		CertificateCollection: NewLinkObject(p.CertificateCollection),
+	})
+}
+
 // This action shall make a certificate signing request. The response shall
 // contain a signing request that a certificate authority (CA) will sign. The
 // service should retain the private key that was generated during this request
@@ -218,12 +231,25 @@ type CertificateServiceReplaceCertificateParameters struct {
 	CertificateType CertificateType `json:"CertificateType,omitempty"`
 	// CertificateURI shall contain a link to a resource of type 'Certificate' that
 	// is being replaced.
-	CertificateURI Link `json:"CertificateUri,omitempty"`
+	CertificateURI string `json:"CertificateUri,omitempty"`
 	// Password shall contain the password for the certificate contained in the
 	// 'CertificateString' parameter. This parameter shall be required if the
 	// 'CertificateType' parameter contains 'PKCS12' and the client-provided
 	// certificate is password protected.
 	Password string `json:"Password,omitempty"`
+}
+
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p CertificateServiceReplaceCertificateParameters) MarshalJSON() ([]byte, error) {
+	type plain CertificateServiceReplaceCertificateParameters
+	return json.Marshal(struct {
+		plain
+		CertificateURI *LinkObject `json:"CertificateUri,omitempty"`
+	}{
+		plain:          plain(p),
+		CertificateURI: NewLinkObject(p.CertificateURI),
+	})
 }
 
 // This action shall replace a certificate. The 'Location' header in the

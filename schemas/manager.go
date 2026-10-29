@@ -590,9 +590,9 @@ func ListReferencedManagers(c Client, link string) ([]*Manager, error) {
 // newManager - This parameter shall contain the manager to which to fail over.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (m *Manager) ForceFailover(newManager Link) (*TaskMonitorInfo, error) {
+func (m *Manager) ForceFailover(newManager string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
-	payload["NewManager"] = newManager
+	payload["NewManager"] = LinkObject{ODataID: newManager}
 	resp, taskInfo, err := PostWithTask(m.client,
 		m.forceFailoverTarget, payload, m.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
@@ -607,10 +607,10 @@ func (m *Manager) ForceFailover(newManager Link) (*TaskMonitorInfo, error) {
 // the redundancy set.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (m *Manager) ModifyRedundancySet(add []Link, remove []Link) (*TaskMonitorInfo, error) {
+func (m *Manager) ModifyRedundancySet(add []string, remove []string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
-	payload["Add"] = add
-	payload["Remove"] = remove
+	payload["Add"] = NewLinkObjects(add)
+	payload["Remove"] = NewLinkObjects(remove)
 	resp, taskInfo, err := PostWithTask(m.client,
 		m.modifyRedundancySetTarget, payload, m.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)

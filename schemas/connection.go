@@ -168,11 +168,11 @@ func ListReferencedConnections(c Client, link string) ([]*Connection, error) {
 // that represents the volume to add.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (c *Connection) AddVolumeInfo(accessCapabilities []AccessCapability, lUN int, volume Link) (*TaskMonitorInfo, error) {
+func (c *Connection) AddVolumeInfo(accessCapabilities []AccessCapability, lUN int, volume string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["AccessCapabilities"] = accessCapabilities
 	payload["LUN"] = lUN
-	payload["Volume"] = volume
+	payload["Volume"] = LinkObject{ODataID: volume}
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.addVolumeInfoTarget, payload, c.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
@@ -189,10 +189,10 @@ func (c *Connection) AddVolumeInfo(accessCapabilities []AccessCapability, lUN in
 // that represents the volume to remove.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
-func (c *Connection) RemoveVolumeInfo(lUN int, volume Link) (*TaskMonitorInfo, error) {
+func (c *Connection) RemoveVolumeInfo(lUN int, volume string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["LUN"] = lUN
-	payload["Volume"] = volume
+	payload["Volume"] = LinkObject{ODataID: volume}
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.removeVolumeInfoTarget, payload, c.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)

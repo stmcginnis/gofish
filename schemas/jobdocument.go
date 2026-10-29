@@ -113,7 +113,7 @@ type JobDocumentSubmitJobParameters struct {
 	HidePayload bool `json:"HidePayload,omitempty"`
 	// JobCreator shall contain a link to a resource of type 'Job' that represents
 	// the job that is submitting this job.
-	JobCreator Link `json:"JobCreator,omitempty"`
+	JobCreator string `json:"JobCreator,omitempty"`
 	// Parameters shall contain the list of parameters for the new job that are
 	// specific to this job document. Services shall reject requests containing
 	// parameters that do not meet the requirements specified by the
@@ -121,10 +121,25 @@ type JobDocumentSubmitJobParameters struct {
 	Parameters []any `json:"Parameters,omitempty"`
 	// PreferredExecutors shall contain an array of links to resources of type
 	// 'JobExecutor' that represent the preferred executors to run this job.
-	PreferredExecutors []Link `json:"PreferredExecutors,omitempty"`
+	PreferredExecutors []string `json:"PreferredExecutors,omitempty"`
 	// StartTime shall contain the date and time when the job is scheduled to
 	// start.
 	StartTime string `json:"StartTime,omitempty"`
+}
+
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p JobDocumentSubmitJobParameters) MarshalJSON() ([]byte, error) {
+	type plain JobDocumentSubmitJobParameters
+	return json.Marshal(struct {
+		plain
+		JobCreator         *LinkObject  `json:"JobCreator,omitempty"`
+		PreferredExecutors []LinkObject `json:"PreferredExecutors,omitempty"`
+	}{
+		plain:              plain(p),
+		JobCreator:         NewLinkObject(p.JobCreator),
+		PreferredExecutors: NewLinkObjects(p.PreferredExecutors),
+	})
 }
 
 // This action shall create a new 'Job' resource based on the contents of this

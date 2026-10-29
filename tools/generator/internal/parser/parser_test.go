@@ -263,21 +263,35 @@ func TestParseActionParametersResourceLinks(t *testing.T) {
 
 	params := p.parseActionParameters("Missing", paramsMap)
 
-	got := make(map[string]string, len(params))
+	got := make(map[string]*schema.ActionParameter, len(params))
 	for _, param := range params {
-		got[param.OriginalName] = param.Type
+		got[param.OriginalName] = param
 	}
 
-	want := map[string]string{
-		"CertificateCollection": "Link",
-		"CertificateUri":        "Link",
-		"Targets":               "[]Link",
-		"ImageURI":              "string",
-		"ResetType":             "ResetType",
+	want := map[string]struct {
+		typ    string
+		isLink bool
+	}{
+		"CertificateCollection": {"string", true},
+		"CertificateUri":        {"Link", true},
+		"Targets":               {"[]string", true},
+		"ImageURI":              {"string", false},
+		"ResetType":             {"ResetType", false},
 	}
-	for name, wantType := range want {
-		if got[name] != wantType {
-			t.Errorf("parameter %s: type %q, want %q", name, got[name], wantType)
+	want["CertificateUri"] = struct {
+		typ    string
+		isLink bool
+	}{"string", true}
+	for name, w := range want {
+		p := got[name]
+		if p == nil {
+			t.Fatalf("parameter %s missing", name)
 		}
+		if p.Type != w.typ || p.IsLink != w.isLink {
+			t.Errorf("parameter %s: type %q link %v, want %q %v", name, p.Type, p.IsLink, w.typ, w.isLink)
+		}
+	}
+	if !got["Targets"].IsArray || got["CertificateCollection"].IsArray {
+		t.Errorf("IsArray wrong: Targets=%v CertificateCollection=%v", got["Targets"].IsArray, got["CertificateCollection"].IsArray)
 	}
 }
