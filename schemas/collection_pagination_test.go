@@ -176,13 +176,56 @@ func TestCollectionPaginationAutoExpandNextLink(t *testing.T) {
 				switch uri {
 				case "/logs?$expand=.":
 					return collectionPageResponse(`{"Members":[{"Id":"first","@odata.id":"/logs/first"}],"Members@odata.nextLink":"/logs?$top=50&$skip=50"}`), nil
+				case "/logs?$top=50&$skip=50&$expand=.":
+					return nil, fmt.Errorf("expansion unsupported")
 				case "/logs?$top=50&$skip=50":
+					return collectionPageResponse(`{"Members":[{"Id":"second","@odata.id":"/logs/second"}],"Members@odata.nextLink":"/logs?$top=50&$skip=100"}`), nil
+				case "/logs?$top=50&$skip=100":
+					return collectionPageResponse(`{"Members":[{"Id":"third","@odata.id":"/logs/third"}],"Members@odata.nextLink":"/logs?$top=50&$skip=150"}`), nil
+				case "/logs?$top=50&$skip=150":
+					return collectionPageResponse(`{"Members":[{"Id":"fourth","@odata.id":"/logs/fourth"}]}`), nil
+				default:
+					return nil, fmt.Errorf("unexpected request %q", uri)
+				}
+			}}
+			client.Settings.DefaultQueryOptions = []QueryGroupOption{
+				WithCollectionQueryOpts(WithExpand(ExpandOptionPeriod), WithExpandFallback(true)),
+			}
+			ids, err := readCollectionPages(client, callback)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if want := []string{"first", "second", "third", "fourth"}; !reflect.DeepEqual(ids, want) {
+				t.Errorf("expected %v, got %v", want, ids)
+			}
+			if want := []string{
+				"/logs?$expand=.",
+				"/logs?$top=50&$skip=50&$expand=.",
+				"/logs?$top=50&$skip=50",
+				"/logs?$top=50&$skip=100",
+				"/logs?$top=50&$skip=150",
+			}; !reflect.DeepEqual(calls, want) {
+				t.Errorf("expected requests %v, got %v", want, calls)
+			}
+		})
+	}
+}
+
+func TestCollectionPaginationAutoExpandAcceptedOnNextLink(t *testing.T) {
+	for _, callback := range []bool{false, true} {
+		t.Run(fmt.Sprintf("callback=%v", callback), func(t *testing.T) {
+			var calls []string
+			client := &collectionPageClient{get: func(uri string) (*http.Response, error) {
+				calls = append(calls, uri)
+				switch uri {
+				case "/logs?$expand=.":
+					return collectionPageResponse(`{"Members":[{"Id":"first","@odata.id":"/logs/first"}],"Members@odata.nextLink":"/logs?$top=50&$skip=50"}`), nil
+				case "/logs?$top=50&$skip=50&$expand=.":
 					return collectionPageResponse(`{"Members":[{"Id":"second","@odata.id":"/logs/second"}]}`), nil
 				default:
 					return nil, fmt.Errorf("unexpected request %q", uri)
 				}
 			}}
-			// AutoExpand stores $expand on the client, not on the call.
 			client.Settings.DefaultQueryOptions = []QueryGroupOption{
 				WithCollectionQueryOpts(WithExpand(ExpandOptionPeriod), WithExpandFallback(true)),
 			}
@@ -193,7 +236,7 @@ func TestCollectionPaginationAutoExpandNextLink(t *testing.T) {
 			if want := []string{"first", "second"}; !reflect.DeepEqual(ids, want) {
 				t.Errorf("expected %v, got %v", want, ids)
 			}
-			if want := []string{"/logs?$expand=.", "/logs?$top=50&$skip=50"}; !reflect.DeepEqual(calls, want) {
+			if want := []string{"/logs?$expand=.", "/logs?$top=50&$skip=50&$expand=."}; !reflect.DeepEqual(calls, want) {
 				t.Errorf("expected requests %v, got %v", want, calls)
 			}
 		})

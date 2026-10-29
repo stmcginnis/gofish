@@ -243,13 +243,16 @@ func walkCollectionPages[T any, PT interface {
 	*T
 	SchemaObject
 }](c Client, link string, visit func([]PT), queryOpts ...QueryGroupOption) error {
+	// Continuation pages drop the caller's options. If a page needed the
+	// expand fallback, later pages skip $expand too (Dell iDRAC returns 404
+	// when $expand is appended to a nextLink).
 	seen := make(map[string]bool)
+	var nextOpts []QueryGroupOption
 	for {
 		if seen[link] {
 			return errors.New("collection pagination loop")
 		}
 		seen[link] = true
-		var nextOpts []QueryGroupOption
 		collection, err := GetResourceCollection[T, PT](c, link, queryOpts...)
 		if err != nil {
 			builtOpts := BuildQueryGroup(c, queryOpts...).QueryCollection
@@ -263,7 +266,6 @@ func walkCollectionPages[T any, PT interface {
 				return err
 			}
 			nextOpts = []QueryGroupOption{WithCollectionQueryOpts(WithExpand(ExpandNone))}
-
 		}
 
 		visit(collection.Members)
