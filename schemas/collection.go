@@ -244,12 +244,12 @@ func walkCollectionPages[T any, PT interface {
 	SchemaObject
 }](c Client, link string, visit func([]PT), queryOpts ...QueryGroupOption) error {
 	seen := make(map[string]bool)
+	var nextOpts []QueryGroupOption
 	for {
 		if seen[link] {
 			return errors.New("collection pagination loop")
 		}
 		seen[link] = true
-
 		collection, err := GetResourceCollection[T, PT](c, link, queryOpts...)
 		if err != nil {
 			builtOpts := BuildQueryGroup(c, queryOpts...).QueryCollection
@@ -262,6 +262,7 @@ func walkCollectionPages[T any, PT interface {
 			if err != nil {
 				return err
 			}
+			nextOpts = []QueryGroupOption{WithCollectionQueryOpts(WithExpand(ExpandNone))}
 		}
 
 		visit(collection.Members)
@@ -269,8 +270,7 @@ func walkCollectionPages[T any, PT interface {
 			return nil
 		}
 		link = collection.MembersNextLink
-		// Follow continuation links without carrying the caller's first-page options.
-		queryOpts = nil
+		queryOpts = nextOpts
 	}
 }
 
