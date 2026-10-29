@@ -864,6 +864,19 @@ type VolumeChangeRAIDLayoutParameters struct {
 	StripSizeBytes int `json:"StripSizeBytes,omitempty"`
 }
 
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p VolumeChangeRAIDLayoutParameters) MarshalJSON() ([]byte, error) {
+	type plain VolumeChangeRAIDLayoutParameters
+	return json.Marshal(struct {
+		plain
+		Drives []LinkObject `json:"Drives,omitempty"`
+	}{
+		plain:  plain(p),
+		Drives: NewLinkObjects(p.Drives),
+	})
+}
+
 // This action shall request the system to change the RAID layout of the
 // volume. Depending on the combination of the submitted parameters, this could
 // be changing the RAID type, changing the span count, changing the number of

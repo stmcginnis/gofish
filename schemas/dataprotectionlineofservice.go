@@ -125,7 +125,7 @@ func ListReferencedDataProtectionLineOfServices(c Client, link string) ([]*DataP
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (d *DataProtectionLineOfService) CreateReplicas(replicaLineOfService string, replicaRequests []ReplicaRequest) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
-	payload["ReplicaLineOfService"] = replicaLineOfService
+	payload["ReplicaLineOfService"] = LinkObject{ODataID: replicaLineOfService}
 	payload["ReplicaRequests"] = replicaRequests
 	resp, taskInfo, err := PostWithTask(d.client,
 		d.createReplicasTarget, payload, d.Headers(), false)

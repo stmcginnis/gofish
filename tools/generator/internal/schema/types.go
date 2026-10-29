@@ -274,6 +274,11 @@ type ActionParameter struct {
 	FieldName string
 	// FieldDescription is the pre-formatted godoc comment for parameter struct fields
 	FieldDescription string
+	// IsLink marks a parameter that references a resource or a resource collection:
+	// the value is a URI in Go and is sent as a link object ({"@odata.id": ...})
+	IsLink bool
+	// IsArray marks an array parameter
+	IsArray bool
 }
 
 // Link represents a link to a related resource

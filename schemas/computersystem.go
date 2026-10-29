@@ -1171,7 +1171,7 @@ func ListReferencedComputerSystems(c Client, link string) ([]*ComputerSystem, er
 func (c *ComputerSystem) AddResourceBlock(computerSystemETag string, resourceBlock string, resourceBlockETag string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ComputerSystemETag"] = computerSystemETag
-	payload["ResourceBlock"] = resourceBlock
+	payload["ResourceBlock"] = LinkObject{ODataID: resourceBlock}
 	payload["ResourceBlockETag"] = resourceBlockETag
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.addResourceBlockTarget, payload, c.Headers(), false)
@@ -1366,7 +1366,7 @@ func (c *ComputerSystem) GraphicalConsoleSetPassword(consoleType GraphicalConsol
 func (c *ComputerSystem) RemoveResourceBlock(computerSystemETag string, resourceBlock string, resourceBlockETag string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["ComputerSystemETag"] = computerSystemETag
-	payload["ResourceBlock"] = resourceBlock
+	payload["ResourceBlock"] = LinkObject{ODataID: resourceBlock}
 	payload["ResourceBlockETag"] = resourceBlockETag
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.removeResourceBlockTarget, payload, c.Headers(), false)

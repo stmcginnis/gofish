@@ -134,6 +134,19 @@ type LicenseServiceInstallParameters struct {
 	Username string `json:"Username,omitempty"`
 }
 
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p LicenseServiceInstallParameters) MarshalJSON() ([]byte, error) {
+	type plain LicenseServiceInstallParameters
+	return json.Marshal(struct {
+		plain
+		TargetServices []LinkObject `json:"TargetServices,omitempty"`
+	}{
+		plain:          plain(p),
+		TargetServices: NewLinkObjects(p.TargetServices),
+	})
+}
+
 // This action shall install one or more licenses from a remote file. The
 // service may update an existing 'License' resource. The 'Location' header in
 // the response shall contain the URI of the new or updated 'License' resource.

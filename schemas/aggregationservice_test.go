@@ -140,7 +140,7 @@ func TestAggregationServiceSetDefaultBootOrder(t *testing.T) {
 		t.Errorf("Expected one call to be made, captured: %#v", calls)
 	}
 
-	if !strings.Contains(calls[0].Payload, "/link/system/1") {
-		t.Errorf("Target system not found in payload: %s", calls[0].Payload)
+	if !strings.Contains(calls[0].Payload, "Systems:[map[@odata.id:/link/system/1]]") {
+		t.Errorf("Target system not sent as a link in payload: %s", calls[0].Payload)
 	}
 }

@@ -127,6 +127,21 @@ type JobDocumentSubmitJobParameters struct {
 	StartTime string `json:"StartTime,omitempty"`
 }
 
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p JobDocumentSubmitJobParameters) MarshalJSON() ([]byte, error) {
+	type plain JobDocumentSubmitJobParameters
+	return json.Marshal(struct {
+		plain
+		JobCreator         *LinkObject  `json:"JobCreator,omitempty"`
+		PreferredExecutors []LinkObject `json:"PreferredExecutors,omitempty"`
+	}{
+		plain:              plain(p),
+		JobCreator:         NewLinkObject(p.JobCreator),
+		PreferredExecutors: NewLinkObjects(p.PreferredExecutors),
+	})
+}
+
 // This action shall create a new 'Job' resource based on the contents of this
 // job document and additional parameters.
 //

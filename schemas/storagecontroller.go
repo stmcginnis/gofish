@@ -278,7 +278,7 @@ func ListReferencedStorageControllers(c Client, link string) ([]*StorageControll
 // storage controller.
 func (s *StorageController) AttachNamespaces(namespaces []string) (*AttachDetachNamespacesResponse, error) {
 	payload := make(map[string]any)
-	payload["Namespaces"] = namespaces
+	payload["Namespaces"] = NewLinkObjects(namespaces)
 
 	resp, err := s.PostWithResponse(s.attachNamespacesTarget, payload)
 	if err != nil {
@@ -308,7 +308,7 @@ func (s *StorageController) AttachNamespaces(namespaces []string) (*AttachDetach
 // storage controller.
 func (s *StorageController) DetachNamespaces(namespaces []string) (*AttachDetachNamespacesResponse, error) {
 	payload := make(map[string]any)
-	payload["Namespaces"] = namespaces
+	payload["Namespaces"] = NewLinkObjects(namespaces)
 
 	resp, err := s.PostWithResponse(s.detachNamespacesTarget, payload)
 	if err != nil {

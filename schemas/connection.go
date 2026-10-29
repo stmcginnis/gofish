@@ -172,7 +172,7 @@ func (c *Connection) AddVolumeInfo(accessCapabilities []AccessCapability, lUN in
 	payload := make(map[string]any)
 	payload["AccessCapabilities"] = accessCapabilities
 	payload["LUN"] = lUN
-	payload["Volume"] = volume
+	payload["Volume"] = LinkObject{ODataID: volume}
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.addVolumeInfoTarget, payload, c.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
@@ -192,7 +192,7 @@ func (c *Connection) AddVolumeInfo(accessCapabilities []AccessCapability, lUN in
 func (c *Connection) RemoveVolumeInfo(lUN int, volume string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 	payload["LUN"] = lUN
-	payload["Volume"] = volume
+	payload["Volume"] = LinkObject{ODataID: volume}
 	resp, taskInfo, err := PostWithTask(c.client,
 		c.removeVolumeInfoTarget, payload, c.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)

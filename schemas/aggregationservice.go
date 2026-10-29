@@ -134,7 +134,7 @@ func (a *AggregationService) Reset(params *AggregationServiceResetParameters) (*
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (a *AggregationService) SetDefaultBootOrder(systems []string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
-	payload["Systems"] = systems
+	payload["Systems"] = NewLinkObjects(systems)
 	resp, taskInfo, err := PostWithTask(a.client,
 		a.setDefaultBootOrderTarget, payload, a.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)
