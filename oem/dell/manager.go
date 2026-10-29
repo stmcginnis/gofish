@@ -17,6 +17,7 @@ type Manager struct {
 
 	importSystemConfigTarget string
 	iDRACCardService         string
+	lcService                string
 
 	// DellServiceLinks are the links to the Dell attribute resources found under
 	// Links.Oem.Dell.DellAttributes of the manager.
@@ -122,6 +123,7 @@ func FromManager(manager *schemas.Manager) (*Manager, error) {
 		Dell struct {
 			DellAttributes       schemas.Links `json:"DellAttributes"`
 			DelliDRACCardService schemas.Link  `json:"DelliDRACCardService"`
+			DellLCService        schemas.Link  `json:"DellLCService"`
 		} `json:"Dell"`
 	}
 	var links oemLinks
@@ -132,6 +134,7 @@ func FromManager(manager *schemas.Manager) (*Manager, error) {
 	}
 	m.DellServiceLinks = links.Dell.DellAttributes.ToStrings()
 	m.iDRACCardService = links.Dell.DelliDRACCardService.String()
+	m.lcService = links.Dell.DellLCService.String()
 
 	return &m, nil
 }
