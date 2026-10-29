@@ -152,6 +152,14 @@ func (t *ThermalSubsystem) CoolantConnectors() ([]*CoolantConnector, error) {
 	return GetCollectionObjects[CoolantConnector](t.client, t.coolantConnectors)
 }
 
+// Fans gets the Fans collection.
+func (t *ThermalSubsystem) Fans() ([]*Fan, error) {
+	if t.fans == "" {
+		return nil, nil
+	}
+	return GetCollectionObjects[Fan](t.client, t.fans)
+}
+
 // Filters gets the Filters collection.
 func (t *ThermalSubsystem) Filters() ([]*Filter, error) {
 	if t.filters == "" {
