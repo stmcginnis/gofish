@@ -299,19 +299,26 @@ var (
 // schema lists idRef as an alternative. Common objects such as Schedule or
 // Message share their schema's name but are always embedded, not linked.
 func isResource(name string) bool {
+	return isResourceDef(name, name)
+}
+
+// isResourceDef reports whether definition def in schema schemaName can be
+// referenced by @odata.id, such as CapacitySource in Capacity.json.
+func isResourceDef(schemaName, def string) bool {
+	key := schemaName + "#" + def
 	resourceCacheMu.Lock()
 	defer resourceCacheMu.Unlock()
-	if v, ok := resourceCache[name]; ok {
+	if v, ok := resourceCache[key]; ok {
 		return v
 	}
-	v := lookupResource(name)
-	resourceCache[name] = v
+	v := lookupResource(schemaName, def)
+	resourceCache[key] = v
 	return v
 }
 
-func lookupResource(name string) bool {
+func lookupResource(schemaName, name string) bool {
 	for _, dir := range SchemaDirs {
-		raw, err := schema.ReadAndParseSchema(filepath.Join(dir, name+".json"))
+		raw, err := schema.ReadAndParseSchema(filepath.Join(dir, schemaName+".json"))
 		if err != nil {
 			continue
 		}
@@ -328,23 +335,23 @@ func lookupResource(name string) bool {
 		}
 		return hasIDRef
 	}
-	// Unknown schemas keep the previous behavior.
-	return true
+	// Unknown schemas keep the previous behavior for a schema's main type.
+	return schemaName == name
 }
 
-// isResourceRef reports whether ref points at a standalone resource (a schema whose file
-// name matches the definition name) or at a resource collection: a reference to either is a
-// link carrying the resource's @odata.id.
+// isResourceRef reports whether ref points at a resource collection or at a definition that
+// can be referenced by @odata.id: a reference to either is a link carrying the resource's
+// @odata.id.
 func isResourceRef(ref string) bool {
 	if ref == "" || strings.Contains(ref, "odata-v4.json") || strings.Contains(ref, "Resource.json") {
 		return false
 	}
-	if strings.Contains(ref, "Collection") {
+	typeName := schema.ExtractTypeFromRef(ref, false)
+	if strings.HasSuffix(typeName, "Collection") {
 		return true
 	}
 	schemaName := extractSchemaNameFromRef(ref)
-	typeName := extractRefType(ref)
-	return schemaName != "" && schemaName == typeName && isResource(typeName)
+	return schemaName != "" && isResourceDef(schemaName, typeName)
 }
 
 // IsResourceLinkProperty reports whether a property or action parameter is a reference to a
