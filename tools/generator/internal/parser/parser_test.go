@@ -233,10 +233,35 @@ func TestParseActionParametersFallbackOrder(t *testing.T) {
 }
 
 func TestParseActionParametersResourceLinks(t *testing.T) {
+	// Capacity.json defines CapacitySource, which can be referenced by
+	// @odata.id, and the embedded CapacityInfo object.
+	dir := t.TempDir()
+	capacityJSON := `{"definitions": {
+		"CapacitySource": {"anyOf": [
+			{"$ref": "http://redfish.dmtf.org/schemas/v1/odata-v4.json#/definitions/idRef"},
+			{"$ref": "http://redfish.dmtf.org/schemas/swordfish/v1/Capacity.v1_2_3.json#/definitions/CapacitySource"}
+		]},
+		"CapacityInfo": {"$ref": "http://redfish.dmtf.org/schemas/swordfish/v1/Capacity.v1_2_3.json#/definitions/CapacityInfo"}
+	}}`
+	if err := os.WriteFile(filepath.Join(dir, "Capacity.json"), []byte(capacityJSON), 0o600); err != nil {
+		t.Fatalf("Failed to write schema: %v", err)
+	}
+	oldDirs := SchemaDirs
+	SchemaDirs = []string{dir}
+	t.Cleanup(func() { SchemaDirs = oldDirs })
+
 	p := NewParser("/tmp")
 	p.rawSchema = []byte(`{}`)
 
 	paramsMap := map[string]any{
+		// A reference to a resource defined in another resource's schema is a link.
+		"CapacitySource": map[string]any{
+			"$ref": "http://redfish.dmtf.org/schemas/swordfish/v1/Capacity.json#/definitions/CapacitySource",
+		},
+		// A reference to an embedded object is not.
+		"CapacityInfo": map[string]any{
+			"$ref": "http://redfish.dmtf.org/schemas/swordfish/v1/Capacity.json#/definitions/CapacityInfo",
+		},
 		// A reference to a resource collection is sent as a link object.
 		"CertificateCollection": map[string]any{
 			"$ref": "http://redfish.dmtf.org/schemas/v1/CertificateCollection.json#/definitions/CertificateCollection",
@@ -272,16 +297,14 @@ func TestParseActionParametersResourceLinks(t *testing.T) {
 		typ    string
 		isLink bool
 	}{
+		"CapacitySource":        {"string", true},
+		"CapacityInfo":          {"CapacityInfo", false},
 		"CertificateCollection": {"string", true},
-		"CertificateUri":        {"Link", true},
+		"CertificateUri":        {"string", true},
 		"Targets":               {"[]string", true},
 		"ImageURI":              {"string", false},
 		"ResetType":             {"ResetType", false},
 	}
-	want["CertificateUri"] = struct {
-		typ    string
-		isLink bool
-	}{"string", true}
 	for name, w := range want {
 		p := got[name]
 		if p == nil {
