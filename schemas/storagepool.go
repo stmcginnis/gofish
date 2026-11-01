@@ -353,7 +353,7 @@ func ListReferencedStoragePools(c Client, link string) ([]*StoragePool, error) {
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (s *StoragePool) RemoveDrives(drives []string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
-	payload["Drives"] = drives
+	payload["Drives"] = NewLinkObjects(drives)
 	resp, taskInfo, err := PostWithTask(s.client,
 		s.removeDrivesTarget, payload, s.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)

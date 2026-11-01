@@ -230,6 +230,19 @@ type CXLLogicalDeviceDynamicCapacityAddParameters struct {
 	Tag string `json:"Tag,omitempty"`
 }
 
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p CXLLogicalDeviceDynamicCapacityAddParameters) MarshalJSON() ([]byte, error) {
+	type plain CXLLogicalDeviceDynamicCapacityAddParameters
+	return json.Marshal(struct {
+		plain
+		ExtentList []LinkObject `json:"ExtentList,omitempty"`
+	}{
+		plain:      plain(p),
+		ExtentList: NewLinkObjects(p.ExtentList),
+	})
+}
+
 // This action shall add dynamic capacity to this CXL logical device.
 //
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
@@ -261,6 +274,19 @@ type CXLLogicalDeviceDynamicCapacityReleaseParameters struct {
 	// Tag shall contain the tag assigned to the dynamic capacity to release. This
 	// parameter shall be required if 'Policy' contains 'TagBased'.
 	Tag string `json:"Tag,omitempty"`
+}
+
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p CXLLogicalDeviceDynamicCapacityReleaseParameters) MarshalJSON() ([]byte, error) {
+	type plain CXLLogicalDeviceDynamicCapacityReleaseParameters
+	return json.Marshal(struct {
+		plain
+		ExtentList []LinkObject `json:"ExtentList,omitempty"`
+	}{
+		plain:      plain(p),
+		ExtentList: NewLinkObjects(p.ExtentList),
+	})
 }
 
 // This action shall release dynamic capacity from this CXL logical device.

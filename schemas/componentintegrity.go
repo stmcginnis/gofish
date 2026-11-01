@@ -343,6 +343,19 @@ type ComponentIntegrityTPMGetSignedMeasurementsParameters struct {
 	Scheme string `json:"Scheme,omitempty"`
 }
 
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p ComponentIntegrityTPMGetSignedMeasurementsParameters) MarshalJSON() ([]byte, error) {
+	type plain ComponentIntegrityTPMGetSignedMeasurementsParameters
+	return json.Marshal(struct {
+		plain
+		Certificate *LinkObject `json:"Certificate,omitempty"`
+	}{
+		plain:       plain(p),
+		Certificate: NewLinkObject(p.Certificate),
+	})
+}
+
 // This action shall generate a cryptographic signed statement over the given
 // nonce and PCRs of the TPM for TPM 2.0 devices. This action shall not be
 // present if the 'ComponentIntegrityType' property does not contain the value

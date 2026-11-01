@@ -332,6 +332,31 @@ func lookupResource(name string) bool {
 	return true
 }
 
+// isResourceRef reports whether ref points at a standalone resource (a schema whose file
+// name matches the definition name) or at a resource collection: a reference to either is a
+// link carrying the resource's @odata.id.
+func isResourceRef(ref string) bool {
+	if ref == "" || strings.Contains(ref, "odata-v4.json") || strings.Contains(ref, "Resource.json") {
+		return false
+	}
+	if strings.Contains(ref, "Collection") {
+		return true
+	}
+	schemaName := extractSchemaNameFromRef(ref)
+	typeName := extractRefType(ref)
+	return schemaName != "" && schemaName == typeName && isResource(typeName)
+}
+
+// IsResourceLinkProperty reports whether a property or action parameter is a reference to a
+// resource or resource collection (or an array of them), as opposed to a URI-valued string. Such
+// a value is exchanged as a link object ({"@odata.id": ...}), not as a bare string.
+func IsResourceLinkProperty(prop *schema.JSONProperty) bool {
+	if prop.Ref != "" {
+		return isResourceRef(prop.Ref)
+	}
+	return prop.Items != nil && isResourceRef(prop.Items.Ref)
+}
+
 // IsLinkProperty checks if a property is a link to another resource
 func IsLinkProperty(propName string, prop *schema.JSONProperty) bool {
 	if slices.Contains(NonLinkTypes, propName) {

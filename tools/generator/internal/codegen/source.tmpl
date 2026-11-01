@@ -245,6 +245,29 @@ type {{ .ParamStructName }} struct {
 	{{ . }}
 {{- end }}
 }
+{{- if and .HasLinkParams (not (hand (printf "%s.MarshalJSON" .ParamStructName))) }}
+
+// MarshalJSON sends the parameters that reference a resource as link objects
+// ({"@odata.id": ...}), as the Redfish schema defines them.
+func (p {{ .ParamStructName }}) MarshalJSON() ([]byte, error) {
+	type plain {{ .ParamStructName }}
+	return json.Marshal(struct {
+		plain
+{{- range .Parameters }}
+{{- if .IsLink }}
+		{{ .FieldName }} {{ if .IsArray }}[]{{ $pkg }}LinkObject{{ else if .Required }}{{ $pkg }}LinkObject{{ else }}*{{ $pkg }}LinkObject{{ end }} {{ .JSONTag }}
+{{- end }}
+{{- end }}
+	}{
+		plain: plain(p),
+{{- range .Parameters }}
+{{- if .IsLink }}
+		{{ .FieldName }}: {{ if .IsArray }}{{ $pkg }}NewLinkObjects(p.{{ .FieldName }}){{ else if .Required }}{{ $pkg }}LinkObject{ODataID: p.{{ .FieldName }}}{{ else }}{{ $pkg }}NewLinkObject(p.{{ .FieldName }}){{ end }},
+{{- end }}
+{{- end }}
+	})
+}
+{{- end }}
 {{- end }}
 {{- if not (or .TargetOverridden (hand (printf "%s.%s" $structName .Name))) }}
 
@@ -262,7 +285,13 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}(params *{{ .ParamStruc
 func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .Parameters }}{{- if $i }}, {{ end }}{{ $p.Name }} {{ $p.Type }}{{- end }}) (*{{ .ResponseType }}, error) {
 	payload := make(map[string]any)
 {{- range .Parameters }}
+{{- if and .IsLink .IsArray }}
+	payload["{{ .OriginalName }}"] = {{ $pkg }}NewLinkObjects({{ .Name }})
+{{- else if .IsLink }}
+	payload["{{ .OriginalName }}"] = {{ $pkg }}LinkObject{ODataID: {{ .Name }}}
+{{- else }}
 	payload["{{ .OriginalName }}"] = {{ .Name }}
+{{- end }}
 {{- end }}
 
 	resp, err := {{ $receiverName }}.PostWithResponse({{ $receiverName }}.{{ .TargetField }}, payload)
@@ -295,7 +324,13 @@ func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}(params *{{ .ParamStruc
 func ({{ $receiverName }} *{{ $structName }}) {{ .Name }}({{- range $i, $p := .Parameters }}{{- if $i }}, {{ end }}{{ $p.Name }} {{ $p.Type }}{{- end }}) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
 {{- range .Parameters }}
+{{- if and .IsLink .IsArray }}
+	payload["{{ .OriginalName }}"] = {{ $pkg }}NewLinkObjects({{ .Name }})
+{{- else if .IsLink }}
+	payload["{{ .OriginalName }}"] = {{ $pkg }}LinkObject{ODataID: {{ .Name }}}
+{{- else }}
 	payload["{{ .OriginalName }}"] = {{ .Name }}
+{{- end }}
 {{- end }}
 	resp, taskInfo, err := PostWithTask({{ $receiverName }}.client,
 		{{ $receiverName }}.{{ .TargetField }}, payload, {{ $receiverName }}.Headers(), false)

@@ -79,6 +79,9 @@ type ActionData struct {
 	// field with TargetOverride (empty to drop it).
 	TargetOverridden bool
 	TargetOverride   string
+	// HasLinkParams is set when a parameter is a resource reference, sent as
+	// {"@odata.id": ...}: the parameter struct gets a MarshalJSON that wraps it.
+	HasLinkParams bool
 }
 
 // ActionParameterData represents an action parameter for the template
@@ -93,6 +96,8 @@ type ActionParameterData struct {
 	FieldDescription string // Pre-formatted godoc comment for parameter struct fields
 	JSONTag          string // JSON struct tag (with omitempty for optional)
 	Override         string // Replacement field declaration (config.FieldOverrides)
+	IsLink           bool   // Resource reference, sent as {"@odata.id": ...}
+	IsArray          bool   // Array parameter
 }
 
 // LinkData represents a link for the template
@@ -518,6 +523,8 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 				OriginalName:     param.OriginalName,
 				FieldName:        param.FieldName,
 				FieldDescription: param.FieldDescription,
+				IsLink:           param.IsLink,
+				IsArray:          param.IsArray,
 			}
 			ad.Parameters = append(ad.Parameters, pd)
 		}
@@ -532,6 +539,15 @@ func (g *Generator) buildStructData(def *schema.Definition, isMainType bool) *St
 					pd.JSONTag = fmt.Sprintf("`json:%q`", pd.OriginalName+",omitempty")
 				}
 				pd.Override = config.FieldOverrides[ad.ParamStructName+"."+pd.FieldName]
+				if pd.Override != "" {
+					// The replacement field is marshaled as declared.
+					pd.IsLink = false
+				}
+			}
+		}
+		for _, pd := range ad.Parameters {
+			if pd.IsLink {
+				ad.HasLinkParams = true
 			}
 		}
 
