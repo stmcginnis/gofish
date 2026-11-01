@@ -18,8 +18,10 @@ package schemas
 // If TaskMonitorInfo is not nil it can be used to monitor async tasks.
 func (s *StoragePool) AddDrives(capacitySource string, drives []string) (*TaskMonitorInfo, error) {
 	payload := make(map[string]any)
-	payload["CapacitySource"] = capacitySource
-	payload["Drives"] = drives
+	if capacitySource != "" {
+		payload["CapacitySource"] = LinkObject{ODataID: capacitySource}
+	}
+	payload["Drives"] = NewLinkObjects(drives)
 	resp, taskInfo, err := PostWithTask(s.client,
 		s.addDrivesTarget, payload, s.Headers(), false)
 	defer DeferredCleanupHTTPResponse(resp)

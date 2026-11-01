@@ -156,3 +156,37 @@ func TestStoragePoolUpdate(t *testing.T) {
 		t.Errorf("Unexpected RecoverableCapacitySourceCount update payload: %s", calls[0].Payload)
 	}
 }
+
+// TestStoragePoolAddDrives tests that AddDrives sends the capacity source and
+// drives as link objects and omits an empty capacity source.
+func TestStoragePoolAddDrives(t *testing.T) {
+	var result StoragePool
+	err := json.NewDecoder(strings.NewReader(storagePoolBody)).Decode(&result)
+	if err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+	result.addDrivesTarget = "/redfish/v1/StoragePool/Actions/StoragePool.AddDrives"
+
+	testClient := &TestClient{}
+	result.SetClient(testClient)
+
+	if _, err := result.AddDrives("/redfish/v1/StoragePool/CapacitySources/1", []string{"/redfish/v1/Drives/1"}); err != nil {
+		t.Fatalf("Error making AddDrives call: %s", err)
+	}
+	if _, err := result.AddDrives("", []string{"/redfish/v1/Drives/2"}); err != nil {
+		t.Fatalf("Error making AddDrives call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 2 {
+		t.Fatalf("Expected two calls, captured: %#v", calls)
+	}
+	want := "map[CapacitySource:map[@odata.id:/redfish/v1/StoragePool/CapacitySources/1] Drives:[map[@odata.id:/redfish/v1/Drives/1]]]"
+	if calls[0].Payload != want {
+		t.Errorf("Unexpected payload:\n got %s\nwant %s", calls[0].Payload, want)
+	}
+	want = "map[Drives:[map[@odata.id:/redfish/v1/Drives/2]]]"
+	if calls[1].Payload != want {
+		t.Errorf("Unexpected payload:\n got %s\nwant %s", calls[1].Payload, want)
+	}
+}
