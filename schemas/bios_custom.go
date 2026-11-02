@@ -91,8 +91,8 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 	}
 
 	header := make(map[string]string)
-	if resp.Header["Etag"] != nil {
-		header["If-Match"] = resp.Header["Etag"][0]
+	if etag := etagFromHeader(resp.Header); etag != "" {
+		header["If-Match"] = etag
 	}
 
 	patchResp, taskInfo, err := PatchWithTask(bi.client, bi.settingsTarget, data, header)
