@@ -34,8 +34,8 @@ func (c *ComputerSystem) SetBoot(b *Boot) error {
 		}
 
 		var header = make(map[string]string)
-		if resp.Header["Etag"] != nil {
-			header["If-Match"] = sanitizeETag(resp.Header["Etag"][0])
+		if etag := etagFromHeader(resp.Header); etag != "" {
+			header["If-Match"] = sanitizeETag(etag)
 		}
 
 		resp, patchErr := c.GetClient().PatchWithHeaders(c.settingsTarget, t, header)
@@ -161,8 +161,8 @@ func (c *ComputerSystem) UpdateBootAttributesApplyAt(attrs SettingsAttributes, a
 		}
 
 		var header = make(map[string]string)
-		if resp.Header["Etag"] != nil {
-			header["If-Match"] = resp.Header["Etag"][0]
+		if etag := etagFromHeader(resp.Header); etag != "" {
+			header["If-Match"] = etag
 		}
 
 		resp, err = c.GetClient().PatchWithHeaders(c.settingsTarget, data, header)

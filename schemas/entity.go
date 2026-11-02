@@ -123,7 +123,7 @@ func (e *Entity) Get(c Client, uri string, payload any) error {
 	}
 
 	// if the entity already has an etag, don't override it, but otherwise pull from the HTTP header
-	if etag := resp.Header.Get("Etag"); etag != "" && e.ODataEtag == "" {
+	if etag := etagFromHeader(resp.Header); etag != "" && e.ODataEtag == "" {
 		e.ODataEtag = sanitizeETag(etag)
 	}
 	e.SetClient(c)
@@ -162,6 +162,22 @@ func sanitizeETag(etag string) string {
 		return strings.TrimSuffix(etag, `-gzip"`) + `"`
 	}
 	return etag
+}
+
+// etagFromHeader returns the ETag from an HTTP response header.
+// Header.Get is the idiomatic lookup and canonicalizes the key to "Etag".
+// A raw map assignment using a non-canonical key ("ETag", "etag") is not
+// visible to Get, so those keys are accepted as a fallback.
+func etagFromHeader(h http.Header) string {
+	if etag := h.Get("ETag"); etag != "" {
+		return etag
+	}
+	for k, vals := range h {
+		if strings.EqualFold(k, "ETag") && len(vals) > 0 {
+			return vals[0]
+		}
+	}
+	return ""
 }
 
 // Headers generates the appropriate Headers including etag if configured.
@@ -562,7 +578,7 @@ func DecodeGenericEntity[T any, PT GenericSchemaObjectPointer[T]](c Client, resp
 		return nil, err
 	}
 
-	if etag := resp.Header.Get("Etag"); etag != "" && entity.GetETag() == "" {
+	if etag := etagFromHeader(resp.Header); etag != "" && entity.GetETag() == "" {
 		entity.SetETag(sanitizeETag(etag))
 	}
 	entity.SetClient(c)

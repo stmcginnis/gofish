@@ -139,7 +139,7 @@ func postToSecureBootCollection[T any, PT GenericSchemaObjectPointer[T]](
 	// through to the Location header.
 	entity := PT(new(T))
 	if json.Unmarshal(body, entity) == nil && entity.GetODataID() != "" {
-		if etag := resp.Header.Get("Etag"); etag != "" && entity.GetETag() == "" {
+		if etag := etagFromHeader(resp.Header); etag != "" && entity.GetETag() == "" {
 			entity.SetETag(sanitizeETag(etag))
 		}
 		entity.SetClient(c)
