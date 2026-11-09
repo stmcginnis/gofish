@@ -172,14 +172,6 @@ func (p *PowerSubsystem) Batteries() ([]*Battery, error) {
 	return GetCollectionObjects[Battery](p.client, p.batteries)
 }
 
-// PowerSupplies gets the PowerSupplies collection.
-func (p *PowerSubsystem) PowerSupplies() ([]*PowerSupply, error) {
-	if p.powerSupplies == "" {
-		return nil, nil
-	}
-	return GetCollectionObjects[PowerSupply](p.client, p.powerSupplies)
-}
-
 // PowerAllocation shall contain the set of properties describing the allocation
 // of power for a subsystem.
 type PowerAllocation struct {
