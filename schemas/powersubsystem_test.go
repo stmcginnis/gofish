@@ -143,65 +143,25 @@ func TestPowerSubsystemNonNumericAllocation(t *testing.T) {
 	assertEquals(t, "1200", fmt.Sprintf("%.0f", *result.Allocation.RequestedWatts))
 }
 
-var powerSubsystemPowerSupplyCollection = `{
-	"@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies",
-	"@odata.type": "#PowerSupplyCollection.PowerSupplyCollection",
-	"Name": "Power Supply Collection",
-	"Members": [
-	  {
-		"@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1"
-	  }
-	],
-	"Members@odata.count": 1
-  }`
-
-var powerSubsystemPowerSupplyUnit = `{
-	"@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1",
-	"@odata.type": "#PowerSupply.v1_5_1.PowerSupply",
-	"Id": "Bay1",
-	"Name": "Power Supply Bay 1",
-	"Status": {
-	  "State": "Enabled",
-	  "Health": "OK"
-	},
-	"PowerSupplyType": "AC",
-	"PowerCapacityWatts": 400,
-	"Metrics": {
-	  "@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1/Metrics"
-	}
-  }`
-
-var powerSubsystemPowerSupplyMetrics = `{
-	"@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1/Metrics",
-	"@odata.type": "#PowerSupplyMetrics.v1_1_0.PowerSupplyMetrics",
-	"Id": "Metrics",
-	"Name": "Metrics for Power Supply 1",
-	"InputPowerWatts": {
-	  "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/PS1InputPower",
-	  "Reading": 937.4
-	},
-	"OutputPowerWatts": {
-	  "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/PS1OutputPower",
-	  "Reading": 905.3
-	},
-	"InputVoltage": {
-	  "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/PS1InputVoltage",
-	  "Reading": 230.2
-	},
-	"InputCurrentAmps": {
-	  "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/PS1InputCurrent",
-	  "Reading": 5.19
-	},
-	"TemperatureCelsius": {
-	  "DataSourceUri": "/redfish/v1/Chassis/1U/Sensors/PS1Temp",
-	  "Reading": 43.9
-	}
-  }`
-
 // TestPowerSubsystemPowerSupplies tests that the PowerSupplies link resolves
 // to PowerSupplyUnit resources (PowerSupplyCollection), not to the legacy
 // Power.PowerSupply type, which has no Metrics link.
 func TestPowerSubsystemPowerSupplies(t *testing.T) {
+	const collection = `{
+		"Members": [{"@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1"}]
+	}`
+	const supply = `{
+		"@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1",
+		"Id": "Bay1",
+		"PowerSupplyType": "AC",
+		"PowerCapacityWatts": 400,
+		"Metrics": {"@odata.id": "/redfish/v1/Chassis/1U/PowerSubsystem/PowerSupplies/Bay1/Metrics"}
+	}`
+	const metricsBody = `{
+		"InputPowerWatts": {"Reading": 937.4},
+		"OutputPowerWatts": {"Reading": 905.3},
+		"TemperatureCelsius": {"Reading": 43.9}
+	}`
 	var result PowerSubsystem
 	err := json.NewDecoder(strings.NewReader(powerSubsystemBody)).Decode(&result)
 	if err != nil {
@@ -211,9 +171,9 @@ func TestPowerSubsystemPowerSupplies(t *testing.T) {
 	testClient := &TestClient{
 		CustomReturnForActions: map[string][]any{
 			http.MethodGet: {
-				getCall(powerSubsystemPowerSupplyCollection),
-				getCall(powerSubsystemPowerSupplyUnit),
-				getCall(powerSubsystemPowerSupplyMetrics),
+				getCall(collection),
+				getCall(supply),
+				getCall(metricsBody),
 			},
 		},
 	}
