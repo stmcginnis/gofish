@@ -1187,20 +1187,20 @@ func (p *Parser) parseLinks(linksMap map[string]any) []*schema.Link {
 
 		// Try to determine the target type from $ref, anyOf, or items
 		if ref, ok := linkMap["$ref"].(string); ok {
-			link.Type = extractTypeFromRef(ref)
+			link.Type = p.extractTypeFromRef(ref)
 		} else if anyOf, ok := linkMap["anyOf"].([]any); ok {
 			// Handle nullable links with anyOf: [{$ref: ...}, {type: null}]
 			for _, item := range anyOf {
 				if itemMap, ok := item.(map[string]any); ok {
 					if ref, ok := itemMap["$ref"].(string); ok {
-						link.Type = extractTypeFromRef(ref)
+						link.Type = p.extractTypeFromRef(ref)
 						break
 					}
 				}
 			}
 		} else if items, ok := linkMap["items"].(map[string]any); ok {
 			if ref, ok := items["$ref"].(string); ok {
-				link.Type = extractTypeFromRef(ref)
+				link.Type = p.extractTypeFromRef(ref)
 			}
 		}
 
@@ -1221,11 +1221,14 @@ func (p *Parser) parseLinks(linksMap map[string]any) []*schema.Link {
 }
 
 // extractTypeFromRef extracts the resource type name from a $ref URL
-func extractTypeFromRef(ref string) string {
+func (p *Parser) extractTypeFromRef(ref string) string {
 	typeName := schema.ExtractTypeFromRef(ref, true)
 	// Filter out generic Link types
 	if typeName == "Link" || typeName == "Links" {
 		return ""
 	}
-	return cleanIdentifier(typeName)
+	if typeName == "idRef" && strings.Contains(ref, "odata-v4.json") {
+		return "Entity"
+	}
+	return p.typeMapper.qualifyRefType(typeName, ref)
 }

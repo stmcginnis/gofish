@@ -378,6 +378,6 @@ func (o *Outlet) DistributionCircuits() ([]*Circuit, error) {
 }
 
 // PowerSupplies gets the PowerSupplies linked resources.
-func (o *Outlet) PowerSupplies() ([]*PowerSupply, error) {
-	return GetObjects[PowerSupply](o.client, o.powerSupplies)
+func (o *Outlet) PowerSupplies() ([]*PowerSupplyUnit, error) {
+	return GetObjects[PowerSupplyUnit](o.client, o.powerSupplies)
 }

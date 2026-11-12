@@ -214,6 +214,8 @@ func (tm *TypeMapper) qualifyRefType(typeName, ref string) string {
 	if schemaName == "" {
 		schemaName = tm.schemaName
 	}
+	// Collection references resolve to members defined in the resource schema.
+	schemaName = strings.TrimSuffix(schemaName, "Collection")
 	return goTypeName(schemaName, typeName)
 }
 

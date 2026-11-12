@@ -866,8 +866,8 @@ func (c *Chassis) PowerOutlets() ([]*Outlet, error) {
 }
 
 // PowerSupplies gets the PowerSupplies linked resources.
-func (c *Chassis) PowerSupplies() ([]*PowerSupply, error) {
-	return GetObjects[PowerSupply](c.client, c.powerSupplies)
+func (c *Chassis) PowerSupplies() ([]*PowerSupplyUnit, error) {
+	return GetObjects[PowerSupplyUnit](c.client, c.powerSupplies)
 }
 
 // PoweredBy gets the PoweredBy linked resources.

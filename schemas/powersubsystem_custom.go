@@ -6,20 +6,6 @@ package schemas
 
 import "encoding/json"
 
-// PowerSupplies gets the PowerSupplies collection.
-//
-// The generator derives a collection's member type from the collection name
-// (PowerSupplyCollection -> PowerSupply), which resolves to the legacy
-// Power.PowerSupply type that has no Metrics link. PowerSupplyCollection
-// members are standalone PowerSupply resources, so this returns PowerSupplyUnit,
-// which carries the Metrics link.
-func (p *PowerSubsystem) PowerSupplies() ([]*PowerSupplyUnit, error) {
-	if p.powerSupplies == "" {
-		return nil, nil
-	}
-	return GetCollectionObjects[PowerSupplyUnit](p.client, p.powerSupplies)
-}
-
 // powerAllocation converts Allocation, whose watt values some NVIDIA services
 // send with non-numeric types. Values that are not numbers become 0.
 func powerAllocation(v any) PowerAllocation {
