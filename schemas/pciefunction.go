@@ -297,8 +297,3 @@ func (p *PCIeFunction) Processor() (*Processor, error) {
 	}
 	return GetObject[Processor](p.client, p.processor)
 }
-
-// StorageControllers gets the StorageControllers linked resources.
-func (p *PCIeFunction) StorageControllers() ([]*StorageStorageController, error) {
-	return GetObjects[StorageStorageController](p.client, p.storageControllers)
-}
