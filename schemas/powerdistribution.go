@@ -438,11 +438,11 @@ func (p *PowerDistribution) Outlets() ([]*Outlet, error) {
 }
 
 // PowerSupplies gets the PowerSupplies collection.
-func (p *PowerDistribution) PowerSupplies() ([]*PowerSupply, error) {
+func (p *PowerDistribution) PowerSupplies() ([]*PowerSupplyUnit, error) {
 	if p.powerSupplies == "" {
 		return nil, nil
 	}
-	return GetCollectionObjects[PowerSupply](p.client, p.powerSupplies)
+	return GetCollectionObjects[PowerSupplyUnit](p.client, p.powerSupplies)
 }
 
 // Sensors gets the Sensors collection.

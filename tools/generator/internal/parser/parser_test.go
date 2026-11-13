@@ -218,7 +218,7 @@ func TestParseActionParametersFallbackOrder(t *testing.T) {
 	p.rawSchema = []byte(`{}`)
 
 	paramsMap := map[string]any{
-		"Zeta": map[string]any{"type": "string"},
+		"Zeta":  map[string]any{"type": "string"},
 		"Alpha": map[string]any{"type": "string"},
 	}
 
@@ -316,5 +316,47 @@ func TestParseActionParametersResourceLinks(t *testing.T) {
 	}
 	if !got["Targets"].IsArray || got["CertificateCollection"].IsArray {
 		t.Errorf("IsArray wrong: Targets=%v CertificateCollection=%v", got["Targets"].IsArray, got["CertificateCollection"].IsArray)
+	}
+}
+
+func TestParseLinksAppliesSchemaRenames(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		schemaName string
+		ref        string
+		want       string
+	}{
+		{"collection", "Chassis", "http://redfish.dmtf.org/schemas/v1/PowerSupplyCollection.json#/definitions/PowerSupplyCollection", "PowerSupplyUnit"},
+		{"resource", "Outlet", "http://redfish.dmtf.org/schemas/v1/PowerSupply.json#/definitions/PowerSupply", "PowerSupplyUnit"},
+		{"local renamed resource", "PowerSupply", "#/definitions/PowerSupply", "PowerSupplyUnit"},
+		{"local legacy resource", "Power", "#/definitions/PowerSupply", "PowerSupply"},
+		{"local collection", "PowerSupplyCollection", "#/definitions/PowerSupplyCollection", "PowerSupplyUnit"},
+		{"generic OData reference", "Chassis", "http://redfish.dmtf.org/schemas/v1/odata-v4.json#/definitions/idRef", "Entity"},
+		{"generic link", "Chassis", "http://redfish.dmtf.org/schemas/v1/Resource.json#/definitions/Link", "Target"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewParser(t.TempDir())
+			p.schemaName = tt.schemaName
+			p.typeMapper.schemaName = tt.schemaName
+			for _, shape := range []struct {
+				name    string
+				prop    map[string]any
+				isArray bool
+			}{
+				{"direct", map[string]any{"$ref": tt.ref}, false},
+				{"nullable", map[string]any{"anyOf": []any{map[string]any{"$ref": tt.ref}, map[string]any{"type": "null"}}}, false},
+				{"array", map[string]any{"items": map[string]any{"$ref": tt.ref}}, true},
+			} {
+				t.Run(shape.name, func(t *testing.T) {
+					links := p.parseLinks(map[string]any{"properties": map[string]any{"Targets": shape.prop}})
+					if len(links) != 1 {
+						t.Fatalf("got %d links, want 1", len(links))
+					}
+					if links[0].Type != tt.want || links[0].IsArray != shape.isArray {
+						t.Errorf("link = (%q, %v), want (%q, %v)", links[0].Type, links[0].IsArray, tt.want, shape.isArray)
+					}
+				})
+			}
+		})
 	}
 }

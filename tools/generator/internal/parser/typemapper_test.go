@@ -262,3 +262,40 @@ func TestQualifyRefTypeAppliesSchemaRenames(t *testing.T) {
 		t.Errorf("lowercase name = %q, want exported ISCSIBoot", got)
 	}
 }
+
+func TestMapTypeCollectionMemberRenames(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		schemaName string
+		ref        string
+		want       string
+	}{
+		{"external collection", "Chassis", "http://redfish.dmtf.org/schemas/v1/PowerSupplyCollection.json#/definitions/PowerSupplyCollection", "PowerSupplyUnit"},
+		{"versioned collection", "Outlet", "http://redfish.dmtf.org/schemas/v1/PowerSupplyCollection.v1_0_0.json#/definitions/PowerSupplyCollection", "PowerSupplyUnit"},
+		{"local collection", "PowerSupplyCollection", "#/definitions/PowerSupplyCollection", "PowerSupplyUnit"},
+		{"external resource", "PowerDistribution", "http://redfish.dmtf.org/schemas/v1/PowerSupply.json#/definitions/PowerSupply", "PowerSupplyUnit"},
+		{"local resource", "PowerSupply", "#/definitions/PowerSupply", "PowerSupplyUnit"},
+		{"legacy embedded resource", "Power", "#/definitions/PowerSupply", "PowerSupply"},
+		{"unrenamed collection", "Chassis", "http://redfish.dmtf.org/schemas/v1/FanCollection.json#/definitions/FanCollection", "Fan"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tm := &TypeMapper{schemaName: tt.schemaName}
+			for _, shape := range []struct {
+				name    string
+				prop    *schema.JSONProperty
+				isArray bool
+			}{
+				{"direct", &schema.JSONProperty{Ref: tt.ref}, false},
+				{"nullable", &schema.JSONProperty{AnyOf: []map[string]string{{"$ref": tt.ref}, {"type": "null"}}}, false},
+				{"array", &schema.JSONProperty{Type: "array", Items: &schema.JSONProperty{Ref: tt.ref}}, true},
+			} {
+				t.Run(shape.name, func(t *testing.T) {
+					got, pointer, array := tm.MapType("PowerSupplies", shape.prop)
+					if got != tt.want || pointer || array != shape.isArray {
+						t.Errorf("MapType() = (%q, %v, %v), want (%q, false, %v)", got, pointer, array, tt.want, shape.isArray)
+					}
+				})
+			}
+		})
+	}
+}
