@@ -7,6 +7,7 @@ package schemas
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -27,6 +28,39 @@ func (bi *Bios) AllowedAttributeUpdateApplyTimes() []SettingsApplyTime {
 
 func (bi *Bios) ReportedAttributeUpdateApplyTimes() []SettingsApplyTime {
 	return bi.settingsApplyTimes
+}
+
+// biosAttributeEqual reports whether a requested attribute value matches the value the
+// service reports. reflect.DeepEqual handles identical types; the remaining case is a
+// requested string against a reported number or boolean. The Redfish Bios schema types
+// Attributes per the attribute registry (Integer and Boolean entries are JSON numbers
+// and booleans), so controller-style callers carrying YAML strings otherwise rewrite an
+// unchanged attribute on every reconcile. A string counts as equal only when it parses
+// and formats back to itself: "007" and "1e5" never equal 7 and 100000, and integers
+// above 2^53 do not round-trip, so they count as changes rather than risk suppressing
+// a real one.
+func biosAttributeEqual(current, val any) bool {
+	if reflect.DeepEqual(current, val) {
+		return true
+	}
+
+	s, ok := val.(string)
+	if !ok {
+		return false
+	}
+
+	s = strings.TrimSpace(s)
+
+	switch c := current.(type) {
+	case float64:
+		f, err := strconv.ParseFloat(s, 64)
+		return err == nil && f == c && strconv.FormatFloat(f, 'g', -1, 64) == s
+	case bool:
+		b, err := strconv.ParseBool(strings.ToLower(s))
+		return err == nil && b == c
+	}
+
+	return false
 }
 
 // UpdateBiosAttributesApplyAt is used to update attribute values and set apply time together
@@ -73,9 +107,7 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 			current = original.Attributes[key]
 		}
 
-		// DeepEqual rather than !=, which panics on the slice-valued attributes that some
-		// implementations report.
-		if strings.HasPrefix(key, "BootTypeOrder") || !reflect.DeepEqual(current, val) {
+		if strings.HasPrefix(key, "BootTypeOrder") || !biosAttributeEqual(current, val) {
 			payload[key] = val
 		}
 	}
