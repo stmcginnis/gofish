@@ -582,3 +582,94 @@ func TestUpdateBiosAttributesSliceValuedAppliedUnchanged(t *testing.T) {
 		t.Fatalf("Expected only the settings target read, captured: %v", calls)
 	}
 }
+
+// TestBiosAttributeEqual covers the unchanged-detection comparison, including the
+// string-against-number/boolean cases from controller-style callers (issue #594).
+func TestBiosAttributeEqual(t *testing.T) {
+	cases := []struct {
+		name    string
+		current any
+		val     any
+		want    bool
+	}{
+		{"identical strings", "Enabled", "Enabled", true},
+		{"identical numbers", float64(131072), float64(131072), true},
+		{"number reported, string requested", float64(131072), "131072", true},
+		{"number reported, differing string", float64(131072), "65536", false},
+		{"bool reported, string requested", true, "true", true},
+		{"bool reported, upper-case string", true, "True", true},
+		{"bool reported, differing string", true, "false", false},
+		{"leading zeros are not equal", float64(7), "007", false},
+		{"hex string is not equal", float64(16), "0x10", false},
+		{"non-numeric string against number", float64(1), "Enabled", false},
+		{"string reported, number requested", "131072", float64(131072), false},
+		{"whitespace-padded string", float64(131072), " 131072 ", true},
+		{"slices still compare deeply", []any{"Hdd", "Pxe"}, []any{"Hdd", "Pxe"}, true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := biosAttributeEqual(tc.current, tc.val); got != tc.want {
+				t.Errorf("biosAttributeEqual(%v, %v) = %v, want %v", tc.current, tc.val, got, tc.want)
+			}
+		})
+	}
+}
+
+// TestUpdateBiosAttributesStringVsNumberNoPatch tests that requesting a numeric attribute
+// as a string equal to the reported value sends no PATCH.
+func TestUpdateBiosAttributesStringVsNumberNoPatch(t *testing.T) {
+	settings := `{
+		"@odata.type": "#Bios.v1_0_6.Bios",
+		"@odata.id": "/redfish/v1/Systems/System.Embedded.1/Bios/Settings",
+		"Attributes": {"CRB004": 131072}
+	}`
+
+	var result Bios
+	if err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	testClient := settingsClient(settings)
+	result.SetClient(testClient)
+
+	if err := result.UpdateBiosAttributes(SettingsAttributes{"CRB004": "131072"}); err != nil {
+		t.Fatalf("Error making UpdateBiosAttributes call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 1 {
+		t.Fatalf("Expected only the settings GET, captured: %v", calls)
+	}
+}
+
+// TestUpdateBiosAttributesStringVsNumberPatch tests that a genuinely different value is
+// still sent when the reported value is numeric.
+func TestUpdateBiosAttributesStringVsNumberPatch(t *testing.T) {
+	settings := `{
+		"@odata.type": "#Bios.v1_0_6.Bios",
+		"@odata.id": "/redfish/v1/Systems/System.Embedded.1/Bios/Settings",
+		"Attributes": {"CRB004": 131072}
+	}`
+
+	var result Bios
+	if err := json.NewDecoder(strings.NewReader(biosBody)).Decode(&result); err != nil {
+		t.Fatalf("Error decoding JSON: %s", err)
+	}
+
+	testClient := settingsClient(settings)
+	result.SetClient(testClient)
+
+	if err := result.UpdateBiosAttributes(SettingsAttributes{"CRB004": "65536"}); err != nil {
+		t.Fatalf("Error making UpdateBiosAttributes call: %s", err)
+	}
+
+	calls := testClient.CapturedCalls()
+	if len(calls) != 2 {
+		t.Fatalf("Expected GET plus PATCH, captured: %v", calls)
+	}
+
+	if !strings.Contains(calls[1].Payload, "65536") {
+		t.Errorf("Unexpected update payload: %s", calls[1].Payload)
+	}
+}
