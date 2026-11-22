@@ -6,6 +6,7 @@ package schemas
 
 import (
 	"encoding/json"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -30,37 +31,90 @@ func (bi *Bios) ReportedAttributeUpdateApplyTimes() []SettingsApplyTime {
 	return bi.settingsApplyTimes
 }
 
+// settingsAttributeInt64 reports v as an int64 when it is one of the exact integer forms
+// a SettingsAttributes value can carry: int, int64, a json.Number whose text is an
+// integer, or a whole float64 within the int64 range.
+func settingsAttributeInt64(v any) (int64, bool) {
+	switch n := v.(type) {
+	case int:
+		return int64(n), true
+	case int64:
+		return n, true
+	case json.Number:
+		i, err := strconv.ParseInt(n.String(), 10, 64)
+		return i, err == nil
+	case float64:
+		if n != math.Trunc(n) || n >= 1<<63 || n < -(1<<63) {
+			return 0, false
+		}
+		return int64(n), true
+	}
+
+	return 0, false
+}
+
+// settingsAttributeFloat64 reports v as a float64 when it is one of the numeric forms a
+// SettingsAttributes value can carry: float64, int, int64, or json.Number.
+func settingsAttributeFloat64(v any) (float64, bool) {
+	switch n := v.(type) {
+	case float64:
+		return n, true
+	case int:
+		return float64(n), true
+	case int64:
+		return float64(n), true
+	case json.Number:
+		f, err := n.Float64()
+		return f, err == nil
+	}
+
+	return 0, false
+}
+
 // biosAttributeEqual reports whether a requested attribute value matches the value the
-// service reports. reflect.DeepEqual handles identical types; the remaining case is a
-// requested string against a reported number or boolean. The Redfish Bios schema types
-// Attributes per the attribute registry (Integer and Boolean entries are JSON numbers
-// and booleans), so controller-style callers carrying YAML strings otherwise rewrite an
-// unchanged attribute on every reconcile. A string counts as equal only when it parses
-// and formats back to itself: "007" and "1e5" never equal 7 and 100000, and integers
-// above 2^53 do not round-trip, so they count as changes rather than risk suppressing
-// a real one.
+// service reports. reflect.DeepEqual handles identical types; the remaining cases are a
+// requested string against a reported number or boolean, and the int, int64, and
+// json.Number forms SettingsAttributes can carry against a reported number. The Redfish
+// Bios schema types Attributes per the attribute registry (Integer and Boolean entries
+// are JSON numbers and booleans), so controller-style callers carrying YAML strings
+// otherwise rewrite an unchanged attribute on every reconcile. A string counts as equal
+// only when it parses and formats back to itself as a plain decimal: "1000000" equals
+// 1000000, while "007" and "1e5" never equal 7 and 100000, and integers above 2^53 do
+// not round-trip, so those count as changes rather than risk suppressing a real one.
 func biosAttributeEqual(current, val any) bool {
 	if reflect.DeepEqual(current, val) {
 		return true
 	}
 
-	s, ok := val.(string)
-	if !ok {
+	s, isString := val.(string)
+	if isString {
+		s = strings.TrimSpace(s)
+
+		if c, isNumber := settingsAttributeFloat64(current); isNumber {
+			f, err := strconv.ParseFloat(s, 64)
+			return err == nil && f == c && strconv.FormatFloat(f, 'f', -1, 64) == s
+		}
+
+		if b, isBool := current.(bool); isBool {
+			parsed, err := strconv.ParseBool(strings.ToLower(s))
+			return err == nil && parsed == b
+		}
+
 		return false
 	}
 
-	s = strings.TrimSpace(s)
-
-	switch c := current.(type) {
-	case float64:
-		f, err := strconv.ParseFloat(s, 64)
-		return err == nil && f == c && strconv.FormatFloat(f, 'g', -1, 64) == s
-	case bool:
-		b, err := strconv.ParseBool(strings.ToLower(s))
-		return err == nil && b == c
+	// The requested value is not a string, so the only remaining match is across the
+	// numeric forms SettingsAttributes can carry. Exactly-integral values compare as
+	// int64 so integers above 2^53 keep their precision; the rest compare as float64.
+	curInt, curExact := settingsAttributeInt64(current)
+	valInt, valExact := settingsAttributeInt64(val)
+	if curExact && valExact {
+		return curInt == valInt
 	}
 
-	return false
+	curFloat, curOK := settingsAttributeFloat64(current)
+	valFloat, valOK := settingsAttributeFloat64(val)
+	return curOK && valOK && curFloat == valFloat
 }
 
 // UpdateBiosAttributesApplyAt is used to update attribute values and set apply time together
@@ -107,6 +161,8 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 			current = original.Attributes[key]
 		}
 
+		// DeepEqual rather than !=, which panics on the slice-valued attributes that some
+		// implementations report.
 		if strings.HasPrefix(key, "BootTypeOrder") || !biosAttributeEqual(current, val) {
 			payload[key] = val
 		}

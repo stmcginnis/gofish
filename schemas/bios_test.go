@@ -584,7 +584,8 @@ func TestUpdateBiosAttributesSliceValuedAppliedUnchanged(t *testing.T) {
 }
 
 // TestBiosAttributeEqual covers the unchanged-detection comparison, including the
-// string-against-number/boolean cases from controller-style callers (issue #594).
+// string-against-number/boolean cases from controller-style callers (issue #594) and
+// the int, int64, and json.Number forms SettingsAttributes can carry.
 func TestBiosAttributeEqual(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -596,9 +597,28 @@ func TestBiosAttributeEqual(t *testing.T) {
 		{"identical numbers", float64(131072), float64(131072), true},
 		{"number reported, string requested", float64(131072), "131072", true},
 		{"number reported, differing string", float64(131072), "65536", false},
+		{"number reported, string requested at 1e6", float64(1000000), "1000000", true},
+		{"number reported, scientific notation at 1e6", float64(1000000), "1e+06", false},
 		{"bool reported, string requested", true, "true", true},
 		{"bool reported, upper-case string", true, "True", true},
+		{"bool reported, all-caps string", true, "TRUE", true},
+		{"bool reported, numeric string", true, "1", true},
 		{"bool reported, differing string", true, "false", false},
+		{"bool reported, differing numeric string", true, "0", false},
+		{"false reported, all-caps string", false, "FALSE", true},
+		{"false reported, differing string", false, "true", false},
+		{"number reported, int requested", float64(131072), 131072, true},
+		{"number reported, int64 requested", float64(131072), int64(131072), true},
+		{"number reported, json.Number requested", float64(131072), json.Number("131072"), true},
+		{"number reported, differing int requested", float64(131072), 65536, false},
+		{"int reported, string requested", 131072, "131072", true},
+		{"int64 reported, string requested", int64(131072), "131072", true},
+		{"json.Number reported, string requested", json.Number("131072"), "131072", true},
+		{"json.Number reported, differing string", json.Number("131072"), "65536", false},
+		{"int reported, int64 requested", 131072, int64(131072), true},
+		{"string reported, int requested", "131072", 131072, false},
+		{"number reported, non-numeric json.Number requested", float64(1), json.Number("not-a-number"), false},
+		{"int64 above 2^53 keeps precision", float64(9007199254740992), int64(9007199254740993), false},
 		{"leading zeros are not equal", float64(7), "007", false},
 		{"hex string is not equal", float64(16), "0x10", false},
 		{"non-numeric string against number", float64(1), "Enabled", false},
