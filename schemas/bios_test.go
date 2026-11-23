@@ -585,7 +585,7 @@ func TestUpdateBiosAttributesSliceValuedAppliedUnchanged(t *testing.T) {
 
 // TestBiosAttributeEqual covers the unchanged-detection comparison, including the
 // string-against-number/boolean cases from controller-style callers (issue #594) and
-// the int, int64, and json.Number forms SettingsAttributes can carry.
+// requested int, int64, and json.Number forms SettingsAttributes can carry.
 func TestBiosAttributeEqual(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -611,11 +611,6 @@ func TestBiosAttributeEqual(t *testing.T) {
 		{"number reported, int64 requested", float64(131072), int64(131072), true},
 		{"number reported, json.Number requested", float64(131072), json.Number("131072"), true},
 		{"number reported, differing int requested", float64(131072), 65536, false},
-		{"int reported, string requested", 131072, "131072", true},
-		{"int64 reported, string requested", int64(131072), "131072", true},
-		{"json.Number reported, string requested", json.Number("131072"), "131072", true},
-		{"json.Number reported, differing string", json.Number("131072"), "65536", false},
-		{"int reported, int64 requested", 131072, int64(131072), true},
 		{"string reported, int requested", "131072", 131072, false},
 		{"number reported, non-numeric json.Number requested", float64(1), json.Number("not-a-number"), false},
 		{"int64 above 2^53 keeps precision", float64(9007199254740992), int64(9007199254740993), false},

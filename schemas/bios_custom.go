@@ -72,16 +72,22 @@ func settingsAttributeFloat64(v any) (float64, bool) {
 }
 
 // biosAttributeEqual reports whether a requested attribute value matches the value the
-// service reports. reflect.DeepEqual handles identical types; the remaining cases are a
-// requested string against a reported number or boolean, and the int, int64, and
-// json.Number forms SettingsAttributes can carry against a reported number. The Redfish
-// Bios schema types Attributes per the attribute registry (Integer and Boolean entries
-// are JSON numbers and booleans), so controller-style callers carrying YAML strings
-// otherwise rewrite an unchanged attribute on every reconcile. A string counts as equal
-// only when it parses and formats back to itself as a plain decimal: "1000000" equals
-// 1000000, while "007" and "1e5" never equal 7 and 100000, and integers above 2^53 do
-// not round-trip, so those count as changes rather than risk suppressing a real one.
+// service reports. The reported value is decoded from JSON, so a number is always a
+// float64. reflect.DeepEqual handles identical types; the remaining cases are a
+// requested string against a reported number or boolean, and a requested int, int64, or
+// json.Number against a reported number. The Redfish Bios schema types Attributes per
+// the attribute registry (Integer and Boolean entries are JSON numbers and booleans), so
+// controller-style callers carrying YAML strings otherwise rewrite an unchanged
+// attribute on every reconcile.
+//
+// Surrounding whitespace is ignored. A string matches a number only when it parses and
+// formats back to itself as a plain decimal: "1000000" equals 1000000, while "007" and
+// "1e5" never equal 7 and 100000, and integers above 2^53 do not round-trip, so those
+// count as changes rather than risk suppressing a real one. A string matches a boolean
+// when strconv.ParseBool accepts it in any case, so "1", "t", and "TRUE" all equal true.
 func biosAttributeEqual(current, val any) bool {
+	// DeepEqual rather than ==, which panics on the slice-valued attributes that some
+	// implementations report.
 	if reflect.DeepEqual(current, val) {
 		return true
 	}
@@ -90,7 +96,7 @@ func biosAttributeEqual(current, val any) bool {
 	if isString {
 		s = strings.TrimSpace(s)
 
-		if c, isNumber := settingsAttributeFloat64(current); isNumber {
+		if c, isNumber := current.(float64); isNumber {
 			f, err := strconv.ParseFloat(s, 64)
 			return err == nil && f == c && strconv.FormatFloat(f, 'f', -1, 64) == s
 		}
@@ -103,16 +109,18 @@ func biosAttributeEqual(current, val any) bool {
 		return false
 	}
 
-	// The requested value is not a string, so the only remaining match is across the
-	// numeric forms SettingsAttributes can carry. Exactly-integral values compare as
-	// int64 so integers above 2^53 keep their precision; the rest compare as float64.
+	// The requested value is not a string, so the only remaining match is a requested
+	// numeric form against a reported number. Exactly-integral values compare as int64 so
+	// a requested integer above 2^53 is not rounded before the comparison. The reported
+	// value was already rounded to a float64 when it was decoded, so above 2^53 a
+	// requested value can still match a reported one that differs from it on the service.
 	curInt, curExact := settingsAttributeInt64(current)
 	valInt, valExact := settingsAttributeInt64(val)
 	if curExact && valExact {
 		return curInt == valInt
 	}
 
-	curFloat, curOK := settingsAttributeFloat64(current)
+	curFloat, curOK := current.(float64)
 	valFloat, valOK := settingsAttributeFloat64(val)
 	return curOK && valOK && curFloat == valFloat
 }
@@ -161,8 +169,6 @@ func (bi *Bios) UpdateBiosAttributesApplyAtWithTask(attrs SettingsAttributes, ap
 			current = original.Attributes[key]
 		}
 
-		// DeepEqual rather than !=, which panics on the slice-valued attributes that some
-		// implementations report.
 		if strings.HasPrefix(key, "BootTypeOrder") || !biosAttributeEqual(current, val) {
 			payload[key] = val
 		}
